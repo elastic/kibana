@@ -35,6 +35,8 @@ describe('getMissingSignificantTerms', () => {
 
     expect(missingSignificantTerms).toEqual([
       {
+        key: 'user:Peter',
+        type: 'keyword',
         bg_count: 553,
         doc_count: 1981,
         fieldName: 'user',
@@ -44,9 +46,10 @@ describe('getMissingSignificantTerms', () => {
         score: 47.38899434932384,
         total_bg_count: 1975,
         total_doc_count: 4669,
-        type: 'keyword',
       },
       {
+        key: 'url:login.php',
+        type: 'keyword',
         bg_count: 632,
         doc_count: 1738,
         fieldName: 'url',
@@ -56,7 +59,6 @@ describe('getMissingSignificantTerms', () => {
         score: 4.359614926663956,
         total_bg_count: 1975,
         total_doc_count: 4669,
-        type: 'keyword',
       },
     ]);
   });

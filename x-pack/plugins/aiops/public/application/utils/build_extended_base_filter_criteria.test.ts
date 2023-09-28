@@ -13,6 +13,7 @@ import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_cr
 
 const selectedSignificantTermMock: SignificantTerm = {
   key: 'meta.cloud.instance_id.keyword:1234',
+  type: 'keyword',
   doc_count: 53408,
   bg_count: 1154,
   fieldName: 'meta.cloud.instance_id.keyword',
@@ -22,7 +23,6 @@ const selectedSignificantTermMock: SignificantTerm = {
   score: 708.3964185322641,
   total_bg_count: 179657,
   total_doc_count: 114011,
-  type: 'keyword',
 };
 
 const selectedGroupMock: GroupTableItem = {

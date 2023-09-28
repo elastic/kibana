@@ -40,6 +40,7 @@ describe('streamReducer', () => {
       addSignificantTermsAction([
         {
           key: 'the-field-name:the-field-value',
+          type: 'keyword',
           fieldName: 'the-field-name',
           fieldValue: 'the-field-value',
           doc_count: 10,
@@ -49,7 +50,6 @@ describe('streamReducer', () => {
           score: 0.1,
           pValue: 0.01,
           normalizedScore: 0.123,
-          type: 'keyword',
         },
       ])
     );
