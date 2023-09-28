@@ -93,7 +93,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('t3_analyst');
+        login(ServerlessRoleName.T3_ANALYST);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -132,7 +132,7 @@ describe(
       const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
 
       beforeEach(() => {
-        login('threat_intelligence_analyst');
+        login(ServerlessRoleName.THREAT_INTELLIGENCE_ANALYST);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -167,7 +167,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('rule_author');
+        login(ServerlessRoleName.RULE_AUTHOR);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -211,7 +211,7 @@ describe(
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
       beforeEach(() => {
-        login('soc_manager');
+        login(ServerlessRoleName.SOC_MANAGER);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
