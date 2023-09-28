@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/logging';
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
 import {
@@ -955,6 +955,136 @@ function getAlwaysFiringAlertAsDataRuleType(
   });
 }
 
+function getWaitingRuleType(logger: Logger) {
+  const ParamsType = schema.object({
+    source: schema.string(),
+    alerts: schema.number(),
+  });
+  type ParamsType = TypeOf<typeof ParamsType>;
+  interface State extends RuleTypeState {
+    runCount?: number;
+  }
+  const id = 'test.waitingRule';
+
+  const result: RuleType<
+    ParamsType,
+    never,
+    State,
+    {},
+    {},
+    'default',
+    'recovered',
+    { runCount: number }
+  > = {
+    id,
+    name: 'Test: Rule that waits for a signal before finishing',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: { params: ParamsType },
+    alerts: {
+      context: id.toLowerCase(),
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          runCount: { required: false, type: 'long' },
+        },
+      },
+    },
+    async executor(alertExecutorOptions) {
+      const { services, state, params } = alertExecutorOptions;
+      const { source, alerts } = params;
+
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) throw new Error(`Expected alertsClient!`);
+
+      const runCount = (state.runCount || 0) + 1;
+      const es = services.scopedClusterClient.asInternalUser;
+
+      await sendSignal(logger, es, id, source, `rule-starting-${runCount}`);
+      await waitForSignal(logger, es, id, source, `rule-complete-${runCount}`);
+
+      for (let i = 0; i < alerts; i++) {
+        alertsClient.report({
+          id: `alert-${i}`,
+          actionGroup: 'default',
+          payload: { runCount },
+        });
+      }
+
+      return { state: { runCount } };
+    },
+  };
+
+  return result;
+}
+
+async function sendSignal(
+  logger: Logger,
+  es: ElasticsearchClient,
+  id: string,
+  source: string,
+  reference: string
+) {
+  logger.info(`rule type ${id} sending signal ${reference}`);
+  await es.index({ index: ES_TEST_INDEX_NAME, refresh: 'true', body: { source, reference } });
+}
+
+async function waitForSignal(
+  logger: Logger,
+  es: ElasticsearchClient,
+  id: string,
+  source: string,
+  reference: string
+) {
+  let docs: unknown[] = [];
+  for (let attempt = 0; attempt < 20; attempt++) {
+    docs = await getSignalDocs(es, source, reference);
+    if (docs.length > 0) {
+      logger.info(`rule type ${id} received signal ${reference}`);
+      break;
+    }
+
+    logger.info(`rule type ${id} waiting for signal ${reference}`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  if (docs.length === 0) {
+    throw new Error(`Expected to find docs with source ${source}`);
+  }
+}
+
+async function getSignalDocs(es: ElasticsearchClient, source: string, reference: string) {
+  const body = {
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              source,
+            },
+          },
+          {
+            term: {
+              reference,
+            },
+          },
+        ],
+      },
+    },
+  };
+  const params = {
+    index: ES_TEST_INDEX_NAME,
+    size: 1000,
+    _source: false,
+    body,
+  };
+  const result = await es.search(params, { meta: true });
+  return result?.body?.hits?.hits || [];
+}
+
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
@@ -1184,4 +1314,5 @@ export function defineAlertTypes(
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
   alerting.registerType(getPatternFiringAutoRecoverFalseAlertType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
+  alerting.registerType(getWaitingRuleType(logger));
 }

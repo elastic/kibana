@@ -84,11 +84,14 @@
     "@kbn/core-capabilities-common",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/osquery-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/embeddable-plugin",
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/core-application-common"
+    "@kbn/core-application-common",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*"
