@@ -47,48 +47,47 @@ function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
 
+const metricLabel = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.customMetric.metricLabel',
+  { defaultMessage: 'Metric' }
+);
+
+const filterLabel = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.customMetric.filterLabel',
+  { defaultMessage: 'Filter' }
+);
+
+const metricTooltip = (
+  <EuiIconTip
+    content={i18n.translate(
+      'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
+      {
+        defaultMessage: 'This data from this field will be aggregated with the "sum" aggregation.',
+      }
+    )}
+    position="top"
+  />
+);
+
+const equationLabel = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.customMetric.equationLabel',
+  { defaultMessage: 'Equation' }
+);
+
+const equationTooltip = (
+  <EuiIconTip
+    content={i18n.translate(
+      'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
+      {
+        defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+      }
+    )}
+    position="top"
+  />
+);
+
 export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIndicatorProps) {
-  const metricLabel = i18n.translate(
-    'xpack.observability.slo.sloEdit.sliType.customMetric.metricLabel',
-    { defaultMessage: 'Metric' }
-  );
-
-  const filterLabel = i18n.translate(
-    'xpack.observability.slo.sloEdit.sliType.customMetric.filterLabel',
-    { defaultMessage: 'Filter' }
-  );
-
-  const metricTooltip = (
-    <EuiIconTip
-      content={i18n.translate(
-        'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
-        {
-          defaultMessage:
-            'This data from this field will be aggregated with the "sum" aggregation.',
-        }
-      )}
-      position="top"
-    />
-  );
-
-  const equationLabel = i18n.translate(
-    'xpack.observability.slo.sloEdit.sliType.customMetric.equationLabel',
-    { defaultMessage: 'Equation' }
-  );
-
-  const equationTooltip = (
-    <EuiIconTip
-      content={i18n.translate(
-        'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
-        {
-          defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
-        }
-      )}
-      position="top"
-    />
-  );
-
-  const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
+  const { control, watch, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
 
   useEffect(() => {
@@ -136,6 +135,7 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
+                isInvalid={getFieldState(`indicator.params.${type}.metrics.${index}.field`).invalid}
                 label={
                   <span>
                     {metricLabel} {metric.name} {metricTooltip}
@@ -165,8 +165,9 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                         'xpack.observability.slo.sloEdit.sliType.customMetric.metricField.placeholder',
                         { defaultMessage: 'Select a metric field' }
                       )}
+                      isClearable
                       isInvalid={fieldState.invalid}
-                      isDisabled={!indexPattern}
+                      isDisabled={isLoadingIndex || !indexPattern}
                       isLoading={!!indexPattern && isLoadingIndex}
                       onChange={(selected: EuiComboBoxOptionOption[]) => {
                         if (selected.length) {
