@@ -5,32 +5,47 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiPanel, EuiStat, useEuiTheme, EuiHorizontalRule } from '@elastic/eui';
+import React, { MouseEventHandler } from 'react';
+import { EuiPanel, EuiStat, useEuiTheme, EuiIcon } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export interface CspCounterCardProps {
+export interface VulnCounterCardProps {
   id: string;
-  button?: ReactNode;
   title: EuiStatProps['title'];
   titleColor?: EuiStatProps['titleColor'];
   description: EuiStatProps['description'];
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export const CspCounterCard = ({
+export const VulnCounterCard = ({
   id,
-  button,
   title,
   titleColor,
   description,
-}: CspCounterCardProps) => {
+  onClick,
+}: VulnCounterCardProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj={id}>
+    <EuiPanel
+      hasBorder
+      onClick={onClick}
+      paddingSize="m"
+      css={css`
+        position: relative;
+        display: flex;
+        align-items: center;
+        :hover .euiIcon {
+          color: ${euiTheme.colors.primary};
+          transition: ${euiTheme.animation.normal};
+        }
+      `}
+      data-test-subj={id}
+    >
       <EuiStat
         css={{
-          height: '60%',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-around',
@@ -45,8 +60,17 @@ export const CspCounterCard = ({
         descriptionElement="h6"
         description={description}
       />
-      <EuiHorizontalRule margin="xs" />
-      {button}
+      {onClick && (
+        <EuiIcon
+          type={'pivot'}
+          css={css`
+            color: ${euiTheme.colors.lightShade};
+            position: absolute;
+            top: ${euiTheme.size.s};
+            right: ${euiTheme.size.s};
+          `}
+        />
+      )}
     </EuiPanel>
   );
 };
