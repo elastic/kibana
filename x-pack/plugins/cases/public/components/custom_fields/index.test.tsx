@@ -89,27 +89,17 @@ describe('CustomFields', () => {
   });
 
   it('shows error when custom fields reaches the limit', async () => {
-    const customFields = [
-      ...customFieldsConfigurationMock,
-      {
-        key: 'third_field_key',
-        label: 'My third custom label',
+    const generatedMockCustomFields = [];
+
+    for (let i = 0; i < 8; i++) {
+      generatedMockCustomFields.push({
+        key: `field_key_${i + 1}`,
+        label: `My custom label ${i + 1}`,
         type: CustomFieldTypes.TEXT,
         required: false,
-      },
-      {
-        key: 'fourth_field_key',
-        label: 'My fourth custom label',
-        type: CustomFieldTypes.TOGGLE,
-        required: true,
-      },
-      {
-        key: 'fifth_field_key',
-        label: 'My fifth custom label',
-        type: CustomFieldTypes.TEXT,
-        required: true,
-      },
-    ];
+      });
+    }
+    const customFields = [...customFieldsConfigurationMock, ...generatedMockCustomFields];
 
     appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
 
