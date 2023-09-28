@@ -55,5 +55,4 @@ export const createModelVersionTestBed = (): ModelVersionTestBed => {
   };
 };
 
-const delay = (seconds: number) =>
-  new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+const delay = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
