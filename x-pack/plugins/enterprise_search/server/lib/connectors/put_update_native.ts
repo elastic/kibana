@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { CONNECTORS_INDEX } from '../..';
-import { Connector } from '../../../common/types/connectors';
+import { Connector, ConnectorStatus } from '../../../common/types/connectors';
 
 export const putUpdateNative = async (
   client: IScopedClusterClient,
