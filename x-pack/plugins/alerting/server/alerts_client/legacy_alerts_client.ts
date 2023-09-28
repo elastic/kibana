@@ -232,4 +232,8 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {}
+
+  public async setAlertStatusToUntracked() {
+    return;
+  }
 }
