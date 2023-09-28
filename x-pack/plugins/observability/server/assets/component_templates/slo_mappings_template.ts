@@ -12,6 +12,14 @@ export const getSLOMappingsTemplate = (name: string) => ({
   template: {
     mappings: {
       properties: {
+        event: {
+          properties: {
+            ingested: {
+              type: 'date',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
         '@timestamp': {
           type: 'date',
           format: 'date_optional_time||epoch_millis',

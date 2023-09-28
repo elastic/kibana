@@ -18,6 +18,12 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
         date_rounding: 'M',
       },
     },
+    {
+      set: {
+        field: 'event.ingested',
+        value: '{{{_ingest.timestamp}}}',
+      },
+    },
   ],
   _meta: {
     description: 'SLO ingest pipeline',
