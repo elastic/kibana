@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
-import type { PluginStart, PluginSetup } from './types';
+import type { PluginStart, PluginSetup, ContractStartServices } from './types';
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
@@ -33,4 +33,12 @@ const startMock = (): PluginStart => ({
 export const securitySolutionMock = {
   createSetup: setupMock,
   createStart: startMock,
+};
+
+export const contractStartServicesMock: ContractStartServices = {
+  extraRoutes$: of([]),
+  isSidebarEnabled$: of(true),
+  getComponent$: jest.fn(),
+  upselling,
+  dataQualityPanelConfig: undefined,
 };
