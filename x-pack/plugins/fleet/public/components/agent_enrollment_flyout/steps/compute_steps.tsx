@@ -229,7 +229,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
 
   const fleetServerHost = fleetServerHosts?.[0];
-  
+
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHosts,
@@ -283,6 +283,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
           cloudShellCommand: installManagedCommands.googleCloudShell,
+          projectId: gcpProjectId,
         })
       );
     } else {
