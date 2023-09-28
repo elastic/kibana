@@ -29,7 +29,10 @@
     "@kbn/react-kibana-mount",
     "@kbn/share-plugin",
     "@kbn/io-ts-utils",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/xstate-utils"
   ],
   "exclude": [
     "target/**/*"

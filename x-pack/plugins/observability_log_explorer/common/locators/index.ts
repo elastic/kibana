@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LocationState as LocatorLocationState } from '@kbn/deeplinks-observability/locators';
 import { AllDatasetsLocator } from './all_datasets';
 import { SingleDatasetLocator } from './single_dataset';
 
@@ -16,3 +17,5 @@ export interface ObservabilityLogExplorerLocators {
   allDatasetsLocator: AllDatasetsLocator;
   singleDatasetLocator: SingleDatasetLocator;
 }
+
+export type ObservabilityLogExplorerLocationState = LocatorLocationState;

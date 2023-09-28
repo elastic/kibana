@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { LogExplorerNavigationParams } from './log_explorer';
 
-export type DatasetLocatorParams = LogExplorerNavigationParams;
+// Will become a union once we have more origins
+export interface LocationState extends SerializableRecord {
+  origin?: {
+    id: 'application-log-onboarding';
+  };
+}
+
+export type DatasetLocatorParams = LogExplorerNavigationParams & LocationState;
 
 // All datasets locator
 export const ALL_DATASETS_LOCATOR_ID = 'ALL_DATASETS_LOCATOR';
