@@ -7,7 +7,7 @@
 
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type {
-  DataComparisonSpec,
+  DataDriftSpec,
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
 } from '../application';
@@ -22,7 +22,7 @@ export async function getIndexDataVisualizerComponent(): Promise<() => IndexData
   return () => modules.IndexDataVisualizer;
 }
 
-export async function getDataComparisonComponent(): Promise<() => DataComparisonSpec> {
+export async function getDataDriftComponent(): Promise<() => DataDriftSpec> {
   const modules = await lazyLoadModules();
-  return () => modules.DataComparison;
+  return () => modules.DataDrift;
 }
