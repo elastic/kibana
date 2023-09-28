@@ -990,6 +990,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_STATUS_UNTRACKED",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_STATUS_UNTRACKED",
+        "description": [],
+        "signature": [
+          "\"untracked\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/alerts_as_data_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_SUPPRESSION_DOCS_COUNT",
         "type": "string",
         "tags": [],
@@ -1386,7 +1401,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"recovered\" | \"active\""
+          "\"recovered\" | \"active\" | \"untracked\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_status.ts",
         "deprecated": false,
