@@ -356,11 +356,11 @@ function seriesTypeLabels(seriesType: SeriesType) {
   switch (seriesType) {
     case 'line':
       return i18n.translate('xpack.lens.xySuggestions.lineChartTitle', {
-        defaultMessage: 'Line',
+        defaultMessage: 'Line chart',
       });
     case 'area':
       return i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
-        defaultMessage: 'Area',
+        defaultMessage: 'Area chart',
       });
     case 'area_stacked':
       return i18n.translate('xpack.lens.xySuggestions.areaStackedChartTitle', {

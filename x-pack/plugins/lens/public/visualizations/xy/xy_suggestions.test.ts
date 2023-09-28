@@ -962,7 +962,7 @@ describe('xy_suggestions', () => {
       layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
     });
     expect(seriesSuggestion.title).toEqual('Line chart');
-    expect(stackSuggestion.title).toEqual('Stacked');
+    expect(stackSuggestion.title).toEqual('Bar vertical stacked');
   });
 
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
@@ -1035,7 +1035,7 @@ describe('xy_suggestions', () => {
     const visibleSuggestions = suggestions.filter((suggestion) => !suggestion.hide);
     expect(visibleSuggestions).toContainEqual(
       expect.objectContaining({
-        title: 'Stacked',
+        title: 'Bar vertical stacked',
         state: expect.objectContaining({ preferredSeriesType: 'bar_stacked' }),
       })
     );
