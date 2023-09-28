@@ -36,6 +36,9 @@ export const useRiskEngineStatus = () => {
         isUpdateAvailable: false,
         isNewRiskScoreModuleInstalled: false,
         isNewRiskScoreModuleAvailable,
+        risk_engine_status: null,
+        legacy_risk_engine_status: null,
+        is_max_amount_of_risk_engines_reached: false,
       };
     }
     const response = await fetchRiskEngineStatus({ signal });
