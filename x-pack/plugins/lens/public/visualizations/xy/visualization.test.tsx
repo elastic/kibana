@@ -57,6 +57,7 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -221,8 +222,30 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
+              "colorMapping": Object {
+                "assignmentMode": "auto",
+                "assignments": Array [],
+                "colorMode": Object {
+                  "type": "categorical",
+                },
+                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "colorIndex": 1,
+                      "paletteId": "neutral",
+                      "type": "categorical",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
               "layerId": "l1",
               "layerType": "data",
+              "palette": undefined,
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,

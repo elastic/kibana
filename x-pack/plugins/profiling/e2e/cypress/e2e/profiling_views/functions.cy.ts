@@ -93,6 +93,84 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(2).contains('libjvm.so');
   });
 
+  it('Sorting grid', () => {
+    cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+    cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
+    cy.wait('@getTopNFunctions');
+    [
+      {
+        columnKey: 'rank',
+        columnIndex: 1,
+        highRank: 388,
+        lowRank: 1,
+        highValue: 388,
+        lowValue: 1,
+      },
+      {
+        columnKey: 'samples',
+        columnIndex: 7,
+        highRank: 1,
+        lowRank: 44,
+        highValue: 28,
+        lowValue: 1,
+      },
+      {
+        columnKey: 'selfCPU',
+        columnIndex: 3,
+        highRank: 1,
+        lowRank: 44,
+        highValue: '5.46%',
+        lowValue: '0.19%',
+      },
+      {
+        columnKey: 'totalCPU',
+        columnIndex: 4,
+        highRank: 338,
+        lowRank: 44,
+        highValue: '10.33%',
+        lowValue: '0.19%',
+      },
+      {
+        columnKey: 'annualizedCo2',
+        columnIndex: 5,
+        highRank: 1,
+        lowRank: 44,
+        highValue: '1.84 lbs / 0.84 kg',
+        lowValue: '0.07 lbs / 0.03 kg',
+      },
+      {
+        columnKey: 'annualizedDollarCost',
+        columnIndex: 6,
+        highRank: 1,
+        lowRank: 44,
+        highValue: '$17.37',
+        lowValue: '$0.62',
+      },
+    ].forEach(({ columnKey, columnIndex, highRank, highValue, lowRank, lowValue }) => {
+      cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
+      cy.contains('Sort High-Low').click();
+      const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
+      cy.get(firstRowSelector).eq(1).contains(highRank);
+      cy.get(firstRowSelector).eq(columnIndex).contains(highValue);
+
+      cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
+      cy.contains('Sort Low-High').click();
+      cy.get(firstRowSelector).eq(1).contains(lowRank);
+      cy.get(firstRowSelector).eq(columnIndex).contains(lowValue);
+    });
+
+    cy.get(`[data-test-subj="dataGridHeaderCell-frame"]`).click();
+    cy.contains('Sort Z-A').click();
+    const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
+    cy.get(firstRowSelector).eq(1).contains('1');
+    cy.get(firstRowSelector).eq(2).contains('vmlinux');
+
+    cy.get('[data-test-subj="dataGridHeaderCell-frame"]').click();
+    cy.contains('Sort A-Z').click();
+    cy.get(firstRowSelector).eq(1).contains('371');
+    cy.get(firstRowSelector).eq(2).contains('/');
+  });
+
   describe('Test changing CO2 settings', () => {
     afterEach(() => {
       cy.updateAdvancedSettings({

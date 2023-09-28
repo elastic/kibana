@@ -16,11 +16,11 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { last } from 'lodash';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { getCalleeFunction, TopNFunctions, TopNFunctionSortField } from '@kbn/profiling-utils';
+import { last, orderBy } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { TopNFunctions, TopNFunctionSortField } from '@kbn/profiling-utils';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
@@ -106,10 +106,33 @@ export const TopNFunctionsGrid = forwardRef(
       totalSeconds,
     ]);
 
+    const sortedRows = useMemo(() => {
+      switch (sortField) {
+        case TopNFunctionSortField.Frame:
+          return orderBy(rows, (row) => getCalleeFunction(row.frame), sortDirection);
+        case TopNFunctionSortField.SelfCPU:
+          return orderBy(rows, (row) => row.selfCPUPerc, sortDirection);
+        case TopNFunctionSortField.TotalCPU:
+          return orderBy(rows, (row) => row.totalCPUPerc, sortDirection);
+        case TopNFunctionSortField.AnnualizedCo2:
+          return orderBy(rows, (row) => row.impactEstimates?.selfCPU.annualizedCo2, sortDirection);
+        case TopNFunctionSortField.AnnualizedDollarCost:
+          return orderBy(
+            rows,
+            (row) => row.impactEstimates?.selfCPU.annualizedDollarCost,
+            sortDirection
+          );
+        default:
+          return orderBy(rows, sortField, sortDirection);
+      }
+    }, [rows, sortDirection, sortField]);
+
     const { columns, leadingControlColumns } = useMemo(() => {
       const gridColumns: EuiDataGridColumn[] = [
         {
           id: TopNFunctionSortField.Rank,
+          schema: 'numeric',
+          actions: { showHide: false },
           initialWidth: isDifferentialView ? 50 : 90,
           displayAsText: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
             defaultMessage: 'Rank',
@@ -117,6 +140,7 @@ export const TopNFunctionsGrid = forwardRef(
         },
         {
           id: TopNFunctionSortField.Frame,
+          actions: { showHide: false },
           displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
             defaultMessage: 'Function',
           }),
@@ -124,7 +148,8 @@ export const TopNFunctionsGrid = forwardRef(
         {
           id: TopNFunctionSortField.Samples,
           initialWidth: isDifferentialView ? 100 : 200,
-          schema: 'samples',
+          schema: 'numeric',
+          actions: { showHide: false },
           display: (
             <LabelWithHint
               label={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
@@ -141,6 +166,8 @@ export const TopNFunctionsGrid = forwardRef(
         },
         {
           id: TopNFunctionSortField.SelfCPU,
+          schema: 'numeric',
+          actions: { showHide: false },
           initialWidth: isDifferentialView ? 100 : 200,
           display: (
             <CPULabelWithHint
@@ -153,6 +180,8 @@ export const TopNFunctionsGrid = forwardRef(
         },
         {
           id: TopNFunctionSortField.TotalCPU,
+          schema: 'numeric',
+          actions: { showHide: false },
           initialWidth: isDifferentialView ? 100 : 200,
           display: (
             <CPULabelWithHint
@@ -170,6 +199,7 @@ export const TopNFunctionsGrid = forwardRef(
         gridColumns.push({
           initialWidth: 60,
           id: TopNFunctionSortField.Diff,
+          actions: { showHide: false },
           displayAsText: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
             defaultMessage: 'Diff',
           }),
@@ -180,6 +210,7 @@ export const TopNFunctionsGrid = forwardRef(
         gridColumns.push(
           {
             id: TopNFunctionSortField.AnnualizedCo2,
+            actions: { showHide: false },
             initialWidth: isDifferentialView ? 100 : 200,
             schema: 'numeric',
             display: (
@@ -199,6 +230,8 @@ export const TopNFunctionsGrid = forwardRef(
           },
           {
             id: TopNFunctionSortField.AnnualizedDollarCost,
+            schema: 'numeric',
+            actions: { showHide: false },
             initialWidth: isDifferentialView ? 100 : 200,
             display: (
               <LabelWithHint
@@ -229,7 +262,7 @@ export const TopNFunctionsGrid = forwardRef(
           rowCellRender: function RowCellRender({ rowIndex }) {
             function handleOnClick() {
               trackProfilingEvent({ metric: 'topN_function_details_click' });
-              setSelectedRow(rows[rowIndex]);
+              setSelectedRow(sortedRows[rowIndex]);
             }
             return (
               <EuiButtonIcon
@@ -244,7 +277,7 @@ export const TopNFunctionsGrid = forwardRef(
         });
       }
       return { columns: gridColumns, leadingControlColumns: gridLeadingControlColumns };
-    }, [isDifferentialView, rows, showDiffColumn, trackProfilingEvent]);
+    }, [isDifferentialView, sortedRows, showDiffColumn, trackProfilingEvent]);
 
     const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
@@ -253,7 +286,7 @@ export const TopNFunctionsGrid = forwardRef(
       columnId,
       setCellProps,
     }: EuiDataGridCellValueElementProps) {
-      const data = rows[rowIndex];
+      const data = sortedRows[rowIndex];
       if (data) {
         return (
           <FunctionRow
@@ -276,9 +309,8 @@ export const TopNFunctionsGrid = forwardRef(
           aria-label="TopN functions"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={rows.length}
+          rowCount={sortedRows.length > 100 ? 100 : sortedRows.length}
           renderCellValue={RenderCellValue}
-          inMemory={{ level: 'sorting' }}
           sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
           leadingControlColumns={leadingControlColumns}
           pagination={{
@@ -300,29 +332,6 @@ export const TopNFunctionsGrid = forwardRef(
           virtualizationOptions={{
             onScroll,
           }}
-          schemaDetectors={[
-            {
-              type: 'samples',
-              comparator: (a, b, direction) => {
-                const aNumber = parseFloat(a.replace(/,/g, ''));
-                const bNumber = parseFloat(b.replace(/,/g, ''));
-
-                if (aNumber < bNumber) {
-                  return direction === 'desc' ? 1 : -1;
-                }
-                if (aNumber > bNumber) {
-                  return direction === 'desc' ? -1 : 1;
-                }
-                return 0;
-              },
-              detector: (a) => {
-                return 1;
-              },
-              icon: '',
-              sortTextAsc: 'Low-High',
-              sortTextDesc: 'High-Low',
-            },
-          ]}
         />
         {selectedRow && (
           <FrameInformationTooltip
