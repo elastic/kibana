@@ -25,10 +25,7 @@
 // force ESM in this module
 export {};
 
-// This module has some interesting ways of importing, check out the options in:
-// https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
 import registerCypressGrep from '@cypress/grep';
 registerCypressGrep();
 

@@ -7,7 +7,8 @@
     "../../../test_serverless/shared/lib"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "../../../test_serverless/shared/lib/security/default_http_headers.ts"
   ],
   "compilerOptions": {
     "outDir": "target/types",
