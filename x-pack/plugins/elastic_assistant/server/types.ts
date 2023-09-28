@@ -9,7 +9,12 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import { CustomRequestHandlerContext, Logger } from '@kbn/core/server';
+import type {
+  CustomRequestHandlerContext,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 
 /** The plugin setup interface */
@@ -41,3 +46,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
 export type ElasticAssistantRequestHandlerContext = CustomRequestHandlerContext<{
   elasticAssistant: ElasticAssistantApiRequestHandlerContext;
 }>;
+
+export type GetElser = (
+  request: KibanaRequest,
+  savedObjectsClient: SavedObjectsClientContract
+) => Promise<string> | never;

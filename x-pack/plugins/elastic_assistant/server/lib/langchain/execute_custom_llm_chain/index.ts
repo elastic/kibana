@@ -25,6 +25,7 @@ export const callAgentExecutor = async ({
   langChainMessages,
   logger,
   request,
+  elserId,
 }: {
   actions: ActionsPluginStart;
   connectorId: string;
@@ -32,6 +33,7 @@ export const callAgentExecutor = async ({
   langChainMessages: BaseMessage[];
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  elserId: string;
 }): Promise<ResponseBody> => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
 
@@ -47,7 +49,7 @@ export const callAgentExecutor = async ({
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger, elserId);
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
 
   const tools: Tool[] = [

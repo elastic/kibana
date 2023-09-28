@@ -12,7 +12,10 @@ import {
   Plugin,
   Logger,
   IContextProvider,
+  KibanaRequest,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { once } from 'lodash';
 
 import {
   ElasticAssistantPluginSetup,
@@ -20,6 +23,7 @@ import {
   ElasticAssistantPluginStart,
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
+  GetElser,
 } from './types';
 import {
   deleteKnowledgeBaseRoute,
@@ -72,10 +76,17 @@ export class ElasticAssistantPlugin
       )
     );
 
+    const getElserId: GetElser = once(
+      async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
+        return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
+          .name;
+      }
+    );
+
     deleteKnowledgeBaseRoute(router);
-    getKnowledgeBaseStatusRoute(router, plugins.ml.trainedModelsProvider);
-    postKnowledgeBaseRoute(router);
-    postActionsConnectorExecuteRoute(router);
+    getKnowledgeBaseStatusRoute(router, getElserId);
+    postKnowledgeBaseRoute(router, getElserId);
+    postActionsConnectorExecuteRoute(router, getElserId);
     return {
       actions: plugins.actions,
     };
