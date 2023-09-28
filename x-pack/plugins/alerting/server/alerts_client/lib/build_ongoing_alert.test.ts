@@ -82,7 +82,7 @@ describe('buildOngoingAlert', () => {
         // @ts-expect-error
         alert: existingExpandedNewAlert,
         legacyAlert,
-        rule: alertRule,
+        rule: updatedRule,
         timestamp: '2023-03-29T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       })

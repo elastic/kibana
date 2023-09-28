@@ -2211,7 +2211,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'close',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'recovered',
-                [ALERT_DURATION]: '39600000000000',
+                [ALERT_DURATION]: '36000000000000',
                 [ALERT_END]: date,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
