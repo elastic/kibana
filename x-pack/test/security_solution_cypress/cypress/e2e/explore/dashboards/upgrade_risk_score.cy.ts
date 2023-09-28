@@ -6,11 +6,20 @@
  */
 
 import { getNewRule } from '../../../objects/rule';
-import { UPGRADE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
+import {
+  UPGRADE_RISK_SCORE_BUTTON,
+  USERS_TABLE,
+  HOSTS_TABLE_ROWS,
+  HOSTS_TABLE,
+  USERS_TABLE_ROWS,
+  HOST_RISK_SCORE_NO_DATA_DETECTED,
+  USER_RISK_SCORE_NO_DATA_DETECTED,
+} from '../../../screens/entity_analytics';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 import {
   deleteRiskScore,
   installLegacyRiskScoreModule,
+  installRiskScoreModule,
 } from '../../../tasks/api_calls/risk_scores';
 import { clickUpgradeRiskScore } from '../../../tasks/risk_scores';
 
@@ -22,6 +31,8 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
+import { upgradeRiskEngine } from '../../../tasks/entity_analytics';
+import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 
 const spaceId = 'default';
 
@@ -30,28 +41,69 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServer
   before(() => {
     cleanKibana();
     login();
+    deleteRiskEngineConfiguration();
     createRule(getNewRule({ rule_id: 'rule1' }));
   });
 
-  beforeEach(() => {
-    login();
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-    installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
-    installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
-    visitWithTimeRange(ENTITY_ANALYTICS_URL);
+  describe('show upgrade risk button', () => {
+    beforeEach(() => {
+      login();
+      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+      installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
+      installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
+    });
+
+    afterEach(() => {
+      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', 'risk_users');
+    });
+
+    it('shows upgrade panel', () => {
+      cy.get(UPGRADE_RISK_SCORE_BUTTON).should('be.visible');
+
+      clickUpgradeRiskScore();
+
+      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+    });
   });
 
-  afterEach(() => {
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-  });
+  describe('upgrade risk engine', () => {
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_users' });
+    });
 
-  it('shows upgrade risk button for host and user', () => {
-    cy.get(UPGRADE_RISK_SCORE_BUTTON).should('be.visible');
+    beforeEach(() => {
+      login();
+      installRiskScoreModule();
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
+    });
 
-    clickUpgradeRiskScore();
+    after(() => {
+      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', 'risk_users');
+      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+      deleteRiskEngineConfiguration();
+    });
 
-    cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+    it('show old risk score data before upgrade, and hide after', () => {
+      cy.get(HOSTS_TABLE).should('be.visible');
+      cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
+
+      cy.get(USERS_TABLE).should('be.visible');
+      cy.get(USERS_TABLE_ROWS).should('have.length', 5);
+
+      upgradeRiskEngine();
+
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
+
+      cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+      cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+    });
   });
 });

@@ -16,7 +16,7 @@ import { RISK_SCORE_STATUS } from '../screens/entity_analytics_management';
 import { ENTITY_ANALYTICS_URL, ENTITY_ANALYTICS_MANAGEMENT_URL } from '../urls/navigation';
 import {
   RISK_SCORE_UPDATE_CONFIRM,
-  RISK_SCORE_UDATE_BUTTON,
+  RISK_SCORE_UPDATE_BUTTON,
   RISK_SCORE_SWITCH,
   RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
@@ -51,7 +51,7 @@ export const enableRiskEngine = () => {
 };
 
 export const updateRiskEngine = () => {
-  cy.get(RISK_SCORE_UDATE_BUTTON).click();
+  cy.get(RISK_SCORE_UPDATE_BUTTON).click();
 };
 
 export const updateRiskEngineConfirm = () => {
@@ -63,3 +63,10 @@ export const previewErrorButtonClick = () => {
 };
 
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
+
+export const upgradeRiskEngine = () => {
+  visitWithTimeRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
+  updateRiskEngine();
+  updateRiskEngineConfirm();
+  cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+};

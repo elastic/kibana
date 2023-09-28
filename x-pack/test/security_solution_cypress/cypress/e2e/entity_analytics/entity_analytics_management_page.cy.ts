@@ -35,8 +35,7 @@ import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 import {
   riskEngineStatusChange,
-  updateRiskEngine,
-  updateRiskEngineConfirm,
+  upgradeRiskEngine,
   previewErrorButtonClick,
 } from '../../tasks/entity_analytics';
 
@@ -144,10 +143,7 @@ describe(
 
         cy.get(RISK_SCORE_STATUS).should('not.exist');
 
-        updateRiskEngine();
-        updateRiskEngineConfirm();
-
-        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+        upgradeRiskEngine();
 
         deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
       });
