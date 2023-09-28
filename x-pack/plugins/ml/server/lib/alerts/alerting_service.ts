@@ -858,8 +858,9 @@ export function alertingServiceProvider(
     const formatters = await getFormatters(indexPattern);
 
     const context = getResultsToContextFormatter(resultType, false, formatters)(value);
+    const payload = getResultsToPayloadFormatter(resultType, false)(value);
 
-    if (!context) return;
+    if (!context || !payload) return;
 
     const anomalyExplorerUrl = buildExplorerUrl(
       context.jobIds,
@@ -871,12 +872,12 @@ export function alertingServiceProvider(
 
     return {
       payload: {
-        ...getResultsToPayloadFormatter(resultType, false)(value)!,
+        ...payload,
         [ALERT_URL]: anomalyExplorerUrl,
       },
       context: {
-        anomalyExplorerUrl,
         ...context,
+        anomalyExplorerUrl,
       },
       name: context.alertInstanceKey,
     };
