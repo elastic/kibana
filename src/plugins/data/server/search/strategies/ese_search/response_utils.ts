@@ -6,25 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import type { AsyncSearchResponse } from './types';
 import { getTotalLoaded } from '../es_search';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
-export function toAsyncKibanaSearchResponse(
-  response: AsyncSearchResponse,
-  warning?: string,
-  requestParams?: ConnectionRequestParams
-) {
+export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse, warning?: string) {
   return {
     id: response.id,
     rawResponse: response.response,
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
-    ...(requestParams ? { requestParams } : {}),
     ...getTotalLoaded(response.response),
   };
 }
