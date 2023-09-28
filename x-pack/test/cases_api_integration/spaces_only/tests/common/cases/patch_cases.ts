@@ -48,6 +48,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql({
         ...postCaseResp(),
         title: 'new title',
+        customFields: [
+          {
+            key: 'test_custom_field',
+            type: CustomFieldTypes.TEXT,
+            value: null
+          },
+        ],
         updated_by: nullUser,
         created_by: nullUser,
       });

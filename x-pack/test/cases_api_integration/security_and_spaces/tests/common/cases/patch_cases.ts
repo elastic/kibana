@@ -109,6 +109,13 @@ export default ({ getService }: FtrProviderContext): void => {
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
         expect(data).to.eql({
           ...postCaseResp(),
+          customFields: [
+            {
+              key: 'test_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: null
+            },
+          ],
           title: 'new title',
           updated_by: defaultUser,
         });
