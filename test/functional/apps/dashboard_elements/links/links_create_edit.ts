@@ -37,114 +37,116 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
-  describe('links panel creation', async () => {
-    before(async () => {
-      await dashboard.navigateToApp();
-      await dashboard.preserveCrossAppState();
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.clickNewDashboard();
-      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
-      await dashboard.loadSavedDashboard(DASHBOARD_NAME);
-      await dashboard.switchToEditMode();
+  describe('links panel', () => {
+    describe('creation', async () => {
+      before(async () => {
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+        await dashboard.loadSavedDashboard(DASHBOARD_NAME);
+        await dashboard.switchToEditMode();
+      });
+
+      it('can not add an external link that violates externalLinks.policy', async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+
+        await dashboardLinks.setExternalUrlInput('https://danger.example.com');
+        expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
+        await dashboardLinks.clickLinkEditorCloseButton();
+        await dashboardLinks.clickPanelEditorCloseButton();
+      });
+
+      it('can create a new by-reference links panel', async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+
+        await createSomeLinks();
+        await dashboardLinks.toggleSaveByReference(true);
+        await dashboardLinks.clickPanelEditorSaveButton();
+
+        await testSubjects.exists('savedObjectSaveModal');
+        await testSubjects.setValue('savedObjectTitle', LINKS_PANEL_NAME);
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        await common.waitForSaveModalToClose();
+        await testSubjects.exists('addObjectToDashboardSuccess');
+
+        expect(await testSubjects.existOrFail('links--component'));
+        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
+        await dashboard.clickDiscardChanges();
+      });
+
+      it('can create a new by-value links panel', async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await dashboardLinks.setLayout('horizontal');
+        await createSomeLinks();
+        await dashboardLinks.toggleSaveByReference(false);
+        await dashboardLinks.clickPanelEditorSaveButton();
+        await testSubjects.exists('addObjectToDashboardSuccess');
+
+        expect(await testSubjects.existOrFail('links--component'));
+        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
+        await dashboard.clickDiscardChanges();
+      });
     });
 
-    it('can not add an external link that violates externalLinks.policy', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+    describe('editing', () => {
+      it('can reorder links in an existing panel', async () => {
+        await dashboard.loadSavedDashboard('links 001');
+        await dashboard.switchToEditMode();
 
-      await dashboardLinks.setExternalUrlInput('https://danger.example.com');
-      expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
-      await dashboardLinks.clickLinkEditorCloseButton();
-      await dashboardLinks.clickPanelEditorCloseButton();
-    });
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await dashboardLinks.expectFlyoutIsOpen();
 
-    it('can create a new by-reference links panel', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        // Move the third link up one step
+        dashboardLinks.reorderLinks('link003', 3, 1, true);
 
-      await createSomeLinks();
-      await dashboardLinks.toggleSaveByReference(true);
-      await dashboardLinks.clickPanelEditorSaveButton();
+        await dashboardLinks.clickPanelEditorSaveButton();
+        await header.waitUntilLoadingHasFinished();
 
-      await testSubjects.exists('savedObjectSaveModal');
-      await testSubjects.setValue('savedObjectTitle', LINKS_PANEL_NAME);
-      await testSubjects.click('confirmSaveSavedObjectButton');
-      await common.waitForSaveModalToClose();
-      await testSubjects.exists('addObjectToDashboardSuccess');
+        // The second link in the component should be the link we moved
+        const listGroup = await testSubjects.find('links--component--listGroup');
+        const listItem = await listGroup.findByCssSelector(`li:nth-child(2)`);
+        expect(await listItem.getVisibleText()).to.equal('links 003 - external');
+      });
 
-      expect(await testSubjects.existOrFail('links--component'));
-      expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
-      await dashboard.clickDiscardChanges();
-    });
+      it('can edit link in existing panel', async () => {
+        await dashboard.loadSavedDashboard('links 001');
+        await dashboard.switchToEditMode();
 
-    it('can create a new by-value links panel', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('links');
-      await dashboardLinks.setLayout('horizontal');
-      await createSomeLinks();
-      await dashboardLinks.toggleSaveByReference(false);
-      await dashboardLinks.clickPanelEditorSaveButton();
-      await testSubjects.exists('addObjectToDashboardSuccess');
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await dashboardLinks.expectFlyoutIsOpen();
 
-      expect(await testSubjects.existOrFail('links--component'));
-      expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
-      await dashboard.clickDiscardChanges();
-    });
-  });
+        await dashboardLinks.editLinkByIndex(5);
+        await testSubjects.exists('links--linkEditor--flyout');
+        await testSubjects.setValue('links--linkEditor--linkLabel--input', 'to be deleted');
+        await dashboardLinks.clickLinksEditorSaveButton();
+        await dashboardLinks.clickPanelEditorSaveButton();
 
-  describe('links panel editing', () => {
-    it('can reorder links in an existing panel', async () => {
-      await dashboard.loadSavedDashboard('links 001');
-      await dashboard.switchToEditMode();
+        await header.waitUntilLoadingHasFinished();
+        const link = await testSubjects.find('dashboardLink--link005');
+        expect(await link.getVisibleText()).to.equal('to be deleted');
+      });
 
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await dashboardLinks.expectFlyoutIsOpen();
+      it('can delete link from existing panel', async () => {
+        await dashboard.loadSavedDashboard('links 001');
+        await dashboard.switchToEditMode();
 
-      // Move the third link up one step
-      dashboardLinks.reorderLinks('link003', 3, 1, true);
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await dashboardLinks.expectFlyoutIsOpen();
 
-      await dashboardLinks.clickPanelEditorSaveButton();
-      await header.waitUntilLoadingHasFinished();
+        await dashboardLinks.deleteLinkByIndex(5);
+        await dashboardLinks.clickPanelEditorSaveButton();
 
-      // The second link in the component should be the link we moved
-      const listGroup = await testSubjects.find('links--component--listGroup');
-      const listItem = await listGroup.findByCssSelector(`li:nth-child(2)`);
-      expect(await listItem.getVisibleText()).to.equal('links 003 - external');
-    });
-
-    it('can edit link in existing panel', async () => {
-      await dashboard.loadSavedDashboard('links 001');
-      await dashboard.switchToEditMode();
-
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await dashboardLinks.expectFlyoutIsOpen();
-
-      await dashboardLinks.editLinkByIndex(5);
-      await testSubjects.exists('links--linkEditor--flyout');
-      await testSubjects.setValue('links--linkEditor--linkLabel--input', 'to be deleted');
-      await dashboardLinks.clickLinksEditorSaveButton();
-      await dashboardLinks.clickPanelEditorSaveButton();
-
-      await header.waitUntilLoadingHasFinished();
-      const link = await testSubjects.find('dashboardLink--link005');
-      expect(await link.getVisibleText()).to.equal('to be deleted');
-    });
-
-    it('can delete link from existing panel', async () => {
-      await dashboard.loadSavedDashboard('links 001');
-      await dashboard.switchToEditMode();
-
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await dashboardLinks.expectFlyoutIsOpen();
-
-      await dashboardLinks.deleteLinkByIndex(5);
-      await dashboardLinks.clickPanelEditorSaveButton();
-
-      await header.waitUntilLoadingHasFinished();
-      expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(5);
+        await header.waitUntilLoadingHasFinished();
+        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(5);
+      });
     });
   });
 }
