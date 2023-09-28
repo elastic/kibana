@@ -24,6 +24,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
   <EuiSelectable
     isPreFiltered={false}
@@ -98,6 +99,7 @@ exports[`Should render 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
   <EuiSelectable
     isPreFiltered={false}
