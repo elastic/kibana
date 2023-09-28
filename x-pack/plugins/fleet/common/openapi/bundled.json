@@ -5479,7 +5479,15 @@
         "operationId": "get-uninstall-tokens",
         "parameters": [
           {
-            "$ref": "#/components/parameters/page_size"
+            "name": "perPage",
+            "in": "query",
+            "description": "The number of items to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 5
+            }
           },
           {
             "$ref": "#/components/parameters/page_index"
@@ -5487,22 +5495,18 @@
           {
             "name": "policyId",
             "in": "query",
+            "description": "Partial match filtering for policy IDs",
             "required": false,
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": []
           }
         ]
       }
     },
     "/uninstall_tokens/{uninstallTokenId}": {
       "get": {
-        "summary": "Get decrypted uninstall token",
+        "summary": "Get one decrypted uninstall token by its ID",
         "tags": [
           "Uninstall tokens"
         ],
@@ -5558,11 +5562,6 @@
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": []
           }
         ]
       }

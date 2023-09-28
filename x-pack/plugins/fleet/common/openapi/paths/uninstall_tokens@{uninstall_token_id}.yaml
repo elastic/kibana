@@ -1,5 +1,5 @@
 get:
-  summary: Get decrypted uninstall token
+  summary: Get one decrypted uninstall token by its ID
   tags:
     - Uninstall tokens
   responses:
@@ -37,5 +37,3 @@ get:
       required: true
       schema:
         type: string
-  security:
-    - basicAuth: []
