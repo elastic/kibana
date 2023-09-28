@@ -11,12 +11,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getService('svlCommonNavigation');
 
-  // Failing: See https://github.com/elastic/kibana/issues/165386
-  // FLAKY: https://github.com/elastic/kibana/issues/165414
-  describe.skip('home page', function () {
+  describe('home page', function () {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
     it('has project header', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertProjectHeaderExists();
+    });
+
+    it('has nav with fixed size', async () => {
+      await svlCommonNavigation.navigateToKibanaHome();
+      await svlCommonPage.assertNavExistsWithFixedSize();
     });
   });
 }

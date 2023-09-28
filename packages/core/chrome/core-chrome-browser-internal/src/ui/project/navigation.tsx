@@ -42,6 +42,7 @@ export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
       }
       <EuiCollapsibleNav
         className="projectLayoutSideNav"
+        data-test-subj="projectLayoutSideNav"
         css={collabsibleNavCSS}
         isOpen={isVisible /* only affects docked state */}
         showButtonIfDocked={true}
