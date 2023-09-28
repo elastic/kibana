@@ -45,11 +45,14 @@ export const LinkDestination = ({
     link && link.type === EXTERNAL_LINK_TYPE ? link.destination : undefined
   );
 
+  const isInvalid = Boolean(destinationError);
+
   return (
     <EuiFormRow
       error={destinationError}
-      isInvalid={Boolean(destinationError)}
+      isInvalid={isInvalid}
       label={LinksStrings.editor.linkEditor.getLinkDestinationLabel()}
+      data-test-subj={`links--linkDestination${isInvalid ? '--error' : ''}`}
     >
       {selectedLinkType === DASHBOARD_LINK_TYPE ? (
         <DashboardLinkDestinationPicker

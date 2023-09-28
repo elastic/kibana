@@ -149,7 +149,11 @@ export const LinkEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} iconType="cross">
+            <EuiButtonEmpty
+              onClick={() => onClose()}
+              iconType="cross"
+              data-test-subj="links--linkEditor--closeBtn"
+            >
               {LinksStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>

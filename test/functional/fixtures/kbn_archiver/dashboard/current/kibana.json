@@ -2793,8 +2793,8 @@
         "destinationRefName": "link_link003_dashboard"
       }
     ],
-    "layout": "horizontal",
-    "title": "a few links",
+    "layout": "vertical",
+    "title": "a few vertical links",
     "description": ""
   },
   "references": [
@@ -2812,6 +2812,113 @@
       "name": "link_link003_dashboard",
       "type": "dashboard",
       "id": "27398c50-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}
+
+{
+  "id": "4dd6f084-ba56-4256-b018-b6df4092a66c",
+  "type": "links",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-26T17:43:44.844Z",
+  "created_at": "2023-09-26T16:30:45.296Z",
+  "version": "WzIxMDEsMV0=",
+  "attributes": {
+    "links": [
+      {
+        "label": "links 001 - filters",
+        "type": "dashboardLink",
+        "id": "link001",
+        "options": {
+          "openInNewTab": false,
+          "useCurrentDateRange": false,
+          "useCurrentFilters": true
+        },
+        "order": 0,
+        "destinationRefName": "link_link001_dashboard"
+      },
+      {
+        "label": "links 002 - date range",
+        "type": "dashboardLink",
+        "id": "link002",
+        "options": {
+          "openInNewTab": false,
+          "useCurrentDateRange": true,
+          "useCurrentFilters": false
+        },
+        "order": 1,
+        "destinationRefName": "link_link002_dashboard"
+      },
+      {
+        "label": "links 003 - external",
+        "type": "dashboardLink",
+        "id": "link003",
+        "options": {
+          "openInNewTab": true,
+          "useCurrentDateRange": false,
+          "useCurrentFilters": false
+        },
+        "order": 2,
+        "destinationRefName": "link_link003_dashboard"
+      },
+      {
+        "label": "links 004 - broken",
+        "type": "dashboardLink",
+        "id": "link004",
+        "options": {
+          "openInNewTab": true,
+          "useCurrentDateRange": false,
+          "useCurrentFilters": false
+        },
+        "order": 3,
+        "destinationRefName": "link_link004_dashboard"
+      },
+      {
+        "label": "links 005 - delete me",
+        "type": "dashboardLink",
+        "id": "link005",
+        "options": {
+          "openInNewTab": true,
+          "useCurrentDateRange": false,
+          "useCurrentFilters": false
+        },
+        "order": 4,
+        "destinationRefName": "link_link005_dashboard"
+      }
+    ],
+    "layout": "horizontal",
+    "title": "a few horizontal links",
+    "description": ""
+  },
+  "references": [
+    {
+      "name": "link_link001_dashboard",
+      "type": "dashboard",
+      "id": "0930f310-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "name": "link_link002_dashboard",
+      "type": "dashboard",
+      "id": "24751520-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "name": "link_link003_dashboard",
+      "type": "dashboard",
+      "id": "27398c50-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "name": "link_link004_dashboard",
+      "type": "dashboard",
+      "id": "does-not-exist"
+    },
+    {
+      "name": "link_link005_dashboard",
+      "type": "dashboard",
+      "id": "89566e10-5d4a-11ee-9513-d3f0b68b64f8"
     }
   ],
   "managed": false,
@@ -2853,7 +2960,7 @@
     {
       "name": "26533acc-3516-445c-9c05-3b0e18686f38:panel_26533acc-3516-445c-9c05-3b0e18686f38",
       "type": "links",
-      "id": "16e12160-5bc2-11ee-9a85-7b86504227bc"
+      "id": "4dd6f084-ba56-4256-b018-b6df4092a66c"
     },
     {
       "type": "tag",
@@ -2901,7 +3008,7 @@
     {
       "name": "26533acc-3516-445c-9c05-3b0e18686f38:panel_26533acc-3516-445c-9c05-3b0e18686f38",
       "type": "links",
-      "id": "16e12160-5bc2-11ee-9a85-7b86504227bc"
+      "id": "4dd6f084-ba56-4256-b018-b6df4092a66c"
     },
     {
       "type": "tag",
@@ -2941,6 +3048,127 @@
       "type": "tag",
       "id": "067be530-5bc2-11ee-9a85-7b86504227bc",
       "name": "tag-ref-067be530-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "89566e10-5d4a-11ee-9513-d3f0b68b64f8",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-27T15:29:41.343Z",
+  "created_at": "2023-09-27T15:29:41.343Z",
+  "version": "WzIwMDAsMV0=",
+  "attributes": {
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"7e4355a2-41e9-4627-982b-66ec7d98d58d\"},\"panelIndex\":\"7e4355a2-41e9-4627-982b-66ec7d98d58d\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_7e4355a2-41e9-4627-982b-66ec7d98d58d\"}]",
+    "timeFrom": "2018-12-24T00:00:00.000Z",
+    "title": "links 005",
+    "timeTo": "2018-12-26T00:00:00.000Z"
+  },
+  "references": [
+    {
+      "name": "7e4355a2-41e9-4627-982b-66ec7d98d58d:panel_7e4355a2-41e9-4627-982b-66ec7d98d58d",
+      "type": "links",
+      "id": "4dd6f084-ba56-4256-b018-b6df4092a66c"
+    },
+    {
+      "type": "tag",
+      "id": "067be530-5bc2-11ee-9a85-7b86504227bc",
+      "name": "tag-ref-067be530-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "d8e17750-5d6c-11ee-be0d-9787f0515106",
+  "type": "links",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-27T19:34:17.157Z",
+  "created_at": "2023-09-27T19:34:17.157Z",
+  "version": "WzM0NDAsMV0=",
+  "attributes": {
+    "links": [
+      {
+        "label": "opens in new tab",
+        "type": "externalLink",
+        "id": "link999",
+        "destination": "https://example.com/1",
+        "order": 0
+      },
+      {
+        "label": "opens in same tab",
+        "type": "externalLink",
+        "id": "link888",
+        "destination": "https://example.com/2",
+        "options": {
+          "openInNewTab": false,
+          "encodeUrl": true
+        },
+        "order": 1
+      },
+      {
+        "label": "external link violation",
+        "type": "externalLink",
+        "id": "link777",
+        "destination": "https://danger.example.com",
+        "order": 2
+      }
+    ],
+    "layout": "vertical",
+    "title": "some external links",
+    "description": ""
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}
+
+{
+  "id": "379c1b60-5d6d-11ee-be0d-9787f0515106",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-27T19:36:56.086Z",
+  "created_at": "2023-09-27T19:36:56.086Z",
+  "version": "WzM0NDEsMV0=",
+  "attributes": {
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "timeRestore": false,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":9,\"h\":6,\"i\":\"fd19ed9e-8e8b-4769-bb25-0a76923e9f80\"},\"panelIndex\":\"fd19ed9e-8e8b-4769-bb25-0a76923e9f80\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_fd19ed9e-8e8b-4769-bb25-0a76923e9f80\"}]",
+    "title": "dashboard with external links"
+  },
+  "references": [
+    {
+      "name": "fd19ed9e-8e8b-4769-bb25-0a76923e9f80:panel_fd19ed9e-8e8b-4769-bb25-0a76923e9f80",
+      "type": "links",
+      "id": "d8e17750-5d6c-11ee-be0d-9787f0515106"
     }
   ],
   "managed": false,

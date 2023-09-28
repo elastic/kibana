@@ -9,6 +9,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const commonConfig = await readConfigFile(require.resolve('../../../../common/config.js'));
   const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 
   return {
@@ -16,6 +17,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     junit: {
       reportName: 'Dashboard Elements - Links panel tests',
+    },
+    kbnTestServer: {
+      ...commonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...commonConfig.get('kbnTestServer.serverArgs'),
+        `--externalUrl.policy=${JSON.stringify([
+          {
+            allow: false,
+            host: 'danger.example.com',
+          },
+          {
+            allow: true,
+            host: 'example.com',
+          },
+        ])}`,
+      ],
     },
   };
 }
