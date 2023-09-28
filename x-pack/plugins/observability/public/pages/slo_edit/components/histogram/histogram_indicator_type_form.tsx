@@ -31,6 +31,7 @@ export function HistogramIndicatorTypeForm() {
 
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
+  const histogramFields = indexFields.filter((field) => field.type === 'histogram');
   const timestampFields = indexFields.filter((field) => field.type === 'date');
   const partitionByFields = indexFields.filter((field) => field.aggregatable);
 
@@ -109,7 +110,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <HistogramIndicator
             type="good"
-            indexFields={indexFields}
+            histogramFields={histogramFields}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -128,7 +129,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <HistogramIndicator
             type="total"
-            indexFields={indexFields}
+            histogramFields={histogramFields}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
