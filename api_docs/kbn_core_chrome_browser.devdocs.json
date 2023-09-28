@@ -1557,6 +1557,22 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.isGroupTitle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGroupTitle",
+            "description": [
+              "Optional flag to indicate if the node must be treated as a group title"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeProjectNavigationNode.children",
             "type": "Array",
             "tags": [],
@@ -1640,6 +1656,22 @@
             ],
             "signature": [
               "\"hidden\" | \"visible\" | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.accordionProps",
+            "type": "Object",
+            "tags": [],
+            "label": "accordionProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiAccordionProps",
+              "> | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -2896,12 +2928,28 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.isGroupTitle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGroupTitle",
+            "description": [
+              "\nOptional flag to indicate if the node must be treated as a group title.\nCan not be used with `children`"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.NodeDefinition.children",
             "type": "Object",
             "tags": [],
             "label": "children",
             "description": [
-              "Optional children of the navigation node"
+              "Optional children of the navigation node. Can not be used with `isGroupTitle`"
             ],
             "signature": [
               "NonEmptyArray<",
@@ -2964,6 +3012,22 @@
             ],
             "signature": [
               "\"hidden\" | \"visible\" | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.accordionProps",
+            "type": "Object",
+            "tags": [],
+            "label": "accordionProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiAccordionProps",
+              "> | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,

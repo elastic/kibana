@@ -135,6 +135,7 @@ describe('_installPackage', () => {
           disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
+          retrySetupOnBoot: false,
           registry: {
             kibanaVersionCheckEnabled: true,
             capabilities: [],
@@ -192,6 +193,7 @@ describe('_installPackage', () => {
           disableILMPolicies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
+          retrySetupOnBoot: false,
           registry: {
             kibanaVersionCheckEnabled: true,
             capabilities: [],
@@ -265,6 +267,7 @@ describe('_installPackage', () => {
             disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
+            retrySetupOnBoot: false,
             registry: {
               kibanaVersionCheckEnabled: true,
               capabilities: [],

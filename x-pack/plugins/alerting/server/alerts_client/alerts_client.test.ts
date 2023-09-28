@@ -1299,7 +1299,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing 1 out of 2 alerts - [{\"type\":\"action_request_validation_exception\",\"reason\":\"Validation Failed: 1: index is missing;2: type is missing;\"}]`
+            `Error writing alerts: 1 successful, 0 conflicts, 1 errors: Validation Failed: 1: index is missing;2: type is missing;`
           );
         });
 
@@ -3024,6 +3024,53 @@ describe('Alerts Client', () => {
           expect(recoveredAlert.alert.getUuid()).toEqual('abc');
           expect(recoveredAlert.alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
           expect(recoveredAlert.hit).toBeUndefined();
+        });
+      });
+
+      describe('setAlertStatusToUntracked()', () => {
+        test('should call updateByQuery on provided ruleIds', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          const opts = {
+            maxAlerts,
+            ruleLabel: `test: rule-name`,
+            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            activeAlertsFromState: {},
+            recoveredAlertsFromState: {},
+          };
+          await alertsClient.initializeExecution(opts);
+
+          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+        });
+
+        test('should retry updateByQuery on failure', async () => {
+          clusterClient.updateByQuery.mockResponseOnce({
+            total: 10,
+            updated: 8,
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          const opts = {
+            maxAlerts,
+            ruleLabel: `test: rule-name`,
+            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            activeAlertsFromState: {},
+            recoveredAlertsFromState: {},
+          };
+          await alertsClient.initializeExecution(opts);
+
+          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
+          expect(logger.warn).toHaveBeenCalledWith(
+            'Attempt 1: Failed to untrack 2 of 10; indices test-index, ruleIds test-rule'
+          );
         });
       });
     });
