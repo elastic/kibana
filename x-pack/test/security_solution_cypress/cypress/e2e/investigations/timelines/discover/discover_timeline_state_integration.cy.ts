@@ -42,6 +42,7 @@ import {
   gotToDiscoverTab,
   openTimelineById,
   openTimelineFromSettings,
+  waitForTimelineChanges,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
@@ -272,6 +273,7 @@ describe(
             openTimelineById(timelineId);
             cy.get(TIMELINE_TITLE).should('have.text', timelineName);
             const timelineDesc = 'Timeline Description with Saved Seach';
+            waitForTimelineChanges();
             addDescriptionToTimeline(timelineDesc);
             cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
               timeout: 30000,
