@@ -9,6 +9,7 @@ import {
   type AppMountParameters,
   type AppUpdater,
   type CoreStart,
+  type AppDeepLink,
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
