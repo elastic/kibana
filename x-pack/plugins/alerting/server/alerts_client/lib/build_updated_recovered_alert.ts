@@ -11,6 +11,7 @@ import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, TIMESTAMP } from '@kbn/rule-dat
 import { RawAlertInstance } from '@kbn/alerting-state-types';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
+import { removeUnflattenedFieldsFromAlert } from './format_alert';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
@@ -30,20 +31,18 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   rule,
   timestamp,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
-  return deepmerge.all(
-    [
-      alert,
-      {
-        // Set latest rule configuration
-        ...rule,
-        // Update the timestamp to reflect latest update time
-        [TIMESTAMP]: timestamp,
-        // Set latest flapping state
-        [ALERT_FLAPPING]: legacyRawAlert.meta?.flapping,
-        // Set latest flapping history
-        [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
-      },
-    ],
-    { arrayMerge: (_, sourceArray) => sourceArray }
-  ) as Alert & AlertData;
+  const alertUpdates = {
+    // Set latest rule configuration
+    ...rule,
+    // Update the timestamp to reflect latest update time
+    [TIMESTAMP]: timestamp,
+    // Set latest flapping state
+    [ALERT_FLAPPING]: legacyRawAlert.meta?.flapping,
+    // Set latest flapping history
+    [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
+  };
+  const formattedAlert = removeUnflattenedFieldsFromAlert(alert, alertUpdates);
+  return deepmerge.all([formattedAlert, alertUpdates], {
+    arrayMerge: (_, sourceArray) => sourceArray,
+  }) as Alert & AlertData;
 };

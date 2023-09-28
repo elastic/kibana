@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expandFlattenedAlert, formatAlertWithPayload } from './format_alert';
+import { expandFlattenedAlert, removeUnflattenedFieldsFromAlert } from './format_alert';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
@@ -119,10 +119,10 @@ describe('expandFlattenedAlert', () => {
   });
 });
 
-describe('formatAlertWithPayload', () => {
-  test('should correctly format unflattened alert', () => {
+describe('removeUnflattenedFieldsFromAlert', () => {
+  test('should correctly remove duplicate data from alert', () => {
     expect(
-      formatAlertWithPayload(
+      removeUnflattenedFieldsFromAlert(
         {
           '@timestamp': '2023-03-29T12:27:28.159Z',
           event: {

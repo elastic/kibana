@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getFlattenedObject } from '@kbn/std';
 import { cloneDeep, get, isObject, merge, omit } from 'lodash';
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
@@ -25,17 +24,21 @@ export const expandFlattenedAlert = (alert: object) => {
 };
 
 /**
- * It is possible the executor reports back a flattened
- * payload but the existing alert is unflattened, so we want to merge
- * the two formats
+ * If we're replacing field values in an unflattened alert
+ * with the flattened version, we want to remove the unflattened version
+ * to avoid duplicate data in the doc
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const formatAlertWithPayload = (alert: any, payload: object) => {
+export const removeUnflattenedFieldsFromAlert = (alert: any, flattenedData: object) => {
   // make a copy of the alert
   let alertCopy = cloneDeep(alert);
-  Object.keys(payload).forEach((payloadKey: string) => {
+
+  // for each flattened field in the flattened data object,
+  // check whether that path exists in the unflattened alert
+  // and omit it if it does
+  Object.keys(flattenedData).forEach((payloadKey: string) => {
     const val = get(alertCopy, payloadKey, null);
-    if (null == alertCopy[payloadKey] && null != val && !isObject(val)) {
+    if (null == alertCopy[payloadKey] && null != val) {
       alertCopy = omit(alertCopy, payloadKey);
     }
   });

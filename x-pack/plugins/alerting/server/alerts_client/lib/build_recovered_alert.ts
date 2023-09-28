@@ -13,7 +13,6 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_STATUS,
   EVENT_ACTION,
@@ -28,7 +27,7 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
-import { formatAlertWithPayload } from './format_alert';
+import { removeUnflattenedFieldsFromAlert } from './format_alert';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -97,7 +96,6 @@ export const buildRecoveredAlert = <
     ...(legacyAlert.getState().end && legacyAlert.getState().start
       ? {
           [ALERT_END]: legacyAlert.getState().end,
-          // this should get merged with a ALERT_TIME_RANGE_GTE
           [ALERT_TIME_RANGE]: {
             gte: legacyAlert.getState().start,
             lte: legacyAlert.getState().end,
@@ -121,7 +119,10 @@ export const buildRecoveredAlert = <
       ])
     ),
   };
-  const formattedAlert = formatAlertWithPayload(alert, { ...cleanedPayload, ...alertUpdates });
+  const formattedAlert = removeUnflattenedFieldsFromAlert(alert, {
+    ...cleanedPayload,
+    ...alertUpdates,
+  });
   return deepmerge.all([formattedAlert, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;

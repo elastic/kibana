@@ -14,6 +14,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_TAGS,
+  ALERT_TIME_RANGE,
   EVENT_ACTION,
   SPACE_IDS,
   TAGS,
@@ -25,7 +26,7 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
-import { formatAlertWithPayload } from './format_alert';
+import { removeUnflattenedFieldsFromAlert } from './format_alert';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -87,6 +88,12 @@ export const buildOngoingAlert = <
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set the time range
+    ...(legacyAlert.getState().start
+      ? {
+          [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
+        }
+      : {}),
     // Set latest duration as ongoing alerts should have updated duration
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: legacyAlert.getState().duration }
@@ -109,7 +116,10 @@ export const buildOngoingAlert = <
       ])
     ),
   };
-  const formattedAlert = formatAlertWithPayload(alert, { ...cleanedPayload, ...alertUpdates });
+  const formattedAlert = removeUnflattenedFieldsFromAlert(alert, {
+    ...cleanedPayload,
+    ...alertUpdates,
+  });
   return deepmerge.all([formattedAlert, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
