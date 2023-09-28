@@ -1504,9 +1504,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
-      const { body, status } = await esSupertest.delete(
-        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
-      );
+      // const { body, status } =
+      await esSupertest.delete(`/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`);
       // @todo
       // this.assertResponseStatusCode(200, status, body);
 
