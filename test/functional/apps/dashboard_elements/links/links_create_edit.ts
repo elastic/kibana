@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorSaveButton();
 
         await header.waitUntilLoadingHasFinished();
-        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(5);
+        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
       });
     });
   });
