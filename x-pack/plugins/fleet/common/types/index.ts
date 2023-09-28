@@ -51,6 +51,7 @@ export interface FleetConfigType {
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
+    retrySetupOnBoot: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];
