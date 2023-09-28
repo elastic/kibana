@@ -14,18 +14,31 @@ import {
 } from '../../../common/gen_ai/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  GenAiRunActionResponseSchema,
-  GenAiStreamingResponseSchema,
-} from '../../../common/gen_ai/schema';
-import { initGenAiDashboard } from './create_dashboard';
+import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/gen_ai/schema';
+import { initDashboard } from './create_dashboard';
 jest.mock('./create_dashboard');
 
 describe('GenAiConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
+  const mockResponseString = 'Hello! How can I assist you today?';
+  const mockResponse = {
+    headers: {},
+    data: {
+      result: 'success',
+      choices: [
+        {
+          message: {
+            role: 'assistant',
+            content: mockResponseString,
+          },
+          finish_reason: 'stop',
+          index: 0,
+        },
+      ],
+    },
+  };
   beforeEach(() => {
-    const mockResponse = { headers: {}, data: { result: 'success' } };
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
@@ -68,14 +81,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides the default model with the default model specified in the body', async () => {
@@ -85,14 +98,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...requestBody, stream: false }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('the OpenAI API call is successful with correct parameters', async () => {
@@ -101,14 +114,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides stream parameter if set in the body', async () => {
@@ -131,7 +144,7 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             ...body,
             stream: false,
@@ -141,7 +154,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -164,14 +177,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
@@ -184,7 +197,7 @@ describe('GenAiConnector', () => {
           responseType: 'stream',
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiStreamingResponseSchema,
+          responseSchema: StreamingResponseSchema,
           data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
@@ -193,7 +206,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -219,7 +232,7 @@ describe('GenAiConnector', () => {
           responseType: 'stream',
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
-          responseSchema: GenAiStreamingResponseSchema,
+          responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
             ...body,
             stream: true,
@@ -231,7 +244,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -242,6 +255,31 @@ describe('GenAiConnector', () => {
         await expect(
           connector.streamApi({ body: JSON.stringify(sampleOpenAiBody), stream: true })
         ).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('invokeAI', () => {
+      it('the API call is successful with correct parameters', async () => {
+        const response = await connector.invokeAI(sampleOpenAiBody);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+        expect(response).toEqual(mockResponseString);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.invokeAI(sampleOpenAiBody)).rejects.toThrow('API Error');
       });
     });
   });
@@ -282,14 +320,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
           headers: {
             'api-key': '123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides stream parameter if set in the body', async () => {
@@ -308,14 +346,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
           headers: {
             'api-key': '123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -338,14 +376,14 @@ describe('GenAiConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
-          responseSchema: GenAiRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
           headers: {
             'api-key': '123',
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('the AzureAI API call is successful with correct parameters when stream = true', async () => {
@@ -358,7 +396,7 @@ describe('GenAiConnector', () => {
           responseType: 'stream',
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
-          responseSchema: GenAiStreamingResponseSchema,
+          responseSchema: StreamingResponseSchema,
           data: JSON.stringify({ ...sampleAzureAiBody, stream: true }),
           headers: {
             'api-key': '123',
@@ -367,7 +405,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -389,7 +427,7 @@ describe('GenAiConnector', () => {
           responseType: 'stream',
           url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
           method: 'post',
-          responseSchema: GenAiStreamingResponseSchema,
+          responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
             ...body,
             stream: true,
@@ -401,7 +439,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -425,7 +463,7 @@ describe('GenAiConnector', () => {
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
-    const mockGenAi = initGenAiDashboard as jest.Mock;
+    const mockGenAi = initDashboard as jest.Mock;
     beforeEach(() => {
       // @ts-ignore
       connector.esClient.transport.request = mockRequest;
