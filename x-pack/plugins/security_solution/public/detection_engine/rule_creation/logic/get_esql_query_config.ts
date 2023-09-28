@@ -24,7 +24,7 @@ export const getEsqlQueryConfig = ({
     queryKey: [(esqlQuery ?? '').trim()],
     queryFn: async () => {
       if (!esqlQuery) {
-        return undefined;
+        return null;
       }
       try {
         const res = await fetchFieldsFromESQL({ esql: emptyResultsEsqlQuery }, expressions);

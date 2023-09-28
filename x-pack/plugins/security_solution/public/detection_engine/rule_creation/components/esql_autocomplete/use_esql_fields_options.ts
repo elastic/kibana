@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
 
@@ -16,7 +16,7 @@ import { getEsqlQueryConfig } from '../../logic/get_esql_query_config';
 import type { FieldType } from '../../logic/esql_validator';
 
 export const esqlToOptions = (
-  data: { error: unknown } | Datatable | undefined,
+  data: { error: unknown } | Datatable | undefined | null,
   fieldType?: FieldType
 ) => {
   if (data && 'error' in data) {
@@ -53,7 +53,9 @@ export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) =
   const queryConfig = getEsqlQueryConfig({ esqlQuery, expressions });
   const { data, isLoading } = useQuery(queryConfig);
 
-  const options = esqlToOptions(data, fieldType);
+  const options = useMemo(() => {
+    return esqlToOptions(data, fieldType);
+  }, [data, fieldType]);
 
   return {
     options,

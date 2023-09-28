@@ -11,6 +11,9 @@ describe('esqlToOptions', () => {
   it('should return empty array if data is undefined', () => {
     expect(esqlToOptions(undefined)).toEqual([]);
   });
+  it('should return empty array if data is null', () => {
+    expect(esqlToOptions(null)).toEqual([]);
+  });
   it('should return empty array if data has error', () => {
     expect(esqlToOptions({ error: Error })).toEqual([]);
   });
