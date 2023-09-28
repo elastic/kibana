@@ -34,7 +34,7 @@ export const DetailsPageError = ({
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.errorDescription"
-              defaultMessage="There was an error loading data for index {indexName}. Make sure the index name in the url is correct and try again."
+              defaultMessage="We encountered an error loading data for index {indexName}. Make sure that the index name in the URL is correct and try again."
               values={{
                 indexName,
               }}

@@ -1603,10 +1603,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@88.3.0":
-  version "88.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-88.3.0.tgz#4f17c04667b94c3e26f6979d458361d4c359949b"
-  integrity sha512-vO4oK+O0cKZkzonGbY4GE/xuKgJbqRktbccGsQmyPh/S9heYssWikyN1n0y2VTTel3DG0f4OCHd4fNum8ZPNOQ==
+"@elastic/eui@88.5.0":
+  version "88.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-88.5.0.tgz#7d5c6f41e322479e6ea81e232a9c9c274a093de3"
+  integrity sha512-TFBr7T9qnbuk3gCgoZjX9Y37Byu4Cp3KVkmT0VeCTYBEwFkxKNzIRIhdLbZFzTsxCc3rssLqaE3d1qstqh3GtA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -3243,6 +3243,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud@link:packages/cloud":
+  version "0.0.0"
+  uid ""
+
 "@kbn/code-editor-mocks@link:packages/shared-ux/code_editor/mocks":
   version "0.0.0"
   uid ""
@@ -4483,6 +4487,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-usage-test-plugin@link:x-pack/test/plugin_api_integration/plugins/feature_usage_test":
   version "0.0.0"
   uid ""
@@ -4935,6 +4943,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-chi2test@link:x-pack/packages/ml/chi2test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""
@@ -5244,6 +5256,14 @@
   uid ""
 
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/resizable-layout-examples-plugin@link:examples/resizable_layout_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/resizable-layout@link:packages/kbn-resizable-layout":
   version "0.0.0"
   uid ""
 
@@ -8536,6 +8556,13 @@
   resolved "https://registry.yarnpkg.com/@types/async/-/async-3.2.15.tgz#26d4768fdda0e466f18d6c9918ca28cc89a4e1fe"
   integrity sha512-PAmPfzvFA31mRoqZyTVsgJMsvbynR429UTTxhmfsUCrWGh3/fxOrzqBtaTPJsn4UtzTv4Vb0+/O7CARWb69N4g==
 
+"@types/aws4@^1.5.0":
+  version "1.11.3"
+  resolved "https://registry.yarnpkg.com/@types/aws4/-/aws4-1.11.3.tgz#a7856fe4e30a7b6411335a73d5440e8b91afc662"
+  integrity sha512-Ka2xKf04xZUH0N7wIYpqcNdavgfPQnaJ1T6GieZs1ydo21vao93aCbHyrA6uKXnaTXzvBcMJkgMsBfT9XvypFQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/babel__core@*", "@types/babel__core@^7.1.14":
   version "7.1.20"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.20.tgz#e168cdd612c92a2d335029ed62ac94c95b362359"
@@ -11426,6 +11453,11 @@ aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
   integrity sha1-tG6JCTSpWR8tL2+G1+ap8bP+dqg=
+
+aws4@^1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.12.0.tgz#ce1c9d143389679e253b314241ea9aa5cec980d3"
+  integrity sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==
 
 aws4@^1.8.0:
   version "1.8.0"
