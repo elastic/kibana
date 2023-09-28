@@ -979,6 +979,7 @@ function getWaitingRuleType(logger: Logger) {
     id,
     name: 'Test: Rule that waits for a signal before finishing',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
