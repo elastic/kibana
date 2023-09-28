@@ -30,6 +30,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <EuiForm>
       <EuiFormRow
@@ -121,6 +122,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <EuiForm>
       <EuiFormRow
@@ -212,6 +214,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <EuiForm>
       <EuiFormRow
