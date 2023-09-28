@@ -10,7 +10,12 @@ import { services } from './apm_api_integration/common/services';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [
+    require.resolve('../common'),
+    require.resolve('.'),
+    require.resolve('../../../../test_all_deployments/api_integration/test_suites/common'),
+    require.resolve('../../../../test_all_deployments/api_integration/test_suites/observability'),
+  ],
   junit: {
     reportName: 'Serverless Observability API Integration Tests',
   },

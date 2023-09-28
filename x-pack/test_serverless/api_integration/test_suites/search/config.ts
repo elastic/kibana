@@ -9,7 +9,12 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [
+    require.resolve('../common'),
+    require.resolve('.'),
+    require.resolve('../../../../test_all_deployments/api_integration/test_suites/common'),
+    require.resolve('../../../../test_all_deployments/api_integration/test_suites/search'),
+  ],
   junit: {
     reportName: 'Serverless Search API Integration Tests',
   },

@@ -9,7 +9,12 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [
+    require.resolve('../common'),
+    require.resolve('.'),
+    require.resolve('../../../../test_all_deployments/functional/test_suites/common'),
+    require.resolve('../../../../test_all_deployments/functional/test_suites/security'),
+  ],
   junit: {
     reportName: 'Serverless Security Functional Tests',
   },
