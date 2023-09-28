@@ -17,11 +17,17 @@ export interface CspCounterCardProps {
   description: EuiStatProps['description'];
 }
 
-export const CspCounterCard = (counter: CspCounterCardProps) => {
+export const CspCounterCard = ({
+  id,
+  button,
+  title,
+  titleColor,
+  description,
+}: CspCounterCardProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj={counter.id}>
+    <EuiPanel hasBorder paddingSize="m" data-test-subj={id}>
       <EuiStat
         css={{
           height: '60%',
@@ -34,13 +40,13 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
           },
         }}
         titleSize="s"
-        title={counter.title}
-        titleColor={counter.titleColor}
+        title={title}
+        titleColor={titleColor}
         descriptionElement="h6"
-        description={counter.description}
+        description={description}
       />
       <EuiHorizontalRule margin="xs" />
-      {counter.button}
+      {button}
     </EuiPanel>
   );
 };
