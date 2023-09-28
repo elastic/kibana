@@ -7,8 +7,8 @@ Any modifications made to this file will be overwritten.
 <div class="openapi">
   <h2>Access</h2>
     <ol>
-      <li>APIKey KeyParamName:ApiKey KeyInQuery:false KeyInHeader:true</li>
       <li>HTTP Basic Authentication</li>
+      <li>APIKey KeyParamName:ApiKey KeyInQuery:false KeyInHeader:true</li>
     </ol>
 
   <h2><a name="__Methods">Methods</a></h2>
@@ -308,7 +308,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
+    <pre class="example"><code>[ {
   "supported_feature_ids" : [ "alerting", "uptime", "siem" ],
   "name" : "Index",
   "enabled_in_license" : true,
@@ -316,7 +316,15 @@ Any modifications made to this file will be overwritten.
   "enabled_in_config" : true,
   "minimum_license_required" : "basic",
   "enabled" : true
-}</code></pre>
+}, {
+  "supported_feature_ids" : [ "alerting", "uptime", "siem" ],
+  "name" : "Index",
+  "enabled_in_license" : true,
+  "id" : ".server-log",
+  "enabled_in_config" : true,
+  "minimum_license_required" : "basic",
+  "enabled" : true
+} ]</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -363,7 +371,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
+    <pre class="example"><code>[ {
   "is_missing_secrets" : false,
   "is_deprecated" : false,
   "is_preconfigured" : false,
@@ -375,7 +383,19 @@ Any modifications made to this file will be overwritten.
     "key" : ""
   },
   "connector_type_id" : ".server-log"
-}</code></pre>
+}, {
+  "is_missing_secrets" : false,
+  "is_deprecated" : false,
+  "is_preconfigured" : false,
+  "name" : "my-connector",
+  "is_system_action" : false,
+  "referenced_by_count" : 2,
+  "id" : "b0766e10-d190-11ec-b04c-776c77d14fca",
+  "config" : {
+    "key" : ""
+  },
+  "connector_type_id" : ".server-log"
+} ]</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -601,14 +621,21 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
+    <pre class="example"><code>[ {
   "enabledInConfig" : true,
   "name" : "name",
   "enabledInLicense" : true,
   "id" : "id",
   "minimumLicenseRequired" : "minimumLicenseRequired",
   "enabled" : true
-}</code></pre>
+}, {
+  "enabledInConfig" : true,
+  "name" : "name",
+  "enabledInLicense" : true,
+  "id" : "id",
+  "minimumLicenseRequired" : "minimumLicenseRequired",
+  "enabled" : true
+} ]</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -655,7 +682,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
+    <pre class="example"><code>[ {
   "isPreconfigured" : true,
   "isDeprecated" : true,
   "actionTypeId" : "actionTypeId",
@@ -663,7 +690,15 @@ Any modifications made to this file will be overwritten.
   "id" : "id",
   "config" : "{}",
   "isMissingSecrets" : true
-}</code></pre>
+}, {
+  "isPreconfigured" : true,
+  "isDeprecated" : true,
+  "actionTypeId" : "actionTypeId",
+  "name" : "name",
+  "id" : "id",
+  "config" : "{}",
+  "isMissingSecrets" : true
+} ]</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -997,12 +1032,13 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Run_connector_request_body_properties"><code>Run_connector_request_body_properties</code> - Run connector request body properties</a></li>
     <li><a href="#Run_connector_request_body_properties_params"><code>Run_connector_request_body_properties_params</code> - </a></li>
     <li><a href="#Severity_mapping"><code>Severity_mapping</code> - Severity mapping</a></li>
-    <li><a href="#Subaction_parameters"><code>Subaction_parameters</code> - Subaction parameters</a></li>
     <li><a href="#Unauthorized_response"><code>Unauthorized_response</code> - Unauthorized response</a></li>
     <li><a href="#Update_connector_request_body_properties"><code>Update_connector_request_body_properties</code> - Update connector request body properties</a></li>
     <li><a href="#action_response_properties"><code>action_response_properties</code> - Action response properties</a></li>
     <li><a href="#config_properties_cases_webhook"><code>config_properties_cases_webhook</code> - Connector request properties for Webhook - Case Management connector</a></li>
     <li><a href="#config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a></li>
+    <li><a href="#config_properties_genai_oneOf"><code>config_properties_genai_oneOf</code> - </a></li>
+    <li><a href="#config_properties_genai_oneOf_1"><code>config_properties_genai_oneOf_1</code> - </a></li>
     <li><a href="#config_properties_index"><code>config_properties_index</code> - Connector request properties for an index connector</a></li>
     <li><a href="#config_properties_jira"><code>config_properties_jira</code> - Connector request properties for a Jira connector</a></li>
     <li><a href="#config_properties_opsgenie"><code>config_properties_opsgenie</code> - Connector request properties for an Opsgenie connector</a></li>
@@ -1289,10 +1325,6 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">debug</div><div class="param-enum">error</div><div class="param-enum">fatal</div><div class="param-enum">info</div><div class="param-enum">trace</div><div class="param-enum">warn</div>
 <div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The message for server log connectors. </div>
-<div class="param">subAction </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The action to test. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">pushToService</div>
-<div class="param">subActionParams </div><div class="param-desc"><span class="param-type"><a href="#run_connector_subaction_pushtoservice_subActionParams">run_connector_subaction_pushtoservice_subActionParams</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1303,16 +1335,6 @@ Any modifications made to this file will be overwritten.
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the field in Swimlane. </div>
 <div class="param">key </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key for the field in Swimlane. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the field in Swimlane. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="Subaction_parameters"><code>Subaction_parameters</code> - Subaction parameters</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>Test an action that involves a subaction.</div>
-    <div class="field-items">
-      <div class="param">subAction </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The action to test. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">pushToService</div>
-<div class="param">subActionParams </div><div class="param-desc"><span class="param-type"><a href="#run_connector_subaction_pushtoservice_subActionParams">run_connector_subaction_pushtoservice_subActionParams</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1335,6 +1357,9 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_swimlane">config_properties_swimlane</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_swimlane">secrets_properties_swimlane</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.gen-ai</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1381,8 +1406,32 @@ Any modifications made to this file will be overwritten.
     <h3><a name="config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines properties for connectors when type is <code>.gen-ai</code>.</div>
     <div class="field-items">
-      <div class="param">apiProvider (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
-<div class="param">apiUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+      <div class="param">apiProvider </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">OpenAI</div>
+<div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+<div class="param">defaultModel (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The default model to use for requests. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_genai_oneOf"><code>config_properties_genai_oneOf</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">apiProvider </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Azure OpenAI</div>
+<div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_genai_oneOf_1"><code>config_properties_genai_oneOf_1</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">apiProvider </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">OpenAI</div>
+<div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+<div class="param">defaultModel (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The default model to use for requests. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
