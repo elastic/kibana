@@ -8,11 +8,11 @@
 import React from 'react';
 import type { FC } from 'react';
 
+import { RuleDetailTabs } from '../../../detection_engine/rule_details_ui/pages/rule_details';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 import { SecurityPageName } from '../../../../common/constants';
 import { getRuleDetailsTabUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '@kbn/security-solution-plugin/public/detection_engine/rule_details_ui/pages/rule_details';
 
 interface LinkToRuleDetailsProps {
   referenceName: string;
