@@ -39,8 +39,8 @@ xpack.fleet.packages:
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false
-xpack.apm.featureFlags.infrastructureTabAvailable: false
-xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: true
+xpack.apm.featureFlags.infraUiAvailable: true
 xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
