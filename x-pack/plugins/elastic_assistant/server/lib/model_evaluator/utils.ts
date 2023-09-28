@@ -30,26 +30,25 @@ export const callAgentWithRetry = async ({
       return await agent(messages);
     } catch (error) {
       // Check for 429, and then if there is a retry-after header
-      if (error.status === 429) {
+      const { isRateLimitError, retryAfter } = parseErrorMessage(error);
+      if (isRateLimitError) {
         logger.error(
           "callAgentWithRetry: Slow down! You're going too fast! 429 detected! Retrying after..."
         );
-        const retryAfter = error.headers?.['retry-after'];
-        if (retryAfter) {
-          const retryAfterNum = parseInt(retryAfter, 10);
-          logger.error(`${retryAfterNum} seconds}`);
-          await wait(retryAfterNum * 1000);
+        if (retryAfter != null) {
+          logger.error(`${retryAfter} seconds}`);
+          await wait(retryAfter * 1000);
           // eslint-disable-next-line no-continue
           continue;
         }
       }
       // If not 429 or there is no retry-after header, reject the promise
       logger.error(`Error calling agent:\n${error}`);
-      throw error;
+      return Promise.reject(error);
     }
   }
   logger.error(`callAgentWithRetry: Max retries reached: ${maxRetries}`);
-  throw new Error(`callAgentWithRetry: Max retries reached: ${maxRetries}`);
+  return Promise.reject(new Error(`callAgentWithRetry: Max retries reached: ${maxRetries}`));
 };
 
 export const getMessageFromLangChainResponse = (
@@ -83,4 +82,27 @@ export const getFormattedMessageContent = (content: string): string => {
   }
 
   return content;
+};
+
+/**
+ * Parse an error message coming back from the agent via the actions frameworks to determine if it is
+ * a rate limit error and extract the retry after delay.
+ *
+ * Note: Could be simplified by instrumenting agents w/ callback where there's access to the actual response
+ * @param error
+ */
+export const parseErrorMessage = (
+  error: Error
+): { isRateLimitError: boolean; retryAfter: number | null } => {
+  const errorMessage: string = error.message;
+
+  const rateLimitRegex = /Status code: 429.*?Please retry after (\d+) seconds/;
+  const match = errorMessage.match(rateLimitRegex);
+
+  // If there is a match, return the parsed delay; otherwise, return an indication that it is not a 429 error.
+  if (match && match[1]) {
+    return { isRateLimitError: true, retryAfter: parseInt(match[1], 10) };
+  } else {
+    return { isRateLimitError: false, retryAfter: null };
+  }
 };
