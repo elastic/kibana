@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
 import { evaluationIndexMappings as mappings } from './mappings';
-import { EvaluationResult } from '../evaluation';
+import { EvaluationResult, EvaluationSummary } from '../evaluation';
 
 interface SetupIndexParams {
   esClient: ElasticsearchClient;
@@ -58,7 +58,8 @@ export const setupEvaluationIndex = async ({
 
 interface IndexEvaluationsParams {
   esClient: ElasticsearchClient;
-  evalResults: EvaluationResult[];
+  evaluationResults: EvaluationResult[];
+  evaluationSummary: EvaluationSummary;
   index: string;
   logger: Logger | ToolingLog;
 }
@@ -67,30 +68,37 @@ interface IndexEvaluationsParams {
  * Indexes evaluation results into the output index
  * @param {Object} options - The options object.
  * @param {ElasticsearchClient} options.esClient Elasticsearch client
- * @param {EvaluationResult[]} options.evalResults Name of the output index
+ * @param {EvaluationResult[]} options.evaluationResults Individual eval results
+ * @param {EvaluationResult[]} options.evaluationSummary Summary of eval
  * @param {string} options.index Name of the output index
  *
  * @returns {Promise<boolean>} True if documents created successfully
  */
 export const indexEvaluations = async ({
   esClient,
-  evalResults,
+  evaluationResults,
+  evaluationSummary,
   index,
   logger,
 }: IndexEvaluationsParams): Promise<boolean> => {
   try {
     const response = await esClient.helpers.bulk({
-      datasource: evalResults,
+      datasource: evaluationResults,
       onDocument(doc) {
         return { index: { _index: index } };
       },
     });
 
-    logger.info(`Bulk index response:\n${JSON.stringify(response)}`);
+    logger.info(`Writing evaluations...`);
+    logger.info(`Evaluations bulk index response:\n${JSON.stringify(response)}`);
+
+    logger.info(`Writing summary...`);
+    const summaryResponse = await esClient.index({ index, document: evaluationSummary });
+    logger.info(`Summary index response:\n${JSON.stringify(summaryResponse)}`);
 
     return true;
   } catch (e) {
-    logger.error('Error loading data into KB', e);
+    logger.error('Error indexing data into the evaluation index', e);
     return false;
   }
 };

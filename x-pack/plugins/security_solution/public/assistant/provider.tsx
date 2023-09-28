@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
-import { useKibana } from '../common/lib/kibana';
+import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from './helpers';
@@ -34,6 +34,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana().services;
+  const basePath = useBasePath();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
 
   const { conversations, setConversations } = useConversationStore();
@@ -63,6 +64,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       baseAllow={DEFAULT_ALLOW}
       baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT}
+      basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
       baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
       baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}

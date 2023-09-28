@@ -56,6 +56,7 @@ export interface AssistantProviderProps {
   baseAllowReplacement: string[];
   defaultAllow: string[];
   defaultAllowReplacement: string[];
+  basePath: string;
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
   baseSystemPrompts?: Prompt[];
@@ -92,6 +93,7 @@ export interface UseAssistantContext {
   docLinks: Omit<DocLinksStart, 'links'>;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
+  basePath: string;
   basePromptContexts: PromptContextTemplate[];
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
@@ -139,6 +141,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   defaultAllow,
   defaultAllowReplacement,
   docLinks,
+  basePath,
   basePromptContexts = [],
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
@@ -258,6 +261,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       allSystemPrompts: localStorageSystemPrompts ?? [],
       baseAllow: uniq(baseAllow),
       baseAllowReplacement: uniq(baseAllowReplacement),
+      basePath,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,
@@ -293,6 +297,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       baseAllow,
       baseAllowReplacement,
+      basePath,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,

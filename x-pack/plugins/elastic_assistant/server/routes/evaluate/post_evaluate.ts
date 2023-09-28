@@ -8,6 +8,7 @@
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { v4 as uuidv4 } from 'uuid';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 
@@ -54,9 +55,12 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
       const connectorIds = request.query.models?.split(',') || [];
       const agentNames = request.query.agents?.split(',') || [];
 
+      const evaluationId = uuidv4();
+
       logger.info('postEvaluateRoute:');
       logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
       logger.info(`request.body:\n${JSON.stringify(request.body, null, 2)}`);
+      logger.info(`Evaluation ID: ${evaluationId}`);
 
       const totalExecutions = connectorIds.length * agentNames.length * dataset.length;
       logger.info('Creating agents:');
@@ -129,9 +133,10 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
           logger,
         });
 
-        const { evalResults } = await performEvaluation({
+        const { evaluationResults, evaluationSummary } = await performEvaluation({
           agentExecutorEvaluators: agents,
           dataset,
+          evaluationId,
           evaluatorModel,
           evaluationPrompt: evalPrompt,
           evaluationType,
@@ -140,7 +145,13 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
 
         logger.info(`Writing evaluation results to index: ${outputIndex}`);
         await setupEvaluationIndex({ esClient, index: outputIndex, logger });
-        await indexEvaluations({ esClient, evalResults, index: outputIndex, logger });
+        await indexEvaluations({
+          esClient,
+          evaluationResults,
+          evaluationSummary,
+          index: outputIndex,
+          logger,
+        });
 
         return response.ok({
           body: { success: true },

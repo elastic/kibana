@@ -36,7 +36,7 @@ export const callAgentWithRetry = async ({
           "callAgentWithRetry: Slow down! You're going too fast! 429 detected! Retrying after..."
         );
         if (retryAfter != null) {
-          logger.error(`${retryAfter} seconds}`);
+          logger.error(`${retryAfter} seconds`);
           await wait(retryAfter * 1000);
           // eslint-disable-next-line no-continue
           continue;
@@ -48,7 +48,9 @@ export const callAgentWithRetry = async ({
     }
   }
   logger.error(`callAgentWithRetry: Max retries reached: ${maxRetries}`);
-  return Promise.reject(new Error(`callAgentWithRetry: Max retries reached: ${maxRetries}`));
+  // Reject and keep going!
+  // eslint-disable-next-line prefer-promise-reject-errors
+  return Promise.reject(`callAgentWithRetry: Max retries reached: ${maxRetries}`);
 };
 
 export const getMessageFromLangChainResponse = (

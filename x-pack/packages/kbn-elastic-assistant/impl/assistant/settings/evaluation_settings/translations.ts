@@ -132,6 +132,6 @@ export const PERFORM_EVALUATION = i18n.translate(
 export const EVALUATOR_FUN_FACT_DISCOVER_LINK = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactDiscoverLinkText',
   {
-    defaultMessage: 'click here ',
+    defaultMessage: 'click here',
   }
 );

@@ -50,6 +50,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
           augmentMessageCodeBlocks={jest.fn()}
           baseAllow={[]}
           baseAllowReplacement={[]}
+          basePath={'https://localhost:5601/kbn'}
           defaultAllow={[]}
           defaultAllowReplacement={[]}
           docLinks={{
