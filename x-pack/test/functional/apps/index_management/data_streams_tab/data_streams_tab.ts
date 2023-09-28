@@ -16,7 +16,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const es = getService('es');
 
   const TEST_DS_NAME = 'test-ds-1';
 
