@@ -258,6 +258,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
             >
               <FormField
                 name="name"
+                setTouchedOnBlur={false}
                 inputRef={firstFieldRef}
                 data-test-subj="apiKeyNameInput"
                 disabled={readOnly || !!apiKey}
@@ -560,6 +561,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         fullWidth
                       >
                         <FormField
+                          setTouchedOnBlur={false}
                           as={EuiFieldNumber}
                           name="expiration"
                           min={0}

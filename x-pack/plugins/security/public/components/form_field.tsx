@@ -15,6 +15,7 @@ export interface FormFieldProps<T extends ElementType> {
   as?: T;
   name: string;
   validate?: FieldValidator | ValidateOptions;
+  setTouchedOnBlur?: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ export function FormField<T extends ElementType = typeof EuiFieldText>({
   as,
   validate,
   onBlur,
+  setTouchedOnBlur = true,
   ...rest
 }: FormFieldProps<T> & Omit<ComponentPropsWithoutRef<T>, keyof FormFieldProps<T>>) {
   const Component = as || EuiFieldText;
@@ -60,7 +62,10 @@ export function FormField<T extends ElementType = typeof EuiFieldText>({
       {...field}
       {...rest}
       onBlur={(event) => {
-        helpers.setTouched(true); // Marking as touched manually here since some EUI components don't pass on the native blur event which is required by `field.onBlur()`.
+        if (setTouchedOnBlur) {
+          helpers.setTouched(setTouchedOnBlur); // Marking as touched manually here since some EUI components don't pass on the native blur event which is required by `field.onBlur()`.
+        }
+
         onBlur?.(event);
       }}
     />
