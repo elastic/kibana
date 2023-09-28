@@ -53,6 +53,18 @@ const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 const OVERVIEW_TAB_ID = 'overview';
 const RELATED_EVENTS_TAB_ID = 'relatedEvents';
 
+const cpuMetricPrefix = 'system.cpu';
+const memoryMetricPrefix = 'system.memory';
+const relatedMetrics = [
+  'system.cpu.user.pct',
+  'system.load.1',
+  'system.memory.actual.used.pct',
+  'system.filesystem.used.pct',
+  'host.network.ingress.bytes',
+  'host.network.egress.bytes',
+];
+const fnList = ['avg', 'sum', 'min', 'max'];
+
 interface AppSectionProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
@@ -199,18 +211,6 @@ export default function AlertDetailsAppSection({
     </>
   ) : null;
 
-  const cpuMetricPrefix = 'system.cpu';
-  const memoryMetricPrefix = 'system.memory';
-  const relatedMetrics = [
-    'system.cpu.user.pct',
-    'system.load.1',
-    'system.memory.actual.used.pct',
-    'system.filesystem.used.pct',
-    'host.network.ingress.bytes',
-    'host.network.egress.bytes',
-  ];
-  const fnList = ['avg', 'sum', 'min', 'max'];
-
   const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
     criterion.metrics?.some(
       (metric: CustomThresholdExpressionMetric) =>
@@ -240,6 +240,11 @@ export default function AlertDetailsAppSection({
     return { relatedMetricsInDataView, metricAggType };
   };
 
+  const relatedEventsTimeRangeEnd = moment(alert.start).add(
+    ruleParams.criteria[0].timeSize ?? 5,
+    ruleParams.criteria[0].timeUnit ?? 'minutes'
+  );
+
   const relatedEventsTimeRange = (): TimeRange => {
     return {
       from: moment(alert.start)
@@ -248,7 +253,10 @@ export default function AlertDetailsAppSection({
           ruleParams.criteria[0].timeUnit ?? 'minutes'
         )
         .toISOString(),
-      to: moment(alert.lastUpdated).toISOString(),
+      to:
+        relatedEventsTimeRangeEnd.valueOf() > moment.now()
+          ? moment().toISOString()
+          : relatedEventsTimeRangeEnd.toISOString(),
       mode: 'absolute',
     };
   };
