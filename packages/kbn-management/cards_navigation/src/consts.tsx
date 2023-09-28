@@ -160,7 +160,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.SERVERLESS_SETTINGS]: {
     category: appCategories.OTHER,
     description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
-      defaultMessage: 'Todo',
+      defaultMessage: 'Control project behavior, such as date display and default sorting.',
     }),
     icon: <EuiIcon size="l" type="gear" />,
   },
