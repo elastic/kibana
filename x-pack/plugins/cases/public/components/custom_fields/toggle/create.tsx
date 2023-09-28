@@ -8,9 +8,13 @@
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, isLoading }) => {
+const CreateComponent: CustomFieldType<CaseCustomFieldToggle>['Create'] = ({
+  customFieldConfiguration,
+  isLoading,
+}) => {
   const { key, label } = customFieldConfiguration;
 
   return (

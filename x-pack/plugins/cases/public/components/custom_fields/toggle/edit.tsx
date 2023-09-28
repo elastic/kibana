@@ -10,10 +10,11 @@ import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const EditComponent: CustomFieldType['Edit'] = ({
+const EditComponent: CustomFieldType<CaseCustomFieldToggle>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,

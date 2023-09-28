@@ -8,9 +8,10 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const ViewComponent: CustomFieldType['View'] = ({ customField }) => {
+const ViewComponent: CustomFieldType<CaseCustomFieldToggle>['View'] = ({ customField }) => {
   const value = Boolean(customField?.value);
   const iconType = value ? 'check' : 'empty';
 
