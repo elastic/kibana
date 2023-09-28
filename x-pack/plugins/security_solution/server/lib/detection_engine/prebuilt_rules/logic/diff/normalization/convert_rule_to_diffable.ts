@@ -190,7 +190,7 @@ const extractDiffableEsqlFieldsFromRuleObject = (
 ): DiffableEsqlFields => {
   return {
     type: rule.type,
-    data_query: extractRuleEsqlQuery(rule.query, rule.language),
+    esql_query: extractRuleEsqlQuery(rule.query, rule.language),
   };
 };
 

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import * as i18n from './translations';
+
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -18,14 +20,12 @@ const POPOVER_WIDTH = 640;
  * Icon and popover that gives hint to users how to get started with ES|QL rules
  */
 const EsqlInfoIconComponent = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { docLinks } = useKibana().services;
 
-  const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
+  const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
 
   const button = (
-    <EuiButtonIcon iconType="iInCircle" onClick={onButtonClick} aria-label={i18n.ARIA_LABEL} />
+    <EuiButtonIcon iconType="iInCircle" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
   );
 
   return (

@@ -246,7 +246,7 @@ const calculateEsqlFieldsDiff = (
 
 const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  esql_query: simpleDiffAlgorithm,
 };
 
 const calculateThreatMatchFieldsDiff = (

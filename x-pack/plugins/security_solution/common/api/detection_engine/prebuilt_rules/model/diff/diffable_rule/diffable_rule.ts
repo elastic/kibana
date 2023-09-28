@@ -152,7 +152,7 @@ export type DiffableEsqlFields = t.TypeOf<typeof DiffableEsqlFields>;
 export const DiffableEsqlFields = buildSchema({
   required: {
     type: t.literal('esql'),
-    data_query: RuleEsqlQuery, // NOTE: new field
+    esql_query: RuleEsqlQuery, // NOTE: new field
   },
   // this is a new type of rule, no prebuilt rules created yet.
   // new properties might be added here during further rule type development
