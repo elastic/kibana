@@ -106,15 +106,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          ", string | number | boolean | (string | number)[] | null | undefined>>, client: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          ") => ",
+          ", string | number | boolean | (string | number)[] | null | undefined>>, client: SettingsClient) => ",
           {
             "pluginId": "@kbn/management-settings-types",
             "scope": "common",
@@ -179,13 +171,7 @@
               "The client itself, used to determine if a setting is custom or overridden."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "SettingsClient"
             ],
             "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
             "deprecated": false,
