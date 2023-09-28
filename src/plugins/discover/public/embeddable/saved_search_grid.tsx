@@ -64,7 +64,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   return (
     <SavedSearchEmbeddableBase
-      totalHitCount={undefined} // total hits will be rendered inside the grid toolbar instead
+      totalHitCount={props.totalHitCount}
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}

@@ -28,6 +28,7 @@ import {
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomToolbarProps,
+  EuiDataGridToolBarVisibilityOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
 } from '@elastic/eui';
@@ -269,7 +270,9 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: (
     toolbarProps: EuiDataGridCustomToolbarProps,
-    gridProps: { totalHits?: number }
+    gridProps: {
+      additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
+    }
   ) => React.ReactElement;
   /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
@@ -537,16 +540,6 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
-    () =>
-      renderCustomToolbar
-        ? (toolbarProps) =>
-            renderCustomToolbar(toolbarProps, {
-              totalHits,
-            })
-        : undefined,
-    [renderCustomToolbar, totalHits]
-  );
   /**
    * Render variables
    */
@@ -688,8 +681,12 @@ export const UnifiedDataTable = ({
       : internalControlColumns;
   }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
 
-  const additionalControls = useMemo(
-    () => (
+  const additionalControls = useMemo(() => {
+    if (!externalAdditionalControls && !usedSelectedDocs.length) {
+      return null;
+    }
+
+    return (
       <>
         {usedSelectedDocs.length ? (
           <DataTableDocumentToolbarBtn
@@ -702,8 +699,18 @@ export const UnifiedDataTable = ({
         ) : null}
         {externalAdditionalControls}
       </>
-    ),
-    [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]
+    );
+  }, [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]);
+
+  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    () =>
+      renderCustomToolbar
+        ? (toolbarProps) =>
+            renderCustomToolbar(toolbarProps, {
+              additionalControls,
+            })
+        : undefined,
+    [renderCustomToolbar, additionalControls]
   );
 
   const showDisplaySelector = useMemo(

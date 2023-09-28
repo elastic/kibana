@@ -6,18 +6,18 @@
   border: $euiBorderThin;
   border-radius: $euiBorderRadiusSmall;
   padding: 0 $euiSizeXS;
-  display: flex;
+  display: inline-flex;
   align-items: stretch;
   flex-direction: row;
 }
 
 .dscGridToolbarControl {
-  padding-top: $euiSizeXS;
-  padding-bottom: $euiSizeXS;
+  padding-block-start: $euiSizeXS - $euiBorderWidthThin;
+  padding-block-end: $euiSizeXS - $euiBorderWidthThin;
 
   & + & {
-    border-left: $euiBorderThin;
-    margin-left: $euiSizeXS;
-    padding-left: $euiSizeXS;
+    border-inline-start: $euiBorderThin;
+    margin-inline-start: $euiSizeXS;
+    padding-inline-start: $euiSizeXS;
   }
 }
