@@ -10,6 +10,7 @@ import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { O11Y_AAD_FIELDS } from '@kbn/infra-plugin/common/constants';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
@@ -26,11 +27,11 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
-  UptimeRuleTypeAlertDefinition,
+  SyntheticsRuleTypeAlertDefinition,
+  getAlertDetailsUrl,
 } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
@@ -157,8 +158,9 @@ export const registerSyntheticsStatusCheckRule = (
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: UptimeRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
+    alerts: SyntheticsRuleTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
   });
 };

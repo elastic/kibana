@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const uptimeRuleFieldMap = {
+export const syntheticsRuleFieldMap = {
   // common fields
   'monitor.id': {
     type: 'keyword',
@@ -68,4 +68,4 @@ export const uptimeRuleFieldMap = {
   },
 } as const;
 
-export type UptimeRuleFieldMap = typeof uptimeRuleFieldMap;
+export type UptimeRuleFieldMap = typeof syntheticsRuleFieldMap;
