@@ -18,13 +18,19 @@ interface VulnCounterCardProps {
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export const VulnCounterCard = (counter: VulnCounterCardProps) => {
+export const VulnCounterCard = ({
+  id,
+  title,
+  titleColor,
+  description,
+  onClick,
+}: VulnCounterCardProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel
       hasBorder
-      onClick={counter.onClick}
+      onClick={onClick}
       paddingSize="m"
       css={css`
         position: relative;
@@ -35,7 +41,7 @@ export const VulnCounterCard = (counter: VulnCounterCardProps) => {
           transition: ${euiTheme.animation.normal};
         }
       `}
-      data-test-subj={counter.id}
+      data-test-subj={id}
     >
       <EuiStat
         css={{
@@ -49,12 +55,12 @@ export const VulnCounterCard = (counter: VulnCounterCardProps) => {
           },
         }}
         titleSize="s"
-        title={counter.title}
-        titleColor={counter.titleColor}
+        title={title}
+        titleColor={titleColor}
         descriptionElement="h6"
-        description={counter.description}
+        description={description}
       />
-      {counter.onClick && (
+      {onClick && (
         <EuiIcon
           type={'pivot'}
           css={css`
