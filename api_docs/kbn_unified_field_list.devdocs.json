@@ -5334,6 +5334,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.UnifiedFieldListSidebarContainerApi.isSidebarCollapsed$",
+            "type": "Object",
+            "tags": [],
+            "label": "isSidebarCollapsed$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
             "id": "def-common.UnifiedFieldListSidebarContainerApi.refetchFieldsExistenceInfo",
             "type": "Function",
             "tags": [],
