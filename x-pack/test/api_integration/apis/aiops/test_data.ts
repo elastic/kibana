@@ -43,6 +43,8 @@ export const logRateAnalysisTestData: TestData[] = [
       errorFilter: 'add_error',
       significantTerms: [
         {
+          key: 'day_of_week:Thursday',
+          type: 'keyword',
           fieldName: 'day_of_week',
           fieldValue: 'Thursday',
           doc_count: 157,
@@ -52,9 +54,10 @@ export const logRateAnalysisTestData: TestData[] = [
           score: 20.366950718358762,
           pValue: 1.428057484826135e-9,
           normalizedScore: 0.7661649691018979,
-          type: 'keyword',
         },
         {
+          key: 'day_of_week:Wednesday',
+          type: 'keyword',
           fieldName: 'day_of_week',
           fieldValue: 'Wednesday',
           doc_count: 145,
@@ -64,7 +67,6 @@ export const logRateAnalysisTestData: TestData[] = [
           score: 36.31595998561873,
           pValue: 1.6911377077437753e-16,
           normalizedScore: 0.8055203624020835,
-          type: 'keyword',
         },
       ],
       groups: [],
