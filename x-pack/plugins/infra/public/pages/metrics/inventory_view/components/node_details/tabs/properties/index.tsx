@@ -11,7 +11,6 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TabContent, TabProps } from '../shared';
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
-import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../../../../components/asset_details/hooks/use_metadata';
 import { getFields } from './build_fields';
@@ -22,17 +21,15 @@ import { useWaffleFiltersContext } from '../../../../hooks/use_waffle_filters';
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.id;
   const nodeType = props.nodeType as InventoryItemType;
-  const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const { currentTimeRange } = useWaffleTimeContext();
   const { applyFilterQuery } = useWaffleFiltersContext();
-  const { loading: metadataLoading, metadata } = useMetadata(
-    nodeId,
-    nodeType,
-    inventoryModel.requiredMetrics,
+  const { loading: metadataLoading, metadata } = useMetadata({
+    assetId: nodeId,
+    assetType: nodeType,
     sourceId,
-    currentTimeRange
-  );
+    timeRange: currentTimeRange,
+  });
 
   const hostFields = useMemo(() => {
     if (!metadata) return null;

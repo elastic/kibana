@@ -409,7 +409,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               )}
               {overrides !== undefined ? (
                 <p>
-                  <EuiButton size="s" onClick={() => startHandler(true)}>
+                  <EuiButton
+                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
+                    size="s"
+                    onClick={() => startHandler(true)}
+                  >
                     <FormattedMessage
                       id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
                       defaultMessage="Try to continue analysis"
