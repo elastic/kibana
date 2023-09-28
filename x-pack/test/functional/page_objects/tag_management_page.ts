@@ -239,7 +239,6 @@ class TagAssignmentFlyout extends FtrService {
  */
 export class TagManagementPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
