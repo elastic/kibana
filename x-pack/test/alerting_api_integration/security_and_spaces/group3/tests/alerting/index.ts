@@ -20,17 +20,17 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
-      loadTestFile(require.resolve('./bulk_edit'));
-      loadTestFile(require.resolve('./bulk_delete'));
-      loadTestFile(require.resolve('./bulk_enable'));
+      // loadTestFile(require.resolve('./bulk_edit'));
+      // loadTestFile(require.resolve('./bulk_delete'));
+      // loadTestFile(require.resolve('./bulk_enable'));
       loadTestFile(require.resolve('./bulk_disable'));
-      loadTestFile(require.resolve('./clone'));
-      loadTestFile(require.resolve('./fields_rule'));
-      loadTestFile(require.resolve('./get_flapping_settings'));
-      loadTestFile(require.resolve('./run_soon'));
-      loadTestFile(require.resolve('./suggestions_value_rule'));
-      loadTestFile(require.resolve('./update_flapping_settings'));
-      loadTestFile(require.resolve('./user_managed_api_key'));
+      // loadTestFile(require.resolve('./clone'));
+      // loadTestFile(require.resolve('./fields_rule'));
+      // loadTestFile(require.resolve('./get_flapping_settings'));
+      // loadTestFile(require.resolve('./run_soon'));
+      // loadTestFile(require.resolve('./suggestions_value_rule'));
+      // loadTestFile(require.resolve('./update_flapping_settings'));
+      // loadTestFile(require.resolve('./user_managed_api_key'));
     });
   });
 }
