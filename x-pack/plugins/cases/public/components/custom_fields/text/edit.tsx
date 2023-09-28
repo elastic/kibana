@@ -82,14 +82,13 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType['Edit'] = ({
+const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
   isLoading,
   canUpdate,
 }) => {
-  const textCustomField = customField as CaseCustomFieldText;
   const [isEdit, setIsEdit] = useState(false);
 
   const [formState, setFormState] = useState<FormState>({
@@ -122,7 +121,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
     setIsEdit(false);
   };
 
-  const initialValue = textCustomField?.value?.[0] ?? '';
+  const initialValue = customField?.value?.[0] ?? '';
   const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
   const isCustomFieldValueDefined = !isEmpty(customField?.value);

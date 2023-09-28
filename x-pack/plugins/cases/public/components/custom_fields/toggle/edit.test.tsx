@@ -12,6 +12,7 @@ import { FormTestComponent } from '../../../common/test_utils';
 import { Edit } from './edit';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 
 describe('Edit ', () => {
   const onSubmit = jest.fn();
@@ -20,7 +21,7 @@ describe('Edit ', () => {
     jest.clearAllMocks();
   });
 
-  const customField = customFieldsMock[1];
+  const customField = customFieldsMock[1] as CaseCustomFieldToggle;
   const customFieldConfiguration = customFieldsConfigurationMock[1];
 
   it('renders correctly', async () => {

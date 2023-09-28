@@ -9,15 +9,15 @@ import type React from 'react';
 import type { CustomFieldTypes } from '../../../common/types/domain';
 import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../containers/types';
 
-export interface CustomFieldType {
+export interface CustomFieldType<T extends CaseUICustomField> {
   Configure: React.FC;
   View: React.FC<{
-    customField?: CaseUICustomField;
+    customField?: T;
   }>;
   Edit: React.FC<{
-    customField?: CaseUICustomField;
+    customField?: T;
     customFieldConfiguration: CasesConfigurationUICustomField;
-    onSubmit: (customField: CaseUICustomField) => void;
+    onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
   }>;
@@ -27,12 +27,12 @@ export interface CustomFieldType {
   }>;
 }
 
-export type CustomFieldFactory = () => {
+export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   id: string;
   label: string;
-  build: () => CustomFieldType;
+  build: () => CustomFieldType<T>;
 };
 
 export type CustomFieldBuilderMap = {
-  readonly [key in CustomFieldTypes]: CustomFieldFactory;
+  readonly [key in CustomFieldTypes]: CustomFieldFactory<CaseUICustomField>;
 };
