@@ -6,12 +6,8 @@
  */
 
 import { VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
-import { SESSION_VIEW_ERROR_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON = getDataTestSubjectSelector(
   VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR = getDataTestSubjectSelector(
-  SESSION_VIEW_ERROR_TEST_ID
 );
