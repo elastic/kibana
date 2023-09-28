@@ -72,7 +72,6 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
                   gte: String(rangeFromSecs),
                   lt: String(rangeToSecs),
                   format: 'epoch_second',
-                  boost: 1.0,
                 },
               },
             },
