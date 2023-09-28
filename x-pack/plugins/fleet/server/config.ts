@@ -188,6 +188,7 @@ export const config: PluginConfigDescriptor = {
               min: 0,
             })
           ),
+          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
           registry: schema.object(
             {
               kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
