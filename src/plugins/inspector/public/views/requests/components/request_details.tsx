@@ -88,6 +88,8 @@ export function RequestDetails(props: Props) {
 
     const nextSelectedDetail = !selectedDetail && initialDetail ? initialDetail : firstDetail;
     setSelectedDetail(nextSelectedDetail);
+    // do not re-run on selectedDetail change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.initialTabs, props.request]);
 
   return selectedDetail ? (

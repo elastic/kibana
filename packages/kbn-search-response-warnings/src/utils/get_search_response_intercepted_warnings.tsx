@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart, ViewWarningButton } from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ViewWarningButton } from '@kbn/data-plugin/public';
 import type { SearchResponseInterceptedWarning } from '../types';
 
 /**
