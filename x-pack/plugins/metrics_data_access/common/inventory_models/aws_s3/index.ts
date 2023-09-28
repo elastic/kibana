@@ -13,12 +13,15 @@ export { awsS3SnapshotMetricTypes } from './metrics';
 
 export const awsS3: InventoryModel = {
   id: 'awsS3',
-  displayName: i18n.translate('xpack.infra.inventoryModels.awsS3.displayName', {
+  displayName: i18n.translate('xpack.metricsData.inventoryModels.awsS3.displayName', {
     defaultMessage: 'S3 Buckets',
   }),
-  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.awsS3.singularDisplayName', {
-    defaultMessage: 'S3 Bucket',
-  }),
+  singularDisplayName: i18n.translate(
+    'xpack.metricsData.inventoryModels.awsS3.singularDisplayName',
+    {
+      defaultMessage: 'S3 Bucket',
+    }
+  ),
   requiredModule: 'aws',
   crosslinkSupport: {
     details: true,

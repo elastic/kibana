@@ -23,7 +23,7 @@ export const findInventoryModel = (type: InventoryItemType) => {
   const model = inventoryModels.find((m) => m.id === type);
   if (!model) {
     throw new Error(
-      i18n.translate('xpack.infra.inventoryModels.findInventoryModel.error', {
+      i18n.translate('xpack.metricsData.inventoryModels.findInventoryModel.error', {
         defaultMessage: "The inventory model you've attempted to find does not exist",
       })
     );

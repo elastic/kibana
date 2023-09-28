@@ -13,12 +13,15 @@ export { containerSnapshotMetricTypes } from './metrics';
 
 export const container: InventoryModel = {
   id: 'container',
-  displayName: i18n.translate('xpack.infra.inventoryModel.container.displayName', {
+  displayName: i18n.translate('xpack.metricsData.inventoryModel.container.displayName', {
     defaultMessage: 'Docker Containers',
   }),
-  singularDisplayName: i18n.translate('xpack.infra.inventoryModel.container.singularDisplayName', {
-    defaultMessage: 'Docker Container',
-  }),
+  singularDisplayName: i18n.translate(
+    'xpack.metricsData.inventoryModel.container.singularDisplayName',
+    {
+      defaultMessage: 'Docker Container',
+    }
+  ),
   requiredModule: 'docker',
   crosslinkSupport: {
     details: true,

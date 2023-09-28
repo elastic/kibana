@@ -14,10 +14,10 @@ export { podSnapshotMetricTypes } from './metrics';
 
 export const pod: InventoryModel = {
   id: 'pod',
-  displayName: i18n.translate('xpack.infra.inventoryModel.pod.displayName', {
+  displayName: i18n.translate('xpack.metricsData.inventoryModel.pod.displayName', {
     defaultMessage: 'Kubernetes Pods',
   }),
-  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.pod.singularDisplayName', {
+  singularDisplayName: i18n.translate('xpack.metricsData.inventoryModels.pod.singularDisplayName', {
     defaultMessage: 'Kubernetes Pod',
   }),
   requiredModule: 'kubernetes',

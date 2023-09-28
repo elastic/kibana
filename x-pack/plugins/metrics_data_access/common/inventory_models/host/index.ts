@@ -17,12 +17,15 @@ export { hostSnapshotMetricTypes } from './metrics';
 
 export const host: InventoryModel = {
   id: 'host',
-  displayName: i18n.translate('xpack.infra.inventoryModel.host.displayName', {
+  displayName: i18n.translate('xpack.metricsData.inventoryModel.host.displayName', {
     defaultMessage: 'Hosts',
   }),
-  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.host.singularDisplayName', {
-    defaultMessage: 'Host',
-  }),
+  singularDisplayName: i18n.translate(
+    'xpack.metricsData.inventoryModels.host.singularDisplayName',
+    {
+      defaultMessage: 'Host',
+    }
+  ),
   requiredModule: 'system',
   crosslinkSupport: {
     details: true,

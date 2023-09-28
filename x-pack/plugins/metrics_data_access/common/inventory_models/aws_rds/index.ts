@@ -13,12 +13,15 @@ export { awsRDSSnapshotMetricTypes } from './metrics';
 
 export const awsRDS: InventoryModel = {
   id: 'awsRDS',
-  displayName: i18n.translate('xpack.infra.inventoryModels.awsRDS.displayName', {
+  displayName: i18n.translate('xpack.metricsData.inventoryModels.awsRDS.displayName', {
     defaultMessage: 'RDS Databases',
   }),
-  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.awsRDS.singularDisplayName', {
-    defaultMessage: 'RDS Database',
-  }),
+  singularDisplayName: i18n.translate(
+    'xpack.metricsData.inventoryModels.awsRDS.singularDisplayName',
+    {
+      defaultMessage: 'RDS Database',
+    }
+  ),
   requiredModule: 'aws',
   crosslinkSupport: {
     details: true,

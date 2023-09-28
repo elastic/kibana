@@ -13,12 +13,15 @@ export { awsEC2SnapshotMetricTypes } from './metrics';
 
 export const awsEC2: InventoryModel = {
   id: 'awsEC2',
-  displayName: i18n.translate('xpack.infra.inventoryModels.awsEC2.displayName', {
+  displayName: i18n.translate('xpack.metricsData.inventoryModels.awsEC2.displayName', {
     defaultMessage: 'EC2 Instances',
   }),
-  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.awsEC2.singularDisplayName', {
-    defaultMessage: 'EC2 Instance',
-  }),
+  singularDisplayName: i18n.translate(
+    'xpack.metricsData.inventoryModels.awsEC2.singularDisplayName',
+    {
+      defaultMessage: 'EC2 Instance',
+    }
+  ),
   requiredModule: 'aws',
   crosslinkSupport: {
     details: true,
