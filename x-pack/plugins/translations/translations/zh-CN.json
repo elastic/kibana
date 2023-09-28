@@ -2075,7 +2075,6 @@
     "data.search.searchSource.dataViewDescription": "被查询的数据视图。",
     "data.search.searchSource.dataViewIdLabel": "数据视图 ID",
     "data.search.searchSource.dataViewLabel": "数据视图",
-    "data.search.searchSource.fetch.shardsFailedModal.tableColReason": "原因",
     "data.search.searchSource.hitsDescription": "查询返回的文档数目。",
     "data.search.searchSource.hitsLabel": "命中数",
     "data.search.searchSource.hitsTotalDescription": "与查询匹配的文档数目。",
