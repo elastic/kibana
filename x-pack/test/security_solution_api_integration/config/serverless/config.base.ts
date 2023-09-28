@@ -24,6 +24,7 @@ export function createTestConfig(options: Partial<CreateTestConfigOptions>) {
       },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
+
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           '--serverless=security',
@@ -36,6 +37,11 @@ export function createTestConfig(options: Partial<CreateTestConfigOptions>) {
       },
       testFiles: options.testFiles,
       junit: options.junit,
+
+      mochaOpts: {
+        ...svlSharedConfig.get('mochaOpts'),
+        grep: '/^(?!.*@brokenInServerless).*@serverless.*/',
+      },
     };
   };
 }
