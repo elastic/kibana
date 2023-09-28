@@ -10,6 +10,7 @@ import {
   VulnSeverity,
   AwsCredentialsTypeFieldMap,
   GcpCredentialsTypeFieldMap,
+  AzureCredentialsTypeFieldMap,
 } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
@@ -99,6 +100,9 @@ export const CLOUDBEAT_VULN_MGMT_GCP = 'cloudbeat/vuln_mgmt_gcp';
 export const CLOUDBEAT_VULN_MGMT_AZURE = 'cloudbeat/vuln_mgmt_azure';
 export const CIS_AWS = 'cis_aws';
 export const CIS_GCP = 'cis_gcp';
+export const CIS_K8S = 'cis_k8s';
+export const CIS_EKS = 'cis_eks';
+export const CIS_AZURE = 'cis_azure';
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const VULN_MGMT_POLICY_TEMPLATE = 'vuln_mgmt';
@@ -155,4 +159,9 @@ export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-de
 export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
   'credentials-file': ['gcp.credentials.file'],
   'credentials-json': ['gcp.credentials.json'],
+};
+
+export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP: AzureCredentialsTypeFieldMap = {
+  manual: [],
+  arm_template: [],
 };
