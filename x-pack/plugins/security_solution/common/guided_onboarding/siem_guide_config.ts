@@ -67,7 +67,7 @@ export const getSiemGuideConfig = (launchDarkly = defaultGuideTranslations): Gui
       integration: 'endpoint',
       location: {
         appID: 'integrations',
-        path: '/browse/security',
+        path: '/detail/endpoint/overview',
       },
     },
     {
