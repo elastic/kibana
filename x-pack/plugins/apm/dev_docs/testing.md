@@ -126,11 +126,13 @@ diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scri
 ## Serverless API tests
 
 #### Start server and run tests (single process)
+
 ```
 node scripts/functional_tests.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
 ```
 
 #### Start server and run tests (separate processes)
+
 ```sh
 # Start server
 node scripts/functional_tests_server.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
@@ -154,3 +156,29 @@ All files with a .stories.tsx extension will be loaded. You can access the devel
 For end-to-end (e.g. agent -> apm server -> elasticsearch <- kibana) development and testing of Elastic APM please check the the [APM Integration Testing repository](https://github.com/elastic/apm-integration-testing).
 
 Data can also be generated using the [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace/README.md) CLI.
+
+## Best practices for API tests
+
+### 1. File structure:
+
+- **Endpoint-specific testing**: Each API endpoint should ideally be tested in an individual `*.spec.ts` file. This makes it easy to find tests, and works well with our general approach of having single-purpose API endpoints.
+- **Directory structure**: Organize these files into feature-specific folders to make navigation easier. Each feature-specific folder can have multiple `*.spec.ts` files related to that particular feature.
+
+### 2. Data:
+
+- **Prefer Synthtrace**: Use Synthtrace for all new tests. It offers better control over data being fed into Elasticsearch, making it easier to verify calculated statistics than using Elasticsearch archives.
+- **Migrating existing tests**: Aim to migrate existing tests that are based on Elasticsearch archives to Synthtrace. If for some reason Synthtrace isn't suitable, it's preferable to manually index documents rather than using ES archives.
+- **Scenario management**:
+  - Prefer to keep the Synthtrace scenario in the same file. This makes it easier to see what's going on.
+  - If you do end up moving the Synthtrace scenario to another file because it gets too long, make sure the inputs are passed as parameters to a function. This keeps the information information in the test file and prevents the reader from navigating back and forth.
+  - Avoid re-using the same Synthtrace scenario across multiple files (in the same file it's mostly fine, but a test-specific Synthtrace scenario doesn't hurt). Re-using it will result in less specific scenarios, making it harder to write specific tests. The single scenario will grow unwieldy. It's akin to using ES archives.
+
+### 3. Scope of tests:
+
+- **Different configurations**: Tests can run for different configurations. This allows us to keep e.g. a test whether an endpoint correctly throws with a failed license check in the same file as one that tests the return values from the endpoint if a license check doesn't fail.
+- **Specificity**: Make checks as detailed as possible. Avoid broad "has data" checks, especially when return values can be controlled by Synthtrace. Avoid using snapshot testing.
+- **Error handling**: For API endpoints that might return specific error codes or messages, ensure there are tests covering those specific scenarios.
+
+### 4. Security and access control:
+
+- **User privileges**: If your endpoint requires write privileges, use `apm.writeUser`. Or any of the other predefined roles, whichever apply. Don't use roles with higher access levels unless required.
