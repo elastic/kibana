@@ -530,95 +530,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.KibanaPageTemplate",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "KibanaPageTemplate",
-        "description": [],
-        "signature": [
-          "({ template, className, children, solutionNav, noDataConfig, ...rest }: React.PropsWithChildren<",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.KibanaPageTemplateProps",
-            "text": "KibanaPageTemplateProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.KibanaPageTemplate.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  template,\n  className,\n  children,\n  solutionNav,\n  noDataConfig,\n  ...rest\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.KibanaPageTemplateProps",
-                "text": "KibanaPageTemplateProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaPageTemplateSolutionNavAvatar",
         "type": "Function",
         "tags": [],
@@ -727,6 +638,18 @@
           {
             "plugin": "home",
             "path": "src/plugins/home/public/application/application.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
           },
           {
             "plugin": "management",
@@ -923,18 +846,6 @@
           {
             "plugin": "indexManagement",
             "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
           },
           {
             "plugin": "visualizations",
@@ -1342,15 +1253,15 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
             "plugin": "aiops",
@@ -1447,18 +1358,6 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
             "plugin": "infra",
@@ -3312,14 +3211,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/copy_to_dashboard_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/copy_to_dashboard_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
@@ -3357,14 +3248,6 @@
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
           },
           {
             "plugin": "lens",
@@ -3953,6 +3836,14 @@
           {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/public/components/edit_index_pattern/remove_data_view.tsx"
+          },
+          {
+            "plugin": "eventAnnotationListing",
+            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
+          },
+          {
+            "plugin": "eventAnnotationListing",
+            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
           },
           {
             "plugin": "filesManagement",
@@ -5567,50 +5458,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.KibanaPageTemplateProps",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "KibanaPageTemplateProps",
-        "description": [
-          "\nA thin wrapper around EuiPageTemplate with a few Kibana specific additions"
-        ],
-        "signature": [
-          "Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"m\" | \"none\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps_Deprecated",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: any; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
-          "Property",
-          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; noDataConfig?: ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.NoDataPageProps",
-            "text": "NoDataPageProps"
-          },
-          " | undefined; }"
-        ],
-        "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaServices",
         "type": "Type",
         "tags": [],
@@ -5877,21 +5724,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.NO_DATA_PAGE_MAX_WIDTH",
-        "type": "number",
-        "tags": [],
-        "label": "NO_DATA_PAGE_MAX_WIDTH",
-        "description": [],
-        "signature": [
-          "950"
-        ],
-        "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.NO_DATA_RECOMMENDED",
         "type": "string",
         "tags": [],
@@ -6082,86 +5914,6 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS",
-        "type": "Object",
-        "tags": [],
-        "label": "NO_DATA_PAGE_TEMPLATE_PROPS",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.restrictWidth",
-            "type": "number",
-            "tags": [],
-            "label": "restrictWidth",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.template",
-            "type": "string",
-            "tags": [],
-            "label": "template",
-            "description": [],
-            "signature": [
-              "\"centeredBody\""
-            ],
-            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.pageContentProps",
-            "type": "Object",
-            "tags": [],
-            "label": "pageContentProps",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.pageContentProps.hasShadow",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasShadow",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.pageContentProps.color",
-                "type": "string",
-                "tags": [],
-                "label": "color",
-                "description": [],
-                "signature": [
-                  "\"transparent\""
-                ],
-                "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
         "initialIsOpen": false
       }
     ]

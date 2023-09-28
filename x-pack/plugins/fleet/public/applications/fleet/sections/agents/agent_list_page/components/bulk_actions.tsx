@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,13 +23,8 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useLicense, sendGetAgents, sendGetAgentPolicies } from '../../../../hooks';
-import {
-  LICENSE_FOR_SCHEDULE_UPGRADE,
-  AGENTS_PREFIX,
-  SO_SEARCH_LIMIT,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../../../../common/constants';
+import { useLicense } from '../../../../hooks';
+import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
@@ -40,8 +35,9 @@ import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
-  totalAgents: number;
-  totalInactiveAgents: number;
+  shownAgents: number;
+  inactiveShownAgents: number;
+  totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -52,8 +48,9 @@ export interface Props {
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
-  totalAgents,
-  totalInactiveAgents,
+  shownAgents,
+  inactiveShownAgents,
+  totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -81,78 +78,30 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
-  const [managedAgents, setManagedAgents] = useState<string[]>([]);
-
-  // get all the managed policies
-  const fetchManagedAgents = useCallback(async () => {
-    if (selectionMode === 'query') {
-      const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
-
-      const agentPoliciesResponse = await sendGetAgentPolicies({
-        kuery: managedPoliciesKuery,
-        perPage: SO_SEARCH_LIMIT,
-        full: false,
-      });
-
-      if (agentPoliciesResponse.error) {
-        throw new Error(agentPoliciesResponse.error.message);
-      }
-
-      const managedPolicies = agentPoliciesResponse.data?.items ?? [];
-
-      if (managedPolicies.length === 0) {
-        return [];
-      }
-
-      // find all the agents that have those policies and are not unenrolled
-      const policiesKuery = managedPolicies
-        .map((policy) => `policy_id:"${policy.id}"`)
-        .join(' or ');
-      const kuery = `NOT (status:unenrolled) and ${policiesKuery}`;
-      const response = await sendGetAgents({
-        kuery,
-        perPage: SO_SEARCH_LIMIT,
-        showInactive: true,
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      return response.data?.items ?? [];
-    }
-    return [];
-  }, [selectionMode]);
-
-  useEffect(() => {
-    async function fetchDataAsync() {
-      const allManagedAgents = await fetchManagedAgents();
-      setManagedAgents(allManagedAgents?.map((agent) => agent.id));
-    }
-    fetchDataAsync();
-  }, [fetchManagedAgents]);
 
   // update the query removing the "managed" agents
   const selectionQuery = useMemo(() => {
-    if (managedAgents.length) {
-      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgents
+    if (totalManagedAgentIds.length) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
         .map((id) => `"${id}"`)
         .join(' or ')})`;
       return `${currentQuery} AND NOT (${excludedKuery})`;
     } else {
       return currentQuery;
     }
-  }, [currentQuery, managedAgents]);
+  }, [currentQuery, totalManagedAgentIds]);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
-      : totalAgents > totalInactiveAgents;
-  const totalActiveAgents = totalAgents - totalInactiveAgents;
+      : shownAgents > inactiveShownAgents;
+  const totalActiveAgents = shownAgents - inactiveShownAgents;
 
   const agentCount =
-    selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents - managedAgents?.length;
+    selectionMode === 'manual'
+      ? selectedAgents.length
+      : totalActiveAgents - totalManagedAgentIds?.length;
 
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
 
