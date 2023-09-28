@@ -59,7 +59,7 @@ export const RulesSettingsFlappingErrorPrompt = memo(() => {
         <h4>
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.flappingErrorPromptTitle"
-            defaultMessage="Unable to load your rules settings"
+            defaultMessage="Unable to load your flapping settings"
           />
         </h4>
       }
@@ -67,7 +67,7 @@ export const RulesSettingsFlappingErrorPrompt = memo(() => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.flappingErrorPromptBody"
-            defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
+            defaultMessage="There was an error loading your flapping settings. Contact your administrator for help"
           />
         </p>
       }

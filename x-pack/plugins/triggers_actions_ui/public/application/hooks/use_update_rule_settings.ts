@@ -7,17 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
-import { RulesSettingsQueryDelayProperties } from '@kbn/alerting-plugin/common';
+import { RulesSettingsProperties } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
+import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';
 import { updateQueryDelaySettings } from '../lib/rule_api/update_query_delay_settings';
 
-interface UseUpdateQueryDelaySettingsProps {
+interface UseUpdateRuleSettingsProps {
   onClose: () => void;
   onSave?: () => void;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
 }
 
-export const useUpdateQueryDelaySettings = (props: UseUpdateQueryDelaySettingsProps) => {
+export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
   const { onSave, onClose, setUpdatingRulesSettings } = props;
 
   const {
@@ -25,8 +26,14 @@ export const useUpdateQueryDelaySettings = (props: UseUpdateQueryDelaySettingsPr
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = (queryDelaySettings: RulesSettingsQueryDelayProperties) => {
-    return updateQueryDelaySettings({ http, queryDelaySettings });
+  const mutationFn = async (settings: Partial<RulesSettingsProperties>) => {
+    if (settings.flapping) {
+      await updateFlappingSettings({ http, flappingSettings: settings.flapping });
+    }
+
+    if (settings.queryDelay) {
+      await updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay });
+    }
   };
 
   return useMutation({
@@ -37,22 +44,16 @@ export const useUpdateQueryDelaySettings = (props: UseUpdateQueryDelaySettingsPr
     },
     onSuccess: () => {
       toasts.addSuccess(
-        i18n.translate(
-          'xpack.triggersActionsUI.rulesSettings.modal.updateRulesQueryDelaySettingsSuccess',
-          {
-            defaultMessage: 'Rules query delay settings updated successfully.',
-          }
-        )
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsSuccess', {
+          defaultMessage: 'Rules settings updated successfully.',
+        })
       );
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate(
-          'xpack.triggersActionsUI.rulesSettings.modal.updateRulesQueryDelaySettingsFailure',
-          {
-            defaultMessage: 'Failed to update rules query delay settings.',
-          }
-        )
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsFailure', {
+          defaultMessage: 'Failed to update rules settings.',
+        })
       );
     },
     onSettled: () => {

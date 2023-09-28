@@ -6,7 +6,13 @@
  */
 
 import React, { memo, useState } from 'react';
-import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  DEFAULT_QUERY_DELAY_SETTINGS,
+  RulesSettingsFlappingProperties,
+  RulesSettingsProperties,
+  RulesSettingsQueryDelayProperties,
+} from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -20,11 +26,40 @@ import {
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
-import { useUpdateFlappingSettings } from '../../hooks/use_update_flapping_settings';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
+import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
+import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
+import { useUpdateRuleSettings } from '../../hooks/use_update_rule_settings';
+
+export const RulesSettingsErrorPrompt = memo(() => {
+  return (
+    <EuiEmptyPrompt
+      data-test-subj="rulesSettingsErrorPrompt"
+      color="danger"
+      iconType="warning"
+      title={
+        <h4>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptTitle"
+            defaultMessage="Unable to load your rules settings"
+          />
+        </h4>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptBody"
+            defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
+          />
+        </p>
+      }
+    />
+  );
+});
 
 export interface RulesSettingsModalProps {
   isVisible: boolean;
@@ -45,27 +80,58 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
       save,
       writeFlappingSettingsUI,
       readFlappingSettingsUI,
-      // writeQueryDelaySettingsUI,
-      // readQueryDelaySettingsUI,
+      writeQueryDelaySettingsUI,
+      readQueryDelaySettingsUI,
     },
   } = capabilities;
 
-  const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
+  const [settings, setSettings] = useState<RulesSettingsProperties>();
 
   const { isLoading, isError: hasError } = useGetFlappingSettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
       if (!settings) {
         setSettings({
-          enabled: fetchedSettings.enabled,
-          lookBackWindow: fetchedSettings.lookBackWindow,
-          statusChangeThreshold: fetchedSettings.statusChangeThreshold,
+          flapping: {
+            enabled: fetchedSettings.enabled,
+            lookBackWindow: fetchedSettings.lookBackWindow,
+            statusChangeThreshold: fetchedSettings.statusChangeThreshold,
+          },
+          queryDelay: DEFAULT_QUERY_DELAY_SETTINGS,
+        });
+      } else if (settings && !settings.flapping) {
+        setSettings({
+          ...settings,
+          flapping: {
+            ...fetchedSettings,
+          },
         });
       }
     },
   });
 
-  const { mutate } = useUpdateFlappingSettings({
+  const { isLoading: isQueryDelayLoading, isError: hasQueryDelayError } = useGetQueryDelaySettings({
+    enabled: isVisible,
+    onSuccess: (fetchedSettings) => {
+      if (!settings) {
+        setSettings({
+          queryDelay: {
+            delay: fetchedSettings.delay,
+          },
+          flapping: DEFAULT_FLAPPING_SETTINGS,
+        });
+      } else if (settings && !settings.queryDelay) {
+        setSettings({
+          ...settings,
+          queryDelay: {
+            ...fetchedSettings,
+          },
+        });
+      }
+    },
+  });
+
+  const { mutate } = useUpdateRuleSettings({
     onSave,
     onClose,
     setUpdatingRulesSettings,
@@ -76,11 +142,12 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // sub-feature capabilities (writeXSettingsUI).
   const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
   const canShowFlappingSettings = show && readFlappingSettingsUI;
-  // const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasError;
-  // const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
+  const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasQueryDelayError;
+  const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
 
   const handleSettingsChange = (
-    key: keyof RulesSettingsFlappingProperties,
+    setting: keyof RulesSettingsProperties,
+    key: keyof RulesSettingsFlappingProperties | keyof RulesSettingsQueryDelayProperties,
     value: number | boolean
   ) => {
     if (!settings) {
@@ -89,15 +156,21 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
 
     const newSettings = {
       ...settings,
-      [key]: value,
+      [setting]: {
+        ...settings[setting],
+        [key]: value,
+      },
     };
 
     setSettings({
       ...newSettings,
-      statusChangeThreshold: Math.min(
-        newSettings.lookBackWindow,
-        newSettings.statusChangeThreshold
-      ),
+      flapping: {
+        ...newSettings.flapping,
+        statusChangeThreshold: Math.min(
+          newSettings.flapping.lookBackWindow,
+          newSettings.flapping.statusChangeThreshold
+        ),
+      },
     });
   };
 
@@ -105,12 +178,45 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     if (!settings) {
       return;
     }
-    mutate(settings);
+    const updatedSettings: Partial<RulesSettingsProperties> = {};
+    if (canWriteFlappingSettings) {
+      updatedSettings.flapping = settings.flapping;
+    }
+    if (canWriteQueryDelaySettings) {
+      updatedSettings.queryDelay = settings.queryDelay;
+    }
+    mutate(updatedSettings);
   };
 
   if (!isVisible) {
     return null;
   }
+
+  const maybeRenderForm = () => {
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
+      return <RulesSettingsErrorPrompt />;
+    }
+    return (
+      <>
+        <RulesSettingsFlappingSection
+          onChange={(key, value) => handleSettingsChange('flapping', key, value)}
+          settings={settings?.flapping}
+          canWrite={canWriteFlappingSettings}
+          canShow={canShowFlappingSettings}
+          hasError={hasError}
+          isLoading={isLoading}
+        />
+        <RulesSettingsQueryDelaySection
+          onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
+          settings={settings?.queryDelay}
+          canWrite={canWriteQueryDelaySettings}
+          canShow={canShowQueryDelaySettings}
+          hasError={hasQueryDelayError}
+          isLoading={isQueryDelayLoading}
+        />
+      </>
+    );
+  };
 
   return (
     <EuiModal data-test-subj="rulesSettingsModal" onClose={onClose} maxWidth={880}>
@@ -130,14 +236,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           })}
         />
         <EuiHorizontalRule />
-        <RulesSettingsFlappingSection
-          onChange={(key, value) => handleSettingsChange(key, value)}
-          settings={settings}
-          canWrite={canWriteFlappingSettings}
-          canShow={canShowFlappingSettings}
-          hasError={hasError}
-          isLoading={isLoading}
-        />
+        {maybeRenderForm()}
         <EuiSpacer />
         <EuiHorizontalRule margin="none" />
       </EuiModalBody>
@@ -152,7 +251,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           fill
           data-test-subj="rulesSettingsModalSaveButton"
           onClick={handleSave}
-          disabled={!canWriteFlappingSettings}
+          disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"

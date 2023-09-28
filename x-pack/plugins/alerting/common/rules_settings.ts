@@ -27,6 +27,11 @@ export interface RulesSettingsQueryDelayProperties {
 export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
+export interface RulesSettingsProperties {
+  flapping: RulesSettingsFlappingProperties;
+  queryDelay: RulesSettingsQueryDelayProperties;
+}
+
 export interface RulesSettings {
   flapping: RulesSettingsFlapping;
   queryDelay: RulesSettingsQueryDelay;

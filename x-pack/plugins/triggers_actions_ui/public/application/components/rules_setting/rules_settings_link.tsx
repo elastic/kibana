@@ -17,26 +17,25 @@ export const RulesSettingsLink = () => {
     application: { capabilities },
   } = useKibana().services;
 
-  const { show, readFlappingSettingsUI } = capabilities.rulesSettings;
-
-  if (!show || !readFlappingSettingsUI) {
-    return null;
-  }
+  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = capabilities.rulesSettings;
 
   return (
-    <>
-      <EuiButtonEmpty
-        onClick={() => setIsVisible(true)}
-        iconType="gear"
-        data-test-subj="rulesSettingsLink"
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.rulesSettings.link.title"
-          defaultMessage="Settings"
-        />
-      </EuiButtonEmpty>
-      <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
-    </>
+    show &&
+    (readFlappingSettingsUI || readQueryDelaySettingsUI) && (
+      <>
+        <EuiButtonEmpty
+          onClick={() => setIsVisible(true)}
+          iconType="gear"
+          data-test-subj="rulesSettingsLink"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.rulesSettings.link.title"
+            defaultMessage="Settings"
+          />
+        </EuiButtonEmpty>
+        <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
+      </>
+    )
   );
 };
 

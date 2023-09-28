@@ -8,19 +8,7 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFormRowProps,
-  EuiIconTip,
-  EuiRange,
-  EuiRangeProps,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText, EuiPanel } from '@elastic/eui';
 import {
   RulesSettingsFlappingProperties,
   MIN_LOOK_BACK_WINDOW,
@@ -28,6 +16,7 @@ import {
   MAX_LOOK_BACK_WINDOW,
   MAX_STATUS_CHANGE_THRESHOLD,
 } from '@kbn/alerting-plugin/common';
+import { RulesSettingsRange } from '../rules_settings_range';
 
 type OnChangeKey = keyof Omit<RulesSettingsFlappingProperties, 'enabled'>;
 
@@ -80,16 +69,6 @@ const getStatusChangeThresholdRuleRuns = (amount: number) => {
   );
 };
 
-export interface RulesSettingsRangeProps {
-  label: EuiFormRowProps['label'];
-  labelPopoverText?: string;
-  min: number;
-  max: number;
-  value: number;
-  disabled?: EuiRangeProps['disabled'];
-  onChange?: EuiRangeProps['onChange'];
-}
-
 export const RulesSettingsFlappingTitle = () => {
   return (
     <EuiTitle size="xs">
@@ -113,36 +92,6 @@ export const RulesSettingsFlappingDescription = () => {
     </EuiText>
   );
 };
-
-export const RulesSettingsRange = memo((props: RulesSettingsRangeProps) => {
-  const { label, labelPopoverText, min, max, value, disabled, onChange, ...rest } = props;
-
-  const renderLabel = () => {
-    return (
-      <div>
-        {label}
-        &nbsp;
-        <EuiIconTip color="subdued" size="s" type="questionInCircle" content={labelPopoverText} />
-      </div>
-    );
-  };
-
-  return (
-    <EuiFormRow label={renderLabel()}>
-      <EuiRange
-        min={min}
-        max={max}
-        step={1}
-        value={value}
-        disabled={disabled}
-        onChange={onChange}
-        showLabels
-        showValue
-        {...rest}
-      />
-    </EuiFormRow>
-  );
-});
 
 export interface RulesSettingsFlappingFormSectionProps {
   flappingSettings: RulesSettingsFlappingProperties;
