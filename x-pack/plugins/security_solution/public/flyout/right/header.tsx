@@ -49,12 +49,7 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
     ));
 
     return (
-      <EuiFlyoutHeader
-        hasBorder
-        css={css`
-          margin-bottom: ${flyoutIsExpandable ? '-24px' : '0px'};
-        `}
-      >
+      <EuiFlyoutHeader hasBorder>
         {flyoutIsExpandable && (
           <div
             // moving the buttons up in the header
