@@ -8,6 +8,7 @@
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface GenAiConfig {
   apiProvider?: OpenAiProviderType;
@@ -28,4 +29,9 @@ export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiCon
     return (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
   }
   return undefined;
+};
+
+export const getActionTypeTitle = (actionType: ActionTypeModel): string => {
+  // This is for types, it is always defined for the AI connectors
+  return actionType.actionTypeTitle ?? actionType.id;
 };
