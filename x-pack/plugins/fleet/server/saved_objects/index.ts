@@ -25,6 +25,11 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import {
+  migratePackagePolicyEvictionsFromV8110,
+  migratePackagePolicyToV8110,
+} from './migrations/security_solution/to_v8_11_0';
+
 import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
 
 import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
@@ -324,8 +329,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           forwardCompatibility: migratePackagePolicyEvictionsFromV8100,
         },
       },
-<<<<<<< HEAD
-=======
       '2': {
         changes: [
           {
@@ -348,7 +351,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
         },
       },
->>>>>>> 9d6ec1a7cb0 ([Security Solution] Correct the license_uuid reference name in the Endpoint Policy (#167194))
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
