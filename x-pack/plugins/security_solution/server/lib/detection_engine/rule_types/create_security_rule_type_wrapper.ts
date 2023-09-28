@@ -448,6 +448,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus['partial failure'],
                 message: truncateList(result.warningMessages).join(),
+                metrics: {
+                  searchDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
+                },
               });
             }
 
