@@ -27,7 +27,7 @@ import {
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
-const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
+const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch.sha1');
 
 const REGISTRY_SPEC_MAX_VERSION = '3.0';
 
@@ -189,6 +189,7 @@ export const config: PluginConfigDescriptor = {
               min: 0,
             })
           ),
+          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
           registry: schema.object(
             {
               kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),

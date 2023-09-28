@@ -14,7 +14,7 @@ password: changeme
 
 ### Adding users
 
-1. Add the user:encrypted_password to `users` file. The encrypted password for `elastic_serverless` is `changeme` if you want to reuse the value.
+1. Add the `user:encrypted_password` to `users` file. The encrypted password for `elastic_serverless` is `changeme` if you want to reuse the value.
 1. Set the new user's roles in `users_roles` file.
 1. Add the username to `operator_users.yml` in the array for file realm users.
 
@@ -48,3 +48,14 @@ curl -H "Authorization: Bearer AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVT
 ```
 
 The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed a serverless cluster with this token.
+
+
+## Overriding resources
+
+The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `yarn es serverless` command.
+Assuming a customized `users` and `users_roles` are located in `/tmp/my_es/` directory and executing the below command from the root of Kibana, here is an example:
+
+```shell
+yarn es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles 
+```
+ 
