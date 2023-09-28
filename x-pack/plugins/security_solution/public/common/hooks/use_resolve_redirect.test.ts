@@ -30,7 +30,7 @@ jest.mock('../../timelines/store/timeline', () => ({
 describe('useResolveRedirect', () => {
   const mockRedirectLegacyUrl = jest.fn();
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     // Mock rison format in actual url
     (useLocation as jest.Mock).mockReturnValue({
       pathname: 'my/cool/path',
