@@ -162,6 +162,15 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertNumberOfRowsInTable(rowCount: number) {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rowCount).to.eql(
+        rows.length,
+        `Expected trained model row count to be '${rowCount}' (got '${rows.length}')`
+      );
+    }
+
     public async assertModelCollapsedActionsButtonExists(modelId: string, expectedValue: boolean) {
       const actionsExists = await this.doesModelCollapsedActionsButtonExist(modelId);
       expect(actionsExists).to.eql(

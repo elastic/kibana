@@ -47,6 +47,7 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'listingTable',
   'managementMenu',
   'menuToggle',
+  'ml',
   'monacoEditor',
   'pieChart',
   'pipelineEditor',

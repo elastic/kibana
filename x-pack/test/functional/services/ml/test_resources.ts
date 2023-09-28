@@ -60,9 +60,9 @@ export function MachineLearningTestResourcesProvider(
       objectType: SavedObjectType,
       space?: string
     ): Promise<boolean> {
-      const response = await supertest.get(
-        `${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`
-      );
+      const response = await supertest
+        .get(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
+        .set(getCommonRequestHeader('1'));
       return response.status === 200;
     },
 
@@ -432,7 +432,7 @@ export function MachineLearningTestResourcesProvider(
     ) {
       await retry.waitForWithTimeout(
         `${objectType} with title '${title}' to exist`,
-        5 * 1000,
+        20 * 1000,
         async () => {
           if ((await this.savedObjectExistsByTitle(title, objectType, space)) === true) {
             return true;
