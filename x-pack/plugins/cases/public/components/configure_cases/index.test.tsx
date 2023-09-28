@@ -847,7 +847,7 @@ describe('ConfigureCases', () => {
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
 
-    describe('when a deleted connector is selected', () => {
+    describe('when the previously selected connector doesnt appear due to license downgrade or because it was deleted', () => {
       beforeEach(() => {
         useGetCaseConfigurationMock.mockImplementation(() => ({
           data: {

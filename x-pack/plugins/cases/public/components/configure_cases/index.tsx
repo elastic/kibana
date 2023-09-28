@@ -60,7 +60,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
-  const isPlatinumLicense = license.isAtLeastPlatinum();
+  const hasMinimumLicensePermissions = license.isAtLeastGold();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -90,7 +90,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isLoading: isPersistingConfiguration,
   } = usePersistConfiguration();
 
-  const isLoadingCustomFields = loadingCaseConfigure || isPersistingConfiguration;
+  const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
 
   const {
     isLoading: isLoadingConnectors,
@@ -337,7 +337,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       />
       <EuiPageBody restrictWidth={true}>
         <FormWrapper>
-          {isPlatinumLicense && (
+          {hasMinimumLicensePermissions && (
             <>
               {!connectorIsValid && (
                 <SectionWrapper style={{ marginTop: 0 }}>
@@ -387,8 +387,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
             <EuiFlexItem grow={false}>
               <CustomFields
                 customFields={customFields}
-                isLoading={isLoadingCustomFields}
-                disabled={isLoadingCustomFields}
+                isLoading={isLoadingCaseConfiguration}
+                disabled={isLoadingCaseConfiguration}
                 handleAddCustomField={onAddCustomFields}
                 handleDeleteCustomField={onDeleteCustomField}
                 handleEditCustomField={onEditCustomField}
