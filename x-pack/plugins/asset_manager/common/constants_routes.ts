@@ -16,3 +16,4 @@ export const GET_RELATED_ASSETS = base('/assets/related');
 export const GET_ASSETS_DIFF = base('/assets/diff');
 
 export const GET_HOSTS = base('/assets/hosts');
+export const GET_SERVICES = base('/assets/services');
