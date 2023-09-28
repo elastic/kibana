@@ -1851,7 +1851,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).resolves.not.toThrow();
+            await expect(service.getMostRecentUserAction('123', [])).resolves.not.toThrow();
           });
 
           it.each(attributesToValidateIfMissing)('throws if %s is omitted', async (key) => {
@@ -1860,7 +1860,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
+            await expect(service.getMostRecentUserAction('123', [])).rejects.toThrow(
               `Invalid value "undefined" supplied to "${key}"`
             );
           });
@@ -1871,7 +1871,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
+            await expect(service.getMostRecentUserAction('123', [])).rejects.toThrow(
               'Invalid value "undefined" supplied to "payload,title"'
             );
           });
@@ -1885,7 +1885,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
+            await expect(service.getMostRecentUserAction('123', [])).rejects.toThrow(
               'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
             );
           });
@@ -1896,7 +1896,8 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).resolves.toMatchInlineSnapshot(`
+            await expect(service.getMostRecentUserAction('123', [])).resolves
+              .toMatchInlineSnapshot(`
               Object {
                 "attributes": Object {
                   "action": "create",
