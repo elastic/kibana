@@ -20,7 +20,7 @@ jest.mock('../lib/build_response', () => ({
 }));
 
 jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
-  executeCustomLlmChain: jest.fn().mockImplementation(
+  callAgentExecutor: jest.fn().mockImplementation(
     async ({
       connectorId,
     }: {

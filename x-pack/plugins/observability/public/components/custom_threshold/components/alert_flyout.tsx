@@ -6,12 +6,14 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
+
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
 
 import { TriggerActionsContext } from './triggers_actions_context';
 import { useAlertPrefillContext } from '../helpers/use_alert_prefill';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import { observabilityRuleCreationValidConsumers } from '../../../../common/constants';
 
 interface Props {
   visible?: boolean;
@@ -28,7 +30,7 @@ export function AlertFlyout(props: Props) {
     () =>
       triggersActionsUI &&
       triggersActionsUI.getAddRuleFlyout({
-        consumer: 'alerts',
+        consumer: 'logs',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -36,6 +38,7 @@ export function AlertFlyout(props: Props) {
           currentOptions: props.options,
           series: props.series,
         },
+        validConsumers: observabilityRuleCreationValidConsumers,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, onCloseFlyout]

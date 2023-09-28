@@ -23,7 +23,7 @@ import {
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
-  SERVERLESS_IMG,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   setupServerlessVolumes,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -32,7 +32,12 @@ import {
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
-import { ESS_CONFIG_PATH, ESS_RESOURCES_PATHS, ESS_SECRETS_PATH, ESS_JWKS_PATH } from '../paths';
+import {
+  SERVERLESS_CONFIG_PATH,
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+  SERVERLESS_JWKS_PATH,
+} from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 
 jest.mock('execa');
@@ -77,8 +82,8 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-  acc.push(`${path}:${ESS_CONFIG_PATH}${basename(path)}`);
+const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  acc.push(`${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
 
   return acc;
 }, []);
@@ -88,10 +93,10 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
   expect(volumeCmd).toEqual(
     expect.arrayContaining([
       ...getESp12Volume(),
-      ...essResources,
+      ...serverlessResources,
       `${baseEsPath}:/objectstore:z`,
-      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
-      `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`,
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
+      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
     ])
   );
 
@@ -428,7 +433,11 @@ describe('setupServerlessVolumes()', () => {
 
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
 
-    const requiredPaths = [`${baseEsPath}:/objectstore:z`, ES_P12_PATH, ...ESS_RESOURCES_PATHS];
+    const requiredPaths = [
+      `${baseEsPath}:/objectstore:z`,
+      ES_P12_PATH,
+      ...SERVERLESS_RESOURCES_PATHS,
+    ];
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
@@ -442,7 +451,7 @@ describe('runServerlessEsNode()', () => {
   const node = {
     params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
     name: 'es01',
-    image: SERVERLESS_IMG,
+    image: ES_SERVERLESS_DEFAULT_IMAGE,
   };
 
   test('should call the correct Docker command', async () => {
@@ -453,7 +462,7 @@ describe('runServerlessEsNode()', () => {
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
-        SERVERLESS_IMG,
+        ES_SERVERLESS_DEFAULT_IMAGE,
         ...node.params,
         '--name',
         node.name,
@@ -521,7 +530,9 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
-    expect(execa.commandSync.mock.calls[0][0]).toEqual(expect.stringContaining(SERVERLESS_IMG));
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+    );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
   });
 
