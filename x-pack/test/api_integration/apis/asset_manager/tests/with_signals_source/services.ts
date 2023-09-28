@@ -17,53 +17,51 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('apmSynthtraceEsClient');
 
-  describe('asset management', () => {
+  describe('GET /assets/services', () => {
     beforeEach(async () => {
       await synthtrace.clean();
     });
 
-    describe('GET /assets/services', () => {
-      it('should return services', async () => {
-        const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
-        const to = new Date().toISOString();
-        await synthtrace.index(generateServicesData({ from, to, count: 2 }));
+    it('should return services', async () => {
+      const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
+      const to = new Date().toISOString();
+      await synthtrace.index(generateServicesData({ from, to, count: 2 }));
 
-        const response = await supertest
-          .get(SERVICES_ASSETS_ENDPOINT)
-          .query({
-            from,
-            to,
-          })
-          .expect(200);
+      const response = await supertest
+        .get(SERVICES_ASSETS_ENDPOINT)
+        .query({
+          from,
+          to,
+        })
+        .expect(200);
 
-        expect(response.body).to.have.property('services');
-        expect(response.body.services.length).to.equal(2);
-      });
+      expect(response.body).to.have.property('services');
+      expect(response.body.services.length).to.equal(2);
+    });
 
-      it('should return services running on specified host', async () => {
-        const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
-        const to = new Date().toISOString();
-        await synthtrace.index(generateServicesData({ from, to, count: 5 }));
+    it('should return services running on specified host', async () => {
+      const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
+      const to = new Date().toISOString();
+      await synthtrace.index(generateServicesData({ from, to, count: 5 }));
 
-        const response = await supertest
-          .get(SERVICES_ASSETS_ENDPOINT)
-          .query({
-            from,
-            to,
-            parent: 'my-host-1',
-          })
-          .expect(200);
+      const response = await supertest
+        .get(SERVICES_ASSETS_ENDPOINT)
+        .query({
+          from,
+          to,
+          parent: 'my-host-1',
+        })
+        .expect(200);
 
-        expect(response.body).to.have.property('services');
-        expect(response.body.services.length).to.equal(1);
-        expect(omit(response.body.services[0], ['@timestamp'])).to.eql({
-          'asset.kind': 'service',
-          'asset.id': 'service-1',
-          'asset.ean': 'service:service-1',
-          'asset.references': [],
-          'asset.parents': [],
-          'service.environment': 'production',
-        });
+      expect(response.body).to.have.property('services');
+      expect(response.body.services.length).to.equal(1);
+      expect(omit(response.body.services[0], ['@timestamp'])).to.eql({
+        'asset.kind': 'service',
+        'asset.id': 'service-1',
+        'asset.ean': 'service:service-1',
+        'asset.references': [],
+        'asset.parents': [],
+        'service.environment': 'production',
       });
     });
   });

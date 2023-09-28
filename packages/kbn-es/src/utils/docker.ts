@@ -38,9 +38,12 @@ import {
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
-interface BaseOptions {
-  tag?: string;
+interface ImageOptions {
   image?: string;
+  tag?: string;
+}
+
+interface BaseOptions extends ImageOptions {
   port?: number;
   ssl?: boolean;
   /** Kill running cluster before starting a new cluster  */
@@ -63,6 +66,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
+  /**
+   * Resource file(s) to overwrite
+   * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
+   */
+  resources?: string | string[];
 }
 
 interface ServerlessEsNodeArgs {
@@ -106,9 +114,10 @@ export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
-export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'latest';
-export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
+export const ES_SERVERLESS_REPO_KIBANA = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_REPO_ELASTICSEARCH = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_LATEST_VERIFIED_TAG = 'latest-verified';
+export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SERVERLESS_LATEST_VERIFIED_TAG}`;
 
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
@@ -275,7 +284,12 @@ export function resolveDockerImage({
   image,
   repo,
   defaultImg,
-}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) {
+}: {
+  tag?: string;
+  image?: string;
+  repo: string;
+  defaultImg: string;
+}) {
   if (image) {
     if (!image.includes(DOCKER_REGISTRY)) {
       throw createCliError(
@@ -461,7 +475,7 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, files } = options;
+  const { basePath, clean, ssl, files, resources } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
@@ -500,11 +514,37 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
+  const resourceFileOverrides: Record<string, string> = resources
+    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
+    : {};
+
   const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-    acc.push('--volume', `${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
+    const fileName = basename(path);
+    let localFilePath = path;
+
+    if (resourceFileOverrides[fileName]) {
+      localFilePath = resourceFileOverrides[fileName];
+      log.info(`'${fileName}' resource overridden with: ${localFilePath}`);
+      delete resourceFileOverrides[fileName];
+    }
+
+    acc.push('--volume', `${localFilePath}:${SERVERLESS_CONFIG_PATH}${fileName}`);
 
     return acc;
   }, []);
+
+  if (Object.keys(resourceFileOverrides).length > 0) {
+    throw new Error(
+      `Unsupported ES serverless --resources value(s):\n  ${Object.values(
+        resourceFileOverrides
+      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
+        basename(filePath)
+      ).join(' | ')}`
+    );
+  }
 
   volumeCmds.push(
     ...getESp12Volume(),
@@ -525,11 +565,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 /**
  * Resolve the Serverless ES image based on defaults and CLI options
  */
-function getServerlessImage(options: ServerlessOptions) {
+function getServerlessImage({ image, tag }: ImageOptions) {
   return resolveDockerImage({
-    ...options,
-    repo: SERVERLESS_REPO,
-    defaultImg: SERVERLESS_IMG,
+    image,
+    tag,
+    repo: ES_SERVERLESS_REPO_ELASTICSEARCH,
+    defaultImg: ES_SERVERLESS_DEFAULT_IMAGE,
   });
 }
 
@@ -573,7 +614,10 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
-  const image = getServerlessImage(options);
+  const image = getServerlessImage({
+    image: options.image,
+    tag: options.tag,
+  });
   await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
@@ -686,8 +730,13 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
 /**
  * Resolve the Elasticsearch image based on defaults and CLI options
  */
-function getDockerImage(options: DockerOptions) {
-  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+function getDockerImage({ image, tag }: ImageOptions) {
+  return resolveDockerImage({
+    image,
+    tag,
+    repo: DOCKER_REPO,
+    defaultImg: DOCKER_IMG,
+  });
 }
 
 /**
@@ -713,7 +762,10 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   let image;
 
   if (!options.dockerCmd) {
-    image = getDockerImage(options);
+    image = getDockerImage({
+      image: options.image,
+      tag: options.tag,
+    });
     await setupDocker({ log, image, options });
   }
 
