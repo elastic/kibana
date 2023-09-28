@@ -108,8 +108,8 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
               script: schema.object({
                 source: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
                 lang: schema.string(),
-                params: schema.maybe(schema.any()),
-                options: schema.object({}, { unknowns: 'allow' }),
+                params: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+                options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
               }),
             })
           ),

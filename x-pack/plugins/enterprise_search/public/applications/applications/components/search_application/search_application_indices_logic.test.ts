@@ -40,6 +40,7 @@ const mockSearchApplicationData: EnterpriseSearchApplicationDetails = {
     script: {
       source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
       lang: 'mustache',
+      options: { content_type: 'application/json;charset=utf-8' },
       params: {
         field_name: 'hello',
         field_value: 'world',
