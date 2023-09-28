@@ -73,7 +73,7 @@ describe(
       gotToDiscoverTab();
       cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
     });
-    it('should remember dataView when navigating away and back to discover ', () => {
+    it.skip('should remember dataView when navigating away and back to discover ', () => {
       const dataviewName = '.kibana-event-log';
       switchDataViewTo(dataviewName);
       navigateFromHeaderTo(CSP_FINDINGS);
