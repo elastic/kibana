@@ -319,30 +319,30 @@ export const ConfigureCases: React.FC = React.memo(() => {
       />
       <EuiPageBody restrictWidth={true}>
         <FormWrapper>
-          {!connectorIsValid && (
-            <SectionWrapper style={{ marginTop: 0 }}>
-              <EuiCallOut
-                title={i18n.WARNING_NO_CONNECTOR_TITLE}
-                color="warning"
-                iconType="help"
-                data-test-subj="configure-cases-warning-callout"
-              >
-                <FormattedMessage
-                  defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                  id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                  values={{
-                    appropriateLicense: (
-                      <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
-                        {i18n.LINK_APPROPRIATE_LICENSE}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiCallOut>
-            </SectionWrapper>
-          )}
           {isPlatinumLicense && (
             <>
+              {!connectorIsValid && (
+                <SectionWrapper style={{ marginTop: 0 }}>
+                  <EuiCallOut
+                    title={i18n.WARNING_NO_CONNECTOR_TITLE}
+                    color="warning"
+                    iconType="help"
+                    data-test-subj="configure-cases-warning-callout"
+                  >
+                    <FormattedMessage
+                      defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                      id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                      values={{
+                        appropriateLicense: (
+                          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                            {i18n.LINK_APPROPRIATE_LICENSE}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiCallOut>
+                </SectionWrapper>
+              )}
               <SectionWrapper>
                 <ClosureOptions
                   closureTypeSelected={closureType}

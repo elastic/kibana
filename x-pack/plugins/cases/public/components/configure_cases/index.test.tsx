@@ -815,20 +815,42 @@ describe('ConfigureCases', () => {
         ...usePersistConfigurationMockResponse,
         mutate: persistCaseConfigure,
       }));
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
 
       // Updated
       useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     });
 
-    it('should hide connectors and closure options', () => {
+    it('should not render connectors and closure options', () => {
       appMockRender.render(<ConfigureCases />);
       expect(screen.queryByTestId('dropdown-connectors')).not.toBeInTheDocument();
       expect(screen.queryByTestId('closure-options-radio-group')).not.toBeInTheDocument();
     });
 
-    it('renders custom field section', () => {
+    it('should render custom field section', () => {
       appMockRender.render(<ConfigureCases />);
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    describe('when a deleted connector is selected', () => {
+      beforeEach(() => {
+        useGetCaseConfigurationMock.mockImplementation(() => ({
+          data: {
+            ...useCaseConfigureResponse.data,
+            closureType: 'close-by-user',
+            connector: {
+              id: 'not-id',
+              name: 'unchanged',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          },
+        }));
+      });
+
+      it('should not render the warning callout', () => {
+        expect(screen.queryByTestId('configure-cases-warning-callout')).not.toBeInTheDocument();
+      });
     });
   });
 });
