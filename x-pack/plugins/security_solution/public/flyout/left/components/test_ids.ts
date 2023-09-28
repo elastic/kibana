@@ -20,8 +20,6 @@ export const SESSION_VIEW_ERROR_TEST_ID = `${PREFIX}SessionViewError` as const;
 const PREVALENCE_DETAILS_TEST_ID = `${PREFIX}PrevalenceDetails` as const;
 export const PREVALENCE_DETAILS_DATE_PICKER_TEST_ID =
   `${PREVALENCE_DETAILS_TEST_ID}DatePicker` as const;
-export const PREVALENCE_DETAILS_LOADING_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}Loading` as const;
-export const PREVALENCE_DETAILS_NO_DATA_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}NoData` as const;
 export const PREVALENCE_DETAILS_UPSELL_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}Upsell` as const;
 export const PREVALENCE_DETAILS_TABLE_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}Table` as const;
 export const PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID =
@@ -36,11 +34,12 @@ export const PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}HostPrevalenceCell` as const;
 export const PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}UserPrevalenceCell` as const;
+export const PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID =
+  `${PREVALENCE_DETAILS_TABLE_TEST_ID}UpsellCell` as const;
 
 /* Entities */
 
 export const ENTITIES_DETAILS_TEST_ID = `${PREFIX}EntitiesDetails` as const;
-export const ENTITIES_DETAILS_NO_DATA_TEST_ID = `${ENTITIES_DETAILS_TEST_ID}NoData` as const;
 export const USER_DETAILS_TEST_ID = `${PREFIX}UsersDetails` as const;
 export const USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID =
   `${USER_DETAILS_TEST_ID}RelatedHostsTable` as const;
@@ -58,9 +57,7 @@ export const THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID =
 
 /* Correlations */
 
-const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as const;
-export const CORRELATIONS_DETAILS_NO_DATA_TEST_ID =
-  `${CORRELATIONS_DETAILS_TEST_ID}NoData` as const;
+export const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as const;
 
 export const CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsByAncestrySection` as const;
@@ -91,5 +88,5 @@ export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
 
 /* Investigation */
 
-export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${PREFIX}InvestigationGuideLoading` as const;
-export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${PREFIX}NoData` as const;
+export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;

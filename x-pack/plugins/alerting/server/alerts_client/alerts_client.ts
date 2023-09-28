@@ -6,7 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -49,6 +55,7 @@ import {
   getContinualAlertsQuery,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -196,6 +203,51 @@ export class AlertsClient<
     });
 
     return { hits, total };
+  }
+
+  public async setAlertStatusToUntracked(indices: string[], ruleIds: string[]) {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const terms: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
+      term: {
+        [ALERT_RULE_UUID]: { value: ruleId },
+      },
+    }));
+    terms.push({
+      term: {
+        [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
+      },
+    });
+
+    try {
+      // Retry this updateByQuery up to 3 times to make sure the number of documents
+      // updated equals the number of documents matched
+      for (let retryCount = 0; retryCount < 3; retryCount++) {
+        const response = await esClient.updateByQuery({
+          index: indices,
+          allow_no_indices: true,
+          body: {
+            conflicts: 'proceed',
+            script: {
+              source: UNTRACK_UPDATE_PAINLESS_SCRIPT,
+              lang: 'painless',
+            },
+            query: {
+              bool: {
+                must: terms,
+              },
+            },
+          },
+        });
+        if (response.total === response.updated) break;
+        this.options.logger.warn(
+          `Attempt ${retryCount + 1}: Failed to untrack ${
+            (response.total ?? 0) - (response.updated ?? 0)
+          } of ${response.total}; indices ${indices}, ruleIds ${ruleIds}`
+        );
+      }
+    } catch (err) {
+      this.options.logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
+    }
   }
 
   public report(
@@ -408,7 +460,7 @@ export class AlertsClient<
 
       try {
         const response = await esClient.bulk({
-          refresh: 'wait_for',
+          refresh: true,
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
           body: bulkBody,
@@ -416,15 +468,17 @@ export class AlertsClient<
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
-          const errorsInResponse = (response.items ?? [])
-            .map((item) => item?.index?.error || item?.create?.error)
-            .filter((item) => item != null);
-
-          this.options.logger.error(
-            `Error writing ${errorsInResponse.length} out of ${
-              alertsToIndex.length
-            } alerts - ${JSON.stringify(errorsInResponse)}`
-          );
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              operations: bulkBody,
+            },
+            bulkResponse: response,
+          });
         }
       } catch (err) {
         this.options.logger.error(
@@ -562,3 +616,11 @@ export class AlertsClient<
     return this._isUsingDataStreams;
   }
 }
+
+const UNTRACK_UPDATE_PAINLESS_SCRIPT = `
+// Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
+if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
+  ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
+} else {
+  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'
+}`;
