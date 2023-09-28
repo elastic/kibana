@@ -39,11 +39,6 @@ import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/t
 import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
 
 import {
-  migratePackagePolicyEvictionsFromV81102,
-  migratePackagePolicyToV81102,
-} from './migrations/security_solution/to_v8_11_0_2';
-
-import {
   migrateAgentPolicyToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
