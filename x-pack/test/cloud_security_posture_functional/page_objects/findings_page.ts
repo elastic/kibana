@@ -275,11 +275,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
-
-    getVulnerabilityTableRows: async () => {
-      const element = await vulnerabilityDataGrid.getVulnerabilityTable();
-      return await element.findAllByIds('dataGridRowCell');
-    },
   };
 
   const createFlyoutObject = (tableTestSubject: string) => ({

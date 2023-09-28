@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { EcsEvent } from '@kbn/ecs';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   vulnerabilitiesLatestMock,
@@ -41,6 +42,7 @@ export interface VulnStatsTrend {
     AccountVulnStats['cloudAccountId'],
     AccountVulnStats
   >;
+  event: EcsEvent;
 }
 
 export interface VulnerableResourceStat {
@@ -137,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
 
     addScores: async <T>(scoresMock: T[]) => {
-      const r = await Promise.all(
+      await Promise.all(
         scoresMock.map((scoreDoc) =>
           es.index({
             index: BENCHMARK_SCORES_INDEX,
