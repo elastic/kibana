@@ -75,7 +75,7 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', () => login());
+Cypress.Commands.add('login', login);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
