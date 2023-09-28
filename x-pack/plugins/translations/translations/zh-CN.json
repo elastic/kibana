@@ -11392,7 +11392,6 @@
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "合规性（按 CIS 部分）",
     "xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription": "已评估帐户",
     "xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription": "集群已评估",
-    "xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription": "失败的结果",
     "xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription": "资源已评估",
     "xpack.csp.dashboardTabs.cloudTab.tabTitle": "云",
     "xpack.csp.dashboardTabs.kubernetesTab.tabTitle": "Kubernetes",
