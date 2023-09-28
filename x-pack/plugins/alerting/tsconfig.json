@@ -58,6 +58,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/serverless",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": ["target/**/*"]
 }
