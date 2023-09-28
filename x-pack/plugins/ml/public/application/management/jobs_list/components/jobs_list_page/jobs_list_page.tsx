@@ -151,7 +151,7 @@ export const JobsListPage: FC<Props> = ({
                     description={
                       <FormattedMessage
                         id="xpack.ml.management.jobsList.jobsListTagline"
-                        defaultMessage="Identify, analyze, and process areas of interest in your data using advanced analysis techniques."
+                        defaultMessage="Identify, analyze, and process your data using advanced analysis techniques."
                       />
                     }
                     rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
