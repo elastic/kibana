@@ -43,10 +43,11 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 {
   readonly #log: Logger;
   readonly #client: SavedObjectsPointInTimeFinderClient;
-  readonly #findOptions: SavedObjectsFindOptions;
+  readonly #findOptions: SavedObjectsCreatePointInTimeFinderOptions;
   readonly #internalOptions: SavedObjectsFindInternalOptions | undefined;
   #open: boolean = false;
   #pitId?: string;
+  #totalCollectedResponseSize: number = 0;
 
   constructor(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
@@ -59,6 +60,8 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
       perPage: 1000,
+      // Default to 256MB to protect the event loop and prevent the server against OOM errors
+      maxTotalResponseSize: 268435456,
       ...findOptions,
     };
   }
@@ -83,6 +86,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         searchAfter: lastHitSortValue,
       });
       this.#pitId = results.pit_id;
+      this.#totalCollectedResponseSize += Buffer.byteLength(JSON.stringify(results));
       lastResultsCount = results.saved_objects.length;
       lastHitSortValue = this.getLastHitSortValue(results);
 
@@ -93,10 +97,17 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         await this.close();
       }
 
+      // Close PIT if we've collected more than maxTotalResponseSize
+      if (this.#totalCollectedResponseSize > this.#findOptions.maxTotalResponseSize!) {
+        await this.close();
+        throw new Error(
+          'The point in time finder has collected more than the maximum total response size'
+        );
+      }
+
       yield results;
-      // We've reached the end when there are fewer hits than our perPage size,
-      // or when `close()` has been called.
-    } while (this.#open && lastResultsCount >= this.#findOptions.perPage!);
+      // `close()` has been called, stop yielding results
+    } while (this.#open);
 
     return;
   }

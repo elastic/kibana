@@ -17,7 +17,7 @@ import type { ISavedObjectsRepository } from '../saved_objects_repository';
 export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
   SavedObjectsFindOptions,
   'page' | 'pit' | 'searchAfter'
->;
+> & { maxTotalResponseSize?: number };
 
 /**
  * Point-in-time finder client.
