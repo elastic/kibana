@@ -25,6 +25,7 @@ import type {
   OutputSOAttributes,
   AgentPolicy,
   OutputSoKafkaAttributes,
+  PolicySecretReference,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -53,7 +54,12 @@ import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
-import { extractAndWriteOutputSecrets } from './secrets';
+import {
+  deleteSecrets,
+  extractAndUpdateOutputSecrets,
+  extractAndWriteOutputSecrets,
+  isSecretStorageEnabled,
+} from './secrets';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -685,6 +691,7 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
@@ -698,6 +705,16 @@ class OutputService {
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    if (await isSecretStorageEnabled(esClient, soClient)) {
+      const secretsRes = await extractAndUpdateOutputSecrets({
+        oldOutput: originalOutput,
+        outputUpdate: data,
+        esClient,
+      });
+
+      updateData.secrets = secretsRes.outputUpdate.secrets;
+      secretsToDelete = secretsRes.secretsToDelete;
+    }
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
     await validateTypeChanges(
@@ -885,6 +902,16 @@ class OutputService {
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
+    }
+
+    if (secretsToDelete.length) {
+      try {
+        await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
+      } catch (err) {
+        appContextService
+          .getLogger()
+          .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+      }
     }
   }
 }

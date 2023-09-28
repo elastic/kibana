@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -29,6 +30,13 @@ export default function (providerContext: FtrProviderContext) {
     });
   };
 
+  const getSecretById = (id: string) => {
+    return es.get({
+      index: '.fleet-secrets',
+      id,
+    });
+  };
+
   const deleteAllSecrets = async () => {
     try {
       await es.deleteByQuery({
@@ -41,6 +49,21 @@ export default function (providerContext: FtrProviderContext) {
       });
     } catch (err) {
       // index doesn't exist
+    }
+  };
+
+  const enableSecrets = async () => {
+    try {
+      await kibanaServer.savedObjects.update({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {
+          secret_storage_requirements_met: true,
+        },
+        overwrite: false,
+      });
+    } catch (e) {
+      throw e;
     }
   };
 
@@ -58,6 +81,7 @@ export default function (providerContext: FtrProviderContext) {
     let fleetServerPolicyWithCustomOutputId: string;
 
     before(async function () {
+      await enableSecrets();
       // we must first force install the fleet_server package to override package verification error on policy create
       // https://github.com/elastic/kibana/issues/137450
       const getPkRes = await supertest
@@ -449,6 +473,84 @@ export default function (providerContext: FtrProviderContext) {
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
         const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
         expect(newOutput[0].shipper).to.equal(null);
+      });
+
+      it.only('should allow secrets to be updated + delete unused secret', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const outputId = res.body.item.id;
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('KEY');
+
+        const updateRes = await supertest
+          .put(`/api/fleet/outputs/${outputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'NEW_KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const updatedSecretId = updateRes.body.item.secrets.ssl.key.id;
+
+        expect(updatedSecretId).not.to.equal(secretId);
+
+        const updatedSecret = await getSecretById(updatedSecretId);
+
+        // @ts-ignore _source unknown type
+        expect(updatedSecret._source.value).to.equal('NEW_KEY');
+
+        try {
+          await getSecretById(secretId);
+          expect().fail('Secret should have been deleted');
+        } catch (e) {
+          // not found
+        }
       });
     });
 

@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { Output, OutputSecretPath } from '../../common/types';
+import type { KafkaOutput, Output, OutputSecretPath } from '../../common/types';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
@@ -124,7 +124,7 @@ export async function deleteSecretsIfNotReferenced(opts: {
     return;
   }
   try {
-    await _deleteSecrets({
+    await deleteSecrets({
       esClient,
       ids: secretsToDelete,
     });
@@ -173,7 +173,7 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   return res;
 }
 
-export async function _deleteSecrets(opts: {
+export async function deleteSecrets(opts: {
   esClient: ElasticsearchClient;
   ids: string[];
 }): Promise<void> {
@@ -250,7 +250,9 @@ export async function extractAndWriteOutputSecrets(opts: {
 }): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
   const { output, esClient } = opts;
 
-  const secretPaths = getOutputSecretPaths(output).filter((path) => typeof path.value === 'string');
+  const secretPaths = getOutputSecretPaths(output.type, output).filter(
+    (path) => typeof path.value === 'string'
+  );
 
   if (secretPaths.length === 0) {
     return { output, secretReferences: [] };
@@ -272,21 +274,27 @@ export async function extractAndWriteOutputSecrets(opts: {
   };
 }
 
-function getOutputSecretPaths(output: NewOutput): OutputSecretPath[] {
+function getOutputSecretPaths(
+  outputType: NewOutput['type'],
+  output: NewOutput | Partial<Output>
+): OutputSecretPath[] {
   const outputSecretPaths: OutputSecretPath[] = [];
 
-  if ((output.type === 'kafka' || output.type === 'logstash') && output.secrets?.ssl?.key) {
+  if ((outputType === 'kafka' || outputType === 'logstash') && output.secrets?.ssl?.key) {
     outputSecretPaths.push({
       path: 'secrets.ssl.key',
       value: output.secrets.ssl.key,
     });
   }
 
-  if (output.type === 'kafka' && output?.secrets?.password) {
-    outputSecretPaths.push({
-      path: 'secrets.password',
-      value: output.secrets.password,
-    });
+  if (outputType === 'kafka') {
+    const kafkaOutput = output as KafkaOutput;
+    if (kafkaOutput?.secrets?.password) {
+      outputSecretPaths.push({
+        path: 'secrets.password',
+        value: kafkaOutput.secrets.password,
+      });
+    }
   }
 
   return outputSecretPaths;
@@ -365,6 +373,52 @@ export async function extractAndUpdateSecrets(opts: {
     secretsToDelete,
   };
 }
+export async function extractAndUpdateOutputSecrets(opts: {
+  oldOutput: Output;
+  outputUpdate: Partial<Output>;
+  esClient: ElasticsearchClient;
+}): Promise<{
+  outputUpdate: Partial<Output>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldOutput, outputUpdate, esClient } = opts;
+  const outputType = outputUpdate.type || oldOutput.type;
+  const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
+  const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
+
+  if (!oldSecretPaths.length && !updatedSecretPaths.length) {
+    return { outputUpdate, secretReferences: [], secretsToDelete: [] };
+  }
+
+  const { toCreate, toDelete, noChange } = diffOutputSecretPaths(
+    oldSecretPaths,
+    updatedSecretPaths
+  );
+
+  const createdSecrets = await createSecrets({
+    esClient,
+    values: toCreate.map((secretPath) => secretPath.value as string),
+  });
+
+  const outputWithSecretRefs = JSON.parse(JSON.stringify(outputUpdate));
+  toCreate.forEach((secretPath, i) => {
+    set(outputWithSecretRefs, secretPath.path, { id: createdSecrets[i].id });
+  });
+
+  const secretReferences = [
+    ...noChange.map((secretPath) => ({ id: (secretPath.value as { id: string }).id })),
+    ...createdSecrets.map(({ id }) => ({ id })),
+  ];
+
+  return {
+    outputUpdate: outputWithSecretRefs,
+    secretReferences,
+    secretsToDelete: toDelete.map((secretPath) => ({
+      id: (secretPath.value as { id: string }).id,
+    })),
+  };
+}
 
 function isSecretVar(varDef: RegistryVarsEntry) {
   return varDef.secret === true;
@@ -409,6 +463,36 @@ export function diffSecretPaths(
       }
       delete newPathsByPath[oldPath.path];
     }
+  }
+
+  const remainingNewPaths = Object.values(newPathsByPath);
+
+  return { toCreate: [...toCreate, ...remainingNewPaths], toDelete, noChange };
+}
+
+export function diffOutputSecretPaths(
+  oldPaths: OutputSecretPath[],
+  newPaths: OutputSecretPath[]
+): { toCreate: OutputSecretPath[]; toDelete: OutputSecretPath[]; noChange: OutputSecretPath[] } {
+  const toCreate: OutputSecretPath[] = [];
+  const toDelete: OutputSecretPath[] = [];
+  const noChange: OutputSecretPath[] = [];
+  const newPathsByPath = keyBy(newPaths, 'path');
+
+  for (const oldPath of oldPaths) {
+    if (!newPathsByPath[oldPath.path]) {
+      toDelete.push(oldPath);
+    }
+
+    const newPath = newPathsByPath[oldPath.path];
+    if (newPath && newPath.value) {
+      const newValue = newPath.value;
+      if (typeof newValue === 'string') toCreate.push(newPath);
+      toDelete.push(oldPath);
+    } else {
+      noChange.push(newPath);
+    }
+    delete newPathsByPath[oldPath.path];
   }
 
   const remainingNewPaths = Object.values(newPathsByPath);
