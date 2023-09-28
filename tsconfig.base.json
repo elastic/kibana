@@ -128,6 +128,8 @@
       "@kbn/ci-stats-shipper-cli/*": ["packages/kbn-ci-stats-shipper-cli/*"],
       "@kbn/cli-dev-mode": ["packages/kbn-cli-dev-mode"],
       "@kbn/cli-dev-mode/*": ["packages/kbn-cli-dev-mode/*"],
+      "@kbn/cloud": ["packages/cloud"],
+      "@kbn/cloud/*": ["packages/cloud/*"],
       "@kbn/cloud-chat-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat"],
       "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
       "@kbn/cloud-chat-provider-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat_provider"],
