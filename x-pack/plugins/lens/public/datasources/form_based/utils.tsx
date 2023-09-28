@@ -306,13 +306,13 @@ export function getSearchWarningMessages(
               fixableInEditor: true,
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
-              longMessage: (props) => (
+              longMessage: (closePopover) => (
                 <>
                   <EuiText size="s">{warning.message}</EuiText>
                   <EuiSpacer size="s" />
                   <ViewWarningButton
                     onClick={() => {
-                      props.closePopover();
+                      closePopover();
                       warning.openInInspector();
                     }}
                     size="m"

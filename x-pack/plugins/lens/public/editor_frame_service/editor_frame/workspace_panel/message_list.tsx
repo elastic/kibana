@@ -69,15 +69,6 @@ export const MessageList = ({
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  function renderLongMessage(message) {
-    if (typeof message.longMessage === 'string') {
-      return message.longMessage;
-    }
-
-    const LongMessage = message.longMessage;
-    return <LongMessage closePopover={closePopover} />;
-  }
-
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -131,7 +122,11 @@ export const MessageList = ({
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
-                <EuiText size="s">{renderLongMessage(message)}</EuiText>
+                <EuiText size="s">
+                  {typeof message.longMessage === 'function'
+                    ? message.longMessage(closePopover)
+                    : message.longMessage}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </li>
