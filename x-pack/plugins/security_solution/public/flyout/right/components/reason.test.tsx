@@ -7,17 +7,14 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
-  REASON_DETAILS_TEST_ID,
-  REASON_TITLE_TEST_ID,
-} from './test_ids';
+import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
 import { Reason } from './reason';
 import { RightPanelContext } from '../context';
-import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { PreviewPanelKey } from '../../preview';
-import { PREVIEW_ALERT_REASON_DETAILS } from './translations';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
@@ -33,17 +30,39 @@ const panelContextValue = {
 
 const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
   render(
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContext}>
-        <Reason />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
+    <IntlProvider locale="en">
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContext}>
+          <Reason />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </IntlProvider>
   );
 
+const NO_DATA_MESSAGE = "There's no source event information for this alert.";
+
 describe('<Reason />', () => {
-  it('should render the component', () => {
+  it('should render the component for alert', () => {
     const { getByTestId } = renderReason();
     expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(REASON_TITLE_TEST_ID)).toHaveTextContent('Alert reason');
+    expect(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID)).toHaveTextContent(
+      'Show full reason'
+    );
+  });
+
+  it('should render the component for document', () => {
+    const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser.filter(
+      (d) => d.field !== 'kibana.alert.rule.uuid'
+    );
+    const panelContext = {
+      ...panelContextValue,
+      dataFormattedForFieldBrowser,
+    };
+    const { getByTestId } = renderReason(panelContext);
+    expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(REASON_TITLE_TEST_ID)).toHaveTextContent('Document reason');
   });
 
   it('should render no reason if the field is null', () => {
@@ -52,9 +71,9 @@ describe('<Reason />', () => {
       getFieldsData: () => {},
     } as unknown as RightPanelContext;
 
-    const { getByTestId } = renderReason(panelContext);
+    const { getByText } = renderReason(panelContext);
 
-    expect(getByTestId(REASON_DETAILS_TEST_ID)).toBeEmptyDOMElement();
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should open preview panel when clicking on button', () => {
@@ -70,7 +89,12 @@ describe('<Reason />', () => {
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
         banner: {
-          title: PREVIEW_ALERT_REASON_DETAILS,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
+              defaultMessage="Preview alert reason"
+            />
+          ),
           backgroundColor: 'warning',
           textColor: 'warning',
         },

@@ -5,15 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useLeftPanelContext } from '../context';
-import {
-  INVESTIGATION_GUIDE_LOADING_TEST_ID,
-  INVESTIGATION_GUIDE_NO_DATA_TEST_ID,
-} from './test_ids';
+import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
 import { InvestigationGuideView } from '../../../common/components/event_details/investigation_guide_view';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 
 /**
  * Investigation guide displayed in the left panel.
@@ -26,22 +24,11 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="spaceAround"
-        data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
-    <>
-      {!error && basicAlertData.ruleId && ruleNote ? (
+    <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
+      {loading ? (
+        <FlyoutLoading data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID} />
+      ) : !error && basicAlertData.ruleId && ruleNote ? (
         <InvestigationGuideView
           basicData={basicAlertData}
           ruleNote={ruleNote}
@@ -49,27 +36,25 @@ export const InvestigationGuide: React.FC = () => {
           showFullView={true}
         />
       ) : (
-        <div data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.investigationGuideNoData"
-            defaultMessage="There’s no investigation guide for this rule. {documentation} to add one."
-            values={{
-              documentation: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/security/current/rules-ui-management.html#edit-rules-settings"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.documentDetails.investigationGuideDocumentationLink"
-                    defaultMessage="Edit the rule's settings"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </div>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.investigation.noDataDescription"
+          defaultMessage="There's no investigation guide for this rule. {documentation} to add one."
+          values={{
+            documentation: (
+              <EuiLink
+                href="https://www.elastic.co/guide/en/security/current/rules-ui-management.html#edit-rules-settings"
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.investigation.noDataLinkText"
+                  defaultMessage="Edit the rule's settings"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       )}
-    </>
+    </div>
   );
 };
 

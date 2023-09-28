@@ -47,6 +47,13 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async getAssetDetailsKubernetesMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsKubernetesMetricsChart"]'
+      );
+    },
+
     async clickOverviewLinkToAlerts() {
       return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
     },
@@ -172,6 +179,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     // Osquery
     async clickOsqueryTab() {
       return testSubjects.click('infraAssetDetailsOsqueryTab');
+    },
+
+    // APM Tab link
+    async clickApmTabLink() {
+      return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
     },
   };
 }

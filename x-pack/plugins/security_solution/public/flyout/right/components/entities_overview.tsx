@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { INSIGHTS_ENTITIES_NO_DATA_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
-import { ENTITIES_NO_DATA_MESSAGE, ENTITIES_TITLE } from './translations';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
@@ -46,8 +46,21 @@ export const EntitiesOverview: React.FC = () => {
     <>
       <ExpandablePanel
         header={{
-          title: ENTITIES_TITLE,
-          callback: goToEntitiesTab,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.entities.entitiesTitle"
+              defaultMessage="Entities"
+            />
+          ),
+          link: {
+            callback: goToEntitiesTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+                defaultMessage="Show all entities"
+              />
+            ),
+          },
           iconType: 'arrowStart',
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
@@ -67,7 +80,10 @@ export const EntitiesOverview: React.FC = () => {
             )}
           </EuiFlexGroup>
         ) : (
-          <div data-test-subj={INSIGHTS_ENTITIES_NO_DATA_TEST_ID}>{ENTITIES_NO_DATA_MESSAGE}</div>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.entities.noDataDescription"
+            defaultMessage="Host and user information are unavailable for this alert."
+          />
         )}
       </ExpandablePanel>
     </>

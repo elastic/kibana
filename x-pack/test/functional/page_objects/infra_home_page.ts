@@ -87,6 +87,28 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return Promise.all(promises);
     },
 
+    async getFirstNode() {
+      const nodes = await testSubjects.findAll('nodeContainer');
+      return nodes[0];
+    },
+
+    async clickOnFirstNode() {
+      const firstNode = await this.getFirstNode();
+      firstNode.click();
+    },
+
+    async clickOnGoToNodeDetails() {
+      await retry.try(async () => {
+        await testSubjects.click('viewAssetDetailsContextMenuItem');
+      });
+    },
+
+    async clickOnNodeDetailsFlyoutOpenAsPage() {
+      await retry.try(async () => {
+        await testSubjects.click('infraAssetDetailsOpenAsPageButton');
+      });
+    },
+
     async sortNodesBy(sort: string) {
       await testSubjects.click('waffleSortByDropdown');
       if (sort === 'value') {
@@ -175,9 +197,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       await testSubjects.click('openInventorySwitcher');
-      return retry.tryForTime(2 * 1000, async () => {
-        return testSubjects.missingOrFail('goToHost');
-      });
+      await testSubjects.missingOrFail('goToHost', { timeout: 10 * 1000 });
     },
 
     async goToHost() {
@@ -412,6 +432,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async inputQueryData() {
       const queryBar = await testSubjects.find('infraSearchField');
       await queryBar.type('h');
+    },
+
+    async inputAddHostNameFilter(hostName: string) {
+      await this.enterSearchTerm(`host.name:"${hostName}"`);
+    },
+
+    async clickOnNode() {
+      return testSubjects.click('nodeContainer');
     },
 
     async ensureSuggestionsPanelVisible() {

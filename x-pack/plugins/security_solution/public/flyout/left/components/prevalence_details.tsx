@@ -14,12 +14,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormattedCount } from '../../../common/components/formatted_number';
@@ -28,31 +28,16 @@ import { InvestigateInTimelineButton } from '../../../common/components/event_de
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
-  HOST_TITLE,
-  PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE,
-  PREVALENCE_TABLE_COUNT_COLUMN_TITLE,
-  PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE,
-  PREVALENCE_TABLE_VALUE_COLUMN_TITLE,
-  PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE,
-  PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
-  USER_TITLE,
-  PREVALENCE_NO_DATA_MESSAGE,
-  PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP,
-  PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP,
-  HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP,
-  USER_PREVALENCE_COLUMN_TITLE_TOOLTIP,
-} from './translations';
-import {
-  PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
 import {
@@ -66,6 +51,19 @@ export const PREVALENCE_TAB_ID = 'prevalence-details';
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
 
+/**
+ * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
+ */
+export const LicenseProtectedCell: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      data-test-subj={PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID}
+      style={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
+    />
+  );
+};
+
 interface PrevalenceDetailsRow extends PrevalenceData {
   /**
    * From datetime selected in the date picker to pass to timeline
@@ -75,37 +73,76 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    * To datetime selected in the date picker to pass to timeline
    */
   to: string;
+  /**
+   * License to drive the rendering of the last 2 prevalence columns
+   */
+  isPlatinumPlus: boolean;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
   {
     field: 'field',
-    name: PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.prevalence.fieldColumnLabel"
+        defaultMessage="Field"
+      />
+    ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
     render: (field: string) => <EuiText size="xs">{field}</EuiText>,
     width: '20%',
   },
   {
-    field: 'value',
-    name: PREVALENCE_TABLE_VALUE_COLUMN_TITLE,
+    field: 'values',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.prevalence.valueColumnLabel"
+        defaultMessage="Value"
+      />
+    ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-    render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+    render: (values: string[]) => (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {values.map((value) => (
+          <EuiFlexItem key={value}>
+            <EuiText size="xs">{value}</EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ),
     width: '20%',
   },
   {
     name: (
-      <EuiToolTip content={PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP}>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.alertCountColumnTooltip"
+            defaultMessage="Total number of alerts with identical field value pairs."
+          />
+        }
+      >
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE}</EuiFlexItem>
-          <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.alertCountColumnLabel"
+              defaultMessage="Alert"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.alertCountColumnCountLabel"
+              defaultMessage="count"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
-      const dataProviders = [
-        getDataProvider(data.field, `timeline-indicator-${data.field}-${data.value}`, data.value),
-      ];
+      const dataProviders = data.values.map((value) =>
+        getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value)
+      );
       return data.alertCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
@@ -123,33 +160,44 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
   },
   {
     name: (
-      <EuiToolTip content={PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP}>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.documentCountColumnTooltip"
+            defaultMessage="Total number of event documents with identical field value pairs."
+          />
+        }
+      >
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE}</EuiFlexItem>
-          <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.documentCountColumnLabel"
+              defaultMessage="Document"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.documentCountColumnCountLabel"
+              defaultMessage="count"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
-      const dataProviders = [
-        {
-          ...getDataProvider(
-            data.field,
-            `timeline-indicator-${data.field}-${data.value}`,
-            data.value
+      const dataProviders = data.values.map((value) => ({
+        ...getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value),
+        and: [
+          getDataProviderAnd(
+            'event.kind',
+            `timeline-indicator-event.kind-not-signal`,
+            'signal',
+            IS_OPERATOR,
+            true
           ),
-          and: [
-            getDataProviderAnd(
-              'event.kind',
-              `timeline-indicator-event.kind-not-signal`,
-              'signal',
-              IS_OPERATOR,
-              true
-            ),
-          ],
-        },
-      ];
+        ],
+      }));
       return data.docCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
@@ -167,34 +215,78 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     width: '10%',
   },
   {
-    field: 'hostPrevalence',
     name: (
-      <EuiToolTip content={HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP}>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.hostPrevalenceColumnTooltip"
+            defaultMessage="Percentage of unique hosts with identical field value pairs."
+          />
+        }
+      >
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{HOST_TITLE}</EuiFlexItem>
-          <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.hostPrevalenceColumnLabel"
+              defaultMessage="Host"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.hostPrevalenceColumnCountLabel"
+              defaultMessage="prevalence"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
-    render: (hostPrevalence: number) => (
-      <EuiText size="xs">{`${Math.round(hostPrevalence * 100)}%`}</EuiText>
+    render: (data: PrevalenceDetailsRow) => (
+      <>
+        {data.isPlatinumPlus ? (
+          <EuiText size="xs">{`${Math.round(data.hostPrevalence * 100)}%`}</EuiText>
+        ) : (
+          <LicenseProtectedCell />
+        )}
+      </>
     ),
     width: '10%',
   },
   {
-    field: 'userPrevalence',
     name: (
-      <EuiToolTip content={USER_PREVALENCE_COLUMN_TITLE_TOOLTIP}>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.userPrevalenceColumnTooltip"
+            defaultMessage="Percentage of unique users with identical field value pairs."
+          />
+        }
+      >
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{USER_TITLE}</EuiFlexItem>
-          <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.userPrevalenceColumnLabel"
+              defaultMessage="User"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.userPrevalenceColumnCountLabel"
+              defaultMessage="prevalence"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
-    render: (userPrevalence: number) => (
-      <EuiText size="xs">{`${Math.round(userPrevalence * 100)}%`}</EuiText>
+    render: (data: PrevalenceDetailsRow) => (
+      <>
+        {data.isPlatinumPlus ? (
+          <EuiText size="xs">{`${Math.round(data.userPrevalence * 100)}%`}</EuiText>
+        ) : (
+          <LicenseProtectedCell />
+        )}
+      </>
     ),
     width: '10%',
   },
@@ -249,37 +341,24 @@ export const PrevalenceDetails: React.FC = () => {
     },
   });
 
-  // add timeRange to pass it down to timeline
+  // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns
   const items = useMemo(
-    () => data.map((item) => ({ ...item, from: absoluteStart, to: absoluteEnd })),
-    [data, absoluteStart, absoluteEnd]
+    () => data.map((item) => ({ ...item, from: absoluteStart, to: absoluteEnd, isPlatinumPlus })),
+    [data, absoluteStart, absoluteEnd, isPlatinumPlus]
   );
-
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="spaceAround"
-        data-test-subj={PREVALENCE_DETAILS_LOADING_TEST_ID}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   const upsell = (
     <>
-      <EuiCallOut data-test-subj={`${PREVALENCE_DETAILS_TABLE_TEST_ID}UpSell`}>
+      <EuiCallOut data-test-subj={PREVALENCE_DETAILS_UPSELL_TEST_ID}>
         <FormattedMessage
-          id="xpack.securitySolution.flyout.documentDetails.prevalenceTableAlertUpsell"
-          defaultMessage="Preview of a {subscription} feature showing host and user prevalence."
+          id="xpack.securitySolution.flyout.left.insights.prevalence.tableAlertUpsellDescription"
+          defaultMessage="Host and user prevalence are only available with a {subscription}."
           values={{
             subscription: (
               <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.documentDetails.prevalenceTableAlertUpsellLink"
-                  defaultMessage="Platinum"
+                  id="xpack.securitySolution.flyout.left.insights.prevalence.tableAlertUpsellLinkText"
+                  defaultMessage="Platinum or higher subscription"
                 />
               </EuiLink>
             ),
@@ -299,19 +378,21 @@ export const PrevalenceDetails: React.FC = () => {
           end={end}
           onTimeChange={onTimeChange}
           data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
+          width="full"
         />
         <EuiSpacer size="m" />
-        {data.length > 0 ? (
-          <EuiInMemoryTable
-            items={items}
-            columns={columns}
-            data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          />
-        ) : (
-          <div data-test-subj={`${PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}Error`}>
-            {PREVALENCE_NO_DATA_MESSAGE}
-          </div>
-        )}
+        <EuiInMemoryTable
+          items={error ? [] : items}
+          columns={columns}
+          loading={loading}
+          data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+          message={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
+              defaultMessage="No prevalence data available."
+            />
+          }
+        />
       </EuiPanel>
     </>
   );

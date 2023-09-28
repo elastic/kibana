@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useImperativeHandle, useRef } from 'react';
 
 import type {
   FieldDefinition,
+  OnInputChangeFn,
+  ResetInputRef,
   SettingType,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
@@ -40,8 +42,6 @@ import {
   isUndefinedFieldUnsavedChange,
 } from '@kbn/management-settings-field-definition/is';
 
-import { getInputValue } from '@kbn/management-settings-utilities';
-
 import {
   BooleanInput,
   CodeEditorInput,
@@ -51,23 +51,20 @@ import {
   SelectInput,
   TextInput,
   ArrayInput,
-  TextInputProps,
 } from './input';
-
-import { OnChangeFn } from './types';
 
 /**
  * The props that are passed to the {@link FieldInput} component.
  */
-export interface FieldInputProps<T extends SettingType> {
+export interface FieldInputProps<T extends SettingType = SettingType> {
   /** The {@link FieldDefinition} for the component. */
-  field: FieldDefinition<T>;
+  field: Pick<FieldDefinition<T>, 'type' | 'id' | 'name' | 'ariaAttributes'>;
   /** An {@link UnsavedFieldChange} for the component, if any. */
   unsavedChange?: UnsavedFieldChange<T>;
-  /** The `onChange` handler for the input. */
-  onChange: OnChangeFn<T>;
-  /** True if the input is disabled, false otherwise. */
-  isDisabled?: boolean;
+  /** The `onInputChange` handler for the input. */
+  onInputChange: OnInputChangeFn<T>;
+  /** True if the input can be saved, false otherwise. */
+  isSavingEnabled: boolean;
   /** True if the value within the input is invalid, false otherwise. */
   isInvalid?: boolean;
 }
@@ -84,23 +81,23 @@ const getMismatchError = (type: SettingType, unsavedType?: SettingType) =>
  *
  * @param props The props for the {@link FieldInput} component.
  */
-export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => {
-  const {
-    field,
-    unsavedChange,
-    isDisabled = false,
-    isInvalid = false,
-    onChange: onChangeProp,
-  } = props;
-  const { id, name, ariaAttributes } = field;
+export const FieldInput = React.forwardRef<ResetInputRef, FieldInputProps>((props, ref) => {
+  const { field, unsavedChange, onInputChange, isSavingEnabled } = props;
 
-  const inputProps = {
-    ...ariaAttributes,
-    id,
-    isDisabled,
-    isInvalid,
-    name,
-  };
+  // Create a ref for those input fields that require an imperative handle.
+  const inputRef = useRef<ResetInputRef>(null);
+
+  // Create an imperative handle that passes the invocation to any internal input that
+  // may require it.
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      if (inputRef.current) {
+        inputRef.current.reset();
+      }
+    },
+  }));
+
+  const inputProps = { isSavingEnabled, onInputChange };
 
   // These checks might seem excessive or redundant, but they are necessary to ensure that
   // the types are honored correctly using type guards.  These checks get compiled down to
@@ -118,14 +115,7 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-
-    // This is a safe cast because we've already checked that the type is correct in both
-    // the `FieldDefinition` and the `UnsavedFieldChange`... no need for a further
-    // type guard.
-    const onChange = onChangeProp as OnChangeFn<'array'>;
-
-    return <ArrayInput {...{ ...inputProps, onChange, value }} />;
+    return <ArrayInput {...{ field, unsavedChange, ...inputProps }} />;
   }
 
   if (isBooleanFieldDefinition(field)) {
@@ -133,10 +123,7 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'boolean'>;
-
-    return <BooleanInput {...{ ...inputProps, onChange, value }} />;
+    return <BooleanInput {...{ field, unsavedChange, ...inputProps }} />;
   }
 
   if (isColorFieldDefinition(field)) {
@@ -144,10 +131,7 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'color'>;
-
-    return <ColorPickerInput {...{ ...inputProps, onChange, value }} />;
+    return <ColorPickerInput {...{ field, unsavedChange, ...inputProps }} />;
   }
 
   if (isImageFieldDefinition(field)) {
@@ -155,16 +139,7 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value, unsaved] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'image'>;
-
-    return (
-      <ImageInput
-        {...{ ...inputProps, onChange, value }}
-        isDefaultValue={field.isDefaultValue}
-        hasChanged={unsaved}
-      />
-    );
+    return <ImageInput {...{ field, unsavedChange, ...inputProps }} ref={inputRef} />;
   }
 
   if (isJsonFieldDefinition(field)) {
@@ -172,12 +147,9 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'json'>;
-
     return (
       <CodeEditorInput
-        {...{ ...inputProps, onChange, value }}
+        {...{ field, unsavedChange, ...inputProps }}
         type="json"
         defaultValue={field.savedValue || ''}
       />
@@ -189,12 +161,9 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'markdown'>;
-
     return (
       <CodeEditorInput
-        {...{ ...inputProps, onChange, value }}
+        {...{ field, unsavedChange, ...inputProps }}
         type="markdown"
         defaultValue={field.savedValue || ''}
       />
@@ -206,10 +175,7 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'number'>;
-
-    return <NumberInput {...{ ...inputProps, onChange, value }} />;
+    return <NumberInput {...{ field, unsavedChange, ...inputProps }} />;
   }
 
   if (isSelectFieldDefinition(field)) {
@@ -217,13 +183,11 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'select'>;
     const {
       options: { values: optionValues, labels: optionLabels },
     } = field;
 
-    return <SelectInput {...{ ...inputProps, onChange, optionLabels, optionValues, value }} />;
+    return <SelectInput {...{ field, unsavedChange, optionLabels, optionValues, ...inputProps }} />;
   }
 
   if (isStringFieldDefinition(field)) {
@@ -231,10 +195,7 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'string'>;
-
-    return <TextInput {...{ ...inputProps, onChange, value }} />;
+    return <TextInput {...{ field, unsavedChange, ...inputProps }} />;
   }
 
   if (isUndefinedFieldDefinition(field)) {
@@ -242,9 +203,14 @@ export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => 
       throw getMismatchError(field.type, unsavedChange?.type);
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    return <TextInput {...{ ...(inputProps as unknown as TextInputProps), value }} />;
+    return (
+      <TextInput
+        field={field as unknown as FieldDefinition<'string'>}
+        unsavedChange={unsavedChange as unknown as UnsavedFieldChange<'string'>}
+        {...inputProps}
+      />
+    );
   }
 
   throw new Error(`Unknown or incompatible field type: ${field.type}`);
-};
+});

@@ -25,6 +25,13 @@ export const betaBadgeDescription = i18n.translate(
 export const discoverLinkTitle = i18n.translate(
   'xpack.observabilityLogExplorer.discoverLinkTitle',
   {
-    defaultMessage: 'Discover',
+    defaultMessage: 'Open in Discover',
+  }
+);
+
+export const onboardingLinkTitle = i18n.translate(
+  'xpack.observabilityLogExplorer.onboardingLinkTitle',
+  {
+    defaultMessage: 'Add data',
   }
 );

@@ -437,6 +437,66 @@ describe('ingest_integration tests ', () => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
 
+    it.each([
+      {
+        date: 'invalid',
+        message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
+      },
+      {
+        date: '2023-10-1',
+        message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
+      },
+      {
+        date: '2020-10-31',
+        message:
+          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.',
+      },
+      {
+        date: '2100-10-01',
+        message: 'Global manifest version cannot be in the future. UTC time.',
+      },
+      {
+        date: 'latest',
+      },
+    ])(
+      'should return bad request for invalid endpoint package policy global manifest values',
+      async ({ date, message }) => {
+        const mockPolicy = policyFactory(); // defaults with paid features on
+        const logger = loggingSystemMock.create().get('ingest_integration.test');
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextMock.featureUsageService,
+          endpointAppContextMock.endpointMetadataService,
+          cloudService,
+          esClient,
+          appFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = {
+          ...mockPolicy,
+          global_manifest_version: date,
+        };
+        if (!message) {
+          const updatedPolicyConfig = await callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+          expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual({
+            ...mockPolicy,
+            global_manifest_version: date,
+          });
+        } else {
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(message);
+        }
+      }
+    );
+
     it('updates successfully when paid features are turned on', async () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
@@ -514,7 +574,7 @@ describe('ingest_integration tests ', () => {
     const infoResponse = {
       cluster_name: 'updated-name',
       cluster_uuid: 'updated-uuid',
-      license_uid: 'updated-uid',
+      license_uuid: 'updated-uuid',
       name: 'name',
       tagline: 'tagline',
       version: {
@@ -542,7 +602,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
-      mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.license_uuid = 'updated-uid';
       mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
@@ -561,7 +621,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'gold';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'original-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
-      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'original-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'original-uid';
       policyConfig.inputs[0]!.config!.policy.value.meta.serverless = true;
       const updatedPolicyConfig = await callback(
         policyConfig,
@@ -579,7 +639,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
-      mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.license_uuid = 'updated-uid';
       mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
@@ -597,7 +657,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'platinum';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'updated-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
-      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'updated-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'updated-uid';
       policyConfig.inputs[0]!.config!.policy.value.meta.serverless = false;
       const updatedPolicyConfig = await callback(
         policyConfig,

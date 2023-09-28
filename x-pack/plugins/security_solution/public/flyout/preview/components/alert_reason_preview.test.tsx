@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { PreviewPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_preview_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
 import { AlertReasonPreview } from './alert_reason_preview';
 import { ThemeProvider } from 'styled-components';
@@ -20,15 +21,33 @@ const panelContextValue = {
   ...mockContextValue,
 };
 
+const NO_DATA_MESSAGE = 'There was an error displaying data.';
+
 describe('<AlertReasonPreview />', () => {
   it('should render alert reason preview', () => {
     const { getByTestId } = render(
-      <PreviewPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <AlertReasonPreview />
-        </ThemeProvider>
-      </PreviewPanelContext.Provider>
+      <IntlProvider locale="en">
+        <PreviewPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <AlertReasonPreview />
+          </ThemeProvider>
+        </PreviewPanelContext.Provider>
+      </IntlProvider>
     );
     expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toHaveTextContent('Alert reason');
+  });
+
+  it('should render no data message if alert reason is not available', () => {
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <PreviewPanelContext.Provider value={{} as unknown as PreviewPanelContext}>
+          <ThemeProvider theme={mockTheme}>
+            <AlertReasonPreview />
+          </ThemeProvider>
+        </PreviewPanelContext.Provider>
+      </IntlProvider>
+    );
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });

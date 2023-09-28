@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -19,9 +20,8 @@ import { SuppressedAlerts } from './suppressed_alerts';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
+import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_ERROR, CORRELATIONS_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
@@ -84,11 +84,24 @@ export const CorrelationsOverview: React.FC = () => {
   return (
     <ExpandablePanel
       header={{
-        title: CORRELATIONS_TITLE,
-        callback: goToCorrelationsTab,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.correlations.overviewTitle"
+            defaultMessage="Correlations"
+          />
+        ),
+        link: {
+          callback: goToCorrelationsTab,
+          tooltip: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+              defaultMessage="Show all correlations"
+            />
+          ),
+        },
         iconType: 'arrowStart',
       }}
-      data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
+      data-test-subj={CORRELATIONS_TEST_ID}
     >
       {canShowAtLeastOneInsight ? (
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -107,7 +120,10 @@ export const CorrelationsOverview: React.FC = () => {
           )}
         </EuiFlexGroup>
       ) : (
-        <div data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}Error`}>{CORRELATIONS_ERROR}</div>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.correlations.noDataDescription"
+          defaultMessage="No correlations data available."
+        />
       )}
     </ExpandablePanel>
   );

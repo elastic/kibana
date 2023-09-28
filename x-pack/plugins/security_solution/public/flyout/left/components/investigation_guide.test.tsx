@@ -10,14 +10,14 @@ import { render } from '@testing-library/react';
 import { InvestigationGuide } from './investigation_guide';
 import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
-import {
-  INVESTIGATION_GUIDE_LOADING_TEST_ID,
-  INVESTIGATION_GUIDE_NO_DATA_TEST_ID,
-} from './test_ids';
+import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
+
+const NO_DATA_TEXT =
+  "There's no investigation guide for this rule. Edit the rule's settingsExternal link(opens in a new tab or window) to add one.";
 
 const renderInvestigationGuide = (context: LeftPanelContext = mockContextValue) => (
   <TestProviders>
@@ -35,8 +35,10 @@ describe('<InvestigationGuide />', () => {
       basicAlertData: { ruleId: 'ruleId' },
       ruleNote: 'test note',
     });
-    const { queryByTestId } = render(renderInvestigationGuide());
-    expect(queryByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+
+    const { queryByTestId, getByText, queryByText } = render(renderInvestigationGuide());
+    expect(getByText('test note')).toBeInTheDocument();
+    expect(queryByText(NO_DATA_TEXT)).not.toBeInTheDocument();
     expect(queryByTestId(INVESTIGATION_GUIDE_LOADING_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -54,7 +56,7 @@ describe('<InvestigationGuide />', () => {
       ruleNote: 'test note',
     });
     const { getByTestId } = render(renderInvestigationGuide());
-    expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
   });
 
   it('should render no data message when there is no rule note', () => {
@@ -63,7 +65,7 @@ describe('<InvestigationGuide />', () => {
       ruleNote: undefined,
     });
     const { getByTestId } = render(renderInvestigationGuide());
-    expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
   });
 
   it('should render no data message when useInvestigationGuide errors out', () => {
@@ -72,6 +74,6 @@ describe('<InvestigationGuide />', () => {
       error: true,
     });
     const { getByTestId } = render(renderInvestigationGuide());
-    expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
   });
 });
