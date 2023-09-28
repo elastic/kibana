@@ -1120,15 +1120,17 @@ export const runActionTestSuite = ({
       `);
     });
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
-      await waitForIndexStatus({
+      const readyTaskRes = await waitForIndexStatus({
         client,
-        index: '.kibana_1',
+        index: 'existing_index_with_docs',
         status: 'yellow',
       })();
 
+      expect(Either.isRight(readyTaskRes)).toBe(true);
+
       const res = (await reindex({
         client,
-        sourceIndex: '.kibana_1',
+        sourceIndex: 'existing_index_with_docs',
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1467,7 +1469,7 @@ export const runActionTestSuite = ({
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1',
+        'existing_index_with_docs',
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 

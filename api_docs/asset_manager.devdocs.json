@@ -22,7 +22,7 @@
         "label": "AssetManagerConfig",
         "description": [],
         "signature": [
-          "{ readonly alphaEnabled?: boolean | undefined; readonly sourceIndices: Readonly<{} & { metrics: string; logs: string; }>; readonly lockedSource: \"assets\" | \"signals\"; }"
+          "{ readonly alphaEnabled?: boolean | undefined; readonly sourceIndices: Readonly<{} & { logs: string; }>; readonly lockedSource: \"assets\" | \"signals\"; }"
         ],
         "path": "x-pack/plugins/asset_manager/server/types.ts",
         "deprecated": false,
