@@ -134,9 +134,9 @@ describe('<ThreatIntelligenceOverview />', () => {
       loading: true,
     });
 
-    const { getAllByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getAllByTestId(LOADING_TEST_ID)).toHaveLength(2);
+    expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {

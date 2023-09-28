@@ -13,8 +13,12 @@ const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const drilldowns = getService('dashboardDrilldownsManage');
-  const PageObjects = getPageObjects(['dashboard', 'discover', 'common', 'timePicker']);
-  const { dashboard, discover, timePicker } = PageObjects;
+  const { dashboard, discover, timePicker } = getPageObjects([
+    'dashboard',
+    'discover',
+    'common',
+    'timePicker',
+  ]);
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
@@ -24,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Explore underlying data - chart action', () => {
     describe('value click action', () => {
       it('action exists in chart click popup menu', async () => {
-        await PageObjects.dashboard.navigateToApp();
+        await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
         await pieChart.clickOnPieSlice('160,000');
@@ -56,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let originalTimeRangeDurationHours: number | undefined;
 
       it('action exists in chart brush popup menu', async () => {
-        await PageObjects.dashboard.navigateToApp();
+        await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_AREA_CHART_NAME);
 
