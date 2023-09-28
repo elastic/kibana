@@ -7,7 +7,6 @@
 
 import { addOrReplaceCustomField } from './utils';
 import { customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CaseUICustomField } from '../../../common/ui';
 
@@ -94,7 +93,7 @@ describe('addOrReplaceCustomField ', () => {
   });
 
   it('adds new custom field configuration correctly', async () => {
-    const fieldToAdd: CustomFieldConfiguration = {
+    const fieldToAdd = {
       key: 'my_test_key',
       type: CustomFieldTypes.TEXT,
       label: 'my_test_label',
@@ -129,7 +128,7 @@ describe('addOrReplaceCustomField ', () => {
   });
 
   it('updates existing custom field config correctly', async () => {
-    const fieldToUpdate: CustomFieldConfiguration = {
+    const fieldToUpdate = {
       ...customFieldsConfigurationMock[0],
       label: `${customFieldsConfigurationMock[0].label}!!!`,
     };

@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import type { CaseUICustomField } from '../../../common/ui';
-
-export const addOrReplaceCustomField = (
-  customFields: CaseUICustomField[] | CustomFieldConfiguration[],
-  customFieldToAdd: CaseUICustomField | CustomFieldConfiguration
-): CaseUICustomField[] | CustomFieldConfiguration[] => {
+export const addOrReplaceCustomField = <T extends { key: string }>(
+  customFields: T[],
+  customFieldToAdd: T
+): T[] => {
   const foundCustomFieldIndex = customFields.findIndex(
     (customField) => customField.key === customFieldToAdd.key
   );
 
   if (foundCustomFieldIndex === -1) {
-    return [...customFields, customFieldToAdd] as CaseUICustomField[] | CustomFieldConfiguration[];
+    return [...customFields, customFieldToAdd];
   }
 
   return customFields.map((customField) => {
@@ -26,5 +23,5 @@ export const addOrReplaceCustomField = (
     }
 
     return customFieldToAdd;
-  }) as CaseUICustomField[] | CustomFieldConfiguration[];
+  });
 };

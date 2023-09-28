@@ -288,7 +288,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       const updatedFields = addOrReplaceCustomField(customFields, customFieldData);
       persistCaseConfigure({
         connector,
-        customFields: updatedFields as CustomFieldConfiguration[],
+        customFields: updatedFields,
         id: configurationId,
         version: configurationVersion,
         closureType,

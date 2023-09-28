@@ -45,7 +45,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
 
       const updatedCustomFields = addOrReplaceCustomField(allCustomFields, customFieldToAdd);
 
-      onSubmit(updatedCustomFields as CaseUICustomField[]);
+      onSubmit(updatedCustomFields);
     },
     [customFields, customFieldsConfiguration, onSubmit]
   );

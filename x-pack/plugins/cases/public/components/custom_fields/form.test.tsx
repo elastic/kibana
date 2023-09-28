@@ -52,6 +52,7 @@ describe('CustomFieldsForm ', () => {
 
     expect(screen.getByText('Text')).toBeInTheDocument();
     expect(screen.getByText('Toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-field-type-selector')).not.toHaveAttribute('disabled');
   });
 
   it('renders toggle custom field type', async () => {
@@ -129,6 +130,8 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
+    expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
+
     expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
       'value',
       customFieldsConfigurationMock[0].label
@@ -154,6 +157,8 @@ describe('CustomFieldsForm ', () => {
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
     });
+
+    expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
 
     expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
       'value',
