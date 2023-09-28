@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -28,6 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
             },
           },
         });
@@ -51,6 +55,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
             },
           },
         });

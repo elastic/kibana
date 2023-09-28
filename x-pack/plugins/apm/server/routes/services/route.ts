@@ -328,27 +328,22 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, serviceTransactionDataSourceRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceTransactionTypesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { start, end, documentType, rollupInterval } = params.query;
 
     return getServiceTransactionTypes({
       serviceName,
       apmEventClient,
-      searchAggregatedTransactions: await getSearchTransactionsEvents({
-        apmEventClient,
-        config,
-        start,
-        end,
-        kuery: '',
-      }),
       start,
       end,
+      documentType,
+      rollupInterval,
     });
   },
 });

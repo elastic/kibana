@@ -42,9 +42,10 @@ describe('services queries', () => {
       getServiceTransactionTypes({
         serviceName: 'foo',
         apmEventClient: mockApmEventClient,
-        searchAggregatedTransactions: false,
         start: 0,
         end: 50000,
+        documentType: ApmDocumentType.TransactionMetric,
+        rollupInterval: RollupInterval.OneMinute,
       })
     );
 
