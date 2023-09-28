@@ -19,7 +19,7 @@ describe('addOrReplaceCustomField ', () => {
     const fieldToAdd: CaseUICustomField = {
       key: 'my_test_key',
       type: CustomFieldTypes.TEXT,
-      field: { value: ['my_test_value'] },
+      value: ['my_test_value'],
     };
     const res = addOrReplaceCustomField(customFieldsMock, fieldToAdd);
     expect(res).toMatchInlineSnapshot(
@@ -27,31 +27,23 @@ describe('addOrReplaceCustomField ', () => {
       `
       Array [
         Object {
-          "field": Object {
-            "value": Array [
-              "My text test value 1",
-            ],
-          },
           "key": "test_key_1",
           "type": "text",
+          "value": Array [
+            "My text test value 1",
+          ],
         },
         Object {
-          "field": Object {
-            "value": Array [
-              true,
-            ],
-          },
           "key": "test_key_2",
           "type": "toggle",
+          "value": true,
         },
         Object {
-          "field": Object {
-            "value": Array [
-              "my_test_value",
-            ],
-          },
           "key": "my_test_key",
           "type": "text",
+          "value": Array [
+            "my_test_value",
+          ],
         },
       ]
     `
@@ -77,15 +69,14 @@ describe('addOrReplaceCustomField ', () => {
           },
           "key": "test_key_1",
           "type": "text",
+          "value": Array [
+            "My text test value 1",
+          ],
         },
         Object {
-          "field": Object {
-            "value": Array [
-              true,
-            ],
-          },
           "key": "test_key_2",
           "type": "toggle",
+          "value": true,
         },
       ]
     `

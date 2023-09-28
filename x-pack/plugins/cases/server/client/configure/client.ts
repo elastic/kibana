@@ -49,6 +49,7 @@ import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
  * Defines the internal helper functions.
@@ -258,6 +259,11 @@ export async function update(
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
       configurationId,
+    });
+
+    validateCustomFieldTypesInRequest({
+      requestCustomFields: request.customFields,
+      originalCustomFields: configuration.attributes.customFields,
     });
 
     await authorization.ensureAuthorized({

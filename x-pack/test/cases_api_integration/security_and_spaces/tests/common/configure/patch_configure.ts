@@ -189,6 +189,41 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should not allow patching the type of a custom field', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'wrong_type_key',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
+
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          {
+            version: configuration.version,
+            customFields: [
+              {
+                key: 'wrong_type_key',
+                label: '#1',
+                type: CustomFieldTypes.TOGGLE,
+                required: false,
+              },
+            ],
+          },
+          400
+        );
+      });
+
       it('should not patch a configuration with duplicated custom field keys', async () => {
         const configuration = await createConfiguration(supertest);
         await updateConfiguration(

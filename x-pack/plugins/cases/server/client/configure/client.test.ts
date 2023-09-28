@@ -309,6 +309,43 @@ describe('client', () => {
         'Failed to get patch configure in route: Error: Invalid duplicated custom field keys in request: duplicated_key'
       );
     });
+
+    it('throws when trying to updated the type of a custom field', async () => {
+      clientArgs.services.caseConfigureService.get.mockResolvedValue({
+        // @ts-ignore: these are all the attributes needed for the test
+        attributes: {
+          customFields: [
+            {
+              key: 'wrong_type_key',
+              label: 'text',
+              type: CustomFieldTypes.TOGGLE,
+              required: false,
+            },
+          ],
+        },
+      });
+
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: [
+              {
+                key: 'wrong_type_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: wrong_type_key'
+      );
+    });
   });
 
   describe('create', () => {
