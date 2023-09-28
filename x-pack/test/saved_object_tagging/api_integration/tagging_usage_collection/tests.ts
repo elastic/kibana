@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../services';
+import { FtrProviderContext } from './services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -15,6 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('saved_object_tagging usage collector data', () => {
     beforeEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
       );
