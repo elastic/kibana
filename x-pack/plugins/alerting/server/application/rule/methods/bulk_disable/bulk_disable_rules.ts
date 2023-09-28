@@ -22,7 +22,7 @@ import {
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  recoverRuleAlerts,
+  untrackRuleAlerts,
   updateMeta,
   migrateLegacyActions,
 } from '../../../../rules_client/lib';
@@ -76,11 +76,12 @@ export const bulkDisableRules = async <Params extends RuleParams>(
       })
   );
 
-  const [taskIdsToDisable, taskIdsToDelete] = accListSpecificForBulkOperation;
+  const [taskIdsToDisable, taskIdsToDelete, taskIdsToClearState] = accListSpecificForBulkOperation;
 
   await Promise.allSettled([
     tryToDisableTasks({
       taskIdsToDisable,
+      taskIdsToClearState,
       logger: context.logger,
       taskManager: context.taskManager,
     }),
@@ -149,8 +150,8 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            // TODO (http-versioning): This should be of type RuleAttributes, change this when all rule types are fixed
-            await recoverRuleAlerts(context, rule.id, rule.attributes as RawRule);
+            // TODO (http-versioning) Remove casts when untrackRuleAlerts has been converted
+            await untrackRuleAlerts(context, rule.id, rule.attributes as RawRule);
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
@@ -242,6 +243,7 @@ const bulkDisableRulesWithOCC = async (
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];
+  const taskIdsToClearState: string[] = [];
   const disabledRules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
 
   result.saved_objects.forEach((rule) => {
@@ -251,6 +253,12 @@ const bulkDisableRulesWithOCC = async (
           taskIdsToDelete.push(rule.attributes.scheduledTaskId);
         } else {
           taskIdsToDisable.push(rule.attributes.scheduledTaskId);
+          if (rule.attributes.alertTypeId) {
+            const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
+              rule.attributes.alertTypeId
+            );
+            if (isLifecycleAlert) taskIdsToClearState.push(rule.attributes.scheduledTaskId);
+          }
         }
       }
       disabledRules.push(rule);
@@ -270,23 +278,28 @@ const bulkDisableRulesWithOCC = async (
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api
     rules: disabledRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-    accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete],
+    accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete, taskIdsToClearState],
   };
 };
 
 const tryToDisableTasks = async ({
   taskIdsToDisable,
+  taskIdsToClearState,
   logger,
   taskManager,
 }: {
   taskIdsToDisable: string[];
+  taskIdsToClearState: string[];
   logger: Logger;
   taskManager: TaskManagerStartContract;
 }) => {
   return await withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
     if (taskIdsToDisable.length > 0) {
       try {
-        const resultFromDisablingTasks = await taskManager.bulkDisable(taskIdsToDisable);
+        const resultFromDisablingTasks = await taskManager.bulkDisable(
+          taskIdsToDisable,
+          taskIdsToClearState
+        );
         if (resultFromDisablingTasks.tasks.length) {
           logger.debug(
             `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks

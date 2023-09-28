@@ -94,6 +94,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -258,7 +260,7 @@ describe('bulkDisableRules', () => {
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       rules: [returnedRuleForBulkDisable1],
@@ -395,7 +397,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1', 'id2']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1', 'id2'], []);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
@@ -458,7 +460,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
@@ -484,7 +486,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
     });
 
     test('should not throw an error if taskManager.bulkDisable throw an error', async () => {
@@ -618,7 +620,7 @@ describe('bulkDisableRules', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenLastCalledWith(
-        "rulesClient.disable('id2') - Could not write recovery events - UPS"
+        "rulesClient.disable('id2') - Could not write untrack events - UPS"
       );
     });
   });

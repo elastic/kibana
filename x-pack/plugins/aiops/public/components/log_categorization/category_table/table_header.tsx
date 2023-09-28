@@ -51,6 +51,7 @@ export const TableHeader: FC<Props> = ({
           <>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverIncludeButton"
                 size="s"
                 onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
                 iconType="plusInCircle"
@@ -61,6 +62,7 @@ export const TableHeader: FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverExcludeButton"
                 size="s"
                 onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
                 iconType="minusInCircle"

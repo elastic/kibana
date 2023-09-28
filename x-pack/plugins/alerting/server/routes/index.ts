@@ -32,7 +32,7 @@ import { healthRoute } from './health';
 import { resolveRuleRoute } from './resolve_rule';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
-import { muteAlertRoute } from './mute_alert';
+import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
