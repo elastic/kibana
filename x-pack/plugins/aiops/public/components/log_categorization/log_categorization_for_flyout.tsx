@@ -5,10 +5,7 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -18,26 +15,33 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
-
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { useData } from '../../hooks/use_data';
-import { useSearch } from '../../hooks/use_search';
-import { useCategorizeRequest } from './use_categorize_request';
-import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
-import { CategoryTable } from './category_table';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { InformationText } from './information_text';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
-import { SamplingMenu } from './sampling_menu';
-import { TechnicalPreviewBadge } from './technical_preview_badge';
-import { LoadingCategorization } from './loading_categorization';
-import { useValidateFieldRequest } from './use_validate_category_field';
+
+import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../application/utils/url_state';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
+import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
+import { useCategorizeRequest } from './use_categorize_request';
+import type { EventRate } from './use_categorize_request';
+import { CategoryTable } from './category_table';
+import { InformationText } from './information_text';
+import { SamplingMenu } from './sampling_menu';
+import { TechnicalPreviewBadge } from './technical_preview_badge';
+import { LoadingCategorization } from './loading_categorization';
+import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 
 export interface LogCategorizationPageProps {
