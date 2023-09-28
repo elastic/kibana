@@ -87,10 +87,14 @@ interface PageUrlState {
   pageUrlState: ListingPageUrlState;
 }
 
+const modelIdColumnName = i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
+  defaultMessage: 'ID',
+});
+
 export const getDefaultModelsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
-  sortField: ModelsTableToConfigMapping.id,
+  sortField: modelIdColumnName,
   sortDirection: 'asc',
 });
 
@@ -484,13 +488,25 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableRowDetailsToggle',
     },
     {
-      field: ModelsTableToConfigMapping.id,
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
-        defaultMessage: 'ID',
-      }),
-      sortable: true,
+      name: modelIdColumnName,
+      sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
+      textOnly: false,
       'data-test-subj': 'mlModelsTableColumnId',
+      render: ({ description, model_id: modelId }: ModelItem) => {
+        const isTechPreview = description?.includes('(Tech Preview)');
+
+        return (
+          <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+            <EuiFlexItem grow={false}>{modelId}</EuiFlexItem>
+            {isTechPreview ? (
+              <EuiFlexItem grow={false}>
+                <TechnicalPreviewBadge compressed />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       width: '35%',
@@ -501,37 +517,28 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnDescription',
       render: ({ description, recommended }: ModelItem) => {
         if (!description) return null;
-        const isTechPreview = description.includes('(Tech Preview)');
         return (
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-              <EuiFlexItem grow={false}>{description.replace('(Tech Preview)', '')}</EuiFlexItem>
-              {isTechPreview ? (
-                <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge compressed />
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
+          <>
+            {description.replace('(Tech Preview)', '')}
             {recommended ? (
-              <EuiFlexItem>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                      defaultMessage="Recommended model version for your cluster's hardware configuration"
-                    />
-                  }
-                >
-                  <EuiBadge color="accent">
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                      defaultMessage="recommended"
-                    />
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                    defaultMessage="Recommended model version for your cluster's hardware configuration"
+                  />
+                }
+              >
+                <b>
+                  &nbsp;
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                    defaultMessage="(Recommended)"
+                  />
+                </b>
+              </EuiToolTip>
             ) : null}
-          </EuiFlexGroup>
+          </>
         );
       },
     },
