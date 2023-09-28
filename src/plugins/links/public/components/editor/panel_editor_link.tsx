@@ -143,6 +143,7 @@ export const PanelEditorLink = ({
             paddingSize="none"
             {...dragHandleProps}
             aria-label={LinksStrings.editor.panelEditor.getDragHandleAriaLabel()}
+            data-test-subj="panelEditorLink--dragHandle"
           >
             <EuiIcon type="grab" />
           </EuiPanel>
@@ -160,6 +161,7 @@ export const PanelEditorLink = ({
                   iconType="pencil"
                   onClick={editLink}
                   aria-label={LinksStrings.editor.getEditLinkTitle()}
+                  data-test-subj="panelEditorLink--editBtn"
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -171,6 +173,7 @@ export const PanelEditorLink = ({
                   aria-label={LinksStrings.editor.getDeleteLinkTitle()}
                   color="danger"
                   onClick={deleteLink}
+                  data-test-subj="panelEditorLink--deleteBtn"
                 />
               </EuiToolTip>
             </EuiFlexItem>

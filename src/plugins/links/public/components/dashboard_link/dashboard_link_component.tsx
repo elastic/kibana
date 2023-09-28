@@ -133,13 +133,11 @@ export const DashboardLinkComponent = ({
     };
   }, [link]);
 
+  const id = `dashboardLink--${link.id}`;
+
   return loadingDestinationDashboard ? (
-    <li id={`dashboardLink--${link.id}--loading`}>
-      <EuiButtonEmpty
-        size="s"
-        isLoading={true}
-        data-test-subj={`dashboardLink--${link.id}--loading`}
-      >
+    <li id={`${id}--loading`}>
+      <EuiButtonEmpty size="s" isLoading={true} data-test-subj={`${id}--loading`}>
         {DashboardLinkStrings.getLoadingDashboardLabel()}
       </EuiButtonEmpty>
     </li>
@@ -156,7 +154,7 @@ export const DashboardLinkComponent = ({
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
-        'data-test-subj': `dashboardLink--${link.id}--tooltip`,
+        'data-test-subj': `${id}--tooltip`,
       }}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
@@ -167,7 +165,7 @@ export const DashboardLinkComponent = ({
         'dashboardLinkError--noLabel': !link.label,
       })}
       label={linkLabel}
-      data-test-subj={error ? `dashboardLink--${link.id}--error` : `dashboardLink--${link.id}`}
+      data-test-subj={error ? `${id}--error` : `${id}`}
     />
   );
 };

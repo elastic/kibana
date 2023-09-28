@@ -61,8 +61,13 @@ export const LinksComponent = () => {
         layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
       }`}
       paddingSize="xs"
+      data-test-subj="links--component"
     >
-      <EuiListGroup maxWidth={false} className={`${layout}LayoutWrapper`}>
+      <EuiListGroup
+        maxWidth={false}
+        className={`${layout}LayoutWrapper`}
+        data-test-subj="links--component--listGroup"
+      >
         {orderedLinks.map((link) => linkItems[link.id].content)}
       </EuiListGroup>
     </EuiPanel>

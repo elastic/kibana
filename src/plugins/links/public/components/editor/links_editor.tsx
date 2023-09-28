@@ -53,10 +53,12 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
     id: LINKS_VERTICAL_LAYOUT,
     label: LinksLayoutInfo[LINKS_VERTICAL_LAYOUT].displayName,
+    'data-test-subj': `links--panelEditor--${LINKS_VERTICAL_LAYOUT}LayoutBtn`,
   },
   {
     id: LINKS_HORIZONTAL_LAYOUT,
     label: LinksLayoutInfo[LINKS_HORIZONTAL_LAYOUT].displayName,
+    'data-test-subj': `links--panelEditor--${LINKS_HORIZONTAL_LAYOUT}LayoutBtn`,
   },
 ];
 
@@ -200,6 +202,7 @@ const LinksEditor = ({
                     <EuiDroppable
                       className="linksDroppableLinksArea"
                       droppableId="linksDroppableLinksArea"
+                      data-test-subj="links--panelEditor--linksAreaDroppable"
                     >
                       {orderedLinks.map((link, idx) => (
                         <EuiDraggable
@@ -229,6 +232,7 @@ const LinksEditor = ({
                     size="s"
                     iconType="plusInCircle"
                     onClick={() => addOrEditLink()}
+                    data-test-subj="links--panelEditor--addLinkBtn"
                   >
                     {LinksStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>

@@ -72,6 +72,7 @@ export const LinkEditor = ({
             <EuiFlexItem>{LinkInfo[type].displayName}</EuiFlexItem>
           </EuiFlexGroup>
         ),
+        'data-test-subj': `links--linkEditor--${type}--radioBtn`,
       };
     });
   }, []);
@@ -89,7 +90,7 @@ export const LinkEditor = ({
   );
 
   return (
-    <EuiFocusTrap className={'linkEditor in'}>
+    <EuiFocusTrap className={'linkEditor in'} data-test-subj="links--linkEditor--flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           className="linkEditorBackButton"
@@ -135,6 +136,7 @@ export const LinkEditor = ({
               }
               value={currentLinkLabel}
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
+              data-test-subj="links--linkEditor--linkLabel--input"
             />
           </EuiFormRow>
           <LinkOptionsComponent
@@ -147,7 +149,11 @@ export const LinkEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} iconType="cross">
+            <EuiButtonEmpty
+              onClick={() => onClose()}
+              iconType="cross"
+              data-test-subj="links--linkEditor--closeBtn"
+            >
               {LinksStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -168,6 +174,7 @@ export const LinkEditor = ({
                   onClose();
                 }
               }}
+              data-test-subj="links--linkEditor--saveBtn"
             >
               {link
                 ? LinksStrings.editor.getUpdateButtonLabel()

@@ -50,6 +50,7 @@ export const UrlDrilldownOptionsComponent = ({
           }
           checked={options.encodeUrl}
           onChange={() => onOptionChange({ encodeUrl: !options.encodeUrl })}
+          data-test-subj="urlDrilldownEncodeUrl"
         />
       </EuiFormRow>
     </>
