@@ -32,6 +32,11 @@ import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/t
 import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
 
 import {
+  migratePackagePolicyEvictionsFromV81102,
+  migratePackagePolicyToV81102,
+} from './migrations/security_solution/to_v8_11_0_2';
+
+import {
   migrateAgentPolicyToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
@@ -319,6 +324,31 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           forwardCompatibility: migratePackagePolicyEvictionsFromV8100,
         },
       },
+<<<<<<< HEAD
+=======
+      '2': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8110,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV8110,
+        },
+      },
+      '3': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV81102,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
+        },
+      },
+>>>>>>> 9d6ec1a7cb0 ([Security Solution] Correct the license_uuid reference name in the Endpoint Policy (#167194))
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
