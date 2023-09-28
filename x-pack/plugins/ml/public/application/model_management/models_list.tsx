@@ -43,6 +43,7 @@ import {
   MODEL_STATE,
   ModelState,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { css } from '@emotion/react';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -530,7 +531,11 @@ export const ModelsList: FC<Props> = ({
                   />
                 }
               >
-                <b>
+                <b
+                  css={css`
+                    text-wrap: nowrap;
+                  `}
+                >
                   &nbsp;
                   <FormattedMessage
                     id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
