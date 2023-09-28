@@ -28,7 +28,7 @@ import {
 export const getStats = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog
-): Promise<DetectionMetrics | RiskEngineMetrics> => {
+): Promise<DetectionMetrics> => {
   const response = await supertest
     .post(getStatsUrl())
     .set('kbn-xsrf', 'true')
