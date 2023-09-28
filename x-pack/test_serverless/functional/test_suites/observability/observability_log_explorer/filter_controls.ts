@@ -14,13 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/166461
   describe('Filter controls customization', () => {
     before('initialize tests', async () => {
-      await PageObjects.svlCommonPage.login();
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await PageObjects.svlCommonPage.login();
     });
 
     after('clean up archives', async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.svlCommonPage.forceLogout();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     it('renders a filter controls section as part of the unified search bar', async () => {
