@@ -75,7 +75,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
         ) : (
           <FormattedMessage
             id="xpack.securitySolution.eventDetails.responseActionsViewNoActions"
-            defaultMessage="No responses are available for this alert."
+            defaultMessage="There are no response actions defined for this event."
           />
         )}
       </TabContentWrapper>
