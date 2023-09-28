@@ -94,6 +94,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         }),
         icon: googleCloudLogo,
       },
+      // needs to be a function that disables/enabled based on integration version
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
@@ -102,11 +103,9 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: true,
+        disabled: false,
+        isBeta: true,
         icon: 'logoAzure',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.azureOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
       },
     ],
   },

@@ -16,9 +16,11 @@ import {
 import { TestProvider } from '../../test/test_provider';
 import {
   getMockPackageInfoCspmAWS,
+  getMockPackageInfoCspmAzure,
   getMockPackageInfoCspmGCP,
   getMockPackageInfoVulnMgmtAWS,
   getMockPolicyAWS,
+  getMockPolicyAzure,
   getMockPolicyEKS,
   getMockPolicyGCP,
   getMockPolicyK8s,
@@ -32,7 +34,12 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
-import { CLOUDBEAT_AWS, CLOUDBEAT_EKS, CLOUDBEAT_GCP } from '../../../common/constants';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+} from '../../../common/constants';
 import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
@@ -207,7 +214,7 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option3).toBeInTheDocument();
     expect(option1).toBeEnabled();
     expect(option2).toBeEnabled();
-    expect(option3).toBeDisabled();
+    expect(option3).toBeEnabled();
     expect(option1).toBeChecked();
   });
 
@@ -1190,6 +1197,46 @@ describe('<CspPolicyTemplateForm />', () => {
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.organization_id': { value: 'c' },
       });
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+    });
+  });
+
+  describe('Azure Credentials input fields', () => {
+    it(`renders ${CLOUDBEAT_AZURE} Not supported when version is not at least version 1.6.0`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'arm_template' },
+        'azure.account_type': { value: 'single-account-azure' },
+      });
+
+      const { getByText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.5.0')} />
+      );
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: false,
+        updatedPolicy: policy,
+      });
+
+      expect(
+        getByText(
+          'CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it(`selects default ${CLOUDBEAT_AZURE} fields`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'arm_template' },
+        'azure.account_type': { value: 'single-account-azure' },
+      });
+
+      render(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure()} />);
 
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,

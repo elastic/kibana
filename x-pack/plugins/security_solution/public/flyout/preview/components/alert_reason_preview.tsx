@@ -14,6 +14,7 @@ import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
 import { usePreviewPanelContext } from '../context';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { FlyoutError } from '../../shared/components/flyout_error';
 
 const ReasonPreviewContainerWrapper = styled.div`
   overflow-x: auto;
@@ -47,7 +48,11 @@ export const AlertReasonPreview: React.FC = () => {
   );
 
   if (!renderer) {
-    return null;
+    return (
+      <EuiPanel hasShadow={false} hasBorder={false}>
+        <FlyoutError />
+      </EuiPanel>
+    );
   }
 
   return (

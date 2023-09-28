@@ -31,7 +31,9 @@ export async function getServicesBySignals(
     client: options.esClient,
     from: options.from,
     to: options.to,
-    apmIndices,
+    sourceIndices: {
+      apm: apmIndices,
+    },
     filters,
   });
 
