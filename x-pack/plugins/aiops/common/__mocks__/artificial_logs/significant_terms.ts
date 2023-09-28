@@ -10,6 +10,7 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 export const significantTerms: SignificantTerm[] = [
   {
     key: 'user:Peter',
+    type: 'keyword',
     fieldName: 'user',
     fieldValue: 'Peter',
     doc_count: 1981,
@@ -19,10 +20,10 @@ export const significantTerms: SignificantTerm[] = [
     score: 47.38899434932384,
     pValue: 2.62555579103777e-21,
     normalizedScore: 0.8328439168064725,
-    type: 'keyword',
   },
   {
     key: 'response_code:500',
+    type: 'keyword',
     fieldName: 'response_code',
     fieldValue: '500',
     doc_count: 1819,
@@ -32,10 +33,10 @@ export const significantTerms: SignificantTerm[] = [
     score: 26.347710713220195,
     pValue: 3.6085657805889595e-12,
     normalizedScore: 0.7809229492301661,
-    type: 'keyword',
   },
   {
     key: 'url:home.php',
+    type: 'keyword',
     fieldName: 'url',
     fieldValue: 'home.php',
     doc_count: 1744,
@@ -45,10 +46,10 @@ export const significantTerms: SignificantTerm[] = [
     score: 4.631197208465419,
     pValue: 0.00974308761016614,
     normalizedScore: 0.12006631193078789,
-    type: 'keyword',
   },
   {
     key: 'url:login.php',
+    type: 'keyword',
     fieldName: 'url',
     fieldValue: 'login.php',
     doc_count: 1738,
@@ -58,6 +59,5 @@ export const significantTerms: SignificantTerm[] = [
     score: 4.359614926663956,
     pValue: 0.012783309213417932,
     normalizedScore: 0.07472703283204607,
-    type: 'keyword',
   },
 ];
