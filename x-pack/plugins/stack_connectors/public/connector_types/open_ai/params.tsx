@@ -14,7 +14,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/open_ai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE } from './constants';
-import { GenerativeAiActionConnector, ActionParams } from './types';
+import { OpenAIActionConnector, ActionParams } from './types';
 
 const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = ({
   actionConnector,
@@ -29,7 +29,7 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
 
   const { body } = subActionParams ?? {};
 
-  const typedActionConnector = actionConnector as unknown as GenerativeAiActionConnector;
+  const typedActionConnector = actionConnector as unknown as OpenAIActionConnector;
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 

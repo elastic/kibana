@@ -25,4 +25,4 @@ export interface Secrets {
 }
 
 export type OpenAIConnector = ConnectorTypeModel<Config, Secrets, ActionParams>;
-export type GenerativeAiActionConnector = UserConfiguredActionConnector<Config, Secrets>;
+export type OpenAIActionConnector = UserConfiguredActionConnector<Config, Secrets>;
