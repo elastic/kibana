@@ -2,33 +2,59 @@
 
 set -euo pipefail
 
+argv=${@}
 diffArgs=("--name-only")
+uniq_dirs=()
+uniq_tsconfigs=()
+
+is_flag_set () {
+  flag=$1
+  if [[ ${argv[@]} =~ $flag ]]; then
+    true
+  else
+    false
+  fi
+}
+
+if is_flag_set "--help" || is_flag_set "-h"; then
+  echo "Usage:"
+  echo "  $0 [options]"
+  echo "  $0 [ref1 [ref2]]"
+  echo
+  echo "Options:"
+  echo "  --help, -h    Show this help"
+  echo "  --cached      Check staged changes"
+  echo "  --merge-base [<ref1> [<ref2>]]"
+  echo "                Check changes between nearest common ansestor (merge-base) of"
+  echo "                ref1 and ref2. Defaults: 'main' and 'HEAD'"
+  echo
+  echo "If no options are provided, the script takes between 0 and 2 arguments"
+  echo "representing two git refs:"
+  echo "  If 0, it will diff HEAD and HEAD^"
+  echo "  If 1 (REF1), it will diff REF1 and REF1^"
+  echo "  If 2 (REF1, REF2), it will diff REF1 and REF2"
+  exit
+fi
 
 if [[ "${CI-}" == "true" ]]; then
+  # Buildkite only
   .buildkite/scripts/bootstrap.sh
 
   targetBranch="${GITHUB_PR_TARGET_BRANCH-}"
-  git config -l
   git fetch origin $targetBranch
-  sha1=$(git merge-base "origin/$targetBranch" "${GITHUB_PR_TRIGGERED_SHA-}")
-  diffArgs+=("$sha1" "${GITHUB_PR_TRIGGERED_SHA-}")
-elif [[ "${1-}" == "--merge-base" ]]; then
+  sha=$(git merge-base "origin/$targetBranch" "${GITHUB_PR_TRIGGERED_SHA-}")
+  diffArgs+=("$sha" "${GITHUB_PR_TRIGGERED_SHA-}")
+elif is_flag_set "--merge-base"; then
   # Similar to when CI=true, but locally
   diffArgs+=("--merge-base" "${2-main}" "${3-HEAD}")
-elif [[ "${1-}" == "--cached" ]]; then
+elif is_flag_set "--cached"; then
   # Only check staged files
   diffArgs+=("--cached")
 else
-  # Script take between 0 and 2 arguments representing two commit SHA's:
-  # If 0, it will diff HEAD and HEAD^
-  # If 1 (SHA1), it will diff SHA1 and SHA1^
-  # If 2 (SHA1, SHA2), it will diff SHA1 and SHA2
-  sha1="${1-HEAD}"
-  diffArgs+=("$sha1" "${2-$sha1^}")
+  # Full manual mode!
+  ref1="${1-HEAD}"
+  diffArgs+=("$ref1" "${2-$ref1^}")
 fi
-
-uniq_dirs=()
-uniq_tsconfigs=()
 
 echo "Detecting files changed..."
 echo "DEBUG: git diff args: ${diffArgs[@]}"
