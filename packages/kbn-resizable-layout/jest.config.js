@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { Panels, PANELS_MODE } from './panels';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-resizable-layout'],
+};

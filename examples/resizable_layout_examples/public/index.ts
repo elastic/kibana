@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
+import { ResizableLayoutExamplesPlugin } from './plugin';
 
-export const navigationStyles = {
-  euiSideNavItems: css`
-    padding-left: 45px;
-  `,
-};
+export function plugin() {
+  return new ResizableLayoutExamplesPlugin();
+}
