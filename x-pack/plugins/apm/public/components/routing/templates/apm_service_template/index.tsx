@@ -404,7 +404,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
         defaultMessage: 'Universal Profiling',
       }),
-      hidden: !isProfilingAvailable,
+      hidden:
+        !isProfilingAvailable ||
+        !isMobileAgentName(agentName) ||
+        !isRumAgentName(agentName),
       append: (
         <EuiBadge color="accent">
           {i18n.translate('xpack.apm.universalProfiling.newLabel', {

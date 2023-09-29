@@ -57,6 +57,10 @@ const profilingFlamegraphRoute = createApmServerRoute({
         rollupInterval,
       });
 
+      if (!serviceHostNames.length) {
+        return undefined;
+      }
+
       const flamegraph =
         await profilingDataAccessStart?.services.fetchFlamechartData({
           esClient: esClient.asCurrentUser,
@@ -115,6 +119,10 @@ const profilingFunctionsRoute = createApmServerRoute({
         documentType,
         rollupInterval,
       });
+
+      if (!serviceHostNames.length) {
+        return undefined;
+      }
 
       const functions = await profilingDataAccessStart?.services.fetchFunction({
         esClient: esClient.asCurrentUser,
