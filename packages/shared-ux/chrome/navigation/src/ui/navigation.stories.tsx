@@ -35,6 +35,7 @@ import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
 import type { GroupDefinition, NonEmptyArray, ProjectNavigationDefinition } from './types';
+import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
 
@@ -294,6 +295,29 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
   );
 };
 
+const CustomPanelContent = () => {
+  return <EuiText>This is a custom component to render in the panel.</EuiText>;
+};
+
+const panelContentProvider: ContentProvider = (id: string) => {
+  if (id === 'example_projet.group:openpanel1') {
+    return; // Use default title & content
+  }
+
+  if (id === 'example_projet.group:openpanel2') {
+    // Custom content
+    return {
+      content: <CustomPanelContent />,
+    };
+  }
+
+  if (id === 'example_projet.group:openpanel3') {
+    return {
+      title: <div style={{ backgroundColor: 'yellow', fontWeight: 600 }}>Custom title</div>,
+    };
+  }
+};
+
 const navigationDefinitionWithPanel: ProjectNavigationDefinition = {
   navigationTree: {
     body: [
@@ -321,8 +345,46 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition = {
             title: 'Some other node',
           },
           {
-            id: 'group:settings',
-            title: 'Settings',
+            id: 'group:openpanel1',
+            title: 'Open panel (default content)',
+            openPanel: true,
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals',
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'Tracing',
+              },
+            ],
+          },
+          {
+            id: 'group:openpanel2',
+            title: 'Open panel (custom content)',
+            openPanel: true,
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals',
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'Tracing',
+              },
+            ],
+          },
+          {
+            id: 'group:openpanel3',
+            title: 'Open panel (custom title)',
             openPanel: true,
             children: [
               {
@@ -361,7 +423,10 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <DefaultNavigation {...navigationDefinitionWithPanel} />
+        <DefaultNavigation
+          {...navigationDefinitionWithPanel}
+          panelContentProvider={panelContentProvider}
+        />
       </NavigationProvider>
     </NavigationWrapper>
   );

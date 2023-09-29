@@ -22,6 +22,7 @@ import type {
 import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
+import type { ContentProvider } from './components/panel';
 
 type NodeDefinitionWithPreset = NodeDefinition<AppDeepLinkId, string> & {
   preset?: NavigationGroupPreset;
@@ -93,10 +94,16 @@ const getDefaultNavigationTree = (
 
 let idCounter = 0;
 
-export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?: string }> = ({
+interface Props {
+  dataTestSubj?: string;
+  panelContentProvider?: ContentProvider;
+}
+
+export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
   projectNavigationTree,
   navigationTree,
   dataTestSubj,
+  panelContentProvider,
 }) => {
   if (!navigationTree && !projectNavigationTree) {
     throw new Error('One of navigationTree or projectNavigationTree must be defined');
@@ -142,7 +149,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
   );
 
   return (
-    <Navigation dataTestSubj={dataTestSubj}>
+    <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
       <>
         {renderItems(navigationDefinition.body)}
         {navigationDefinition.footer && (

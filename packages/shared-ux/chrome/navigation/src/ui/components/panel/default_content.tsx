@@ -8,7 +8,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { type FC } from 'react';
-import { PanelGroupTitle } from './group_title';
 
 import { PanelNavNode } from './types';
 
@@ -20,9 +19,13 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
       <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h2>{activeNode.title}</h2>
-        </EuiTitle>
+        {typeof activeNode.title === 'string' ? (
+          <EuiTitle size="xxs">
+            <h2>{activeNode.title}</h2>
+          </EuiTitle>
+        ) : (
+          activeNode.title
+        )}
       </EuiFlexItem>
       <EuiFlexItem style={{ width: '100%' }}>
         {activeNode.children && (
