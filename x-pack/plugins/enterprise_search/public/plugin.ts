@@ -84,6 +84,15 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     try {
       this.data = await http.get('/internal/enterprise_search/config_data');
+      const resp = await http.post('/internal/workplace_search/ws_gate', {
+        body: JSON.stringify({
+          ws_gate_data: { feature: 'Content sources' },
+          // features_other: 'Text from the other field, if filled in, can be null if not',
+          // additional_feedback: 'Text from the feedback area',
+          // participate_in_ux_labs: false,
+        }),
+      });
+      console.log('resp', resp);
       this.hasInitialized = true;
     } catch (e) {
       this.data.errorConnectingMessage = `${e.response.status} ${e.message}`;

@@ -7,6 +7,18 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import {
+  GatedFormDataApiLogicActions,
+  UpdateGatedFormDataApiLogic,
+} from './send_gatedForm_data_api_logic';
+
+// import {
+//   GatedFormDataApiLogicActions,
+//   sendGatedFormData,
+//   UpdateGatedFormDataApiLogic,
+//   UpdateSearchApplicationApiLogic,
+// } from './send_gatedForm_data_api_logic';
+
 interface WorkplaceSearchGateValues {
   additionalFeedback?: string;
   feature: string;
@@ -18,7 +30,9 @@ interface WorkplaceSearchGateActions {
   setAdditionalFeedback(additionalFeedback: string): { additionalFeedback: string };
   setFeature(feature: string): { feature: string };
   setFeaturesOther(featuresOther: string): { featuresOther: string };
-  setFormSubmitted(): void;
+  setFormSubmitted: () => void;
+  formDataUpdated: () => void;
+  submitGatedFormDataRequest: GatedFormDataApiLogicActions['makeRequest'];
   setParticipateInUXLabs(participateInUXLabs: string): { participateInUXLabs: boolean };
 }
 export const WorkplaceSearchGateLogic = kea<
@@ -28,8 +42,14 @@ export const WorkplaceSearchGateLogic = kea<
     setAdditionalFeedback: (additionalFeedback) => ({ additionalFeedback }),
     setFeature: (feature) => ({ feature }),
     setFeaturesOther: (featuresOther) => ({ featuresOther }),
-    setFormSubmitted: () => null,
+    setFormSubmitted: true,
     setParticipateInUXLabs: (participateInUXLabs) => ({ participateInUXLabs }),
+  },
+  connect: {
+    actions: [
+      UpdateGatedFormDataApiLogic,
+      ['makeRequest as submitGatedFormDataRequest', 'apiSuccess as formDataUpdated'],
+    ],
   },
   path: ['enterprise_search', 'workplace_search', 'gate_form'],
   reducers: {
@@ -54,7 +74,7 @@ export const WorkplaceSearchGateLogic = kea<
     isFormSubmitted: [
       false,
       {
-        setFormSubmitted: () => true,
+        formDataUpdated: () => true,
       },
     ],
     participateInUXLabs: [
@@ -64,4 +84,19 @@ export const WorkplaceSearchGateLogic = kea<
       },
     ],
   },
+  listeners: ({ actions, values }) => ({
+    setFormSubmitted: () => {
+      const resp = actions.submitGatedFormDataRequest({
+        additionalFeedback: values.additionalFeedback,
+        feature: values.feature,
+        featuresOther: values.featuresOther,
+        participateInUXLabs: false,
+      });
+
+      console.log('resp', resp);
+    },
+    formDataUpdated: () => {
+      console.log('Done');
+    },
+  }),
 });

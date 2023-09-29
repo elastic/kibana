@@ -524,8 +524,13 @@ export const WorkplaceSearchGate: React.FC = () => {
     },
   ];
 
-  const { setFormSubmitted, setAdditionalFeedback, setParticipateInUXLabs, setFeature } =
-    useActions(WorkplaceSearchGateLogic);
+  const {
+    // setFormSubmitted,
+    setFormSubmitted,
+    setAdditionalFeedback,
+    setParticipateInUXLabs,
+    setFeature,
+  } = useActions(WorkplaceSearchGateLogic);
 
   const { feature, participateInUXLabs } = useValues(WorkplaceSearchGateLogic);
 
@@ -664,7 +669,12 @@ export const WorkplaceSearchGate: React.FC = () => {
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton isDisabled={!feature ?? false} type="submit" fill onClick={setFormSubmitted}>
+            <EuiButton
+              isDisabled={!feature ?? false}
+              type="submit"
+              fill
+              onClick={() => setFormSubmitted()}
+            >
               {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
                 defaultMessage: 'Submit',
               })}

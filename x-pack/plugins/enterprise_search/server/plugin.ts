@@ -81,6 +81,7 @@ import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
+import { registerGatedFormRoute } from './routes/workplace_search/gated_form';
 
 interface PluginsSetup {
   cloud: CloudSetup;
@@ -222,8 +223,10 @@ export class EnterpriseSearchPlugin implements Plugin {
     const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
 
     registerConfigDataRoute(dependencies);
+
     if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
+    registerGatedFormRoute(dependencies);
     if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
