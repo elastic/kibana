@@ -122,6 +122,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsBox: string;
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
@@ -138,14 +139,17 @@ export interface DocLinks {
     readonly connectorsNetworkDrive: string;
     readonly connectorsOneDrive: string;
     readonly connectorsOracle: string;
+    readonly connectorsOutlook: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
     readonly connectorsSalesforce: string;
     readonly connectorsServiceNow: string;
     readonly connectorsSharepoint: string;
     readonly connectorsSharepointOnline: string;
+    readonly connectorsTeams: string;
     readonly connectorsSlack: string;
     readonly connectorsWorkplaceSearch: string;
+    readonly connectorsZoom: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
