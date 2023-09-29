@@ -287,10 +287,17 @@ export const ModelsList: FC<Props> = ({
       let resultItems = newItems;
       // don't add any of the built-in models (e.g. elser) if NLP is disabled
       if (isNLPEnabled) {
-        const idSet = new Set(resultItems.map((i) => i.model_id));
+        const idMap = new Map<string, ModelItem>(
+          resultItems.map((model) => [model.model_id, model])
+        );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ name, hidden }) => !idSet.has(name) && !hidden)
+          .filter(({ name, hidden, recommended }) => {
+            if (recommended && idMap.has(name)) {
+              idMap.get(name)!.recommended = true;
+            }
+            return !idMap.has(name) && !hidden;
+          })
           .map<ModelItem>((modelDefinition) => {
             return {
               model_id: modelDefinition.name,
