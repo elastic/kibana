@@ -114,6 +114,26 @@ describe('SearchResponseCache', () => {
       expect(cache.get('234')).not.toBeUndefined();
     });
 
+    test('evicts searches that returned an error response', async () => {
+      const err$ = getSearchObservable$([
+        {
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            t: 'a'.repeat(1000),
+          },
+        },
+        {},
+      ]);
+      cache.set('123', wrapWithAbortController(err$));
+
+      const errHandler = jest.fn();
+      await err$.toPromise().catch(errHandler);
+
+      expect(errHandler).toBeCalledTimes(1);
+      expect(cache.get('123')).toBeUndefined();
+    });
+
     test('evicts oldest item if has too many cached items', async () => {
       const finalResult = r[r.length - 1];
       cache.set('123', wrapWithAbortController(of(finalResult)));
