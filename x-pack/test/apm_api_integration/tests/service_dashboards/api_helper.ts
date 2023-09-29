@@ -10,15 +10,17 @@ import { ApmApiClient } from '../../common/config';
 export async function getServiceDashboardApi(
   apmApiClient: ApmApiClient,
   serviceName: string,
-  start: number,
-  end: number
+  start: string,
+  end: string
 ) {
   return apmApiClient.writeUser({
     endpoint: 'GET /internal/apm/services/{serviceName}/dashboards',
     params: {
       path: { serviceName },
-      start: new Date(start).toISOString(),
-      end: new Date(end).toISOString(),
+      query: {
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+      },
     },
   });
 }
@@ -28,13 +30,13 @@ export async function getLinkServiceDashboardApi({
   apmApiClient,
   serviceDashboardId,
   kuery,
-  useContextFilter,
+  useServiceFilters,
 }: {
   apmApiClient: ApmApiClient;
   dashboardSavedObjectId: string;
   serviceDashboardId?: string;
   kuery: string;
-  useContextFilter: boolean;
+  useServiceFilters: boolean;
 }) {
   const response = await apmApiClient.writeUser({
     endpoint: 'POST /internal/apm/service-dashboard',
@@ -45,15 +47,20 @@ export async function getLinkServiceDashboardApi({
       body: {
         dashboardSavedObjectId,
         kuery,
-        useContextFilter,
+        useServiceFilters,
       },
     },
   });
   return response;
 }
 
-export async function deleteAllServiceDashboard(apmApiClient: ApmApiClient, serviceName: string) {
-  return await getServiceDashboardApi(apmApiClient, serviceName).then((response) => {
+export async function deleteAllServiceDashboard(
+  apmApiClient: ApmApiClient,
+  serviceName: string,
+  start: string,
+  end: string
+) {
+  return await getServiceDashboardApi(apmApiClient, serviceName, start, end).then((response) => {
     const promises = response.body.serviceDashboards.map((item) => {
       if (item.id) {
         return apmApiClient.writeUser({

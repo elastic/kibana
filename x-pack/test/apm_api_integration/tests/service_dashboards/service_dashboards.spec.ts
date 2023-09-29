@@ -85,14 +85,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await deleteAllServiceDashboard(apmApiClient, 'synth-go');
+      await deleteAllServiceDashboard(apmApiClient, 'synth-go', start, end);
     });
 
     describe('when data is not loaded', () => {
       it('creates a new service dashboard', async () => {
         const serviceDashboard = {
           dashboardSavedObjectId: 'dashboard-saved-object-id',
-          useContextFilter: true,
+          useServiceFilters: true,
           kuery: 'service.name: synth-go',
         };
         const createResponse = await getLinkServiceDashboardApi({
@@ -109,8 +109,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expect(createResponse.body).to.have.property('kuery', serviceDashboard.kuery);
         expect(createResponse.body).to.have.property(
-          'useContextFilter',
-          serviceDashboard.useContextFilter
+          'useServiceFilters',
+          serviceDashboard.useServiceFilters
         );
 
         const dasboardForGoService = await getServiceDashboardApi(
@@ -132,7 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('updates the existing linked service dashboard', async () => {
         const serviceDashboard = {
           dashboardSavedObjectId: 'dashboard-saved-object-id',
-          useContextFilter: true,
+          useServiceFilters: true,
           kuery: 'service.name: synth-go or agent.name: java',
         };
 
@@ -152,7 +152,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           apmApiClient,
           serviceDashboardId: dasboardForGoService.body.serviceDashboards[0].id,
           ...serviceDashboard,
-          useContextFilter: true,
+          useServiceFilters: true,
         });
 
         expect(updateResponse.status).to.be(200);
@@ -165,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expect(updateddasboardForGoService.body.serviceDashboards.length).to.be(1);
         expect(updateddasboardForGoService.body.serviceDashboards[0]).to.have.property(
-          'useContextFilter',
+          'useServiceFilters',
           true
         );
         expect(updateddasboardForGoService.body.serviceDashboards[0]).to.have.property(
