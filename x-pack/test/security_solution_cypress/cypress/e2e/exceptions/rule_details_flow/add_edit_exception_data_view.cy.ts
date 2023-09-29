@@ -45,7 +45,7 @@ describe(
   'Add exception using data views from rule details',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const ITEM_NAME = 'Sample Exception List Item';
 
     before(() => {
@@ -87,8 +87,8 @@ describe(
       addFirstExceptionFromRuleDetails(
         {
           field: 'agent.name',
-          operator: 'is',
-          values: ['foo'],
+          operator: 'is one of',
+          values: ['foo', 'FOO', 'bar'],
         },
         ITEM_NAME
       );
