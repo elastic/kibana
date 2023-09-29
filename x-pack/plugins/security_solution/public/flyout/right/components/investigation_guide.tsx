@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,6 @@ import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
-  INVESTIGATION_GUIDE_NO_DATA_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
 
@@ -45,22 +44,9 @@ export const InvestigationGuide: React.FC = () => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="spaceAround"
-        data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
+      <EuiFlexItem>
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
@@ -70,8 +56,16 @@ export const InvestigationGuide: React.FC = () => {
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem>
-        {!error && basicAlertData.ruleId && ruleNote ? (
+      {loading ? (
+        <EuiSkeletonText
+          data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
+          contentAriaLabel={i18n.translate(
+            'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideLoadingAriaLabel',
+            { defaultMessage: 'investigation guide' }
+          )}
+        />
+      ) : !error && basicAlertData.ruleId && ruleNote ? (
+        <EuiFlexItem>
           <EuiButton
             onClick={goToInvestigationsTab}
             iconType="documentation"
@@ -88,15 +82,13 @@ export const InvestigationGuide: React.FC = () => {
               defaultMessage="Show investigation guide"
             />
           </EuiButton>
-        ) : (
-          <p data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
-              defaultMessage="There’s no investigation guide for this rule."
-            />
-          </p>
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      ) : (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
+          defaultMessage="There’s no investigation guide for this rule."
+        />
+      )}
     </EuiFlexGroup>
   );
 };

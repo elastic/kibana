@@ -84,7 +84,7 @@ export function InternalDashboardTopNav({
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
-    dashboardCapabilities: { saveQuery: showSaveQuery, showWriteControls },
+    dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -342,8 +342,8 @@ export function InternalDashboardTopNav({
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews}
-        showSaveQuery={showSaveQuery}
-        appName={originatingApp ?? LEGACY_DASHBOARD_APP_ID}
+        saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
+        appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
         setMenuMountPoint={
           embedSettings || fullScreenMode
