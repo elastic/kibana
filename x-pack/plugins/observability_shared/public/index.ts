@@ -10,6 +10,7 @@ export type {
   ObservabilitySharedPlugin,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
+  ProfilingLocators,
 } from './plugin';
 export const plugin = () => {
   return new ObservabilitySharedPlugin();

@@ -72,7 +72,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       {
         range: {
           '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}`,
+            gte: `now-${slo.timeWindow.duration.format()}/d`,
           },
         },
       },

@@ -50,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         'ML:saved-objects-sync',
         'Synthetics:Clean-Up-Package-Policies',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
+        'actions:.bedrock',
         'actions:.cases-webhook',
         'actions:.d3security',
         'actions:.email',

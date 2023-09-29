@@ -688,7 +688,7 @@
         "signature": [
           "React.ExoticComponent<",
           "DashboardPickerProps",
-          "> & { readonly _result: (props: ",
+          "> & { readonly _result: ({ isDisabled, onChange, idsToOmit }: ",
           "DashboardPickerProps",
           ") => JSX.Element; }"
         ],
@@ -1485,119 +1485,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.PresentationDashboardsService",
-        "type": "Interface",
-        "tags": [],
-        "label": "PresentationDashboardsService",
-        "description": [],
-        "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.PresentationDashboardsService.findDashboards",
-            "type": "Function",
-            "tags": [],
-            "label": "findDashboards",
-            "description": [],
-            "signature": [
-              "(query: string, fields: string[]) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<",
-              "PartialDashboardAttributes",
-              ">[]>"
-            ],
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.PresentationDashboardsService.findDashboards.$1",
-                "type": "string",
-                "tags": [],
-                "label": "query",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.PresentationDashboardsService.findDashboards.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "fields",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.PresentationDashboardsService.findDashboardsByTitle",
-            "type": "Function",
-            "tags": [],
-            "label": "findDashboardsByTitle",
-            "description": [],
-            "signature": [
-              "(title: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<",
-              "PartialDashboardAttributes",
-              ">[]>"
-            ],
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.PresentationDashboardsService.findDashboardsByTitle.$1",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           }
         ],

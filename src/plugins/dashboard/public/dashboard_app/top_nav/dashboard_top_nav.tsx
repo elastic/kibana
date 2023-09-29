@@ -68,7 +68,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
-    dashboardCapabilities: { saveQuery: showSaveQuery, showWriteControls },
+    dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -83,6 +83,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
@@ -297,7 +298,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews}
-        showSaveQuery={showSaveQuery}
+        saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
         setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}
@@ -323,7 +324,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
           <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
         </PresentationUtilContextProvider>
       ) : null}
-      {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
+      {viewMode === ViewMode.EDIT ? (
+        <DashboardEditingToolbar isDisabled={!!focusedPanelId} />
+      ) : null}
       <EuiHorizontalRule margin="none" />
     </div>
   );

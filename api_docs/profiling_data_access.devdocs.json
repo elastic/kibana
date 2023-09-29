@@ -47,7 +47,9 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          ">; getStatus: ({ esClient, soClient, spaceId }: HasSetupParams) => Promise<",
+          ">; getStatus: ({ esClient, soClient, spaceId }: ",
+          "HasSetupParams",
+          ") => Promise<",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",
