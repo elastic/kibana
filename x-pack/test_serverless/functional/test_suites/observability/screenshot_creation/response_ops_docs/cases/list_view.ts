@@ -19,12 +19,13 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const screenshotDirectories = ['response_ops_docs', 'observability_cases'];
   // const supertest = getService('supertest');
   // const testSubjects = getService('testSubjects');
-  let caseIdMonitoring: string;
+  // let caseIdMonitoring: string;
   // let caseOwnerMonitoring: string;
 
   describe('list view', function () {
     before(async () => {
-      const { id: caseIdMetrics } = await cases.api.createCase({
+      // const { id: caseIdMetrics } = await cases.api.createCase({
+      await cases.api.createCase({
         title: 'Metrics inventory',
         tags: ['IBM resilient'],
         description: 'Test.',
@@ -47,22 +48,21 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       });
       await cases.api.setStatus(caseIdLogs, caseVersionLogs, 'closed');
 
-      const caseMonitoring = await cases.api.createCase({
+      const { id: caseIdMonitoring, version: caseVersionMonitoring } = await cases.api.createCase({
         title: 'Monitor uptime',
         tags: ['swimlane'],
         description: 'Test.',
         owner: 'observability',
       });
-      caseIdMonitoring = caseMonitoring.id;
+      await cases.api.setStatus(caseIdMonitoring, caseVersionMonitoring, 'in-progress');
+
+      // caseIdMonitoring = caseMonitoring.id;
       // caseOwnerMonitoring = caseMonitoring.owner;
 
       // const { version: caseVersionMonitoring } = await cases.api.createAttachment({
       //   caseId: caseIdMonitoring,
       //   params: { comment: 'test comment', type: AttachmentType.user, owner: 'observability' },
       // });
-
-      // await cases.api.setStatus(caseIdMonitoring, caseVersionMonitoring, 'in-progress');
-
       // await createAndUploadFile({
       //   supertest,
       //   createFileParams: {
