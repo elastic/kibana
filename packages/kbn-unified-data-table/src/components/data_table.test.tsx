@@ -433,6 +433,50 @@ describe('UnifiedDataTable', () => {
     });
   });
 
+  describe('renderCustomToolbar', () => {
+    it('should render a custom toolbar', async () => {
+      let toolbarParams: Record<string, unknown> = {};
+      let gridParams: Record<string, unknown> = {};
+      const renderCustomToolbarMock = jest.fn((tp, gp) => {
+        toolbarParams = tp;
+        gridParams = gp;
+        return <div data-test-subj="custom-toolbar">Custom layout</div>;
+      });
+      const component = await getComponent({
+        ...getProps(),
+        renderCustomToolbar: renderCustomToolbarMock,
+      });
+
+      // custom toolbar should be rendered
+      expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
+
+      expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          hasRoomForGridControls: true,
+        }),
+        expect.objectContaining({
+          additionalControls: null,
+        })
+      );
+
+      // the default eui controls should be available for custom rendering
+      expect(toolbarParams?.columnSortingControl).toBeTruthy();
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBe(null);
+
+      // additional controls become available after selecting a document
+      act(() => {
+        component
+          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .first()
+          .simulate('change');
+      });
+
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBeTruthy();
+    });
+  });
+
   describe('gridStyleOverride', () => {
     it('should render the grid with the default style if no gridStyleOverride is provided', async () => {
       const component = await getComponent({
