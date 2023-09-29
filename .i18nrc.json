@@ -15,6 +15,7 @@
     "customIntegrations": "src/plugins/custom_integrations",
     "customIntegrationsPackage": "packages/kbn-custom-integrations",
     "dashboard": "src/plugins/dashboard",
+    "cloud": "packages/cloud",
     "domDragDrop": "packages/kbn-dom-drag-drop",
     "controls": "src/plugins/controls",
     "data": "src/plugins/data",

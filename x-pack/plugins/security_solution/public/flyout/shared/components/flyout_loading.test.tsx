@@ -15,4 +15,10 @@ describe('<FlyoutLoading />', () => {
     const { getByTestId } = render(<FlyoutLoading />);
     expect(getByTestId(FLYOUT_LOADING_TEST_ID)).toBeInTheDocument();
   });
+
+  it('should render loading when data test subject is passed', () => {
+    const { getByTestId, queryByTestId } = render(<FlyoutLoading data-test-subj="test-id" />);
+    expect(getByTestId('test-id')).toBeInTheDocument();
+    expect(queryByTestId(FLYOUT_LOADING_TEST_ID)).not.toBeInTheDocument();
+  });
 });

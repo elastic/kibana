@@ -137,6 +137,7 @@ const basicTimeline: TimelineModel = {
   timelineType: TimelineType.default,
   title: '',
   version: null,
+  savedSearchId: null,
 };
 const timelineByIdMock: TimelineById = {
   foo: { ...basicTimeline },
@@ -223,6 +224,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        savedSearchId: null,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
@@ -235,6 +237,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        savedSearchId: null,
       });
       expect(update).toEqual({
         foo: basicTimeline,
@@ -253,6 +256,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        savedSearchId: null,
       });
       expect(update).toEqual({
         foo: basicTimeline,

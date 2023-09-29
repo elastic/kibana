@@ -67,6 +67,7 @@ packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
+packages/cloud @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
@@ -483,6 +484,7 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/settings/components/field_category @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management
 packages/kbn-management/settings/components/form @elastic/platform-deployment-management
@@ -502,6 +504,7 @@ x-pack/plugins/metrics_data_access @elastic/infra-monitoring-ui
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/category_validator @elastic/ml-ui
+x-pack/packages/ml/chi2test @elastic/ml-ui
 x-pack/packages/ml/data_frame_analytics_utils @elastic/ml-ui
 x-pack/packages/ml/data_grid @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
@@ -580,6 +583,8 @@ packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
+packages/kbn-resizable-layout @elastic/kibana-data-discovery
+examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
@@ -848,6 +853,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover @elastic/kibana-data-discovery
 /x-pack/test/search_sessions_integration @elastic/kibana-data-discovery
 /x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery

@@ -95,7 +95,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
 export const HighlightedFields: FC = () => {
   const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
+  const { loading, error, rule: maybeRule } = useRuleWithFallback(ruleId);
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
@@ -105,10 +105,6 @@ export const HighlightedFields: FC = () => {
     () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
     [highlightedFields, scopeId]
   );
-
-  if (items.length === 0) {
-    return null;
-  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -124,7 +120,18 @@ export const HighlightedFields: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable items={items} columns={columns} compressed />
+          <EuiInMemoryTable
+            items={error ? [] : items}
+            columns={columns}
+            compressed
+            loading={loading}
+            message={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
+                defaultMessage="There's no highlighted fields for this alert."
+              />
+            }
+          />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
