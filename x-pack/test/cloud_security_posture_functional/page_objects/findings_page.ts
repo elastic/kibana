@@ -124,6 +124,108 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
+  const createDataTableObject = (tableTestSubject: string) => ({
+    getElement() {
+      return testSubjects.find(tableTestSubject);
+    },
+
+    async getHeaders() {
+      const element = await this.getElement();
+      return await element.findAllByCssSelector('[data-test-subj="dataGridHeader"] div');
+    },
+
+    async getColumnIndex(columnName: string) {
+      const headers = await this.getHeaders();
+      const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
+      const columnIndex = texts.findIndex((i) => i === columnName);
+      expect(columnIndex).to.be.greaterThan(-1);
+      return columnIndex + 1;
+    },
+
+    async getColumnHeaderCell(columnName: string) {
+      const headers = await this.getHeaders();
+      const headerIndexes = await Promise.all(headers.map((header) => header.getVisibleText()));
+      const columnIndex = headerIndexes.findIndex((i) => i === columnName);
+      return headers[columnIndex];
+    },
+
+    async getRowsCount() {
+      const element = await this.getElement();
+      const rows = await element.findAllByCssSelector('tbody tr');
+      return rows.length;
+    },
+
+    async getFindingsCount(type: 'passed' | 'failed') {
+      const element = await this.getElement();
+      const items = await element.findAllByCssSelector(`span[data-test-subj="${type}_finding"]`);
+      return items.length;
+    },
+
+    async getRowIndexForValue(columnName: string, value: string) {
+      const values = await this.getColumnValues(columnName);
+      const rowIndex = values.indexOf(value);
+      expect(rowIndex).to.be.greaterThan(-1);
+      return rowIndex + 1;
+    },
+
+    async getFilterElementButton(rowIndex: number, columnIndex: number, negated = false) {
+      const tableElement = await this.getElement();
+      const button = negated ? 'filterOutButton' : 'filterForButton';
+      const selector = `[data-grid-row-index="${rowIndex}"] [data-gridcell-column-index="${columnIndex}"] button[data-test-subj="${button}"]`;
+      return tableElement.findByCssSelector(selector);
+    },
+
+    async addCellFilter(columnName: string, cellValue: string, negated = false) {
+      const columnIndex = await this.getColumnIndex(columnName);
+      const rowIndex = await this.getRowIndexForValue(columnName, cellValue);
+      const filterElement = await this.getFilterElementButton(rowIndex, columnIndex, negated);
+      await filterElement.click();
+    },
+
+    async getColumnValues(columnName: string) {
+      const tableElement = await this.getElement();
+      const columnIndex = await this.getColumnIndex(columnName);
+      const selector = `[data-gridcell-column-index="${columnIndex}]`;
+      const columnCells = await tableElement.findAllByCssSelector(selector);
+
+      return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
+    },
+
+    async hasColumnValue(columnName: string, value: string) {
+      const values = await this.getColumnValues(columnName);
+      return values.includes(value);
+    },
+
+    async toggleColumnSort(columnName: string, direction: 'asc' | 'desc') {
+      const element = await this.getColumnHeaderCell(columnName);
+      const currentSort = await element.getAttribute('aria-sort');
+      if (currentSort === 'none') {
+        // a click is needed to focus on Eui column header
+        await element.click();
+
+        // default is ascending
+        if (direction === 'desc') {
+          const nonStaleElement = await this.getColumnHeaderCell(columnName);
+          await nonStaleElement.click();
+        }
+      }
+      if (
+        (currentSort === 'ascending' && direction === 'desc') ||
+        (currentSort === 'descending' && direction === 'asc')
+      ) {
+        // Without getting the element again, the click throws an error (stale element reference)
+        const nonStaleElement = await this.getColumnHeaderCell(columnName);
+        await nonStaleElement.click();
+      }
+    },
+
+    async openFlyoutAt(rowIndex: number) {
+      const table = await this.getElement();
+      const flyoutButton = await table.findAllByTestSubject('findings_table_expand_column');
+      await flyoutButton[rowIndex].click();
+    },
+  });
+
   const createTableObject = (tableTestSubject: string) => ({
     getElement() {
       return testSubjects.find(tableTestSubject);
@@ -255,7 +357,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     );
   };
 
-  const latestFindingsTable = createTableObject('latest_findings_table');
+  const latestFindingsTable = createDataTableObject('latest_findings_table');
   const resourceFindingsTable = createTableObject('resource_findings_table');
   const findingsByResourceTable = {
     ...createTableObject('findings_by_resource_table'),

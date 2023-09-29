@@ -8,14 +8,11 @@ import { Dispatch, SetStateAction, useCallback } from 'react';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { BoolQuery } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
-
-interface QuerySort {
-  direction: string;
-  id: string;
-}
+import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 
 export interface CloudPostureTableResult {
   setUrlQuery: (query: any) => void;
@@ -35,6 +32,8 @@ export interface CloudPostureTableResult {
   onChangePage: (newPageIndex: number) => void;
   onSort: (sort: string[][]) => void;
   onResetFilters: () => void;
+  columnsLocalStorageKey: string;
+  getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
 /*
@@ -44,10 +43,12 @@ export const useCloudPostureTable = ({
   defaultQuery = getDefaultQuery,
   dataView,
   paginationLocalStorageKey,
+  columnsLocalStorageKey,
 }: {
   defaultQuery?: (params: any) => any;
   dataView: DataView;
   paginationLocalStorageKey: string;
+  columnsLocalStorageKey?: string;
 }): CloudPostureTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -120,6 +121,13 @@ export const useCloudPostureTable = ({
     [setUrlQuery]
   );
 
+  const getRowsFromPages = (data: Array<{ page: DataTableRecord[] }> | undefined) =>
+    data
+      ?.map(({ page }: { page: DataTableRecord[] }) => {
+        return page;
+      })
+      .flat() || [];
+
   return {
     setUrlQuery,
     sort: urlQuery.sort,
@@ -136,5 +144,7 @@ export const useCloudPostureTable = ({
     onChangePage,
     onSort,
     onResetFilters,
+    columnsLocalStorageKey: columnsLocalStorageKey || LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY,
+    getRowsFromPages,
   };
 };
