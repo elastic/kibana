@@ -136,6 +136,7 @@ import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -794,18 +795,14 @@ export class Embeddable
    * Used for the Edit in Lens link inside the inline editing flyout.
    */
   private async navigateToLensEditor() {
-    const executionContext = this.getExecutionContext();
+    const appContext = this.getAppContext();
     /**
      * The origininating app variable is very important for the Save and Return button
      * of the editor to work properly.
-     * The best way to get it dynamically is from the execution context but for the dashboard
-     * it needs to be pluralized
      */
     const transferState = {
-      originatingApp:
-        executionContext?.type === 'dashboard'
-          ? 'dashboards'
-          : executionContext?.type ?? 'dashboards',
+      originatingApp: appContext?.currentAppId ?? 'dashboards',
+      originatingPath: appContext?.getCurrentPath?.(),
       valueInput: this.getExplicitInput(),
       embeddableId: this.id,
       searchSessionId: this.getInput().searchSessionId,
@@ -818,6 +815,7 @@ export class Embeddable
       await transfer.navigateToEditor(APP_ID, {
         path: this.output.editPath,
         state: transferState,
+        skipAppLeave: true,
       });
     }
   }

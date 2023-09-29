@@ -69,8 +69,8 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
-          originatingApp: dashboard.getEmbeddableContainerContext()?.currentAppId,
-          originatingPath: dashboard.getEmbeddableContainerContext()?.getCurrentPath?.(),
+          originatingApp: dashboard.getAppContext()?.currentAppId,
+          originatingPath: dashboard.getAppContext()?.getCurrentPath?.(),
           searchSessionId: search.session.getSessionId(),
         },
       });
