@@ -470,20 +470,6 @@
           },
           {
             "parentPluginId": "infra",
-            "id": "def-server.InfraConfig.logs",
-            "type": "Object",
-            "tags": [],
-            "label": "logs",
-            "description": [],
-            "signature": [
-              "{ app_target: \"discover\" | \"logs-ui\"; }"
-            ],
-            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "infra",
             "id": "def-server.InfraConfig.sources",
             "type": "Object",
             "tags": [],
