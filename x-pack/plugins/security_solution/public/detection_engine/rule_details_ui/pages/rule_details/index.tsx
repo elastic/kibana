@@ -38,7 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { useGetEndpointExceptionsUnavailableComponent } from './hooks/use_get_endpoint_exceptions_unavailablle_component';
+import { useGetEndpointExceptionsUnavailableComponent } from './use_get_endpoint_exceptions_unavailablle_component';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
