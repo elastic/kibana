@@ -29,7 +29,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
-import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
 import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
 import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
 import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
@@ -37,6 +36,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
+import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
@@ -79,7 +79,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       packagePolicyId: _policy.id,
     });
     const [note, setNote] = useState('');
-    const [showWarningPanel, setShowWarningPanel] = useState(true);
 
     useEffect(() => {
       if (fetchedNote && !getNoteInProgress) {
@@ -360,11 +359,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     return (
       <>
-        <ProtectionUpdatesWarningPanel
-          showCallout={showWarningPanel}
-          onClose={() => setShowWarningPanel(false)}
-        />
-        <EuiSpacer size="m" />
         <EuiPanel
           data-test-subject="protection-updates-layout"
           hasBorder
@@ -412,6 +406,8 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           <EuiHorizontalRule margin="m" />
           <EuiSpacer size="m" />
           <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
+            <ProtectionUpdatesWarningPanel />
+            <EuiSpacer size="m" />
             {renderManifestOutdatedCallOut()}
             {renderContent()}
           </div>
