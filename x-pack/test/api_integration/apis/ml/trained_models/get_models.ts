@@ -32,16 +32,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await ml.api.cleanMlIndices();
+      await esDeleteAllIndices('user-index_dfa*');
+
       // delete created ingest pipelines
       await Promise.all(
         ['dfa_regression_model_alias', ...testModelIds].map((modelId) =>
           ml.api.deleteIngestPipeline(modelId)
         )
       );
-      await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
-
-      await esDeleteAllIndices('user-index_dfa*');
     });
 
     it('returns all trained models with associated pipelines including aliases', async () => {
