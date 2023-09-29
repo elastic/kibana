@@ -33,8 +33,8 @@ export const ValidChannelIdParamsSchema = schema.object({
 });
 
 export const PostMessageSubActionParamsSchema = schema.object({
-  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 0 })),
-  channelIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
+  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   text: schema.string({ minLength: 1 }),
 });
 

@@ -181,7 +181,7 @@ export const createExternalService = (
       // For now, we only allow one channel but we wanted
       // to have a array in case we need to allow multiple channels
       // in one actions
-      let channelToUse = channelIds[0];
+      let channelToUse = channelIds.length > 0 ? channelIds[0] : '';
       if (channelToUse.length === 0 && channels && channels.length > 0 && channels[0].length > 0) {
         channelToUse = channels[0];
       }
