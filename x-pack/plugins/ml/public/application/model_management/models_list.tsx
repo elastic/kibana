@@ -20,6 +20,8 @@ import {
   EuiTitle,
   SearchFilterConfig,
   EuiToolTip,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -44,6 +46,8 @@ import {
   ModelState,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { css } from '@emotion/react';
+import { useStorage } from '@kbn/ml-local-storage';
+import { ML_ELSER_CALLOUT_VISIBLE } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -162,10 +166,14 @@ export const ModelsList: FC<Props> = ({
   const {
     services: {
       application: { capabilities },
+      docLinks,
     },
   } = useMlKibana();
 
+  const nlpElserDocUrl = docLinks.links.ml.nlpElser;
+
   const { isNLPEnabled } = useEnabledFeatures();
+  const [isCalloutVisible, setIsCalloutVisible] = useStorage(ML_ELSER_CALLOUT_VISIBLE, true);
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -752,6 +760,34 @@ export const ModelsList: FC<Props> = ({
           onTableChange={onTableChange}
           sorting={sorting}
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+          childrenBetween={
+            isCalloutVisible ? (
+              <>
+                <EuiCallOut
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
+                      defaultMessage="New ELSER model now available"
+                    />
+                  }
+                  onDismiss={setIsCalloutVisible.bind(null, false)}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
+                    defaultMessage="ELSER model v2 release shows faster performance and better relevance for improved information retrieval."
+                  />{' '}
+                  <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                      defaultMessage="View documentation"
+                    />
+                  </EuiLink>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : null
+          }
         />
       </div>
       {modelsToDelete.length > 0 && (
