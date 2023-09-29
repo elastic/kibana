@@ -1271,7 +1271,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
       {
         defaultMessage:
-          'Controls whether API events are enabled. Set to false to disable API event collection. Default: true',
+          'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_disabled',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_disabled',
+      {
+        defaultMessage: 'A comma separated list of API names to selectively disable.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_verbose',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_verbose',
+      {
+        defaultMessage:
+          'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
       }
     ),
   },
@@ -1331,12 +1352,23 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.check_debug_registers',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.check_debug_registers',
+      {
+        defaultMessage:
+          'Check debug registers inline to detect the use of hardware breakpoints. Malware may use hardware breakpoints to forge benign-looking call stacks. Default: true',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.fileaccess',
     first_supported_version: '8.11',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
       {
-        defaultMessage: 'A value of 'false' overrides other config settings that would enable kernel fileaccess events. Default: true.',
+        defaultMessage: 'A value of false overrides other config settings that would enable kernel fileaccess events. Default: true.',
       }
     ),
   },
@@ -1347,7 +1379,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
       {
         defaultMessage:
-          'A value of 'false' overrides other config settings that would enable kernel image load events. Default: true.',
+          'A value of false overrides other config settings that would enable kernel image load events. Default: true.',
       }
     ),
   },
