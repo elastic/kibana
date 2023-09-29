@@ -15,9 +15,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { APP_NAME } from '../../../common/constants';
 import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-navigation';
 import { TestProviders } from '../../common/mock';
-import { useNavigateTo } from '../../common/lib/kibana';
-import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
-import { DashboardContainerContextProvider } from '../context/dashboard_container_context';
+import { useNavigation } from '../../common/lib/kibana';
 
 const mockDashboardTopNav = DashboardTopNav as jest.Mock;
 
@@ -25,7 +23,7 @@ jest.mock('../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../common/lib/kibana');
   return {
     ...actual,
-    useNavigateTo: jest.fn(),
+    useNavigation: jest.fn(),
     useCapabilities: jest.fn(() => ({ showWriteControls: true })),
   };
 });
@@ -34,7 +32,8 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardTopNav: jest.fn(() => <div data-test-subj="dashboard-top-nav" />),
 }));
 const mockCore = coreMock.createStart();
-const mockNavigateTo = jest.fn(({ url }: { url: string }) => url);
+const mockNavigateTo = jest.fn();
+const mockGetAppUrl = jest.fn();
 const mockGetSecuritySolutionUrl = jest.fn();
 const mockDashboardContainer = {
   select: jest.fn(),
@@ -42,22 +41,20 @@ const mockDashboardContainer = {
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
-    <DashboardContainerContextProvider dashboardContainer={mockDashboardContainer}>
-      <NavigationProvider core={mockCore}>{children}</NavigationProvider>
-    </DashboardContainerContextProvider>
+    <NavigationProvider core={mockCore}>{children}</NavigationProvider>
   </TestProviders>
 );
 
 describe('DashboardToolBar', () => {
   const mockOnLoad = jest.fn();
 
-  beforeAll(() => {
-    (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
-    (useGetSecuritySolutionUrl as jest.Mock).mockReturnValue(mockGetSecuritySolutionUrl);
-  });
   beforeEach(() => {
     jest.clearAllMocks();
-    render(<DashboardToolBar onLoad={mockOnLoad} />, {
+    (useNavigation as jest.Mock).mockReturnValue({
+      navigateTo: mockNavigateTo,
+      getAppUrl: mockGetAppUrl,
+    });
+    render(<DashboardToolBar onLoad={mockOnLoad} dashboardContainer={mockDashboardContainer} />, {
       wrapper,
     });
   });
@@ -74,19 +71,15 @@ describe('DashboardToolBar', () => {
   });
 
   it('should render the DashboardTopNav component with the correct breadcrumb', () => {
-    expect(mockGetSecuritySolutionUrl.mock.calls[1][0].deepLinkId).toEqual(
-      SecurityPageName.landing
-    );
+    expect(mockGetAppUrl.mock.calls[0][0].deepLinkId).toEqual(SecurityPageName.landing);
     expect(mockDashboardTopNav.mock.calls[0][0].customLeadingBreadCrumbs[0].text).toEqual(APP_NAME);
   });
 
   it('should render the DashboardTopNav component with the correct redirect to create dashboard url', () => {
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'dashboard' });
 
-    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].deepLinkId).toEqual(
-      SecurityPageName.dashboards
-    );
-    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].path).toEqual(`/create`);
+    expect(mockNavigateTo.mock.calls[0][0].deepLinkId).toEqual(SecurityPageName.dashboards);
+    expect(mockNavigateTo.mock.calls[0][0].path).toEqual(`/create`);
   });
 
   it('should render the DashboardTopNav component with the correct redirect to edit dashboard url', () => {
@@ -96,10 +89,8 @@ describe('DashboardToolBar', () => {
       destination: 'dashboard',
       id: mockDashboardId,
     });
-    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].deepLinkId).toEqual(
-      SecurityPageName.dashboards
-    );
-    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].path).toEqual(`${mockDashboardId}/edit`);
+    expect(mockNavigateTo.mock.calls[0][0].deepLinkId).toEqual(SecurityPageName.dashboards);
+    expect(mockNavigateTo.mock.calls[0][0].path).toEqual(`${mockDashboardId}/edit`);
   });
 
   it('should render the DashboardTopNav component with the correct props', () => {
