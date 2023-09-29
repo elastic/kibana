@@ -15,6 +15,7 @@ import {
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { APMTransactionDurationIndicator } from '../../domain/models';
@@ -23,6 +24,7 @@ import { InvalidQueryError } from '../../errors';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
+  GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
 
 export class GetPreviewData {
@@ -261,6 +263,41 @@ export class GetPreviewData {
     }));
   }
 
+  private async getTimesliceMetricPreviewData(
+    indicator: TimesliceMetricIndicator
+  ): Promise<GetPreviewDataResponse> {
+    const timestampField = indicator.params.timestampField;
+    const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
+    const getCustomMetricIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(
+      indicator
+    );
+    const result = await this.esClient.search({
+      index: indicator.params.index,
+      query: {
+        bool: {
+          filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+        },
+      },
+      aggs: {
+        perMinute: {
+          date_histogram: {
+            field: timestampField,
+            fixed_interval: '1m',
+          },
+          aggs: {
+            ...getCustomMetricIndicatorAggregation.execute('metric'),
+          },
+        },
+      },
+    });
+
+    // @ts-ignore buckets is not improperly typed
+    return result.aggregations?.perMinute.buckets.map((bucket) => ({
+      date: bucket.key_as_string,
+      sliValue: !!bucket.metric ? bucket.metric.value : null,
+    }));
+  }
+
   private async getCustomKQLPreviewData(
     indicator: KQLCustomIndicator
   ): Promise<GetPreviewDataResponse> {
@@ -313,6 +350,8 @@ export class GetPreviewData {
           return this.getHistogramPreviewData(params.indicator);
         case 'sli.metric.custom':
           return this.getCustomMetricPreviewData(params.indicator);
+        case 'sli.metric.timeslice':
+          return this.getTimesliceMetricPreviewData(params.indicator);
         default:
           assertNever(type);
       }

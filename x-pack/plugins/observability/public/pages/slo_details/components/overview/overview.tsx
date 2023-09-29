@@ -94,16 +94,26 @@ export function Overview({ slo }: Props) {
             ) : (
               <EuiText size="s">
                 {BUDGETING_METHOD_TIMESLICES} (
-                {i18n.translate(
-                  'xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethodDetails',
-                  {
-                    defaultMessage: '{duration} slices, {target} target',
-                    values: {
-                      duration: toDurationLabel(slo.objective.timesliceWindow!),
-                      target: numeral(slo.objective.timesliceTarget!).format(percentFormat),
-                    },
-                  }
-                )}
+                {slo.indicator.type === 'sli.metric.timeslice'
+                  ? i18n.translate(
+                      'xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethodDetailsForTimesliceMetric',
+                      {
+                        defaultMessage: '{duration} slices',
+                        values: {
+                          duration: toDurationLabel(slo.objective.timesliceWindow!),
+                        },
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethodDetails',
+                      {
+                        defaultMessage: '{duration} slices, {target} target',
+                        values: {
+                          duration: toDurationLabel(slo.objective.timesliceWindow!),
+                          target: numeral(slo.objective.timesliceTarget!).format(percentFormat),
+                        },
+                      }
+                    )}
                 )
               </EuiText>
             )

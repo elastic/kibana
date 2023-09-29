@@ -133,7 +133,7 @@ function transformPartialIndicatorState(
         params: Object.assign({}, CUSTOM_METRIC_DEFAULT_VALUES.params, indicator.params ?? {}),
       };
     default:
-      assertNever(indicatorType);
+      assertNever(indicatorType as never);
   }
 }
 

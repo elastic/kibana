@@ -37,7 +37,7 @@ export class GetCustomMetricIndicatorAggregation {
   private convertEquationToPainless(bucketsPath: Record<string, string>, equation: string) {
     const workingEquation = equation || Object.keys(bucketsPath).join(' + ');
     return Object.keys(bucketsPath).reduce((acc, key) => {
-      return acc.replace(key, `params.${key}`);
+      return acc.replaceAll(key, `params.${key}`);
     }, workingEquation);
   }
 

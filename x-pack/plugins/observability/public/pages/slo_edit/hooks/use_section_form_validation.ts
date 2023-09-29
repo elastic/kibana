@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MetricCustomIndicator } from '@kbn/slo-schema';
+import {
+  MetricCustomIndicator,
+  timesliceMetricBasicMetricWithField,
+  TimesliceMetricIndicator,
+  timesliceMetricPercentileMetric,
+} from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
 import { isObject } from 'lodash';
 import { CreateSLOForm } from '../types';
@@ -53,6 +58,39 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         ) &&
         isGoodParamsValid() &&
         isTotalParamsValid();
+      break;
+    case 'sli.metric.timeslice':
+      const isMetricParamsValid = () => {
+        const data = getValues(
+          'indicator.params.metric'
+        ) as TimesliceMetricIndicator['params']['metric'];
+        const isEquationValid = !getFieldState('indicator.params.metric.equation').invalid;
+        const areMetricsValid =
+          isObject(data) &&
+          (data.metrics ?? []).every((metric) => {
+            if (timesliceMetricBasicMetricWithField.is(metric)) {
+              return Boolean(metric.field);
+            }
+            if (timesliceMetricPercentileMetric.is(metric)) {
+              return Boolean(metric.field) && Boolean(metric.percentile);
+            }
+            return true;
+          });
+        return isEquationValid && areMetricsValid;
+      };
+
+      isIndicatorSectionValid =
+        (
+          [
+            'indicator.params.index',
+            'indicator.params.filter',
+            'indicator.params.timestampField',
+          ] as const
+        ).every((field) => !getFieldState(field).invalid) &&
+        (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
+          (field) => !!getValues(field)
+        ) &&
+        isMetricParamsValid();
       break;
     case 'sli.histogram.custom':
       const isRangeValid = (type: 'good' | 'total') => {
