@@ -496,6 +496,7 @@
     "@kbn/license-api-guard-plugin": "link:x-pack/plugins/license_api_guard",
     "@kbn/license-management-plugin": "link:x-pack/plugins/license_management",
     "@kbn/licensing-plugin": "link:x-pack/plugins/licensing",
+    "@kbn/links-plugin": "link:src/plugins/links",
     "@kbn/lists-plugin": "link:x-pack/plugins/lists",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
