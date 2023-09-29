@@ -68,7 +68,7 @@ export const useLatestFindingsDataView = (dataView: string) => {
     if (dataView === LATEST_FINDINGS_INDEX_PATTERN) {
       Object.entries(cloudSecurityFieldLabels).forEach(([field, label]) => {
         if (
-          !dataViewObj.getFieldAttrs()[field].customLabel ||
+          !dataViewObj?.getFieldAttrs()?.[field]?.customLabel ||
           dataViewObj.getFieldAttrs()[field].customLabel === field
         ) {
           dataViewObj.setFieldCustomLabel(field, label);
