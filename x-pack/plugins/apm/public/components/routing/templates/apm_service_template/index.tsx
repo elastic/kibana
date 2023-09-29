@@ -27,6 +27,7 @@ import {
   isAWSLambdaAgent,
   isAzureFunctionsAgent,
   isServerlessAgent,
+  isRumOrMobileAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -406,8 +407,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       hidden:
         !isProfilingAvailable ||
-        isMobileAgentName(agentName) ||
-        isRumAgentName(agentName),
+        isRumOrMobileAgent(agentName) ||
+        isAWSLambdaAgent(serverlessType),
       append: (
         <EuiBadge color="accent">
           {i18n.translate('xpack.apm.universalProfiling.newLabel', {
