@@ -43,9 +43,9 @@ export const CodeEditorInput = ({
   type,
   isSavingEnabled,
   defaultValue,
-  onChange: onChangeProp,
+  onInputChange,
 }: CodeEditorInputProps) => {
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
+  const onUpdate = useUpdate({ onInputChange, field });
 
   const onChange: CodeEditorProps['onChange'] = (inputValue) => {
     let newUnsavedValue;

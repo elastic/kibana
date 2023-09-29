@@ -74,7 +74,10 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
 };
 
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic);
+  const {
+    hasInitialized,
+    organization: { kibanaUIsEnabled },
+  } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
   const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
 
@@ -99,53 +102,58 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
 
   return (
     <Routes>
-      <Route path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
-      <Route path={SOURCE_ADDED_PATH}>
-        <SourceAdded />
-      </Route>
       <Route exact path="/">
         <Overview />
       </Route>
-      <Route path={PERSONAL_PATH}>
-        <Routes>
-          <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
-          <Route path={PRIVATE_SOURCES_PATH}>
+      {kibanaUIsEnabled && (
+        <>
+          <Route path={SETUP_GUIDE_PATH}>
+            <SetupGuide />
+          </Route>
+          <Route path={SOURCE_ADDED_PATH}>
+            <SourceAdded />
+          </Route>
+          <Route path={PERSONAL_PATH}>
+            <Routes>
+              <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
+              <Route path={PRIVATE_SOURCES_PATH}>
+                <SourcesRouter />
+              </Route>
+              <Route path={PERSONAL_SETTINGS_PATH}>
+                <AccountSettings />
+              </Route>
+              <Route path={OAUTH_AUTHORIZE_PATH}>
+                <OAuthAuthorize />
+              </Route>
+              <Route path={SEARCH_AUTHORIZE_PATH}>
+                <SearchAuthorize />
+              </Route>
+              <Route>
+                <NotFound isOrganization={false} />
+              </Route>
+            </Routes>
+          </Route>
+          <Route path={SOURCES_PATH}>
             <SourcesRouter />
           </Route>
-          <Route path={PERSONAL_SETTINGS_PATH}>
-            <AccountSettings />
+          <Route path={GROUPS_PATH}>
+            <GroupsRouter />
           </Route>
-          <Route path={OAUTH_AUTHORIZE_PATH}>
-            <OAuthAuthorize />
+          <Route path={USERS_AND_ROLES_PATH}>
+            <RoleMappings />
           </Route>
-          <Route path={SEARCH_AUTHORIZE_PATH}>
-            <SearchAuthorize />
+          <Route path={API_KEYS_PATH}>
+            <ApiKeys />
           </Route>
-          <Route>
-            <NotFound isOrganization={false} />
+          <Route path={SECURITY_PATH}>
+            <Security />
           </Route>
-        </Routes>
-      </Route>
-      <Route path={SOURCES_PATH}>
-        <SourcesRouter />
-      </Route>
-      <Route path={GROUPS_PATH}>
-        <GroupsRouter />
-      </Route>
-      <Route path={USERS_AND_ROLES_PATH}>
-        <RoleMappings />
-      </Route>
-      <Route path={API_KEYS_PATH}>
-        <ApiKeys />
-      </Route>
-      <Route path={SECURITY_PATH}>
-        <Security />
-      </Route>
-      <Route path={ORG_SETTINGS_PATH}>
-        <SettingsRouter />
-      </Route>
+          <Route path={ORG_SETTINGS_PATH}>
+            <SettingsRouter />
+          </Route>
+        </>
+      )}
+
       <Route>
         <NotFound />
       </Route>

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import type { PaletteOutput } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -96,7 +96,7 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State,
   seriesType?: SeriesType,
-  mainPalette?: PaletteOutput,
+  mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
@@ -230,7 +230,7 @@ function getSuggestionsForLayer({
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
-  mainPalette?: PaletteOutput;
+  mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
@@ -528,7 +528,7 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
   hide?: boolean;
-  mainPalette?: PaletteOutput;
+  mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
@@ -540,10 +540,11 @@ function buildSuggestion({
   const newLayer: XYDataLayerConfig = {
     ...(existingLayer || {}),
     palette:
-      mainPalette ||
-      (existingLayer && 'palette' in existingLayer
+      mainPalette?.type === 'legacyPalette'
+        ? mainPalette.value
+        : existingLayer && 'palette' in existingLayer
         ? (existingLayer as XYDataLayerConfig).palette
-        : undefined),
+        : undefined,
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
@@ -554,6 +555,11 @@ function buildSuggestion({
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: LayerTypes.DATA,
+    colorMapping: !mainPalette
+      ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+      : mainPalette?.type === 'colorMapping'
+      ? mainPalette.value
+      : undefined,
   };
 
   const hasDateHistogramDomain =
