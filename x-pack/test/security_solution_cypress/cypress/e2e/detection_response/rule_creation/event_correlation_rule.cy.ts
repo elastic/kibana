@@ -52,9 +52,10 @@ import {
   selectEqlRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -78,7 +79,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
     const expectedNumberOfAlerts = '2 alerts';
 
     it('Creates and enables a new EQL rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
@@ -155,7 +156,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
 
     it('Creates and enables a new EQL rule with a sequence', function () {
       login();
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);

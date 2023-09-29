@@ -100,33 +100,19 @@ interface BasicTimelineTab {
 }
 
 const AssistantTab: React.FC<{
-  isAssistantEnabled: boolean;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: TimelineId;
   shouldRefocusPrompt: boolean;
   setConversationId: Dispatch<SetStateAction<string>>;
-}> = memo(
-  ({
-    isAssistantEnabled,
-    renderCellValue,
-    rowRenderers,
-    timelineId,
-    shouldRefocusPrompt,
-    setConversationId,
-  }) => (
-    <Suspense fallback={<EuiSkeletonText lines={10} />}>
-      <AssistantTabContainer>
-        <Assistant
-          isAssistantEnabled={isAssistantEnabled}
-          conversationId={TIMELINE_CONVERSATION_TITLE}
-          setConversationId={setConversationId}
-          shouldRefocusPrompt={shouldRefocusPrompt}
-        />
-      </AssistantTabContainer>
-    </Suspense>
-  )
-);
+}> = memo(({ shouldRefocusPrompt, setConversationId }) => (
+  <Suspense fallback={<EuiSkeletonText lines={10} />}>
+    <AssistantTabContainer>
+      <Assistant
+        conversationId={TIMELINE_CONVERSATION_TITLE}
+        setConversationId={setConversationId}
+        shouldRefocusPrompt={shouldRefocusPrompt}
+      />
+    </AssistantTabContainer>
+  </Suspense>
+));
 
 AssistantTab.displayName = 'AssistantTab';
 
@@ -147,7 +133,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     showTimeline,
   }) => {
     const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
-    const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+    const { hasAssistantPrivilege } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -235,10 +221,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             {(activeTimelineTab === TimelineTabs.securityAssistant ||
               hasTimelineConversationStarted) && (
               <AssistantTab
-                isAssistantEnabled={isAssistantEnabled}
-                renderCellValue={renderCellValue}
-                rowRenderers={rowRenderers}
-                timelineId={timelineId}
                 setConversationId={setConversationId}
                 shouldRefocusPrompt={
                   showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
@@ -252,7 +234,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             $isVisible={TimelineTabs.discover === activeTimelineTab}
             data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
           >
-            <DiscoverTab />
+            <DiscoverTab timelineId={timelineId} />
           </HideShowContainer>
         )}
       </>

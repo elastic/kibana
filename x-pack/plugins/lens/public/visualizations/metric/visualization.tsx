@@ -369,7 +369,7 @@ export const getMetricVisualization = ({
       state ?? {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
-        palette: mainPalette,
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
       }
     );
   },

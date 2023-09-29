@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import isEmpty from 'lodash/isEmpty';
 import { EnrichmentRangePicker } from '../../../common/components/event_details/cti_details/enrichment_range_picker';
 import { ThreatDetailsView } from '../../../common/components/event_details/cti_details/threat_details_view';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
-import { THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID } from './test_ids';
+import { THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID } from './test_ids';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threat-intelligence-details';
 
@@ -29,33 +30,20 @@ export const ThreatIntelligenceDetails: React.FC = () => {
     setRange,
   } = useThreatIntelligenceDetails();
 
-  if (isEventDataLoading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="spaceAround"
-        data-test-subj={THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  return (
-    <>
-      <ThreatDetailsView
-        before={null}
-        loading={isLoading}
-        enrichments={enrichments}
-        showInvestigationTimeEnrichments={!isEmpty(eventFields)}
-      >
-        <>
-          <EnrichmentRangePicker setRange={setRange} loading={isEnrichmentsLoading} range={range} />
-          <EuiSpacer size="m" />
-        </>
-      </ThreatDetailsView>
-    </>
+  return isEventDataLoading ? (
+    <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
+  ) : (
+    <ThreatDetailsView
+      before={null}
+      loading={isLoading}
+      enrichments={enrichments}
+      showInvestigationTimeEnrichments={!isEmpty(eventFields)}
+    >
+      <>
+        <EnrichmentRangePicker setRange={setRange} loading={isEnrichmentsLoading} range={range} />
+        <EuiSpacer size="m" />
+      </>
+    </ThreatDetailsView>
   );
 };
 

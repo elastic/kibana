@@ -66,6 +66,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -373,6 +375,7 @@ beforeEach(() => {
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -390,6 +393,7 @@ beforeEach(() => {
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   });
 
   rulesClient = new RulesClient(rulesClientParams);
