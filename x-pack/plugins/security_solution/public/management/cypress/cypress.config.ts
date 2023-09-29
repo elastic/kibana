@@ -6,8 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { dataLoaders } from './cypress/support/data_loaders';
+import { dataLoaders } from './support/data_loaders';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
