@@ -23,7 +23,7 @@ const tabs = [
     name: 'Tab2',
     label: 'Tab2',
     component: null,
-  }
+  },
 ];
 
 describe('getNextTab', () => {
@@ -50,7 +50,7 @@ describe('getNextTab', () => {
       name: 'noLongerAvailableTab',
       label: 'noLongerAvailableTab',
       component: null,
-    }
+    };
     test('should return first tab when preferred tabs are not requested', () => {
       expect(getNextTab(currentTab, tabs)).toEqual(tabs[0]);
     });

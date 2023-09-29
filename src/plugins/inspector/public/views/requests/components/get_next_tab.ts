@@ -8,7 +8,11 @@
 
 import type { DetailViewData } from './types';
 
-export function getNextTab(currentTab: DetailViewData | null, tabs: DetailViewData[], preferredTabs?: string[]) {
+export function getNextTab(
+  currentTab: DetailViewData | null,
+  tabs: DetailViewData[],
+  preferredTabs?: string[]
+) {
   const firstTab = tabs.length ? tabs[0] : null;
   if (currentTab || !preferredTabs) {
     return firstTab;
@@ -23,4 +27,3 @@ export function getNextTab(currentTab: DetailViewData | null, tabs: DetailViewDa
 
   return preferredTab ? preferredTab : firstTab;
 }
-

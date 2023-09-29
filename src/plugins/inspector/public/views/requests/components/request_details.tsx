@@ -73,7 +73,7 @@ export function RequestDetails(props: Props) {
     }
 
     setSelectedDetail(getNextTab(selectedDetail, nextAvailableDetails, props.initialTabs));
-    
+
     // do not re-run on selectedDetail change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.initialTabs, props.request]);
