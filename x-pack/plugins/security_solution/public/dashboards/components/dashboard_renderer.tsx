@@ -16,6 +16,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_UI_ID } from '../../../common';
 import { useSecurityTags } from '../context/dashboard_context';
+import { DASHBOARDS_PATH } from '../../../common/constants';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
