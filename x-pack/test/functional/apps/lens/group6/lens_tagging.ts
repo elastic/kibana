@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const lensTag = 'extreme-lens-tag';
   const lensTitle = 'lens tag test';
 
-  // Failing: See https://github.com/elastic/kibana/issues/167561
-  describe.skip('lens tagging', () => {
+  describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -84,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         {
           submit: true,
+          clearWithKeyboard: true,
         }
       );
 
