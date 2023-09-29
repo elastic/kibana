@@ -14,4 +14,8 @@ export default createTestConfig({
     reportName: 'Serverless Security API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlSec'] },
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/security/config/elasticsearch.yml
+  esServerArgs: ['xpack.ml.nlp.enabled=false'],
 });

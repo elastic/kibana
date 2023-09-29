@@ -50,6 +50,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contractStartServicesMock } from '../../../mocks';
 
 const mockUiSettings: Record<string, unknown> = {
@@ -218,6 +219,7 @@ export const createStartServicesMock = (
     },
     customDataService,
     uiActions: uiActionsPluginMock.createStartContract(),
+    savedSearch: savedSearchPluginMock.createStartContract(),
   } as unknown as StartServices;
 };
 

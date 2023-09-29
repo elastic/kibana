@@ -24,7 +24,7 @@ export const createQueue = (
   logger.debug(`createQueue > index name: ${indexName}`);
   return async.cargoQueue(
     (docs: object[], callback) => {
-      const body: any[] = [];
+      const body: object[] = [];
       docs.forEach((doc) => {
         body.push({
           create: {
@@ -34,7 +34,7 @@ export const createQueue = (
         body.push(omit(doc, 'namespace'));
       });
       esClient
-        .bulk({ body })
+        .bulk({ body, refresh: true })
         .then((resp) => {
           if (resp.errors) {
             logger.error(

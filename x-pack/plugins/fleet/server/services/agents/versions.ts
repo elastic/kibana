@@ -60,8 +60,7 @@ export const getAvailableVersions = async ({
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
     versionsToDisplay = uniq(versions) as string[];
 
-    const appendCurrentVersion =
-      includeCurrentVersion ?? !config?.internal?.onlyAllowAgentUpgradeToKnownVersions;
+    const appendCurrentVersion = includeCurrentVersion;
 
     if (appendCurrentVersion) {
       // Add current version if not already present

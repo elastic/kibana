@@ -62,7 +62,7 @@ export interface InfraClientSetupExports {
 
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
-  metricsExplorerViews: MetricsExplorerViewsServiceStart;
+  metricsExplorerViews?: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
   locators: InfraLocators;
   ContainerMetricsTable: (

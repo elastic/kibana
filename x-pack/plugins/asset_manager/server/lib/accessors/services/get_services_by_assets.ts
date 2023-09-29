@@ -18,7 +18,7 @@ export async function getServicesByAssets(
   }
 
   const services = await getAssets({
-    esClient: options.esClient,
+    elasticsearchClient: options.elasticsearchClient,
     filters: {
       kind: 'service',
       from: options.from,
@@ -32,7 +32,7 @@ export async function getServicesByAssets(
 async function getServicesByParent(
   options: GetServicesOptionsInjected
 ): Promise<{ services: Asset[] }> {
-  const { descendants } = await getAllRelatedAssets(options.esClient, {
+  const { descendants } = await getAllRelatedAssets(options.elasticsearchClient, {
     from: options.from,
     to: options.to,
     maxDistance: 5,
