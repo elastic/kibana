@@ -62,6 +62,7 @@ export function ServiceDashboards() {
         return callApmApi(
           `GET /internal/apm/services/{serviceName}/dashboards`,
           {
+            isCachable: false,
             params: {
               path: { serviceName },
               query: { start, end },
@@ -75,7 +76,10 @@ export function ServiceDashboards() {
 
   useEffect(() => {
     const filteredServiceDashbords = (data?.serviceDashboards ?? []).reduce(
-      (result, serviceDashboard) => {
+      (
+        result: MergedServiceDashboard[],
+        serviceDashboard: SavedServiceDashboard
+      ) => {
         const matchedDashboard = allAvailableDashboards.find(
           ({ id }) => id === serviceDashboard.dashboardSavedObjectId
         );

@@ -39,7 +39,7 @@ export function DashboardSelector({
     []
   );
 
-  function onChange(newDashboardId: string) {
+  function onChange(newDashboardId?: string) {
     history.push({
       ...history.location,
       search: fromQuery({
@@ -47,7 +47,7 @@ export function DashboardSelector({
         dashboardId: newDashboardId,
       }),
     });
-    handleOnChange();
+    handleOnChange(newDashboardId);
   }
   return (
     <EuiComboBox

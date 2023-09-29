@@ -7,15 +7,15 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 import { SaveDashboardModal } from './save_dashboard_modal';
+import { MergedServiceDashboard } from '..';
 
 export function EditDashboard({
   onRefresh,
   currentDashboard,
 }: {
   onRefresh: () => void;
-  currentDashboard: SavedServiceDashboard;
+  currentDashboard: MergedServiceDashboard;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   return (
