@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should resolve a case with no comments', async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest());
+      const postedCase = await createCase(supertest, postCaseReq);
       const resolvedCase = await resolveCase({
         supertest,
         caseId: postedCase.id,
