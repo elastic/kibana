@@ -9,6 +9,8 @@
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import React, { FC } from 'react';
 
+import { NavigationPanel } from './panel';
+
 interface Props {
   unstyled?: boolean;
   footerChildren?: React.ReactNode;
@@ -28,6 +30,7 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
           {footerChildren && (
             <EuiCollapsibleNavBeta.Footer>{footerChildren}</EuiCollapsibleNavBeta.Footer>
           )}
+          <NavigationPanel />
         </>
       )}
     </>
