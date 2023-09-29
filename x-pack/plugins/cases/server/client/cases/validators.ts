@@ -103,17 +103,27 @@ export const validateRequiredCustomFields = ({
     }
   }
 
+  const notRegisteredCustomFields = differenceWith(
+    requestCustomFields ?? [],
+    customFieldsConfiguration,
+    (requestedVal, requiredVal) => requestedVal.key === requiredVal.key
+  ).map((e) => e.key);
+
+  if (notRegisteredCustomFields.length) {
+    throw Boom.badRequest(`Unknown custom fields: ${notRegisteredCustomFields}`);
+  }
+
   const requiredCustomFields = customFieldsConfiguration.filter(
     (customField) => customField.required
   );
 
-  const invalidCustomFieldKeys = differenceWith(
+  const missingRequiredCustomFields = differenceWith(
     requiredCustomFields,
     requestCustomFields ?? [],
     (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
   ).map((e) => e.key);
 
-  if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
+  if (missingRequiredCustomFields.length) {
+    throw Boom.badRequest(`Missing required custom fields: ${missingRequiredCustomFields}`);
   }
 };
