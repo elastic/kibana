@@ -21,7 +21,7 @@
     "@kbn/i18n-react",
     "@kbn/ui-theme",
     "@kbn/cloud-experiments-plugin",
-    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

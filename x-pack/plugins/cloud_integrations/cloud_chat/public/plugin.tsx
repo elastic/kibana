@@ -13,9 +13,8 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ReplaySubject, first } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
@@ -89,16 +88,14 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
 
       return (
         <CloudChatContextProvider>
-          <KibanaThemeProvider theme={core.theme}>
-            <I18nProvider>
-              {variant && (
-                <ChatExperimentSwitcher
-                  location$={core.application.currentLocation$}
-                  variant={variant}
-                />
-              )}
-            </I18nProvider>
-          </KibanaThemeProvider>
+          <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+            {variant && (
+              <ChatExperimentSwitcher
+                location$={core.application.currentLocation$}
+                variant={variant}
+              />
+            )}
+          </KibanaRenderContextProvider>
         </CloudChatContextProvider>
       );
     }
