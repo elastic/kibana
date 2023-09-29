@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardContainerInput } from '../../../common';
 
-export interface DashboardSessionStorageServiceType {
+export interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
   getState: (id: string | undefined) => Partial<DashboardContainerInput> | undefined;
   setState: (id: string | undefined, newState: Partial<DashboardContainerInput>) => void;
+  getViewMode: () => ViewMode;
+  storeViewMode: (viewMode: ViewMode) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
   dashboardHasUnsavedEdits: (id?: string) => boolean;
 }
