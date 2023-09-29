@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LeftPanelContext } from '../context';
 import { rawEventData, TestProviders } from '../../../common/mock';
-import { RESPONSE_DETAILS_TEST_ID, RESPONSE_NO_DATA_TEST_ID } from './test_ids';
+import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
@@ -58,6 +58,9 @@ jest.mock('../../../common/lib/kibana', () => {
     }),
   };
 });
+
+const NO_DATA_MESSAGE =
+  "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actionsExternal link(opens in a new tab or window).";
 
 const defaultContextValue = {
   dataAsNestedObject: {
@@ -114,7 +117,7 @@ describe('<ResponseDetails />', () => {
     expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
-    expect(wrapper.queryByTestId(RESPONSE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).not.toHaveTextContent(NO_DATA_MESSAGE);
   });
 
   it('should render the view with osquery only', () => {
@@ -135,9 +138,6 @@ describe('<ResponseDetails />', () => {
     expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
-    expect(wrapper.getByTestId(RESPONSE_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId(RESPONSE_NO_DATA_TEST_ID)).toHaveTextContent(
-      'There are no response actions defined for this event. To add some, edit the rule’s settings and set up response actionsExternal link(opens in a new tab or window).'
-    );
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
   });
 });

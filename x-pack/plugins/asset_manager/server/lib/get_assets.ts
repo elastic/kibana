@@ -19,7 +19,7 @@ interface GetAssetsOptions extends ElasticsearchAccessorOptions {
 }
 
 export async function getAssets({
-  esClient,
+  elasticsearchClient,
   size = 100,
   filters = {},
 }: GetAssetsOptions): Promise<Asset[]> {
@@ -125,6 +125,6 @@ export async function getAssets({
 
   debug('Performing Get Assets Query', '\n\n', JSON.stringify(dsl, null, 2));
 
-  const response = await esClient.search<Asset>(dsl);
+  const response = await elasticsearchClient.search<Asset>(dsl);
   return response.hits.hits.map((hit) => hit._source).filter((asset): asset is Asset => !!asset);
 }

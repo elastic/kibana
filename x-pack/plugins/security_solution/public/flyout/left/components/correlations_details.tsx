@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CORRELATIONS_DETAILS_NO_DATA_TEST_ID } from './test_ids';
+import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 import { RelatedCases } from './related_cases';
@@ -56,7 +56,7 @@ export const CorrelationsDetails: React.FC = () => {
     showSuppressedAlerts;
 
   return (
-    <>
+    <EuiPanel paddingSize="none" data-test-subj={CORRELATIONS_DETAILS_TEST_ID} color="transparent">
       {canShowAtLeastOneInsight ? (
         <EuiFlexGroup gutterSize="l" direction="column">
           {showSuppressedAlerts && (
@@ -98,14 +98,12 @@ export const CorrelationsDetails: React.FC = () => {
           )}
         </EuiFlexGroup>
       ) : (
-        <p data-test-subj={CORRELATIONS_DETAILS_NO_DATA_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.noDataDescription"
-            defaultMessage="No correlations data available."
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.noDataDescription"
+          defaultMessage="No correlations data available."
+        />
       )}
-    </>
+    </EuiPanel>
   );
 };
 

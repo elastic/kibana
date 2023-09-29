@@ -20,8 +20,7 @@ import { waitForFleetSetup } from './helpers';
 
 const logFilePath = path.join(__dirname, 'logs.log');
 
-// Failing: See https://github.com/elastic/kibana/issues/156245
-describe.skip('fleet usage telemetry', () => {
+describe('fleet usage telemetry', () => {
   let core: any;
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
@@ -218,7 +217,7 @@ describe.skip('fleet usage telemetry', () => {
             version: '8.6.0',
           },
           last_checkin_status: 'online',
-          last_checkin: '2023-09-13T12:26:24Z',
+          last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
           active: true,
           policy_id: 'policy2',
         },
