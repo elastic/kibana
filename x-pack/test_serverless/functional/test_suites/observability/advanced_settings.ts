@@ -22,6 +22,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('settings');
     });
 
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
+    });
+
     it('renders the page', async () => {
       await retry.waitFor('title to be visible', async () => {
         return await testSubjects.exists('managementSettingsTitle');
