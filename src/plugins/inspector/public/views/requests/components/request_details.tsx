@@ -31,28 +31,28 @@ interface DetailViewData {
 
 const DETAILS: DetailViewData[] = [
   {
-    name: 'statistics',
+    name: 'Statistics',
     label: i18n.translate('inspector.requests.statisticsTabLabel', {
       defaultMessage: 'Statistics',
     }),
     component: RequestDetailsStats,
   },
   {
-    name: 'clusters',
+    name: 'Clusters',
     label: i18n.translate('inspector.requests.clustersTabLabel', {
       defaultMessage: 'Clusters',
     }),
     component: ClustersView,
   },
   {
-    name: 'request',
+    name: 'Request',
     label: i18n.translate('inspector.requests.requestTabLabel', {
       defaultMessage: 'Request',
     }),
     component: RequestDetailsRequest,
   },
   {
-    name: 'response',
+    name: 'Response',
     label: i18n.translate('inspector.requests.responseTabLabel', {
       defaultMessage: 'Response',
     }),
@@ -79,7 +79,7 @@ export function RequestDetails(props: Props) {
     const firstDetail = nextAvailableDetails.length ? nextAvailableDetails[0] : null;
     const initialTabName = props.initialTabs
       ? props.initialTabs.find((tabName) => {
-          return nextAvailableDetails.some(({ name }) => tabName === name);
+          return nextAvailableDetails.some(({ name }) => tabName.toLowerCase() === name.toLowerCase());
         })
       : undefined;
     const initialDetail = initialTabName
