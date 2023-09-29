@@ -158,6 +158,9 @@ export const RULE_NAME_INPUT =
 
 export const RULE_NAME_OVERRIDE = '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]';
 
+export const RULE_NAME_OVERRIDE_FOR_ESQL =
+  '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType"]';
+
 export const RULE_STATUS = '[data-test-subj="ruleStatus"]';
 
 export const RULE_TIMESTAMP_OVERRIDE =

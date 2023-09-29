@@ -7,7 +7,7 @@
 
 import { getEsqlRule } from '../../../objects/rule';
 
-import { CUSTOM_QUERY_DETAILS } from '../../../screens/rule_details';
+import { CUSTOM_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../screens/rule_details';
 
 import { ESQL_QUERY_BAR } from '../../../screens/create_new_rule';
 
@@ -16,7 +16,13 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import { getDetails } from '../../../tasks/rule_details';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
-import { clearEsqlQueryBar, fillEsqlQueryBar } from '../../../tasks/create_new_rule';
+import {
+  clearEsqlQueryBar,
+  fillEsqlQueryBar,
+  fillOverrideEsqlRuleName,
+  goToAboutStepTab,
+  expandAdvancedSettings,
+} from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 
 import { editFirstRule } from '../../../tasks/alerts_detection_rules';
@@ -54,5 +60,36 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
     // ensure updated query is displayed on details page
     getDetails(CUSTOM_QUERY_DETAILS).should('have.text', expectedValidEsqlQuery);
+  });
+
+  it('edits ES|QL rule query and override rule name with new property', () => {
+    visit(RULES_MANAGEMENT_URL);
+    editFirstRule();
+    clearEsqlQueryBar();
+    fillEsqlQueryBar(expectedValidEsqlQuery);
+
+    goToAboutStepTab();
+    expandAdvancedSettings();
+    fillOverrideEsqlRuleName('event.category');
+
+    saveEditedRule();
+
+    // ensure rule name override is displayed on details page
+    getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'event.category');
+  });
+
+  it('adds ES|QL override rule name on edit', () => {
+    visit(RULES_MANAGEMENT_URL);
+    editFirstRule();
+
+    goToAboutStepTab();
+    expandAdvancedSettings();
+    // this field defined to be returned in rule query
+    fillOverrideEsqlRuleName('test_id');
+
+    saveEditedRule();
+
+    // ensure rule name override is displayed on details page
+    getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
   });
 });

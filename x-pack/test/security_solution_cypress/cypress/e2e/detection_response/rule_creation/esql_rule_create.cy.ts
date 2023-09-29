@@ -8,7 +8,11 @@
 import { getEsqlRule } from '../../../objects/rule';
 
 import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../../screens/alerts_detection_rules';
-import { RULE_NAME_HEADER, RULE_TYPE_DETAILS } from '../../../screens/rule_details';
+import {
+  RULE_NAME_HEADER,
+  RULE_TYPE_DETAILS,
+  RULE_NAME_OVERRIDE_DETAILS,
+} from '../../../screens/rule_details';
 
 import {
   ESQL_TYPE,
@@ -28,6 +32,7 @@ import {
   getDefineContinueButton,
   fillEsqlQueryBar,
   pressRuleCreateBtn,
+  fillAboutSpecificEsqlRuleAndContinue,
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -73,6 +78,21 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
       cy.get(RULE_NAME).should('have.text', rule.name);
+    });
+
+    // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
+    it('creates an ES|QL rule and overrides its name', function () {
+      visit(CREATE_RULE_URL);
+
+      selectEsqlRuleType();
+
+      fillDefineEsqlRuleAndContinue(rule);
+      fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
+      fillScheduleRuleAndContinue(rule);
+      pressRuleCreateBtn();
+
+      // ensure rule name override is displayed on details page
+      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
     });
   });
 
