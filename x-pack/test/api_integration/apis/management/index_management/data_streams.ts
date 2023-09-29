@@ -117,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -156,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: testDataStreamName,
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -190,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: testDataStreamName,
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
