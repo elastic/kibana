@@ -171,26 +171,29 @@ export const waitForHostToEnroll = async (
   return found;
 };
 
+export const fetchFleetServerHostList = async (
+  kbnClient: KbnClient
+): Promise<GetFleetServerHostsResponse> => {
+  return kbnClient
+    .request<GetFleetServerHostsResponse>({
+      method: 'GET',
+      path: fleetServerHostsRoutesService.getListPath(),
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
 /**
  * Returns the URL for the default Fleet Server connected to the stack
  * @param kbnClient
  */
 export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string | undefined> => {
-  const fleetServerListResponse = await kbnClient
-    .request<GetFleetServerHostsResponse>({
-      method: 'GET',
-      path: fleetServerHostsRoutesService.getListPath(),
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
-      query: {
-        perPage: 100,
-      },
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
+  const fleetServerListResponse = await fetchFleetServerHostList(kbnClient);
 
-  // TODO:PT need to also pull in the Proxies and use that instead if defiend for url
+  // TODO:PT need to also pull in the Proxies and use that instead if defined for url?
 
   let url: string | undefined;
 
@@ -451,6 +454,8 @@ export const generateFleetServiceToken = async (
   kbnClient: KbnClient,
   logger: ToolingLog
 ): Promise<string> => {
+  logger.info(`Generating new Fleet Service Token`);
+
   const serviceToken: string = await kbnClient
     .request<GenerateServiceTokenResponse>({
       method: 'POST',
