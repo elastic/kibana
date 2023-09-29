@@ -28,5 +28,6 @@
     "@kbn/datemath",
     "@kbn/es-types",
     "@kbn/config-schema",
+    "@kbn/es-query",
   ]
 }
