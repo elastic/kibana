@@ -35,7 +35,7 @@ a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
 
-a| <<openai-action-type,OpenAI>>
+a| <<gen-ai-action-type,OpenAI>>
 
 | Send a request to OpenAI.
 

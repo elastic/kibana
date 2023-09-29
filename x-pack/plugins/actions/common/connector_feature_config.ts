@@ -25,12 +25,12 @@ export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
-export const GenerativeAIConnectorFeatureId = 'generativeAI';
+export const GeneralConnectorFeatureId = 'general';
 
-const compatibilityGenerativeAI = i18n.translate(
-  'xpack.actions.availableConnectorFeatures.compatibility.generativeAI',
+const compatibilityGeneral = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.general',
   {
-    defaultMessage: 'Generative AI',
+    defaultMessage: 'General',
   }
 );
 
@@ -80,10 +80,10 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityAlertingRules,
 };
 
-export const GenerativeAIFeature: ConnectorFeatureConfig = {
-  id: GenerativeAIConnectorFeatureId,
-  name: compatibilityGenerativeAI,
-  compatibility: compatibilityGenerativeAI,
+export const GeneralFeature: ConnectorFeatureConfig = {
+  id: GeneralConnectorFeatureId,
+  name: compatibilityGeneral,
+  compatibility: compatibilityGeneral,
 };
 
 const AllAvailableConnectorFeatures = {
@@ -91,7 +91,7 @@ const AllAvailableConnectorFeatures = {
   [CasesConnectorFeature.id]: CasesConnectorFeature,
   [UptimeConnectorFeature.id]: UptimeConnectorFeature,
   [SecuritySolutionFeature.id]: SecuritySolutionFeature,
-  [GenerativeAIFeature.id]: GenerativeAIFeature,
+  [GeneralFeature.id]: GeneralFeature,
 };
 
 export function areValidFeatures(ids: string[]) {
