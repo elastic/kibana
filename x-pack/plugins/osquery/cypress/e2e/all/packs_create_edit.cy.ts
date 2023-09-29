@@ -509,7 +509,7 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('should verify that packs are triggered', { tags: ['@ess', '@serverless'] }, () => {
+  describe('should verify that packs are triggered', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     let packId: string;
     let packName: string;
 
