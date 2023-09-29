@@ -35,6 +35,7 @@ import { CustomFieldFlyout } from '../custom_fields/flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 import { addOrReplaceCustomField } from '../custom_fields/utils';
+import { useLicense } from '../../common/use_license';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -58,6 +59,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
+  const license = useLicense();
+  const hasMinimumLicensePermissions = license.isAtLeastGold();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -86,6 +89,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     mutateAsync: persistCaseConfigureAsync,
     isLoading: isPersistingConfiguration,
   } = usePersistConfiguration();
+
+  const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
 
   const {
     isLoading: isLoadingConnectors,
@@ -332,54 +337,58 @@ export const ConfigureCases: React.FC = React.memo(() => {
       />
       <EuiPageBody restrictWidth={true}>
         <FormWrapper>
-          {!connectorIsValid && (
-            <SectionWrapper style={{ marginTop: 0 }}>
-              <EuiCallOut
-                title={i18n.WARNING_NO_CONNECTOR_TITLE}
-                color="warning"
-                iconType="help"
-                data-test-subj="configure-cases-warning-callout"
-              >
-                <FormattedMessage
-                  defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                  id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                  values={{
-                    appropriateLicense: (
-                      <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
-                        {i18n.LINK_APPROPRIATE_LICENSE}
-                      </EuiLink>
-                    ),
-                  }}
+          {hasMinimumLicensePermissions && (
+            <>
+              {!connectorIsValid && (
+                <SectionWrapper style={{ marginTop: 0 }}>
+                  <EuiCallOut
+                    title={i18n.WARNING_NO_CONNECTOR_TITLE}
+                    color="warning"
+                    iconType="help"
+                    data-test-subj="configure-cases-warning-callout"
+                  >
+                    <FormattedMessage
+                      defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                      id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                      values={{
+                        appropriateLicense: (
+                          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                            {i18n.LINK_APPROPRIATE_LICENSE}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiCallOut>
+                </SectionWrapper>
+              )}
+              <SectionWrapper>
+                <ClosureOptions
+                  closureTypeSelected={closureType}
+                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  onChangeClosureType={onChangeClosureType}
                 />
-              </EuiCallOut>
-            </SectionWrapper>
+              </SectionWrapper>
+              <SectionWrapper>
+                <Connectors
+                  actionTypes={actionTypes}
+                  connectors={connectors ?? []}
+                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  handleShowEditFlyout={onClickUpdateConnector}
+                  isLoading={isLoadingAny}
+                  mappings={mappings}
+                  onChangeConnector={onChangeConnector}
+                  selectedConnector={connector}
+                  updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
+                />
+              </SectionWrapper>
+            </>
           )}
-          <SectionWrapper>
-            <ClosureOptions
-              closureTypeSelected={closureType}
-              disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
-              onChangeClosureType={onChangeClosureType}
-            />
-          </SectionWrapper>
-          <SectionWrapper>
-            <Connectors
-              actionTypes={actionTypes}
-              connectors={connectors ?? []}
-              disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
-              handleShowEditFlyout={onClickUpdateConnector}
-              isLoading={isLoadingAny}
-              mappings={mappings}
-              onChangeConnector={onChangeConnector}
-              selectedConnector={connector}
-              updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
-            />
-          </SectionWrapper>
           <SectionWrapper>
             <EuiFlexItem grow={false}>
               <CustomFields
                 customFields={customFields}
-                isLoading={loadingCaseConfigure || isPersistingConfiguration}
-                disabled={isPersistingConfiguration || loadingCaseConfigure}
+                isLoading={isLoadingCaseConfiguration}
+                disabled={isLoadingCaseConfiguration}
                 handleAddCustomField={onAddCustomFields}
                 handleDeleteCustomField={onDeleteCustomField}
                 handleEditCustomField={onEditCustomField}

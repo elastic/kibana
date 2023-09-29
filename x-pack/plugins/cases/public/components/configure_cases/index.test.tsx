@@ -35,12 +35,14 @@ import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useLicense } from '../../common/use_license';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
+jest.mock('../../common/use_license');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -50,6 +52,7 @@ const useGetUrlSearchMock = jest.fn();
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
+const useLicenseMock = useLicense as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeAll(() => {
@@ -67,6 +70,7 @@ describe('ConfigureCases', () => {
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true });
   });
 
   describe('rendering', () => {
@@ -809,6 +813,59 @@ describe('ConfigureCases', () => {
 
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('rendering with license limitations', () => {
+    let appMockRender: AppMockRenderer;
+    let persistCaseConfigure: jest.Mock;
+
+    beforeEach(() => {
+      // Default setup
+      jest.clearAllMocks();
+      useGetConnectorsMock.mockImplementation(() => ({ useConnectorsResponse }));
+      appMockRender = createAppMockRenderer();
+      persistCaseConfigure = jest.fn();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+
+      // Updated
+      useLicenseMock.mockReturnValue({ isAtLeastGold: () => false });
+    });
+
+    it('should not render connectors and closure options', () => {
+      appMockRender.render(<ConfigureCases />);
+      expect(screen.queryByTestId('dropdown-connectors')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('closure-options-radio-group')).not.toBeInTheDocument();
+    });
+
+    it('should render custom field section', () => {
+      appMockRender.render(<ConfigureCases />);
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    describe('when the previously selected connector doesnt appear due to license downgrade or because it was deleted', () => {
+      beforeEach(() => {
+        useGetCaseConfigurationMock.mockImplementation(() => ({
+          data: {
+            ...useCaseConfigureResponse.data,
+            closureType: 'close-by-user',
+            connector: {
+              id: 'not-id',
+              name: 'unchanged',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          },
+        }));
+      });
+
+      it('should not render the warning callout', () => {
+        expect(screen.queryByTestId('configure-cases-warning-callout')).not.toBeInTheDocument();
+      });
     });
   });
 });
