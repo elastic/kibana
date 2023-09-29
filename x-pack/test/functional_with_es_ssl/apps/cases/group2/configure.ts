@@ -25,13 +25,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
-      it('defaults the closure option correctly', async () => {
+      this.beforeEach(async () => {
         await header.waitUntilLoadingHasFinished();
+      })
+      it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
 
       it('change closure option successfully', async () => {
-        await header.waitUntilLoadingHasFinished();
         await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
         const toast = await toasts.getToastElement(1);
         expect(await toast.getVisibleText()).to.be('Saved external connection settings');

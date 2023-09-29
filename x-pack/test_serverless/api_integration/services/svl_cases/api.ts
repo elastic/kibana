@@ -133,7 +133,6 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         status: CaseStatuses.open,
         updated_by: null,
         category: null,
-        customFields: [],
       };
     },
 
