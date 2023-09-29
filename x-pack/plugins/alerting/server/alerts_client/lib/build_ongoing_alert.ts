@@ -13,16 +13,10 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_TAGS,
-  ALERT_START,
-  ALERT_STATUS,
   ALERT_TIME_RANGE,
-  ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
-  EVENT_KIND,
   SPACE_IDS,
   TAGS,
   TIMESTAMP,
@@ -77,10 +71,10 @@ export const buildOngoingAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
-  const refreshableAlertFields = REFRESH_FIELDS_ALL.reduce<Partial<Alert & AlertData>>(
-    (acc, currField) => {
-      const value = get(alert, currField, null);
-      if (value) {
+  const refreshableAlertFields = REFRESH_FIELDS_ALL.reduce<Record<string, string | string[]>>(
+    (acc: Record<string, string | string[]>, currField) => {
+      const value = get(alert, currField);
+      if (null != value) {
         acc[currField] = value;
       }
       return acc;

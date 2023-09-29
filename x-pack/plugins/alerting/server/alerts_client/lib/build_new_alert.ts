@@ -75,8 +75,8 @@ export const buildNewAlert = <
   return deepmerge.all(
     [
       cleanedPayload,
+      rule,
       {
-        ...rule,
         [TIMESTAMP]: timestamp,
         [EVENT_ACTION]: 'open',
         [EVENT_KIND]: 'signal',
