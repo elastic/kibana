@@ -109,7 +109,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        showFrozenDataTierChoice ? frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE : false,
+        showFrozenDataTierChoice === false
+          ? false
+          : frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
         apiPath
       );
       if (typeof callback === 'function' && fullTimeRange !== undefined) {
@@ -192,9 +194,16 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     [sortOptions, frozenDataPreference, setPreference]
   );
 
-  const buttonTooltip = useMemo(
-    () =>
-      frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
+  const buttonTooltip = useMemo(() => {
+    if (showFrozenDataTierChoice === false) {
+      return (
+        <FormattedMessage
+          id="xpack.ml.datePicker.fullTimeRangeSelector.useFullData"
+          defaultMessage="Use full range of data."
+        />
+      );
+    } else {
+      return frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
         <FormattedMessage
           id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
           defaultMessage="Use full range of data excluding frozen data tier."
@@ -204,9 +213,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
           defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
         />
-      ),
-    [frozenDataPreference]
-  );
+      );
+    }
+  }, [frozenDataPreference, showFrozenDataTierChoice]);
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs">
@@ -222,7 +231,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      {showFrozenDataTierChoice ? (
+      {showFrozenDataTierChoice === false ? null : (
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
@@ -248,7 +257,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
             {popoverContent}
           </EuiPopover>
         </EuiFlexItem>
-      ) : null}
+      )}
     </EuiFlexGroup>
   );
 };
