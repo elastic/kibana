@@ -20,21 +20,26 @@ export function createCategorizeQuery(
   if (query.bool === undefined) {
     query.bool = {};
   }
-  if (query.bool.must === undefined) {
-    query.bool.must = [];
-    if (query.match_all !== undefined) {
-      query.bool.must.push({ match_all: query.match_all });
-      delete query.match_all;
-    }
+
+  if (query.bool.filter === undefined) {
+    query.bool.filter = [] as QueryDslQueryContainer[];
+  } else if (!Array.isArray(query.bool.filter)) {
+    query.bool.filter = [query.bool.filter];
   }
+
+  if (query.match_all !== undefined) {
+    query.bool.filter.push({ match_all: query.match_all });
+    delete query.match_all;
+  }
+
   if (query.multi_match !== undefined) {
-    query.bool.should = {
+    query.bool.filter.push({
       multi_match: query.multi_match,
-    };
+    });
     delete query.multi_match;
   }
 
-  (query.bool.must as QueryDslQueryContainer[]).push({
+  query.bool.filter.push({
     range: {
       [timeField]: {
         gte: from,
