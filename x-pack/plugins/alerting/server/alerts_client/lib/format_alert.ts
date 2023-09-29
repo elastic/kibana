@@ -32,9 +32,13 @@ type Obj = Record<string, unknown>;
 export const compactObject = (obj: Obj) => {
   return Object.keys(obj)
     .filter((key: string) => {
+      // just filter out empty objects
+      // keep any primitives or arrays, even empty arrays
       return (
         !!obj[key] &&
-        ((typeof obj[key] === 'object' && !isEmpty(obj[key])) || typeof obj[key] !== 'object')
+        (Array.isArray(obj[key]) ||
+          typeof obj[key] !== 'object' ||
+          (typeof obj[key] === 'object' && !isEmpty(obj[key])))
       );
     })
     .reduce<Obj>((acc, curr) => {

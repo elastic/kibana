@@ -240,9 +240,15 @@ describe('compactObject', () => {
     expect(compactObject({ kibana: { alert: { rule: { execution: {} } }, rule: {} } })).toEqual({});
     expect(
       compactObject({
-        kibana: { rule: 34, alert: { rule: { execution: {}, nested_field: ['a', 'b'] } } },
+        kibana: {
+          rule: 34,
+          testField: [],
+          alert: { rule: { execution: {}, nested_field: ['a', 'b'] } },
+        },
       })
-    ).toEqual({ kibana: { rule: 34, alert: { rule: { nested_field: ['a', 'b'] } } } });
+    ).toEqual({
+      kibana: { rule: 34, testField: [], alert: { rule: { nested_field: ['a', 'b'] } } },
+    });
   });
   expect(compactObject({ 'kibana.alert.rule.execution': {} })).toEqual({});
   expect(
