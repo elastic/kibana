@@ -19,11 +19,9 @@ import type { Rule } from '../../../rule_management/logic/types';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
-jest.mock('../../../../helper_hooks');
-jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-list-api');
@@ -33,8 +31,7 @@ jest.mock('react', () => {
   return { ...r, useReducer: jest.fn() };
 });
 
-const mockUseHasSecurityCapability = useHasSecurityCapability as jest.Mock;
-const mockUseListsConfig = useListsConfig as jest.Mock;
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
 const sampleExceptionItem = {
   _version: 'WzEwMjM4MSwxXQ==',
@@ -88,11 +85,7 @@ describe('ExceptionsViewer', () => {
       },
     });
 
-    mockUseListsConfig.mockReturnValue({
-      loading: false,
-      needsConfiguration: false,
-    });
-    mockUseHasSecurityCapability.mockReturnValue(true);
+    mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     (fetchExceptionListsItemsByListIds as jest.Mock).mockReturnValue({ total: 0 });
 

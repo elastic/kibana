@@ -10,16 +10,13 @@ import type { UseRuleDetailsTabsProps } from './use_rule_details_tabs';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { useRuleExecutionSettings } from '../../../rule_monitoring';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
 jest.mock('../../../rule_monitoring');
-jest.mock('../../../../helper_hooks');
-jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 
 const mockUseRuleExecutionSettings = useRuleExecutionSettings as jest.Mock;
-const mockUseHasSecurityCapability = useHasSecurityCapability as jest.Mock;
-const mockUseListsConfig = useListsConfig as jest.Mock;
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
 const mockRule: Rule = {
   id: 'myfakeruleid',
@@ -65,11 +62,7 @@ describe('useRuleDetailsTabs', () => {
         minLevel: 'debug',
       },
     });
-    mockUseListsConfig.mockReturnValue({
-      loading: false,
-      needsConfiguration: false,
-    });
-    mockUseHasSecurityCapability.mockReturnValue(true);
+    mockUseEndpointExceptionsCapability.mockReturnValue(true);
   });
 
   beforeEach(() => {
@@ -133,33 +126,7 @@ describe('useRuleDetailsTabs', () => {
   });
 
   it('hides endpoint exceptions tab when rule includes endpoint list but no endpoint PLI', async () => {
-    mockUseHasSecurityCapability.mockReturnValue(false);
-    const tabs = render({
-      rule: {
-        ...mockRule,
-        outcome: 'conflict',
-        alias_target_id: 'aliased_rule_id',
-        alias_purpose: 'savedObjectConversion',
-        exceptions_list: [
-          {
-            id: 'endpoint_list',
-            list_id: 'endpoint_list',
-            type: 'endpoint',
-            namespace_type: 'agnostic',
-          },
-        ],
-      },
-      ruleId: mockRule.rule_id,
-      isExistingRule: true,
-      hasIndexRead: true,
-    });
-    const tabsNames = Object.keys(tabs.result.current);
-
-    expect(tabsNames).not.toContain(RuleDetailTabs.endpointExceptions);
-  });
-
-  it('hides endpoint exceptions tab when rule includes endpoint list, has endpoint PLI, but no index privilege', async () => {
-    mockUseListsConfig.mockReturnValue({ loading: false, needsConfiguration: true });
+    mockUseEndpointExceptionsCapability.mockReturnValue(false);
     const tabs = render({
       rule: {
         ...mockRule,

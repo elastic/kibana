@@ -29,7 +29,7 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -45,7 +45,6 @@ import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -122,14 +121,7 @@ const ExceptionsViewerComponent = ({
     [listTypes]
   );
 
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
-    useListsConfig();
-  const canCrudEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
-
-  const canWriteEndpointExceptions = useMemo(
-    () => !listsConfigLoading && !needsListsConfiguration && canCrudEndpointExceptions,
-    [canCrudEndpointExceptions, listsConfigLoading, needsListsConfiguration]
-  );
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   // Reducer state
   const [
