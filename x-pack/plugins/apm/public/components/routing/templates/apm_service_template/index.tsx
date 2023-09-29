@@ -406,8 +406,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       hidden:
         !isProfilingAvailable ||
-        !isMobileAgentName(agentName) ||
-        !isRumAgentName(agentName),
+        isMobileAgentName(agentName) ||
+        isRumAgentName(agentName),
       append: (
         <EuiBadge color="accent">
           {i18n.translate('xpack.apm.universalProfiling.newLabel', {
