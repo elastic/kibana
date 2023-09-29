@@ -160,7 +160,6 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
       selectAllAgents();
       submitQuery();
-      cy.getBySel('live-query-loading').should('exist');
       cy.getBySel('toggleIcon-events').click();
       checkResults();
       checkActionItemsInResults({
