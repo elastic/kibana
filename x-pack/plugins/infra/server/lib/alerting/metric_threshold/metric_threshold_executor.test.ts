@@ -1898,6 +1898,9 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   inventory: {
     compositeSize: 2000,
   },
+  featureFlags: {
+    metricsExplorerEnabled: true,
+  },
   enabled: true,
   sources,
 });
