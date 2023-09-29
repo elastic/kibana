@@ -27,6 +27,7 @@ import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
 import { NavigationUI } from './navigation_ui';
 import { RecentlyAccessed } from './recently_accessed';
+import { PanelProvider } from './panel';
 
 interface Context {
   register: RegisterFunction;
@@ -134,11 +135,17 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
   }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
-    <NavigationContext.Provider value={contextValue}>
-      <NavigationUI footerChildren={footerChildren} unstyled={unstyled} dataTestSubj={dataTestSubj}>
-        {children}
-      </NavigationUI>
-    </NavigationContext.Provider>
+    <PanelProvider>
+      <NavigationContext.Provider value={contextValue}>
+        <NavigationUI
+          footerChildren={footerChildren}
+          unstyled={unstyled}
+          dataTestSubj={dataTestSubj}
+        >
+          {children}
+        </NavigationUI>
+      </NavigationContext.Provider>
+    </PanelProvider>
   );
 }
 

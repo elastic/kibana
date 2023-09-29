@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
-
-type ContentProvider = (nodeId: string) => React.ReactNode;
-type PanelNavNode = Pick<ChromeProjectNavigationNode, 'id' | 'children' | 'path'>;
+import React, { type FC, useCallback, useContext, useMemo, useState } from 'react';
+import { DefaultContent } from './default_content';
+import { ContentProvider, PanelNavNode } from './types';
 
 export interface PanelContext {
   isOpen: boolean;
@@ -18,10 +16,7 @@ export interface PanelContext {
   open: (navNode: PanelNavNode) => void;
   close: () => void;
   activeNode: PanelNavNode | null;
-  content: {
-    set: (content: React.ReactNode) => void;
-    get: () => React.ReactNode;
-  };
+  getContent: () => React.ReactNode;
 }
 
 const Context = React.createContext<PanelContext | null>(null);
@@ -31,8 +26,7 @@ interface Props {
 }
 
 export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState<React.ReactNode>(null);
+  const [isOpen, setIsOpen] = useState(true);
   const [activeNode, setActiveNode] = useState<PanelNavNode | null>(null);
 
   const toggle = useCallback(() => {
@@ -46,15 +40,24 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
 
   const close = useCallback(() => {
     setActiveNode(null);
-    setContent(null);
     setIsOpen(false);
   }, []);
 
-  const getContent = useCallback(() => content, [content]);
+  const getContent = useCallback(() => {
+    if (!activeNode) {
+      return null;
+    }
 
-  const setContentFn = useCallback((_content: React.ReactNode) => {
-    setContent(_content);
-  }, []);
+    if (contentProvider) {
+      const { title, content } = contentProvider(activeNode.id);
+      return {
+        content,
+        title: title ?? activeNode.title,
+      };
+    }
+
+    return <DefaultContent activeNode={activeNode} />;
+  }, [activeNode, contentProvider]);
 
   const ctx: PanelContext = useMemo(
     () => ({
@@ -63,13 +66,9 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
       open,
       close,
       activeNode,
-      content: {
-        set: setContentFn,
-        get: getContent,
-        provider: contentProvider,
-      },
+      getContent,
     }),
-    [isOpen, toggle, open, close, activeNode, setContentFn, getContent, contentProvider]
+    [isOpen, toggle, open, close, activeNode, getContent]
   );
 
   return <Context.Provider value={ctx}>{children}</Context.Provider>;

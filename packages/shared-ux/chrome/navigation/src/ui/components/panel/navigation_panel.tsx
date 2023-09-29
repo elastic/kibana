@@ -6,27 +6,64 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC } from 'react';
+import {
+  EuiFocusTrap,
+  EuiOutsideClickDetector,
+  EuiPanel,
+  EuiWindowEvent,
+  keys,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useCallback, type FC } from 'react';
+import classNames from 'classnames';
+
 import { usePanel } from './context';
+import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
 
 export const NavigationPanel: FC = () => {
-  const { isOpen } = usePanel();
+  const { euiTheme } = useEuiTheme();
+  const { isOpen, close, getContent } = usePanel();
+
+  // ESC key closes PanelNav
+  const onKeyDown = useCallback(
+    (ev: KeyboardEvent) => {
+      if (ev.key === keys.ESCAPE) {
+        close();
+      }
+    },
+    [close]
+  );
+
+  const onOutsideClick = useCallback(() => {
+    close();
+  }, [close]);
+
+  const panelWrapperClasses = getPanelWrapperStyles();
+  const sideNavPanelStyles = getNavPanelStyles(euiTheme);
+  const panelClasses = classNames('sideNavPanel', 'eui-yScroll', sideNavPanelStyles);
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div
-      style={{
-        backgroundColor: 'yellow',
-        position: 'absolute',
-        top: 0,
-        left: '100%',
-        height: '100%',
-      }}
-    >
-      PANEL
-    </div>
+    <>
+      <EuiWindowEvent event="keydown" handler={onKeyDown} />
+      <div className={panelWrapperClasses}>
+        <EuiFocusTrap autoFocus css={{ height: '100%' }}>
+          <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
+            <EuiPanel
+              className={panelClasses}
+              hasShadow
+              borderRadius="none"
+              paddingSize="m"
+              data-test-subj="sideNavPanel"
+            >
+              {getContent()}
+            </EuiPanel>
+          </EuiOutsideClickDetector>
+        </EuiFocusTrap>
+      </div>
+    </>
   );
 };

@@ -94,6 +94,10 @@ export interface ChromeProjectNavigationNode {
   breadcrumbStatus?: 'hidden' | 'visible';
 
   accordionProps?: Partial<EuiAccordionProps>;
+  /**
+   * Flag to indicate if the node opens a panel when clicking on it.
+   */
+  openPanel?: boolean;
 }
 
 /** @public */
@@ -150,6 +154,11 @@ export interface NodeDefinition<
    * Can not be used with `children`
    */
   isGroupTitle?: boolean;
+  /**
+   * Flag to indicate if the node opens a panel when clicking on it.
+   * Can't be used with a `link` or `href` value.
+   */
+  openPanel?: boolean;
   /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
