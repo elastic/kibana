@@ -102,13 +102,15 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         this.logger.warn(`Registering Rollup collector failed: ${e}`);
       }
     }
+
     if (this.config.ui.enabled) {
       if (indexManagement && indexManagement.indexDataEnricher) {
         indexManagement.indexDataEnricher.add(rollupDataEnricher);
       }
+
+      dataViews.enableRollups();
+      data.search.enableRollups();
     }
-    dataViews.enableRollups();
-    data.search.enableRollups();
   }
 
   start() {}
