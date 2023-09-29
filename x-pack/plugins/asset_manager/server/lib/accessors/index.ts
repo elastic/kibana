@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { AssetManagerConfig } from '../../types';
+import { AssetManagerConfig } from '../../../common/config';
 
 export interface InjectedValues {
   sourceIndices: AssetManagerConfig['sourceIndices'];
@@ -18,8 +17,3 @@ export interface InjectedValues {
 }
 
 export type OptionsWithInjectedValues<T extends object> = T & InjectedValues;
-
-export interface AccessorOptions {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-}
