@@ -186,7 +186,10 @@ export const useBulkUntrackActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
+  const { application } = useKibana().services;
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+
+  if (!application?.capabilities.rulesSettings.save) return [];
 
   return [
     {
@@ -233,10 +236,12 @@ export function useBulkActions({
 
   const initialItems = [...caseBulkActions, ...untrackBulkActions];
 
-  const bulkActions = addItemsToInitialPanel({
-    panels: configBulkActionPanels,
-    items: initialItems,
-  });
+  const bulkActions = initialItems.length
+    ? addItemsToInitialPanel({
+        panels: configBulkActionPanels,
+        items: initialItems,
+      })
+    : configBulkActionPanels;
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
