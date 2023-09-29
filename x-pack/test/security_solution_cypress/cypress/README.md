@@ -42,10 +42,9 @@ Please, before opening a PR with the new test, please make sure that the test fa
 
 Note that we use tags in order to select which tests we want to execute:
 
-*DISCLAIMER: We are adding the @serverlessQA tag temporaly until we check the behaviour of our tests in the second quality gate.*
-
-- `@serverless` includes a test in the first quality gate Serverless test suite.  You need to explicitly add this tag to any test you want to run as part of the PR process using the FTR serverless environment.
-- `@serverlessQA` includes a test in the second quality gate Serverless test suite.  You need to explicitly add this tag to any test you want to run the test in the deployed serverless project at the QA environment.
+- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate). You need to explicitly add this tag to any test you want to run in CI for open PRs. These tests will run against a local, "simulated" serverless environment.
+- `@serverlessQA` includes a test in the Serverless test suite for QA (the so-called second quality gate). You need to explicitly add this tag to any test you want to run in the CD pipeline against real serverless projects deployed in the Serverless QA environment.
+  - **NOTE:** We are adding this tag temporarily until we check the behavior of our tests in the second quality gate.
 - `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
 - `@brokenInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that a test should run in Serverless, but currently is broken.
 - `@skipInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environemnt", "the test has been temporarily excluded, see the comment above why".
