@@ -75,7 +75,10 @@ import {
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
-import { migratePackagePolicyToV81102, migratePackagePolicyEvictionsFromV81102 } from './migrations/security_solution/to_v8_11_0_2';
+import {
+  migratePackagePolicyToV81102,
+  migratePackagePolicyEvictionsFromV81102,
+} from './migrations/security_solution/to_v8_11_0_2';
 
 /*
  * Saved object types and mappings
