@@ -76,7 +76,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
       ES_NODE: esNode,
       ES_REQUEST_TIMEOUT: esRequestTimeout,
       TEST_CLOUD: process.env.TEST_CLOUD,
-      NO_COMMAND_LOG: 1,
+      NO_COMMAND_LOG: 1, // Temp fix, With Cypress 13, this might not be required https://github.com/elastic/kibana/pull/162383
     },
   });
 
