@@ -445,6 +445,35 @@ describe('setupServerlessVolumes()', () => {
     expect(volumeCmd).toHaveLength(20);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
+
+  test('should use resource overrides', async () => {
+    mockFs(existingObjectStore);
+    const volumeCmd = await setupServerlessVolumes(log, {
+      basePath: baseEsPath,
+      resources: ['./relative/path/users', '/absolute/path/users_roles'],
+    });
+
+    expect(volumeCmd).toContain(
+      '/absolute/path/users_roles:/usr/share/elasticsearch/config/users_roles'
+    );
+    expect(volumeCmd).toContain(
+      `${process.cwd()}/relative/path/users:/usr/share/elasticsearch/config/users`
+    );
+  });
+
+  test('should throw if an unknown resource override is used', async () => {
+    mockFs(existingObjectStore);
+
+    await expect(async () => {
+      await setupServerlessVolumes(log, {
+        basePath: baseEsPath,
+        resources: ['/absolute/path/invalid'],
+      });
+    }).rejects.toThrow(
+      'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
+        'Valid resources: operator_users.yml | role_mapping.yml | roles.yml | service_tokens | users | users_roles'
+    );
+  });
 });
 
 describe('runServerlessEsNode()', () => {

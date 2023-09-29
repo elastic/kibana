@@ -23,6 +23,7 @@ import {
   getRiskEngineTask,
   cleanRiskEngineConfig,
   waitForRiskEngineTaskToBeGone,
+  deleteRiskScoreIndices,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -270,6 +271,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         afterEach(async () => {
           await getService('spaces').delete(namespace);
+          await deleteRiskScoreIndices({ log, es, namespace });
         });
 
         it('calculates and persists risk scores for alert documents', async () => {
