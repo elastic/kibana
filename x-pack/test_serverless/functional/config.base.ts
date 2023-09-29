@@ -72,7 +72,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         connectors: {
           pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
         },
-        advancedSettings: {
+        settings: {
           pathname: '/app/management/kibana/settings',
         },
         login: {
