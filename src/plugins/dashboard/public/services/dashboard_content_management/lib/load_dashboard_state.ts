@@ -57,7 +57,7 @@ export const loadDashboardState = async ({
    * This is a newly created dashboard, so there is no saved object state to load.
    */
   if (!savedObjectId) {
-    return { dashboardInput: newDashboardState, dashboardFound: true, dashboardCreated: true };
+    return { dashboardInput: newDashboardState, dashboardFound: true, newDashboardCreated: true };
   }
 
   /**

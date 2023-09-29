@@ -18,7 +18,7 @@ import type { DashboardStartDependencies } from '../../plugin';
 import type { DashboardBackupServiceType } from './types';
 import type { DashboardContainerInput } from '../../../common';
 import { DashboardNotificationsService } from '../notifications/types';
-import { panelStorageErrorStrings } from '../../dashboard_container/_dashboard_container_strings';
+import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
@@ -64,8 +64,8 @@ class DashboardBackupService implements DashboardBackupServiceType {
       this.localStorage.set(DASHBOARD_VIEWMODE_LOCAL_KEY, viewMode);
     } catch (e) {
       this.notifications.toasts.addDanger({
-        title: panelStorageErrorStrings.getPanelsGetError(e.message),
-        'data-test-subj': 'dashboardPanelsGetFailure',
+        title: backupServiceStrings.viewModeStorageError(e.message),
+        'data-test-subj': 'dashboardViewmodeBackupFailure',
       });
     }
   };
@@ -80,7 +80,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       }
     } catch (e) {
       this.notifications.toasts.addDanger({
-        title: panelStorageErrorStrings.getPanelsClearError(e.message),
+        title: backupServiceStrings.getPanelsClearError(e.message),
         'data-test-subj': 'dashboardPanelsClearFailure',
       });
     }
@@ -91,7 +91,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[id];
     } catch (e) {
       this.notifications.toasts.addDanger({
-        title: panelStorageErrorStrings.getPanelsGetError(e.message),
+        title: backupServiceStrings.getPanelsGetError(e.message),
         'data-test-subj': 'dashboardPanelsGetFailure',
       });
     }
@@ -104,7 +104,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStateStorage);
     } catch (e) {
       this.notifications.toasts.addDanger({
-        title: panelStorageErrorStrings.getPanelsSetError(e.message),
+        title: backupServiceStrings.getPanelsSetError(e.message),
         'data-test-subj': 'dashboardPanelsSetFailure',
       });
     }
@@ -128,7 +128,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       return dashboardsWithUnsavedChanges;
     } catch (e) {
       this.notifications.toasts.addDanger({
-        title: panelStorageErrorStrings.getPanelsGetError(e.message),
+        title: backupServiceStrings.getPanelsGetError(e.message),
         'data-test-subj': 'dashboardPanelsGetFailure',
       });
       return [];

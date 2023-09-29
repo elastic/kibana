@@ -130,7 +130,7 @@ test('new dashboards start in edit mode', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
-      dashboardCreated: true,
+      newDashboardCreated: true,
       dashboardInput: {
         ...DEFAULT_DASHBOARD_INPUT,
         description: 'wow this description is okay',

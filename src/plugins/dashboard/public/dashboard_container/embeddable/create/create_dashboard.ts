@@ -184,7 +184,7 @@ export const initializeDashboard = async ({
   const initialViewMode = (() => {
     if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
     if (
-      loadDashboardReturn.dashboardCreated ||
+      loadDashboardReturn.newDashboardCreated ||
       dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
     ) {
       return ViewMode.EDIT;

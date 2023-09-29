@@ -63,7 +63,7 @@ type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 
 export interface LoadDashboardReturn {
   dashboardFound: boolean;
-  dashboardCreated?: boolean;
+  newDashboardCreated?: boolean;
   dashboardId?: string;
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
