@@ -9,7 +9,7 @@
 import { action } from '@storybook/addon-actions';
 import { useState } from '@storybook/addons';
 import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, PropsWithChildren, MouseEvent } from 'react';
+import React, { EventHandler, FC, PropsWithChildren, MouseEvent, useEffect } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import {
@@ -42,11 +42,26 @@ const NavigationWrapper: FC<
   PropsWithChildren<{ clickAction?: EventHandler<MouseEvent>; clickActionText?: string }> &
     Partial<EuiCollapsibleNavBetaProps>
 > = (props) => {
+  useEffect(() => {
+    // Set padding to body to avoid unnecessary scrollbars
+    document.body.style.paddingTop = '0px';
+    document.body.style.paddingRight = '0px';
+    document.body.style.paddingBottom = '0px';
+  }, []);
+
   return (
     <>
       <EuiHeader position="fixed">
         <EuiHeaderSection side={props?.side}>
-          <EuiCollapsibleNavBeta {...props} style={{ overflow: 'visible' }} />
+          <EuiCollapsibleNavBeta
+            {...props}
+            css={
+              props.css ?? {
+                overflow: 'visible',
+                clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)',
+              }
+            }
+          />
         </EuiHeaderSection>
       </EuiHeader>
       <EuiPageTemplate>
@@ -274,6 +289,79 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
     <NavigationWrapper>
       <NavigationProvider {...services}>
         <DefaultNavigation {...navigationDefinition} />
+      </NavigationProvider>
+    </NavigationWrapper>
+  );
+};
+
+const navigationDefinitionWithPanel: ProjectNavigationDefinition = {
+  navigationTree: {
+    body: [
+      // My custom project
+      {
+        type: 'navGroup',
+        id: 'example_projet',
+        title: 'Example project',
+        icon: 'logoObservability',
+        defaultIsCollapsed: false,
+        accordionProps: {
+          arrowProps: { css: { display: 'none' } },
+        },
+        children: [
+          {
+            link: 'item1',
+            title: 'Get started',
+          },
+          {
+            link: 'item2',
+            title: 'Alerts',
+          },
+          {
+            link: 'item3',
+            title: 'Some other node',
+          },
+          {
+            id: 'group:settings',
+            title: 'Settings',
+            openPanel: true,
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals',
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'Tracing',
+              },
+            ],
+          },
+        ],
+      } as GroupDefinition<any>,
+    ],
+  },
+};
+
+export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <DefaultNavigation {...navigationDefinitionWithPanel} />
       </NavigationProvider>
     </NavigationWrapper>
   );
