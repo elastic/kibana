@@ -80,6 +80,7 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
+  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -380,6 +381,9 @@ export class ChromeService {
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
+                toggleSideNav={(isCollapsed) => {
+                  this.isSideNavCollapsed$.next(isCollapsed);
+                }}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -502,6 +506,7 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
