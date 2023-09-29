@@ -14,6 +14,7 @@ import {
   builtInGroupByTypes,
   COMPARATORS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { MAX_SELECTABLE_GROUP_BY_TERMS } from '../../../common/constants';
 import { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
@@ -72,11 +73,27 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     groupBy &&
     builtInGroupByTypes[groupBy].validNormalizedTypes &&
     builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
-    !termField
+    (!termField || termField.length <= 0)
   ) {
     errors.termField.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
         defaultMessage: 'Term field is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
+    termField &&
+    Array.isArray(termField) &&
+    termField.length > MAX_SELECTABLE_GROUP_BY_TERMS
+  ) {
+    errors.termField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.overNumberedTermFieldText', {
+        defaultMessage: `Cannot select more than {max} terms`,
+        values: { max: MAX_SELECTABLE_GROUP_BY_TERMS },
       })
     );
   }

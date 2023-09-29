@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import {
   EuiScreenReaderOnly,
@@ -18,101 +18,112 @@ import { i18n } from '@kbn/i18n';
 
 import type {
   FieldDefinition,
+  ResetInputRef,
   SettingType,
   UnsavedFieldChange,
+  OnInputChangeFn,
+  OnFieldChangeFn,
 } from '@kbn/management-settings-types';
 import { isImageFieldDefinition } from '@kbn/management-settings-field-definition';
-import { FieldInput, type OnChangeParams } from '@kbn/management-settings-components-field-input';
-import { isUnsavedValue } from '@kbn/management-settings-utilities';
+import { FieldInput } from '@kbn/management-settings-components-field-input';
 
+import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 import { FieldDescription } from './description';
 import { FieldTitle } from './title';
-import { FieldInputFooter } from './input_footer';
 import { useFieldStyles } from './field_row.styles';
-import { OnChangeFn } from './types';
+import { FieldInputFooter } from './footer';
 
 export const DATA_TEST_SUBJ_SCREEN_READER_MESSAGE = 'fieldRowScreenReaderMessage';
+
+type Definition<T extends SettingType = SettingType> = Pick<
+  FieldDefinition<T>,
+  | 'ariaAttributes'
+  | 'defaultValue'
+  | 'defaultValueDisplay'
+  | 'displayName'
+  | 'groupId'
+  | 'id'
+  | 'isCustom'
+  | 'isDefaultValue'
+  | 'isOverridden'
+  | 'name'
+  | 'savedValue'
+  | 'type'
+  | 'unsavedFieldId'
+>;
 
 /**
  * Props for a {@link FieldRow} component.
  */
-export interface FieldRowProps<T extends SettingType> {
+export interface FieldRowProps {
+  /** The {@link FieldDefinition} corresponding the setting. */
+  field: Definition;
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
-  /** The {@link OnChangeFn} handler. */
-  onChange: OnChangeFn<T>;
+  /** The {@link OnInputChangeFn} handler. */
+  onFieldChange: OnFieldChangeFn;
   /**
    * The onClear handler, if a value is cleared to an empty or default state.
    * @param id The id relating to the field to clear.
    */
   onClear?: (id: string) => void;
-  /** The {@link FieldDefinition} corresponding the setting. */
-  field: FieldDefinition<T>;
   /** The {@link UnsavedFieldChange} corresponding to any unsaved change to the field. */
-  unsavedChange?: UnsavedFieldChange<T>;
+  unsavedChange?: UnsavedFieldChange;
 }
 
 /**
  * Component for displaying a {@link FieldDefinition} in a form row, using a {@link FieldInput}.
  * @param props The {@link FieldRowProps} for the {@link FieldRow} component.
  */
-export const FieldRow = <T extends SettingType>(props: FieldRowProps<T>) => {
-  const { isSavingEnabled, onChange: onChangeProp, field, unsavedChange } = props;
-  const { id, name, groupId, isOverridden, type, unsavedFieldId } = field;
+export const FieldRow = (props: FieldRowProps) => {
+  const { isSavingEnabled, onFieldChange, field, unsavedChange } = props;
+  const { id, groupId, isOverridden, unsavedFieldId } = field;
   const { cssFieldFormGroup } = useFieldStyles({
     field,
     unsavedChange,
   });
 
-  const onChange = (changes: UnsavedFieldChange<T>) => {
-    onChangeProp(name, changes);
+  // Create a ref for those input fields that use a `reset` handle.
+  const ref = useRef<ResetInputRef>(null);
+
+  // Route any change to the `onFieldChange` handler, along with the field id.
+  const onInputChange: OnInputChangeFn = (update) => {
+    onFieldChange(id, update);
   };
 
-  const resetField = () => {
-    const { defaultValue: unsavedValue } = field;
-    return onChange({ type, unsavedValue });
+  const onReset = () => {
+    ref.current?.reset();
+
+    const update = { type: field.type, unsavedValue: field.defaultValue };
+
+    if (hasUnsavedChange(field, update)) {
+      onInputChange(update);
+    } else {
+      onInputChange();
+    }
   };
 
-  const onFieldChange = ({ isInvalid, error, value: unsavedValue }: OnChangeParams<T>) => {
-    if (error) {
-      isInvalid = true;
+  const onClear = () => {
+    if (ref.current) {
+      ref.current.reset();
     }
 
-    const change = {
-      type,
-      isInvalid,
-      error,
-    };
-
-    if (!isUnsavedValue(field, unsavedValue)) {
-      onChange(change);
+    // Indicate a field is being cleared for a new value by setting its unchanged
+    // value to`undefined`. Currently, this only applies to `image` fields.
+    if (field.savedValue !== undefined && field.savedValue !== null) {
+      onInputChange({ type: field.type, unsavedValue: undefined });
     } else {
-      onChange({
-        ...change,
-        unsavedValue,
-      });
+      onInputChange();
     }
   };
 
   const title = <FieldTitle {...{ field, unsavedChange }} />;
-  const description = <FieldDescription {...{ field }} />;
+  const description = <FieldDescription {...{ field, unsavedChange }} />;
   const error = unsavedChange?.error;
   const isInvalid = unsavedChange?.isInvalid;
   let unsavedScreenReaderMessage = null;
 
-  const helpText = (
-    <FieldInputFooter
-      {...{
-        field,
-        unsavedChange,
-        isSavingEnabled,
-        onCancel: resetField,
-        onReset: resetField,
-        onChange: onFieldChange,
-      }}
-    />
-  );
-
+  // Provide a screen-reader only message if there's an unsaved change.
   if (unsavedChange) {
     unsavedScreenReaderMessage = (
       <EuiScreenReaderOnly>
@@ -133,23 +144,25 @@ export const FieldRow = <T extends SettingType>(props: FieldRowProps<T>) => {
   return (
     <EuiErrorBoundary>
       <EuiDescribedFormGroup
-        id={groupId}
-        fullWidth
         css={cssFieldFormGroup}
+        fullWidth
+        id={groupId}
         {...{ title, description }}
       >
         <EuiFormRow
           fullWidth
           hasChildLabel={!isImageFieldDefinition(field)}
           label={id}
-          {...{ isInvalid, error, helpText }}
+          helpText={
+            <FieldInputFooter {...{ field, isSavingEnabled, onClear, onReset, unsavedChange }} />
+          }
+          {...{ isInvalid, error }}
         >
           <>
             <FieldInput
-              isDisabled={!isSavingEnabled || isOverridden}
+              isSavingEnabled={isSavingEnabled && !isOverridden}
               isInvalid={unsavedChange?.isInvalid}
-              onChange={onFieldChange}
-              {...{ field, unsavedChange }}
+              {...{ field, unsavedChange, ref, onInputChange }}
             />
             {unsavedScreenReaderMessage}
           </>

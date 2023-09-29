@@ -9,10 +9,10 @@ import expect from '@kbn/expect';
 import {
   AuthStackByField,
   Direction,
-  UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
   UsersQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

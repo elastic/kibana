@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
+import { RESPONSE_DETAILS_TEST_ID, RESPONSE_NO_DATA_TEST_ID } from './test_ids';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type {
   ExpandedEventFieldsObject,
@@ -19,7 +19,6 @@ import { useLeftPanelContext } from '../context';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useOsqueryTab } from '../../../common/components/event_details/osquery_tab';
 import { useResponseActionsView } from '../../../common/components/event_details/response_actions_view';
-import * as i18n from './translations';
 
 const ExtendedFlyoutWrapper = styled.div`
  figure {
@@ -58,14 +57,19 @@ export const ResponseDetails: React.FC = () => {
   return (
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
       <EuiTitle size="xxxs">
-        <h5>{i18n.RESPONSE_TITLE}</h5>
+        <h5>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.response.responseTitle"
+            defaultMessage="Responses"
+          />
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       {!responseActions ? (
-        <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>
+        <InlineBlock data-test-subj={RESPONSE_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.documentDetails.response.emptyMessage"
-            defaultMessage="There are no response actions defined for this event. To add some, edit the rule’s settings and set up {link}."
+            id="xpack.securitySolution.flyout.left.response.noDataDescription"
+            defaultMessage="There are no response actions defined for this event. To add some, edit the rule's settings and set up {link}."
             values={{
               link: (
                 <EuiLink
@@ -73,7 +77,7 @@ export const ResponseDetails: React.FC = () => {
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.documentDetails.response.responseActionLink"
+                    id="xpack.securitySolution.flyout.left.response.noDataLinkText"
                     defaultMessage="response actions"
                   />
                 </EuiLink>

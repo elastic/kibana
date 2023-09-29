@@ -64,6 +64,7 @@ type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 export interface LoadDashboardReturn {
   dashboardFound: boolean;
   dashboardId?: string;
+  managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: DashboardContainerInput;
   anyMigrationRun?: boolean;
@@ -91,8 +92,12 @@ export interface SaveDashboardReturn {
  */
 export interface FindDashboardsService {
   search: (
-    props: Pick<SearchDashboardsArgs, 'hasReference' | 'hasNoReference' | 'search' | 'size'>
+    props: Pick<
+      SearchDashboardsArgs,
+      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
+    >
   ) => Promise<SearchDashboardsResponse>;
+  findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;
 }

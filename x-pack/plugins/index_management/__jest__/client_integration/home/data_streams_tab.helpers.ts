@@ -8,7 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { EuiDescriptionListDescription } from '@elastic/eui';
 import {
   registerTestBed,
   TestBed,
@@ -43,8 +42,9 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDetailPanelTitle: () => string;
   findEmptyPromptIndexTemplateLink: () => ReactWrapper;
   findDetailPanelIlmPolicyLink: () => ReactWrapper;
-  findDetailPanelIlmPolicyName: () => ReactWrapper;
+  findDetailPanelIlmPolicyDetail: () => ReactWrapper;
   findDetailPanelIndexTemplateLink: () => ReactWrapper;
+  findDetailPanelDataRetentionDetail: () => ReactWrapper;
 }
 
 export const setup = async (
@@ -211,10 +211,14 @@ export const setup = async (
     return find('indexTemplateLink');
   };
 
-  const findDetailPanelIlmPolicyName = () => {
-    const descriptionList = testBed.component.find(EuiDescriptionListDescription);
-    // ilm policy is the last in the details list
-    return descriptionList.last();
+  const findDetailPanelIlmPolicyDetail = () => {
+    const { find } = testBed;
+    return find('ilmPolicyDetail');
+  };
+
+  const findDetailPanelDataRetentionDetail = () => {
+    const { find } = testBed;
+    return find('dataRetentionDetail');
   };
 
   return {
@@ -240,8 +244,9 @@ export const setup = async (
     findDetailPanelTitle,
     findEmptyPromptIndexTemplateLink,
     findDetailPanelIlmPolicyLink,
-    findDetailPanelIlmPolicyName,
+    findDetailPanelIlmPolicyDetail,
     findDetailPanelIndexTemplateLink,
+    findDetailPanelDataRetentionDetail,
   };
 };
 
@@ -264,6 +269,9 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
     delete_index: true,
   },
   hidden: false,
+  lifecycle: {
+    data_retention: '7d',
+  },
   ...dataStream,
 });
 

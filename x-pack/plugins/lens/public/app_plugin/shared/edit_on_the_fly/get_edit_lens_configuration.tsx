@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
+import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -29,12 +29,13 @@ import {
   LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
+import { SavedObjectIndexStore, type Document } from '../../../persistence';
+import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
-  'startDependencies' | 'coreStart' | 'visualizationMap' | 'datasourceMap'
+  'startDependencies' | 'coreStart' | 'visualizationMap' | 'datasourceMap' | 'saveByRef'
 >;
-
 function LoadingSpinnerWithOverlay() {
   return (
     <EuiOverlayMask>
@@ -86,17 +87,36 @@ export async function getEditLensConfiguration(
 
   return ({
     attributes,
-    dataView,
-    updateAll,
+    updatePanelState,
     closeFlyout,
     wrapInFlyout,
     datasourceId,
-    adaptersTables,
     panelId,
+    savedObjectId,
+    output$,
+    lensAdapters,
+    updateByRefInput,
+    navigateToLensEditor,
+    displayFlyoutHeader,
   }: EditLensConfigurationProps) => {
-    if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
+    if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
+    /**
+     * During inline editing of a by reference panel, the panel is converted to a by value one.
+     * When the user applies the changes we save them to the Lens SO
+     */
+    const saveByRef = useCallback(
+      async (attrs: Document) => {
+        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
+        await savedObjectStore.save({
+          ...attrs,
+          savedObjectId,
+          type: DOC_TYPE,
+        });
+      },
+      [savedObjectId]
+    );
     const datasourceState = attributes.state.datasourceStates[datasourceId];
     const storeDeps = {
       lensServices,
@@ -110,7 +130,7 @@ export async function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(
       storeDeps,
       undefined,
-      updatingMiddleware(updateAll)
+      updatingMiddleware(updatePanelState)
     );
     lensStore.dispatch(
       loadInitial({
@@ -118,6 +138,7 @@ export async function getEditLensConfiguration(
           attributes,
           id: panelId ?? generateId(),
         },
+        inlineEditing: true,
       })
     );
 
@@ -136,7 +157,6 @@ export async function getEditLensConfiguration(
             size="s"
             hideCloseButton
             css={css`
-              background: none;
               clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
             `}
           >
@@ -150,15 +170,20 @@ export async function getEditLensConfiguration(
 
     const configPanelProps = {
       attributes,
-      dataView,
-      updateAll,
+      updatePanelState,
       closeFlyout,
       datasourceId,
-      adaptersTables,
       coreStart,
       startDependencies,
       visualizationMap,
+      output$,
+      lensAdapters,
       datasourceMap,
+      saveByRef,
+      savedObjectId,
+      updateByRefInput,
+      navigateToLensEditor,
+      displayFlyoutHeader,
     };
 
     return getWrapper(

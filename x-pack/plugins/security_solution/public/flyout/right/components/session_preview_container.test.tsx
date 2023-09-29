@@ -20,10 +20,15 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
 jest.mock('../hooks/use_session_preview');
 jest.mock('../../../common/hooks/use_license');
+
+const NO_DATA_MESSAGE =
+  'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View dataExternal link(opens in a new tab or window) for more information.';
+
+const UPSELL_TEXT = 'This feature requires an Enterprise subscription';
 
 const panelContextValue = {
   getFieldsData: mockGetFieldsData,
@@ -34,10 +39,6 @@ const sessionViewConfig = {
   sessionEntityId: 'sessionEntityId',
   sessionStartTime: 'sessionStartTime',
 };
-
-const TEST_ID = SESSION_PREVIEW_TEST_ID;
-const ERROR_TEST_ID = `${SESSION_PREVIEW_TEST_ID}Error`;
-const UPSELL_TEST_ID = `${SESSION_PREVIEW_TEST_ID}UpSell`;
 
 const renderSessionPreview = () =>
   render(
@@ -50,21 +51,20 @@ const renderSessionPreview = () =>
 
 describe('SessionPreviewContainer', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should render component and link in header', () => {
     (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
-    const { getByTestId, queryByTestId } = renderSessionPreview();
+    const { getByTestId } = renderSessionPreview();
 
-    expect(getByTestId(TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(ERROR_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(UPSELL_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+
     expect(
       screen.queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
@@ -77,6 +77,12 @@ describe('SessionPreviewContainer', () => {
     expect(
       screen.queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).not.toHaveTextContent(NO_DATA_MESSAGE);
+    expect(
+      screen.queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).not.toHaveTextContent(UPSELL_TEXT);
   });
 
   it('should render error message and text in header if no sessionConfig', () => {
@@ -84,26 +90,35 @@ describe('SessionPreviewContainer', () => {
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview();
-
-    expect(queryByTestId(TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(ERROR_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(UPSELL_TEST_ID)).not.toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).toHaveTextContent(NO_DATA_MESSAGE);
+
+    expect(
+      screen.queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).not.toHaveTextContent(UPSELL_TEXT);
+    expect(queryByTestId(SESSION_PREVIEW_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render error message and text in header if no correct license', () => {
+  it('should render upsell message in header if no correct license', () => {
     (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => false });
 
     const { getByTestId, queryByTestId } = renderSessionPreview();
 
-    expect(queryByTestId(TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(ERROR_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(UPSELL_TEST_ID)).toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).toHaveTextContent(UPSELL_TEXT);
+
+    expect(
+      screen.queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).not.toHaveTextContent(NO_DATA_MESSAGE);
+    expect(queryByTestId(SESSION_PREVIEW_TEST_ID)).not.toBeInTheDocument();
   });
 });

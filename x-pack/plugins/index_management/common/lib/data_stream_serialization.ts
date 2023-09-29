@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataStream, DataStreamFromEs, Health } from '../types';
+import { DataStream, EnhancedDataStreamFromEs, Health } from '../types';
 
-export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataStream {
+export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
   const {
     name,
     timestamp_field: timeStampField,
@@ -22,6 +22,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     _meta,
     privileges,
     hidden,
+    lifecycle,
   } = dataStreamFromEs;
 
   return {
@@ -44,9 +45,12 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     _meta,
     privileges,
     hidden,
+    lifecycle,
   };
 }
 
-export function deserializeDataStreamList(dataStreamsFromEs: DataStreamFromEs[]): DataStream[] {
+export function deserializeDataStreamList(
+  dataStreamsFromEs: EnhancedDataStreamFromEs[]
+): DataStream[] {
   return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream));
 }

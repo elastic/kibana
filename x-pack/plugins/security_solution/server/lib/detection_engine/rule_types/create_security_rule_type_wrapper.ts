@@ -169,14 +169,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           };
 
           const {
-            actions,
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          const refresh = actions.length ? 'wait_for' : false;
+          const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug('[+] Starting Signal Rule execution');
-          ruleExecutionLogger.debug(`interval: ${interval}`);
+          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatus.running,
@@ -184,6 +182,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
           let wroteWarningStatus = false;
+          let warningMessage;
           let hasError = false;
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
@@ -252,11 +251,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
-              wroteWarningStatus = await hasReadIndexPrivileges({
-                privileges,
-                ruleExecutionLogger,
-                uiSettingsClient,
-              });
+              const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
+                await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
+
+              wroteWarningStatus = wroteWarningMessage;
+              warningMessage = readIndexWarningMessage;
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
@@ -274,14 +277,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
 
-                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
-                  await hasTimestampFields({
-                    timestampField: primaryTimestamp,
-                    timestampFieldCapsResponse: timestampFieldCaps,
-                    inputIndices: inputIndex,
-                    ruleExecutionLogger,
-                  });
+                const {
+                  wroteWarningStatus: wroteWarningStatusResult,
+                  foundNoIndices,
+                  warningMessage: warningMissingTimestampFieldsMessage,
+                } = await hasTimestampFields({
+                  timestampField: primaryTimestamp,
+                  timestampFieldCapsResponse: timestampFieldCaps,
+                  inputIndices: inputIndex,
+                  ruleExecutionLogger,
+                });
                 wroteWarningStatus = wroteWarningStatusResult;
+                warningMessage = warningMissingTimestampFieldsMessage;
                 skipExecution = foundNoIndices;
               }
             }
@@ -449,17 +456,26 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus['partial failure'],
                 message: truncateList(result.warningMessages).join(),
+                metrics: {
+                  searchDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
+                },
               });
             }
 
             const createdSignalsCount = result.createdSignals.length;
 
             if (result.success) {
-              ruleExecutionLogger.debug('[+] Signal Rule execution completed.');
+              ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexNameWithNamespace(
+                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )}`
+                )} ${
+                  !isEmpty(tuples)
+                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    : ''
+                }`
               );
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
@@ -472,19 +488,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     enrichmentDurations: result.enrichmentTimes,
                   },
                 });
+              } else if (wroteWarningStatus && !hasError && !result.warning) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatus['partial failure'],
+                  message: warningMessage,
+                  metrics: {
+                    searchDurations: result.searchAfterTimes,
+                    indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
+                  },
+                });
               }
-
-              ruleExecutionLogger.debug(
-                `[+] Finished indexing ${createdSignalsCount} ${
-                  !isEmpty(tuples)
-                    ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
-                    : ''
-                }`
-              );
             } else {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus.failed,
-                message: `Bulk Indexing of signals failed: ${truncateList(result.errors).join()}`,
+                message: `Bulk Indexing of alerts failed: ${truncateList(result.errors).join()}`,
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,

@@ -14,7 +14,7 @@ import { HostMetricsExplanationContent } from '../../../../../../components/lens
 import { Chart } from './chart';
 import { Popover } from '../../table/popover';
 
-export const MetricsGrid = React.memo(() => {
+export const MetricsGrid = () => {
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -38,4 +38,4 @@ export const MetricsGrid = React.memo(() => {
       </EuiFlexGrid>
     </>
   );
-});
+};

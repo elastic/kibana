@@ -14,7 +14,7 @@ import { getDefaultDateRange, toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export interface UseDateRangeProviderProps {
-  initialDateRange: TimeRange;
+  initialDateRange?: TimeRange;
 }
 
 export function useDateRangeProvider({

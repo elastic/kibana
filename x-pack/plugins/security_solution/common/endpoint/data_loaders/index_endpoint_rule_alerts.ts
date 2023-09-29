@@ -5488,10 +5488,6 @@ const getAlertsIndexMappings = (): IndexMappings => {
         index: {
           auto_expand_replicas: '0-1',
           hidden: 'true',
-          lifecycle: {
-            name: '.alerts-ilm-policy',
-            rollover_alias: '.alerts-security.alerts-default',
-          },
           mapping: {
             total_fields: {
               limit: 1900,

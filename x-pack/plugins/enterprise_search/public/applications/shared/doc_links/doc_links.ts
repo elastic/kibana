@@ -8,6 +8,8 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
+  public aiSearchDoc: string;
+  public aiSearchHelp: string;
   public apiKeys: string;
   public appSearchAdaptiveRelevance: string;
   public appSearchApiClients: string;
@@ -103,10 +105,6 @@ class DocLinks {
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
-  public esre: string;
-  public esreFaq: string;
-  public esreHelp: string;
-  public esreLearn: string;
   public indexApi: string;
   public ingestionApis: string;
   public ingestPipelines: string;
@@ -127,6 +125,8 @@ class DocLinks {
   public searchApplicationsSearch: string;
   public searchApplicationsTemplates: string;
   public searchApplicationsSearchApi: string;
+  public searchLabs: string;
+  public searchLabsRepo: string;
   public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
@@ -172,6 +172,8 @@ class DocLinks {
   public workplaceSearchZoom: string;
 
   constructor() {
+    this.aiSearchDoc = '';
+    this.aiSearchHelp = '';
     this.apiKeys = '';
     this.appSearchAdaptiveRelevance = '';
     this.appSearchApis = '';
@@ -267,10 +269,6 @@ class DocLinks {
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
-    this.esre = '';
-    this.esreFaq = '';
-    this.esreHelp = '';
-    this.esreLearn = '';
     this.indexApi = '';
     this.ingestionApis = '';
     this.ingestPipelines = '';
@@ -293,6 +291,8 @@ class DocLinks {
     this.searchApplications = '';
     this.searchApplicationsSearch = '';
     this.searchApplicationsSearchApi = '';
+    this.searchLabs = '';
+    this.searchLabsRepo = '';
     this.searchTemplates = '';
     this.start = '';
     this.supportedNlpModels = '';
@@ -337,6 +337,8 @@ class DocLinks {
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
+    this.aiSearchDoc = docLinks.links.enterpriseSearch.aiSearchDoc;
+    this.aiSearchHelp = docLinks.links.enterpriseSearch.aiSearchHelp;
     this.apiKeys = docLinks.links.enterpriseSearch.apiKeys;
     this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
@@ -432,10 +434,6 @@ class DocLinks {
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
-    this.esre = docLinks.links.enterpriseSearch.esre;
-    this.esreFaq = docLinks.links.enterpriseSearch.esreFaq;
-    this.esreHelp = docLinks.links.enterpriseSearch.esreHelp;
-    this.esreLearn = docLinks.links.enterpriseSearch.esreLearn;
     this.indexApi = docLinks.links.enterpriseSearch.indexApi;
     this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
@@ -459,6 +457,8 @@ class DocLinks {
     this.searchApplicationsSearchApi = docLinks.links.enterpriseSearch.searchApplicationsSearchApi;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
     this.searchApplicationsSearch = docLinks.links.enterpriseSearch.searchApplicationsSearch;
+    this.searchLabs = docLinks.links.enterpriseSearch.searchLabs;
+    this.searchLabsRepo = docLinks.links.enterpriseSearch.searchLabsRepo;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;

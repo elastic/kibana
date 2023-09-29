@@ -26,8 +26,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/140973
-  describe.skip('telemetry', () => {
+  describe('telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
     const alwaysFiringRuleId: { [key: string]: string } = {};
 

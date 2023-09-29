@@ -27,8 +27,10 @@ export function PalettePanelContainer({
   handleClose,
   siblingRef,
   children,
+  title,
 }: {
   isOpen: boolean;
+  title: string;
   handleClose: () => void;
   siblingRef: MutableRefObject<HTMLDivElement | null>;
   children?: React.ReactElement | React.ReactElement[];
@@ -76,16 +78,12 @@ export function PalettePanelContainer({
 
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h2
+                    <h3
                       id="lnsPalettePanelContainerTitle"
                       className="lnsPalettePanelContainer__headerTitle"
                     >
-                      <strong>
-                        {i18n.translate('xpack.lens.table.palettePanelTitle', {
-                          defaultMessage: 'Color',
-                        })}
-                      </strong>
-                    </h2>
+                      {title}
+                    </h3>
                   </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -17,7 +17,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
@@ -36,7 +35,6 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   securitySolutionEss: SecuritySolutionEssPluginSetup;
   serverless: ServerlessPluginSetup;
   features: PluginSetupContract;
-  ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
 }
@@ -78,6 +76,10 @@ export interface UsageSourceMetadata {
 
 export type Tier = ProductTier | 'none';
 
+export interface SecurityUsageReportingTaskSetupContractOptions {
+  lookBackLimitMinutes?: number;
+}
+
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
@@ -88,6 +90,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
+  options?: SecurityUsageReportingTaskSetupContractOptions;
 }
 
 export interface SecurityUsageReportingTaskStartContract {

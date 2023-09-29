@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { FieldRow, type FieldRowProps as FieldProps } from './field_row';
+export { FieldRow, type FieldRowProps } from './field_row';
+export { FieldRowProvider, FieldRowKibanaProvider, type FieldRowProviderProps } from './services';
+export type {
+  FieldRowServices,
+  FieldRowKibanaDependencies,
+  KibanaDependencies,
+  Services,
+} from './types';

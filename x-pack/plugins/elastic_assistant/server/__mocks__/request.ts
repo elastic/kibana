@@ -5,7 +5,29 @@
  * 2.0.
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { KNOWLEDGE_BASE } from '../../common/constants';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
 };
+
+export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
+  requestMock.create({
+    method: 'get',
+    path: KNOWLEDGE_BASE,
+    query: { resource },
+  });
+
+export const getPostKnowledgeBaseRequest = (resource?: string) =>
+  requestMock.create({
+    method: 'post',
+    path: KNOWLEDGE_BASE,
+    query: { resource },
+  });
+
+export const getDeleteKnowledgeBaseRequest = (resource?: string) =>
+  requestMock.create({
+    method: 'delete',
+    path: KNOWLEDGE_BASE,
+    query: { resource },
+  });

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition } from '../../../common/types';
+import { type FunctionDefinition, FunctionVisibility } from '../../../common/types';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 
 interface FunctionListOption {
@@ -175,12 +175,14 @@ function mapFunctions({
   functions: FunctionDefinition[];
   selectedFunctionName: string | undefined;
 }) {
-  return functions.map((func) => ({
-    label: func.options.name,
-    searchableLabel: func.options.descriptionForUser,
-    checked:
-      func.options.name === selectedFunctionName
-        ? ('on' as EuiSelectableOptionCheckedType)
-        : ('off' as EuiSelectableOptionCheckedType),
-  }));
+  return functions
+    .filter((func) => func.options.visibility !== FunctionVisibility.System)
+    .map((func) => ({
+      label: func.options.name,
+      searchableLabel: func.options.descriptionForUser || func.options.description,
+      checked:
+        func.options.name === selectedFunctionName
+          ? ('on' as EuiSelectableOptionCheckedType)
+          : ('off' as EuiSelectableOptionCheckedType),
+    }));
 }

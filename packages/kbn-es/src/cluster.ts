@@ -42,8 +42,7 @@ import {
   InstallSnapshotOptions,
   InstallSourceOptions,
 } from './install/types';
-
-const DEFAULT_READY_TIMEOUT = 60 * 1000;
+import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
 
 // listen to data on stream until map returns anything but undefined
 const firstResult = (stream: Readable, map: (data: Buffer) => string | true | undefined) =>
@@ -426,7 +425,12 @@ export class Cluster {
       });
 
       if (!skipReadyCheck) {
-        await this.waitForClusterReady(client, readyTimeout);
+        await waitUntilClusterReady({
+          client,
+          expectedStatus: 'yellow',
+          log: this.log,
+          readyTimeout,
+        });
       }
 
       // once the cluster is ready setup the native realm
@@ -509,45 +513,6 @@ export class Cluster {
     });
   }
 
-  async waitForClusterReady(client: Client, readyTimeout = DEFAULT_READY_TIMEOUT) {
-    let attempt = 0;
-    const start = Date.now();
-
-    this.log.info('waiting for ES cluster to report a yellow or green status');
-
-    while (true) {
-      attempt += 1;
-
-      try {
-        const resp = await client.cluster.health();
-        if (resp.status !== 'red') {
-          return;
-        }
-
-        throw new Error(`not ready, cluster health is ${resp.status}`);
-      } catch (error) {
-        const timeSinceStart = Date.now() - start;
-        if (timeSinceStart > readyTimeout) {
-          const sec = readyTimeout / 1000;
-          throw new Error(`ES cluster failed to come online with the ${sec} second timeout`);
-        }
-
-        if (error.message.startsWith('not ready,')) {
-          if (timeSinceStart > 10_000) {
-            this.log.warning(error.message);
-          }
-        } else {
-          this.log.warning(
-            `waiting for ES cluster to come online, attempt ${attempt} failed with: ${error.message}`
-          );
-        }
-
-        const waitSec = attempt * 1.5;
-        await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
-      }
-    }
-  }
-
   private getJavaOptions(opts: string | undefined) {
     let esJavaOpts = `${opts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
     // ES now automatically sets heap size to 50% of the machine's available memory
@@ -573,15 +538,15 @@ export class Cluster {
       throw new Error('ES serverless docker cluster has already been started');
     }
 
-    this.serverlessNodes = await runServerlessCluster(this.log, options);
-
-    if (options.teardown) {
+    if (!options.skipTeardown) {
       /**
        * Ideally would be async and an event like beforeExit or SIGINT,
        * but those events are not being triggered in FTR child process.
        */
       process.on('exit', () => teardownServerlessClusterSync(this.log, options));
     }
+
+    this.serverlessNodes = await runServerlessCluster(this.log, options);
 
     return this.serverlessNodes;
   }

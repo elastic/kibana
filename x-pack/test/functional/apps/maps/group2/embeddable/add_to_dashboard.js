@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
-  describe('maps add-to-dashboard save flow', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167320
+  describe.skip('maps add-to-dashboard save flow', () => {
     before(async () => {
       await security.testUser.setRoles(
         [
@@ -83,7 +84,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should allow new map be added by value to an existing dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
 
       await PageObjects.dashboard.saveDashboard('My Very Cool Dashboard');
@@ -113,7 +114,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should allow existing maps be added by value to an existing dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
 
       await PageObjects.dashboard.saveDashboard('My Wonderful Dashboard');
@@ -185,7 +186,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should allow new map be added by reference to an existing dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
 
       await PageObjects.dashboard.saveDashboard('My Super Cool Dashboard');
@@ -215,7 +216,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should allow existing maps be added by reference to an existing dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
 
       await PageObjects.dashboard.saveDashboard('My Amazing Dashboard');

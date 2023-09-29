@@ -39,6 +39,18 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
 );
 
+const renderRelatedAlertsByAncestry = () =>
+  render(
+    <TestProviders>
+      <RelatedAlertsByAncestry
+        documentId={documentId}
+        indices={indices}
+        scopeId={scopeId}
+        eventId={eventId}
+      />
+    </TestProviders>
+  );
+
 describe('<RelatedAlertsByAncestry />', () => {
   it('should render many related alerts correctly', () => {
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
@@ -74,16 +86,7 @@ describe('<RelatedAlertsByAncestry />', () => {
       ],
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RelatedAlertsByAncestry
-          documentId={documentId}
-          indices={indices}
-          scopeId={scopeId}
-          eventId={eventId}
-        />
-      </TestProviders>
-    );
+    const { getByTestId } = renderRelatedAlertsByAncestry();
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
@@ -99,16 +102,24 @@ describe('<RelatedAlertsByAncestry />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <TestProviders>
-        <RelatedAlertsByAncestry
-          documentId={documentId}
-          indices={indices}
-          scopeId={scopeId}
-          eventId={eventId}
-        />
-      </TestProviders>
-    );
+    const { container } = renderRelatedAlertsByAncestry();
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render no data message', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByText } = renderRelatedAlertsByAncestry();
+    expect(getByText('No alerts related by ancestry.')).toBeInTheDocument();
   });
 });

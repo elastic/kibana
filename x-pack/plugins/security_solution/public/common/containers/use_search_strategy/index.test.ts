@@ -9,7 +9,10 @@ import { useSearch, useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import type { FactoryQueryTypes, StrategyRequestType } from '../../../../common/search_strategy';
+import type {
+  FactoryQueryTypes,
+  StrategyRequestInputType,
+} from '../../../../common/search_strategy';
 import { Observable } from 'rxjs';
 
 jest.mock('@kbn/securitysolution-hook-utils');
@@ -83,7 +86,7 @@ const userSearchStrategyProps = {
 const request = {
   fake: 'request',
   search: 'parameters',
-} as unknown as StrategyRequestType<FactoryQueryTypes>;
+} as unknown as StrategyRequestInputType<FactoryQueryTypes>;
 
 describe('useSearchStrategy', () => {
   beforeEach(() => {

@@ -7,6 +7,8 @@
 
 import { Direction } from '@kbn/timelines-plugin/common';
 
+export { Direction };
+
 import { z } from 'zod';
 
 export const order = z.enum([Direction.asc, Direction.desc]);
