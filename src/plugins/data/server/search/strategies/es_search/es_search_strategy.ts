@@ -50,13 +50,12 @@ export const esSearchStrategyProvider = (
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
         };
-        const { body, meta } = await esClient.asCurrentUser.search(params, {
+        const body = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
           ...transport,
-          meta: true,
         });
         const response = shimHitsTotal(body, options);
-        return toKibanaSearchResponse(response, meta?.request?.params);
+        return toKibanaSearchResponse(response);
       } catch (e) {
         throw getKbnServerError(e);
       }
