@@ -1058,6 +1058,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             })
           );
+
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
             customFields: [

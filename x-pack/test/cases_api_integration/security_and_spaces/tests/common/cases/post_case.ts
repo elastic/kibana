@@ -16,7 +16,7 @@ import {
 import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
+  deleteAllCaseItems,
   createCase,
   removeServerGeneratedPropertiesFromCase,
   getCaseUserActions,
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await deleteAllCaseItems(es);
     });
 
     describe('happy path', () => {

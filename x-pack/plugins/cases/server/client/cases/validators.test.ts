@@ -346,7 +346,6 @@ describe('validators', () => {
               value: true,
             },
           ],
-
           customFieldsConfiguration: [
             {
               key: 'first_key',
