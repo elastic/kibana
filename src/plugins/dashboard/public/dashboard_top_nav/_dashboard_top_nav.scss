@@ -4,6 +4,6 @@
     position: sticky;
     z-index: $euiZLevel2;
     top: var(--euiFixedHeadersOffset, 0);
-    background: transparent;
+    background: $euiPageBackgroundColor;
   }
 }

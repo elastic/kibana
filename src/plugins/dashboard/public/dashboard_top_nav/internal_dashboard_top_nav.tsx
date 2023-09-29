@@ -325,7 +325,7 @@ export function InternalDashboardTopNav({
   }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);
 
   return (
-    <div>
+    <div className="dashboardTopNav">
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
