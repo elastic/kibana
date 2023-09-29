@@ -123,7 +123,7 @@ describe('SearchResponseCache', () => {
             t: 'a'.repeat(1000),
           },
         },
-        {},
+        {} as any,
       ]);
       cache.set('123', wrapWithAbortController(err$));
 
