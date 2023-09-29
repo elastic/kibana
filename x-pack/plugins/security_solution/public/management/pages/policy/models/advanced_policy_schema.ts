@@ -1336,7 +1336,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
       {
-        defaultMessage: 'Sends file access events to the stack. Default: false',
+        defaultMessage: 'A value of 'false' overrides other config settings that would enable kernel fileaccess events. Default: true.',
       }
     ),
   },
