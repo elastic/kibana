@@ -8,6 +8,7 @@
 import { TimeRange } from '@kbn/es-query';
 import { Search } from 'history';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InfraWaffleMapOptions } from '../../lib/lib';
 
 export type { AssetDetailsUrlState } from './hooks/use_asset_details_url_state';
 
@@ -37,6 +38,7 @@ export interface OverridableTabState {
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
+    options?: Partial<InfraWaffleMapOptions>;
   };
 }
 

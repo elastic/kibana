@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { ContentTabIds } from '../../../../../components/asset_details/types';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import AssetDetails from '../../../../../components/asset_details/asset_details';
@@ -18,6 +19,7 @@ interface Props {
   assetType: InventoryItemType;
   closeFlyout: () => void;
   currentTime: number;
+  options?: InfraWaffleMapOptions;
 }
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -32,7 +34,13 @@ const flyoutTabs = [
   },
 ];
 
-export const AssetDetailsFlyout = ({ assetName, assetType, closeFlyout, currentTime }: Props) => {
+export const AssetDetailsFlyout = ({
+  assetName,
+  assetType,
+  closeFlyout,
+  currentTime,
+  options,
+}: Props) => {
   const { source } = useSourceContext();
 
   return source ? (
@@ -42,6 +50,9 @@ export const AssetDetailsFlyout = ({ assetName, assetType, closeFlyout, currentT
       overrides={{
         metadata: {
           showActionsColumn: false,
+        },
+        alertRule: {
+          options,
         },
       }}
       tabs={flyoutTabs}
