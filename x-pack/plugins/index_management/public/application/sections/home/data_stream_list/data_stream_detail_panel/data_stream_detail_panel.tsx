@@ -312,21 +312,25 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         defaultMessage: 'Data stream options',
       }),
       items: [
-        ...((!dataStream?.ilmPolicyName && dataStream?.privileges?.manage_data_stream_lifecycle)
-          ? [{
-            key: 'editDataRetention',
-            name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
-              defaultMessage: 'Edit data retention',
-            }),
-            'data-test-subj': 'editDataRetentionButton',
-            icon: <EuiIcon type="pencil" size="m" />,
-            onClick: () => {
-              closePopover();
-              setIsEditingDataRetention(true);
-            },
-          }]
-          : []
-        ),
+        ...(!dataStream?.ilmPolicyName && dataStream?.privileges?.manage_data_stream_lifecycle
+          ? [
+              {
+                key: 'editDataRetention',
+                name: i18n.translate(
+                  'xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention',
+                  {
+                    defaultMessage: 'Edit data retention',
+                  }
+                ),
+                'data-test-subj': 'editDataRetentionButton',
+                icon: <EuiIcon type="pencil" size="m" />,
+                onClick: () => {
+                  closePopover();
+                  setIsEditingDataRetention(true);
+                },
+              },
+            ]
+          : []),
         ...(dataStream?.privileges?.delete_index
           ? [
               {

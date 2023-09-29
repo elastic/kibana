@@ -37,7 +37,6 @@ const enhanceDataStreams = ({
         manage_data_stream_lifecycle: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].manage_data_stream_lifecycle
           : true,
-
       },
     };
 

@@ -679,7 +679,12 @@ describe('Data Streams tab', () => {
       });
 
       beforeEach(async () => {
-        setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete, dataStreamNoEditRetention, dataStreamNoPermissions]);
+        setLoadDataStreamsResponse([
+          dataStreamWithDelete,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
 
         testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
         await act(async () => {
