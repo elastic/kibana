@@ -7,8 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import { PropsWithChildren, ReactElement, RefObject } from 'react';
-import React, { useMemo } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -21,9 +20,13 @@ import type {
   LensSuggestionsApi,
   Suggestion,
 } from '@kbn/lens-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  ResizableLayout,
+  ResizableLayoutMode,
+  ResizableLayoutDirection,
+} from '@kbn/resizable-layout';
 import { Chart } from '../chart';
-import { Panels, PANELS_MODE } from '../panels';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
@@ -96,9 +99,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   breakdown?: UnifiedHistogramBreakdownContext;
   /**
-   * Ref to the element wrapping the layout which will be used for resize calculations
+   * The parent container element, used to calculate the layout size
    */
-  resizeRef: RefObject<HTMLDivElement>;
+  container: HTMLElement | null;
   /**
    * Current top panel height -- leave undefined to use the default
    */
@@ -192,7 +195,7 @@ export const UnifiedHistogramLayout = ({
   lensEmbeddableOutput$,
   chart: originalChart,
   breakdown,
-  resizeRef,
+  container,
   topPanelHeight,
   appendHitsCounter,
   disableAutoFetching,
@@ -226,14 +229,11 @@ export const UnifiedHistogramLayout = ({
     });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
-  const topPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
+  const [topPanelNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
-
-  const mainPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
+  const [mainPanelNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -252,14 +252,15 @@ export const UnifiedHistogramLayout = ({
   const panelsMode =
     chart || hits
       ? showFixedPanels
-        ? PANELS_MODE.FIXED
-        : PANELS_MODE.RESIZABLE
-      : PANELS_MODE.SINGLE;
+        ? ResizableLayoutMode.Static
+        : ResizableLayoutMode.Resizable
+      : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
   const onResetChartHeight = useMemo(() => {
-    return currentTopPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
+    return currentTopPanelHeight !== defaultTopPanelHeight &&
+      panelsMode === ResizableLayoutMode.Resizable
       ? () => onTopPanelHeightChange?.(undefined)
       : undefined;
   }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
@@ -305,16 +306,18 @@ export const UnifiedHistogramLayout = ({
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>
-      <Panels
+      <ResizableLayout
         className={className}
         mode={panelsMode}
-        resizeRef={resizeRef}
-        topPanelHeight={currentTopPanelHeight}
-        minTopPanelHeight={defaultTopPanelHeight}
-        minMainPanelHeight={minMainPanelHeight}
-        topPanel={<OutPortal node={topPanelNode} />}
-        mainPanel={<OutPortal node={mainPanelNode} />}
-        onTopPanelHeightChange={onTopPanelHeightChange}
+        direction={ResizableLayoutDirection.Vertical}
+        container={container}
+        fixedPanelSize={currentTopPanelHeight}
+        minFixedPanelSize={defaultTopPanelHeight}
+        minFlexPanelSize={minMainPanelHeight}
+        fixedPanel={<OutPortal node={topPanelNode} />}
+        flexPanel={<OutPortal node={mainPanelNode} />}
+        data-test-subj="unifiedHistogram"
+        onFixedPanelSizeChange={onTopPanelHeightChange}
       />
     </>
   );

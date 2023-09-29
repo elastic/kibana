@@ -154,7 +154,7 @@ export function App({
 
   useExecutionContext(executionContext, {
     type: 'application',
-    id: savedObjectId || 'new',
+    id: savedObjectId || 'new', // TODO: this doesn't consider when lens is saved by value
     page: 'editor',
   });
 

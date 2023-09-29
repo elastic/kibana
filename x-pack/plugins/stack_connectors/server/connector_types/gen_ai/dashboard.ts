@@ -11,7 +11,7 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 
 export const dashboardTitle = `Generative AI Token Usage`;
 
-export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAttributes> => {
+export const getDashboard = (dashboardId: string): SavedObject<DashboardAttributes> => {
   const ids: Record<string, string> = {
     genAiSavedObjectId: dashboardId,
     tokens: uuidv4(),
