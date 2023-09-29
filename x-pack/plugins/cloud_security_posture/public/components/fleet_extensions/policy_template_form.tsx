@@ -198,7 +198,7 @@ const AwsAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
@@ -341,7 +341,7 @@ const GcpAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
