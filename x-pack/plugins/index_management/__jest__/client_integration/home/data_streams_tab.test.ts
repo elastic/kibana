@@ -662,15 +662,24 @@ describe('Data Streams tab', () => {
 
       const dataStreamWithDelete = createDataStreamPayload({
         name: 'dataStreamWithDelete',
-        privileges: { delete_index: true },
+        privileges: { delete_index: true, manage_data_stream_lifecycle: true },
       });
       const dataStreamNoDelete = createDataStreamPayload({
         name: 'dataStreamNoDelete',
-        privileges: { delete_index: false },
+        privileges: { delete_index: false, manage_data_stream_lifecycle: true },
+      });
+      const dataStreamNoEditRetention = createDataStreamPayload({
+        name: 'dataStreamNoEditRetention',
+        privileges: { delete_index: true, manage_data_stream_lifecycle: false },
+      });
+
+      const dataStreamNoPermissions = createDataStreamPayload({
+        name: 'dataStreamNoPermissions',
+        privileges: { delete_index: false, manage_data_stream_lifecycle: false },
       });
 
       beforeEach(async () => {
-        setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
+        setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete, dataStreamNoEditRetention, dataStreamNoPermissions]);
 
         testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
         await act(async () => {
@@ -685,6 +694,8 @@ describe('Data Streams tab', () => {
 
         expect(tableCellsValues).toEqual([
           ['', 'dataStreamNoDelete', 'green', '1', '7d', ''],
+          ['', 'dataStreamNoEditRetention', 'green', '1', '7d', 'Delete'],
+          ['', 'dataStreamNoPermissions', 'green', '1', '7d', ''],
           ['', 'dataStreamWithDelete', 'green', '1', '7d', 'Delete'],
         ]);
       });
@@ -705,19 +716,6 @@ describe('Data Streams tab', () => {
         expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
       });
 
-      test('displays delete button in detail panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
-        await clickNameAt(1);
-
-        // Open manage data stream panel
-        testBed.find('manageDataStreamButton').simulate('click');
-        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
-      });
-
       test('hides delete button in detail panel', async () => {
         const {
           actions: { clickNameAt },
@@ -726,9 +724,43 @@ describe('Data Streams tab', () => {
         setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
         await clickNameAt(0);
 
-        // Open manage data stream panel
         testBed.find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeFalsy();
+      });
+
+      test('hides edit data retention button if no permissions', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
+        await clickNameAt(1);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('editDataRetentionButton').exists()).toBeFalsy();
+      });
+
+      test('hides manage button if no permissions', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+        await clickNameAt(2);
+
+        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+      });
+
+      test('displays delete button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
+        await clickNameAt(3);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
       });
     });
   });

@@ -34,6 +34,10 @@ const enhanceDataStreams = ({
         delete_index: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].delete_index
           : true,
+        manage_data_stream_lifecycle: dataStreamsPrivileges
+          ? dataStreamsPrivileges.index[dataStream.name].manage_data_stream_lifecycle
+          : true,
+
       },
     };
 
@@ -73,7 +77,7 @@ const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[])
       index: [
         {
           names,
-          privileges: ['delete_index'],
+          privileges: ['delete_index', 'manage_data_stream_lifecycle'],
         },
       ],
     },

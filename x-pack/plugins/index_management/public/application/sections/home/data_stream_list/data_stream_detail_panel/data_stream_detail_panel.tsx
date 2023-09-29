@@ -312,7 +312,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         defaultMessage: 'Data stream options',
       }),
       items: [
-        ...(!dataStream?.ilmPolicyName
+        ...((!dataStream?.ilmPolicyName && dataStream?.privileges?.manage_data_stream_lifecycle)
           ? [{
             key: 'editDataRetention',
             name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
@@ -327,7 +327,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           }]
           : []
         ),
-        ...(dataStream?.privileges.delete_index
+        ...(dataStream?.privileges?.delete_index
           ? [
               {
                 key: 'deleteDataStream',

@@ -274,6 +274,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   maxTimeStamp: 420,
   privileges: {
     delete_index: true,
+    manage_data_stream_lifecycle: true,
   },
   hidden: false,
   lifecycle: {
