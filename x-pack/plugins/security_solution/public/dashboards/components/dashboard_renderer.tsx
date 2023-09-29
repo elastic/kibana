@@ -68,7 +68,7 @@ const DashboardRendererComponent = ({
           embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
         getEmbeddableContainerContext: (dashboardId?: string) => ({
           getCurrentPath: () =>
-            dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`,
+            dashboardId ? `${DASHBOARDS_PATH}/${dashboardId}/edit` : `${DASHBOARDS_PATH}/create`,
           currentAppId: APP_UI_ID,
         }),
       }),
