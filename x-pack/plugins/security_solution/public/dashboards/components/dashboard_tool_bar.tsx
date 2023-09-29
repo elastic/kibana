@@ -13,8 +13,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import { SecurityPageName } from '../../../common';
-import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
-import { useCapabilities, useKibana, useNavigateTo } from '../../common/lib/kibana';
+import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
 
 const DashboardToolBarComponent = ({
