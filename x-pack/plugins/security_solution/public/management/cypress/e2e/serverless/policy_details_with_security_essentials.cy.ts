@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginServerless } from '../../tasks/login_serverless';
+import { login } from '../../tasks/login';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 
@@ -35,7 +35,7 @@ describe(
     });
 
     beforeEach(() => {
-      loginServerless();
+      login();
       visitPolicyDetailsPage(loadedPolicyData.integrationPolicies[0].id);
     });
 

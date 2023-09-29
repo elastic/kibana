@@ -114,8 +114,10 @@ export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) => {
-  cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+export const addExceptionEntryFieldMatchAnyValue = (values: string[], index = 0) => {
+  values.forEach((value) => {
+    cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+  });
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 export const addExceptionEntryFieldMatchIncludedValue = (value: string, index = 0) => {
@@ -164,9 +166,13 @@ export const selectCloseSingleAlerts = () => {
 export const addExceptionConditions = (exception: Exception) => {
   cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
+  if (exception.operator === 'is one of') {
+    addExceptionEntryFieldMatchAnyValue(exception.values, 0);
+  } else {
+    exception.values.forEach((value) => {
+      cy.get(VALUES_INPUT).type(`${value}{enter}`);
+    });
+  }
 };
 
 export const validateExceptionConditionField = (value: string) => {

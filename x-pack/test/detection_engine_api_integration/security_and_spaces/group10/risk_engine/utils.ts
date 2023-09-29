@@ -101,6 +101,27 @@ export const createAndSyncRuleAndAlertsFactory =
     await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
   };
 
+export const deleteRiskScoreIndices = async ({
+  log,
+  es,
+  namespace = 'default',
+}: {
+  log: ToolingLog;
+  es: Client;
+  namespace?: string;
+}) => {
+  try {
+    await Promise.allSettled([
+      es.indices.deleteDataStream({ name: [`risk-score.risk-score-${namespace}`] }),
+      es.indices.delete({
+        index: [`risk-score.risk-score-latest-${namespace}`],
+      }),
+    ]);
+  } catch (e) {
+    log.error(`Error deleting risk score indices: ${e.message}`);
+  }
+};
+
 /**
  * Deletes all risk scores from a given index or indices, defaults to `risk-score.risk-score-*`
  * For use inside of afterEach blocks of tests
@@ -427,6 +448,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -434,6 +456,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -441,6 +464,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -448,6 +472,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 });
@@ -460,12 +485,14 @@ export const installLegacyRiskScore = async ({
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send({ riskScoreEntity: 'host' })
     .expect(200);
 
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send({ riskScoreEntity: 'user' })
     .expect(200);
 

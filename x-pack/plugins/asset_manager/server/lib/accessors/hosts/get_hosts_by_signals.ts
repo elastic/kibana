@@ -12,11 +12,18 @@ import { collectHosts } from '../../collectors/hosts';
 export async function getHostsBySignals(
   options: GetHostsOptionsInjected
 ): Promise<{ hosts: Asset[] }> {
+  const metricsIndices = await options.metricsClient.getMetricIndices({
+    savedObjectsClient: options.savedObjectsClient,
+  });
+
   const { assets } = await collectHosts({
-    client: options.esClient,
+    client: options.elasticsearchClient,
     from: options.from,
     to: options.to,
-    sourceIndices: options.sourceIndices,
+    sourceIndices: {
+      metrics: metricsIndices,
+      logs: options.sourceIndices.logs,
+    },
   });
   return {
     hosts: assets,
