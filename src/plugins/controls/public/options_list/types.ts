@@ -7,7 +7,7 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldSpec, DataView } from '@kbn/data-views-plugin/common';
 
 import { ControlOutput } from '../types';
 import {

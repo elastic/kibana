@@ -21,7 +21,7 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 import './options_list.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
 import { MIN_POPOVER_WIDTH } from '../../constants';
-import { pluginServices } from '../../services';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -30,11 +30,7 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
-  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
   const optionsList = useOptionsList();
-  const {
-    dataViews: { get: getDataViewById },
-  } = pluginServices.getServices();
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
@@ -53,22 +49,7 @@ export const OptionsListControl = ({
 
   const loading = optionsList.select((state) => state.output.loading);
   const dataViewId = optionsList.select((state) => state.output.dataViewId);
-
-  /**
-   * derive field formatter from fieldSpec and dataViewId
-   */
-  useEffect(() => {
-    (async () => {
-      if (!dataViewId || !fieldSpec) return;
-      // dataViews are cached, and should always be available without having to hit ES.
-      const dataView = await getDataViewById(dataViewId);
-      setFieldFormatter(
-        () =>
-          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: string) => toFormat)
-      );
-    })();
-  }, [dataViewId, fieldSpec, getDataViewById]);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   useEffect(() => {
     return () => {
