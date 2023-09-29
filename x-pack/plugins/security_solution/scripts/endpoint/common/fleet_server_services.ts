@@ -29,6 +29,8 @@ import {
   fleetServerHostsRoutesService,
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
+import axios from 'axios';
+import * as https from 'https';
 import type { FormattedAxiosError } from './format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import {
@@ -95,11 +97,9 @@ export const startFleetServer = async ({
     if (!force) {
       const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
 
-      // TODO: actually ping the server to ensure its up and running
-
-      if (currentFleetServerUrl) {
+      if (currentFleetServerUrl && (await isFleetServerRunning(currentFleetServerUrl))) {
         throw new Error(
-          `Fleet server seems to already be configured for this instance of Kibana. (Use 'force' option to bypass this error)`
+          `Fleet server is already configured for this instance of Kibana and available at: ${currentFleetServerUrl}.\n(Use 'force' option to bypass this error)`
         );
       }
     }
@@ -320,7 +320,7 @@ const addFleetServerHostToFleetSettings = async (
   log: ToolingLog,
   fleetServerHostUrl: string
 ): Promise<FleetServerHost> => {
-  log.verbose(`Updating Fleet with new fleet server host: ${fleetServerHostUrl}`);
+  log.info(`Updating Fleet with new fleet server host: ${fleetServerHostUrl}`);
 
   return log.indent(4, async () => {
     try {
@@ -386,7 +386,7 @@ const updateFleetElasticsearchOutputHostNames = async (
   kbnClient: KbnClient,
   log: ToolingLog
 ): Promise<void> => {
-  log.info('Checking if Fleet settings needs to updated');
+  log.info('Checking if Fleet output for Elasticsearch needs to be updated');
 
   return log.indent(4, async () => {
     try {
@@ -443,4 +443,24 @@ const updateFleetElasticsearchOutputHostNames = async (
       throw error;
     }
   });
+};
+
+const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
+  const url = new URL(serverUrl);
+  url.pathname = '/api/status';
+
+  return axios
+    .request({
+      method: 'GET',
+      url: url.toString(),
+      responseType: 'json',
+      // Custom agent to ensure we don't get cert errors
+      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+    })
+    .then(() => {
+      return true;
+    })
+    .catch(() => {
+      return false;
+    });
 };

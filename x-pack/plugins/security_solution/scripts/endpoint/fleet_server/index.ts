@@ -40,7 +40,7 @@ export const cli = async () => {
         force,
       });
 
-      log.info(runningServer.info);
+      log.info(`\n\n${runningServer.info}`);
     },
     {
       description: 'Start fleet-server locally and connect it to Kibana/ES',
