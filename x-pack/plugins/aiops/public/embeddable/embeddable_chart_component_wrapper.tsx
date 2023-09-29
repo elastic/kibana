@@ -70,6 +70,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
             onLoading={onLoading}
             onRenderComplete={onRenderComplete}
             onError={onError}
+            onChange={input.onChange}
+            emptyState={input.emptyState}
           />
         </FilterQueryContextProvider>
       </DataSourceContextProvider>
@@ -103,6 +105,8 @@ export const ChartGridEmbeddableWrapper: FC<
   onError,
   onLoading,
   onRenderComplete,
+  onChange,
+  emptyState,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -189,8 +193,12 @@ export const ChartGridEmbeddableWrapper: FC<
       resultChangePoints = resultChangePoints.slice(0, maxSeriesToPlot);
     }
 
+    if (onChange) {
+      onChange(resultChangePoints);
+    }
+
     return resultChangePoints;
-  }, [results, maxSeriesToPlot]);
+  }, [results, maxSeriesToPlot, onChange]);
 
   return (
     <div
@@ -205,6 +213,8 @@ export const ChartGridEmbeddableWrapper: FC<
           interval={requestParams.interval}
           onRenderComplete={onRenderComplete}
         />
+      ) : emptyState ? (
+        emptyState
       ) : (
         <NoChangePointsWarning />
       )}
