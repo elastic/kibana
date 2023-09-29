@@ -324,7 +324,12 @@ export const LogCategorizationPage: FC = () => {
               />
             </EuiButton>
           ) : (
-            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
+            <EuiButton
+              data-test-subj="aiopsLogCategorizationPageCancelButton"
+              onClick={() => cancelRequest()}
+            >
+              Cancel
+            </EuiButton>
           )}
         </EuiFlexItem>
         <EuiFlexItem />
