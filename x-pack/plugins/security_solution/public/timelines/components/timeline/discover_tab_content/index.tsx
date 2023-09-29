@@ -56,7 +56,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
-  const currentQuery = discoverDataService.query.queryString.getQuery();
 
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
@@ -73,6 +72,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     updateSavedSearch,
     restoreDiscoverAppStateFromSavedSearch,
     resetDiscoverAppState,
+    getDefaultDiscoverAppState,
   } = useDiscoverInTimelineContext();
 
   const {
@@ -110,16 +110,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     },
     [dispatch, timelineId]
   );
-
-  useEffect(() => {
-    if (isDiscoverSavedSearchLoaded && dataView && !('esql' in currentQuery)) {
-      // By setting the query string to esql and locking the esql selection via
-      // use_data_view_customization.tsx we lock the tab to the ESQL experience
-      discoverDataService.query.queryString.setQuery({
-        esql: `from ${dataView?.getIndexPattern()} | limit 10`,
-      });
-    }
-  }, [currentQuery, dataView, discoverDataService.query.queryString, isDiscoverSavedSearchLoaded]);
 
   const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
@@ -239,15 +229,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
-      const finalAppState = savedSearchAppState?.appState ?? discoverAppState;
+      const defaultDiscoverAppState = await getDefaultDiscoverAppState();
 
-      if (finalAppState) {
-        stateContainer.appState.set(finalAppState);
-        await stateContainer.appState.replaceUrlState(finalAppState);
-      } else {
-        // set initial dataView Id
-        if (dataView) stateContainer.actions.setDataView(dataView);
-      }
+      const finalAppState =
+        savedSearchAppState?.appState ?? discoverAppState ?? defaultDiscoverAppState;
+
+      stateContainer.appState.set(finalAppState);
+      await stateContainer.appState.replaceUrlState(finalAppState);
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
         next: setDiscoverAppState,
@@ -284,12 +272,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       setDiscoverSavedSearchState,
       setDiscoverInternalState,
       setDiscoverAppState,
-      dataView,
       setDiscoverStateContainer,
       getAppStateFromSavedSearch,
       discoverDataService.query.timefilter.timefilter,
       savedSearchId,
       savedSearchService,
+      getDefaultDiscoverAppState,
     ]
   );
 
