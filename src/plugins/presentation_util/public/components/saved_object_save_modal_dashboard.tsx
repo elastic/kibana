@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { OnSaveProps, SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import { OnSaveProps, SavedObjectSaveModal, type SaveModalState } from '@kbn/saved-objects-plugin/public';
 
 import { pluginServices } from '../services';
 import { SaveModalDashboardProps } from './types';
@@ -39,7 +39,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const [copyOnSave, setCopyOnSave] = useState<boolean>(initialCopyOnSave);
 
   const rightOptions = !disableDashboardOptions
-    ? () => (
+    ? ({ hasAttemptedSubmit }: SaveModalState) => (
         <SaveModalDashboardSelector
           onSelectDashboard={(dash) => {
             setSelectedDashboard(dash);
@@ -48,7 +48,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
             setDashboardOption(option);
           }}
           canSaveByReference={canSaveByReference}
-          {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
+          {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected, hasAttemptedSubmit, hasSelectedDashboard: Boolean(selectedDashboard) }}
         />
       )
     : null;
