@@ -562,7 +562,7 @@ describe('create', () => {
           ],
         },
       ]);
-      
+
       await expect(
         create({ ...theCase }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(

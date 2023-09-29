@@ -27,7 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Closure options', function () {
       this.beforeEach(async () => {
         await header.waitUntilLoadingHasFinished();
-      })
+      });
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
