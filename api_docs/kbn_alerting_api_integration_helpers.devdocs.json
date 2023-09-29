@@ -113,6 +113,55 @@
           },
           {
             "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.indexDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "indexDoc",
+            "description": [],
+            "signature": [
+              "(source: string, reference?: string | undefined) => Promise<",
+              "WriteResponseBase",
+              ">"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.indexDoc.$1",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.indexDoc.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reference",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
             "id": "def-common.ESTestIndexTool.destroy",
             "type": "Function",
             "tags": [],

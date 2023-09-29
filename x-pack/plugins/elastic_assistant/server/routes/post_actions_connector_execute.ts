@@ -9,10 +9,7 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
-import {
-  getLangChainMessages,
-  unsafeGetAssistantMessagesFromRequest,
-} from '../lib/langchain/helpers';
+import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import {
@@ -39,7 +36,6 @@ export const postActionsConnectorExecuteRoute = (
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
-        const rawSubActionParamsBody = request.body.params.subActionParams.body;
 
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
@@ -47,11 +43,10 @@ export const postActionsConnectorExecuteRoute = (
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        // get the assistant messages from the request body:
-        const assistantMessages = unsafeGetAssistantMessagesFromRequest(rawSubActionParamsBody);
-
         // convert the assistant messages to LangChain messages:
-        const langChainMessages = getLangChainMessages(assistantMessages);
+        const langChainMessages = getLangChainMessages(
+          request.body.params.subActionParams.messages
+        );
 
         const langChainResponseBody = await callAgentExecutor({
           actions,
