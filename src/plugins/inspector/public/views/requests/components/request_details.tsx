@@ -9,6 +9,8 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
+import type { DetailViewData } from './types';
+import { getNextTab } from './get_next_tab';
 import { Request } from '../../../../common/adapters/request/types';
 
 import {
@@ -21,12 +23,6 @@ import {
 interface Props {
   initialTabs?: string[];
   request: Request;
-}
-
-interface DetailViewData {
-  name: string;
-  label: string;
-  component: any;
 }
 
 const DETAILS: DetailViewData[] = [
@@ -76,18 +72,8 @@ export function RequestDetails(props: Props) {
       return;
     }
 
-    const firstDetail = nextAvailableDetails.length ? nextAvailableDetails[0] : null;
-    const initialTabName = props.initialTabs
-      ? props.initialTabs.find((tabName) => {
-          return nextAvailableDetails.some(({ name }) => tabName.toLowerCase() === name.toLowerCase());
-        })
-      : undefined;
-    const initialDetail = initialTabName
-      ? nextAvailableDetails.find(({ name }) => initialTabName === name)
-      : undefined;
-
-    const nextSelectedDetail = !selectedDetail && initialDetail ? initialDetail : firstDetail;
-    setSelectedDetail(nextSelectedDetail);
+    setSelectedDetail(getNextTab(selectedDetail, nextAvailableDetails, props.initialTabs));
+    
     // do not re-run on selectedDetail change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.initialTabs, props.request]);
