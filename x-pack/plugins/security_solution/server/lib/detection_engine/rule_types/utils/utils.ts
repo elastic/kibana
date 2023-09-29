@@ -71,7 +71,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
-}): Promise<boolean> => {
+}): Promise<{ wroteWarningMessage: boolean; warningStatusMessage: string | undefined }> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -86,17 +86,20 @@ export const hasReadIndexPrivileges = async (args: {
     (indexName) => privileges.index[indexName].read
   );
 
+  let warningStatusMessage;
+
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
+    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
-      message: `This rule may not have the required read privileges to the following index patterns: ${indexesString}`,
+      message: warningStatusMessage,
     });
-    return true;
+    return { wroteWarningMessage: true, warningStatusMessage };
   }
 
-  return false;
+  return { wroteWarningMessage: false, warningStatusMessage };
 };
 
 export const hasTimestampFields = async (args: {
@@ -107,7 +110,11 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<{ wroteWarningStatus: boolean; foundNoIndices: boolean }> => {
+}): Promise<{
+  wroteWarningStatus: boolean;
+  foundNoIndices: boolean;
+  warningMessage: string | undefined;
+}> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
@@ -125,7 +132,11 @@ export const hasTimestampFields = async (args: {
       message: errorString.trimEnd(),
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: true };
+    return {
+      wroteWarningStatus: true,
+      foundNoIndices: true,
+      warningMessage: errorString.trimEnd(),
+    };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -149,10 +160,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: false };
+    return { wroteWarningStatus: true, foundNoIndices: false, warningMessage: errorString };
   }
 
-  return { wroteWarningStatus: false, foundNoIndices: false };
+  return { wroteWarningStatus: false, foundNoIndices: false, warningMessage: undefined };
 };
 
 export const checkPrivileges = async (
