@@ -279,7 +279,10 @@ export const defineLogRateAnalysisRoute = (
                 }
               }
 
-              // Step 2: Significant Terms
+              // Step 2: Significant Categories and Terms
+
+              // This will store the combined count of detected significant log patterns and keywords
+              let fieldValuePairsCount = 0;
 
               const significantCategories: SignificantTerm[] = [];
               // Get significant categories of text fields
@@ -304,6 +307,7 @@ export const defineLogRateAnalysisRoute = (
               const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
                 ? request.body.overrides?.significantTerms
                 : [];
+
               const fieldsToSample = new Set<string>();
 
               // Don't use more than 10 here otherwise Kibana will emit an error
@@ -367,6 +371,8 @@ export const defineLogRateAnalysisRoute = (
                   push(addSignificantTermsAction(pValues));
                 }
 
+                fieldValuePairsCount = significantCategories.length + significantTerms.length;
+
                 push(
                   updateLoadingStateAction({
                     ccsWarning: false,
@@ -377,7 +383,7 @@ export const defineLogRateAnalysisRoute = (
                         defaultMessage:
                           'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
                         values: {
-                          fieldValuePairsCount: significantTerms.length,
+                          fieldValuePairsCount,
                         },
                       }
                     ),
@@ -400,7 +406,7 @@ export const defineLogRateAnalysisRoute = (
               });
               await pValuesQueue.drain();
 
-              if (significantTerms.length === 0) {
+              if (fieldValuePairsCount === 0) {
                 logDebugMessage('Stopping analysis, did not find significant terms.');
                 endWithUpdatedLoadingState();
                 return;
@@ -694,7 +700,7 @@ export const defineLogRateAnalysisRoute = (
 
                     const { fieldName, fieldValue } = cp;
 
-                    loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
+                    loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                     pushHistogramDataLoadingState();
                     push(
                       addSignificantTermsHistogramAction([
@@ -782,8 +788,8 @@ export const defineLogRateAnalysisRoute = (
 
                   const { fieldName, fieldValue } = cp;
 
-                  // loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
-                  // pushHistogramDataLoadingState();
+                  loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
+                  pushHistogramDataLoadingState();
                   push(
                     addSignificantTermsHistogramAction([
                       {
