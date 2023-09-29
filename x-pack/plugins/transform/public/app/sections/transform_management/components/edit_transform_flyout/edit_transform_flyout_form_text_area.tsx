@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -24,7 +24,7 @@ interface EditTransformFlyoutFormTextInputProps {
   placeHolder?: boolean;
 }
 
-export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
+export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInputProps> = ({
   field,
   label,
   helpText,
@@ -41,7 +41,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
       isInvalid={errorMessages.length > 0}
       error={errorMessages}
     >
-      <EuiFieldText
+      <EuiTextArea
         data-test-subj={`transformEditFlyout${upperCaseField}Input`}
         placeholder={
           placeHolder
