@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
-import { EnterpriseSearchPlugin, EnterpriseSearchPluginStart as PluginStart } from './plugin';
+import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
@@ -54,5 +54,3 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 
 export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
-
-export type EnterpriseSearchPluginStart = PluginStart;

@@ -12,7 +12,7 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 import { login } from '../../tasks/login';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 
-describe('Disabled experimental features on: ', () => {
+describe('Disabled experimental features on: ', { tags: '@ess' }, () => {
   describe('Policy list', () => {
     describe('Renders policy list without protection updates feature flag', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;

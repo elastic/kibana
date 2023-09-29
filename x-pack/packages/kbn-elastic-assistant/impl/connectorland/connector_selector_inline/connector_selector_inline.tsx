@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import {
-  GEN_AI_CONNECTOR_ID,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/public/common';
 import { css } from '@emotion/css/dist/emotion-css.cjs';
+import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
-import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
-import { getGenAiConfig } from '../helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
+
 interface Props {
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
-  onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
 }
 
 const inputContainerClassName = css`
@@ -69,131 +62,55 @@ const placeholderButtonClassName = css`
 `;
 
 /**
- * A minimal and connected version of the ConnectorSelector component used in the Settings modal.
+ * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
-  ({
-    isDisabled = false,
-    onConnectorModalVisibilityChange,
-    selectedConnectorId,
-    selectedConversation,
-  }) => {
+  ({ isDisabled = false, selectedConnectorId, selectedConversation }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
-    // Connector Modal State
-    const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-    const { data: actionTypes } = useLoadActionTypes({ http });
-    const actionType = actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['general'],
-      isSystemActionType: false,
-      id: '.gen-ai',
-      name: 'Generative AI',
-      enabled: true,
-    };
 
-    const {
-      data: connectors,
-      isLoading: isLoadingActionTypes,
-      isFetching: isFetchingActionTypes,
-      refetch: refetchConnectors,
-    } = useLoadConnectors({ http });
-    const isLoading = isLoadingActionTypes || isFetchingActionTypes;
-    const selectedConnectorName =
-      connectors?.find((c) => c.id === selectedConnectorId)?.name ??
-      i18n.INLINE_CONNECTOR_PLACEHOLDER;
-    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+    const { data: connectorsWithoutActionContext } = useLoadConnectors({ http });
 
-    const addNewConnectorOption = useMemo(() => {
-      return {
-        value: ADD_NEW_CONNECTOR,
-        inputDisplay: i18n.ADD_NEW_CONNECTOR,
-        dropdownDisplay: (
-          <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
-            <EuiFlexItem grow={true}>
-              <EuiButtonEmpty data-test-subj="addNewConnectorButton" iconType="plus" size="xs">
-                {i18n.ADD_NEW_CONNECTOR}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* Right offset to compensate for 'selected' icon of EuiSuperSelect since native footers aren't supported*/}
-              <div style={{ width: '24px' }} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      };
-    }, []);
-
-    const connectorOptions = useMemo(() => {
-      return (
-        connectors?.map((connector) => {
-          const apiProvider = getGenAiConfig(connector)?.apiProvider;
-          const connectorDetails = connector.isPreconfigured
-            ? i18n.PRECONFIGURED_CONNECTOR
-            : apiProvider;
-          return {
-            value: connector.id,
-            inputDisplay: (
-              <EuiText className={inputDisplayClassName} size="xs">
-                {connector.name}
-              </EuiText>
-            ),
-            dropdownDisplay: (
-              <React.Fragment key={connector.id}>
-                <strong>{connector.name}</strong>
-                {connectorDetails && (
-                  <EuiText size="xs" color="subdued">
-                    <p>{connectorDetails}</p>
-                  </EuiText>
-                )}
-              </React.Fragment>
-            ),
-          };
-        }) ?? []
-      );
-    }, [connectors]);
-
-    // Only include add new connector option if user has privilege
-    const allConnectorOptions = useMemo(
+    const aiConnectors: AIConnector[] = useMemo(
       () =>
-        assistantAvailability.hasConnectorsAllPrivilege
-          ? [...connectorOptions, addNewConnectorOption]
-          : [...connectorOptions],
-      [addNewConnectorOption, assistantAvailability.hasConnectorsAllPrivilege, connectorOptions]
+        connectorsWithoutActionContext
+          ? connectorsWithoutActionContext.map((c) => ({
+              ...c,
+              connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId)),
+            }))
+          : [],
+      [actionTypeRegistry, connectorsWithoutActionContext]
     );
 
-    const cleanupAndCloseModal = useCallback(() => {
-      onConnectorModalVisibilityChange?.(false);
-      setIsConnectorModalVisible(false);
-    }, [onConnectorModalVisibilityChange]);
+    const selectedConnectorName =
+      aiConnectors.find((c) => c.id === selectedConnectorId)?.name ??
+      i18n.INLINE_CONNECTOR_PLACEHOLDER;
+    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const onConnectorClick = useCallback(() => {
       setIsOpen(!isOpen);
     }, [isOpen]);
 
-    const handleOnBlur = useCallback(() => setIsOpen(false), []);
-
     const onChange = useCallback(
-      (connectorId: string, apiProvider?: OpenAiProviderType, model?: string) => {
-        setIsOpen(false);
-
+      (connector: AIConnector) => {
+        const connectorId = connector.id;
         if (connectorId === ADD_NEW_CONNECTOR) {
-          onConnectorModalVisibilityChange?.(true);
-          setIsConnectorModalVisible(true);
           return;
         }
 
-        const connector = connectors?.find((c) => c.id === connectorId);
         const config = getGenAiConfig(connector);
+        const apiProvider = config?.apiProvider;
+        const model = config?.defaultModel;
+        setIsOpen(false);
+
         if (selectedConversation != null) {
           setApiConfig({
             conversationId: selectedConversation.id,
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId,
+              connectorTypeTitle: connector.connectorTypeTitle,
               // With the inline component, prefer config args to handle 'new connector' case
               provider: apiProvider ?? config?.apiProvider,
               model: model ?? config?.defaultModel,
@@ -201,16 +118,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           });
         }
       },
-      [connectors, selectedConversation, onConnectorModalVisibilityChange, setApiConfig]
-    );
-
-    const placeholderComponent = useMemo(
-      () => (
-        <EuiText color="default" size={'xs'}>
-          {i18n.INLINE_CONNECTOR_PLACEHOLDER}
-        </EuiText>
-      ),
-      []
+      [selectedConversation, setApiConfig]
     );
 
     return (
@@ -229,18 +137,17 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         </EuiFlexItem>
         <EuiFlexItem>
           {isOpen ? (
-            <EuiSuperSelect
-              aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-              compressed={true}
-              disabled={localIsDisabled}
-              hasDividers={true}
-              isLoading={isLoading}
-              isOpen={isOpen}
-              onBlur={handleOnBlur}
-              onChange={onChange}
-              options={allConnectorOptions}
-              placeholder={placeholderComponent}
-              valueOfSelected={selectedConnectorId}
+            <ConnectorSelector
+              displayFancy={(displayText) => (
+                <EuiText className={inputDisplayClassName} size="xs">
+                  {displayText}
+                </EuiText>
+              )}
+              isOpen
+              isDisabled={localIsDisabled}
+              selectedConnectorId={selectedConnectorId}
+              setIsOpen={setIsOpen}
+              onConnectorSelectionChange={onChange}
             />
           ) : (
             <span>
@@ -257,19 +164,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 {selectedConnectorName}
               </EuiButtonEmpty>
             </span>
-          )}
-          {isConnectorModalVisible && (
-            <ConnectorAddModal
-              actionType={actionType}
-              onClose={cleanupAndCloseModal}
-              postSaveEventHandler={(connector: ActionConnector) => {
-                const config = getGenAiConfig(connector);
-                onChange(connector.id, config?.apiProvider, config?.defaultModel);
-                refetchConnectors?.();
-                cleanupAndCloseModal();
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

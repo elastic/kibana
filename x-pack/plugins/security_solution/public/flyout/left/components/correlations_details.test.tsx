@@ -20,7 +20,6 @@ import {
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_NO_DATA_TEST_ID,
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -53,11 +52,12 @@ const renderCorrelationDetails = () => {
     </TestProviders>
   );
 };
-
 const CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID =
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
     CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID
   );
+
+const NO_DATA_MESSAGE = 'No correlations data available.';
 
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
@@ -102,14 +102,14 @@ describe('CorrelationsDetails', () => {
       dataCount: 1,
     });
 
-    const { getByTestId, queryByTestId } = renderCorrelationDetails();
+    const { getByTestId, queryByText } = renderCorrelationDetails();
 
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should render no section and show error message if show values are false', () => {
@@ -125,7 +125,7 @@ describe('CorrelationsDetails', () => {
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
-    const { getByTestId, queryByTestId } = renderCorrelationDetails();
+    const { getByText, queryByTestId } = renderCorrelationDetails();
 
     expect(
       queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
@@ -140,10 +140,7 @@ describe('CorrelationsDetails', () => {
     expect(
       queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
     ).not.toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
-      'No correlations data available.'
-    );
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render no section if values are null', () => {

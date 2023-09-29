@@ -24,7 +24,11 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
               <div
                 class="euiComboBox__input"
@@ -99,7 +103,11 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
             <div
               class="euiComboBox__input"
@@ -231,7 +239,11 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
               <div
                 class="euiComboBox__input"
@@ -279,7 +291,11 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
             <div
               class="euiComboBox__input"
@@ -384,7 +400,11 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
               <div
                 class="euiComboBox__input"
@@ -448,7 +468,11 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
             <div
               class="euiComboBox__input"
@@ -569,7 +593,11 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
               <div
                 class="euiComboBox__input"
@@ -626,7 +654,11 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
             <div
               class="euiComboBox__input"

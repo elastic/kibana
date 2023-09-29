@@ -7238,6 +7238,20 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableOutput.inlineEditable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inlineEditable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableOutput.editableWithExplicitInput",
             "type": "CompoundType",
             "tags": [],
@@ -7333,6 +7347,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePackageState.size",
+            "type": "Object",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "{ width?: number | undefined; height?: number | undefined; } | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
