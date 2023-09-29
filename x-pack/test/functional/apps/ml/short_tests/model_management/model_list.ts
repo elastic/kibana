@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/165083
   // Failing: See https://github.com/elastic/kibana/issues/165084
-  describe.skip('trained models', function () {
+  describe('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -209,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         });
       });
-
+      // THIS TEST IS FLAKY
       it('deploys the trained model with custom values', async () => {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
