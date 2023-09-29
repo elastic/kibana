@@ -177,7 +177,7 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
-          defaultMessage: 'Start deployment',
+          defaultMessage: 'Deploy',
         }),
         description: i18n.translate(
           'xpack.ml.inference.modelsList.startModelDeploymentActionLabel',
@@ -186,8 +186,9 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
+        // @ts-ignore
         icon: 'play',
-        type: 'icon',
+        type: 'button',
         isPrimary: true,
         enabled: (item) => {
           return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
@@ -311,10 +312,12 @@ export function useModelActions({
         'data-test-subj': 'mlModelsTableRowStopDeploymentAction',
         icon: 'stop',
         type: 'icon',
-        isPrimary: true,
-        available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
-        enabled: (item) =>
-          canStartStopTrainedModels && !isLoading && item.deployment_ids.length > 0,
+        isPrimary: false,
+        available: (item) =>
+          item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+          canStartStopTrainedModels &&
+          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING),
+        enabled: (item) => !isLoading,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
           const hasMultipleDeployments = item.deployment_ids.length > 1;
@@ -390,10 +393,9 @@ export function useModelActions({
         icon: 'download',
         type: 'button',
         isPrimary: true,
-        available: (item) => item.tags.includes(ELASTIC_MODEL_TAG),
-        enabled: (item) => {
-          return (!item.state || item.state === MODEL_STATE.NOT_DOWNLOADED) && !isLoading;
-        },
+        available: (item) =>
+          item.tags.includes(ELASTIC_MODEL_TAG) && item.state === MODEL_STATE.NOT_DOWNLOADED,
+        enabled: (item) => !isLoading,
         onClick: async (item) => {
           try {
             onLoading(true);
