@@ -41,12 +41,11 @@ FROM logs* [metadata _id, _index, _version]
 \`\`\`
 
 Please, ensure, metadata properties \`id\`, \`_index\`, \`_version\` are carried over through pipe operators.
-
-More information can be found on {startUsingEsqlLink}
     `,
       values: {
         statsByLink: `[STATS..BY](${statsByLink})`,
-        startUsingEsqlLink: `[WIP: Get started using ES|QL rules](${startUsingEsqlLink})`,
+        // Docs team will provide actual link to a new page before release
+        //  startUsingEsqlLink: `[WIP: Get started using ES|QL rules](${startUsingEsqlLink})`,
       },
     }
   );
