@@ -61,5 +61,6 @@
     "@kbn/serverless-search-settings",
     "@kbn/serverless-security-settings",
     "@kbn/reporting-plugin",
+    "@kbn/management-settings-ids",
   ]
 }
