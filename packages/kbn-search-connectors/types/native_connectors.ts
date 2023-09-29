@@ -819,7 +819,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         tooltip:
           'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
         type: FieldType.BOOLEAN,
-        ui_restrictions: ['advanced'],
+        ui_restrictions: [],
         validations: [],
         value: false,
       },
