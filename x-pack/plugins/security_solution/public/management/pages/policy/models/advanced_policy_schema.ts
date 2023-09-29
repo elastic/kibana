@@ -1355,10 +1355,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'mac.advanced.image_load.capture',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.capture',
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.collect',
       {
         defaultMessage:
-          'Verbose collection of image load events. Sends all of them to the stack (High volume!). Default: false',
+          'Collect and send image load events to Elasticsearch. Take caution, this can be a very high data volume. Adding an event filter to drop unwanted events is strongly recommended. Default: false',
       }
     ),
   },
