@@ -242,14 +242,13 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             component={NumericField}
             labelAppend={
               <EuiText size="xs">
-                <EuiLink
-                  href={documentationService.getUpdateExistingDS()}
-                  target="_blank"
-                  external
-                >
-                  {i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText', {
-                    defaultMessage: 'How does it work?',
-                  })}
+                <EuiLink href={documentationService.getUpdateExistingDS()} target="_blank" external>
+                  {i18n.translate(
+                    'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText',
+                    {
+                      defaultMessage: 'How does it work?',
+                    }
+                  )}
                 </EuiLink>
               </EuiText>
             }
