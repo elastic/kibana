@@ -18,9 +18,6 @@ export interface InfraConfig {
   inventory: {
     compositeSize: number;
   };
-  logs: {
-    app_target: 'logs-ui' | 'discover';
-  };
   sources?: {
     default?: {
       fields?: {
@@ -28,11 +25,14 @@ export interface InfraConfig {
       };
     };
   };
+  featureFlags: {
+    metricsExplorerEnabled: boolean;
+  };
 }
 
 export const publicConfigKeys = {
   sources: true,
-  logs: true,
+  featureFlags: true,
 } as const;
 
 export type InfraPublicConfigKey = keyof {

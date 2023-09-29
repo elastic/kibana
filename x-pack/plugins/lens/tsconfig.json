@@ -86,7 +86,10 @@
     "@kbn/content-management-utils",
     "@kbn/serverless",
     "@kbn/ebt-tools",
+    "@kbn/chart-expressions-common",
     "@kbn/search-response-warnings",
+    "@kbn/logging",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

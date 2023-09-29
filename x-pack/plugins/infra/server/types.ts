@@ -27,12 +27,12 @@ export interface InfraPluginSetup {
     sourceProperties: InfraStaticSourceConfiguration
   ) => void;
   inventoryViews: InventoryViewsServiceSetup;
-  metricsExplorerViews: MetricsExplorerViewsServiceSetup;
+  metricsExplorerViews?: MetricsExplorerViewsServiceSetup;
 }
 
 export interface InfraPluginStart {
   inventoryViews: InventoryViewsServiceStart;
-  metricsExplorerViews: MetricsExplorerViewsServiceStart;
+  metricsExplorerViews?: MetricsExplorerViewsServiceStart;
 }
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;

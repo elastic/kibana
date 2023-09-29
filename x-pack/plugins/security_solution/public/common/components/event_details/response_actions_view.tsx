@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
@@ -71,7 +72,12 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
             ruleName={ruleName}
             ecsData={ecsData}
           />
-        ) : null}
+        ) : (
+          <FormattedMessage
+            id="xpack.securitySolution.eventDetails.responseActionsViewNoActions"
+            defaultMessage="There are no response actions defined for this event."
+          />
+        )}
       </TabContentWrapper>
     </>
   );

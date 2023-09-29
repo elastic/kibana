@@ -1054,7 +1054,11 @@ export const LensTopNavMenu = ({
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
-      showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+      saveQueryMenuVisibility={
+        application.capabilities.visualize.saveQuery
+          ? 'allowed_by_app_privilege'
+          : 'globally_managed'
+      }
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}

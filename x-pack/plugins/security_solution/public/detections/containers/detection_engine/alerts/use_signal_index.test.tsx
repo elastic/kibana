@@ -15,13 +15,13 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../../timelines/components/timeline/discover_tab_content');
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
