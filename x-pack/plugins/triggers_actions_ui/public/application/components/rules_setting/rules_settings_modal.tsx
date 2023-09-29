@@ -85,49 +85,34 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   } = capabilities;
 
-  const [settings, setSettings] = useState<RulesSettingsProperties>();
+  const [settings, setSettings] = useState<RulesSettingsProperties>({
+    flapping: DEFAULT_FLAPPING_SETTINGS,
+    queryDelay: DEFAULT_QUERY_DELAY_SETTINGS,
+  });
 
   const { isLoading, isError: hasError } = useGetFlappingSettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
-      if (!settings) {
-        setSettings({
-          flapping: {
-            enabled: fetchedSettings.enabled,
-            lookBackWindow: fetchedSettings.lookBackWindow,
-            statusChangeThreshold: fetchedSettings.statusChangeThreshold,
-          },
-          queryDelay: DEFAULT_QUERY_DELAY_SETTINGS,
-        });
-      } else {
-        setSettings({
-          ...settings,
-          flapping: {
-            ...fetchedSettings,
-          },
-        });
-      }
+      setSettings({
+        ...settings,
+        flapping: {
+          enabled: fetchedSettings.enabled,
+          lookBackWindow: fetchedSettings.lookBackWindow,
+          statusChangeThreshold: fetchedSettings.statusChangeThreshold,
+        },
+      });
     },
   });
 
   const { isLoading: isQueryDelayLoading, isError: hasQueryDelayError } = useGetQueryDelaySettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
-      if (!settings) {
-        setSettings({
-          queryDelay: {
-            delay: fetchedSettings.delay,
-          },
-          flapping: DEFAULT_FLAPPING_SETTINGS,
-        });
-      } else {
-        setSettings({
-          ...settings,
-          queryDelay: {
-            ...fetchedSettings,
-          },
-        });
-      }
+      setSettings({
+        ...settings,
+        queryDelay: {
+          delay: fetchedSettings.delay,
+        },
+      });
     },
   });
 

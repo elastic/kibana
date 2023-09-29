@@ -21,8 +21,8 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/get_flapping_settings', () => ({
   getFlappingSettings: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/update_flapping_settings', () => ({
-  updateFlappingSettings: jest.fn(),
+jest.mock('../../lib/rule_api/get_query_delay_settings', () => ({
+  getQueryDelaySettings: jest.fn(),
 }));
 
 const queryClient = new QueryClient({
@@ -41,7 +41,6 @@ const mocks = coreMock.createSetup();
 const getFlappingSettingsMock = getFlappingSettings as unknown as jest.MockedFunction<
   typeof getFlappingSettings
 >;
-
 const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as jest.MockedFunction<
   typeof getQueryDelaySettings
 >;
