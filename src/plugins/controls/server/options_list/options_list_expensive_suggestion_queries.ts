@@ -227,48 +227,4 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       };
     },
   },
-  /**
-   * the "date" query / parser should be used when the options list is built on a field of type date.
-   */
-  date: {
-    buildAggregation: ({ fieldName, sort, size }: OptionsListRequestBody) => {
-      const dateQuery: any = {
-        suggestions: {
-          terms: {
-            size,
-            field: fieldName,
-            shard_size: 10,
-            order: getSortType(sort),
-          },
-        },
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
-        },
-      };
-
-      return dateQuery;
-    },
-
-    parse: (rawEsResult, request) => {
-      let basePath = 'aggregations';
-      basePath += request.searchString ? '.filteredSuggestions' : '';
-
-      const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
-        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          acc.push({
-            value: suggestion.key,
-            docCount: suggestion.doc_count,
-          });
-          return acc;
-        },
-        []
-      );
-      return {
-        suggestions,
-        totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`),
-      };
-    },
-  },
 };
