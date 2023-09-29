@@ -34,7 +34,6 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 const mockCore = coreMock.createStart();
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();
-const mockGetSecuritySolutionUrl = jest.fn();
 const mockDashboardContainer = {
   select: jest.fn(),
 } as unknown as DashboardAPI;
