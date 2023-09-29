@@ -1,3 +1,4 @@
+include::action-types/bedrock.asciidoc[leveloffset=+1]
 include::action-types/d3security.asciidoc[leveloffset=+1]
 include::action-types/email.asciidoc[leveloffset=+1]
 include::action-types/gen-ai.asciidoc[leveloffset=+1]

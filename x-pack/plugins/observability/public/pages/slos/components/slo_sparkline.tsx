@@ -46,20 +46,6 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
-  const LineAxisComponent =
-    chart === 'line' ? (
-      <Axis
-        id="axis"
-        hide
-        domain={{
-          min: 0,
-          max: 1,
-        }}
-        gridLine={{
-          visible: false,
-        }}
-      />
-    ) : null;
 
   if (isLoading) {
     return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" mono />;
@@ -73,7 +59,18 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
         theme={[theme, EUI_SPARKLINE_THEME_PARTIAL]}
       />
       <Tooltip type={TooltipType.None} />
-      {LineAxisComponent}
+      <Axis
+        id="axis"
+        hide
+        domain={{
+          min: NaN,
+          max: NaN,
+          fit: true,
+        }}
+        gridLine={{
+          visible: false,
+        }}
+      />
       <ChartComponent
         color={color}
         data={data}
