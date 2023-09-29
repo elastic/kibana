@@ -90,6 +90,7 @@ export class TimelineTestService extends FtrService {
         eventCategoryField: 'event.category',
         timestampField: '@timestamp',
       },
+      savedSearchId: null,
     };
 
     // Update the timeline
@@ -187,6 +188,7 @@ export class TimelineTestService extends FtrService {
             serializedQuery: JSON.stringify(esQuery),
           },
         },
+        savedSearchId: null,
       },
       newTimeline.data.persistTimeline.timeline.version
     );
