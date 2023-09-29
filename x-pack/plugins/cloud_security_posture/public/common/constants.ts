@@ -93,7 +93,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: googleCloudLogo,
-        isBeta: true,
       },
       // needs to be a function that disables/enabled based on integration version
       {

@@ -50,7 +50,10 @@ import {
   DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
-import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
+import {
+  getDiscoverGlobalStateContainer,
+  DiscoverGlobalStateContainer,
+} from './discover_global_state_container';
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -87,6 +90,11 @@ export interface LoadParams {
 }
 
 export interface DiscoverStateContainer {
+  /**
+   * Global State, the _g part of the URL
+   */
+  globalState: DiscoverGlobalStateContainer;
+
   /**
    * App state, the _a part of the URL
    */
@@ -460,6 +468,7 @@ export function getDiscoverStateContainer({
   };
 
   return {
+    globalState: globalStateContainer,
     appState: appStateContainer,
     internalState: internalStateContainer,
     dataState: dataStateContainer,

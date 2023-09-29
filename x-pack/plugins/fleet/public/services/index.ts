@@ -53,3 +53,5 @@ export { getTemplateUrlFromAgentPolicy } from './get_template_url_from_agent_pol
 export { getTemplateUrlFromPackageInfo } from './get_template_url_from_package_info';
 export { getCloudShellUrlFromPackagePolicy } from './get_cloud_shell_url_from_package_policy';
 export { getCloudShellUrlFromAgentPolicy } from './get_cloud_shell_url_from_agent_policy';
+export { getGcpIntegrationDetailsFromPackagePolicy } from './get_gcp_integration_details_from_package_policy';
+export { getGcpIntegrationDetailsFromAgentPolicy } from './get_gcp_integration_details_from_agent_policy';
