@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './fleet';
 export * from './landing_page';

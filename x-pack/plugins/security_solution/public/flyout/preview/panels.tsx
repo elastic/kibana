@@ -8,7 +8,6 @@
 import React from 'react';
 import { AlertReasonPreview } from './components/alert_reason_preview';
 import type { PreviewPanelPaths } from '.';
-import { ALERT_REASON_PREVIEW, RULE_PREVIEW } from './translations';
 import { RulePreview } from './components/rule_preview';
 import { RulePreviewFooter } from './components/rule_preview_footer';
 
@@ -17,10 +16,6 @@ export type PreviewPanelType = Array<{
    * Id of the preview panel
    */
   id: PreviewPanelPaths;
-  /**
-   * Panel name
-   */
-  name: string;
   /**
    * Main body component to be rendered in the panel
    */
@@ -37,13 +32,11 @@ export type PreviewPanelType = Array<{
 export const panels: PreviewPanelType = [
   {
     id: 'rule-preview',
-    name: RULE_PREVIEW,
     content: <RulePreview />,
     footer: <RulePreviewFooter />,
   },
   {
     id: 'alert-reason-preview',
-    name: ALERT_REASON_PREVIEW,
     content: <AlertReasonPreview />,
   },
 ];

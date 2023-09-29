@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TOAST_CLOSE_BTN } from '../screens/navigation';
 import { setupFleetServer } from '../tasks/fleet_server';
 import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../screens/fleet';
+import { login } from '../tasks/login';
+
 describe('Edit agent policy', () => {
   beforeEach(() => {
+    login();
+
     cy.intercept('/api/fleet/agent_policies/policy-1', {
       item: {
         id: 'policy-1',
@@ -35,7 +38,6 @@ describe('Edit agent policy', () => {
 
   it('should edit agent policy', () => {
     cy.visit('/app/fleet/policies/policy-1/settings');
-    cy.getBySel(TOAST_CLOSE_BTN).click();
     cy.get('[placeholder="Optional description"').clear().type('desc');
 
     cy.intercept('/api/fleet/agent_policies/policy-1', {

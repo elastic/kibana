@@ -104,14 +104,12 @@ export const singleSearchAfter = async <
         searchErrors,
       };
     } catch (exc) {
-      ruleExecutionLogger.error(`[-] nextSearchAfter threw an error ${exc}`);
+      ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
       if (
         exc.message.includes(`No mapping found for [${primaryTimestamp}] in order to sort on`) ||
         (secondaryTimestamp &&
           exc.message.includes(`No mapping found for [${secondaryTimestamp}] in order to sort on`))
       ) {
-        ruleExecutionLogger.error(`[-] failure reason: ${exc.message}`);
-
         const searchRes: SignalSearchResponse<TAggregations> = {
           took: 0,
           timed_out: false,

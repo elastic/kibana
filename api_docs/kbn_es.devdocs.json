@@ -544,55 +544,6 @@
           },
           {
             "parentPluginId": "@kbn/es",
-            "id": "def-common.Cluster.waitForClusterReady",
-            "type": "Function",
-            "tags": [],
-            "label": "waitForClusterReady",
-            "description": [],
-            "signature": [
-              "(client: ",
-              "default",
-              ", readyTimeout?: number) => Promise<void>"
-            ],
-            "path": "packages/kbn-es/src/cluster.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/es",
-                "id": "def-common.Cluster.waitForClusterReady.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "client",
-                "description": [],
-                "signature": [
-                  "default"
-                ],
-                "path": "packages/kbn-es/src/cluster.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/es",
-                "id": "def-common.Cluster.waitForClusterReady.$2",
-                "type": "number",
-                "tags": [],
-                "label": "readyTimeout",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "packages/kbn-es/src/cluster.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/es",
             "id": "def-common.Cluster.runServerless",
             "type": "Function",
             "tags": [],
@@ -675,7 +626,7 @@
         "tags": [],
         "label": "getDockerFileMountPath",
         "description": [
-          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ESS container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
+          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ES serverless container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
         ],
         "signature": [
           "(hostPath: string) => string"
@@ -765,7 +716,7 @@
         "signature": [
           "\"elastic_serverless\""
         ],
-        "path": "packages/kbn-es/src/utils/ess_file_realm.ts",
+        "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -780,7 +731,7 @@
         "signature": [
           "\"changeme\""
         ],
-        "path": "packages/kbn-es/src/utils/ess_file_realm.ts",
+        "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

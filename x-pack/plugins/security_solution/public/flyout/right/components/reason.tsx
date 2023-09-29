@@ -10,6 +10,8 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getField } from '../../shared/utils';
 import { AlertReasonPreviewPanel, PreviewPanelKey } from '../../preview';
 import {
@@ -17,12 +19,6 @@ import {
   REASON_DETAILS_TEST_ID,
   REASON_TITLE_TEST_ID,
 } from './test_ids';
-import {
-  ALERT_REASON_DETAILS_TEXT,
-  ALERT_REASON_TITLE,
-  DOCUMENT_REASON_TITLE,
-  PREVIEW_ALERT_REASON_DETAILS,
-} from './translations';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useRightPanelContext } from '../context';
 
@@ -45,7 +41,12 @@ export const Reason: FC = () => {
         indexName,
         scopeId,
         banner: {
-          title: PREVIEW_ALERT_REASON_DETAILS,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
+              defaultMessage="Preview alert reason"
+            />
+          ),
           backgroundColor: 'warning',
           textColor: 'warning',
         },
@@ -62,12 +63,31 @@ export const Reason: FC = () => {
           onClick={openRulePreview}
           iconSide="right"
           data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.about.reason.alertReasonButtonAriaLabel',
+            {
+              defaultMessage: 'Show full reason',
+            }
+          )}
+          disabled={!alertReason}
         >
-          {ALERT_REASON_DETAILS_TEXT}
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
+            defaultMessage="Show full reason"
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [openRulePreview]
+    [alertReason, openRulePreview]
+  );
+
+  const alertReasonText = alertReason ? (
+    alertReason
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.about.reason.noReasonDescription"
+      defaultMessage="There's no source event information for this alert."
+    />
   );
 
   return (
@@ -78,17 +98,29 @@ export const Reason: FC = () => {
             {isAlert ? (
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem>
-                  <h5>{ALERT_REASON_TITLE}</h5>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.right.about.reason.alertReasonTitle"
+                      defaultMessage="Alert reason"
+                    />
+                  </h5>
                 </EuiFlexItem>
                 {viewPreview}
               </EuiFlexGroup>
             ) : (
-              DOCUMENT_REASON_TITLE
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.about.reason.documentReasonTitle"
+                  defaultMessage="Document reason"
+                />
+              </p>
             )}
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>{alertReason}</EuiFlexItem>
+      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>
+        {isAlert ? alertReasonText : '-'}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

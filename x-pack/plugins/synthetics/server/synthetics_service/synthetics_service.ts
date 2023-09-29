@@ -608,7 +608,7 @@ export class SyntheticsService {
       await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>({
         type: syntheticsParamType,
         perPage: 1000,
-        namespaces: spaceId ? [spaceId] : undefined,
+        namespaces: spaceId ? [spaceId] : [ALL_SPACES_ID],
       });
 
     for await (const response of finder.find()) {

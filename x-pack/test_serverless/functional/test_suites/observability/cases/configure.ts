@@ -24,8 +24,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlObltNavigation.navigateToLandingPage();
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
     });
 
     after(async () => {
@@ -34,6 +32,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      before(async () => {
+        await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      });
+
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });

@@ -38,6 +38,17 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID
 );
 
+const renderRelatedAlertsBySameSourceEvent = () =>
+  render(
+    <TestProviders>
+      <RelatedAlertsBySameSourceEvent
+        originalEventId={originalEventId}
+        scopeId={scopeId}
+        eventId={eventId}
+      />
+    </TestProviders>
+  );
+
 describe('<RelatedAlertsBySameSourceEvent />', () => {
   it('should render component correctly', () => {
     (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
@@ -73,15 +84,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       ],
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RelatedAlertsBySameSourceEvent
-          originalEventId={originalEventId}
-          scopeId={scopeId}
-          eventId={eventId}
-        />
-      </TestProviders>
-    );
+    const { getByTestId } = renderRelatedAlertsBySameSourceEvent();
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
@@ -97,15 +100,24 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <TestProviders>
-        <RelatedAlertsBySameSourceEvent
-          originalEventId={originalEventId}
-          scopeId={scopeId}
-          eventId={eventId}
-        />
-      </TestProviders>
-    );
+    const { container } = renderRelatedAlertsBySameSourceEvent();
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render no data message', () => {
+    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByText } = renderRelatedAlertsBySameSourceEvent();
+    expect(getByText('No related source events.')).toBeInTheDocument();
   });
 });

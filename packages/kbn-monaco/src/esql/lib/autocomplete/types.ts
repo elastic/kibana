@@ -32,5 +32,5 @@ export interface UserDefinedVariables {
 /** @internal **/
 export type AutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
-  'label' | 'insertText' | 'kind' | 'detail' | 'documentation' | 'sortText'
+  'label' | 'insertText' | 'kind' | 'detail' | 'documentation' | 'sortText' | 'command'
 >;

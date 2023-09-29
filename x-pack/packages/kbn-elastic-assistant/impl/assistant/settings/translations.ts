@@ -49,17 +49,17 @@ export const ANONYMIZATION_MENU_ITEM = i18n.translate(
   }
 );
 
-export const FUNCTIONS_MENU_ITEM = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsFunctionsMenuItemTitle',
-  {
-    defaultMessage: 'Functions',
-  }
-);
-
 export const ADVANCED_MENU_ITEM = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsAdvancedMenuItemTitle',
   {
     defaultMessage: 'Advanced',
+  }
+);
+
+export const EVALUATION_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsEvaluationMenuItemTitle',
+  {
+    defaultMessage: 'Evaluation',
   }
 );
 

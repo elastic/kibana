@@ -21,6 +21,12 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
   });
 
   describe('t1_analyst role', () => {
+    before(() => {
+      cy.login(ServerlessRoleName.SOC_MANAGER);
+
+      cy.visit('/app/security/rules');
+      clickRuleName(ruleName);
+    });
     beforeEach(() => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 
@@ -29,7 +35,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
       cy.getBySel('expand-event').first().click({ force: true });
 
       cy.wait(500);
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
+      cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
     });
 

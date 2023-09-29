@@ -62,6 +62,11 @@ RUNTIME_DEPS = [
   "@npm//tslib",
   "@npm//uuid",
   "@npm//io-ts",
+  "@npm//@reduxjs/toolkit",
+  "@npm//redux",
+  "@npm//react-redux",
+  "@npm//immer",
+  "@npm//reselect"
 ]
 
 webpack_cli(

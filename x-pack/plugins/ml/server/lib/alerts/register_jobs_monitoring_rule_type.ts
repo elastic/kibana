@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from '@kbn/core/server';
-import {
+import type { KibanaRequest } from '@kbn/core/server';
+import type {
   MlDatafeedState,
   MlJobState,
   MlJobStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
@@ -24,9 +24,9 @@ import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
   anomalyDetectionJobsHealthRuleParams,
-  AnomalyDetectionJobsHealthRuleParams,
+  type AnomalyDetectionJobsHealthRuleParams,
 } from '../../routes/schemas/alerting_schema';
-import { RegisterAlertParams } from './register_ml_alerts';
+import type { RegisterAlertParams } from './register_ml_alerts';
 import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
