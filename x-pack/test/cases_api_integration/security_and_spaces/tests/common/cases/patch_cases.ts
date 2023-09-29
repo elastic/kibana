@@ -109,6 +109,13 @@ export default ({ getService }: FtrProviderContext): void => {
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
         expect(data).to.eql({
           ...postCaseResp(),
+          customFields: [
+            {
+              key: 'test_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: null,
+            },
+          ],
           title: 'new title',
           updated_by: defaultUser,
         });
@@ -329,7 +336,16 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const postedCase = await createCase(supertest, postCaseReq);
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          customFields: [
+            {
+              key: 'test_custom_field_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+        });
         const patchedCases = await updateCase({
           supertest,
           params: {
@@ -368,7 +384,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      it('should fill out missing custom fields', async () => {
+      it('should fill out missing optional custom fields', async () => {
         await createConfiguration(
           supertest,
           getConfigurationRequest({
@@ -391,7 +407,17 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const postedCase = await createCase(supertest, postCaseReq);
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          customFields: [
+            {
+              key: 'test_custom_field_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+        });
+
         const patchedCases = await updateCase({
           supertest,
           params: {
@@ -1016,7 +1042,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when trying to create case with a missing required custom field', async () => {
+        it('400s when trying to patch a case with a missing required custom field', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -1032,7 +1058,16 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             })
           );
-          const postedCase = await createCase(supertest, postCaseReq);
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: [
+              {
+                key: 'test_custom_field',
+                type: CustomFieldTypes.TEXT,
+                value: ['hello'],
+              },
+            ],
+          });
 
           await updateCase({
             supertest,
@@ -1049,7 +1084,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when trying to create case with a custom field with the wrong type', async () => {
+        it('400s when trying to patch a case with a custom field with the wrong type', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -1059,7 +1094,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     key: 'test_custom_field',
                     label: 'text',
                     type: CustomFieldTypes.TEXT,
-                    required: true,
+                    required: false,
                   },
                 ],
               },
@@ -1078,7 +1113,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     {
                       key: 'test_custom_field',
                       type: CustomFieldTypes.TOGGLE,
-                      value: true,
+                      value: false,
                     },
                   ],
                 },

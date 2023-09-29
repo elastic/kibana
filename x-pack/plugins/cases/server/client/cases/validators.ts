@@ -95,12 +95,12 @@ export const validateRequiredCustomFields = ({
   requestCustomFields,
   customFieldsConfiguration,
 }: CustomFieldValidationParams) => {
-  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
-    return;
-  }
-
   if (customFieldsConfiguration === undefined) {
-    throw Boom.badRequest('No custom fields configured.');
+    if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
+      return;
+    } else {
+      throw Boom.badRequest('No custom fields configured.');
+    }
   }
 
   const requiredCustomFields = customFieldsConfiguration.filter(
@@ -109,7 +109,7 @@ export const validateRequiredCustomFields = ({
 
   const invalidCustomFieldKeys = differenceWith(
     requiredCustomFields,
-    requestCustomFields,
+    requestCustomFields ?? [],
     (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
   ).map((e) => e.key);
 
