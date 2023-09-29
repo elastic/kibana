@@ -17,7 +17,6 @@ import {
   ALERT_REASON,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
@@ -320,12 +319,12 @@ export function getRuleType(
         actionGroup: ActionGroupId,
         state: {},
         context: actionContext,
-        payload: expandFlattenedAlert({
+        payload: {
           [ALERT_REASON]: actionContext.message,
           [ALERT_TITLE]: actionContext.title,
           [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
-          [ALERT_EVALUATION_VALUE]: actionContext.value,
-        }),
+          [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        },
       });
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
@@ -348,12 +347,12 @@ export function getRuleType(
       alertsClient?.setAlertData({
         id: alertId,
         context: recoveryContext,
-        payload: expandFlattenedAlert({
+        payload: {
           [ALERT_REASON]: recoveryContext.message,
           [ALERT_TITLE]: recoveryContext.title,
           [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
-          [ALERT_EVALUATION_VALUE]: recoveryContext.value,
-        }),
+          [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        },
       });
     }
 

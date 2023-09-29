@@ -70,57 +70,23 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const ObservabilityUptimeAlertRequired = rt.type({
 });
 const ObservabilityUptimeAlertOptional = rt.partial({
-  agent: rt.partial({
-    name: schemaString,
-  }),
-  anomaly: rt.partial({
-    bucket_span: rt.partial({
-      minutes: schemaString,
-    }),
-    start: schemaDate,
-  }),
-  error: rt.partial({
-    message: schemaString,
-  }),
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        threshold: schemaStringOrNumber,
-        value: schemaStringOrNumber,
-        values: schemaStringOrNumberArray,
-      }),
-    }),
-  }),
-  monitor: rt.partial({
-    id: schemaString,
-    name: schemaString,
-    type: schemaString,
-  }),
-  observer: rt.partial({
-    geo: rt.partial({
-      name: schemaString,
-    }),
-  }),
-  tls: rt.partial({
-    server: rt.partial({
-      hash: rt.partial({
-        sha256: schemaString,
-      }),
-      x509: rt.partial({
-        issuer: rt.partial({
-          common_name: schemaString,
-        }),
-        not_after: schemaDate,
-        not_before: schemaDate,
-        subject: rt.partial({
-          common_name: schemaString,
-        }),
-      }),
-    }),
-  }),
-  url: rt.partial({
-    full: schemaString,
-  }),
+  'agent.name': schemaString,
+  'anomaly.bucket_span.minutes': schemaString,
+  'anomaly.start': schemaDate,
+  'error.message': schemaString,
+  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.value': schemaStringOrNumber,
+  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'monitor.id': schemaString,
+  'monitor.name': schemaString,
+  'monitor.type': schemaString,
+  'observer.geo.name': schemaString,
+  'tls.server.hash.sha256': schemaString,
+  'tls.server.x509.issuer.common_name': schemaString,
+  'tls.server.x509.not_after': schemaDate,
+  'tls.server.x509.not_before': schemaDate,
+  'tls.server.x509.subject.common_name': schemaString,
+  'url.full': schemaString,
 });
 
 // prettier-ignore

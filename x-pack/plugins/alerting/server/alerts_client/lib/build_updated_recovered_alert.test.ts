@@ -7,6 +7,36 @@
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertRule } from '../types';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+  ALERT_TIME_RANGE,
+  ALERT_END,
+} from '@kbn/rule-data-utils';
 
 const rule = {
   category: 'My test rule',
@@ -26,36 +56,40 @@ const rule = {
 };
 
 const alertRule: AlertRule = {
-  kibana: {
-    alert: {
-      rule,
-    },
-    space_ids: ['default'],
-  },
+  [ALERT_RULE_CATEGORY]: rule.category,
+  [ALERT_RULE_CONSUMER]: rule.consumer,
+  [ALERT_RULE_EXECUTION_UUID]: rule.execution.uuid,
+  [ALERT_RULE_NAME]: rule.name,
+  [ALERT_RULE_PARAMETERS]: rule.parameters,
+  [ALERT_RULE_PRODUCER]: rule.producer,
+  [ALERT_RULE_REVISION]: rule.revision,
+  [ALERT_RULE_TYPE_ID]: rule.rule_type_id,
+  [ALERT_RULE_TAGS]: rule.tags,
+  [ALERT_RULE_UUID]: rule.uuid,
+  [SPACE_IDS]: ['default'],
 };
 
 const existingRecoveredAlert = {
-  '@timestamp': '2023-03-28T12:27:28.159Z',
-  kibana: {
-    alert: {
-      action_group: 'recovered',
-      duration: {
-        us: '0',
-      },
-      end: '2023-03-28T12:27:28.159Z',
-      flapping: false,
-      flapping_history: [true, false, false],
-      instance: {
-        id: 'alert-A',
-      },
-      maintenance_window_ids: ['maint-x'],
-      start: '2023-03-27T12:27:28.159Z',
-      rule,
-      status: 'recovered',
-      uuid: 'abcdefg',
-    },
-    space_ids: ['default'],
-  },
+  ...alertRule,
+  [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+  [EVENT_ACTION]: 'close',
+  [EVENT_KIND]: 'signal',
+  [ALERT_ACTION_GROUP]: 'recovered',
+  [ALERT_DURATION]: '36000000',
+  [ALERT_START]: '2023-03-27T12:27:28.159Z',
+  [ALERT_END]: '2023-03-30T12:27:28.159Z',
+  [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+  [ALERT_FLAPPING]: false,
+  [ALERT_FLAPPING_HISTORY]: [true, false, false],
+  [ALERT_INSTANCE_ID]: 'alert-A',
+  [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
+  [ALERT_STATUS]: 'recovered',
+  [ALERT_START]: '2023-03-28T12:27:28.159Z',
+  [ALERT_UUID]: 'abcdefg',
+  [ALERT_WORKFLOW_STATUS]: 'open',
+  [SPACE_IDS]: ['default'],
+  [VERSION]: '8.8.1',
+  [TAGS]: ['rule-', '-tags'],
 };
 
 describe('buildUpdatedRecoveredAlert', () => {
@@ -82,27 +116,26 @@ describe('buildUpdatedRecoveredAlert', () => {
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
-      '@timestamp': '2023-03-29T12:27:28.159Z',
-      kibana: {
-        alert: {
-          action_group: 'recovered',
-          duration: {
-            us: '0',
-          },
-          end: '2023-03-28T12:27:28.159Z',
-          flapping: true,
-          flapping_history: [false, false, true, true],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: ['maint-x'],
-          start: '2023-03-27T12:27:28.159Z',
-          rule,
-          status: 'recovered',
-          uuid: 'abcdefg',
-        },
-        space_ids: ['default'],
-      },
+      ...alertRule,
+      [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+      [EVENT_ACTION]: 'close',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'recovered',
+      [ALERT_DURATION]: '36000000',
+      [ALERT_START]: '2023-03-27T12:27:28.159Z',
+      [ALERT_END]: '2023-03-30T12:27:28.159Z',
+      [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+      [ALERT_FLAPPING]: true,
+      [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
+      [ALERT_STATUS]: 'recovered',
+      [ALERT_START]: '2023-03-28T12:27:28.159Z',
+      [ALERT_UUID]: 'abcdefg',
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.8.1',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 });

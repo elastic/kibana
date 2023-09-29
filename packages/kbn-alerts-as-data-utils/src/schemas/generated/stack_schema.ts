@@ -69,15 +69,9 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const StackAlertRequired = rt.type({
 });
 const StackAlertOptional = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        conditions: schemaString,
-        value: schemaString,
-      }),
-      title: schemaString,
-    }),
-  }),
+  'kibana.alert.evaluation.conditions': schemaString,
+  'kibana.alert.evaluation.value': schemaString,
+  'kibana.alert.title': schemaString,
 });
 
 // prettier-ignore
