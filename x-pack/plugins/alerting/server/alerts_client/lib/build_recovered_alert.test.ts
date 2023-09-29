@@ -62,14 +62,11 @@ for (const flattened of [true, false]) {
         ...alertRule,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [EVENT_ACTION]: 'close',
-        [EVENT_KIND]: 'signal',
         [ALERT_ACTION_GROUP]: 'recovered',
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_INSTANCE_ID]: 'alert-A',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
-        [ALERT_UUID]: 'abcdefg',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: '36000000',
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -78,6 +75,23 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
       });
     });
 
@@ -112,14 +126,11 @@ for (const flattened of [true, false]) {
         ...updatedRule,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [EVENT_ACTION]: 'close',
-        [EVENT_KIND]: 'signal',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_INSTANCE_ID]: 'alert-A',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
-        [ALERT_UUID]: 'abcdefg',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: '36000000',
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -128,6 +139,23 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
       });
     });
 
@@ -192,14 +220,11 @@ for (const flattened of [true, false]) {
         'kibana.alert.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [EVENT_ACTION]: 'close',
-        [EVENT_KIND]: 'signal',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_INSTANCE_ID]: 'alert-A',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
-        [ALERT_UUID]: 'abcdefg',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: '36000000',
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -208,6 +233,23 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
       });
     });
 
@@ -280,14 +322,11 @@ for (const flattened of [true, false]) {
         'kibana.alert.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [EVENT_ACTION]: 'close',
-        [EVENT_KIND]: 'signal',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_INSTANCE_ID]: 'alert-A',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
-        [ALERT_UUID]: 'abcdefg',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: '36000000',
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -296,6 +335,23 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['-tags', 'reported-recovery-tag', 'active-alert-tag', 'rule-'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
       });
     });
 
@@ -366,14 +422,11 @@ for (const flattened of [true, false]) {
         'kibana.alert.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [EVENT_ACTION]: 'close',
-        [EVENT_KIND]: 'signal',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_INSTANCE_ID]: 'alert-A',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
-        [ALERT_UUID]: 'abcdefg',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DURATION]: '36000000',
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -382,6 +435,23 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
       });
     });
 
@@ -451,14 +521,11 @@ for (const flattened of [true, false]) {
         'kibana.alert.deeply.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [EVENT_ACTION]: 'close',
-        [EVENT_KIND]: 'signal',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_INSTANCE_ID]: 'alert-A',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
-        [ALERT_UUID]: 'abcdefg',
         [ALERT_WORKFLOW_STATUS]: 'custom_status',
         [ALERT_DURATION]: '36000000',
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -467,6 +534,23 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        ...(flattened
+          ? {
+              [EVENT_KIND]: 'signal',
+              [ALERT_INSTANCE_ID]: 'alert-A',
+              [ALERT_UUID]: 'abcdefg',
+            }
+          : {
+              event: {
+                kind: 'signal',
+              },
+              kibana: {
+                alert: {
+                  instance: { id: 'alert-A' },
+                  uuid: 'abcdefg',
+                },
+              },
+            }),
       });
     });
   });

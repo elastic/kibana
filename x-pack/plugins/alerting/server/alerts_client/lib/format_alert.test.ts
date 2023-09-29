@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expandFlattenedAlert, removeUnflattenedFieldsFromAlert } from './format_alert';
+import {
+  expandFlattenedAlert,
+  compactObject,
+  removeUnflattenedFieldsFromAlert,
+} from './format_alert';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
@@ -213,12 +217,8 @@ describe('removeUnflattenedFieldsFromAlert', () => {
           evaluation: {
             value: '123',
           },
-          duration: {},
           instance: {
             id: 'alert-A',
-          },
-          rule: {
-            execution: {},
           },
           start: '2023-03-28T12:27:28.159Z',
           status: 'active',
@@ -233,4 +233,19 @@ describe('removeUnflattenedFieldsFromAlert', () => {
       tags: ['rule-', '-tags'],
     });
   });
+});
+
+describe('compactObject', () => {
+  test('should compact object as expected', () => {
+    expect(compactObject({ kibana: { alert: { rule: { execution: {} } }, rule: {} } })).toEqual({});
+    expect(
+      compactObject({
+        kibana: { rule: 34, alert: { rule: { execution: {}, nested_field: ['a', 'b'] } } },
+      })
+    ).toEqual({ kibana: { rule: 34, alert: { rule: { nested_field: ['a', 'b'] } } } });
+  });
+  expect(compactObject({ 'kibana.alert.rule.execution': {} })).toEqual({});
+  expect(
+    compactObject({ 'kibana.alert.rule.execution': {}, 'kibana.alert.nested_field': ['a', 'b'] })
+  ).toEqual({ 'kibana.alert.nested_field': ['a', 'b'] });
 });

@@ -25,7 +25,8 @@ export const expandFlattenedAlert = (alert: object) => {
 
 type Obj = Record<string, unknown>;
 
-const compactObject = (obj: Obj) => {
+// Removes empty nested objects
+export const compactObject = (obj: Obj) => {
   return Object.keys(obj)
     .filter((key: string) => {
       return (
@@ -51,8 +52,11 @@ const compactObject = (obj: Obj) => {
  * with the flattened version, we want to remove the unflattened version
  * to avoid duplicate data in the doc
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const removeUnflattenedFieldsFromAlert = (alert: any, flattenedData: object) => {
+
+export const removeUnflattenedFieldsFromAlert = (
+  alert: Record<string, unknown>,
+  flattenedData: object
+) => {
   // make a copy of the alert
   let alertCopy = cloneDeep(alert);
 

@@ -81,6 +81,7 @@ export const buildOngoingAlert = <
     },
     {}
   );
+
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
@@ -120,12 +121,12 @@ export const buildOngoingAlert = <
       ])
     ),
   };
-  const formattedAlert = removeUnflattenedFieldsFromAlert(alert, {
+  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
     ...cleanedPayload,
     ...alertUpdates,
     ...refreshableAlertFields,
   });
-  return deepmerge.all([formattedAlert, cleanedPayload, alertUpdates], {
+  return deepmerge.all([cleanedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

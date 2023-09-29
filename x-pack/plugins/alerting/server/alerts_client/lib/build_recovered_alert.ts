@@ -21,11 +21,7 @@ import {
   VERSION,
   ALERT_END,
   ALERT_TIME_RANGE,
-  ALERT_INSTANCE_ID,
   ALERT_START,
-  ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
-  EVENT_KIND,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
@@ -34,6 +30,7 @@ import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../t
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { removeUnflattenedFieldsFromAlert } from './format_alert';
+import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -78,6 +75,16 @@ export const buildRecoveredAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
+  const refreshableAlertFields = REFRESH_FIELDS_ALL.reduce<Record<string, string | string[]>>(
+    (acc: Record<string, string | string[]>, currField) => {
+      const value = get(alert, currField);
+      if (null != value) {
+        acc[currField] = value;
+      }
+      return acc;
+    },
+    {}
+  );
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
@@ -110,12 +117,6 @@ export const buildRecoveredAlert = <
         }
       : {}),
 
-    [EVENT_KIND]: 'signal',
-    [ALERT_INSTANCE_ID]: legacyAlert.getId(),
-    [ALERT_UUID]: legacyAlert.getUuid(),
-    [ALERT_WORKFLOW_STATUS]:
-      get(cleanedPayload, ALERT_WORKFLOW_STATUS) ?? get(alert, ALERT_WORKFLOW_STATUS, 'open'),
-
     [SPACE_IDS]: rule[SPACE_IDS],
     // Set latest kibana version
     [VERSION]: kibanaVersion,
@@ -130,8 +131,9 @@ export const buildRecoveredAlert = <
   const formattedAlert = removeUnflattenedFieldsFromAlert(alert, {
     ...cleanedPayload,
     ...alertUpdates,
+    ...refreshableAlertFields,
   });
-  return deepmerge.all([formattedAlert, cleanedPayload, alertUpdates], {
+  return deepmerge.all([formattedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

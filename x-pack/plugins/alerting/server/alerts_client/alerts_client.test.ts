@@ -657,20 +657,12 @@ describe('Alerts Client', () => {
               },
               // ongoing alert doc
               {
-                event: {
-                  kind: 'signal',
-                },
+                event: { kind: 'signal' },
                 kibana: {
                   alert: {
-                    duration: {},
-                    instance: {
-                      id: '1',
-                    },
-                    rule: { execution: {} },
+                    instance: { id: '1' },
                     start: '2023-03-28T12:27:28.159Z',
-                    status: 'active',
                     uuid: 'abc',
-                    workflow_status: 'open',
                   },
                 },
                 [TIMESTAMP]: date,
@@ -690,7 +682,9 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+                [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
@@ -952,18 +946,12 @@ describe('Alerts Client', () => {
               },
               // ongoing alert doc
               {
-                event: {
-                  kind: 'signal',
-                },
+                event: { kind: 'signal' },
                 kibana: {
                   alert: {
-                    duration: {},
                     instance: { id: '2' },
-                    rule: { execution: {} },
                     start: '2023-03-28T02:27:28.159Z',
-                    status: 'active',
                     uuid: 'def',
-                    workflow_status: 'open',
                   },
                 },
                 [TIMESTAMP]: date,
@@ -983,7 +971,9 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
@@ -1004,17 +994,11 @@ describe('Alerts Client', () => {
               },
               // recovered alert doc
               {
-                event: {
-                  kind: 'signal',
-                },
+                event: { kind: 'signal' },
                 kibana: {
                   alert: {
-                    duration: {},
                     instance: { id: '1' },
-                    rule: { execution: {} },
-                    start: '2023-03-28T12:27:28.159Z',
                     uuid: 'abc',
-                    workflow_status: 'open',
                   },
                 },
                 [TIMESTAMP]: date,
@@ -1034,9 +1018,11 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: date },
+                [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
