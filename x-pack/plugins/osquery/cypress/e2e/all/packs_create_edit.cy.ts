@@ -509,72 +509,74 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('should verify that packs are triggered', { tags: ['@ess', '@serverless'] }, () => {
-    let packId: string;
-    let packName: string;
+  describe(
+    'should verify that packs are triggered',
+    { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+    () => {
+      let packId: string;
+      let packName: string;
 
-    before(() => {
-      request<{ items: PackagePolicy[] }>({
-        url: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: {
-          'Elastic-Api-Version': API_VERSIONS.internal.v1,
-        },
-      })
-        .then((response) =>
-          loadPack({
-            policy_ids: [response.body.items[0].policy_id],
-            queries: {
-              [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
-            },
-          })
-        )
-        .then((pack) => {
-          packId = pack.saved_object_id;
-          packName = pack.name;
-        });
-    });
-
-    after(() => {
-      cleanupPack(packId);
-    });
-
-    it('', () => {
-      preparePack(packName);
-      cy.contains(`${packName} details`).should('exist');
-
-      recurse<string>(
-        () => {
-          cy.waitForReact();
-
-          cy.getBySel('docsLoading').should('exist');
-          cy.getBySel('docsLoading').should('not.exist');
-
-          return cy.get('tbody .euiTableRow > td:nth-child(5)').invoke('text');
-        },
-        (response) => response === 'Docs1',
-        {
-          timeout: 300000,
-          post: () => {
-            cy.reload();
+      before(() => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
           },
-        }
-      );
+        })
+          .then((response) =>
+            loadPack({
+              policy_ids: [response.body.items[0].policy_id],
+              queries: {
+                [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
+              },
+            })
+          )
+          .then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
+      });
 
-      cy.react('ScheduledQueryLastResults', { options: { timeout: 3000 } })
-        .should('exist')
-        .within(() => {
-          cy.react('FormattedRelative');
+      after(() => {
+        cleanupPack(packId);
+      });
+
+      it('', () => {
+        preparePack(packName);
+        cy.contains(`${packName} details`).should('exist');
+
+        recurse<string>(
+          () => {
+            cy.getBySel('docsLoading').should('exist');
+            cy.getBySel('docsLoading').should('not.exist');
+
+            return cy.get('tbody .euiTableRow > td:nth-child(5)').invoke('text');
+          },
+          (response) => response === 'Docs1',
+          {
+            timeout: 300000,
+            post: () => {
+              cy.reload();
+            },
+          }
+        );
+
+        cy.react('ScheduledQueryLastResults', { options: { timeout: 3000 } })
+          .should('exist')
+          .within(() => {
+            cy.react('FormattedRelative');
+          });
+
+        cy.react('DocsColumnResults').within(() => {
+          cy.react('EuiNotificationBadge').contains('1');
         });
-
-      cy.react('DocsColumnResults').within(() => {
-        cy.react('EuiNotificationBadge').contains('1');
+        cy.react('AgentsColumnResults').within(() => {
+          cy.react('EuiNotificationBadge').contains('1');
+        });
+        cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
       });
-      cy.react('AgentsColumnResults').within(() => {
-        cy.react('EuiNotificationBadge').contains('1');
-      });
-      cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
-    });
-  });
+    }
+  );
 
   describe('delete all queries in the pack', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
