@@ -85,18 +85,16 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                     isDisabled={dashboardOption !== 'existing'}
                     onChange={onSelectDashboard}
                   />
-                  {hasAttemptedSubmit && dashboardOption === 'existing' && !hasSelectedDashboard
-                    ?
-                      <div className="euiFormErrorText euiFormRow__text">
-                        {i18n.translate(
-                          'presentationUtil.saveModalDashboard.existingDashboardRequiredMessage',
-                          {
-                            defaultMessage: 'Dashboard required',
-                          })
-                      }
-                      </div>
-                    : null
-                  }
+                  {hasAttemptedSubmit && dashboardOption === 'existing' && !hasSelectedDashboard ? (
+                    <div className="euiFormErrorText euiFormRow__text">
+                      {i18n.translate(
+                        'presentationUtil.saveModalDashboard.existingDashboardRequiredMessage',
+                        {
+                          defaultMessage: 'Dashboard required',
+                        }
+                      )}
+                    </div>
+                  ) : null}
                 </div>
                 <EuiSpacer size="s" />
               </>
