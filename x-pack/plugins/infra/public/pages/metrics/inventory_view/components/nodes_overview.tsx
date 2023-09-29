@@ -147,6 +147,7 @@ export const NodesOverview = ({
           assetName={detailsItemId}
           assetType={nodeType}
           currentTime={currentTime}
+          options={options}
         />
       )}
       <Legend

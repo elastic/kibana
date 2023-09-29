@@ -13,7 +13,7 @@ export async function getHostsByAssets(
   options: GetHostsOptionsInjected
 ): Promise<{ hosts: Asset[] }> {
   const hosts = await getAssets({
-    esClient: options.esClient,
+    elasticsearchClient: options.elasticsearchClient,
     filters: {
       kind: 'host',
       from: options.from,
