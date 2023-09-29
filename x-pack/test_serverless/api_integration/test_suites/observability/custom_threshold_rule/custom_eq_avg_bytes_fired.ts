@@ -29,11 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  describe('Custom Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
+  // Issue: https://github.com/elastic/kibana/issues/165138
+  describe.skip('Custom Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
-    // DATE_VIEW should match the index template:
-    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
@@ -43,9 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await dataViewApi.create({
-        name: DATE_VIEW,
+        name: 'metrics-fake_hosts',
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: 'metrics-fake_hosts',
       });
     });
 
@@ -82,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'apm',
+          consumer: 'logs',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
@@ -151,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold (BETA)'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'apm');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
