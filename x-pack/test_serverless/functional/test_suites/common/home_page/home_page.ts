@@ -16,6 +16,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonPage.login();
     });
 
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     it('has project header', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertProjectHeaderExists();
