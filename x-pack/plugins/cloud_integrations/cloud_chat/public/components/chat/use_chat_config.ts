@@ -110,7 +110,6 @@ export const useChatConfig = ({
       switch (message.type) {
         // The IFRAME is ready to receive messages.
         case MESSAGE_IFRAME_READY: {
-          debugger;
           const user = {
             id,
             attributes: {
