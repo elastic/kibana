@@ -52,7 +52,6 @@
 .optionsList__popoverOverride {
   @include euiBottomShadowMedium;
   filter: none; // overwrite the default popover shadow
-  transform: translateY(-$euiSizeS) translateX(0); // prevent "slide in" animation on open/close
 }
 
 .optionsList__popover {
