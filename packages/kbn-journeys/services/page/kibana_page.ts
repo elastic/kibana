@@ -15,12 +15,14 @@ interface WaitForRenderArgs {
   expectedItemsCount: number;
   itemLocator: string;
   checkAttribute: string;
+  timeout: number;
 }
 
 export class KibanaPage {
   readonly page: Page;
   readonly log: ToolingLog;
   readonly retry: Retry;
+  readonly defaultTimeout = 30_000;
 
   constructor(page: Page, log: ToolingLog, retry: Retry) {
     this.page = page;
@@ -38,24 +40,31 @@ export class KibanaPage {
     await this.page.click(subj('breadcrumb dashboardListingBreadcrumb first'));
   }
 
-  async waitForRender({ expectedItemsCount, itemLocator, checkAttribute }: WaitForRenderArgs) {
+  async waitForRender({
+    expectedItemsCount,
+    itemLocator,
+    checkAttribute,
+    timeout,
+  }: WaitForRenderArgs) {
     // we can't use `page.waitForFunction` because of CSP while testing on Cloud
-    await this.retry.waitFor(
+    await this.retry.waitForWithTimeout(
       `rendering of ${expectedItemsCount} elements with selector ${itemLocator} is completed`,
+      timeout,
       async () => {
         const renderingItems = await this.page.$$(itemLocator);
         if (renderingItems.length === expectedItemsCount) {
           // all components are loaded, checking if all are rendered
-          const renderStatuses = await Promise.all(
-            renderingItems.map(async (item) => {
-              return (await item.getAttribute(checkAttribute)) === 'true';
-            })
-          );
-          const rendered = renderStatuses.filter((isRendered) => isRendered === true);
+          let renderedCount = 0;
+          for (let i = 0; i < renderingItems.length; i++) {
+            const isRendered = await renderingItems[i].getAttribute(checkAttribute);
+            if (isRendered === 'true') {
+              renderedCount++;
+            }
+          }
           this.log.debug(
-            `waitForRender: ${rendered.length} out of ${expectedItemsCount} are rendered...`
+            `waitForRender: ${renderedCount} out of ${expectedItemsCount} are rendered...`
           );
-          return rendered.length === expectedItemsCount;
+          return renderedCount === expectedItemsCount;
         } else {
           // not all components are loaded yet
           this.log.debug(
@@ -67,19 +76,33 @@ export class KibanaPage {
     );
   }
 
-  async waitForVisualizations(count: number) {
+  async waitForVisualizations({
+    count,
+    timeout = this.defaultTimeout,
+  }: {
+    count: number;
+    timeout?: number;
+  }) {
     await this.waitForRender({
       expectedItemsCount: count,
       itemLocator: '[data-rendering-count]',
       checkAttribute: 'data-render-complete',
+      timeout,
     });
   }
 
-  async waitForCharts(count: number) {
+  async waitForCharts({
+    count,
+    timeout = this.defaultTimeout,
+  }: {
+    count: number;
+    timeout?: number;
+  }) {
     await this.waitForRender({
       expectedItemsCount: count,
       itemLocator: '.echChartStatus',
       checkAttribute: 'data-ech-render-complete',
+      timeout,
     });
   }
 
