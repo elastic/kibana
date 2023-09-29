@@ -82,6 +82,7 @@ const timelineData = {
     },
   ],
   status: TimelineStatus.active,
+  savedSearchId: null,
 };
 const mockPatchTimelineResponse = {
   data: {

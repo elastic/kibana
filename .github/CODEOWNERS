@@ -485,6 +485,7 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/settings/components/field_category @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management
 packages/kbn-management/settings/components/form @elastic/platform-deployment-management

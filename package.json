@@ -507,6 +507,7 @@
     "@kbn/logstash-plugin": "link:x-pack/plugins/logstash",
     "@kbn/management-cards-navigation": "link:packages/kbn-management/cards_navigation",
     "@kbn/management-plugin": "link:src/plugins/management",
+    "@kbn/management-settings-components-field-category": "link:packages/kbn-management/settings/components/field_category",
     "@kbn/management-settings-components-field-input": "link:packages/kbn-management/settings/components/field_input",
     "@kbn/management-settings-components-field-row": "link:packages/kbn-management/settings/components/field_row",
     "@kbn/management-settings-components-form": "link:packages/kbn-management/settings/components/form",
