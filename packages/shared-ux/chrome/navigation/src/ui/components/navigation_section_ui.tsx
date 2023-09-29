@@ -28,11 +28,13 @@ const navigationNodeToEuiItem = (
     basePath,
     openPanel,
     closePanel,
+    isSideNavCollapsed,
   }: {
     navigateToUrl: NavigateToUrlFn;
     basePath: BasePathService;
     openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
+    isSideNavCollapsed: boolean;
   }
 ): EuiCollapsibleNavSubItemProps => {
   const href = item.deepLink?.url ?? item.href;
@@ -77,6 +79,9 @@ const navigationNodeToEuiItem = (
         return;
       }
       if (itemOpenPanel) {
+        if (isSideNavCollapsed) {
+          return;
+        }
         openPanel({ ...item, id });
       }
     }
@@ -100,7 +105,13 @@ const navigationNodeToEuiItem = (
     items: itemOpenPanel
       ? undefined // Don't render children if the item opens a panel
       : item.children?.map((_item) =>
-          navigationNodeToEuiItem(_item, { navigateToUrl, basePath, openPanel, closePanel })
+          navigationNodeToEuiItem(_item, {
+            navigateToUrl,
+            basePath,
+            openPanel,
+            closePanel,
+            isSideNavCollapsed,
+          })
         ),
     ['data-test-subj']: dataTestSubj,
     icon: item.icon,
@@ -115,7 +126,7 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const { id, title, icon, isActive } = navNode;
-  const { navigateToUrl, basePath } = useServices();
+  const { navigateToUrl, basePath, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(!isActive);
   // We want to auto expand the group automatically if the node is active (URL match)
@@ -196,7 +207,13 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
       data-test-subj={`nav-bucket-${id}`}
       {...propsForGroupAsLink}
       items={filteredItems.map((item) =>
-        navigationNodeToEuiItem(item, { navigateToUrl, basePath, openPanel, closePanel })
+        navigationNodeToEuiItem(item, {
+          navigateToUrl,
+          basePath,
+          isSideNavCollapsed,
+          openPanel,
+          closePanel,
+        })
       )}
     />
   );

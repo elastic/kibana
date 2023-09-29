@@ -7,9 +7,9 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { useState } from '@storybook/addons';
+import { useState as useStateStorybook } from '@storybook/addons';
 import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, PropsWithChildren, MouseEvent, useEffect } from 'react';
+import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import {
@@ -39,10 +39,19 @@ import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
 
-const NavigationWrapper: FC<
-  PropsWithChildren<{ clickAction?: EventHandler<MouseEvent>; clickActionText?: string }> &
-    Partial<EuiCollapsibleNavBetaProps>
-> = (props) => {
+interface Props {
+  clickAction?: EventHandler<MouseEvent>;
+  clickActionText?: string;
+  children?: React.ReactNode | (({ isCollapsed }: { isCollapsed: boolean }) => React.ReactNode);
+}
+
+const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (props) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const onCollapseToggle = (nextIsCollapsed: boolean) => {
+    setIsCollapsed(nextIsCollapsed);
+  };
+
   useEffect(() => {
     // Set padding to body to avoid unnecessary scrollbars
     document.body.style.paddingTop = '0px';
@@ -56,6 +65,13 @@ const NavigationWrapper: FC<
         <EuiHeaderSection side={props?.side}>
           <EuiCollapsibleNavBeta
             {...props}
+            children={
+              typeof props.children === 'function'
+                ? props.children({ isCollapsed })
+                : props.children
+            }
+            initialIsCollapsed={isCollapsed}
+            onCollapseToggle={onCollapseToggle}
             css={
               props.css ?? {
                 overflow: 'visible',
@@ -422,12 +438,14 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <DefaultNavigation
-          {...navigationDefinitionWithPanel}
-          panelContentProvider={panelContentProvider}
-        />
-      </NavigationProvider>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <DefaultNavigation
+            {...navigationDefinitionWithPanel}
+            panelContentProvider={panelContentProvider}
+          />
+        </NavigationProvider>
+      )}
     </NavigationWrapper>
   );
 };
@@ -748,7 +766,7 @@ export const UpdatingState = (args: NavigationServices) => {
   ];
 
   // use state to track which element of activeNodeSets is active
-  const [activeNodeIndex, setActiveNodeIndex] = useState<number>(0);
+  const [activeNodeIndex, setActiveNodeIndex] = useStateStorybook<number>(0);
   const changeActiveNode = () => {
     const value = (activeNodeIndex + 1) % 2; // toggle between 0 and 1
     setActiveNodeIndex(value);
