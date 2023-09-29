@@ -180,7 +180,7 @@ export function useModelActions({
           defaultMessage: 'Deploy',
         }),
         description: i18n.translate(
-          'xpack.ml.inference.modelsList.startModelDeploymentActionLabel',
+          'xpack.ml.inference.modelsList.startModelDeploymentActionDescription',
           {
             defaultMessage: 'Start deployment',
           }
