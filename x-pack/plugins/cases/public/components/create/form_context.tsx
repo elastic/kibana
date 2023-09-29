@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { isEmpty } from 'lodash';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
@@ -26,6 +25,7 @@ import {
   getConnectorById,
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
+  convertCustomFieldValue,
 } from '../utils';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
@@ -105,20 +105,12 @@ export const FormContext: React.FC<Props> = ({
       }
 
       for (const [key, value] of Object.entries(customFields)) {
-        let fieldValue = null;
         const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
-
         if (configCustomField) {
-          if (!isEmpty(value) && typeof value === 'string') {
-            fieldValue = [value];
-          } else if (typeof value === 'boolean') {
-            fieldValue = value;
-          }
-
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,
-            value: fieldValue,
+            value: convertCustomFieldValue(value),
           } as CaseUICustomField);
         }
       }
