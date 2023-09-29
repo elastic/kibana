@@ -34,7 +34,7 @@ const rule = getEsqlRule();
 
 const expectedValidEsqlQuery = 'from auditbeat* | stats count(event.category) by event.category';
 
-describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
+describe.only('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -82,6 +82,11 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   it('adds ES|QL override rule name on edit', () => {
     visit(RULES_MANAGEMENT_URL);
     editFirstRule();
+
+    // expands query bar, so query is not obscured on narrow screens
+    cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
+    // ensure once edit form opened, correct query is displayed in ES|QL input
+    cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
     goToAboutStepTab();
     expandAdvancedSettings();
