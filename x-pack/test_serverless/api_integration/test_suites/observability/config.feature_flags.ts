@@ -23,4 +23,8 @@ export default createTestConfig({
   kbnServerArgs: ['--xpack.observability.unsafe.thresholdRule.enabled=true'],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
+  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
 });
