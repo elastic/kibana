@@ -10,7 +10,11 @@ import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-obje
 import { migrateCspPackagePolicyToV8110 as migration } from './to_v8_11_0';
 
 describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
-  const policyDoc = (accountType: string, isAccountTypeCorrect: boolean, packageName: string) : any => {
+  const policyDoc = (
+    accountType: string,
+    isAccountTypeCorrect: boolean,
+    packageName: string
+  ): any => {
     return {
       id: 'mock-saved-csp-object-id',
       attributes: {
@@ -33,11 +37,15 @@ describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
           {
             type: accountType,
             enabled: true,
-            streams: [{
-                vars:{
-                    ...(isAccountTypeCorrect && ({'gcp.account_type':{value:'single-account',type:'text'}})),
-                }
-            }],
+            streams: [
+              {
+                vars: {
+                  ...(isAccountTypeCorrect && {
+                    'gcp.account_type': { value: 'single-account', type: 'text' },
+                  }),
+                },
+              },
+            ],
             config: {},
           },
         ],
@@ -49,7 +57,7 @@ describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
   it('adds gcp.account_type to policy, set to single', () => {
     const initialDoc = policyDoc('cloudbeat/cis_gcp', false, 'cloud_security_posture');
     const migratedDoc = policyDoc('cloudbeat/cis_gcp', true, 'cloud_security_posture');
-    expect(migration(initialDoc , {} as SavedObjectModelTransformationContext)).toEqual({
+    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
       attributes: migratedDoc.attributes,
     });
   });
@@ -57,7 +65,7 @@ describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
   it('if there are no type cloudbeat/cis_gcp, do not add gcp.account_type', () => {
     const initialDoc = policyDoc('cloudbeat/cis_aws', false, 'cloud_security_posture');
     const migratedDoc = policyDoc('cloudbeat/cis_aws', false, 'cloud_security_posture');
-    expect(migration(initialDoc , {} as SavedObjectModelTransformationContext)).toEqual({
+    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
       attributes: migratedDoc.attributes,
     });
   });
@@ -65,7 +73,7 @@ describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
   it('if there are no type cloudbeat/cis_gcp, do not add gcp.account_type', () => {
     const initialDoc = policyDoc('cloudbeat/cis_gcp', false, 'NOT_cloud_security_posture');
     const migratedDoc = policyDoc('cloudbeat/cis_gcp', false, 'NOT_cloud_security_posture');
-    expect(migration(initialDoc , {} as SavedObjectModelTransformationContext)).toEqual({
+    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
       attributes: migratedDoc.attributes,
     });
   });
