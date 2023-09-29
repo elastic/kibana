@@ -56,11 +56,22 @@ export interface HistogramField {
   type: KBN_FIELD_TYPES;
 }
 
+/**
+ * Enumeration of significant term types.
+ */
 export const SIGNIFICANT_TERM_TYPE = {
   KEYWORD: 'keyword',
   LOG_PATTERN: 'log_pattern',
 } as const;
+
+/**
+ * Type for significant term type keys.
+ */
 type SignificantTermTypeKeys = keyof typeof SIGNIFICANT_TERM_TYPE;
+
+/**
+ * Represents the type of significant term as determined by the SIGNIFICANT_TERM_TYPE enumeration.
+ */
 export type SignificantTermType = typeof SIGNIFICANT_TERM_TYPE[SignificantTermTypeKeys];
 
 /**
