@@ -15,7 +15,8 @@ import { matchPath, useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { noop } from 'lodash';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { isDetectionsPath } from '../../../helpers';
@@ -39,7 +40,7 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(() => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
-  const { theme, setHeaderActionMenu } = useKibana().services;
+  const { theme, setHeaderActionMenu, i18n: kibanaServiceI18n } = useKibana().services;
   const { pathname } = useLocation();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -49,10 +50,10 @@ export const GlobalHeader = React.memo(() => {
 
   const sourcererScope = getScopeFromPath(pathname);
   const showSourcerer = showSourcererByPath(pathname);
-  const shouldRestoreActionMenu =
+  const dashboardViewPath =
     matchPath(pathname, {
       path: `/${SecurityPageName.dashboards}/:id`,
-      exact: true,
+      exact: false,
       strict: false,
     }) != null;
 
@@ -60,16 +61,23 @@ export const GlobalHeader = React.memo(() => {
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$: theme.theme$ });
+      const mount = toMountPoint(<OutPortal node={portalNode} />, {
+        theme,
+        i18n: kibanaServiceI18n,
+      });
       return mount(element);
     });
 
     return () => {
+      /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
+      if (dashboardViewPath) {
+        return;
+      }
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
     /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
-  }, [portalNode, setHeaderActionMenu, theme.theme$, shouldRestoreActionMenu]);
+  }, [portalNode, setHeaderActionMenu, theme.theme$, theme, kibanaServiceI18n, dashboardViewPath]);
 
   return (
     <InPortal node={portalNode}>
