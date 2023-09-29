@@ -11,8 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -266,17 +268,18 @@ export default function AlertDetailsAppSection({
   const relatedEventsTab = !!ruleParams.criteria ? (
     <>
       <EuiSpacer size="l" />
-      <EuiFlexGroup direction="column" data-test-subj="thresholdAlertRelatedEventsSection">
+      <EuiFlexGrid columns={2} data-test-subj="thresholdAlertRelatedEventsSection">
         {relatedMetricsInDataView?.map(
           (relatedMetric, relatedMetricIndex) =>
             dataView &&
             dataView.id && (
-              <>
+              <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h4>
                     {metricAggType}({relatedMetric})
                   </h4>
                 </EuiTitle>
+                <EuiHorizontalRule margin="xs" />
                 <EmbeddableChangePointChart
                   key={`relatedMetric${relatedMetricIndex}`}
                   dataViewId={dataView.id}
@@ -284,10 +287,10 @@ export default function AlertDetailsAppSection({
                   fn={metricAggType || 'avg'}
                   metricField={relatedMetric}
                 />
-              </>
+              </EuiFlexItem>
             )
         )}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
     </>
   ) : null;
 
