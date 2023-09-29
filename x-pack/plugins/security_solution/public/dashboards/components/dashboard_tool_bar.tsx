@@ -15,7 +15,7 @@ import { SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useCapabilities, useKibana, useNavigateTo } from '../../common/lib/kibana';
 
-import { APP_NAME, APP_UI_ID } from '../../../common/constants';
+import { APP_NAME } from '../../../common/constants';
 import { useDashboardContainerContext } from '../context/dashboard_container_context';
 
 const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => void }) => {
@@ -87,7 +87,6 @@ const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => vo
       forceHideDatePicker={true}
       forceHideQueryInput={true}
       embedSettings={embedSettings}
-      originatingApp={APP_UI_ID}
       redirectTo={redirectTo}
       showBorderBottom={false}
       setCustomHeaderActionMenu={setHeaderActionMenu}

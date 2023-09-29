@@ -45,7 +45,6 @@ export interface InternalDashboardTopNavProps {
   forceHideDatePicker?: boolean;
   forceHideQueryInput?: boolean;
   redirectTo: DashboardRedirect;
-  originatingApp?: string;
   setCustomHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
   showBorderBottom?: boolean;
 }
@@ -58,7 +57,6 @@ export function InternalDashboardTopNav({
   forceHideDatePicker,
   forceHideQueryInput,
   redirectTo,
-  originatingApp,
   setCustomHeaderActionMenu,
   showBorderBottom,
 }: InternalDashboardTopNavProps) {
@@ -375,7 +373,7 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar originatingApp={originatingApp} isDisabled={!!focusedPanelId} />
+        <DashboardEditingToolbar isDisabled={!!focusedPanelId} />
       ) : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

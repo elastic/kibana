@@ -105,13 +105,9 @@ describe('DashboardToolBar', () => {
   it('should render the DashboardTopNav component with the correct props', () => {
     expect(mockDashboardTopNav.mock.calls[0][0].embedSettings).toEqual(
       expect.objectContaining({
-        forceHideDatePicker: true,
         forceHideFilterBar: true,
-        forceHideQueryInput: true,
         forceShowTopNavMenu: true,
-        setHeaderActionMenu: undefined,
-        showBorderBottom: false,
-        showDatePicker: false,
+        forceShowDatePicker: false,
         forceShowQueryInput: false,
       })
     );
