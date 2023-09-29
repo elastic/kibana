@@ -1271,7 +1271,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
       {
         defaultMessage:
-          'Controls whether API events are enabled. Set to false to disable API event collection. Default: true',
+          'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_disabled',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_disabled',
+      {
+        defaultMessage: 'A comma separated list of API names to selectively disable.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api_verbose',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_verbose',
+      {
+        defaultMessage:
+          'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
       }
     ),
   },
