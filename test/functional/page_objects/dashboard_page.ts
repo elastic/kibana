@@ -612,8 +612,12 @@ export class DashboardPageObject extends FtrService {
     return visibilities;
   }
 
+  public async getPanels() {
+    return await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+  }
+
   public async getPanelDimensions() {
-    const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+    const panels = await this.getPanels();
     return await Promise.all(
       panels.map(async (panel) => {
         const size = await panel.getSize();
