@@ -7,7 +7,10 @@
 
 import { APP_PATH, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
-import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
+import type {
+  SecuritySolutionServerlessPluginSetupDeps,
+  ServerlessSecurityPublicConfig,
+} from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { SecurityPagePath } from './links/constants';
@@ -31,7 +34,7 @@ export const setupNavigation = (
   securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
 };
 
-export const startNavigation = (services: Services) => {
+export const startNavigation = (services: Services, config: ServerlessSecurityPublicConfig) => {
   const { serverless, securitySolution, management } = services;
   securitySolution.setIsSidebarEnabled(false);
   serverless.setProjectHome(APP_PATH);
@@ -43,9 +46,9 @@ export const startNavigation = (services: Services) => {
       serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
     });
   } else {
-    // if (!config.developer.disableManagementUrlRedirect) {
-    //   management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
-    // }
+    if (!config.developer.disableManagementUrlRedirect) {
+      management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
+    }
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigation({ navigationTree: chromeNavigationTree });
     });

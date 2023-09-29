@@ -46,12 +46,14 @@ export class SecuritySolutionServerlessPlugin
     core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
+    const { securitySolution } = setupDeps;
+
     this.experimentalFeatures = parseExperimentalConfigValue(
       this.config.enableExperimental,
-      setupDeps.securitySolution.experimentalFeatures
+      securitySolution.experimentalFeatures
     ).features;
 
-    setupNavigation(core, setupDeps, this.config);
+    setupNavigation(core, setupDeps, this.experimentalFeatures);
     return {};
   }
 
@@ -66,9 +68,10 @@ export class SecuritySolutionServerlessPlugin
 
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
-    securitySolution.setDashboardsLandingCallout(getDashboardsLandingCallout(services));
-    securitySolution.setIsILMAvailable(false);
+    securitySolution.setComponents({
+      getStarted: getSecurityGetStartedComponent(services, productTypes),
+      dashboardsLandingCallout: getDashboardsLandingCallout(services),
+    });
 
     startNavigation(services, this.config);
     setRoutes(services);
