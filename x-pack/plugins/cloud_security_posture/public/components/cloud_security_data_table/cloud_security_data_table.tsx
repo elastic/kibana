@@ -175,8 +175,9 @@ export const CloudSecurityDataTable = ({
               operation,
               dataView
             );
+            filterManager.addFilters(newFilters);
             setUrlQuery({
-              filters: newFilters,
+              filters: filterManager.getFilters(),
             });
           }
         : undefined,
