@@ -176,6 +176,55 @@ describe('When the add exception modal is opened', () => {
     it('should show the loading spinner', () => {
       expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
     });
+
+    it('should show the loading spinner if alertData is passed and exception is building prefilled conditions', () => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: { fields: [], title: 'foo' },
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[{ ...getRulesSchemaMock() } as Rule]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={true}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
+    });
+    it('should not show the loading spinner if alertData is not loading', () => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: { fields: [], title: 'foo' },
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[{ ...getRulesSchemaMock() } as Rule]}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={true}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
+    });
   });
 
   describe('exception list type of "endpoint"', () => {

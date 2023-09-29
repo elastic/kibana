@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useEffect, useCallback, useMemo, useReducer, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
@@ -129,12 +129,13 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       return true;
     }
   }, [rules]);
+  const [isPopulatingFieldsLoading, setIsPopulatingFieldsLoading] = useState(true);
 
   const showLoadingSkeleton = useMemo(
-    () => isLoading && isAlertDataLoading && !sharedListToAddTo && !rules?.length,
-    [isAlertDataLoading, isLoading, rules?.length, sharedListToAddTo]
+    () => isLoading || isAlertDataLoading || isPopulatingFieldsLoading,
+    [isAlertDataLoading, isLoading, isPopulatingFieldsLoading]
   );
-  const getRadioSelectionMode = useMemo(() => {
+  const addExceptionToRuleOrListSelection = useMemo(() => {
     if (isBulkAction) return 'add_to_rules';
     if (rules?.length === 1 || isAlertDataLoading !== undefined) return 'add_to_rule';
     return 'select_rules_to_add_to';
@@ -169,7 +170,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     ...initialState,
-    addExceptionToRadioSelection: getRadioSelectionMode,
+    addExceptionToRadioSelection: addExceptionToRuleOrListSelection,
     listType: getListType,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
@@ -343,11 +344,13 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   useEffect((): void => {
     if (alertData) {
+      setIsPopulatingFieldsLoading(true);
       switch (listType) {
         case ExceptionListTypeEnum.ENDPOINT: {
-          return setInitialExceptionItems(
+          setInitialExceptionItems(
             defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
           );
+          return setIsPopulatingFieldsLoading(false);
         }
         case ExceptionListTypeEnum.RULE_DEFAULT: {
           const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
@@ -359,11 +362,13 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           });
           if (populatedException) {
             setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
-            return setInitialExceptionItems([populatedException]);
+            setInitialExceptionItems([populatedException]);
+            return setIsPopulatingFieldsLoading(false);
           }
         }
       }
     }
+    return setIsPopulatingFieldsLoading(false);
   }, [listType, exceptionItemName, alertData, rules, setInitialExceptionItems, setComment]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
