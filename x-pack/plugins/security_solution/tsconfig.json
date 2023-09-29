@@ -173,6 +173,7 @@
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
     "@kbn/subscription-tracking",
-    "@kbn/openapi-generator"
+    "@kbn/openapi-generator",
+    "@kbn/es"
   ]
 }
