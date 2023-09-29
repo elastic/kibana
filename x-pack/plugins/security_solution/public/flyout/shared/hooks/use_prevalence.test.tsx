@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { usePrevalence } from './use_prevalence';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
 import {
   FIELD_NAMES_AGG_KEY,
@@ -124,7 +124,7 @@ describe('usePrevalence', () => {
     expect(hookResult.result.current.data).toEqual([
       {
         field: 'host.name',
-        value: 'host-1',
+        values: ['host-1'],
         alertCount: 1,
         docCount: 1,
         hostPrevalence: 0.1,

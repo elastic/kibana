@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
@@ -63,7 +64,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
   describe('Without data', () => {
     beforeEach(() => {
       login();
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     it('shows enable host risk button', () => {
@@ -83,7 +84,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
     beforeEach(() => {
       login();
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
@@ -108,7 +109,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
     beforeEach(() => {
       login();
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
@@ -132,7 +133,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
     beforeEach(() => {
       login();
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
@@ -177,9 +178,9 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
       beforeEach(() => {
         login();
-        visit(ALERTS_URL);
+        visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
-        visit(ENTITY_ANALYTICS_URL);
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
       after(() => {
@@ -220,7 +221,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
     beforeEach(() => {
       login();
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
@@ -265,9 +266,9 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
       beforeEach(() => {
         login();
-        visit(ALERTS_URL);
+        visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
-        visit(ENTITY_ANALYTICS_URL);
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
       after(() => {
@@ -306,7 +307,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
       cy.get(ANOMALIES_TABLE).should('be.visible');
       waitForAnomaliesToBeLoaded();
     });

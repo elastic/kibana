@@ -46,6 +46,28 @@ describe('FieldDefaultValue', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('renders nothing if an unsaved change matches the default value', () => {
+    const { container } = render(
+      wrap(
+        <FieldDefaultValue
+          field={{
+            id: 'test',
+            type: 'string',
+            isDefaultValue: false,
+            defaultValueDisplay: 'null',
+            defaultValue: 'test',
+          }}
+          unsavedChange={{
+            type: 'string',
+            unsavedValue: 'test',
+          }}
+        />
+      )
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('does not render a code block for string fields', () => {
     const { queryByTestId, getByText } = render(
       wrap(

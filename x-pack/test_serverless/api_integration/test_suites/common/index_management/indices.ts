@@ -17,12 +17,19 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165565
-  describe.skip('Indices', function () {
+  describe('Indices', function () {
     const indexName = `index-${Math.random()}`;
 
     before(async () => {
       // Create a new index to test against
+      const indexExists = await es.indices.exists({ index: indexName });
+
+      // Index should not exist, but in the case that it already does, we bypass the create request
+      if (indexExists) {
+        return;
+      }
+
+      log.debug(`Creating index: '${indexName}'`);
       try {
         await es.indices.create({ index: indexName });
       } catch (err) {
@@ -99,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             indexName: createIndexName,
           })
@@ -119,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             indexName: createIndexName,
           })

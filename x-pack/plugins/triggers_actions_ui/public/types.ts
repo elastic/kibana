@@ -26,6 +26,7 @@ import type {
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
 } from '@elastic/eui';
+import type { AlertConsumers, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -457,6 +458,8 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];
+  validConsumers?: RuleCreationValidConsumer[];
+  useRuleProducer?: boolean;
 }
 export interface RuleDefinitionProps {
   rule: Rule;
@@ -819,3 +822,8 @@ export interface NotifyWhenSelectOptions {
   isForEachAlertOption?: boolean;
   value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }
+
+export type RuleCreationValidConsumer =
+  | typeof AlertConsumers.LOGS
+  | typeof AlertConsumers.INFRASTRUCTURE
+  | typeof STACK_ALERTS_FEATURE_ID;

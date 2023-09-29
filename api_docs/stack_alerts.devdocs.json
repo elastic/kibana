@@ -406,23 +406,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.STACK_ALERTS_FEATURE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "STACK_ALERTS_FEATURE_ID",
-        "description": [],
-        "signature": [
-          "\"stackAlerts\""
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "stackAlerts",

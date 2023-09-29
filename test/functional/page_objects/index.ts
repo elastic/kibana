@@ -34,8 +34,10 @@ import { DashboardPageControls } from './dashboard_page_controls';
 import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
+import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 
 export const pageObjects = {
+  annotationEditor: AnnotationEditorPageObject,
   common: CommonPageObject,
   console: ConsolePageObject,
   context: ContextPageObject,

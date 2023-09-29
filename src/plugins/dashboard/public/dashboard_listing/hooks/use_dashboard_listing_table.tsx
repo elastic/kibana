@@ -7,27 +7,28 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { DashboardContainerInput } from '../../../common';
-import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
-import { pluginServices } from '../../services/plugin_services';
+import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
-import { DashboardItem } from '../../../common/content_management';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
 } from '../_dashboard_listing_strings';
-import { confirmCreateWithUnsaved } from '../confirm_overlays';
+import { DashboardContainerInput } from '../../../common';
 import { DashboardSavedObjectUserContent } from '../types';
+import { confirmCreateWithUnsaved } from '../confirm_overlays';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardItem } from '../../../common/content_management';
+import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -42,6 +43,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     id: hit.id,
     updatedAt: hit.updatedAt!,
     references: hit.references,
+    managed: hit.managed,
     attributes: {
       title,
       description,
@@ -50,14 +52,16 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
   };
 };
 
+type DashboardListingViewTableProps = Omit<
+  TableListViewTableProps<DashboardSavedObjectUserContent>,
+  'tableCaption'
+> & { title: string };
+
 interface UseDashboardListingTableReturnType {
   hasInitialFetchReturned: boolean;
   pageDataTestSubject: string | undefined;
   refreshUnsavedDashboards: () => void;
-  tableListViewTableProps: Omit<
-    TableListViewTableProps<DashboardSavedObjectUserContent>,
-    'tableCaption'
-  > & { title: string };
+  tableListViewTableProps: DashboardListingViewTableProps;
   unsavedDashboardIds: string[];
 }
 
@@ -269,7 +273,7 @@ export const useDashboardListingTable = ({
     [getDashboardUrl]
   );
 
-  const tableListViewTableProps = useMemo(
+  const tableListViewTableProps: DashboardListingViewTableProps = useMemo(
     () => ({
       contentEditor: {
         isReadonly: !showWriteControls,
@@ -279,6 +283,7 @@ export const useDashboardListingTable = ({
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
+      itemIsEditable: () => showWriteControls,
       emptyPrompt,
       entityName,
       entityNamePlural,

@@ -17,9 +17,16 @@ import type { FieldRowServices, FieldRowKibanaDependencies, Services } from './t
 const FieldRowContext = React.createContext<Services | null>(null);
 
 /**
- * React Provider that provides services to a {@link FieldRow} component and its dependents.
+ * Props for {@link FieldRowProvider}.
  */
-export const FieldRowProvider: FC<FieldRowServices> = ({ children, ...services }) => {
+export interface FieldRowProviderProps extends FieldRowServices {
+  children: React.ReactNode;
+}
+
+/**
+ * React Provider that provides services to a {@link FieldRow} component and its dependents.\
+ */
+export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProps) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
   const { links, showDanger } = services;

@@ -74,7 +74,7 @@
                 "id": "def-common.SOContentStorage.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n    allowedSavedObjectAttributes,\n    mSearchAdditionalSearchFields,\n  }",
+                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n    allowedSavedObjectAttributes,\n    mSearchAdditionalSearchFields,\n    logger,\n    throwOnResultValidationError,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -2879,6 +2879,37 @@
             "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.throwOnResultValidationError",
+            "type": "boolean",
+            "tags": [],
+            "label": "throwOnResultValidationError",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2979,6 +3010,20 @@
             "description": [],
             "signature": [
               "{ error: string; message: string; statusCode: number; metadata?: Record<string, unknown> | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,

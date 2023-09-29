@@ -11,7 +11,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
 
-  describe('Filter controls customization', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/166461
+  describe.skip('Filter controls customization', () => {
     before('initialize tests', async () => {
       await PageObjects.svlCommonPage.login();
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

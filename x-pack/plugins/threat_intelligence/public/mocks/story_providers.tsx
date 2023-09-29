@@ -12,6 +12,7 @@ import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { MockSubscriptionTrackingProvider } from '@kbn/subscription-tracking/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
@@ -107,7 +108,9 @@ export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
             <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
               <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
                 <KibanaReactContext.Provider>
-                  <BlockListProvider>{children}</BlockListProvider>
+                  <MockSubscriptionTrackingProvider>
+                    <BlockListProvider>{children}</BlockListProvider>
+                  </MockSubscriptionTrackingProvider>
                 </KibanaReactContext.Provider>
               </IndicatorsFiltersContext.Provider>
             </SecuritySolutionContext.Provider>

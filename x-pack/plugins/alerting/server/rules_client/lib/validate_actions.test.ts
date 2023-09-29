@@ -32,6 +32,7 @@ describe('validateActions', () => {
       context: 'context',
       mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
     },
+    validLegacyConsumers: [],
   };
 
   const data = {

@@ -24,3 +24,57 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_A",
+    "index": "exceptions-0001",
+    "source": {
+      "@timestamp": "2019-09-01T00:41:04.527Z",
+      "agent": {
+        "name": "bar"
+      },
+      "unique_value": {
+        "test": "another value"
+      },
+      "user" : [ 
+        {
+          "name" : "john",
+          "id" :  "c5baec68-e774-46dc-b728-417e71d68444"
+        },
+        {
+          "name" : "alice",
+          "id" :  "6e831997-deab-4e56-9218-a90ef045556e"
+        }
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_C",
+    "index": "exceptions-0001",
+    "source": {
+      "@timestamp": "2019-09-01T00:41:09.527Z",
+      "agent": {
+        "name": "FOO"
+      },
+      "unique_value": {
+        "test": "different value"
+      },
+      "user" : [ 
+        {
+          "name" : "john",
+          "id" :  "c5baec68-e774-46dc-b728-417e71d68444"
+        },
+        {
+          "name" : "alice",
+          "id" :  "6e831997-deab-4e56-9218-a90ef045556e"
+        }
+      ]
+    }
+  }
+}

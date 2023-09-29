@@ -232,6 +232,7 @@ export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
   return sendRequest<GetAgentUploadsResponse>({
     path: agentRouteService.getListAgentUploads(agentId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }

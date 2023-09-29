@@ -7,38 +7,55 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 const DEFAULT_READY_TIMEOUT = 60 * 1000; // 1 minute
 
+export type ClusterReadyStatus = 'green' | 'yellow';
 export interface WaitOptions {
   client: Client;
+  expectedStatus: ClusterReadyStatus;
   log: ToolingLog;
   readyTimeout?: number;
 }
 
+const checkStatus = (readyStatus: ClusterReadyStatus) => {
+  return readyStatus === 'yellow'
+    ? (status: HealthStatus) => status.toLocaleLowerCase() !== 'red'
+    : (status: HealthStatus) => status.toLocaleLowerCase() === 'green';
+};
+
 /**
- * General method to wait for the ES cluster status to be green
+ * General method to wait for the ES cluster status to be yellow or green
  */
 export async function waitUntilClusterReady({
   client,
+  expectedStatus,
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
 }: WaitOptions) {
   let attempt = 0;
   const start = Date.now();
 
-  log.info('waiting for ES cluster to report a green status');
+  // The loop will continue until timeout even if SIGINT is signaled, so force exit
+  process.on('SIGINT', () => process.exit());
+
+  log.info(`waiting for ES cluster to report a ${expectedStatus} status`);
+
+  const isReady = checkStatus(expectedStatus);
 
   while (true) {
     attempt += 1;
 
     try {
       const resp = await client.cluster.health();
-      if (resp.status === 'green') {
+      const status: HealthStatus = resp.status;
+      if (isReady(status)) {
+        log.success('ES cluster is ready');
         return;
       }
 
-      throw new Error(`not ready, cluster health is ${resp.status}`);
+      throw new Error(`not ready, cluster health is ${status}`);
     } catch (error) {
       const timeSinceStart = Date.now() - start;
       if (timeSinceStart > readyTimeout) {

@@ -65,8 +65,6 @@ export class SecuritySolutionServerlessPlugin
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     }
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
-
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
@@ -89,6 +87,9 @@ export class SecuritySolutionServerlessPlugin
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloud,
+      options: {
+        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
+      },
     });
 
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);

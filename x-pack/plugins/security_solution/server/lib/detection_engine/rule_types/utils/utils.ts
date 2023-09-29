@@ -91,7 +91,7 @@ export const hasReadIndexPrivileges = async (args: {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
-      message: `This rule may not have the required read privileges to the following indices/index patterns: ${indexesString}`,
+      message: `This rule may not have the required read privileges to the following index patterns: ${indexesString}`,
     });
     return true;
   }
@@ -112,7 +112,7 @@ export const hasTimestampFields = async (args: {
   const { ruleName } = ruleExecutionLogger.context;
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
@@ -432,7 +432,9 @@ export const getRuleRangeTuples = ({
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
     ruleExecutionLogger.error(
-      'Failed to compute gap between rule runs: could not parse rule interval'
+      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
+        interval
+      )}"`
     );
     return { tuples, remainingGap: moment.duration(0) };
   }

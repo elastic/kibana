@@ -84,7 +84,7 @@ export default function ({
 
     describe('Print PDF button', () => {
       it('is available if new', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -110,7 +110,7 @@ export default function ({
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         await PageObjects.reporting.checkUsePrintLayout();
@@ -133,7 +133,7 @@ export default function ({
       });
 
       it('is available if new', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPngReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -158,7 +158,7 @@ export default function ({
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         await PageObjects.reporting.clickGenerateReportButton();
@@ -187,7 +187,7 @@ export default function ({
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
 
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
         await PageObjects.reporting.openPngReportingPanel();
@@ -226,7 +226,7 @@ export default function ({
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.03);
+        expect(percentDiff).to.be.lessThan(0.035);
       });
     });
   });

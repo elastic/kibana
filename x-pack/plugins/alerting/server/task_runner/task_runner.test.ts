@@ -16,7 +16,6 @@ import {
   RuleExecutionStatusWarningReasons,
   Rule,
   RuleAction,
-  MaintenanceWindow,
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
@@ -80,8 +79,9 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
+import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

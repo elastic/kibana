@@ -16,9 +16,7 @@ import { buildActionResultsQuery } from './query.action_results.dsl';
 import type { EndpointFactory } from '../../types';
 
 export const actionResults: EndpointFactory<ResponseActionsQueries.results> = {
-  buildDsl: (options: ActionResponsesRequestOptions) => {
-    return buildActionResultsQuery(options);
-  },
+  buildDsl: (options: ActionResponsesRequestOptions) => buildActionResultsQuery(options),
   parse: async (options, response): Promise<ActionResponsesRequestStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],

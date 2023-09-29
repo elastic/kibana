@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { getEventLog, getTestRuleData, ObjectRemover } from '../../../common/lib';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { getEventLog, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -17,8 +17,18 @@ export default function createActionTests({ getService }: FtrProviderContext) {
   describe('max queued actions circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
     const retry = getService('retry');
+    const es = getService('es');
+    const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-    after(() => objectRemover.removeAll());
+    beforeEach(async () => {
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
+    });
+
+    afterEach(async () => {
+      objectRemover.removeAll();
+      await esTestIndexTool.destroy();
+    });
 
     it('completes execution and reports back whether it reached the limit', async () => {
       const response = await supertest
@@ -43,7 +53,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       for (let i = 0; i < 510; i++) {
         actions.push({
           id: actionId,
-          group: 'default',
+          group: 'query matched',
           params: {
             index: ES_TEST_INDEX_NAME,
             reference: 'test',
@@ -60,19 +70,25 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       const resp = await supertest
         .post('/api/alerting/rule')
         .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.always-firing-alert-as-data',
-            schedule: { interval: '1h' },
-            throttle: undefined,
-            notify_when: undefined,
-            params: {
-              index: ES_TEST_INDEX_NAME,
-              reference: 'test',
-            },
-            actions,
-          })
-        );
+        .send({
+          name: 'abc',
+          consumer: 'alertsFixture',
+          enabled: true,
+          rule_type_id: '.es-query',
+          schedule: { interval: '1h' },
+          actions,
+          notify_when: undefined,
+          params: {
+            size: 100,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [-1],
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeField: 'date',
+            index: [ES_TEST_INDEX_NAME],
+          },
+        });
 
       expect(resp.status).to.eql(200);
       const ruleId = resp.body.id;

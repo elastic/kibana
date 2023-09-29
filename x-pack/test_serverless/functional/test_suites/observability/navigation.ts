@@ -11,13 +11,18 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
   const svlObltNavigation = getService('svlObltNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/165924
-  describe.skip('navigation', function () {
+  describe('navigation', function () {
     before(async () => {
+      await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
     });
 
     it('navigate observability sidenav & breadcrumbs', async () => {

@@ -19,6 +19,7 @@ export enum CREATED_BY_LABEL {
   SINGLE_METRIC = 'single-metric-wizard',
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
+  ADVANCED = 'advanced-wizard',
   CATEGORIZATION = 'categorization-wizard',
   RARE = 'rare-wizard',
   GEO = 'geo-wizard',

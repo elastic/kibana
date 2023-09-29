@@ -7,15 +7,12 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
-import {
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  SLO_BURN_RATE_RULE_TYPE_ID,
-} from '../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 import { validateMetricThreshold } from '../components/custom_threshold/components/validation';
 import { formatReason } from '../components/custom_threshold/rule_data_formatters';
