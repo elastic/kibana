@@ -52,7 +52,7 @@ export const getCategoryRequest = (
   return request;
 };
 
-interface FetchCategoriesResponse {
+export interface FetchCategoriesResponse {
   categories: Category[];
   sparkLinesPerCategory: SparkLinesPerCategory;
 }

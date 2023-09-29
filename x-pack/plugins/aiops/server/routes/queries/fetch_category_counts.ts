@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
@@ -19,6 +20,9 @@ import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
 import { getQueryWithParams } from './get_query_with_params';
 import type { FetchCategoriesResponse } from './fetch_categories';
+
+const isMsearchResponseItem = (arg: unknown): arg is estypes.MsearchMultiSearchItem =>
+  isPopulatedObject(arg, ['hits']);
 
 export const getCategoryCountRequest = (
   params: AiopsLogRateAnalysisSchema,
@@ -71,42 +75,50 @@ export const fetchCategoryCounts = async (
 ): Promise<FetchCategoriesResponse> => {
   const updatedCategories = cloneDeep(categories);
 
-  const settledPromises = await Promise.allSettled(
-    categories.categories.map((category) => {
-      const request = getCategoryCountRequest(params, fieldName, category, from, to);
-      return esClient.search(request, {
+  const searches = categories.categories.flatMap((category) => [
+    { index: params.index },
+    getCategoryCountRequest(params, fieldName, category, from, to)
+      .body as estypes.MsearchMultisearchBody,
+  ]);
+
+  let mSearchresponse;
+
+  try {
+    mSearchresponse = await esClient.msearch(
+      { searches },
+      {
         signal: abortSignal,
         maxRetries: 0,
-      });
-    })
-  );
-
-  function reportError(categoryKey: string, error: unknown) {
+      }
+    );
+  } catch (error) {
     if (!isRequestAbortedError(error)) {
       logger.error(
-        `Failed to fetch category count for category "${categoryKey}", got: \n${JSON.stringify(
+        `Failed to fetch category counts for field name "${fieldName}", got: \n${JSON.stringify(
           error,
           null,
           2
         )}`
       );
-      emitError(`Failed to fetch category count for category "${categoryKey}".`);
+      emitError(`Failed to fetch category counts for field name "${fieldName}".`);
     }
+    return updatedCategories;
   }
 
-  for (const [index, settledPromise] of settledPromises.entries()) {
-    const category = updatedCategories.categories[index];
-
-    if (settledPromise.status === 'rejected') {
-      reportError(category.key, settledPromise.reason);
-      // Still continue the analysis even if individual category queries fail.
-      continue;
+  for (const [index, resp] of mSearchresponse.responses.entries()) {
+    if (isMsearchResponseItem(resp)) {
+      updatedCategories.categories[index].count =
+        (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
+    } else {
+      logger.error(
+        `Failed to fetch category count for category "${
+          updatedCategories.categories[index].key
+        }", got: \n${JSON.stringify(resp, null, 2)}`
+      );
+      emitError(
+        `Failed to fetch category count for category "${updatedCategories.categories[index].key}".`
+      );
     }
-
-    const resp = settledPromise.value;
-
-    updatedCategories.categories[index].count =
-      (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
   }
 
   return updatedCategories;
