@@ -152,10 +152,9 @@ describe('MaintenanceWindowClient - create', () => {
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Error validating create maintenance window data - [data.categoryIds]: types that failed validation:
       - [data.categoryIds.0.0]: types that failed validation:
-       - [data.categoryIds.0.0]: expected value to equal [kibana]
-       - [data.categoryIds.0.1]: expected value to equal [observability]
-       - [data.categoryIds.0.2]: expected value to equal [securitySolution]
-       - [data.categoryIds.0.3]: expected value to equal [management]
+       - [data.categoryIds.0.0]: expected value to equal [observability]
+       - [data.categoryIds.0.1]: expected value to equal [securitySolution]
+       - [data.categoryIds.0.2]: expected value to equal [management]
       - [data.categoryIds.1]: expected value to equal [null]"
     `);
   });

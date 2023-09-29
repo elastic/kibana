@@ -132,7 +132,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
           title: 'test-maintenance-window-new',
           duration: 60 * 1000,
           r_rule: newRRule,
-          category_ids: ['kibana'],
+          category_ids: ['management'],
           enabled: false,
         })
         .expect(200);
@@ -141,7 +141,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
       expect(updatedMW.duration).eql(60 * 1000);
       expect(updatedMW.r_rule).eql(newRRule);
       expect(updatedMW.title).eql('test-maintenance-window-new');
-      expect(updatedMW.category_ids).eql(['kibana']);
+      expect(updatedMW.category_ids).eql(['management']);
     });
 
     it('should update RRule correctly when removing fields', async () => {
@@ -155,7 +155,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
             count: 1,
             until: moment.utc().add(1, 'week').toISOString(),
           },
-          category_ids: ['kibana'],
+          category_ids: ['management'],
         })
         .expect(200);
 
