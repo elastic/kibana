@@ -10,6 +10,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { COLLAPSE_DETAILS_BUTTON_TEST_ID, EXPAND_DETAILS_BUTTON_TEST_ID } from './test_ids';
 import { LeftPanelKey } from '../../left';
 import { useRightPanelContext } from '../context';
@@ -42,6 +43,12 @@ export const ExpandDetailButton: FC = memo(() => {
       onClick={collapseDetails}
       iconType="arrowEnd"
       data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
+      aria-label={i18n.translate(
+        'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
+        {
+          defaultMessage: 'Collapse details',
+        }
+      )}
     >
       <FormattedMessage
         id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
@@ -54,6 +61,12 @@ export const ExpandDetailButton: FC = memo(() => {
       onClick={expandDetails}
       iconType="arrowStart"
       data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
+      aria-label={i18n.translate(
+        'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',
+        {
+          defaultMessage: 'Expand details',
+        }
+      )}
     >
       <FormattedMessage
         id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"

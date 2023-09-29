@@ -12,7 +12,7 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { PREVALENCE_NO_DATA_TEST_ID, PREVALENCE_TEST_ID } from './test_ids';
+import { PREVALENCE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
@@ -99,7 +99,7 @@ export const PrevalenceOverview: FC = () => {
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.insights.prevalence.rowDescription"
                   defaultMessage="{field}, {value} is uncommon"
-                  values={{ field: d.field, value: d.value }}
+                  values={{ field: d.field, value: d.values.toString() }}
                 />
               }
               data-test-subj={`${PREVALENCE_TEST_ID}${d.field}`}
@@ -107,12 +107,10 @@ export const PrevalenceOverview: FC = () => {
             />
           ))
         ) : (
-          <p data-test-subj={PREVALENCE_NO_DATA_TEST_ID}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.prevalence.noDataDescription"
-              defaultMessage="No prevalence data available."
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.prevalence.noDataDescription"
+            defaultMessage="No prevalence data available."
+          />
         )}
       </EuiFlexGroup>
     </ExpandablePanel>

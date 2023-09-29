@@ -30,6 +30,8 @@ const renderAnalyzerPreview = (contextValue: RightPanelContext) =>
     </TestProviders>
   );
 
+const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.';
+
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +59,7 @@ describe('<AnalyzerPreview />', () => {
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
-  it('does not show analyzer preview when documentId and index are not present', () => {
+  it('shows error message when documentid and index are not present', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
@@ -76,13 +78,25 @@ describe('<AnalyzerPreview />', () => {
         },
       ],
     };
-    const { queryByTestId } = renderAnalyzerPreview(contextValue);
+    const { getByText } = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       isActiveTimeline: false,
       documentId: '',
       indices: [],
     });
-    expect(queryByTestId(ANALYZER_PREVIEW_TEST_ID)).not.toBeInTheDocument();
+
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+  });
+
+  it('shows error message when there is an error', () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: true,
+      alertIds: undefined,
+      statsNodes: undefined,
+    });
+    const { getByText } = renderAnalyzerPreview(mockContextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });

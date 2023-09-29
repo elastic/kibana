@@ -197,6 +197,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
@@ -247,17 +248,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean)',
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
-        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
         'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
-         * xpack.infra.logs is conditional and will resolve to an object of properties
-         * - xpack.infra.logs.app_target (string)
+         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
          */
-        'xpack.infra.logs (any)',
+        'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
+        'xpack.ml.ad.enabled (boolean)',
+        'xpack.ml.dfa.enabled (boolean)',
+        'xpack.ml.nlp.enabled (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**

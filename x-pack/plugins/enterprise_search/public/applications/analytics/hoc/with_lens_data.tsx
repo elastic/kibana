@@ -96,9 +96,9 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
               attributes={attributes}
               searchSessionId={props?.searchSessionId}
               onBrushEnd={handleBrushEnd}
-              onLoad={(...args) => {
+              onLoad={(isLoading, adapters) => {
                 if (dataLoadTransform) {
-                  setData(dataLoadTransform(...args));
+                  setData(dataLoadTransform(isLoading, adapters));
                 }
               }}
             />

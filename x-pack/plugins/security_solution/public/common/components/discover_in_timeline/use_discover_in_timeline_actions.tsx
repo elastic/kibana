@@ -14,6 +14,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { endTimelineSaving, startTimelineSaving } from '../../../timelines/store/timeline/actions';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
@@ -165,7 +166,12 @@ export const useDiscoverInTimelineActions = (
    *
    * */
   const updateSavedSearch = useCallback(
-    async (savedSearch: SavedSearch) => {
+    async (savedSearch: SavedSearch, timelineId: string) => {
+      dispatch(
+        startTimelineSaving({
+          id: timelineId,
+        })
+      );
       savedSearch.timeRestore = true;
       savedSearch.timeRange =
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
@@ -197,6 +203,12 @@ export const useDiscoverInTimelineActions = (
           title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
           toastMessage: String(err),
         });
+      } finally {
+        dispatch(
+          endTimelineSaving({
+            id: timelineId,
+          })
+        );
       }
     },
     [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]

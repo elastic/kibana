@@ -93,7 +93,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     status,
     savedSearchId,
     activeTab,
-    isLoading: isTimelineLoading,
     savedObjectId,
     title,
     description,
@@ -113,14 +112,14 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   );
 
   useEffect(() => {
-    if (!isTimelineLoading && dataView && !('esql' in currentQuery)) {
+    if (isDiscoverSavedSearchLoaded && dataView && !('esql' in currentQuery)) {
       // By setting the query string to esql and locking the esql selection via
       // use_data_view_customization.tsx we lock the tab to the ESQL experience
       discoverDataService.query.queryString.setQuery({
         esql: `from ${dataView?.getIndexPattern()} | limit 10`,
       });
     }
-  }, [currentQuery, dataView, discoverDataService.query.queryString, isTimelineLoading]);
+  }, [currentQuery, dataView, discoverDataService.query.queryString, isDiscoverSavedSearchLoaded]);
 
   const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
@@ -181,7 +180,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
 
   const debouncedUpdateSavedSearch = useMemo(
-    () => debounce(updateSavedSearch, 1000),
+    () => debounce(updateSavedSearch, 300),
     [updateSavedSearch]
   );
 
@@ -193,7 +192,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     const latestState = getCombinedDiscoverSavedSearchState();
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
-    debouncedUpdateSavedSearch(latestState);
+    debouncedUpdateSavedSearch(latestState, timelineId);
     combinedDiscoverSavedSearchStateRef.current = latestState;
   }, [
     getCombinedDiscoverSavedSearchState,
@@ -206,6 +205,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     discoverTimerange,
     savedObjectId,
     isFetching,
+    timelineId,
+    dispatch,
   ]);
 
   useEffect(() => {
@@ -233,7 +234,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
       if (savedSearchId) {
-        const localSavedSearch = await stateContainer.savedSearchState.load(savedSearchId);
+        const localSavedSearch = await savedSearchService.get(savedSearchId);
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
@@ -287,6 +288,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       getAppStateFromSavedSearch,
       discoverDataService.query.timefilter.timefilter,
       savedSearchId,
+      savedSearchService,
     ]
   );
 
@@ -306,7 +308,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = Boolean(!dataView) || isTimelineLoading;
+  const isLoading = Boolean(!dataView) || !isDiscoverSavedSearchLoaded;
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">

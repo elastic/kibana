@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { TIMELINE_TITLE } from '../../../../screens/timeline';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
 import { goToSavedObjectSettings } from '../../../../tasks/stack_management';
@@ -14,7 +15,7 @@ import {
 } from '../../../../tasks/kibana_navigation';
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
 import {
-  addDiscoverEsqlQuery,
+  addDiscoverKqlQuery,
   addFieldToTable,
   openAddDiscoverFilterPopover,
   switchDataViewTo,
@@ -29,11 +30,11 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_VIEW_SWITCHER,
   DISCOVER_FILTER_BADGES,
-  DISCOVER_ESQL_QUERY_INPUT,
+  DISCOVER_QUERY_INPUT,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,
@@ -41,6 +42,7 @@ import {
   gotToDiscoverTab,
   openTimelineById,
   openTimelineFromSettings,
+  waitForTimelineChanges,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
@@ -62,7 +64,7 @@ const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 
-describe.skip(
+describe(
   'Discover Timeline State Integration',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
@@ -108,7 +110,7 @@ describe.skip(
         }
       });
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
@@ -123,15 +125,15 @@ describe.skip(
           `Last 15 minutes`
         );
       });
-      it('should save/restore discover dataview/timerange/filter/query/columns when saving/restoring timeline', () => {
+      it('should save/restore discover dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
         const dataviewName = '.kibana-event-log';
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
-        const esqlQuery = 'from .kibana-event-log | keep event.category, ecs.version | limit 10';
+        const kqlQuery = '_id:*';
         const column1 = 'event.category';
         const column2 = 'ecs.version';
         switchDataViewTo(dataviewName);
-        addDiscoverEsqlQuery(esqlQuery);
+        addDiscoverKqlQuery(kqlQuery);
         openAddDiscoverFilterPopover();
         fillAddFilterForm({
           key: 'ecs.version',
@@ -154,7 +156,7 @@ describe.skip(
             cy.get(LOADING_INDICATOR).should('not.exist');
             gotToDiscoverTab();
             cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-            cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', esqlQuery);
+            cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
             cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
             cy.get(DISCOVER_FILTER_BADGES).should('contain.text', 'ecs.version: 1.8.0');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
@@ -169,11 +171,11 @@ describe.skip(
         const dataviewName = '.kibana-event-log';
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
-        const esqlQuery = 'from .kibana-event-log | keep event.category, ecs.version | limit 10';
+        const kqlQuery = '_id:*';
         const column1 = 'event.category';
         const column2 = 'ecs.version';
         switchDataViewTo(dataviewName);
-        addDiscoverEsqlQuery(esqlQuery);
+        addDiscoverKqlQuery(kqlQuery);
         openAddDiscoverFilterPopover();
         fillAddFilterForm({
           key: 'ecs.version',
@@ -191,7 +193,7 @@ describe.skip(
             // reload the page with the exact url
             cy.reload();
             cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-            cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', esqlQuery);
+            cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
             cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
             cy.get(DISCOVER_FILTER_BADGES).should('contain.text', 'ecs.version: 1.8.0');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
@@ -233,8 +235,8 @@ describe.skip(
       it('should save discover saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
-        const esqlQuery = '_id: *';
-        addDiscoverEsqlQuery(esqlQuery);
+        const kqlQuery = '_id: *';
+        addDiscoverKqlQuery(kqlQuery);
         addNameToTimeline(timelineName);
         cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
         openKibanaNavigation();
@@ -255,8 +257,8 @@ describe.skip(
       it('should rename the saved search on timeline rename', () => {
         const timelineSuffix = Date.now();
         const timelineName = `Rename timeline-${timelineSuffix}`;
-        const esqlQuery = '_id: *';
-        addDiscoverEsqlQuery(esqlQuery);
+        const kqlQuery = '_id: *';
+        addDiscoverKqlQuery(kqlQuery);
 
         addNameToTimeline(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
@@ -271,6 +273,7 @@ describe.skip(
             openTimelineById(timelineId);
             cy.get(TIMELINE_TITLE).should('have.text', timelineName);
             const timelineDesc = 'Timeline Description with Saved Seach';
+            waitForTimelineChanges();
             addDescriptionToTimeline(timelineDesc);
             cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
               timeout: 30000,

@@ -17,12 +17,12 @@ import {
   DISCOVER_NO_RESULTS,
   DISCOVER_RESULT_HITS,
   DISCOVER_FILTER_BADGES,
-  DISCOVER_ESQL_QUERY_INPUT,
+  DISCOVER_QUERY_INPUT,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
   DISCOVER_DATA_VIEW_SWITCHER,
 } from '../../../../screens/discover';
 import {
-  addDiscoverEsqlQuery,
+  addDiscoverKqlQuery,
   switchDataViewTo,
   submitDiscoverSearchBar,
   openAddDiscoverFilterPopover,
@@ -60,7 +60,7 @@ describe.skip(
 
     it('should show data according to kql query', () => {
       const kqlQuery = '_id:"invalid"';
-      addDiscoverEsqlQuery(kqlQuery);
+      addDiscoverKqlQuery(kqlQuery);
       submitDiscoverSearchBar();
       cy.get(DISCOVER_NO_RESULTS).should('be.visible');
     });
@@ -118,11 +118,11 @@ describe.skip(
       });
       it('should removed the query when back is pressed after adding a query', () => {
         const kqlQuery = '_id:"invalid"';
-        addDiscoverEsqlQuery(kqlQuery);
+        addDiscoverKqlQuery(kqlQuery);
         submitDiscoverSearchBar();
-        cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', kqlQuery);
+        cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
         cy.go('back');
-        cy.get(DISCOVER_ESQL_QUERY_INPUT).should('not.have.text', kqlQuery);
+        cy.get(DISCOVER_QUERY_INPUT).should('not.have.text', kqlQuery);
       });
 
       it(`should changed the timerange to ${INITIAL_START_DATE} when back is pressed after modifying timerange from ${INITIAL_START_DATE} to ${NEW_START_DATE} `, () => {

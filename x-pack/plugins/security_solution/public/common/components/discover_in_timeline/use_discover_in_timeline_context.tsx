@@ -12,8 +12,6 @@ export const useDiscoverInTimelineContext = () => {
   const discoverContext = useContext(DiscoverInTimelineContext);
   if (!discoverContext) {
     const errMessage = `useDiscoverInTimelineContext should only used within a tree with parent as DiscoverInTimelineContextProvider`;
-    /* eslint-disable-next-line no-console */
-    console.error(errMessage);
     throw new Error(errMessage);
   }
 

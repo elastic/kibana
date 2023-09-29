@@ -10,7 +10,7 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_GRID_UPDATING,
   DISCOVER_DATA_VIEW_SWITCHER,
-  DISCOVER_ESQL_QUERY_INPUT,
+  DISCOVER_QUERY_INPUT,
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   DISCOVER_FIELD_SEARCH,
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
@@ -21,7 +21,7 @@ import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 export const switchDataViewTo = (dataviewName: string) => {
   openDataViewSwitcher();
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.GET_DATA_VIEW(dataviewName)).trigger('click');
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('not.be.visible');
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('not.exist');
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
 };
 
@@ -43,9 +43,8 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
-export const addDiscoverEsqlQuery = (kqlQuery: string) => {
-  cy.get(DISCOVER_ESQL_QUERY_INPUT).type('{selectall}{backspace}');
-  cy.get(DISCOVER_ESQL_QUERY_INPUT).type(`${kqlQuery}{enter}`);
+export const addDiscoverKqlQuery = (kqlQuery: string) => {
+  cy.get(DISCOVER_QUERY_INPUT).type(`${kqlQuery}{enter}`);
 };
 
 export const submitDiscoverSearchBar = () => {

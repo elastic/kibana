@@ -7,7 +7,7 @@
 
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
 import {
-  addDiscoverEsqlQuery,
+  addDiscoverKqlQuery,
   addFieldToTable,
   openAddDiscoverFilterPopover,
   submitDiscoverSearchBar,
@@ -16,7 +16,7 @@ import {
 import { navigateFromHeaderTo } from '../../../../tasks/security_header';
 import {
   DISCOVER_CONTAINER,
-  DISCOVER_ESQL_QUERY_INPUT,
+  DISCOVER_QUERY_INPUT,
   DISCOVER_FILTER_BADGES,
   DISCOVER_DATA_VIEW_SWITCHER,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
@@ -58,17 +58,38 @@ describe(
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
     });
     it('should have the default esql query on load', () => {
-      cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', DEFAULT_ESQL_QUERY);
+      cy.get(DISCOVER_QUERY_INPUT).should('have.text', DEFAULT_ESQL_QUERY);
     });
     it.skip('should remember esql query when navigating away and back to discover ', () => {
       const esqlQuery = 'from .alerts-security.alerts-* | limit 100';
-      addDiscoverEsqlQuery(esqlQuery);
+      addDiscoverKqlQuery(esqlQuery);
       submitDiscoverSearchBar();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
-      cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', esqlQuery);
+      cy.get(DISCOVER_QUERY_INPUT).should('have.text', esqlQuery);
+    });
+    it('should remember filters when navigating away and back to discover ', () => {
+      openAddDiscoverFilterPopover();
+      fillAddFilterForm({
+        key: 'agent.type',
+        value: 'winlogbeat',
+      });
+      navigateFromHeaderTo(CSP_FINDINGS);
+      navigateFromHeaderTo(ALERTS);
+      openActiveTimeline();
+      gotToDiscoverTab();
+      cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+    });
+    it.skip('should remember dataView when navigating away and back to discover ', () => {
+      const dataviewName = '.kibana-event-log';
+      switchDataViewTo(dataviewName);
+      navigateFromHeaderTo(CSP_FINDINGS);
+      navigateFromHeaderTo(ALERTS);
+      openActiveTimeline();
+      gotToDiscoverTab();
+      cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
     });
     it('should remember columns when navigating away and back to discover ', () => {
       addFieldToTable('host.name');
