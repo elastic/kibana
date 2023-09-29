@@ -20,6 +20,7 @@ import { ServerlessRoleName } from '../../support/roles';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
+// Issue: https://github.com/elastic/security-team/issues/7731
 describe.skip('Alert Event Details', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let ruleName: string;

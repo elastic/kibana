@@ -9,20 +9,19 @@
 import Url from 'url';
 import { inspect, format } from 'util';
 import { setTimeout } from 'timers/promises';
-
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { EsArchiver, KibanaServer, Es, RetryService } from '@kbn/ftr-common-functional-services';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { Auth } from '../services/auth';
+import { AxiosError } from 'axios';
+import { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
@@ -40,7 +39,7 @@ export class JourneyFtrHarness {
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
     private readonly es: Es,
-    private readonly retry: RetryService,
+    private readonly retry: Retry,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -63,15 +62,24 @@ export class JourneyFtrHarness {
   private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {
     this.log.info(`Updating telemetry & APM labels: ${JSON.stringify(labels)}`);
 
-    await this.kibanaServer.request({
-      path: '/internal/core/_settings',
-      method: 'PUT',
-      headers: {
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'ftr',
-      },
-      body: { telemetry: { labels } },
-    });
+    try {
+      await this.kibanaServer.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'ftr',
+        },
+        body: { telemetry: { labels } },
+      });
+    } catch (error) {
+      const statusCode = (error as AxiosError).response?.status;
+      if (statusCode === 404) {
+        throw new Error(
+          `Failed to update labels, supported Kibana version is 8.11.0+ and must be started with "coreApp.allowDynamicConfigOverrides:true"`
+        );
+      } else throw error;
+    }
   }
 
   private async setupApm() {
@@ -385,7 +393,7 @@ export class JourneyFtrHarness {
     }
 
     const isServerlessProject = !!this.config.get('serverless');
-    const kibanaPage = getNewPageObject(isServerlessProject, page, this.log);
+    const kibanaPage = getNewPageObject(isServerlessProject, page, this.log, this.retry);
 
     this.#_ctx = this.journeyConfig.getExtendedStepCtx({
       kibanaPage,

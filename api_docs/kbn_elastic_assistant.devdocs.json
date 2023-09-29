@@ -745,7 +745,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
+              "{ connectorId?: string | undefined; connectorTypeTitle?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
               "OpenAiProviderType",
               " | undefined; model?: string | undefined; }"
             ],

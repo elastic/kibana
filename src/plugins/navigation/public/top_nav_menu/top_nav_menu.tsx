@@ -20,7 +20,7 @@ import classNames from 'classnames';
 import { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/kibana-react-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { StatefulSearchBarProps, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
@@ -30,38 +30,39 @@ type Badge = EuiBadgeProps & {
   toolTipProps?: Partial<EuiToolTipProps>;
 };
 
-export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
-  StatefulSearchBarProps<QT> &
-    Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
-      config?: TopNavMenuData[];
-      badges?: Badge[];
-      showSearchBar?: boolean;
-      showQueryInput?: boolean;
-      showDatePicker?: boolean;
-      showFilterBar?: boolean;
-      unifiedSearch?: UnifiedSearchPublicPluginStart;
-      className?: string;
-      visible?: boolean;
-      /**
-       * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
-       *
-       * This is meant to be used with the `setHeaderActionMenu` core API.
-       *
-       * @example
-       * ```ts
-       * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
-       *   const topNavConfig = ...; // TopNavMenuProps
-       *   return (
-       *     <Router history=history>
-       *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
-       *       <MyRoutes />
-       *     </Router>
-       *   )
-       * }
-       * ```
-       */
-      setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-    };
+export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
+  StatefulSearchBarProps<QT>,
+  'kibana' | 'intl' | 'timeHistory'
+> & {
+  config?: TopNavMenuData[];
+  badges?: Badge[];
+  showSearchBar?: boolean;
+  showQueryInput?: boolean;
+  showDatePicker?: boolean;
+  showFilterBar?: boolean;
+  unifiedSearch?: UnifiedSearchPublicPluginStart;
+  className?: string;
+  visible?: boolean;
+  /**
+   * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
+   *
+   * This is meant to be used with the `setHeaderActionMenu` core API.
+   *
+   * @example
+   * ```ts
+   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+   *   const topNavConfig = ...; // TopNavMenuProps
+   *   return (
+   *     <Router history=history>
+   *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
+   *       <MyRoutes />
+   *     </Router>
+   *   )
+   * }
+   * ```
+   */
+  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+};
 
 /*
  * Top Nav Menu is a convenience wrapper component for:
