@@ -222,7 +222,20 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnDescription',
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
-      truncateText: true,
+      render(text: string) {
+        return (
+          <EuiText
+            style={{
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 3,
+              overflow: 'hidden',
+            }}
+          >
+            {text}
+          </EuiText>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),

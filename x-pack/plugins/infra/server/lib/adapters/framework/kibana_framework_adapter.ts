@@ -34,6 +34,7 @@ interface FrozenIndexParams {
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
   public plugins: InfraServerPluginSetupDeps;
+  public config: InfraConfig;
   private core: CoreSetup<InfraServerPluginStartDeps>;
 
   constructor(
@@ -44,6 +45,7 @@ export class KibanaFramework {
     this.router = core.http.createRouter();
     this.plugins = plugins;
     this.core = core;
+    this.config = config;
   }
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
