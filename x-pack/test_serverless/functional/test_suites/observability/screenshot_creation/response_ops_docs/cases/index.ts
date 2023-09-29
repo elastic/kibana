@@ -10,11 +10,11 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
 
-  describe('observability connectors', function () {
+  describe('observability cases', function () {
     before(async () => {
       await browser.setWindowSize(1920, 1080);
     });
 
-    loadTestFile(require.resolve('./server_log_connector'));
+    loadTestFile(require.resolve('./list_view'));
   });
 }

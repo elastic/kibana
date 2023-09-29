@@ -11,7 +11,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'observability_connectors'];
   const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage']);
-  const actions = getService('actions');
   const testSubjects = getService('testSubjects');
 
   describe('server log connector', function () {

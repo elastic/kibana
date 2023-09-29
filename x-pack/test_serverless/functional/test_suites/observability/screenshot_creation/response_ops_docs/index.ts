@@ -37,6 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaAnnouncements();
     });
 
+    loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./connectors'));
   });
 }
