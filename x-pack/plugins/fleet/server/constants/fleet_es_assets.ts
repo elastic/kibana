@@ -108,6 +108,12 @@ processors:
         - event.agent_id_status
         - _security
       ignore_missing: true
+  - remove:
+      description: Remove event.original unless the preserve_original_event tag is set
+      field: event.original
+      if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
+      ignore_failure: true
+      ignore_missing: true
   - set_security_user:
       field: _security
       properties:
