@@ -99,6 +99,7 @@ paths:
           schema:
             type: integer
             default: 25
+            maximum: 5000
           example: 25
         - name: sortBy
           in: query
