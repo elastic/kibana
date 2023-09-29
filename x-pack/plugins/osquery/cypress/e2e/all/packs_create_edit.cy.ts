@@ -544,8 +544,6 @@ describe('Packs - Create and Edit', () => {
 
       recurse<string>(
         () => {
-          cy.waitForReact();
-
           cy.getBySel('docsLoading').should('exist');
           cy.getBySel('docsLoading').should('not.exist');
 
