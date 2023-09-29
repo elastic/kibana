@@ -19,6 +19,7 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",

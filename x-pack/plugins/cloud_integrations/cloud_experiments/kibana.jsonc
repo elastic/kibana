@@ -14,7 +14,8 @@
     ],
     "requiredPlugins": [
       "cloud",
-      "dataViews"
+      "dataViews",
+      "kibanaUtils"
     ],
     "optionalPlugins": [
       "usageCollection"
