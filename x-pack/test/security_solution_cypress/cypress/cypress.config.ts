@@ -7,7 +7,6 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
-import { oldHeadless } from './support/old_headless';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -30,7 +29,6 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
-      oldHeadless(on);
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

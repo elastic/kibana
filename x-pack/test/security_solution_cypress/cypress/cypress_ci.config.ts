@@ -38,7 +38,6 @@ export default defineCypressConfig({
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
-      // oldHeadless(on);
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

@@ -386,8 +386,6 @@ ${JSON.stringify(
 
               IS_SERVERLESS: config.get('serverless'),
 
-              NODE_OPTIONS: '--openssl-legacy-provider',
-
               ...argv.env,
             };
 
