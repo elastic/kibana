@@ -8,7 +8,7 @@
 
 import {
   FieldDefinition,
-  OnChangeFn,
+  OnInputChangeFn,
   SettingType,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
@@ -44,6 +44,6 @@ export interface InputProps<T extends SettingType> {
   >;
   unsavedChange?: UnsavedFieldChange<T>;
   isSavingEnabled: boolean;
-  /** The `onChange` handler. */
-  onChange: OnChangeFn<T>;
+  /** The `onInputChange` handler. */
+  onInputChange: OnInputChangeFn<T>;
 }
