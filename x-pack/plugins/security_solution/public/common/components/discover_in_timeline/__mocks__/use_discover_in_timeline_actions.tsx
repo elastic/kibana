@@ -11,7 +11,7 @@ export const useDiscoverInTimelineActions = () => {
     restoreDiscoverAppStateFromSavedSearch: jest.fn(),
     updateSavedSearch: jest.fn(),
     getAppStateFromSavedSearch: jest.fn(),
-    defaultDiscoverAppState: {
+    getDefaultDiscoverAppState: () => ({
       query: {
         query: '',
         language: 'kuery',
@@ -23,6 +23,6 @@ export const useDiscoverInTimelineActions = () => {
       filters: [],
       hideChart: true,
       grid: {},
-    },
+    }),
   };
 };

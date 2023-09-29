@@ -137,9 +137,10 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
       if (status === 'draft') {
-        resetDiscoverAppState();
+        resetDiscoverAppState().then(() => {
+          setSavedSearchLoaded(true);
+        });
       }
-      setSavedSearchLoaded(true);
       return;
     }
     restoreDiscoverAppStateFromSavedSearch(savedSearchById);
