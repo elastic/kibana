@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { UnifiedDataTableRenderCustomToolbar } from '@kbn/unified-data-table';
 import './render_custom_toolbar.scss';
 
-export const renderCustomToolbar: UnifiedDataTableProps['renderCustomToolbar'] = (
+export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = (
   {
     hasRoomForGridControls,
     columnControl,

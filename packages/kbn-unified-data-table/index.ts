@@ -7,7 +7,10 @@
  */
 
 export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
-export type { UnifiedDataTableProps } from './src/components/data_table';
+export type {
+  UnifiedDataTableProps,
+  UnifiedDataTableRenderCustomToolbar,
+} from './src/components/data_table';
 export { getDisplayedColumns } from './src/utils/columns';
 export { ROWS_HEIGHT_OPTIONS } from './src/constants';
 

@@ -63,6 +63,13 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 
+export type UnifiedDataTableRenderCustomToolbar = (
+  toolbarProps: EuiDataGridCustomToolbarProps,
+  gridProps: {
+    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
+  }
+) => React.ReactElement;
+
 export type SortOrder = [string, string];
 
 export enum DataLoadingState {
@@ -268,12 +275,7 @@ export interface UnifiedDataTableProps {
    * @param toolbarProps
    * @param gridProps
    */
-  renderCustomToolbar?: (
-    toolbarProps: EuiDataGridCustomToolbarProps,
-    gridProps: {
-      additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
-    }
-  ) => React.ReactElement;
+  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
