@@ -50,7 +50,7 @@ import {
   DashboardRenderPerformanceStats,
 } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
-import { createPanelState } from '../component/panel';
+import { placePanel } from '../component/panel_placement';
 import { pluginServices } from '../../services/plugin_services';
 import { initializeDashboard } from './create/create_dashboard';
 import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
@@ -213,11 +213,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
-    partial: Partial<TEmbeddableInput> = {}
-  ): DashboardPanelState<TEmbeddableInput> {
-    const panelState = super.createNewPanelState(factory, partial);
-    const { newPanel } = createPanelState(panelState, this.input.panels);
-    return newPanel;
+    partial: Partial<TEmbeddableInput> = {},
+    attributes?: unknown
+  ): {
+    newPanel: DashboardPanelState<TEmbeddableInput>;
+    otherPanels: DashboardContainerInput['panels'];
+  } {
+    const { newPanel } = super.createNewPanelState(factory, partial, attributes);
+    return placePanel(factory, newPanel, this.input.panels, attributes);
   }
 
   public render(dom: HTMLElement) {
