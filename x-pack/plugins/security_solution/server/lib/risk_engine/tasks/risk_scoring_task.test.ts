@@ -9,6 +9,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 
 import type { RiskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
@@ -30,6 +31,7 @@ describe('Risk Scoring Task', () => {
   let mockTaskManagerSetup: ReturnType<typeof taskManagerMock.createSetup>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
+  let mockTelemetry: jest.Mocked<AnalyticsServiceSetup>;
 
   beforeEach(() => {
     mockCore = coreMock.createSetup();
@@ -38,6 +40,7 @@ describe('Risk Scoring Task', () => {
     mockTaskManagerSetup = taskManagerMock.createSetup();
     mockTaskManagerStart = taskManagerMock.createStart();
     mockLogger = loggerMock.create();
+    mockTelemetry = mockCore.analytics;
   });
 
   describe('registerRiskScoringTask()', () => {
@@ -48,6 +51,7 @@ describe('Risk Scoring Task', () => {
         kibanaVersion: '8.10.0',
         taskManager: mockTaskManagerSetup,
         logger: mockLogger,
+        telemetry: mockTelemetry,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalled();
     });
@@ -59,6 +63,7 @@ describe('Risk Scoring Task', () => {
         kibanaVersion: '8.10.0',
         taskManager: undefined,
         logger: mockLogger,
+        telemetry: mockTelemetry,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
     });
@@ -168,7 +173,7 @@ describe('Risk Scoring Task', () => {
   describe('runTask()', () => {
     let riskScoringTaskInstanceMock: ReturnType<typeof riskScoringTaskMock.createInstance>;
     let getRiskScoreService: (namespace: string) => Promise<RiskScoreService>;
-    const mockIsCancelled = jest.fn().mockReturnValue(false);
+    let mockIsCancelled: jest.MockedFunction<() => boolean>;
 
     beforeEach(async () => {
       await startRiskScoringTask({
@@ -191,6 +196,7 @@ describe('Risk Scoring Task', () => {
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
       });
+      mockIsCancelled = jest.fn().mockReturnValue(false);
 
       getRiskScoreService = jest.fn().mockResolvedValueOnce(mockRiskScoreService);
     });
@@ -210,6 +216,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
+          telemetry: mockTelemetry,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(1);
       });
@@ -236,6 +243,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
+          telemetry: mockTelemetry,
         });
 
         expect(mockRiskScoreService.getConfiguration).toHaveBeenCalledTimes(1);
@@ -247,6 +255,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
+          telemetry: mockTelemetry,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(2);
       });
@@ -268,6 +277,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
+          telemetry: mockTelemetry,
         });
 
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
@@ -316,6 +326,7 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
+            telemetry: mockTelemetry,
           });
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
 
@@ -339,6 +350,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
+          telemetry: mockTelemetry,
         });
 
         expect(initialState).not.toEqual(nextState);
@@ -368,6 +380,7 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
+            telemetry: mockTelemetry,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -381,6 +394,7 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
+            telemetry: mockTelemetry,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -395,6 +409,7 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
+            telemetry: mockTelemetry,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -415,6 +430,7 @@ describe('Risk Scoring Task', () => {
             isCancelled: mockIsCancelled,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -426,11 +442,54 @@ describe('Risk Scoring Task', () => {
             isCancelled: mockIsCancelled,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
           });
 
           expect(mockLogger.info).toHaveBeenCalledWith(
             expect.stringContaining('task was cancelled')
           );
+        });
+      });
+
+      describe('telemetry', () => {
+        it('send success telemetry event', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
+            executionDurationExceededInterval: false,
+            scoresWritten: 10,
+            taskDurationInSeconds: 0,
+          });
+        });
+
+        it('send error telemetry event', async () => {
+          mockRiskScoreService.calculateAndPersistScores.mockReset();
+          mockRiskScoreService.calculateAndPersistScores.mockImplementationOnce(() => {
+            throw new Error();
+          });
+
+          try {
+            await runTask({
+              getRiskScoreService,
+              isCancelled: mockIsCancelled,
+              logger: mockLogger,
+              taskInstance: riskScoringTaskInstanceMock,
+              telemetry: mockTelemetry,
+            });
+          } catch (err) {
+            expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
+            expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+              'risk_score_execution_error',
+              {}
+            );
+          }
         });
       });
     });
