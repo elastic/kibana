@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
 import { DefaultContent } from './default_content';
 import { ContentProvider, PanelNavNode } from './types';
 
@@ -48,15 +48,14 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
       return null;
     }
 
-    if (contentProvider) {
-      const { title, content } = contentProvider(activeNode.id);
-      return {
-        content,
-        title: title ?? activeNode.title,
-      };
+    const provided = contentProvider?.(activeNode.id);
+
+    if (!provided) {
+      return <DefaultContent activeNode={activeNode} />;
     }
 
-    return <DefaultContent activeNode={activeNode} />;
+    const title: string | ReactNode = provided.title ?? activeNode.title;
+    return provided.content ?? <DefaultContent activeNode={{ ...activeNode, title }} />;
   }, [activeNode, contentProvider]);
 
   const ctx: PanelContext = useMemo(

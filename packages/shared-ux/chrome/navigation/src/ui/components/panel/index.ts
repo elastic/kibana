@@ -10,3 +10,4 @@ export { NavigationPanel } from './navigation_panel';
 
 export { PanelProvider, usePanel } from './context';
 export type { PanelContext } from './context';
+export type { ContentProvider } from './types';

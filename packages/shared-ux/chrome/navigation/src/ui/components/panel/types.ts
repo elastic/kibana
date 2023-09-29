@@ -14,6 +14,8 @@ export interface PanelContent {
   content?: ReactNode;
 }
 
-export type ContentProvider = (nodeId: string) => PanelContent;
+export type ContentProvider = (nodeId: string) => PanelContent | void;
 
-export type PanelNavNode = Pick<ChromeProjectNavigationNode, 'id' | 'title' | 'children' | 'path'>;
+export type PanelNavNode = Pick<ChromeProjectNavigationNode, 'id' | 'children' | 'path'> & {
+  title: string | ReactNode;
+};
