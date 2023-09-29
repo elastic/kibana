@@ -90,7 +90,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                       {i18n.translate(
                         'presentationUtil.saveModalDashboard.existingDashboardRequiredMessage',
                         {
-                          defaultMessage: 'Dashboard required',
+                          defaultMessage: 'Dashboard is required',
                         }
                       )}
                     </div>
