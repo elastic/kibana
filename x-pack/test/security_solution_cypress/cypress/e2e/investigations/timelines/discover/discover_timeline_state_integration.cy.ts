@@ -13,13 +13,11 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../../tasks/kibana_navigation';
-import { fillAddFilterForm } from '../../../../tasks/search_bar';
 import {
-  addDiscoverKqlQuery,
+  addDiscoverEsqlQuery,
   addFieldToTable,
-  openAddDiscoverFilterPopover,
   switchDataViewTo,
-  switchDataViewToESQL,
+  verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
 import {
   GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
@@ -29,8 +27,6 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_VIEW_SWITCHER,
-  DISCOVER_FILTER_BADGES,
-  DISCOVER_QUERY_INPUT,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
@@ -63,6 +59,8 @@ const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
 const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
+const ESQL_DATAVIEW_NAME = 'ES|QL';
+const esqlQuery = 'from auditbeat-* | where ecs.version == "1.8.0"';
 
 describe(
   'Discover Timeline State Integration',
@@ -126,19 +124,11 @@ describe(
         );
       });
       it('should save/restore discover dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
-        const dataviewName = '.kibana-event-log';
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
-        const kqlQuery = '_id:*';
         const column1 = 'event.category';
         const column2 = 'ecs.version';
-        switchDataViewTo(dataviewName);
-        addDiscoverKqlQuery(kqlQuery);
-        openAddDiscoverFilterPopover();
-        fillAddFilterForm({
-          key: 'ecs.version',
-          value: '1.8.0',
-        });
+        addDiscoverEsqlQuery(esqlQuery);
         addFieldToTable(column1);
         addFieldToTable(column2);
 
@@ -155,10 +145,8 @@ describe(
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             gotToDiscoverTab();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-            cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
-            cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-            cy.get(DISCOVER_FILTER_BADGES).should('contain.text', 'ecs.version: 1.8.0');
+            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
+            verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
             cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
@@ -168,19 +156,12 @@ describe(
           });
       });
       it('should save/restore discover dataview/timerange/filter/query/columns when timeline is opened via url', () => {
-        const dataviewName = '.kibana-event-log';
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
-        const kqlQuery = '_id:*';
         const column1 = 'event.category';
         const column2 = 'ecs.version';
-        switchDataViewTo(dataviewName);
-        addDiscoverKqlQuery(kqlQuery);
-        openAddDiscoverFilterPopover();
-        fillAddFilterForm({
-          key: 'ecs.version',
-          value: '1.8.0',
-        });
+        switchDataViewTo(ESQL_DATAVIEW_NAME);
+        addDiscoverEsqlQuery(esqlQuery);
         addFieldToTable(column1);
         addFieldToTable(column2);
 
@@ -192,10 +173,8 @@ describe(
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
             // reload the page with the exact url
             cy.reload();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-            cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
-            cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-            cy.get(DISCOVER_FILTER_BADGES).should('contain.text', 'ecs.version: 1.8.0');
+            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
+            verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
             cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
@@ -207,7 +186,6 @@ describe(
       it('should save/restore discover ES|QL when saving timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `ES|QL timeline-${timelineSuffix}`;
-        switchDataViewToESQL();
         addNameToTimeline(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
@@ -220,7 +198,7 @@ describe(
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             gotToDiscoverTab();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
+            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
           });
       });
     });
@@ -235,8 +213,7 @@ describe(
       it('should save discover saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
-        const kqlQuery = '_id: *';
-        addDiscoverKqlQuery(kqlQuery);
+        addDiscoverEsqlQuery(esqlQuery);
         addNameToTimeline(timelineName);
         cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
         openKibanaNavigation();
@@ -257,8 +234,7 @@ describe(
       it('should rename the saved search on timeline rename', () => {
         const timelineSuffix = Date.now();
         const timelineName = `Rename timeline-${timelineSuffix}`;
-        const kqlQuery = '_id: *';
-        addDiscoverKqlQuery(kqlQuery);
+        addDiscoverEsqlQuery(esqlQuery);
 
         addNameToTimeline(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)

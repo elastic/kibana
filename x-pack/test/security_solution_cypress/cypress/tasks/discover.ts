@@ -10,11 +10,12 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_GRID_UPDATING,
   DISCOVER_DATA_VIEW_SWITCHER,
-  DISCOVER_QUERY_INPUT,
+  DISCOVER_ESQL_INPUT,
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   DISCOVER_FIELD_SEARCH,
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
   DISCOVER_FIELD_LIST_LOADING,
+  DISCOVER_ESQL_EDITABLE_INPUT,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 
@@ -43,8 +44,29 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
-export const addDiscoverKqlQuery = (kqlQuery: string) => {
-  cy.get(DISCOVER_QUERY_INPUT).type(`${kqlQuery}{enter}`);
+export const selectCurrentDiscoverEsqlQuery = (discoverEsqlInput = DISCOVER_ESQL_INPUT) => {
+  cy.get(discoverEsqlInput).click();
+  cy.get(discoverEsqlInput).focused();
+  cy.get(discoverEsqlInput).type('{cmd}a');
+};
+
+export const addDiscoverEsqlQuery = (esqlQuery: string) => {
+  // ESQL input uses the monaco editor which doesn't allow for traditional input updates
+  selectCurrentDiscoverEsqlQuery(DISCOVER_ESQL_EDITABLE_INPUT);
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).clear();
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${esqlQuery}{cmd}{enter}`);
+};
+
+export const verifyDiscoverEsqlQuery = (esqlQueryToVerify: string) => {
+  // We select the query first as multi-line queries do not render fully unless all the text is selected
+  selectCurrentDiscoverEsqlQuery();
+  /**
+   * When selected all visual spaces actually render the middot character, so we replace the spaces with the middot
+   * If testing without selecting first you can replace with a Non-breaking space character
+   * https://github.com/cypress-io/cypress/issues/15863#issuecomment-816746693
+   */
+  const unicodeReplacedQuery = esqlQueryToVerify.replaceAll(' ', '\u00b7');
+  cy.get(DISCOVER_ESQL_INPUT).should('include.text', unicodeReplacedQuery);
 };
 
 export const submitDiscoverSearchBar = () => {
