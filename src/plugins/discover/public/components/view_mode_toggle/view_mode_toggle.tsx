@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiTabs, useEuiPaddingSize, useEuiTheme } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
@@ -25,7 +25,7 @@ export const DocumentViewModeToggle = ({
   const { uiSettings } = useDiscoverServices();
 
   const tabsCss = css`
-    padding: 0 ${useEuiPaddingSize('s')};
+    padding: 0 ${euiTheme.size.s};
     border-bottom: ${euiTheme.border.thin};
   `;
 
