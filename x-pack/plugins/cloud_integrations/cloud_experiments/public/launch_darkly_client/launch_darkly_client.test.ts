@@ -144,7 +144,7 @@ describe('LaunchDarklyClient - browser', () => {
 
       test('calls the LaunchDarkly client when the user has been defined', async () => {
         await client.updateUserMetadata(testUserMetadata);
-        await client.reportMetric('my-feature-flag', {}, 123);
+        client.reportMetric('my-feature-flag', {}, 123);
         expect(ldClientMock.track).toHaveBeenCalledTimes(1);
         expect(ldClientMock.track).toHaveBeenCalledWith('my-feature-flag', {}, 123);
       });
