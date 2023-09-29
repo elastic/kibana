@@ -21,6 +21,6 @@ describe('useDashboardRenderer', () => {
       await result.current.handleDashboardLoaded(mockDashboardContainer);
     });
 
-    expect(result.current.dashboard.container).toEqual(mockDashboardContainer);
+    expect(result.current.dashboardContainer).toEqual(mockDashboardContainer);
   });
 });

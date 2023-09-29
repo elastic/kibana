@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -14,12 +15,15 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import { SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useCapabilities, useKibana, useNavigateTo } from '../../common/lib/kibana';
-
 import { APP_NAME } from '../../../common/constants';
-import { useDashboardContainerContext } from '../context/dashboard_container_context';
 
-const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => void }) => {
-  const dashboardContainer = useDashboardContainerContext();
+const DashboardToolBarComponent = ({
+  dashboardContainer,
+  onLoad,
+}: {
+  dashboardContainer: DashboardAPI;
+  onLoad?: (mode: ViewMode) => void;
+}) => {
   const { setHeaderActionMenu } = useKibana().services;
 
   const viewMode =

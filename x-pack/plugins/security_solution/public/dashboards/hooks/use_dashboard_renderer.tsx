@@ -11,15 +11,13 @@ import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 export const useDashboardRenderer = () => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
 
-  const handleDashboardLoaded = useCallback(async (container: DashboardAPI) => {
+  const handleDashboardLoaded = useCallback((container: DashboardAPI) => {
     setDashboardContainer(container);
   }, []);
 
   return useMemo(
     () => ({
-      dashboard: {
-        container: dashboardContainer,
-      },
+      dashboardContainer,
       handleDashboardLoaded,
     }),
     [dashboardContainer, handleDashboardLoaded]

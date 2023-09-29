@@ -31,7 +31,6 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
-import { DashboardContainerContextProvider } from '../../context/dashboard_container_context';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -65,10 +64,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
-  const {
-    dashboard: { container: dashboardContainer },
-    handleDashboardLoaded,
-  } = useDashboardRenderer();
+  const { dashboardContainer, handleDashboardLoaded } = useDashboardRenderer();
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
@@ -87,15 +83,21 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             {dashboardContainer && (
-              <DashboardContainerContextProvider dashboardContainer={dashboardContainer}>
-                <>
-                  <HeaderPage
-                    border
-                    title={<DashboardTitle onTitleLoaded={setDashboardTitle} />}
-                    subtitle={<DashboardToolBar onLoad={onDashboardToolBarLoad} />}
+              <HeaderPage
+                border
+                title={
+                  <DashboardTitle
+                    dashboardContainer={dashboardContainer}
+                    onTitleLoaded={setDashboardTitle}
                   />
-                </>
-              </DashboardContainerContextProvider>
+                }
+                subtitle={
+                  <DashboardToolBar
+                    dashboardContainer={dashboardContainer}
+                    onLoad={onDashboardToolBarLoad}
+                  />
+                }
+              />
             )}
           </EuiFlexItem>
           {!errorState && (

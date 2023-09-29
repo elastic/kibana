@@ -7,11 +7,16 @@
 
 import React, { useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { EDIT_DASHBOARD_TITLE } from '../pages/details/translations';
-import { useDashboardContainerContext } from '../context/dashboard_container_context';
 
-const DashboardTitleComponent = ({ onTitleLoaded }: { onTitleLoaded: (title: string) => void }) => {
-  const dashboardContainer = useDashboardContainerContext();
+const DashboardTitleComponent = ({
+  dashboardContainer,
+  onTitleLoaded,
+}: {
+  dashboardContainer: DashboardAPI;
+  onTitleLoaded: (title: string) => void;
+}) => {
   const dashboardTitle = dashboardContainer.select((state) => state.explicitInput.title).trim();
   const title =
     dashboardTitle && dashboardTitle.length !== 0 ? dashboardTitle : EDIT_DASHBOARD_TITLE;
