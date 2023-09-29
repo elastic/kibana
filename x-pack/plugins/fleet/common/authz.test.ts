@@ -104,6 +104,10 @@ describe('fleet authz', () => {
     it('calculates endpoint exceptions privileges correctly when no matching capabilities', () => {
       const endpointCapabilities = {
         writeEndpointList: true,
+        writeTrustedApplications: true,
+        writePolicyManagement: false,
+        readPolicyManagement: true,
+        writeHostIsolationExceptions: true,
         writeHostIsolation: false,
       };
       const expected = {
