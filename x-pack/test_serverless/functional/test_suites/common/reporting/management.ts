@@ -47,7 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const TEST_PASSWORD = 'changeme';
 
     before('initialize saved object archive', async () => {
-      await reportingAPI.createReportingRole();
       await reportingAPI.createReportingUser();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
@@ -73,6 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
     });
 
+    // Skipping test for now because functionality is not yet possible to test
     xit(`user doesn't see a job another user has created`, async () => {
       log.debug(`creating a csv report job as '${TEST_USERNAME}'`);
 

@@ -35,29 +35,29 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Define a role that DOES grant privileges to create certain types of reports.
      */
-    async createReportingRole() {
-      await security.role.create(REPORTING_ROLE, {
-        metadata: {},
-        elasticsearch: {
-          cluster: [],
-          indices: [
-            {
-              names: ['ecommerce'],
-              privileges: ['read', 'view_index_metadata'],
-              allow_restricted_indices: false,
-            },
-          ],
-          run_as: [],
-        },
-        kibana: [
-          {
-            base: [],
-            feature: { discover: ['minimal_read', 'generate_report'] },
-            spaces: ['*'],
-          },
-        ],
-      });
-    },
+    // async createReportingRole() {
+    //   await security.role.create(REPORTING_ROLE, {
+    //     metadata: {},
+    //     elasticsearch: {
+    //       cluster: [],
+    //       indices: [
+    //         {
+    //           names: ['ecommerce'],
+    //           privileges: ['read', 'view_index_metadata'],
+    //           allow_restricted_indices: false,
+    //         },
+    //       ],
+    //       run_as: [],
+    //     },
+    //     kibana: [
+    //       {
+    //         base: [],
+    //         feature: { discover: ['minimal_read', 'generate_report'] },
+    //         spaces: ['*'],
+    //       },
+    //     ],
+    //   });
+    // },
 
     async createReportingUser(
       username = REPORTING_USER_USERNAME,
