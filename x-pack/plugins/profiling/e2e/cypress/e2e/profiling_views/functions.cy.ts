@@ -85,11 +85,10 @@ describe('Functions page', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
-    cy.get('.euiDataGridRow').should('have.length.gt', 1);
+    const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
+    cy.get(firstRowSelector).eq(2).contains('vmlinux');
     cy.addKqlFilter({ key: 'Stacktrace.id', value: '-7DvnP1mizQYw8mIIpgbMg' });
     cy.wait('@getTopNFunctions');
-    cy.get('.euiDataGridRow').should('have.length', 1);
-    const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(2).contains('libjvm.so');
   });
 
@@ -101,50 +100,50 @@ describe('Functions page', () => {
       {
         columnKey: 'rank',
         columnIndex: 1,
-        highRank: 388,
+        highRank: 4481,
         lowRank: 1,
-        highValue: 388,
+        highValue: 4481,
         lowValue: 1,
       },
       {
         columnKey: 'samples',
         columnIndex: 7,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: 28,
-        lowValue: 1,
+        lowValue: 0,
       },
       {
         columnKey: 'selfCPU',
         columnIndex: 3,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: '5.46%',
-        lowValue: '0.19%',
+        lowValue: '0.00%',
       },
       {
         columnKey: 'totalCPU',
         columnIndex: 4,
-        highRank: 338,
+        highRank: 3623,
         lowRank: 44,
-        highValue: '10.33%',
+        highValue: '60.43%',
         lowValue: '0.19%',
       },
       {
         columnKey: 'annualizedCo2',
         columnIndex: 5,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: '1.84 lbs / 0.84 kg',
-        lowValue: '0.07 lbs / 0.03 kg',
+        lowValue: undefined,
       },
       {
         columnKey: 'annualizedDollarCost',
         columnIndex: 6,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: '$17.37',
-        lowValue: '$0.62',
+        lowValue: undefined,
       },
     ].forEach(({ columnKey, columnIndex, highRank, highValue, lowRank, lowValue }) => {
       cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
@@ -156,7 +155,11 @@ describe('Functions page', () => {
       cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
       cy.contains('Sort Low-High').click();
       cy.get(firstRowSelector).eq(1).contains(lowRank);
-      cy.get(firstRowSelector).eq(columnIndex).contains(lowValue);
+      if (lowValue !== undefined) {
+        cy.get(firstRowSelector).eq(columnIndex).contains(lowValue);
+      } else {
+        cy.get(firstRowSelector).eq(columnIndex).should('not.have.value');
+      }
     });
 
     cy.get(`[data-test-subj="dataGridHeaderCell-frame"]`).click();

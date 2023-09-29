@@ -75,7 +75,7 @@ export function getFunctionsRows({
     ? keyBy(comparisonTopNFunctions.TopN, 'Id')
     : {};
 
-  return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
+  return topNFunctions.TopN.filter((topN) => topN.CountExclusive >= 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
     const scaledSelfCPU = scaleValue({
