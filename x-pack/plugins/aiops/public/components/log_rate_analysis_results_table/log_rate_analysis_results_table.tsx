@@ -28,8 +28,10 @@ import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+
+import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
@@ -123,19 +125,33 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameLabel', {
         defaultMessage: 'Field name',
       }),
-      render: (_, { fieldName, fieldValue }) => (
-        <>
-          <FieldStatsPopover
-            dataView={dataView}
-            fieldName={fieldName}
-            fieldValue={fieldValue}
-            fieldStatsServices={fieldStatsServices}
-            dslQuery={searchQuery}
-            timeRangeMs={timeRangeMs}
-          />
-          {fieldName}
-        </>
-      ),
+      render: (_, { fieldName, fieldValue, key, type, doc_count: count }) => {
+        const dslQuery =
+          type === SIGNIFICANT_TERM_TYPE.KEYWORD
+            ? searchQuery
+            : getCategoryQuery(fieldName, [
+                {
+                  key,
+                  count,
+                  examples: [],
+                },
+              ]);
+        return (
+          <>
+            {type === SIGNIFICANT_TERM_TYPE.KEYWORD && (
+              <FieldStatsPopover
+                dataView={dataView}
+                fieldName={fieldName}
+                fieldValue={type === SIGNIFICANT_TERM_TYPE.KEYWORD ? fieldValue : key}
+                fieldStatsServices={fieldStatsServices}
+                dslQuery={dslQuery}
+                timeRangeMs={timeRangeMs}
+              />
+            )}
+            {fieldName}
+          </>
+        );
+      },
       sortable: true,
       valign: 'middle',
     },
