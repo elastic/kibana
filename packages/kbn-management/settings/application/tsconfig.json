@@ -22,5 +22,7 @@
     "@kbn/management-settings-utilities",
     "@kbn/management-settings-components-form",
     "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-application-browser",
   ]
 }
