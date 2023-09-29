@@ -172,6 +172,7 @@
     "@kbn/security-solution-features",
     "@kbn/content-management-plugin",
     "@kbn/subscription-tracking",
-    "@kbn/openapi-generator"
+    "@kbn/openapi-generator",
+    "@kbn/react-kibana-mount"
   ]
 }
