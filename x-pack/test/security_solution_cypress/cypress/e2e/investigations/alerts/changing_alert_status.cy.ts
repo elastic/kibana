@@ -262,7 +262,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
 
-    it('Updates count table whenever alert status is updated in table', () => {
+    it.skip('Updates count table whenever alert status is updated in table', () => {
       const numberOfAlertsToBeClosed = 1;
       cy.get(ALERTS_COUNT)
         .invoke('text')

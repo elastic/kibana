@@ -8,8 +8,8 @@
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { AssetManagerConfig } from '../../common/config';
 import { Asset } from '../../common/types_api';
-import { AssetManagerConfig } from '../types';
 import { OptionsWithInjectedValues } from './accessors';
 import { GetHostsOptions } from './accessors/hosts';
 import { GetServicesOptions } from './accessors/services';
@@ -18,28 +18,28 @@ import { getHostsBySignals } from './accessors/hosts/get_hosts_by_signals';
 import { getServicesByAssets } from './accessors/services/get_services_by_assets';
 import { getServicesBySignals } from './accessors/services/get_services_by_signals';
 
-interface AssetAccessorClassOptions {
+interface AssetClientClassOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
   source: AssetManagerConfig['lockedSource'];
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
   metricsClient: MetricsDataClient;
 }
 
-export class AssetAccessor {
-  constructor(private options: AssetAccessorClassOptions) {}
+export class AssetClient {
+  constructor(private baseOptions: AssetClientClassOptions) {}
 
   injectOptions<T extends object = {}>(options: T): OptionsWithInjectedValues<T> {
     return {
       ...options,
-      sourceIndices: this.options.sourceIndices,
-      getApmIndices: this.options.getApmIndices,
-      metricsClient: this.options.metricsClient,
+      sourceIndices: this.baseOptions.sourceIndices,
+      getApmIndices: this.baseOptions.getApmIndices,
+      metricsClient: this.baseOptions.metricsClient,
     };
   }
 
   async getHosts(options: GetHostsOptions): Promise<{ hosts: Asset[] }> {
     const withInjected = this.injectOptions(options);
-    if (this.options.source === 'assets') {
+    if (this.baseOptions.source === 'assets') {
       return await getHostsByAssets(withInjected);
     } else {
       return await getHostsBySignals(withInjected);
@@ -48,7 +48,7 @@ export class AssetAccessor {
 
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
     const withInjected = this.injectOptions(options);
-    if (this.options.source === 'assets') {
+    if (this.baseOptions.source === 'assets') {
       return await getServicesByAssets(withInjected);
     } else {
       return await getServicesBySignals(withInjected);
