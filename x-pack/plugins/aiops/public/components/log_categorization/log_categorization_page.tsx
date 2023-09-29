@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
 
@@ -53,7 +54,12 @@ import { FieldValidationCallout } from './category_validation_callout';
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-export const LogCategorizationPage: FC = () => {
+interface LogCategorizationPageProps {
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
+}
+
+export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
@@ -208,7 +214,10 @@ export const LogCategorizationPage: FC = () => {
 
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery),
+        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery, {
+          [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+        }),
+
         runCategorizeRequest(
           index,
           selectedField,
@@ -245,6 +254,7 @@ export const LogCategorizationPage: FC = () => {
     runCategorizeRequest,
     intervalMs,
     toasts,
+    embeddingOrigin,
   ]);
 
   useEffect(
