@@ -16,7 +16,6 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import classNames from 'classnames';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
@@ -259,10 +258,7 @@ export function InternalDashboardTopNav({
       showDatePicker,
     };
   }, [
-    embedSettings?.forceHideFilterBar,
-    embedSettings?.forceShowDatePicker,
-    embedSettings?.forceShowQueryInput,
-    embedSettings?.forceShowTopNavMenu,
+    embedSettings,
     filterManager,
     forceHideUnifiedSearch,
     fullScreenMode,
@@ -348,9 +344,7 @@ export function InternalDashboardTopNav({
             ? setCustomHeaderActionMenu ?? undefined
             : setHeaderActionMenu
         }
-        className={classNames({
-          'kbnTopNavMenu-isFullScreen': fullScreenMode,
-        })}
+        className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}
         config={
           visibilityProps.showTopNavMenu
             ? viewMode === ViewMode.EDIT

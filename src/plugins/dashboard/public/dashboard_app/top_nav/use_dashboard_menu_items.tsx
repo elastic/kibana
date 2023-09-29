@@ -281,11 +281,7 @@ export const useDashboardMenuItems = ({
     ];
   }, [
     isLabsEnabled,
-    menuItems.labs,
-    menuItems.share,
-    menuItems.clone,
-    menuItems.edit,
-    menuItems.fullScreen,
+    menuItems,
     share,
     showWriteControls,
     managed,
