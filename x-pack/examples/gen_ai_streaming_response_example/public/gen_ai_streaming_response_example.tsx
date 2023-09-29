@@ -65,7 +65,7 @@ export const GenAiStreamingResponseExampleApp = ({
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['general'],
     id: '.gen-ai',
-    name: 'OpenAI',
+    name: 'Generative AI',
     enabled: true,
   });
   const [loading, setLoading] = useState<boolean>(true);
