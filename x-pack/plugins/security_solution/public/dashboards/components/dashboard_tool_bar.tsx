@@ -73,8 +73,7 @@ const DashboardToolBarComponent = ({
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
       dashboardContainer={dashboardContainer}
-      forceHideDatePicker={true}
-      forceHideQueryInput={true}
+      forceHideUnifiedSearch={true}
       embedSettings={embedSettings}
       redirectTo={redirectTo}
       showBorderBottom={false}

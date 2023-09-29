@@ -42,8 +42,7 @@ import { DashboardRedirect } from '../dashboard_container/types';
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
-  forceHideDatePicker?: boolean;
-  forceHideQueryInput?: boolean;
+  forceHideUnifiedSearch?: boolean;
   redirectTo: DashboardRedirect;
   setCustomHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
   showBorderBottom?: boolean;
@@ -55,8 +54,7 @@ const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
-  forceHideDatePicker,
-  forceHideQueryInput,
+  forceHideUnifiedSearch,
   redirectTo,
   setCustomHeaderActionMenu,
   showBorderBottom = true,
@@ -242,12 +240,12 @@ export function InternalDashboardTopNav({
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = Boolean(forceHideQueryInput)
+    const showQueryInput = Boolean(forceHideUnifiedSearch)
       ? false
       : shouldShowNavBarComponent(
           Boolean(embedSettings?.forceShowQueryInput || viewMode === ViewMode.PRINT)
         );
-    const showDatePicker = Boolean(forceHideDatePicker)
+    const showDatePicker = Boolean(forceHideUnifiedSearch)
       ? false
       : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
@@ -266,8 +264,7 @@ export function InternalDashboardTopNav({
     embedSettings?.forceShowQueryInput,
     embedSettings?.forceShowTopNavMenu,
     filterManager,
-    forceHideDatePicker,
-    forceHideQueryInput,
+    forceHideUnifiedSearch,
     fullScreenMode,
     isChromeVisible,
     viewMode,
