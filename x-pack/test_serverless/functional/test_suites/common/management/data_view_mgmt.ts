@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const archivePath = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['settings', 'common', 'header']);
+  const PageObjects = getPageObjects(['settings', 'common', 'header', 'svlCommonPage']);
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
@@ -23,6 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/165796
   // FLAKY: https://github.com/elastic/kibana/issues/165425
   describe('Data View Management', function () {
+    this.beforeAll(async () => {
+      await PageObjects.svlCommonPage.login();
+    });
     describe('disables scripted fields', function () {
       let dataViewId = '';
 
