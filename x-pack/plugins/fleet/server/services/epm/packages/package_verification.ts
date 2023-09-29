@@ -59,9 +59,6 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   try {
     key = await openpgp.readKey({
       armoredKey: buffer.toString(),
-      config: {
-        preferredHashAlgorithm: openpgp.enums.hash.sha256,
-      },
     });
   } catch (e) {
     logger.warn(`Unable to parse GPG key from '${gpgKeyPath}': ${e}`);
@@ -123,9 +120,6 @@ async function _verifyPackageSignature({
 }): Promise<VerificationResult> {
   const signature = await openpgp.readSignature({
     armoredSignature: pkgArchiveSignature,
-    config: {
-      preferredHashAlgorithm: openpgp.enums.hash.sha256,
-    },
   });
 
   const message = await openpgp.createMessage({
@@ -136,9 +130,6 @@ async function _verifyPackageSignature({
     verificationKeys: verificationKey,
     signature,
     message,
-    config: {
-      preferredHashAlgorithm: openpgp.enums.hash.sha256,
-    },
   });
 
   const signatureVerificationResult = verificationResult.signatures[0];
