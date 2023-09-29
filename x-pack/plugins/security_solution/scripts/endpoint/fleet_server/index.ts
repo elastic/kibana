@@ -61,6 +61,8 @@ export const cli = async () => {
       --version           Optional. The Agent version to be used when installing fleet server.
                           Default: uses the same version as the stack (kibana). Version
                           can also be from 'SNAPSHOT'.
+                          NOTE: this value will be specifically set to 'latest' when ran against
+                          kibana in serverless mode.
                           Examples: 8.6.0, 8.7.0-SNAPSHOT
       --policy            Optional. The UUID of the agent policy that should be used to enroll
                           fleet-server with Kibana/ES (Default: uses existing (if found) or

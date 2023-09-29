@@ -592,7 +592,7 @@ const updateFleetElasticsearchOutputHostNames = async (
  * the status api
  * @param serverUrl
  */
-const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
+export const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
   const url = new URL(serverUrl);
   url.pathname = '/api/status';
 
