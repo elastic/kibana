@@ -255,6 +255,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          * and will resolve to (boolean)
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
+        'xpack.infra.featureFlags.osqueryEnabled (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
