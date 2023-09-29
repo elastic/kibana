@@ -356,8 +356,6 @@ export const defineLogRateAnalysisRoute = (
                   return;
                 }
 
-                // console.log('pValues', fieldCandidate, pValues);
-
                 remainingFieldCandidates = remainingFieldCandidates.filter(
                   (d) => d !== fieldCandidate
                 );
