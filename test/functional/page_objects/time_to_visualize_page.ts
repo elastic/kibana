@@ -77,6 +77,7 @@ export class TimeToVisualizePageObject extends FtrService {
       if (dashboardId) {
         await this.testSubjects.click('open-dashboard-picker');
         await this.testSubjects.setValue('dashboard-picker-search', dashboardId);
+        await this.common.sleep(1000);
         await this.testSubjects.click(
           `dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`
         );
