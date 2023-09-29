@@ -18,7 +18,7 @@ import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions'
 import { useRightPanelContext } from '../context';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_NO_DATA_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
@@ -64,34 +64,42 @@ export const AnalyzerPreviewContainer: React.FC = () => {
           />
         ),
         iconType: 'timeline',
-        ...(isEnabled && { callback: goToAnalyzerTab }),
+        ...(isEnabled && {
+          link: {
+            callback: goToAnalyzerTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
+                defaultMessage="Show analyzer graph"
+              />
+            ),
+          },
+        }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >
       {isEnabled ? (
         <AnalyzerPreview />
       ) : (
-        <p data-test-subj={ANALYZER_PREVIEW_NO_DATA_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataDescription"
-            defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
-            values={{
-              sysmon: <EuiMark>{'sysmon'}</EuiMark>,
-              winlogbeat: <EuiMark>{'winlogbeat'}</EuiMark>,
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataLinkText"
-                    defaultMessage="Visual event analyzer"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataDescription"
+          defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
+          values={{
+            sysmon: <EuiMark>{'sysmon'}</EuiMark>,
+            winlogbeat: <EuiMark>{'winlogbeat'}</EuiMark>,
+            link: (
+              <EuiLink
+                href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataLinkText"
+                  defaultMessage="Visual event analyzer"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       )}
     </ExpandablePanel>
   );

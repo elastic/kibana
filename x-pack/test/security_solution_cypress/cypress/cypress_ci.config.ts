@@ -7,7 +7,6 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
-import { oldHeadless } from './support/old_headless';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -36,9 +35,10 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
-      oldHeadless(on);
+      // oldHeadless(on);
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

@@ -28,6 +28,7 @@ export default defineCypressConfig({
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
       oldHeadless(on);
       esArchiver(on, config);

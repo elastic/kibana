@@ -9,8 +9,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import { mockContextValue } from '../mocks/mock_right_panel_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_context';
+import { mockContextValue } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { RightPanelContext } from '../context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
@@ -21,43 +21,35 @@ jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_t
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
-const contextValue = {
-  ...mockContextValue,
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-};
+const renderAnalyzerPreview = (contextValue: RightPanelContext) =>
+  render(
+    <TestProviders>
+      <RightPanelContext.Provider value={contextValue}>
+        <AnalyzerPreview />
+      </RightPanelContext.Provider>
+    </TestProviders>
+  );
 
-const contextValueEmpty = {
-  ...mockContextValue,
-  dataFormattedForFieldBrowser: [
-    {
-      category: 'kibana',
-      field: 'kibana.alert.rule.uuid',
-      values: ['rule-uuid'],
-      originalValue: ['rule-uuid'],
-      isObjectArray: false,
-    },
-  ],
-};
+const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.';
 
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
-  it('shows analyzer preview correctly when documentid and index are present', () => {
+  it('shows analyzer preview correctly when documentId and index are present', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
       alertIds: ['alertid'],
       statsNodes: mock.mockStatsNodes,
     });
-    const wrapper = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <AnalyzerPreview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const contextValue = {
+      ...mockContextValue,
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+    };
+
+    const wrapper = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       isActiveTimeline: false,
@@ -67,26 +59,44 @@ describe('<AnalyzerPreview />', () => {
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
-  it('does not show analyzer preview when documentid and index are not present', () => {
+  it('shows error message when documentid and index are not present', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
       alertIds: undefined,
       statsNodes: undefined,
     });
-    const { queryByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValueEmpty}>
-          <AnalyzerPreview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const contextValue = {
+      ...mockContextValue,
+      dataFormattedForFieldBrowser: [
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.uuid',
+          values: ['rule-uuid'],
+          originalValue: ['rule-uuid'],
+          isObjectArray: false,
+        },
+      ],
+    };
+    const { getByText } = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       isActiveTimeline: false,
       documentId: '',
       indices: [],
     });
-    expect(queryByTestId(ANALYZER_PREVIEW_TEST_ID)).not.toBeInTheDocument();
+
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+  });
+
+  it('shows error message when there is an error', () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: true,
+      alertIds: undefined,
+      statsNodes: undefined,
+    });
+    const { getByText } = renderAnalyzerPreview(mockContextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });

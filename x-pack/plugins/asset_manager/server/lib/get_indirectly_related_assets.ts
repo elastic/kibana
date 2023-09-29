@@ -23,7 +23,7 @@ interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
 }
 
 export async function getIndirectlyRelatedAssets({
-  esClient,
+  elasticsearchClient,
   size = 100,
   from = 'now-24h',
   to = 'now',
@@ -91,7 +91,7 @@ export async function getIndirectlyRelatedAssets({
 
   debug('Performing Indirectly Related Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
-  const response = await esClient.search<Asset>(dsl);
+  const response = await elasticsearchClient.search<Asset>(dsl);
   return response.hits.hits.map((hit) => hit._source).filter((asset): asset is Asset => !!asset);
 }
 

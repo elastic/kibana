@@ -16049,7 +16049,9 @@
         "type": "Function",
         "tags": [],
         "label": "isErrorResponse",
-        "description": [],
+        "description": [
+          "\nFrom https://github.com/elastic/elasticsearch/issues/55572: \"When is_running is false, the query has stopped, which\nmay happen due to ... the search failed, in which case is_partial is set to true to indicate that any results that\nmay be included in the search response come only from a subset of the shards that the query should have hit.\""
+        ],
         "signature": [
           "(response?: ",
           {
@@ -16118,6 +16120,39 @@
               "any"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isMultiFieldKey",
+        "type": "Function",
+        "tags": [],
+        "label": "isMultiFieldKey",
+        "description": [],
+        "signature": [
+          "(field: unknown) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.isMultiFieldKey.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -35029,6 +35064,23 @@
           }
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.MULTI_FIELD_KEY_SEPARATOR",
+        "type": "string",
+        "tags": [],
+        "label": "MULTI_FIELD_KEY_SEPARATOR",
+        "description": [
+          "\nMulti-field key separator used in Visualizations (Lens, AggBased, TSVB).\nThis differs from the separator used in the toString method of the MultiFieldKey"
+        ],
+        "signature": [
+          "\" › \""
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

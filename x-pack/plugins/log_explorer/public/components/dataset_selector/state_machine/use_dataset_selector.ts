@@ -11,6 +11,7 @@ import {
   ChangePanelHandler,
   DatasetSelectionHandler,
   DatasetsSelectorSearchHandler,
+  DataViewSelectionHandler,
   PanelId,
 } from '../types';
 import { createDatasetsSelectorStateMachine } from './state_machine';
@@ -18,6 +19,9 @@ import { DatasetsSelectorStateMachineDependencies } from './types';
 
 export const useDatasetSelector = ({
   initialContext,
+  onDataViewSelection,
+  onDataViewsSearch,
+  onDataViewsSort,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -25,13 +29,16 @@ export const useDatasetSelector = ({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
-  onUnmanagedStreamsReload,
+  onUncategorizedSearch,
+  onUncategorizedSort,
+  onUncategorizedReload,
 }: DatasetsSelectorStateMachineDependencies) => {
   const datasetsSelectorStateService = useInterpret(() =>
     createDatasetsSelectorStateMachine({
       initialContext,
+      onDataViewSelection,
+      onDataViewsSearch,
+      onDataViewsSort,
       onIntegrationsLoadMore,
       onIntegrationsReload,
       onIntegrationsSearch,
@@ -39,9 +46,9 @@ export const useDatasetSelector = ({
       onIntegrationsStreamsSearch,
       onIntegrationsStreamsSort,
       onSelectionChange,
-      onUnmanagedStreamsSearch,
-      onUnmanagedStreamsSort,
-      onUnmanagedStreamsReload,
+      onUncategorizedSearch,
+      onUncategorizedSort,
+      onUncategorizedReload,
     })
   );
 
@@ -51,6 +58,23 @@ export const useDatasetSelector = ({
 
   const panelId = useSelector(datasetsSelectorStateService, (state) => state.context.panelId);
   const search = useSelector(datasetsSelectorStateService, (state) => state.context.search);
+  const selection = useSelector(datasetsSelectorStateService, (state) => state.context.selection);
+  const tabId = useSelector(datasetsSelectorStateService, (state) => state.context.tabId);
+
+  const switchToIntegrationsTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_INTEGRATIONS_TAB' }),
+    [datasetsSelectorStateService]
+  );
+
+  const switchToUncategorizedTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
+    [datasetsSelectorStateService]
+  );
+
+  const switchToDataViewsTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_DATA_VIEWS_TAB' }),
+    [datasetsSelectorStateService]
+  );
 
   const changePanel = useCallback<ChangePanelHandler>(
     (panelDetails) =>
@@ -81,6 +105,11 @@ export const useDatasetSelector = ({
     [datasetsSelectorStateService]
   );
 
+  const selectDataView = useCallback<DataViewSelectionHandler>(
+    (dataView) => datasetsSelectorStateService.send({ type: 'SELECT_DATA_VIEW', dataView }),
+    [datasetsSelectorStateService]
+  );
+
   const sortByOrder = useCallback<DatasetsSelectorSearchHandler>(
     (params) => datasetsSelectorStateService.send({ type: 'SORT_BY_ORDER', search: params }),
     [datasetsSelectorStateService]
@@ -98,17 +127,25 @@ export const useDatasetSelector = ({
 
   return {
     // Data
-    isOpen,
     panelId,
     search,
+    selection,
+    tabId,
+    // Flags
+    isOpen,
+    isAllMode: selection.selectionType === 'all',
     // Actions
-    closePopover,
     changePanel,
+    closePopover,
     scrollToIntegrationsBottom,
     searchByName,
     selectAllLogDataset,
     selectDataset,
+    selectDataView,
     sortByOrder,
+    switchToIntegrationsTab,
+    switchToUncategorizedTab,
+    switchToDataViewsTab,
     togglePopover,
   };
 };
