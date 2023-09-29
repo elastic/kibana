@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -268,7 +267,7 @@ export default function AlertDetailsAppSection({
   const relatedEventsTab = !!ruleParams.criteria ? (
     <>
       <EuiSpacer size="l" />
-      <EuiFlexGrid columns={2} data-test-subj="thresholdAlertRelatedEventsSection">
+      <EuiFlexGroup direction="column" data-test-subj="thresholdAlertRelatedEventsSection">
         {relatedMetricsInDataView?.map(
           (relatedMetric, relatedMetricIndex) =>
             dataView &&
@@ -290,7 +289,7 @@ export default function AlertDetailsAppSection({
               </EuiFlexItem>
             )
         )}
-      </EuiFlexGrid>
+      </EuiFlexGroup>
     </>
   ) : null;
 
