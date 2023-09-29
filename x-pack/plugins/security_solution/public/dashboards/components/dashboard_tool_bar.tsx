@@ -29,44 +29,30 @@ const DashboardToolBarComponent = ({
   const viewMode =
     dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
 
-  const { navigateTo } = useNavigateTo();
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const dashboardListingUrl = useMemo(
-    () =>
-      `${getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-      })}`,
-    [getSecuritySolutionUrl]
-  );
-  const getEditOrCreateDashboardUrl = useCallback(
-    (id: string | undefined) =>
-      `${getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-        path: id ? `${id}/edit` : `/create`,
-      })}`,
-    [getSecuritySolutionUrl]
-  );
-
+  const { navigateTo, getAppUrl } = useNavigation();
   const redirectTo = useCallback(
-    (props) => {
-      if (props.destination === 'listing') {
-        navigateTo({ url: dashboardListingUrl });
+    ({ destination, id }) => {
+      if (destination === 'listing') {
+        navigateTo({ deepLinkId: SecurityPageName.dashboards });
       }
-      if (props.destination === 'dashboard') {
-        navigateTo({ url: getEditOrCreateDashboardUrl(props.id) });
+      if (destination === 'dashboard') {
+        navigateTo({
+          deepLinkId: SecurityPageName.dashboards,
+          path: id ? `${id}/edit` : `/create`,
+        });
       }
     },
-    [dashboardListingUrl, getEditOrCreateDashboardUrl, navigateTo]
+    [navigateTo]
   );
 
   const landingBreadcrumb: ChromeBreadcrumb[] = useMemo(
     () => [
       {
         text: APP_NAME,
-        href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
+        href: getAppUrl({ deepLinkId: SecurityPageName.landing }),
       },
     ],
-    [getSecuritySolutionUrl]
+    [getAppUrl]
   );
 
   useEffect(() => {
