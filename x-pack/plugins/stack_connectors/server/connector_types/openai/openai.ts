@@ -86,12 +86,14 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
     if (!error.response?.status) {
-      return `Unexpected API Error: ${error.code} - ${error.message}`;
+      return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
     if (error.response.status === 401) {
-      return 'Unauthorized API Error';
+      return `Unauthorized API Error${
+        error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
+      }`;
     }
-    return `API Error: ${error.response?.status} - ${error.response?.statusText}${
+    return `API Error: ${error.response?.statusText}${
       error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
     }`;
   }
@@ -193,8 +195,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       return result;
     }
 
-    // TO DO: Pass actual error
-    // tracked here https://github.com/elastic/security-team/issues/7373
-    return 'An error occurred sending your message. If the problem persists, please test the connector configuration.';
+    return 'An error occurred sending your message. If the problem persists, please test the connector configuration. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
   }
 }

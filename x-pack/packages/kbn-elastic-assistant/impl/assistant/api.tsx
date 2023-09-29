@@ -61,19 +61,24 @@ export const fetchConnectorExecuteAction = async ({
       ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
       : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
 
-    const response = await http.fetch<{ connector_id: string; status: string; data: string }>(
-      path,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        signal,
-      }
-    );
+    const response = await http.fetch<{
+      connector_id: string;
+      status: string;
+      data: string;
+      service_message?: string;
+    }>(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+      signal,
+    });
 
     if (response.status !== 'ok' || !response.data) {
+      if (response.service_message) {
+        return `${API_ERROR} \n\n${response.service_message}`;
+      }
       return API_ERROR;
     }
 

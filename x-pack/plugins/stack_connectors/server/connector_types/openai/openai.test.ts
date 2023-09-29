@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AxiosError } from 'axios';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
@@ -281,6 +282,61 @@ describe('OpenAIConnector', () => {
 
         await expect(connector.invokeAI(sampleOpenAiBody)).rejects.toThrow('API Error');
       });
+    });
+  });
+
+  describe('getResponseErrorMessage', () => {
+    it('returns an unknown error message', () => {
+      // @ts-expect-error expects an axios error as the parameter
+      expect(connector.getResponseErrorMessage({})).toEqual(
+        `Unexpected API Error:  - Unknown error`
+      );
+    });
+
+    it('returns the error.message', () => {
+      // @ts-expect-error expects an axios error as the parameter
+      expect(connector.getResponseErrorMessage({ message: 'a message' })).toEqual(
+        `Unexpected API Error:  - a message`
+      );
+    });
+
+    it('returns the error.response.data.error.message', () => {
+      const err = {
+        response: {
+          headers: {},
+          status: 404,
+          statusText: 'Resource Not Found',
+          data: {
+            error: {
+              message: 'Resource not found',
+            },
+          },
+        },
+      } as AxiosError<{ error?: { message?: string } }>;
+      expect(
+        // @ts-expect-error expects an axios error as the parameter
+        connector.getResponseErrorMessage(err)
+      ).toEqual(`API Error: Resource Not Found - Resource not found`);
+    });
+
+    it('returns auhtorization error', () => {
+      const err = {
+        response: {
+          headers: {},
+          status: 401,
+          statusText: 'Auth error',
+          data: {
+            error: {
+              message: 'The api key was invalid.',
+            },
+          },
+        },
+      } as AxiosError<{ error?: { message?: string } }>;
+
+      // @ts-expect-error expects an axios error as the parameter
+      expect(connector.getResponseErrorMessage(err)).toEqual(
+        `Unauthorized API Error - The api key was invalid.`
+      );
     });
   });
 
