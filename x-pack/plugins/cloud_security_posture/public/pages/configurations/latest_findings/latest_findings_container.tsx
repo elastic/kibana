@@ -5,9 +5,11 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord } from '@kbn/discover-utils/types';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
 import type { FindingsBaseProps } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -16,7 +18,7 @@ import { useLatestFindings } from './use_latest_findings';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { getFilters } from '../utils/utils';
 import { ErrorCallout } from '../layout/error_callout';
-import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
+import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
 import {
@@ -43,32 +45,78 @@ const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: '@timestamp' },
 ];
 
+const isCspFinding = (source: any): source is CspFinding => {
+  return source?.result?.evaluation !== undefined;
+};
+
+const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+  return (
+    <CspFindingRenderer row={row}>
+      {({ finding }) => <FindingsRuleFlyout findings={finding} onClose={onCloseFlyout} />}
+    </CspFindingRenderer>
+  );
+};
+
+const columnsLocalStorageKey = 'cloudSecurityPostureLatestFindingsColumns';
+
+const title = i18n.translate('xpack.csp.findings.latestFindings.tableTitle', {
+  defaultMessage: 'Findings',
+});
+
+const CspFindingRenderer = ({
+  row,
+  children,
+}: {
+  row: DataTableRecord;
+  children: ({ finding }: { finding: CspFinding }) => JSX.Element;
+}) => {
+  const source = row.raw._source;
+  const finding = isCspFinding(source) && (source as CspFinding);
+  if (!finding) return <></>;
+  return children({ finding });
+};
+
+const customCellRenderer = (rows: DataTableRecord[]) => ({
+  'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <CspEvaluationBadge type={finding.result.evaluation} />}
+    </CspFindingRenderer>
+  ),
+  '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <TimestampTableCell timestamp={finding['@timestamp']} />}
+    </CspFindingRenderer>
+  ),
+});
+
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const cloudPostureTable = useCloudPostureTable({
     dataView,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+    paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+    columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
   });
 
-  const { query, sort, queryError, setUrlQuery, filters } = cloudPostureTable;
+  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureTable;
 
-  const findingsGroupByNone = useLatestFindings({
+  const {
+    data,
+    error: fetchError,
+    isFetching,
+    fetchNextPage,
+  } = useLatestFindings({
     query,
     sort,
     enabled: !queryError,
   });
 
-  const rows = useMemo(() => {
-    return (
-      findingsGroupByNone.data?.pages
-        ?.map(({ page }) => {
-          return page;
-        })
-        .flat() || []
-    );
-  }, [findingsGroupByNone.data?.pages]);
+  const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);
 
-  const error = findingsGroupByNone.error || queryError;
+  const error = fetchError || queryError;
+
+  const passed = data?.pages[0].count.passed || 0;
+  const failed = data?.pages[0].count.failed || 0;
+  const total = data?.pages[0].total || 0;
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -83,53 +131,36 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     });
   };
 
-  const isCspFinding = (source: any): source is CspFinding => {
-    return source?.result?.evaluation !== undefined;
-  };
-
-  const flyoutComponent = (hit: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-    const finding = isCspFinding(hit.raw._source) && (hit.raw._source as CspFinding);
-    if (!finding) return <></>;
-    return <FindingsRuleFlyout findings={finding} onClose={onCloseFlyout} />;
-  };
-
   return (
-    <div data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
-      <FindingsSearchBar
-        dataView={dataView}
-        setQuery={(newQuery) => {
-          setUrlQuery({ ...newQuery, pageIndex: 0 });
-        }}
-        loading={findingsGroupByNone.isFetching}
-      />
+    <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
+      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
-          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.pages[0].page.length && (
+          {total > 0 && (
             <FindingsDistributionBar
               distributionOnClick={handleDistributionClick}
-              type={i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
-                defaultMessage: 'Findings',
-              })}
-              passed={findingsGroupByNone.data.pages[0].count.passed}
-              failed={findingsGroupByNone.data.pages[0].count.failed}
+              passed={passed}
+              failed={failed}
             />
           )}
           <EuiSpacer />
           <CloudSecurityDataTable
+            data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
             dataView={dataView}
-            isLoading={findingsGroupByNone.isFetching}
+            isLoading={isFetching}
             defaultColumns={defaultColumns}
-            sort={sort}
             rows={rows}
-            total={findingsGroupByNone.data?.pages[0].total || 0}
+            total={total}
             flyoutComponent={flyoutComponent}
             cloudPostureTable={cloudPostureTable}
-            loadMore={() => findingsGroupByNone.fetchNextPage()}
+            loadMore={fetchNextPage}
+            title={title}
+            customCellRenderer={customCellRenderer}
           />
         </>
       )}
-    </div>
+    </EuiFlexItem>
   );
 };

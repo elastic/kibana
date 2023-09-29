@@ -117,6 +117,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
       getNextPageParam: (lastPage) => {
+        if (lastPage.page.length === 0) return undefined;
         return lastPage.page[lastPage.page.length - 1].raw.sort;
       },
     }

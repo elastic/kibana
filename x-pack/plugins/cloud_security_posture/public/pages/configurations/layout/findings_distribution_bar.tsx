@@ -10,13 +10,13 @@ import {
   EuiHealth,
   EuiBadge,
   EuiSpacer,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiTextColor,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { statusColors } from '../../../common/constants';
@@ -26,10 +26,34 @@ interface Props {
   passed: number;
   failed: number;
   distributionOnClick: (evaluation: Evaluation) => void;
-  type: string;
 }
 
 const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
+
+export const CurrentPageOfTotal = ({
+  pageEnd,
+  pageStart,
+  total,
+  type,
+}: {
+  pageEnd: number;
+  pageStart: number;
+  total: number;
+  type: string;
+}) => (
+  <EuiTextColor color="subdued">
+    <FormattedMessage
+      id="xpack.csp.findings.distributionBar.showingPageOfTotalLabel"
+      defaultMessage="Showing {pageStart}-{pageEnd} of {total} {type}"
+      values={{
+        pageStart: <b>{pageStart}</b>,
+        pageEnd: <b>{pageEnd}</b>,
+        total: <b>{formatNumber(total)}</b>,
+        type,
+      }}
+    />
+  </EuiTextColor>
+);
 
 export const FindingsDistributionBar = (props: Props) => (
   <div>
@@ -76,26 +100,6 @@ const PassedFailedCounters = ({ passed, failed }: Pick<Props, 'passed' | 'failed
     </div>
   );
 };
-
-const CurrentPageOfTotal = ({
-  pageEnd,
-  pageStart,
-  total,
-  type,
-}: Pick<Props, 'pageEnd' | 'pageStart' | 'total' | 'type'>) => (
-  <EuiTextColor color="subdued">
-    <FormattedMessage
-      id="xpack.csp.findings.distributionBar.showingPageOfTotalLabel"
-      defaultMessage="Showing {pageStart}-{pageEnd} of {total} {type}"
-      values={{
-        pageStart: <b>{pageStart}</b>,
-        pageEnd: <b>{pageEnd}</b>,
-        total: <b>{formatNumber(total)}</b>,
-        type,
-      }}
-    />
-  </EuiTextColor>
-);
 
 const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
   passed,

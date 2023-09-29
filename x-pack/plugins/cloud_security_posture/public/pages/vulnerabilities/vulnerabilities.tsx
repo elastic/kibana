@@ -29,7 +29,6 @@ import type { VulnerabilitiesQueryData } from './types';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
-import { useFilteredDataView } from '../../common/api/use_filtered_data_view';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 import { EmptyState } from '../../components/empty_state';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
@@ -308,10 +307,10 @@ const VulnerabilitiesDataGrid = ({
         schemaDetectors={[severitySchemaConfig]}
         rowCount={limitedTotalItemCount}
         toolbarVisibility={{
-          showColumnSelector: true,
-          showDisplaySelector: true,
-          showKeyboardShortcuts: true,
-          showFullScreenSelector: true,
+          showColumnSelector: false,
+          showDisplaySelector: false,
+          showKeyboardShortcuts: false,
+          showFullScreenSelector: false,
           additionalControls: {
             left: {
               append: (
@@ -454,7 +453,6 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 };
 
 export const Vulnerabilities = () => {
-  // const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
   const { data, isLoading, error } = useLatestFindingsDataView(
     LATEST_VULNERABILITIES_INDEX_PATTERN
   );

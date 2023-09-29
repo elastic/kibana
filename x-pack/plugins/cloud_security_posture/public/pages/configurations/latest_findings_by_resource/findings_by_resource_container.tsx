@@ -22,7 +22,7 @@ import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
-import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { CurrentPageOfTotal, FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../../common/types';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
@@ -38,6 +38,8 @@ const getDefaultQuery = ({
   pageIndex: 0,
   sort: { field: 'compliance_score' as keyof CspFinding, direction: 'asc' },
 });
+
+const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
   <Routes>
@@ -111,34 +113,48 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         loading={findingsGroupByResource.isFetching}
       />
       <EuiSpacer size="m" />
-      {!error && (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false} style={{ width: 188 }}>
-            <FindingsGroupBySelector type="resource" />
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
           {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
-            <FindingsDistributionBar
-              {...{
-                distributionOnClick: handleDistributionClick,
-                type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
-                  defaultMessage: 'Resources',
-                }),
-                total: findingsGroupByResource.data.total,
-                passed: findingsGroupByResource.data.count.passed,
-                failed: findingsGroupByResource.data.count.failed,
-                ...getFindingsPageSizeInfo({
-                  pageIndex: urlQuery.pageIndex,
-                  pageSize,
-                  currentPageSize: slicedPage.length,
-                }),
-              }}
-            />
+            <>
+              <FindingsDistributionBar
+                {...{
+                  distributionOnClick: handleDistributionClick,
+                  type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
+                    defaultMessage: 'Resources',
+                  }),
+                  total: findingsGroupByResource.data.total,
+                  passed: findingsGroupByResource.data.count.passed,
+                  failed: findingsGroupByResource.data.count.failed,
+                  ...getFindingsPageSizeInfo({
+                    pageIndex: urlQuery.pageIndex,
+                    pageSize,
+                    currentPageSize: slicedPage.length,
+                  }),
+                }}
+              />
+              <EuiSpacer size="l" />
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <CurrentPageOfTotal
+                    pageStart={urlQuery.pageIndex * pageSize + 1}
+                    pageEnd={urlQuery.pageIndex * pageSize + slicedPage.length}
+                    total={limitedTotalItemCount}
+                    type={i18n.translate(
+                      'xpack.csp.findings.findingsByResource.tableRowTypeLabel',
+                      {
+                        defaultMessage: 'Resources',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ width: 188, marginLeft: 'auto' }}>
+                  <FindingsGroupBySelector type="resource" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           )}
           <EuiSpacer />
           <FindingsByResourceTable
