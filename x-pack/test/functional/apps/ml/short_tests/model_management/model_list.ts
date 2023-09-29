@@ -161,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
-          true
+          false
         );
         await ml.testExecution.logTestStep('should show deploy action for the model in the table');
         await ml.trainedModelsTable.assertModelDeployActionButtonExists(
