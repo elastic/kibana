@@ -71,7 +71,6 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
           visible: false,
         }}
       />
-      );
       <ChartComponent
         color={color}
         data={data}
