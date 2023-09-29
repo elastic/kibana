@@ -200,17 +200,13 @@ export const useDashboardMenuItems = ({
         run: () => saveDashboardAs(),
       } as TopNavMenuData,
 
-      ...(showResetChange
-        ? {
-            switchToViewMode: {
-              ...topNavStrings.switchToViewMode,
-              id: 'cancel',
-              disableButton: disableTopNav || !lastSavedId,
-              testId: 'dashboardViewOnlyMode',
-              run: () => resetChanges(true),
-            } as TopNavMenuData,
-          }
-        : {}),
+      switchToViewMode: {
+        ...topNavStrings.switchToViewMode,
+        id: 'cancel',
+        disableButton: disableTopNav || !lastSavedId,
+        testId: 'dashboardViewOnlyMode',
+        run: () => resetChanges(true),
+      } as TopNavMenuData,
 
       share: {
         ...topNavStrings.share,
@@ -242,7 +238,6 @@ export const useDashboardMenuItems = ({
     hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
-    showResetChange,
     showShare,
     dashboard,
     setIsLabsShown,
@@ -274,24 +269,27 @@ export const useDashboardMenuItems = ({
     const shareMenuItem = share ? [menuItems.share] : [];
     const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
     const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
+    const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
+
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
       ...shareMenuItem,
       ...cloneMenuItem,
-      resetChangesMenuItem,
+      ...mayberesetChangesMenuItem,
       ...editMenuItem,
     ];
   }, [
     isLabsEnabled,
     menuItems.labs,
-    menuItems.fullScreen,
     menuItems.share,
     menuItems.clone,
     menuItems.edit,
+    menuItems.fullScreen,
     share,
     showWriteControls,
     managed,
+    showResetChange,
     resetChangesMenuItem,
   ]);
 
@@ -299,18 +297,32 @@ export const useDashboardMenuItems = ({
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
+
     if (lastSavedId) {
-      editModeItems.push(
-        menuItems.saveAs,
-        menuItems.switchToViewMode,
-        resetChangesMenuItem,
-        menuItems.quickSave
-      );
+      editModeItems.push(menuItems.saveAs, menuItems.switchToViewMode);
+
+      if (showResetChange) {
+        editModeItems.push(resetChangesMenuItem);
+      }
+
+      editModeItems.push(menuItems.quickSave);
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.saveAs);
     }
     return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
-  }, [lastSavedId, menuItems, share, resetChangesMenuItem, isLabsEnabled]);
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.share,
+    menuItems.settings,
+    menuItems.saveAs,
+    menuItems.switchToViewMode,
+    menuItems.quickSave,
+    share,
+    lastSavedId,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };
