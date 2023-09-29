@@ -125,6 +125,16 @@ export const CreateCustomIntegrationForm = ({
           {i18n.translate('customIntegrationsPackage.create.configureIntegrationDescription', {
             defaultMessage: 'Configure integration',
           })}
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'customIntegrationsPackage.create.configureIntegrationDescription.helper',
+              {
+                defaultMessage:
+                  'Elastic creates an integration to streamline connecting your log data to the Elastic Stack.',
+              }
+            )}
+          </EuiText>
         </p>
       </EuiText>
       <EuiSpacer size="l" />
