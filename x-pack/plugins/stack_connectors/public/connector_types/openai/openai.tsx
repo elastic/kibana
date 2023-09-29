@@ -8,8 +8,8 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/open_ai/constants';
-import { OPEN_AI_CONNECTOR_ID, OPEN_AI_TITLE } from '../../../common/open_ai/constants';
+import { SUB_ACTION } from '../../../common/openai/constants';
+import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
 import { ActionParams, OpenAIConnector } from './types';
 
 interface ValidationErrors {
@@ -18,12 +18,12 @@ interface ValidationErrors {
 }
 export function getConnectorType(): OpenAIConnector {
   return {
-    id: OPEN_AI_CONNECTOR_ID,
+    id: OPENAI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
       defaultMessage: 'Send a request to OpenAI systems.',
     }),
-    actionTypeTitle: OPEN_AI_TITLE,
+    actionTypeTitle: OPENAI_TITLE,
     validateParams: async (
       actionParams: ActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {

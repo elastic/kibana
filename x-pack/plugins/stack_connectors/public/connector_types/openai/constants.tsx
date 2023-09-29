@@ -9,7 +9,7 @@ import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/open_ai/constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
@@ -46,7 +46,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
               href="https://platform.openai.com/docs/api-reference"
               target="_blank"
             >
-              {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
+              {`${i18n.OPENAI} ${i18n.DOCUMENTATION}`}
             </EuiLink>
           ),
         }}
@@ -108,7 +108,7 @@ export const openAiSecrets: SecretsFieldSchema[] = [
               href="https://platform.openai.com/account/api-keys"
               target="_blank"
             >
-              {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
+              {`${i18n.OPENAI} ${i18n.DOCUMENTATION}`}
             </EuiLink>
           ),
         }}
@@ -145,8 +145,8 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
 export const providerOptions = [
   {
     value: OpenAiProviderType.OpenAi,
-    text: i18n.OPEN_AI,
-    label: i18n.OPEN_AI,
+    text: i18n.OPENAI,
+    label: i18n.OPENAI,
   },
   {
     value: OpenAiProviderType.AzureAi,

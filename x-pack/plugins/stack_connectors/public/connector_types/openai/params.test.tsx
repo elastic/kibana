@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/open_ai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
 
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';

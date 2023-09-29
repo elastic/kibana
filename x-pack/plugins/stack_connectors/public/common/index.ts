@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import OpenAILogo from '../connector_types/open_ai/logo';
+import OpenAILogo from '../connector_types/openai/logo';
 
-export { OPEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../common/open_ai/constants';
+export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';
 export { OpenAILogo };

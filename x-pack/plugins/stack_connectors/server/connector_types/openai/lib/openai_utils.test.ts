@@ -10,7 +10,7 @@ import {
   DEFAULT_OPENAI_MODEL,
   OPENAI_CHAT_URL,
   OPENAI_LEGACY_COMPLETION_URL,
-} from '../../../../common/open_ai/constants';
+} from '../../../../common/openai/constants';
 
 describe('Open AI Utils', () => {
   describe('sanitizeRequest', () => {

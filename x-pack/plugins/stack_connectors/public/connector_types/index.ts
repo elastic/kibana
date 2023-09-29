@@ -11,7 +11,7 @@ import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
-import { getOpenAIConnectorType } from './open_ai';
+import { getOpenAIConnectorType } from './openai';
 import { getBedrockConnectorType } from './bedrock';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';

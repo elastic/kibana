@@ -15,18 +15,18 @@ import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import {
-  OPEN_AI_CONNECTOR_ID,
-  OPEN_AI_TITLE,
+  OPENAI_CONNECTOR_ID,
+  OPENAI_TITLE,
   OpenAiProviderType,
-} from '../../../common/open_ai/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/open_ai/schema';
-import { Config, Secrets } from '../../../common/open_ai/types';
-import { OpenAIConnector } from './open_ai';
+} from '../../../common/openai/constants';
+import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
+import { Config, Secrets } from '../../../common/openai/types';
+import { OpenAIConnector } from './openai';
 import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: OPEN_AI_CONNECTOR_ID,
-  name: OPEN_AI_TITLE,
+  id: OPENAI_CONNECTOR_ID,
+  name: OPENAI_TITLE,
   Service: OpenAIConnector,
   schema: {
     config: ConfigSchema,

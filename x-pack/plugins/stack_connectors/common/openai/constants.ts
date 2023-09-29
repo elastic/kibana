@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const OPEN_AI_TITLE = i18n.translate(
+export const OPENAI_TITLE = i18n.translate(
   'xpack.stackConnectors.components.genAi.connectorTypeTitle',
   {
     defaultMessage: 'OpenAI',
   }
 );
-export const OPEN_AI_CONNECTOR_ID = '.gen-ai';
+export const OPENAI_CONNECTOR_ID = '.gen-ai';
 export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',

@@ -14,21 +14,21 @@ import {
   StreamActionParamsSchema,
   StreamingResponseSchema,
   InvokeAIActionParamsSchema,
-} from '../../../common/open_ai/schema';
+} from '../../../common/openai/schema';
 import type {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
   StreamActionParams,
-} from '../../../common/open_ai/types';
-import { SUB_ACTION } from '../../../common/open_ai/constants';
+} from '../../../common/openai/types';
+import { SUB_ACTION } from '../../../common/openai/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-} from '../../../common/open_ai/types';
+} from '../../../common/openai/types';
 import { initDashboard } from './create_dashboard';
 import {
   getAxiosOptions,

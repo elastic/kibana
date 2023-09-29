@@ -12,7 +12,7 @@ import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/open_ai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE } from './constants';
 import { OpenAIActionConnector, ActionParams } from './types';
 

@@ -9,7 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/open_ai/constants';
+import { SUB_ACTION } from '../../../common/openai/constants';
 
 const ACTION_TYPE_ID = '.gen-ai';
 let actionTypeModel: ActionTypeModel;

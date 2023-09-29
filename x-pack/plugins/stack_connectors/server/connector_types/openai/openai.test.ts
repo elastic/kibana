@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { OpenAIConnector } from './open_ai';
+import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
   DEFAULT_OPENAI_MODEL,
-  OPEN_AI_CONNECTOR_ID,
+  OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
-} from '../../../common/open_ai/constants';
+} from '../../../common/openai/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/open_ai/schema';
+import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from './create_dashboard';
 jest.mock('./create_dashboard');
 
@@ -48,7 +48,7 @@ describe('OpenAIConnector', () => {
   describe('OpenAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPEN_AI_CONNECTOR_ID },
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
@@ -287,7 +287,7 @@ describe('OpenAIConnector', () => {
   describe('AzureAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPEN_AI_CONNECTOR_ID },
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
         apiUrl:
           'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
@@ -457,7 +457,7 @@ describe('OpenAIConnector', () => {
   describe('Token dashboard', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPEN_AI_CONNECTOR_ID },
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),

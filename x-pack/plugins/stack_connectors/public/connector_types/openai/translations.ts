@@ -39,7 +39,7 @@ export const API_PROVIDER_LABEL = i18n.translate(
   }
 );
 
-export const OPEN_AI = i18n.translate('xpack.stackConnectors.components.genAi.openAi', {
+export const OPENAI = i18n.translate('xpack.stackConnectors.components.genAi.openAi', {
   defaultMessage: 'OpenAI',
 });
 

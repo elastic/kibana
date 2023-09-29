@@ -10,7 +10,7 @@ import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/open_ai/constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from './use_get_dashboard';
 

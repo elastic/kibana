@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import {
   OpenAISimulator,
   genAiSuccessResponse,
-} from '@kbn/actions-simulators-plugin/server/open_ai_simulation';
+} from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 

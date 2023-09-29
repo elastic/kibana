@@ -10,7 +10,7 @@ import {
   DEFAULT_OPENAI_MODEL,
   OpenAiProviderType,
   OPENAI_CHAT_URL,
-} from '../../../../common/open_ai/constants';
+} from '../../../../common/openai/constants';
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,

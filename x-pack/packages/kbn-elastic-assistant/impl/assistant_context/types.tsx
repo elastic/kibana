@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/open_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 

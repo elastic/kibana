@@ -19,7 +19,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { OpenAiProviderType } from '../../../common/open_ai/constants';
+import { OpenAiProviderType } from '../../../common/openai/constants';
 import { useGetDashboard } from './use_get_dashboard';
 import * as i18n from './translations';
 import {

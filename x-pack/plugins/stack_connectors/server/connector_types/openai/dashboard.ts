@@ -177,7 +177,7 @@ export const getDashboard = (dashboardId: string): SavedObject<DashboardAttribut
                               includeIsRegex: false,
                               excludeIsRegex: false,
                               orderAgg: {
-                                label: 'Sum of kibana.action.execution.open_ai.usage.total_tokens',
+                                label: 'Sum of kibana.action.execution.openai.usage.total_tokens',
                                 dataType: 'number',
                                 operationType: 'sum',
                                 sourceField: 'kibana.action.execution.gen_ai.usage.total_tokens',

@@ -8,7 +8,7 @@
 import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
-import { SUB_ACTION } from '../../../common/open_ai/constants';
+import { SUB_ACTION } from '../../../common/openai/constants';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   params,
