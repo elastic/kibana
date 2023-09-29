@@ -19,7 +19,7 @@ import {
 import { EmbeddableError } from '../lib/embeddables/i_embeddable';
 import { EmbeddableContext, EmbeddableInput, EmbeddableOutput, IEmbeddable } from '..';
 
-export interface EmbeddableContainerContext {
+export interface EmbeddableAppContext {
   /**
    * Current app's path including query and hash starting from {appId}
    */
@@ -54,7 +54,6 @@ export interface EmbeddablePanelProps {
   hideHeader?: boolean;
   hideInspector?: boolean;
   showNotifications?: boolean;
-  containerContext?: EmbeddableContainerContext;
   actionPredicate?: (actionId: string) => boolean;
   onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
   getActions?: UiActionsService['getTriggerCompatibleActions'];

@@ -48,9 +48,9 @@ export function DashboardEmptyScreen() {
   const isDarkTheme = useObservable(theme$)?.darkMode;
   const isEditMode =
     dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
-  const embeddableContainerContext = dashboardContainer.getEmbeddableContainerContext();
-  const originatingPath = embeddableContainerContext?.getCurrentPath?.() ?? '';
-  const originatingApp = embeddableContainerContext?.currentAppId;
+  const embeddableAppContext = dashboardContainer.getAppContext();
+  const originatingPath = embeddableAppContext?.getCurrentPath?.() ?? '';
+  const originatingApp = embeddableAppContext?.currentAppId;
 
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.aliasPath) return;

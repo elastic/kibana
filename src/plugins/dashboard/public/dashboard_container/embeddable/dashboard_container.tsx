@@ -184,13 +184,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.select = reduxTools.select;
   }
 
-  public getEmbeddableContainerContext() {
-    const embeddableContainerContext = this.creationOptions?.getEmbeddableContainerContext?.(
+  public getAppContext() {
+    const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
       this.getDashboardSavedObjectId()
     );
     return {
-      ...embeddableContainerContext,
-      currentAppId: embeddableContainerContext?.currentAppId ?? DASHBOARD_APP_ID,
+      ...embeddableAppContext,
+      currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
     };
   }
 

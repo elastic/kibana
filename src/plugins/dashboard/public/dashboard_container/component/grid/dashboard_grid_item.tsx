@@ -111,7 +111,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
               showNotifications={true}
               onPanelStatusChange={onPanelStatusChange}
               embeddable={() => container.untilEmbeddableLoaded(id)}
-              containerContext={container.getEmbeddableContainerContext()}
+              containerContext={container.getAppContext()}
             />
             {children}
           </>
