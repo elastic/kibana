@@ -95,7 +95,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.contract = new PluginContract();
+    this.contract = new PluginContract(this.experimentalFeatures);
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
   }

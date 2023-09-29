@@ -15,13 +15,13 @@ import { createInvestigationsLinkFromTimeline } from './sections/investigations_
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
-import type { ServerlessSecurityPublicConfig } from '../../types';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 // This function is called by the security_solution plugin to alter the app links
 // that will be registered to the Security Solution application on Serverless projects.
 // The capabilities filtering is done after this function is called by the security_solution plugin.
 export const getProjectAppLinksSwitcher =
-  (config: ServerlessSecurityPublicConfig): AppLinksSwitcher =>
+  (experimentalFeatures: ExperimentalFeatures): AppLinksSwitcher =>
   (appLinks) => {
     const projectAppLinks = cloneDeep(appLinks) as LinkItem[];
 
@@ -43,7 +43,7 @@ export const getProjectAppLinksSwitcher =
     // Add ML link
     projectAppLinks.push(mlAppLink);
 
-    if (!config.platformNavEnabled && manageLinkItem) {
+    if (!experimentalFeatures.platformNavEnabled && manageLinkItem) {
       // Add project settings link
       projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
     }

@@ -108,7 +108,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     if (opts.serverless) {
-      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+      // setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {

@@ -11,6 +11,7 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { AppLinksSwitcher } from './common/links';
 import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 
@@ -24,7 +25,7 @@ export class PluginContract {
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
 
-  constructor() {
+  constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.isILMAvailable$ = new BehaviorSubject<boolean>(true);
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
@@ -55,6 +56,7 @@ export class PluginContract {
       setDeepLinksFormatter: (deepLinksFormatter) => {
         this.deepLinksFormatter = deepLinksFormatter;
       },
+      experimentalFeatures: { ...this.experimentalFeatures },
     };
   }
 

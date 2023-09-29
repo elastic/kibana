@@ -21,14 +21,14 @@ import { devToolsNavLink } from './sections/dev_tools_links';
 import type { ProjectNavigationLink } from './types';
 import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
 import { investigationsNavLinks } from './sections/investigations_links';
-import type { ServerlessSecurityPublicConfig } from '../../types';
 import { ExternalPageName } from './constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export const createProjectNavLinks$ = (
   securityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,
   core: CoreStart,
   cloud: CloudStart,
-  config: ServerlessSecurityPublicConfig
+  experimentalFeatures: ExperimentalFeatures
 ): Observable<ProjectNavigationLink[]> => {
   const { chrome } = core;
   return combineLatest([securityNavLinks$, chrome.navLinks.getNavLinks$()]).pipe(
@@ -37,7 +37,9 @@ export const createProjectNavLinks$ = (
       ([securityNavLinks, chromeNavLinks]) =>
         securityNavLinks.length === 0 || chromeNavLinks.length === 0 // skip if not initialized
     ),
-    map(([securityNavLinks]) => processNavLinks(securityNavLinks, chrome.navLinks, cloud, config))
+    map(([securityNavLinks]) =>
+      processNavLinks(securityNavLinks, chrome.navLinks, cloud, experimentalFeatures)
+    )
   );
 };
 
@@ -49,7 +51,7 @@ const processNavLinks = (
   securityNavLinks: Array<NavigationLink<SecurityPageName>>,
   chromeNavLinks: ChromeNavLinks,
   cloud: CloudStart,
-  config: ServerlessSecurityPublicConfig
+  experimentalFeatures: ExperimentalFeatures
 ): ProjectNavigationLink[] => {
   const projectNavLinks: ProjectNavigationLink[] = [...securityNavLinks];
 
@@ -101,7 +103,7 @@ const processNavLinks = (
   // Dev Tools. just pushing it
   projectNavLinks.push(devToolsNavLink);
 
-  if (config.platformNavEnabled) {
+  if (experimentalFeatures.platformNavEnabled) {
     remove(projectNavLinks, { id: SecurityPageName.landing });
     remove(projectNavLinks, { id: ExternalPageName.devTools });
     remove(projectNavLinks, { id: SecurityPageName.projectSettings });

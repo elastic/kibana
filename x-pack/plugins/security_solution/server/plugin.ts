@@ -69,7 +69,7 @@ import type {
   CreateQueryRuleAdditionalOptions,
   CreateRuleOptions,
 } from './lib/detection_engine/rule_types/types';
-// eslint-disable-next-line no-restricted-imports
+
 import {
   legacyIsNotificationAlertExecutor,
   legacyRulesNotificationAlertType,
@@ -443,6 +443,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     return {
       setAppFeaturesConfigurator:
         appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
+      experimentalFeatures: { ...config.experimentalFeatures },
     };
   }
 

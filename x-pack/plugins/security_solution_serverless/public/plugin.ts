@@ -20,6 +20,11 @@ import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { setupNavigation, startNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
+import {
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from '../common/experimental_features';
+
 export class SecuritySolutionServerlessPlugin
   implements
     Plugin<
@@ -30,15 +35,22 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityPublicConfig;
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
+    this.experimentalFeatures = {} as ExperimentalFeatures;
   }
 
   public setup(
     core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental,
+      setupDeps.securitySolution.experimentalFeatures
+    ).features;
+
     setupNavigation(core, setupDeps, this.config);
     return {};
   }
@@ -50,7 +62,7 @@ export class SecuritySolutionServerlessPlugin
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
-    const services = createServices(core, startDeps, this.config);
+    const services = createServices(core, startDeps, this.experimentalFeatures);
 
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
