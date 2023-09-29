@@ -36,14 +36,14 @@ export interface LogCategorizationAppStateProps {
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
   /** Optional flag to indicate whether kibana is running in serverless */
-  isServerless?: boolean;
+  showFrozenDataTierChoice?: boolean;
 }
 
 export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
-  isServerless = false,
+  showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
 
@@ -56,7 +56,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
-    isServerless,
+    showFrozenDataTierChoice,
   };
 
   return (

@@ -908,6 +908,7 @@ module.exports = {
     },
     {
       files: [
+        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',

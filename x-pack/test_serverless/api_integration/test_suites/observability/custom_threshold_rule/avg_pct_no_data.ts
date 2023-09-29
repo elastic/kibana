@@ -11,7 +11,7 @@ import {
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
 import expect from '@kbn/expect';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Blocked API: index_not_found_exception: no such index [.alerts-observability.threshold.alerts-default]
   // Issue: https://github.com/elastic/kibana/issues/165138
+  // Failing: See https://github.com/elastic/kibana/issues/167629
   describe.skip('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
@@ -52,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
+        query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
@@ -68,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'alerts',
+          consumer: 'logs',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
@@ -135,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold (BETA)'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'alerts');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);

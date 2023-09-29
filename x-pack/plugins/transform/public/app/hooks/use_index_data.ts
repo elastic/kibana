@@ -310,6 +310,8 @@ export const useIndexData = (
   if (
     dataGrid.status === INDEX_STATUS.LOADED &&
     dataViewFields !== undefined &&
+    Array.isArray(histogramsForFieldsData) &&
+    histogramsForFieldsData.length > 0 &&
     loadIndexDataStartTime.current !== undefined
   ) {
     const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;

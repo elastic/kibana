@@ -19,7 +19,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common/constants';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 
 function validateQuery(query: Query) {
   try {

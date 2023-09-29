@@ -90,7 +90,7 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
@@ -140,6 +140,7 @@ function TemplateWithContext({
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
+                    environment={environment}
                     start={start}
                     end={end}
                   />

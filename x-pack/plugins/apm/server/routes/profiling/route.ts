@@ -131,7 +131,38 @@ const profilingFunctionsRoute = createApmServerRoute({
   },
 });
 
+const profilingStatusRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/profiling/status',
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<{ initialized: boolean }> => {
+    const { context, plugins, logger } = resources;
+    const [esClient, profilingDataAccessStart] = await Promise.all([
+      (await context.core).elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+    ]);
+    if (profilingDataAccessStart) {
+      try {
+        const response = await profilingDataAccessStart?.services.getStatus({
+          esClient: esClient.asCurrentUser,
+          soClient: (await context.core).savedObjects.client,
+          spaceId: (
+            await plugins.spaces?.start()
+          )?.spacesService.getSpaceId(resources.request),
+        });
+
+        return { initialized: response.has_setup };
+      } catch (e) {
+        // If any error happens just return as if profiling has not been initialized
+        logger.warn('Could not check Universal Profiling status');
+      }
+    }
+
+    return { initialized: false };
+  },
+});
+
 export const profilingRouteRepository = {
   ...profilingFlamegraphRoute,
+  ...profilingStatusRoute,
   ...profilingFunctionsRoute,
 };

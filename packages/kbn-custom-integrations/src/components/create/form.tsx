@@ -28,6 +28,11 @@ import {
 } from '../../state_machines/create/types';
 import { Dataset, IntegrationError } from '../../types';
 import { hasFailedSelector } from '../../state_machines/create/selectors';
+import {
+  datasetNameWillBePrefixed,
+  getDatasetNamePrefix,
+  prefixDatasetName,
+} from '../../state_machines/create/pipelines/fields';
 
 // NOTE: Hardcoded for now. We will likely extend the functionality here to allow the selection of the type.
 // And also to allow adding multiple datasets.
@@ -50,6 +55,7 @@ export const ConnectedCreateCustomIntegrationForm = ({
   testSubjects?: CreateTestSubjects;
 }) => {
   const [state, send] = useActor(machineRef);
+
   const updateIntegrationName = useCallback(
     (integrationName: string) => {
       send({ type: 'UPDATE_FIELDS', fields: { integrationName } });
@@ -181,17 +187,32 @@ export const CreateCustomIntegrationForm = ({
                 <EuiIconTip
                   content={i18n.translate('customIntegrationsPackage.create.dataset.name.tooltip', {
                     defaultMessage:
-                      'Provide a dataset name to help organise these custom logs. This dataset will be associated with the integration.',
+                      'Provide a dataset name to help organise these custom logs. This dataset will be associated with the integration. ',
                   })}
                   position="right"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          helpText={i18n.translate('customIntegrationsPackage.create.dataset.helper', {
-            defaultMessage:
-              "All lowercase, max 100 chars, special characters will be replaced with '_'.",
-          })}
+          helpText={[
+            i18n.translate('customIntegrationsPackage.create.dataset.helper', {
+              defaultMessage:
+                "All lowercase, max 100 chars, special characters will be replaced with '_'.",
+            }),
+            datasetNameWillBePrefixed(datasetName, integrationName)
+              ? i18n.translate(
+                  'customIntegrationsPackage.create.dataset.name.tooltipPrefixMessage',
+                  {
+                    defaultMessage:
+                      'This name will be prefixed with {prefixValue}, e.g. {prefixedDatasetName}',
+                    values: {
+                      prefixValue: getDatasetNamePrefix(integrationName),
+                      prefixedDatasetName: prefixDatasetName(datasetName, integrationName),
+                    },
+                  }
+                )
+              : '',
+          ].join(' ')}
           isInvalid={hasErrors(errors?.fields?.datasets?.[0]?.name) && touchedFields.datasets}
           error={errorsList(errors?.fields?.datasets?.[0]?.name)}
         >

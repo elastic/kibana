@@ -7,30 +7,14 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { getCypressBaseConfig } from './cypress_base.config';
-import { dataLoaders } from './support/data_loaders';
 
 // eslint-disable-next-line import/no-default-export
-export default defineCypressConfig({
-  ...getCypressBaseConfig(),
+export default defineCypressConfig(
+  getCypressBaseConfig({
+    env: {
+      IS_SERVERLESS: true,
 
-  env: {
-    ...getCypressBaseConfig().env,
-
-    IS_SERVERLESS: true,
-
-    grepTags: '@serverless --@brokenInServerless',
-  },
-
-  e2e: {
-    ...getCypressBaseConfig().e2e,
-
-    specPattern: 'public/management/cypress/e2e/mocked_data/',
-
-    setupNodeEvents: (on, config) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@cypress/grep/src/plugin')(config);
-
-      return dataLoaders(on, config);
+      grepTags: '@serverless --@brokenInServerless',
     },
-  },
-});
+  })
+);

@@ -33,6 +33,22 @@ export interface GuideCardConstants {
 export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
+    icon: 'database',
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
+        defaultMessage="Search across databases {lineBreak} and business systems"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
+    guideId: 'databaseSearch',
+    telemetryId: 'onboarding--search--database',
+    order: 1,
+  },
+  {
+    solution: 'search',
     icon: 'vector',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
       defaultMessage: 'Set up vector search',
@@ -41,19 +57,19 @@ export const guideCards: GuideCardConstants[] = [
       appId: 'enterpriseSearchVectorSearch',
     },
     telemetryId: 'onboarding--search--vector',
-    order: 1,
+    order: 4,
   },
   {
     solution: 'search',
     icon: 'magnifyWithPlus',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
-      defaultMessage: 'Build a semantic search experience',
+      defaultMessage: 'Build an AI-powered search experience',
     }),
     navigateTo: {
       appId: 'enterpriseSearchAISearch',
     },
-    telemetryId: 'onboarding--search--semantic',
-    order: 4,
+    telemetryId: 'onboarding--search--ai',
+    order: 7,
   },
   {
     solution: 'search',
@@ -69,7 +85,7 @@ export const guideCards: GuideCardConstants[] = [
     ),
     guideId: 'appSearch',
     telemetryId: 'onboarding--search--application',
-    order: 7,
+    order: 10,
   },
   {
     solution: 'search',
@@ -79,22 +95,6 @@ export const guideCards: GuideCardConstants[] = [
     }),
     guideId: 'websiteSearch',
     telemetryId: 'onboarding--search--website',
-    order: 10,
-  },
-  {
-    solution: 'search',
-    icon: 'database',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases {lineBreak} and business systems"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'databaseSearch',
-    telemetryId: 'onboarding--search--database',
     order: 13,
   },
   {

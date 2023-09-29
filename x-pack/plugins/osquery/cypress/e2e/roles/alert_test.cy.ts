@@ -35,7 +35,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
       cy.getBySel('expand-event').first().click({ force: true });
 
       cy.wait(500);
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
+      cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
     });
 
