@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esSupertest = getService('esSupertest');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('Elasticsearch API', function () {
+  describe('Home', function () {
     it('can request /', async () => {
       const { body, status } = await esSupertest.get('/');
       svlCommonApi.assertResponseStatusCode(200, status, body);

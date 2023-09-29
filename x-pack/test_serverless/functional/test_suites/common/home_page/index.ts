@@ -7,10 +7,9 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Index Management', function () {
-    loadTestFile(require.resolve('./index_templates'));
-    loadTestFile(require.resolve('./indices'));
-    loadTestFile(require.resolve('./create_enrich_policy'));
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Serverless Common UI - Home Page', function () {
+    loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./sample_data'));
   });
-};
+}

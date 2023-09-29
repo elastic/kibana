@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
