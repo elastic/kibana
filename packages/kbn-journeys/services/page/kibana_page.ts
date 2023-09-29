@@ -53,18 +53,16 @@ export class KibanaPage {
       async () => {
         const renderingItems = await this.page.$$(itemLocator);
         if (renderingItems.length === expectedItemsCount) {
-          // all components are loaded, checking if all are rendered
-          let renderedCount = 0;
-          for (let i = 0; i < renderingItems.length; i++) {
-            const isRendered = await renderingItems[i].getAttribute(checkAttribute);
-            if (isRendered === 'true') {
-              renderedCount++;
-            }
-          }
-          this.log.debug(
-            `waitForRender: ${renderedCount} out of ${expectedItemsCount} are rendered...`
+          const renderStatuses = await Promise.all(
+            renderingItems.map(async (item) => {
+              return (await item.getAttribute(checkAttribute)) === 'true';
+            })
           );
-          return renderedCount === expectedItemsCount;
+          const rendered = renderStatuses.filter((isRendered) => isRendered === true);
+          this.log.debug(
+            `waitForRender: ${rendered.length} out of ${expectedItemsCount} are rendered...`
+          );
+          return rendered.length === expectedItemsCount;
         } else {
           // not all components are loaded yet
           this.log.debug(

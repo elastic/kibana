@@ -20,11 +20,12 @@ export const journey = new Journey({
       )
     );
     await page.waitForSelector(subj('table-is-ready'));
-    // wait extra 5 seconds: we're not sure why, but the extra sleep before loading the editor makes the metrics more consistent
-    await page.waitForTimeout(5000);
+    // wait extra 10 seconds: we're not sure why, but the extra sleep before loading the editor makes the metrics more consistent
+    // sometimes lens charts are not loaded
+    await page.waitForTimeout(10000);
   })
   .step('Open existing Lens visualization', async ({ page, kibanaPage }) => {
     await page.click(subj('visListingTitleLink-Lens-Stress-Test'));
     await page.waitForSelector(subj('lnsChartSwitchPopover'));
-    await kibanaPage.waitForCharts({ count: 6 });
+    await kibanaPage.waitForCharts({ count: 6, timeout: 60000 });
   });
