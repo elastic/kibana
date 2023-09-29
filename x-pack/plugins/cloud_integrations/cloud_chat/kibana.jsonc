@@ -16,7 +16,6 @@
       "cloud"
     ],
     "requiredBundles": [
-      "kibanaReact"
     ],
     "optionalPlugins": [
       "security",

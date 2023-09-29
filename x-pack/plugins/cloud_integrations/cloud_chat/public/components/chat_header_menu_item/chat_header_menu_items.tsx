@@ -25,7 +25,7 @@ export function ChatHeaderMenuItem() {
   const [showChatButton, setChatButtonShow] = React.useState(false);
   const [chatApi, setChatApi] = React.useState<ChatApi | null>(null);
   const [showTour, setShowTour] = useLocalStorage('cloudChatTour', true);
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const ref = React.useRef<HTMLButtonElement>(null);
 
   // chat top offset is used to properly position the chat widget
@@ -47,7 +47,11 @@ export function ChatHeaderMenuItem() {
         <EuiTourStep
           title={
             <>
-              <EuiIcon type={chatIconDark} size={'l'} css={{ marginRight: euiTheme.size.s }} />
+              <EuiIcon
+                type={colorMode === 'DARK' ? chatIconLight : chatIconDark}
+                size={'l'}
+                css={{ marginRight: euiTheme.size.s }}
+              />
               {i18n.translate('xpack.cloudChat.chatTourHeaderText', {
                 defaultMessage: 'Live Chat Now',
               })}

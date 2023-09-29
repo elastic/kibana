@@ -13,7 +13,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ReplaySubject, first } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { GetChatUserDataResponseBody } from '../common/types';
@@ -89,7 +89,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
 
       return (
         <CloudChatContextProvider>
-          <KibanaThemeProvider theme$={core.theme.theme$}>
+          <KibanaThemeProvider theme={core.theme}>
             <I18nProvider>
               {variant && (
                 <ChatExperimentSwitcher
