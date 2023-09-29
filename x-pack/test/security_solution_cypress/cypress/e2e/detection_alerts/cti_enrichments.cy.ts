@@ -8,7 +8,7 @@
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -23,9 +23,7 @@ import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
-
-import { ruleDetailsUrl } from '../../urls/navigation';
-import { addsFieldsToTimeline } from '../../tasks/rule_details';
+import { addsFieldsToTimeline, visitRuleDetailsPage } from '../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -47,7 +45,7 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
   beforeEach(() => {
     login();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
-      (rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+      (rule) => visitRuleDetailsPage(rule.body.id)
     );
   });
 
