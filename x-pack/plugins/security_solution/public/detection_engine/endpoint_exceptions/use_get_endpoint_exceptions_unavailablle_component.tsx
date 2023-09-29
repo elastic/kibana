@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
+import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 
 export const useGetEndpointExceptionsUnavailableComponent = (): React.ComponentType | null => {
   return useUpsellingComponent('ruleDetailsEndpointExceptions');

@@ -38,7 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { useGetEndpointExceptionsUnavailableComponent } from './use_get_endpoint_exceptions_unavailablle_component';
+import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -150,8 +150,6 @@ const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.RULE_DEFAULT,
 ];
 
-const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
-
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -250,8 +248,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const startMlJobsIfNeeded = useCallback(async () => {
     await startMlJobs(rule?.machine_learning_job_id);
   }, [rule, startMlJobs]);
-
-  const EndpointExceptionsUnavailableComponent = useGetEndpointExceptionsUnavailableComponent();
 
   const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
 
@@ -783,21 +779,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route
                   path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
                 >
-                  {!EndpointExceptionsUnavailableComponent ? (
-                    <ExceptionsViewer
-                      rule={rule}
-                      listTypes={RULE_ENDPOINT_EXCEPTION_LIST_TYPE}
-                      onRuleChange={refreshRule}
-                      isViewReadOnly={!isExistingRule}
-                      data-test-subj="endpointExceptionsTab"
-                    />
-                  ) : (
-                    <EuiFlexGroup justifyContent="spaceAround">
-                      <EuiFlexItem grow={false}>
-                        <EndpointExceptionsUnavailableComponent />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
+                  <EndpointExceptionsViewer
+                    rule={rule}
+                    onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
+                    data-test-subj="endpointExceptionsTab"
+                  />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
                   <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
