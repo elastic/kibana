@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { type FC } from 'react';
+import { PanelGroupTitle } from './group_title';
 
 import { PanelNavNode } from './types';
 
@@ -17,10 +18,18 @@ interface Props {
 
 export const DefaultContent: FC<Props> = ({ activeNode }) => {
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
-      <EuiFlexItem>{activeNode.title}</EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ borderTop: '1px solid #333', paddingTop: '16px' }}>
-        Footer
+    <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h2>{activeNode.title}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ width: '100%' }}>
+        {activeNode.children && (
+          <>
+            <div>Render {activeNode.children.length} children here.</div>
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
