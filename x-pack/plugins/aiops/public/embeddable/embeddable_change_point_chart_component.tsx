@@ -36,6 +36,10 @@ export interface EmbeddableChangePointChartProps {
    * Outputs the most recent change point data
    */
   onChange?: (changePointData: ChangePointAnnotation[]) => void;
+  /**
+   * Last reload request time, can be used for manual reload
+   */
+  lastReloadRequestTime?: number;
 }
 
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
