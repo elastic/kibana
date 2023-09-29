@@ -23,13 +23,18 @@ export interface FetchConnectorExecuteAction {
   signal?: AbortSignal | undefined;
 }
 
+export interface FetchConnectorExecuteResponse {
+  response: string;
+  isError: boolean;
+}
+
 export const fetchConnectorExecuteAction = async ({
   assistantLangChain,
   http,
   messages,
   apiConfig,
   signal,
-}: FetchConnectorExecuteAction): Promise<string> => {
+}: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
     content: msg.content,
@@ -77,14 +82,25 @@ export const fetchConnectorExecuteAction = async ({
 
     if (response.status !== 'ok' || !response.data) {
       if (response.service_message) {
-        return `${API_ERROR} \n\n${response.service_message}`;
+        return {
+          response: `${API_ERROR}\n\n${response.service_message}`,
+          isError: true,
+        };
       }
-      return API_ERROR;
+      return {
+        response: API_ERROR,
+        isError: true,
+      };
     }
-
-    return assistantLangChain ? getFormattedMessageContent(response.data) : response.data;
+    return {
+      response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
+      isError: false,
+    };
   } catch (error) {
-    return API_ERROR;
+    return {
+      response: API_ERROR,
+      isError: true,
+    };
   }
 };
 
