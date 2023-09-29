@@ -128,9 +128,18 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     );
   };
 
+  const navigateToAddIntegrationCspmPage = async () => {
+    await PageObjects.common.navigateToUrl(
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture-1.6.0-preview13/add-integration/cspm',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
   return {
     waitForPluginInitialized,
     navigateToComplianceDashboardPage,
+    navigateToAddIntegrationCspmPage,
     dashboard,
     index,
   };

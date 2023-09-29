@@ -8,9 +8,11 @@
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
+import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page'
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
+  cisAddIntegration: AddCisIntegrationFormPageProvider,
 };
