@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const log = getService('log');
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
@@ -23,8 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let unsavedPanelCount = 0;
   const testQuery = 'Test Query';
 
-  // Failing: See https://github.com/elastic/kibana/issues/167661
-  describe.skip('dashboard unsaved state', () => {
+  describe.only('dashboard unsaved state', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('view mode state', () => {
+    describe.skip('view mode state', () => {
       before(async () => {
         await queryBar.setQuery(testQuery);
         await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
@@ -136,16 +136,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('retains unsaved panel count after navigating to another app and back', async () => {
+        log.debug('... before nav to other app ...');
+        await PageObjects.dashboard.getSessionStorage(
+          await PageObjects.dashboard.getDashboardIdFromCurrentUrl()
+        );
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
+
+        log.debug('... after nav to other app, before nav to dashboard ...');
+        await PageObjects.dashboard.getSessionStorage();
+
         await PageObjects.dashboard.navigateToApp();
+
+        log.debug('... after nav back to dashboard ...');
+        await PageObjects.dashboard.getSessionStorage();
+
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);
       });
 
-      it('can discard changes', async () => {
+      it.skip('can discard changes', async () => {
         unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(unsavedPanelCount).to.eql(originalPanelCount + 2);
 
@@ -154,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(currentPanelCount).to.eql(originalPanelCount);
       });
 
-      it('resets to original panel count after switching to view mode and discarding changes', async () => {
+      it.skip('resets to original panel count after switching to view mode and discarding changes', async () => {
         await addPanels();
         await PageObjects.header.waitUntilLoadingHasFinished();
         unsavedPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -167,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(PageObjects.dashboard.getIsInViewMode()).to.eql(true);
       });
 
-      it('does not show unsaved changes badge after saving', async () => {
+      it.skip('does not show unsaved changes badge after saving', async () => {
         await PageObjects.dashboard.switchToEditMode();
         await addPanels();
         await PageObjects.header.waitUntilLoadingHasFinished();

@@ -289,8 +289,22 @@ export class CommonPageObject extends FtrService {
         const alert = await this.browser.getAlert();
         await alert?.accept();
         await this.sleep(700);
+
+        // this.log.debug('... before refresh ...');
+        // let test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
+        // if (test) {
+        //   this.log.debug('--> Found session storage:', JSON.parse(test));
+        // }
+
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
+
+        this.log.debug('... after refresh ...');
+        const test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
+        if (test) {
+          this.log.debug('--> Found session storage:', JSON.parse(test));
+        }
+
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();

@@ -590,6 +590,22 @@ export class DashboardPageObject extends FtrService {
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+
+    await this.getSessionStorage(await this.getDashboardIdFromCurrentUrl());
+  }
+
+  public async getSessionStorage(dashboardId?: string) {
+    const test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
+    if (test) {
+      // const currentDash = await this.getDashboardIdFromCurrentUrl();
+      if (dashboardId) {
+        this.log.debug('Found session storage 1:', JSON.parse(test).default[dashboardId]);
+      } else {
+        this.log.debug('Found session storage 2:', JSON.parse(test));
+      }
+    } else {
+      this.log.debug("Couldn't find session storage???");
+    }
   }
 
   public async getPanelTitles() {
