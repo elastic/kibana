@@ -63,7 +63,7 @@ describe(
   'Add/edit exception from rule details',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
     const ITEM_FIELD = 'unique_value.test';
 
@@ -276,8 +276,8 @@ describe(
         // add exception item conditions
         addExceptionConditions({
           field: 'agent.name',
-          operator: 'is',
-          values: ['foo'],
+          operator: 'is one of',
+          values: ['foo', 'FOO', 'bar'],
         });
 
         // Name is required so want to check that submit is still disabled

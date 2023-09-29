@@ -89,8 +89,8 @@ describe('WorkplaceSearchConfigured', () => {
   });
 
   it('renders chrome and header actions', () => {
+    setMockValues({ organization: { kibanaUIsEnabled: false } });
     const wrapper = shallow(<WorkplaceSearchConfigured />);
-
     expect(wrapper.find(Overview)).toHaveLength(1);
 
     expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
@@ -99,13 +99,14 @@ describe('WorkplaceSearchConfigured', () => {
 
   it('initializes app data with passed props', () => {
     const { workplaceSearch } = DEFAULT_INITIAL_APP_DATA;
+    setMockValues({ organization: { kibanaUIsEnabled: false } });
     shallow(<WorkplaceSearchConfigured workplaceSearch={workplaceSearch} />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ workplaceSearch });
   });
 
   it('does not re-initialize app data or re-render header actions', () => {
-    setMockValues({ hasInitialized: true });
+    setMockValues({ hasInitialized: true, organization: { kibanaUIsEnabled: false } });
 
     shallow(<WorkplaceSearchConfigured />);
 
@@ -114,8 +115,14 @@ describe('WorkplaceSearchConfigured', () => {
   });
 
   it('renders SourceAdded', () => {
+    setMockValues({ organization: { kibanaUIsEnabled: true } });
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
     expect(wrapper.find(SourceAdded)).toHaveLength(1);
+  });
+  it('renders Overview when kibanaUIsEnabled is true', () => {
+    setMockValues({ organization: { kibanaUIsEnabled: false } });
+    const wrapper = shallow(<WorkplaceSearchConfigured />);
+    expect(wrapper.find(Overview)).toHaveLength(1);
   });
 });

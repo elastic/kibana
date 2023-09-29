@@ -7,5 +7,9 @@
 
 export const riskScoreBaseIndexName = 'risk-score';
 
+export const allRiskScoreIndexPattern = '.ds-risk-score*';
+
+export const latestRiskScoreIndexPattern = 'risk-score.risk-score-latest-*';
+
 export const getRiskScoreLatestIndex = (spaceId = 'default') =>
   `${riskScoreBaseIndexName}.risk-score-latest-${spaceId}`;

@@ -10,7 +10,7 @@ import type {
   FieldRowKibanaDependencies,
   FieldRowServices,
 } from '@kbn/management-settings-components-field-row';
-import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { UnsavedFieldChange } from '@kbn/management-settings-types';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -20,7 +20,7 @@ import { ToastsStart } from '@kbn/core-notifications-browser';
  * Contextual services used by a {@link Form} component.
  */
 export interface Services {
-  saveChanges: (changes: Record<string, UnsavedFieldChange<SettingType>>) => void;
+  saveChanges: (changes: Record<string, UnsavedFieldChange>) => void;
   showError: (message: string) => void;
   showReloadPagePrompt: () => void;
 }
