@@ -86,11 +86,11 @@ export const useRuleDetailsTabs = ({
 
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const canCrudEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
+  const canSeeEndpointExceptions = useHasSecurityCapability('showEndpointExceptions');
 
-  const canWriteEndpointExceptions = useMemo(
-    () => !listsConfigLoading && !needsListsConfiguration && canCrudEndpointExceptions,
-    [canCrudEndpointExceptions, listsConfigLoading, needsListsConfiguration]
+  const canReadEndpointExceptions = useMemo(
+    () => !listsConfigLoading && !needsListsConfiguration && canSeeEndpointExceptions,
+    [canSeeEndpointExceptions, listsConfigLoading, needsListsConfiguration]
   );
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export const useRuleDetailsTabs = ({
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
-    if (!canWriteEndpointExceptions) {
+    if (!canReadEndpointExceptions) {
       hiddenTabs.push(RuleDetailTabs.endpointExceptions);
     }
     if (rule != null) {
@@ -117,7 +117,7 @@ export const useRuleDetailsTabs = ({
     const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
 
     setTabs(tabs);
-  }, [canWriteEndpointExceptions, hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
+  }, [canReadEndpointExceptions, hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
 
   return pageTabs;
 };
