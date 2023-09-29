@@ -16,7 +16,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonPage.login();
     });
 
-    before(async () => {
+    after(async () => {
       await svlCommonPage.forceLogout();
     });
 
