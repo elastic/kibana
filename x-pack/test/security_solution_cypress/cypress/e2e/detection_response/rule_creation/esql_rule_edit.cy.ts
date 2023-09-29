@@ -83,6 +83,11 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
     visit(RULES_MANAGEMENT_URL);
     editFirstRule();
 
+    // expands query bar, so query is not obscured on narrow screens
+    cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
+    // ensure once edit form opened, correct query is displayed in ES|QL input
+    cy.get(ESQL_QUERY_BAR).contains(rule.query);
+
     goToAboutStepTab();
     expandAdvancedSettings();
     // this field defined to be returned in rule query
