@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { AccessorOptions, OptionsWithInjectedValues } from '..';
+import type { AssetClientDependencies } from '../../../types';
+import type { GetHostsOptionsPublic } from '../../../../common/types_client';
+import type { OptionsWithInjectedValues } from '..';
 
-export interface GetHostsOptions extends AccessorOptions {
-  from: string;
-  to: string;
-}
+export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
 export type GetHostsOptionsInjected = OptionsWithInjectedValues<GetHostsOptions>;
 
 export interface HostIdentifier {

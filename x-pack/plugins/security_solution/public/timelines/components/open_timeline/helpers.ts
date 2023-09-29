@@ -327,6 +327,7 @@ export interface QueryTimelineById<TCache> {
     isLoading: boolean;
   }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
+  savedSearchId?: string;
 }
 
 export const queryTimelineById = <TCache>({
@@ -340,6 +341,7 @@ export const queryTimelineById = <TCache>({
   openTimeline = true,
   updateIsLoading,
   updateTimeline,
+  savedSearchId,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (timelineId == null) {
@@ -355,6 +357,7 @@ export const queryTimelineById = <TCache>({
         activeTab: activeTimelineTab,
         show: openTimeline,
         initialized: true,
+        savedSearchId: savedSearchId ?? null,
       },
     })();
     updateIsLoading({ id: TimelineId.active, isLoading: false });
@@ -395,6 +398,7 @@ export const queryTimelineById = <TCache>({
               graphEventId,
               show: openTimeline,
               dateRange: { start: from, end: to },
+              savedSearchId: timeline.savedSearchId,
             },
             to,
           })();

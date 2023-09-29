@@ -59,12 +59,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:hard-typecheck')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/type_check.yml'));
-    } else {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/type_check_selective.yml'));
-    }
-
     if (
       (await doAnyChangesMatch([
         /^src\/plugins\/controls/,
