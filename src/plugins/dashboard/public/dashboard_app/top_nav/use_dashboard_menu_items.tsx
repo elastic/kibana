@@ -242,6 +242,7 @@ export const useDashboardMenuItems = ({
     hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
+    showResetChange,
     showShare,
     dashboard,
     setIsLabsShown,
