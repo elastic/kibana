@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+# This script will collect typescript projects and run typecheck on projects between the given 2 parameters
+# Could be used for selective typechecking on projects that might be affected for a given PR.
+# (The accuracy for finding related projects is not a 100%)
+
 if [[ "${CI-}" == "true" ]]; then
   .buildkite/scripts/bootstrap.sh
 
