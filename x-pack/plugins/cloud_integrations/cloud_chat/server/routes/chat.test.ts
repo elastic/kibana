@@ -15,11 +15,20 @@ import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { registerChatRoute } from './chat';
+import { ChatVariant } from '../../common/types';
 
 describe('chat route', () => {
+  const getChatVariant = async (): Promise<ChatVariant> => 'header';
+
   test('do not add the route if security is not enabled', async () => {
     const router = httpServiceMock.createRouter();
-    registerChatRoute({ router, isDev: false, chatIdentitySecret: 'secret', trialBuffer: 60 });
+    registerChatRoute({
+      router,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 60,
+      getChatVariant,
+    });
     expect(router.get.mock.calls).toEqual([]);
   });
 
@@ -35,6 +44,7 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
+      getChatVariant,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -70,6 +80,7 @@ describe('chat route', () => {
       isDev: false,
       chatIdentitySecret: 'secret',
       trialBuffer: 2,
+      getChatVariant,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -108,6 +119,7 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 2,
       trialEndDate,
+      getChatVariant,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -144,6 +156,7 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
+      getChatVariant,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
@@ -151,12 +164,14 @@ describe('chat route', () => {
       KibanaResponse {
         "options": Object {
           "body": Object {
+            "chatVariant": "header",
             "email": "${email}",
             "id": "${username}",
             "token": "json-web-token",
           },
         },
         "payload": Object {
+          "chatVariant": "header",
           "email": "${email}",
           "id": "${username}",
           "token": "json-web-token",
@@ -181,6 +196,7 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       trialEndDate: new Date(),
+      getChatVariant,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
@@ -188,12 +204,59 @@ describe('chat route', () => {
       KibanaResponse {
         "options": Object {
           "body": Object {
+            "chatVariant": "header",
             "email": "${email}",
             "id": "${username}",
             "token": "json-web-token",
           },
         },
         "payload": Object {
+          "chatVariant": "header",
+          "email": "${email}",
+          "id": "${username}",
+          "token": "json-web-token",
+        },
+        "status": 200,
+      }
+      `);
+  });
+
+  test('returns chat variant', async () => {
+    const security = securityMock.createSetup();
+    const username = 'user.name';
+    const email = 'user@elastic.co';
+
+    security.authc.getCurrentUser.mockReturnValueOnce({
+      username,
+      metadata: {
+        saml_email: [email],
+      },
+    });
+
+    const router = httpServiceMock.createRouter();
+    registerChatRoute({
+      router,
+      security,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 60,
+      trialEndDate: new Date(),
+      getChatVariant: async () => 'bubble',
+    });
+    const [_config, handler] = router.get.mock.calls[0];
+    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
+      .toMatchInlineSnapshot(`
+      KibanaResponse {
+        "options": Object {
+          "body": Object {
+            "chatVariant": "bubble",
+            "email": "${email}",
+            "id": "${username}",
+            "token": "json-web-token",
+          },
+        },
+        "payload": Object {
+          "chatVariant": "bubble",
           "email": "${email}",
           "id": "${username}",
           "token": "json-web-token",

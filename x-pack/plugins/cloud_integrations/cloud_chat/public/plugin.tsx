@@ -14,15 +14,11 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ReplaySubject, first } from 'rxjs';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
-import type { GetChatUserDataResponseBody } from '../common/types';
+import type { ChatVariant, GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
 import { isTodayInDateWindow } from '../common/util';
-import {
-  ChatExperimentSwitcher,
-  ChatVariantExperiment,
-} from './components/chat_experiment_switcher';
+import { ChatExperimentSwitcher } from './components/chat_experiment_switcher';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -31,7 +27,6 @@ interface CloudChatSetupDeps {
 
 interface CloudChatStartDeps {
   cloud: CloudStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 interface SetupChatDeps extends CloudChatSetupDeps {
@@ -62,49 +57,31 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     );
   }
 
-  public start(core: CoreStart, { cloud, cloudExperiments }: CloudChatStartDeps) {
+  public start(core: CoreStart, { cloud }: CloudChatStartDeps) {
     const CloudChatContextProvider: FC = ({ children }) => {
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);
       return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
     };
-    function ConnectedChat() {
-      const [variant, setVariant] = React.useState<ChatVariantExperiment | null>(null);
-      React.useEffect(() => {
-        if (cloudExperiments) {
-          cloudExperiments
-            .getVariation<ChatVariantExperiment>('cloud-chat.chat-variant', 'header-menu-item')
-            .then((_variant) => {
-              setVariant(_variant === 'floating-bubble' ? 'floating-bubble' : 'header-menu-item');
-            })
-            .catch(() => {
-              setVariant('header-menu-item');
-            });
-        } else {
-          setVariant('header-menu-item');
-        }
-      }, []);
-
+    function ConnectedChat(props: { chatVariant: ChatVariant }) {
       return (
         <CloudChatContextProvider>
           <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
-            {variant && (
-              <ChatExperimentSwitcher
-                location$={core.application.currentLocation$}
-                variant={variant}
-              />
-            )}
+            <ChatExperimentSwitcher
+              location$={core.application.currentLocation$}
+              variant={props.chatVariant}
+            />
           </KibanaRenderContextProvider>
         </CloudChatContextProvider>
       );
     }
 
-    this.chatConfig$.pipe(first((config) => config != null)).subscribe(() => {
+    this.chatConfig$.pipe(first((config) => config != null)).subscribe((config) => {
       core.chrome.navControls.registerExtension({
         order: 50,
         mount: (e) => {
-          ReactDOM.render(<ConnectedChat />, e);
+          ReactDOM.render(<ConnectedChat chatVariant={config.chatVariant} />, e);
           return () => {
             ReactDOM.unmountComponentAtNode(e);
           };
@@ -134,6 +111,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
         email,
         id,
         token: jwt,
+        chatVariant,
       } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
 
       if (!email || !id || !jwt) {
@@ -142,6 +120,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
 
       this.chatConfig$.next({
         chatURL,
+        chatVariant,
         user: {
           email,
           id,

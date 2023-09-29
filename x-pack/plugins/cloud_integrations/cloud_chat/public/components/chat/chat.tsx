@@ -31,7 +31,6 @@ export const Chat = ({ onReady, onResize, onPlaybookFired, topOffset = 0 }: Prop
     onReady,
     onResize,
     onPlaybookFired,
-    chatVariant: 'header-menu-item' /* just pass this down to user attributes */,
   });
 
   if (!config.enabled) {

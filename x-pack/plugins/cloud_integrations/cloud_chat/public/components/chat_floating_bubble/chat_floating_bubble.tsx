@@ -34,7 +34,6 @@ export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: 
     onResize,
     onPlaybookFired,
     controlled: false /* makes this chat appear automatically */,
-    chatVariant: 'floating-bubble' /* just pass this down to user attributes */,
   });
   const ref = useRef<HTMLDivElement>(null);
   const [isClosed, setIsClosed] = useState(false);

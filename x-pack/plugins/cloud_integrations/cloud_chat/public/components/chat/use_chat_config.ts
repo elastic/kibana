@@ -10,7 +10,6 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useChat } from '../../services';
 import { getChatContext } from './get_chat_context';
 import { Props as ChatProps } from './chat';
-import type { ChatVariantExperiment } from '../chat_experiment_switcher';
 
 type UseChatType =
   | { enabled: false }
@@ -39,9 +38,6 @@ const MESSAGE_PLAYBOOK_FIRED = 'driftPlaybookFired';
 type ChatConfigParams = Exclude<ChatProps, 'onHide'> & {
   /** if the chat visibility is controlled from the outside */
   controlled?: boolean;
-
-  /** just pass this down to user attributes */
-  chatVariant?: ChatVariantExperiment;
 };
 
 /**
@@ -52,7 +48,6 @@ export const useChatConfig = ({
   onResize = () => {},
   onPlaybookFired = () => {},
   controlled = true,
-  chatVariant,
 }: ChatConfigParams): UseChatType => {
   const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
@@ -75,7 +70,7 @@ export const useChatConfig = ({
 
       const context = getChatContext();
       const { data: message } = event;
-      const { user: userConfig } = chat;
+      const { user: userConfig, chatVariant } = chat;
       const { id, email, jwt, trialEndDate, kbnVersion, kbnBuildNum } = userConfig;
 
       const chatApi: ChatApi = {
@@ -115,6 +110,7 @@ export const useChatConfig = ({
       switch (message.type) {
         // The IFRAME is ready to receive messages.
         case MESSAGE_IFRAME_READY: {
+          debugger;
           const user = {
             id,
             attributes: {
@@ -197,7 +193,6 @@ export const useChatConfig = ({
     onResize,
     isReady,
     isResized,
-    chatVariant,
     controlled,
     hasPlaybookFiredOnce,
     onPlaybookFired,

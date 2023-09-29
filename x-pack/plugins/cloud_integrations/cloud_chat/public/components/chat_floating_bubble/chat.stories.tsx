@@ -80,6 +80,7 @@ export const Component = ({
     <ServicesProvider
       chat={{
         chatURL,
+        chatVariant: 'bubble',
         user: {
           jwt,
           id,

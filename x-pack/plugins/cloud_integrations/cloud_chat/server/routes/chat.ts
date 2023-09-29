@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import type { SecurityPluginSetup, AuthenticatedUser } from '@kbn/security-plugin/server';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../../common/constants';
-import type { GetChatUserDataResponseBody } from '../../common/types';
+import type { GetChatUserDataResponseBody, ChatVariant } from '../../common/types';
 import { generateSignedJwt } from '../util/generate_jwt';
 import { isTodayInDateWindow } from '../../common/util';
 
@@ -26,6 +26,7 @@ export const registerChatRoute = ({
   trialBuffer,
   security,
   isDev,
+  getChatVariant,
 }: {
   router: IRouter;
   chatIdentitySecret: string;
@@ -33,6 +34,7 @@ export const registerChatRoute = ({
   trialBuffer: number;
   security?: SecurityPluginSetup;
   isDev: boolean;
+  getChatVariant: () => Promise<ChatVariant>;
 }) => {
   if (!security) {
     return;
@@ -83,6 +85,7 @@ export const registerChatRoute = ({
         token,
         email: userEmail,
         id: userId,
+        chatVariant: await getChatVariant(),
       };
       return response.ok({ body });
     }
