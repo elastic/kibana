@@ -6,7 +6,6 @@
  */
 
 import deepmerge from 'deepmerge';
-import { get } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
@@ -27,8 +26,7 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
-import { removeUnflattenedFieldsFromAlert } from './format_alert';
-import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
+import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -71,16 +69,9 @@ export const buildOngoingAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
-  const refreshableAlertFields = REFRESH_FIELDS_ALL.reduce<Record<string, string | string[]>>(
-    (acc: Record<string, string | string[]>, currField) => {
-      const value = get(alert, currField);
-      if (null != value) {
-        acc[currField] = value;
-      }
-      return acc;
-    },
-    {}
-  );
+
+  // Make sure that any alert fields that are updateable are flattened.
+  const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -121,6 +112,22 @@ export const buildOngoingAlert = <
       ])
     ),
   };
+
+  // Clean the existing alert document so any nested fields that will be updated
+  // are removed, to avoid duplicate data.
+  // e.g. if the existing alert document has the field:
+  // {
+  //   kibana: {
+  //     alert: {
+  //       field1: 'value1'
+  //     }
+  //   }
+  // }
+  // and the updated alert has the field
+  // {
+  //   'kibana.alert.field1': 'value2'
+  // }
+  // the expanded field from the existing alert is removed
   const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
     ...cleanedPayload,
     ...alertUpdates,

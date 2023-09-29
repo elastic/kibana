@@ -11,7 +11,7 @@ import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, TIMESTAMP } from '@kbn/rule-dat
 import { RawAlertInstance } from '@kbn/alerting-state-types';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
-import { removeUnflattenedFieldsFromAlert } from './format_alert';
+import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
@@ -31,6 +31,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   rule,
   timestamp,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
+  // Make sure that any alert fields that are updateable are flattened.
+  const refreshableAlertFields = replaceRefreshableAlertFields(alert);
+
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
@@ -41,8 +44,28 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
   };
-  const formattedAlert = removeUnflattenedFieldsFromAlert(alert, alertUpdates);
-  return deepmerge.all([formattedAlert, alertUpdates], {
+
+  // Clean the existing alert document so any nested fields that will be updated
+  // are removed, to avoid duplicate data.
+  // e.g. if the existing alert document has the field:
+  // {
+  //   kibana: {
+  //     alert: {
+  //       field1: 'value1'
+  //     }
+  //   }
+  // }
+  // and the updated alert has the field
+  // {
+  //   'kibana.alert.field1': 'value2'
+  // }
+  // the expanded field from the existing alert is removed
+  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
+    ...alertUpdates,
+    ...refreshableAlertFields,
+  });
+
+  return deepmerge.all([cleanedAlert, refreshableAlertFields, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

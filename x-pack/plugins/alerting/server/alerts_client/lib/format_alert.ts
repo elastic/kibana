@@ -6,6 +6,9 @@
  */
 
 import { cloneDeep, get, isEmpty, merge, omit } from 'lodash';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import { RuleAlertData } from '../../types';
+import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   const parts = dottedFieldName.split('.');
@@ -70,4 +73,20 @@ export const removeUnflattenedFieldsFromAlert = (
     }
   });
   return compactObject(alertCopy);
+};
+
+export const replaceRefreshableAlertFields = <AlertData extends RuleAlertData>(
+  alert: Alert & AlertData
+) => {
+  // Make sure that any alert fields that are updateable are flattened.
+  return REFRESH_FIELDS_ALL.reduce<Record<string, string | string[]>>(
+    (acc: Record<string, string | string[]>, currField) => {
+      const value = get(alert, currField);
+      if (null != value) {
+        acc[currField] = value;
+      }
+      return acc;
+    },
+    {}
+  );
 };
