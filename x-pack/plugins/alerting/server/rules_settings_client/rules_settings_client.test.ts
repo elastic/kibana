@@ -318,4 +318,125 @@ describe('RulesSettingsClient', () => {
       })
     );
   });
+
+  test('can persist query delay settings when saved object already exists', async () => {
+    const client = new RulesSettingsClient(rulesSettingsClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    const result = await client.queryDelay().get();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_SAVED_OBJECT_ID
+    );
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(result).toEqual(mockAttributes.queryDelay);
+  });
+
+  test('can update query delay settings when saved object does not exist', async () => {
+    const client = new RulesSettingsClient(rulesSettingsClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        RULES_SETTINGS_SAVED_OBJECT_ID
+      )
+    );
+
+    const mockResolve = {
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+      version: '123',
+    };
+
+    savedObjectsClient.create.mockResolvedValueOnce(mockResolve);
+    savedObjectsClient.update.mockResolvedValueOnce({
+      ...mockResolve,
+      attributes: {
+        queryDelay: {
+          ...mockResolve.attributes.queryDelay,
+          delay: 5,
+        },
+      },
+    });
+
+    // Try to update with new values
+    const result = await client.queryDelay().update({
+      delay: 5,
+    });
+
+    // Tried to get first, but no results
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_SAVED_OBJECT_ID
+    );
+
+    // So create a new entry
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      {
+        flapping: expect.objectContaining({
+          enabled: true,
+          lookBackWindow: 20,
+          statusChangeThreshold: 4,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: mockAttributes.queryDelay.delay,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      {
+        id: RULES_SETTINGS_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
+
+    // Try to update with version
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_SAVED_OBJECT_ID,
+      {
+        flapping: expect.objectContaining({
+          enabled: true,
+          lookBackWindow: 20,
+          statusChangeThreshold: 4,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 5,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      { version: '123' }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        delay: 5,
+      })
+    );
+  });
 });

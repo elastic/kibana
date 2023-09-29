@@ -22,7 +22,6 @@ import {
   EuiEmptyPrompt,
   EuiTitle,
 } from '@elastic/eui';
-import { CenterJustifiedSpinner } from '../../center_justified_spinner';
 import { RulesSettingsRange } from '../rules_settings_range';
 
 const queryDelayDescription = i18n.translate(
@@ -82,24 +81,20 @@ export const RulesSettingsQueryDelayTitle = () => {
 
 export interface RulesSettingsQueryDelaySectionProps {
   onChange: (key: keyof RulesSettingsQueryDelayProperties, value: number | boolean) => void;
-  settings: RulesSettingsQueryDelayProperties | undefined;
+  settings: RulesSettingsQueryDelayProperties;
   canShow: boolean | Readonly<{ [x: string]: boolean }>;
   canWrite: boolean;
   hasError: boolean;
-  isLoading: boolean;
 }
 
 export const RulesSettingsQueryDelaySection = memo((props: RulesSettingsQueryDelaySectionProps) => {
-  const { onChange, settings, hasError, isLoading, canShow, canWrite } = props;
+  const { onChange, settings, hasError, canShow, canWrite } = props;
 
   if (!canShow) {
     return null;
   }
   if (hasError) {
     return <RulesSettingsQueryDelayErrorPrompt />;
-  }
-  if (!settings || isLoading) {
-    return <CenterJustifiedSpinner />;
   }
   return (
     <EuiForm data-test-subj="rulesSettingsQueryDelaySection">

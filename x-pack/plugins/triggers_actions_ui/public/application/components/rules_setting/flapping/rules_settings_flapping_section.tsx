@@ -25,7 +25,6 @@ import {
   RulesSettingsFlappingFormSectionProps,
   RulesSettingsFlappingTitle,
 } from './rules_settings_flapping_form_section';
-import { CenterJustifiedSpinner } from '../../center_justified_spinner';
 
 const flappingDescription = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription',
@@ -146,24 +145,20 @@ export const RulesSettingsFlappingFormRight = memo((props: RulesSettingsFlapping
 
 export interface RulesSettingsFlappingSectionProps {
   onChange: (key: keyof RulesSettingsFlappingProperties, value: number | boolean) => void;
-  settings: RulesSettingsFlappingProperties | undefined;
+  settings: RulesSettingsFlappingProperties;
   canShow: boolean | Readonly<{ [x: string]: boolean }>;
   canWrite: boolean;
   hasError: boolean;
-  isLoading: boolean;
 }
 
 export const RulesSettingsFlappingSection = memo((props: RulesSettingsFlappingSectionProps) => {
-  const { onChange, settings, hasError, isLoading, canShow, canWrite } = props;
+  const { onChange, settings, hasError, canShow, canWrite } = props;
 
   if (!canShow) {
     return null;
   }
   if (hasError) {
     return <RulesSettingsFlappingErrorPrompt />;
-  }
-  if (!settings || isLoading) {
-    return <CenterJustifiedSpinner />;
   }
   return (
     <EuiForm data-test-subj="rulesSettingsFlappingSection">

@@ -7,8 +7,6 @@
 
 import React, { memo, useState } from 'react';
 import {
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
   RulesSettingsQueryDelayProperties,
@@ -34,6 +32,7 @@ import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
 import { useUpdateRuleSettings } from '../../hooks/use_update_rule_settings';
+import { CenterJustifiedSpinner } from '../center_justified_spinner';
 
 export const RulesSettingsErrorPrompt = memo(() => {
   return (
@@ -85,34 +84,30 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   } = capabilities;
 
-  const [settings, setSettings] = useState<RulesSettingsProperties>({
-    flapping: DEFAULT_FLAPPING_SETTINGS,
-    queryDelay: DEFAULT_QUERY_DELAY_SETTINGS,
-  });
+  const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
+  const [queryDelaySettings, setQueryDelaySettings] = useState<RulesSettingsQueryDelayProperties>();
 
   const { isLoading, isError: hasError } = useGetFlappingSettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
-      setSettings({
-        ...settings,
-        flapping: {
+      if (!settings) {
+        setSettings({
           enabled: fetchedSettings.enabled,
           lookBackWindow: fetchedSettings.lookBackWindow,
           statusChangeThreshold: fetchedSettings.statusChangeThreshold,
-        },
-      });
+        });
+      }
     },
   });
 
   const { isLoading: isQueryDelayLoading, isError: hasQueryDelayError } = useGetQueryDelaySettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
-      setSettings({
-        ...settings,
-        queryDelay: {
+      if (!queryDelaySettings) {
+        setQueryDelaySettings({
           delay: fetchedSettings.delay,
-        },
-      });
+        });
+      }
     },
   });
 
@@ -133,30 +128,35 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
     key: keyof RulesSettingsFlappingProperties | keyof RulesSettingsQueryDelayProperties,
-    value: number | boolean
+    value: boolean | number
   ) => {
-    if (!settings) {
-      return;
+    if (setting === 'flapping') {
+      if (!settings) {
+        return;
+      }
+      const newSettings = {
+        ...settings,
+        [key]: value,
+      };
+      setSettings({
+        ...newSettings,
+        statusChangeThreshold: Math.min(
+          newSettings.lookBackWindow,
+          newSettings.statusChangeThreshold
+        ),
+      });
     }
 
-    const newSettings = {
-      ...settings,
-      [setting]: {
-        ...settings[setting],
+    if (setting === 'queryDelay') {
+      if (!queryDelaySettings) {
+        return;
+      }
+      const newSettings = {
+        ...queryDelaySettings,
         [key]: value,
-      },
-    };
-
-    setSettings({
-      ...newSettings,
-      flapping: {
-        ...newSettings.flapping,
-        statusChangeThreshold: Math.min(
-          newSettings.flapping.lookBackWindow,
-          newSettings.flapping.statusChangeThreshold
-        ),
-      },
-    });
+      };
+      setQueryDelaySettings(newSettings);
+    }
   };
 
   const handleSave = () => {
@@ -165,10 +165,10 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     }
     const updatedSettings: Partial<RulesSettingsProperties> = {};
     if (canWriteFlappingSettings) {
-      updatedSettings.flapping = settings.flapping;
+      updatedSettings.flapping = settings;
     }
     if (canWriteQueryDelaySettings) {
-      updatedSettings.queryDelay = settings.queryDelay;
+      updatedSettings.queryDelay = queryDelaySettings;
     }
     mutate(updatedSettings);
   };
@@ -181,24 +181,29 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
       return <RulesSettingsErrorPrompt />;
     }
+    if (isLoading || isQueryDelayLoading) {
+      return <CenterJustifiedSpinner />;
+    }
     return (
       <>
-        <RulesSettingsFlappingSection
-          onChange={(key, value) => handleSettingsChange('flapping', key, value)}
-          settings={settings?.flapping}
-          canWrite={canWriteFlappingSettings}
-          canShow={canShowFlappingSettings}
-          hasError={hasError}
-          isLoading={isLoading}
-        />
-        <RulesSettingsQueryDelaySection
-          onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
-          settings={settings?.queryDelay}
-          canWrite={canWriteQueryDelaySettings}
-          canShow={canShowQueryDelaySettings}
-          hasError={hasQueryDelayError}
-          isLoading={isQueryDelayLoading}
-        />
+        {settings && (
+          <RulesSettingsFlappingSection
+            onChange={(key, value) => handleSettingsChange('flapping', key, value)}
+            settings={settings}
+            canWrite={canWriteFlappingSettings}
+            canShow={canShowFlappingSettings}
+            hasError={hasError}
+          />
+        )}
+        {queryDelaySettings && (
+          <RulesSettingsQueryDelaySection
+            onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
+            settings={queryDelaySettings}
+            canWrite={canWriteQueryDelaySettings}
+            canShow={canShowQueryDelaySettings}
+            hasError={hasQueryDelayError}
+          />
+        )}
       </>
     );
   };
