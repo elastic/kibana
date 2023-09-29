@@ -15,7 +15,7 @@ it('correctly determines attribute properties', () => {
       EncryptedSavedObjectTypeRegistration,
       {
         shouldBeEncrypted: boolean[];
-        shouldBeExcludedFromAAD: boolean[];
+        shouldBeIncludedInAAD: boolean[];
         shouldBeStripped: boolean[];
       }
     ]
@@ -27,7 +27,7 @@ it('correctly determines attribute properties', () => {
       },
       {
         shouldBeEncrypted: [true, true, true, true],
-        shouldBeExcludedFromAAD: [true, true, true, true],
+        shouldBeIncludedInAAD: [false, false, false, false],
         shouldBeStripped: [true, true, true, true],
       },
     ],
@@ -38,7 +38,7 @@ it('correctly determines attribute properties', () => {
       },
       {
         shouldBeEncrypted: [true, true, false, false],
-        shouldBeExcludedFromAAD: [true, true, false, false],
+        shouldBeIncludedInAAD: [false, false, false, false],
         shouldBeStripped: [true, true, false, false],
       },
     ],
@@ -49,7 +49,7 @@ it('correctly determines attribute properties', () => {
       },
       {
         shouldBeEncrypted: [true, true, false, false],
-        shouldBeExcludedFromAAD: [true, true, false, false],
+        shouldBeIncludedInAAD: [false, false, false, false],
         shouldBeStripped: [true, true, false, false],
       },
     ],
@@ -57,11 +57,11 @@ it('correctly determines attribute properties', () => {
       {
         type: 'so-type',
         attributesToEncrypt: new Set(['attr#1', 'attr#2']),
-        attributesToExcludeFromAAD: new Set(['attr#3']),
+        attributesToIncludeInAAD: new Set(['attr#4']),
       },
       {
         shouldBeEncrypted: [true, true, false, false],
-        shouldBeExcludedFromAAD: [true, true, true, false],
+        shouldBeIncludedInAAD: [false, false, false, true],
         shouldBeStripped: [true, true, false, false],
       },
     ],
@@ -73,11 +73,11 @@ it('correctly determines attribute properties', () => {
           'attr#2',
           { key: 'attr#4', dangerouslyExposeValue: true },
         ]),
-        attributesToExcludeFromAAD: new Set(['attr#3']),
+        attributesToIncludeInAAD: new Set(['attr#3', 'attr#4']),
       },
       {
         shouldBeEncrypted: [true, true, false, true],
-        shouldBeExcludedFromAAD: [true, true, true, true],
+        shouldBeIncludedInAAD: [false, false, true, false], // will not include attr#4 because it is to be encrypted
         shouldBeStripped: [true, true, false, false],
       },
     ],
@@ -89,11 +89,11 @@ it('correctly determines attribute properties', () => {
           'attr#2',
           { key: 'attr#4', dangerouslyExposeValue: true },
         ]),
-        attributesToExcludeFromAAD: new Set(['some-other-attribute']),
+        attributesToIncludeInAAD: new Set(['attr#3', 'some-other-attribute']),
       },
       {
         shouldBeEncrypted: [true, true, false, true],
-        shouldBeExcludedFromAAD: [true, true, false, true],
+        shouldBeIncludedInAAD: [false, false, true, false],
         shouldBeStripped: [false, true, false, false],
       },
     ],
@@ -108,8 +108,8 @@ it('correctly determines attribute properties', () => {
       expect(typeDefinition.shouldBeStripped(attributeName)).toBe(
         asserts.shouldBeStripped[attributeIndex]
       );
-      expect(typeDefinition.shouldBeExcludedFromAAD(attributeName)).toBe(
-        asserts.shouldBeExcludedFromAAD[attributeIndex]
+      expect(typeDefinition.shouldBeIncludedInAAD(attributeName)).toBe(
+        asserts.shouldBeIncludedInAAD[attributeIndex]
       );
     }
   }

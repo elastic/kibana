@@ -69,7 +69,13 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
-    attributesToExcludeFromAAD: new Set(['name']),
+    // attributesToExcludeFromAAD: new Set(['name']),
+    // included actionTypeId: string;
+    // excluded name: string;
+    // included isMissingSecrets: boolean;
+    // included config: SavedObjectAttributes;
+    // excluded secrets: SavedObjectAttributes;
+    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
   });
 
   savedObjects.registerType({
@@ -98,6 +104,21 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
+    // ToDo: Inlcude all in AAD
+    // actionId: {
+    // consumer: {
+    // params: {
+    // executionId: {
+    // relatedSavedObjects: {
+    // source: {
+    attributesToIncludeInAAD: new Set([
+      'actionId',
+      'consumer',
+      'params',
+      'executionId',
+      'relatedSavedObjects',
+      'source',
+    ]),
   });
 
   savedObjects.registerType({
@@ -114,5 +135,18 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+    // ToDo: Inlcude all in AAD
+    // connectorId: {
+    // tokenType: {
+    // expiresAt: {
+    // createdAt: {
+    // updatedAt: {
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
   });
 }

@@ -49,6 +49,99 @@ export const AlertAttributesExcludedFromAAD = [
   'running',
 ];
 
+// properties: {
+//     enabled: {
+//     name: {
+//     tags: {
+//     alertTypeId: {
+//     schedule: {
+//     consumer: {
+//     legacyId: {
+//     actions: {
+//     params: {
+//     mapped_params: {
+//     scheduledTaskId: {
+//     createdBy: {
+//     updatedBy: {
+//     createdAt: {
+//     updatedAt: {
+//     // NEED TO CHECK WITH KIBANA SECURITY
+//     // apiKey: {
+//     //   type: 'binary',
+//     // },
+//     // NO NEED TO BE INDEXED
+//     // apiKeyOwner: {
+//     //   type: 'keyword',
+//     // },
+//     throttle: {
+//     notifyWhen: {
+//     muteAll: {
+//     mutedInstanceIds: {
+//     // meta: {
+//     monitoring: {
+//     revision: {
+//     snoozeSchedule: {
+//     nextRun: {
+//     executionStatus: {
+//     lastRun: {
+//     running: {
+//       type: 'boolean',
+//     },
+//   },
+
+export const AlertAttributesIncludedInAAD = [
+  // include enabled: boolean;
+  'enabled',
+  // include name: string;
+  'name',
+  // include tags: string[];
+  'tags',
+  // include alertTypeId: string; // this cannot be renamed since it is in the saved object
+  'alertTypeId',
+  // include consumer: string;
+  'consumer',
+  // include legacyId: string | null;
+  'legacyId',
+  // include schedule: IntervalSchedule;
+  'schedule',
+  // include actions: RawRuleAction[];
+  'actions',
+  // include params: SavedObjectAttributes;
+  'params',
+  // include mapped_params?: MappedParams;
+  'mapped_params',
+  // exclude scheduledTaskId?: string | null;
+  // include createdBy: string | null;
+  'createdBy',
+  // exclude updatedBy: string | null;
+  // include createdAt: string;
+  'createdAt',
+  // exclude updatedAt: string;
+  // include apiKey: string | null;
+  'apiKey',
+  // include apiKeyOwner: string | null;
+  'apiKeyOwner',
+  // include apiKeyCreatedByUser?: boolean | null;
+  'apiKeyCreatedByUser',
+  // include throttle?: string | null;
+  'throttle',
+  // include notifyWhen?: RuleNotifyWhenType | null;
+  'notifyWhen',
+  // exclude muteAll: boolean;
+  // exclude mutedInstanceIds: string[];
+  // include meta?: RuleMeta;
+  'meta',
+  // exclude executionStatus: RawRuleExecutionStatus;
+  // exclude monitoring?: RawRuleMonitoring;
+  // exclude snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  // exclude isSnoozedUntil?: string | null;
+  // exclude lastRun?: RawRuleLastRun | null;
+  // exclude nextRun?: string | null;
+  // exclude revision: number;
+  // exclude running?: boolean | null;
+  // exclude (**no longer a field**) snoozeEndTime
+];
+
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
 
@@ -145,12 +238,14 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+    // attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+    attributesToIncludeInAAD: new Set(AlertAttributesIncludedInAAD),
   });
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'api_key_pending_invalidation',
     attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToIncludeInAAD: new Set('createdAt'),
   });
 }

@@ -500,6 +500,7 @@ describe('#encryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     const mockUser = mockAuthenticatedUser();
@@ -527,6 +528,7 @@ describe('#encryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     await expect(
@@ -548,6 +550,7 @@ describe('#encryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     const mockUser = mockAuthenticatedUser();
@@ -567,6 +570,7 @@ describe('#encryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     const mockUser = mockAuthenticatedUser();
@@ -587,13 +591,14 @@ describe('#encryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
+      attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo', 'attrThree']),
     });
 
     const knownType2attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
     service.registerType({
       type: 'known-type-2',
       attributesToEncrypt: new Set(['attrThree']),
-      attributesToExcludeFromAAD: new Set(['attrTwo']),
+      attributesToIncludeInAAD: new Set(['attrOne', 'attrThree']),
     });
 
     await expect(
@@ -801,7 +806,7 @@ describe('#decryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
-      attributesToExcludeFromAAD: new Set(['attrOne']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     const encryptedAttributes = await service.encryptAttributes(
@@ -904,6 +909,7 @@ describe('#decryptAttributes', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       const encryptedAttributes = service.encryptAttributesSync(
@@ -947,6 +953,7 @@ describe('#decryptAttributes', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       const encryptedAttributes = service.encryptAttributesSync(
@@ -990,6 +997,7 @@ describe('#decryptAttributes', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       const encryptedAttributes = service.encryptAttributesSync(
@@ -1116,11 +1124,13 @@ describe('#decryptAttributes', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       service.registerType({
         type: 'known-type-2',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       encryptedAttributes = await service.encryptAttributes(
@@ -1408,6 +1418,7 @@ describe('#decryptAttributes', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
+        attributesToIncludeInAAD: new Set(['attrTwo']),
       });
 
       const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three', attrFour: null };
@@ -1468,6 +1479,7 @@ describe('#encryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     expect(
@@ -1492,6 +1504,7 @@ describe('#encryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     expect(
@@ -1513,6 +1526,7 @@ describe('#encryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     expect(
@@ -1529,6 +1543,7 @@ describe('#encryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     expect(
@@ -1547,13 +1562,14 @@ describe('#encryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
+      attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
     });
 
     const knownType2attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
     service.registerType({
       type: 'known-type-2',
       attributesToEncrypt: new Set(['attrThree']),
-      attributesToExcludeFromAAD: new Set(['attrTwo']),
+      attributesToIncludeInAAD: new Set(['attrOne']),
     });
 
     expect(
@@ -1739,7 +1755,7 @@ describe('#decryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
-      attributesToExcludeFromAAD: new Set(['attrOne']),
+      attributesToIncludeInAAD: new Set(['attrTwo']),
     });
 
     const encryptedAttributes = service.encryptAttributesSync(
@@ -1838,6 +1854,7 @@ describe('#decryptAttributesSync', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       const encryptedAttributes = service.encryptAttributesSync(
@@ -1881,6 +1898,7 @@ describe('#decryptAttributesSync', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       const encryptedAttributes = service.encryptAttributesSync(
@@ -1924,6 +1942,7 @@ describe('#decryptAttributesSync', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrThree']),
+        attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
       });
 
       const encryptedAttributes = service.encryptAttributesSync(
@@ -2042,11 +2061,13 @@ describe('#decryptAttributesSync', () => {
     const type1 = {
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
+      attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
     };
 
     const type2 = {
       type: 'known-type-2',
       attributesToEncrypt: new Set(['attrThree']),
+      attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
     };
 
     beforeEach(() => {
@@ -2348,6 +2369,7 @@ describe('#decryptAttributesSync', () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
+        attributesToIncludeInAAD: new Set(['attrTwo']),
       });
 
       const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three', attrFour: null };

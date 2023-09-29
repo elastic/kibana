@@ -46,6 +46,57 @@ export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
     ConfigKey.METADATA,
     ...legacyConfigKeys,
   ]),
+  // name: {
+  // type: {
+  // urls: {
+  // hosts: {
+  // journey_id: {
+  // project_id: {
+  // origin: {
+  // hash: {
+  // locations: {
+  // custom_heartbeat_id: {
+  // id: {
+  // tags: {
+  // schedule: {
+  // enabled: {
+  // exclude alert: {
+  // exclude throttling: {
+  // exclude __ui
+  attributesToIncludeInAAD: new Set([
+    'name',
+    'type',
+    'urls',
+    'hosts',
+    'journey_id',
+    'project_id',
+    'origin',
+    'hash',
+    'locations',
+    'custom_heartbeat_ids',
+    'id',
+    'tags',
+    'schedule',
+    'enabled',
+  ]),
+
+  // SOURCE_ZIP_URL = 'source.zip_url.url',
+  // SOURCE_ZIP_USERNAME = 'source.zip_url.username',
+  // SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
+  // SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
+  // SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
+  // ZIP_URL_TLS_CERTIFICATE_AUTHORITIES = 'source.zip_url.ssl.certificate_authorities',
+  // ZIP_URL_TLS_CERTIFICATE = 'source.zip_url.ssl.certificate',
+  // ZIP_URL_TLS_KEY = 'source.zip_url.ssl.key',
+  // ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
+  // ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
+  // ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+
+  // THROTTLING_CONFIG = 'throttling.config',
+  // IS_THROTTLING_ENABLED = 'throttling.is_enabled',
+  // DOWNLOAD_SPEED = 'throttling.download_speed',
+  // UPLOAD_SPEED = 'throttling.upload_speed',
+  // LATENCY = 'throttling.latency',
 };
 
 export const getSyntheticsMonitorSavedObjectType = (
