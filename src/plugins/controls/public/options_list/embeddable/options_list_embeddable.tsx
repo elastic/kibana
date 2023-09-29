@@ -332,6 +332,7 @@ export class OptionsListEmbeddable
       }
 
       const { suggestions, invalidSelections, totalCardinality } = response;
+
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
@@ -347,7 +348,7 @@ export class OptionsListEmbeddable
         const valid: string[] = [];
         const invalid: string[] = [];
         for (const selectedOption of selectedOptions ?? []) {
-          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+          if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
         this.dispatch.updateQueryResults({
