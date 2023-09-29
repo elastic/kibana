@@ -11,14 +11,14 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
-import { matchPath, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath } from '../../../helpers';
+import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -27,7 +27,6 @@ import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { AssistantHeaderLink } from '../../../assistant/header_link';
-import { SecurityPageName } from '../../../../common/constants';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -49,12 +48,7 @@ export const GlobalHeader = React.memo(() => {
 
   const sourcererScope = getScopeFromPath(pathname);
   const showSourcerer = showSourcererByPath(pathname);
-  const dashboardViewPath =
-    matchPath(pathname, {
-      path: `/${SecurityPageName.dashboards}/:id`,
-      exact: false,
-      strict: false,
-    }) != null;
+  const dashboardViewPath = isDashboardViewPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -75,8 +69,7 @@ export const GlobalHeader = React.memo(() => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-    /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
-  }, [portalNode, setHeaderActionMenu, theme.theme$, theme, kibanaServiceI18n, dashboardViewPath]);
+  }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
   return (
     <InPortal node={portalNode}>

@@ -122,6 +122,7 @@ export const createStartServicesMock = (
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
+  const mockSetHeaderActionMenu = jest.fn();
 
   return {
     ...core,
@@ -222,6 +223,7 @@ export const createStartServicesMock = (
     customDataService,
     uiActions: uiActionsPluginMock.createStartContract(),
     savedSearch: savedSearchPluginMock.createStartContract(),
+    setHeaderActionMenu: mockSetHeaderActionMenu,
   } as unknown as StartServices;
 };
 

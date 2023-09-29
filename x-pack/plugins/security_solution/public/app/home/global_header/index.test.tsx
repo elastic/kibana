@@ -26,7 +26,6 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
-import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -50,7 +49,6 @@ jest.mock('react-reverse-portal', () => ({
 }));
 
 describe('global header', () => {
-  const mockSetHeaderActionMenu = jest.fn();
   const state = {
     ...mockGlobalState,
     timeline: {
@@ -68,21 +66,6 @@ describe('global header', () => {
 
   beforeEach(() => {
     useVariationMock.mockReset();
-    (useKibana as jest.Mock).mockImplementation(() => {
-      return {
-        services: {
-          data: {
-            dataViews: {},
-          },
-          http: { basePath: { prepend: jest.fn((url: string) => url) } },
-          cloudExperiments: {
-            getVariation: jest.fn(),
-          },
-          theme: { theme$: jest.fn() },
-          setHeaderActionMenu: mockSetHeaderActionMenu,
-        },
-      };
-    });
   });
 
   it('has add data link', () => {
