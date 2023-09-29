@@ -201,6 +201,7 @@ describe('Functions page', () => {
         .type('20');
       cy.contains('Save changes').click();
       cy.go('back');
+      cy.wait('@getTopNFunctions');
       cy.get(firstRowSelector).eq(5).contains('24.22k lbs / 10.99k');
       const firstRowSelectorActionButton =
         '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
