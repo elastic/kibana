@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import styled from 'styled-components';
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionListItemSchema,
-  UseExceptionListItemsSuccess,
-  Pagination,
   ExceptionListSchema,
+  Pagination,
+  UseExceptionListItemsSuccess,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
 import {
@@ -29,6 +29,7 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -44,6 +45,7 @@ import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -118,6 +120,15 @@ const ExceptionsViewerComponent = ({
   const isEndpointSpecified = useMemo(
     () => listTypes.length === 1 && listTypes[0] === ExceptionListTypeEnum.ENDPOINT,
     [listTypes]
+  );
+
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
+  const canCrudEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
+
+  const canWriteEndpointExceptions = useMemo(
+    () => !listsConfigLoading && !needsListsConfiguration && canCrudEndpointExceptions,
+    [canCrudEndpointExceptions, listsConfigLoading, needsListsConfiguration]
   );
 
   // Reducer state
@@ -531,7 +542,7 @@ const ExceptionsViewerComponent = ({
 
           <ExceptionsViewerItems
             isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting'}
+            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
