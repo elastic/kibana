@@ -105,7 +105,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickOnNodeDetailsFlyoutOpenAsPage() {
       await retry.try(async () => {
-        await testSubjects.click('infraNodeContextPopoverOpenAsPageButton');
+        await testSubjects.click('infraAssetDetailsOpenAsPageButton');
       });
     },
 
@@ -432,6 +432,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async inputQueryData() {
       const queryBar = await testSubjects.find('infraSearchField');
       await queryBar.type('h');
+    },
+
+    async inputAddHostNameFilter(hostName: string) {
+      await this.enterSearchTerm(`host.name:"${hostName}"`);
+    },
+
+    async clickOnNode() {
+      return testSubjects.click('nodeContainer');
     },
 
     async ensureSuggestionsPanelVisible() {

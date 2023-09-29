@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
@@ -37,12 +36,14 @@ import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider
 import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
+import { usePluginConfig } from '../../containers/plugin_config_context';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
 
-export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+export const InfrastructurePage = () => {
+  const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
@@ -96,19 +97,21 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   )}
                   <Routes>
                     <Route path={'/inventory'} component={SnapshotPage} />
-                    <Route path={'/explorer'}>
-                      <MetricsExplorerOptionsContainer>
-                        <WithMetricsExplorerOptionsUrlState />
-                        {source?.configuration ? (
-                          <PageContent
-                            configuration={source.configuration}
-                            createDerivedIndexPattern={createDerivedIndexPattern}
-                          />
-                        ) : (
-                          <SourceLoadingPage />
-                        )}
-                      </MetricsExplorerOptionsContainer>
-                    </Route>
+                    {config.featureFlags.metricsExplorerEnabled && (
+                      <Route path={'/explorer'}>
+                        <MetricsExplorerOptionsContainer>
+                          <WithMetricsExplorerOptionsUrlState />
+                          {source?.configuration ? (
+                            <PageContent
+                              configuration={source.configuration}
+                              createDerivedIndexPattern={createDerivedIndexPattern}
+                            />
+                          ) : (
+                            <SourceLoadingPage />
+                          )}
+                        </MetricsExplorerOptionsContainer>
+                      </Route>
+                    )}
                     <Route path="/detail/:type/:node" component={NodeDetail} />
                     <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
@@ -131,10 +134,6 @@ const PageContent = (props: {
   const { createDerivedIndexPattern, configuration } = props;
 
   return (
-    <MetricsExplorerPage
-      derivedIndexPattern={createDerivedIndexPattern()}
-      source={configuration}
-      {...props}
-    />
+    <MetricsExplorerPage derivedIndexPattern={createDerivedIndexPattern()} source={configuration} />
   );
 };

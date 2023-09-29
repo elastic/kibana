@@ -25,6 +25,15 @@ describe('getLatestMonitor', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: 'run_once',
+                    },
+                  },
+                },
+              },
+              {
                 range: {
                   '@timestamp': {
                     gte: 'now-1h',

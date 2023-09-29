@@ -310,6 +310,7 @@ enabled:
   - x-pack/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts
+  - x-pack/test/functional/apps/saved_query_management/config.ts
   - x-pack/test/functional/apps/security/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
@@ -357,6 +358,7 @@ enabled:
   - x-pack/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
+  - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/test/saved_object_tagging/functional/config.ts
   - x-pack/test/saved_objects_field_count/config.ts
   - x-pack/test/search_sessions_integration/config.ts
