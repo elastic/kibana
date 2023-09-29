@@ -141,7 +141,7 @@ export function DeployDFAModelFlyoutProvider(
         'mlTrainedModelsInferencePipelineFieldMapEditButton'
       );
       await editFieldMapButton.click();
-      // TODO: need to make sure the field map editor is cleared before adding value
+
       await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
         'mlTrainedModelsInferencePipelineFieldMapEdit',
         JSON.stringify(values.editedFieldMap)
