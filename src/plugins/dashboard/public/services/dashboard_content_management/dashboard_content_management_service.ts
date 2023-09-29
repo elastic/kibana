@@ -13,6 +13,7 @@ import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashb
 
 import {
   searchDashboards,
+  findDashboardById,
   findDashboardsByIds,
   findDashboardIdByTitle,
 } from './lib/find_dashboards';
@@ -21,15 +22,18 @@ import type {
   DashboardContentManagementRequiredServices,
   DashboardContentManagementService,
 } from './types';
-import { loadDashboardState } from './lib/load_dashboard_state';
 import { deleteDashboards } from './lib/delete_dashboards';
+import { loadDashboardState } from './lib/load_dashboard_state';
 import { updateDashboardMeta } from './lib/update_dashboard_meta';
+import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 
 export type DashboardContentManagementServiceFactory = KibanaPluginServiceFactory<
   DashboardContentManagementService,
   DashboardStartDependencies,
   DashboardContentManagementRequiredServices
 >;
+
+export const dashboardContentManagementCache = new DashboardContentManagementCache();
 
 export const dashboardContentManagementServiceFactory: DashboardContentManagementServiceFactory = (
   { startPlugins: { contentManagement } },
@@ -66,14 +70,16 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         dashboardSessionStorage,
       }),
     findDashboards: {
-      search: ({ hasReference, hasNoReference, search, size }) =>
+      search: ({ hasReference, hasNoReference, search, size, options }) =>
         searchDashboards({
           contentManagement,
           hasNoReference,
           hasReference,
+          options,
           search,
           size,
         }),
+      findById: (id) => findDashboardById(contentManagement, id),
       findByIds: (ids) => findDashboardsByIds(contentManagement, ids),
       findByTitle: (title) => findDashboardIdByTitle(contentManagement, title),
     },
