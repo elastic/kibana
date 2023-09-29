@@ -19,23 +19,24 @@ export const RulesSettingsLink = () => {
 
   const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = capabilities.rulesSettings;
 
+  if (!show || (!readFlappingSettingsUI && !readQueryDelaySettingsUI)) {
+    return null;
+  }
+
   return (
-    show &&
-    (readFlappingSettingsUI || readQueryDelaySettingsUI) && (
-      <>
-        <EuiButtonEmpty
-          onClick={() => setIsVisible(true)}
-          iconType="gear"
-          data-test-subj="rulesSettingsLink"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.link.title"
-            defaultMessage="Settings"
-          />
-        </EuiButtonEmpty>
-        <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
-      </>
-    )
+    <>
+      <EuiButtonEmpty
+        onClick={() => setIsVisible(true)}
+        iconType="gear"
+        data-test-subj="rulesSettingsLink"
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.rulesSettings.link.title"
+          defaultMessage="Settings"
+        />
+      </EuiButtonEmpty>
+      <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
+    </>
   );
 };
 

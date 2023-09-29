@@ -38138,7 +38138,6 @@
     "xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription": "检测在“活动”和“已恢复”状态之间快速切换的告警，并为这些摆动告警减少不必要噪音。",
     "xpack.triggersActionsUI.rulesSettings.modal.flappingOffLabel": "关闭",
     "xpack.triggersActionsUI.rulesSettings.modal.flappingOnLabel": "开（建议）",
-    "xpack.triggersActionsUI.rulesSettings.modal.getRulesSettingsError": "无法获取规则设置。",
     "xpack.triggersActionsUI.rulesSettings.modal.saveButton": "保存",
     "xpack.triggersActionsUI.rulesSettings.modal.title": "规则设置",
     "xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsFailure": "无法更新规则设置。",

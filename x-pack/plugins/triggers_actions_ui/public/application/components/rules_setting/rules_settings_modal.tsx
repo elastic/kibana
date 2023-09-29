@@ -99,7 +99,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           },
           queryDelay: DEFAULT_QUERY_DELAY_SETTINGS,
         });
-      } else if (settings && !settings.flapping) {
+      } else {
         setSettings({
           ...settings,
           flapping: {
@@ -120,7 +120,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           },
           flapping: DEFAULT_FLAPPING_SETTINGS,
         });
-      } else if (settings && !settings.queryDelay) {
+      } else {
         setSettings({
           ...settings,
           queryDelay: {

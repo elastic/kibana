@@ -10,8 +10,12 @@ import {
   RulesSettingsQueryDelay,
   RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-plugin/common';
-import { AsApiContract } from '@kbn/actions-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+
+const rewriteBodyRes: RewriteRequestCase<RulesSettingsQueryDelay> = ({ ...rest }: any) => ({
+  ...rest,
+});
 
 export const updateQueryDelaySettings = async ({
   http,
@@ -36,5 +40,5 @@ export const updateQueryDelaySettings = async ({
     }
   );
 
-  return res;
+  return rewriteBodyRes(res);
 };
