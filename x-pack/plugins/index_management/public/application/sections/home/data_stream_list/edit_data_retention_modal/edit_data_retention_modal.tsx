@@ -15,7 +15,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
-  EuiCallOut,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,7 @@ import {
   NumericField,
 } from '../../../../../shared_imports';
 
+import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
@@ -40,7 +42,6 @@ import { updateDataRetention } from '../../../../services/api';
 interface Props {
   dataRetention: string;
   dataStreamName: string;
-  configuredByILM: boolean;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
@@ -171,7 +172,6 @@ const configurationFormSchema: FormSchema = {
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   dataRetention,
   dataStreamName,
-  configuredByILM,
   onClose,
 }) => {
   const { size, unit } = splitSizeAndUnits(dataRetention);
@@ -237,30 +237,27 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {configuredByILM && (
-            <>
-              <EuiCallOut
-                color="warning"
-                iconType="warning"
-                data-test-subj="configuredByILMWarning"
-                title={i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle',
-                  {
-                    defaultMessage: 'Override ILM data retention',
-                  }
-                )}
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningText"
-                    defaultMessage="Since this data stream is configured by ILM, you must also update the ILM policy to match the new data retention period."
-                  />
-                </p>
-              </EuiCallOut>
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionDocsLink"
+              defaultMessage="Edit the data retention requirements for your data stream. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={documentationService.getUpdateExistingDS()}
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText', {
+                      defaultMessage: 'Learn more.',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
 
-              <EuiSpacer size="m" />
-            </>
-          )}
           <UseField
             path="dataRetention"
             component={NumericField}

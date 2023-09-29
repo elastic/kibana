@@ -491,7 +491,7 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
     });
 
-    test('with ILM updating data retention should show a warning callout', async () => {
+    test('with ILM updating data retention should be dissabled', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({
@@ -514,8 +514,8 @@ describe('Data Streams tab', () => {
       const { actions } = testBed;
       await actions.clickNameAt(0);
 
-      actions.clickEditDataRetentionButton();
-      expect(testBed.find('configuredByILMWarning').exists()).toBeTruthy();
+      testBed.find('manageDataStreamButton').simulate('click');
+      expect(testBed.find('editDataRetentionButton').exists()).toBeFalsy();
     });
 
     test('with an ILM url locator and no ILM policy', async () => {

@@ -312,18 +312,21 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         defaultMessage: 'Data stream options',
       }),
       items: [
-        {
-          key: 'editDataRetention',
-          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
-            defaultMessage: 'Edit data retention',
-          }),
-          'data-test-subj': 'editDataRetentionButton',
-          icon: <EuiIcon type="pencil" size="m" />,
-          onClick: () => {
-            closePopover();
-            setIsEditingDataRetention(true);
-          },
-        },
+        ...(!dataStream?.ilmPolicyName
+          ? [{
+            key: 'editDataRetention',
+            name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
+              defaultMessage: 'Edit data retention',
+            }),
+            'data-test-subj': 'editDataRetentionButton',
+            icon: <EuiIcon type="pencil" size="m" />,
+            onClick: () => {
+              closePopover();
+              setIsEditingDataRetention(true);
+            },
+          }]
+          : []
+        ),
         ...(dataStream?.privileges.delete_index
           ? [
               {
@@ -369,7 +372,6 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             }
           }}
           dataStreamName={dataStreamName}
-          configuredByILM={!!dataStream?.ilmPolicyName}
           dataRetention={dataStream?.lifecycle?.data_retention as string}
         />
       )}
@@ -408,7 +410,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            {!isLoading && !error && (
+            {!isLoading && !error && panels[0].items?.length && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={button}
