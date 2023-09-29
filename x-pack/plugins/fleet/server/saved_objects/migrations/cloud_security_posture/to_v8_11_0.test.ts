@@ -62,7 +62,7 @@ describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
     });
   });
 
-  it('if there are no type cloudbeat/cis_gcp, do not add gcp.account_type', () => {
+  it('if there are no cloud_security_posture package, do not change the doc', () => {
     const initialDoc = policyDoc('cloudbeat/cis_gcp', false, 'NOT_cloud_security_posture');
     const migratedDoc = policyDoc('cloudbeat/cis_gcp', false, 'NOT_cloud_security_posture');
     expect(migration(initialDoc , {} as SavedObjectModelTransformationContext)).toEqual({
