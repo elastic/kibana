@@ -80,11 +80,7 @@ export class CollectConfigContainer extends React.Component<
 
     return (
       <DashboardDrilldownConfig
-        activeDashboardId={config.dashboardId}
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
-        currentFilters={config.useCurrentFilters}
-        keepRange={config.useCurrentDateRange}
-        openInNewTab={config.openInNewTab}
         isLoading={isLoading}
         error={error}
         onDashboardSelect={(dashboardId) => {
@@ -94,24 +90,10 @@ export class CollectConfigContainer extends React.Component<
           }
         }}
         onSearchChange={this.debouncedLoadDashboards}
-        onCurrentFiltersToggle={() =>
-          onConfig({
-            ...config,
-            useCurrentFilters: !config.useCurrentFilters,
-          })
-        }
-        onKeepRangeToggle={() =>
-          onConfig({
-            ...config,
-            useCurrentDateRange: !config.useCurrentDateRange,
-          })
-        }
-        onOpenInNewTab={() =>
-          onConfig({
-            ...config,
-            openInNewTab: !config.openInNewTab,
-          })
-        }
+        config={config}
+        onConfigChange={(changes: Partial<Config>) => {
+          onConfig({ ...config, ...changes });
+        }}
       />
     );
   }

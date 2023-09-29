@@ -18,9 +18,9 @@ const name = 'Some array field';
 const id = 'some:array:field';
 
 describe('ArrayInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: InputProps<'array'> = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'array',
@@ -35,7 +35,7 @@ describe('ArrayInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -70,7 +70,7 @@ describe('ArrayInput', () => {
     expect(input).toHaveValue('foo, bar, baz');
   });
 
-  it('only calls onChange when blurred ', () => {
+  it('only calls onInputChange when blurred ', () => {
     render(wrap(<ArrayInput {...defaultProps} />));
     const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
 
@@ -78,13 +78,13 @@ describe('ArrayInput', () => {
     userEvent.type(input, ',baz');
 
     expect(input).toHaveValue('foo, bar,baz');
-    expect(defaultProps.onChange).not.toHaveBeenCalled();
+    expect(defaultProps.onInputChange).not.toHaveBeenCalled();
 
     act(() => {
       input.blur();
     });
 
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'array',
       unsavedValue: ['foo', 'bar', 'baz'],
     });

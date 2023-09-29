@@ -22,6 +22,7 @@ import {
   getDefaultAiOpsListState,
   type AiOpsPageUrlState,
 } from '../../application/utils/url_state';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import { SearchPanel } from '../search_panel';
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
@@ -151,6 +152,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             setGlobalState={setGlobalState}
             esSearchQuery={searchQuery}
             stickyHistogram={stickyHistogram}
+            embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
           />
         </EuiFlexGroup>
       </EuiPageSection>
