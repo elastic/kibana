@@ -286,8 +286,8 @@ export class ActionExecutor {
 
         event.event = event.event || {};
 
-        // start openai extension
-        // add event.kibana.action.execution.openai to event log when OpenAI Connector is executed
+        // start gen_ai extension
+        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
           const data = result.data as unknown as {
             usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
@@ -311,7 +311,7 @@ export class ActionExecutor {
             },
           };
         }
-        // end openai extension
+        // end gen_ai extension
 
         const currentUser = security?.authc.getCurrentUser(request);
 
