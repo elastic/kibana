@@ -90,6 +90,7 @@ const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => vo
       redirectTo={redirectTo}
       showBorderBottom={false}
       setCustomHeaderActionMenu={setHeaderActionMenu}
+      showResetChange={false}
     />
   ) : null;
 };

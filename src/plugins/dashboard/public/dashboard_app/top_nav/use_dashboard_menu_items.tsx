@@ -26,10 +26,12 @@ export const useDashboardMenuItems = ({
   redirectTo,
   isLabsShown,
   setIsLabsShown,
+  showResetChange,
 }: {
   redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+  showResetChange?: boolean;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -198,13 +200,17 @@ export const useDashboardMenuItems = ({
         run: () => saveDashboardAs(),
       } as TopNavMenuData,
 
-      switchToViewMode: {
-        ...topNavStrings.switchToViewMode,
-        id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId,
-        testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
-      } as TopNavMenuData,
+      ...(showResetChange
+        ? {
+            switchToViewMode: {
+              ...topNavStrings.switchToViewMode,
+              id: 'cancel',
+              disableButton: disableTopNav || !lastSavedId,
+              testId: 'dashboardViewOnlyMode',
+              run: () => resetChanges(true),
+            } as TopNavMenuData,
+          }
+        : {}),
 
       share: {
         ...topNavStrings.share,

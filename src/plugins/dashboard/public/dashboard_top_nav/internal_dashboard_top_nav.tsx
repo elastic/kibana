@@ -47,6 +47,7 @@ export interface InternalDashboardTopNavProps {
   redirectTo: DashboardRedirect;
   setCustomHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
   showBorderBottom?: boolean;
+  showResetChange?: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -58,7 +59,8 @@ export function InternalDashboardTopNav({
   forceHideQueryInput,
   redirectTo,
   setCustomHeaderActionMenu,
-  showBorderBottom,
+  showBorderBottom = true,
+  showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
@@ -275,6 +277,7 @@ export function InternalDashboardTopNav({
     redirectTo,
     isLabsShown,
     setIsLabsShown,
+    showResetChange,
   });
 
   UseUnmount(() => {
