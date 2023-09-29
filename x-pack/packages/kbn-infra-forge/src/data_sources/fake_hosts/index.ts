@@ -8,7 +8,7 @@
 import lodash from 'lodash';
 import type { Moment } from 'moment';
 
-export { indexTemplate } from './index_template_def';
+export { template } from './template';
 
 const createGroupIndex = (index: number) => Math.floor(index / 1000) * 1000;
 

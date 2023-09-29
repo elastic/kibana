@@ -20,7 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  describe('Custom Threshold rule - AVG - PCT - NoData', () => {
+  // Blocked API: index_not_found_exception: no such index [.alerts-observability.threshold.alerts-default]
+  // Issue: https://github.com/elastic/kibana/issues/165138
+  describe.skip('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id-no-data';
@@ -50,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
+        query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
@@ -66,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'apm',
+          consumer: 'logs',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
@@ -133,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold (BETA)'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'apm');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
