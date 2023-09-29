@@ -143,7 +143,7 @@ export function InitialSetupPanel({
                       {i18n.translate(
                         'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description1',
                         {
-                          defaultMessage: 'Set up an OpenAI connector with your AI provider.',
+                          defaultMessage: 'Set up a Generative AI connector with your AI provider.',
                         }
                       )}
                     </p>
@@ -153,7 +153,7 @@ export function InitialSetupPanel({
                         'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description2',
                         {
                           defaultMessage:
-                            'The OpenAI model needs to support function calls. We strongly recommend using GPT4.',
+                            'The Generative AI model needs to support function calls. We strongly recommend using GPT4.',
                         }
                       )}
                       <EuiBetaBadge
@@ -197,7 +197,7 @@ export function InitialSetupPanel({
                     {i18n.translate(
                       'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.buttonLabel',
                       {
-                        defaultMessage: 'Set up OpenAI connector',
+                        defaultMessage: 'Set up Generative AI connector',
                       }
                     )}
                   </EuiButton>

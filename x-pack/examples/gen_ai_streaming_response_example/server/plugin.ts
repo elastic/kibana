@@ -87,7 +87,7 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
           };
         } else {
           throw Boom.badRequest(
-            `Invalid OpenAI connector selected - ${connector.config?.apiProvider} is not a valid provider`
+            `Invalid generative AI connector selected - ${connector.config?.apiProvider} is not a valid provider`
           );
         }
 

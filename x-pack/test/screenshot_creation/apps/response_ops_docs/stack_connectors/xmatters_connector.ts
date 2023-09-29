@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('xmatters connector screenshots', async () => {
+    it('generative ai connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('xmatters');
