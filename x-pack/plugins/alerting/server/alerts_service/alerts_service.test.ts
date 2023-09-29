@@ -2364,50 +2364,6 @@ describe('Alerts Service', () => {
           );
         });
       });
-
-      describe('setAlertsToUntracked()', () => {
-        test('should call updateByQuery on provided ruleIds', async () => {
-          const alertsService = new AlertsService({
-            logger,
-            elasticsearchClientPromise: Promise.resolve(clusterClient),
-            pluginStop$,
-            kibanaVersion: '8.8.0',
-            dataStreamAdapter,
-          });
-
-          await alertsService.setAlertsToUntracked({
-            indices: ['test-index'],
-            ruleIds: ['test-rule'],
-          });
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
-        });
-
-        test('should retry updateByQuery on failure', async () => {
-          clusterClient.updateByQuery.mockResponseOnce({
-            total: 10,
-            updated: 8,
-          });
-
-          const alertsService = new AlertsService({
-            logger,
-            elasticsearchClientPromise: Promise.resolve(clusterClient),
-            pluginStop$,
-            kibanaVersion: '8.8.0',
-            dataStreamAdapter,
-          });
-
-          await alertsService.setAlertsToUntracked({
-            indices: ['test-index'],
-            ruleIds: ['test-rule'],
-          });
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
-          expect(logger.warn).toHaveBeenCalledWith(
-            'Attempt 1: Failed to untrack 2 of 10; indices test-index, ruleIds test-rule'
-          );
-        });
-      });
     });
   }
 });

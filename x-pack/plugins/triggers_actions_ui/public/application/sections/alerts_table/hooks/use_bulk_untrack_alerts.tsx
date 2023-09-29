@@ -30,7 +30,7 @@ export const useBulkUntrackAlerts = () => {
       }
     },
     {
-      onError: (_err, params, context) => {
+      onError: (_err, params) => {
         toasts.addDanger(
           i18n.translate(
             'xpack.observability.rules.deleteConfirmationModal.errorNotification.descriptionText',
