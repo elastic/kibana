@@ -8,6 +8,9 @@
 
 export { createModelVersionTestBed } from './src/test_bed';
 
-export type { ModelVersionTestBed } from './src/test_bed';
-export type { SavedObjectTestkitDefinition } from './src/type_registry';
-export type { ModelVersionTestKit, ModelVersionTestkitOptions } from './src/test_kit';
+export type {
+  ModelVersionTestBed,
+  ModelVersionTestKit,
+  ModelVersionTestkitOptions,
+  SavedObjectTestkitDefinition,
+} from './src/types';

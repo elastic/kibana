@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-
-export interface SavedObjectTestkitDefinition {
-  definition: SavedObjectsType;
-  modelVersionBefore: number;
-  modelVersionAfter: number;
-}
+import type { SavedObjectTestkitDefinition } from './types';
 
 export interface TestkitTypeRegistries {
   registryBefore: SavedObjectTypeRegistry;
   registryAfter: SavedObjectTypeRegistry;
 }
 
+/**
+ * Create the 'before' and 'after' type registries from the provided testkit type definitions.
+ */
 export const getTypeRegistries = ({
   types,
   kibanaIndex,

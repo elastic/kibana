@@ -8,19 +8,52 @@
 
 import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { startElasticsearch } from './elasticsearch';
-import {
-  prepareModelVersionTestKit,
-  type ModelVersionTestkitOptions,
-  type ModelVersionTestKit,
-} from './test_kit';
+import { prepareModelVersionTestKit } from './test_kit';
+import type { ModelVersionTestBed } from './types';
 
-export interface ModelVersionTestBed {
-  startES: () => Promise<void>;
-  stopES: () => Promise<void>;
-  clearData: () => Promise<void>;
-  prepareTestKit: (options: ModelVersionTestkitOptions) => Promise<ModelVersionTestKit>;
-}
-
+/**
+ * Create a {@link ModelVersionTestBed} that can be used for model version integration testing.
+ *
+ * @example
+ * ```ts
+ * describe('myIntegrationTest', () => {
+ *   const testbed = createModelVersionTestBed();
+ *   let testkit: ModelVersionTestKit;
+ *
+ *   beforeAll(async () => {
+ *     await testbed.startES();
+ *   });
+ *
+ *   afterAll(async () => {
+ *     await testbed.stopES();
+ *   });
+ *
+ *   beforeEach(async () => {
+ *     testkit = await testbed.prepareTestKit({
+ *       savedObjectDefinitions: [{
+ *         definition: mySoTypeDefinition,
+ *         modelVersionBefore: 1,
+ *         modelVersionAfter: 2,
+ *       }]
+ *     })
+ *   });
+ *
+ *   it('can be used to test model version cohabitation', async () => {
+ *     // last registered version is `1`
+ *     const repositoryV1 = testkit.repositoryBefore;
+ *     // last registered version is `2`
+ *     const repositoryV2 = testkit.repositoryAfter;
+ *
+ *     // do something with the two repositories, e.g
+ *     await repositoryV1.create(someAttrs, { id });
+ *     const v2docReadFromV1 = await repositoryV2.get('my-type', id);
+ *     expect(v2docReadFromV1.attributes).toEqual(something);
+ *   })
+ * })
+ * ```
+ *
+ * @public
+ */
 export const createModelVersionTestBed = (): ModelVersionTestBed => {
   let elasticsearch: TestElasticsearchUtils | undefined;
 
@@ -40,17 +73,9 @@ export const createModelVersionTestBed = (): ModelVersionTestBed => {
     elasticsearch = undefined;
   };
 
-  const clearData = async () => {
-    if (!elasticsearch) {
-      throw new Error('Elasticsearch not started');
-    }
-    // TODO  const client = elasticsearch!.es.getClient();
-  };
-
   return {
     startES,
     stopES,
-    clearData,
     prepareTestKit: prepareModelVersionTestKit,
   };
 };

@@ -9,7 +9,6 @@
 import fs from 'fs/promises';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { Client } from '@elastic/elasticsearch';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -28,36 +27,16 @@ import {
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-
 import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import type {
-  ISavedObjectsRepository,
-  SavedObjectsBulkCreateObject,
-} from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
-import { getTypeRegistries, type SavedObjectTestkitDefinition } from './type_registry';
-
-export interface ModelVersionTestkitOptions {
-  savedObjectDefinitions: SavedObjectTestkitDefinition[];
-  objectsToCreateBetween?: SavedObjectsBulkCreateObject[];
-  logFilePath: string;
-  settingOverrides?: Record<string, any>;
-  kibanaVersion?: string;
-  kibanaBranch?: string;
-  kibanaIndex?: string;
-}
-
-export interface ModelVersionTestKit {
-  esClient: Client;
-  repositoryBefore: ISavedObjectsRepository;
-  repositoryAfter: ISavedObjectsRepository;
-}
+import { getTypeRegistries } from './type_registry';
+import type { ModelVersionTestkitOptions, ModelVersionTestKit } from './types';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const currentVersion = env.packageInfo.version;
@@ -65,6 +44,11 @@ const currentBranch = env.packageInfo.branch;
 const defaultKibanaIndex = '.kibana_migrator_tests';
 const defaultNodeRoles: NodeRoles = { migrator: true, ui: true, backgroundTasks: true };
 
+/**
+ * Prepare the model version integration test kit
+ *
+ * @internal
+ */
 export const prepareModelVersionTestKit = async ({
   savedObjectDefinitions,
   objectsToCreateBetween = [],

@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 
+/**
+ * Start the traditional ES cluster and return the instance.
+ */
 export const startElasticsearch = async ({
   basePath,
   dataArchive,
@@ -16,7 +19,7 @@ export const startElasticsearch = async ({
   basePath?: string;
   dataArchive?: string;
   timeout?: number;
-} = {}) => {
+} = {}): Promise<TestElasticsearchUtils> => {
   const { startES } = createTestServers({
     adjustTimeout: (t: number) => jest.setTimeout(t + (timeout ?? 0)),
     settings: {
