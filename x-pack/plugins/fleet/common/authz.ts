@@ -149,15 +149,15 @@ export function calculateEndpointExceptionsPrivilegesFromCapabilities(
     return;
   }
 
-  const endpointExceptionsActions = Object.keys(capabilities.siem).reduce<Record<string, boolean>>(
-    (acc, privilegeName) => {
-      if (Object.keys(ENDPOINT_EXCEPTIONS_PRIVILEGES).includes(privilegeName)) {
-        acc[privilegeName] = (capabilities.siem[privilegeName] as boolean) || false;
-      }
-      return acc;
-    },
-    {}
-  );
+  const endpointExceptionsActions = Object.keys(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<
+    Record<string, boolean>
+  >((acc, privilegeName) => {
+    if (Object.keys(ENDPOINT_EXCEPTIONS_PRIVILEGES).includes(privilegeName)) {
+      acc[privilegeName] =
+        (capabilities.siem && (capabilities.siem[privilegeName] as boolean)) || false;
+    }
+    return acc;
+  }, {});
 
   return {
     actions: endpointExceptionsActions,

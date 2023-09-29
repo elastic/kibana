@@ -100,6 +100,27 @@ describe('fleet authz', () => {
 
       expect(actual).toEqual(expected);
     });
+
+    it('calculates endpoint exceptions privileges correctly when no matching capabilities', () => {
+      const endpointCapabilities = {
+        writeEndpointList: true,
+        writeHostIsolation: false,
+      };
+      const expected = {
+        actions: {
+          showEndpointExceptions: false,
+          crudEndpointExceptions: false,
+        },
+      };
+      const actual = calculateEndpointExceptionsPrivilegesFromCapabilities({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        siem: endpointCapabilities,
+      });
+
+      expect(actual).toEqual(expected);
+    });
   });
 
   describe('calculatePackagePrivilegesFromKibanaPrivileges', () => {
