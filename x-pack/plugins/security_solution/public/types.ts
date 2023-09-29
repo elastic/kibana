@@ -55,6 +55,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -77,6 +78,8 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import type { DataQualityPanelConfig } from './overview/types';
+import type { SetComponents, GetComponent$ } from './contract_components';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -130,6 +133,7 @@ export interface StartPlugins {
   discover: DiscoverStart;
   navigation: NavigationPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -139,11 +143,10 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  isILMAvailable$: Observable<boolean>;
   isSidebarEnabled$: Observable<boolean>;
-  getStartedComponent$: Observable<React.ComponentType | null>;
-  dashboardsLandingCalloutComponent$: Observable<React.ComponentType | null>;
+  getComponent$: GetComponent$;
   upselling: UpsellingService;
+  dataQualityPanelConfig: DataQualityPanelConfig | undefined;
 }
 
 export type StartServices = CoreStart &
@@ -171,15 +174,14 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
+  setDataQualityPanelConfig: (dataQualityPanelConfig: DataQualityPanelConfig) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setIsILMAvailable: (isILMAvailable: boolean) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
-  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
-  setDashboardsLandingCallout: (dashboardsLandingCallout: React.ComponentType) => void;
+  setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
 }
