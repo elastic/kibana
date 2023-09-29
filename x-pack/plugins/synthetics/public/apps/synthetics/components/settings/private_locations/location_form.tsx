@@ -23,14 +23,14 @@ import { useFormContext, useFormState } from 'react-hook-form';
 import { TagsField } from '../components/tags_field';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
-import { PolicyHostsField } from './policy_hosts';
+import { PolicyHostsField, AGENT_POLICY_FIELD_NAME } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
-  const { control, register, watch, formState } = useFormContext<PrivateLocation>();
+  const { control, register, getValues } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
-  const selectedPolicyId = watch('agentPolicyId');
+  const selectedPolicyId = getValues(AGENT_POLICY_FIELD_NAME);
   const selectedPolicy = data?.find((item) => item.id === selectedPolicyId);
 
   const tagsList = privateLocations.reduce((acc, item) => {
@@ -66,12 +66,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField
-          errors={errors}
-          control={control}
-          isFormSubmitted={formState.isSubmitted}
-          privateLocations={privateLocations}
-        />
+        <PolicyHostsField privateLocations={privateLocations} />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />

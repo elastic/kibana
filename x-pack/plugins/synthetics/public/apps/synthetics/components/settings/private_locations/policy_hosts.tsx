@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { Controller, FieldErrors, Control } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,22 +23,17 @@ import { i18n } from '@kbn/i18n';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
-const FIELD_NAME = 'agentPolicyId';
+export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
-export const PolicyHostsField = ({
-  errors,
-  control,
-  isFormSubmitted,
-  privateLocations,
-}: {
-  errors: FieldErrors;
-  control: Control<PrivateLocation, any>;
-  isFormSubmitted: boolean;
-  privateLocations: PrivateLocation[];
-}) => {
+export const PolicyHostsField = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
-  const isFieldTouched = control.getFieldState(FIELD_NAME).isTouched;
-  const showFieldInvalid = (isFormSubmitted || isFieldTouched) && !!errors?.[FIELD_NAME];
+  const {
+    control,
+    formState: { isSubmitted },
+    trigger,
+  } = useFormContext<PrivateLocation>();
+  const { isTouched, error } = control.getFieldState(AGENT_POLICY_FIELD_NAME);
+  const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
   const policyHostsOptions = data?.map((item) => {
     const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
@@ -103,7 +97,7 @@ export const PolicyHostsField = ({
       error={showFieldInvalid ? SELECT_POLICY_HOSTS : undefined}
     >
       <Controller
-        name={FIELD_NAME}
+        name={AGENT_POLICY_FIELD_NAME}
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
@@ -118,6 +112,9 @@ export const PolicyHostsField = ({
             isInvalid={showFieldInvalid}
             options={policyHostsOptions ?? []}
             {...field}
+            onBlur={async () => {
+              await trigger();
+            }}
           />
         )}
       />
