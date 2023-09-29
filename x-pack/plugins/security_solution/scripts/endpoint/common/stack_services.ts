@@ -17,6 +17,7 @@ import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { memoize } from 'lodash';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './localhost_services';
@@ -330,7 +331,7 @@ export const waitForKibana = async (kbnUrl: string): Promise<void> => {
   );
 };
 
-export const isServerlessKibanaFlavor = async (kbnClient: KbnClient): Promise<boolean> => {
+export const isServerlessKibanaFlavor = memoize(async (kbnClient: KbnClient): Promise<boolean> => {
   const kbnStatus = await fetchKibanaStatus(kbnClient);
 
   // If we don't have status for plugins, then error
@@ -343,4 +344,4 @@ export const isServerlessKibanaFlavor = async (kbnClient: KbnClient): Promise<bo
   }
 
   return kbnStatus.status.plugins?.serverless?.level === 'available';
-};
+});

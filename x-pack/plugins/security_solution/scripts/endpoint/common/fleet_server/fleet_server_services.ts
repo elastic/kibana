@@ -12,9 +12,10 @@ import chalk from 'chalk';
 import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
+  FLEET_SERVER_SERVERS_INDEX,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type {
   FleetServerHost,
@@ -31,8 +32,22 @@ import {
 } from '@kbn/fleet-plugin/common/services';
 import axios from 'axios';
 import * as https from 'https';
-import type { FormattedAxiosError } from './format_axios_error';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import {
+  CA_TRUSTED_FINGERPRINT,
+  FLEET_SERVER_CERT_PATH,
+  FLEET_SERVER_KEY_PATH,
+  fleetServerDevServiceAccount,
+} from '@kbn/dev-utils';
+import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
+import { resolve } from 'path';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../../common/endpoint/data_loaders/utils';
+import { isServerlessKibanaFlavor } from '../stack_services';
+import type { FormattedAxiosError } from '../format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import {
   fetchFleetOutputs,
   fetchFleetServerHostList,
@@ -42,10 +57,12 @@ import {
   getAgentVersionMatchingCurrentStack,
   getFleetElasticsearchOutputHost,
   waitForHostToEnroll,
-} from './fleet_services';
-import { dump } from '../endpoint_agent_runner/utils';
-import { getLocalhostRealIp } from './localhost_services';
-import { isLocalhost } from './is_localhost';
+} from '../fleet_services';
+import { dump } from '../../endpoint_agent_runner/utils';
+import { getLocalhostRealIp } from '../localhost_services';
+import { isLocalhost } from '../is_localhost';
+
+export const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 
 interface StartedServer {
   /** The type of virtualization used to start the server */
@@ -91,6 +108,8 @@ export const startFleetServer = async ({
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
 
   const response = await logger.indent(4, async () => {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+
     let policyId = policy ?? '';
 
     // Check if fleet already running if `force` is false
@@ -104,13 +123,12 @@ export const startFleetServer = async ({
       }
     }
 
-    if (!policyId) {
+    // Only fetch/create a fleet-server policy
+    if (!policyId && !isServerless) {
       policyId = await getOrCreateFleetServerAgentPolicyId(kbnClient, logger);
     }
 
-    const serviceToken = await generateFleetServiceToken(kbnClient, logger);
-
-    // FIXME:PT add support for serverless once PR merges - https://github.com/elastic/kibana/pull/165415
+    const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
 
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
@@ -120,8 +138,6 @@ export const startFleetServer = async ({
       port,
       serviceToken,
     });
-
-    logger.indent(-4);
 
     return {
       ...startedFleetServer,
@@ -205,11 +221,14 @@ const startFleetServerWithDocker = async ({
   version,
   port = 8220,
 }: StartFleetServerWithDockerOptions): Promise<StartedServer> => {
-  const agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
+  await verifyDockerInstalled(log);
+
+  let agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
 
   log.info(`Starting a new fleet server using Docker (version: ${agentVersion})`);
 
   const response: StartedServer = await log.indent(4, async () => {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
     const localhostRealIp = getLocalhostRealIp();
     const fleetServerUrl = `https://${localhostRealIp}:${port}`;
     const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
@@ -221,44 +240,33 @@ const startFleetServerWithDocker = async ({
       esURL.hostname = localhostRealIp;
     }
 
+    if (isServerless) {
+      log.info(`Kibana running in serverless mode.
+  - will install/run standalone Fleet Server
+  - version adjusted to [latest] from [${agentVersion}]`);
+
+      agentVersion = 'latest';
+      await maybeCreateDockerNetwork(log);
+    }
+
     try {
-      const dockerArgs = [
-        'run',
-
-        '--restart',
-        'no',
-
-        '--add-host',
-        'host.docker.internal:host-gateway',
-
-        '--rm',
-
-        '--detach',
-
-        '--name',
-        containerName,
-
-        // The container's hostname will appear in Fleet when the agent enrolls
-        '--hostname',
-        hostname,
-
-        '--env',
-        'FLEET_SERVER_ENABLE=1',
-
-        '--env',
-        `FLEET_SERVER_ELASTICSEARCH_HOST=${esURL.toString()}`,
-
-        '--env',
-        `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-
-        '--env',
-        `FLEET_SERVER_POLICY=${policyId}`,
-
-        '--publish',
-        `${port}:8220`,
-
-        `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
-      ];
+      const dockerArgs = isServerless
+        ? getFleetServerStandAloneDockerArgs({
+            containerName,
+            hostname,
+            port,
+            esUrl: esURL.toString(),
+            agentVersion,
+          })
+        : getFleetServerManagedDockerArgs({
+            containerName,
+            hostname,
+            port,
+            serviceToken,
+            policyId,
+            agentVersion,
+            esUrl: esURL.toString(),
+          });
 
       await execa('docker', ['kill', containerName])
         .then(() => {
@@ -276,15 +284,22 @@ const startFleetServerWithDocker = async ({
 
       containerId = (await execa('docker', dockerArgs)).stdout;
 
-      log.info(`Fleet server started. Waiting for it to show up in Kibana`);
+      log.info(`Fleet server started`);
 
-      const [fleetServerAgent] = await Promise.all([
-        waitForHostToEnroll(kbnClient, hostname, 120000),
-        addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl),
-        updateFleetElasticsearchOutputHostNames(kbnClient, log),
-      ]);
+      await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
+      await updateFleetElasticsearchOutputHostNames(kbnClient, log);
 
-      log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
+      if (isServerless) {
+        log.info(`Waiting for server to register with Elasticsearch`);
+
+        await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 120000);
+      } else {
+        log.info('Waiting for server to show up in Kibana Fleet');
+
+        const fleetServerAgent = await waitForHostToEnroll(kbnClient, hostname, 120000);
+
+        log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
+      }
     } catch (error) {
       log.error(dump(error));
       throw error;
@@ -313,6 +328,133 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
   log.info(`Done. Fleet server up and running`);
 
   return response;
+};
+
+interface GetFleetServerManagedDockerArgsOptions {
+  containerName: string;
+  esUrl: string;
+  serviceToken: string;
+  policyId: string;
+  port: number;
+  agentVersion: string;
+  /** The hostname. Defaults to `containerName` */
+  hostname?: string;
+}
+
+const getFleetServerManagedDockerArgs = ({
+  hostname,
+  port,
+  serviceToken,
+  esUrl,
+  containerName,
+  agentVersion,
+  policyId,
+}: GetFleetServerManagedDockerArgsOptions): string[] => {
+  return [
+    'run',
+
+    '--restart',
+    'no',
+
+    '--add-host',
+    'host.docker.internal:host-gateway',
+
+    '--rm',
+
+    '--detach',
+
+    '--name',
+    containerName,
+
+    // The container's hostname will appear in Fleet when the agent enrolls
+    '--hostname',
+    hostname || containerName,
+
+    '--env',
+    'FLEET_SERVER_ENABLE=1',
+
+    '--env',
+    `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrl}`,
+
+    '--env',
+    `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+
+    '--env',
+    `FLEET_SERVER_POLICY=${policyId}`,
+
+    '--publish',
+    `${port}:8220`,
+
+    `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
+  ];
+};
+
+type GetFleetServerStandAloneDockerArgsOptions = Pick<
+  GetFleetServerManagedDockerArgsOptions,
+  'esUrl' | 'hostname' | 'containerName' | 'port' | 'agentVersion'
+>;
+
+const getFleetServerStandAloneDockerArgs = ({
+  containerName,
+  hostname,
+  esUrl,
+  agentVersion,
+  port,
+}: GetFleetServerStandAloneDockerArgsOptions): string[] => {
+  const esURL = new URL(esUrl);
+  esURL.hostname = SERVERLESS_NODES[0].name;
+
+  return [
+    'run',
+
+    '--restart',
+    'no',
+
+    '--net',
+    'elastic',
+
+    '--add-host',
+    'host.docker.internal:host-gateway',
+
+    '--rm',
+    '--detach',
+
+    '--name',
+    containerName,
+
+    // The hostname will appear in Fleet when the agent enrolls
+    '--hostname',
+    hostname || containerName,
+
+    '--env',
+    'FLEET_SERVER_CERT=/fleet-server.crt',
+
+    '--env',
+    'FLEET_SERVER_CERT_KEY=/fleet-server.key',
+
+    '--env',
+    `ELASTICSEARCH_HOSTS=${esURL.toString()}`,
+
+    '--env',
+    `ELASTICSEARCH_SERVICE_TOKEN=${fleetServerDevServiceAccount.token}`,
+
+    '--env',
+    `ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=${CA_TRUSTED_FINGERPRINT}`,
+
+    '--volume',
+    `${FLEET_SERVER_CERT_PATH}:/fleet-server.crt`,
+
+    '--volume',
+    `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
+
+    '--volume',
+    `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
+
+    '--publish',
+    `${port}:8220`,
+
+    `docker.elastic.co/observability-ci/fleet-server:${agentVersion}`,
+  ];
 };
 
 const addFleetServerHostToFleetSettings = async (
@@ -445,6 +587,11 @@ const updateFleetElasticsearchOutputHostNames = async (
   });
 };
 
+/**
+ * Checks to see if the fleet server at the given URL is up and running by calling
+ * the status api
+ * @param serverUrl
+ */
 const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
   const url = new URL(serverUrl);
   url.pathname = '/api/status';
@@ -463,4 +610,64 @@ const isFleetServerRunning = async (serverUrl: string): Promise<boolean> => {
     .catch(() => {
       return false;
     });
+};
+
+/**
+ * Checks and waits until the given fleet server hostname has been registered into elasticsearch.
+ * This check can be used when enrolling a standalone fleet-server, since those would not show up
+ * in Kibana's Fleet UI.
+ */
+const waitForFleetServerToRegisterWithElasticsearch = async (
+  kbnClient: KbnClient,
+  fleetServerHostname: string,
+  timeoutMs: number = 30000
+): Promise<void> => {
+  const started = new Date();
+  const hasTimedOut = (): boolean => {
+    const elapsedTime = Date.now() - started.getTime();
+    return elapsedTime > timeoutMs;
+  };
+  let found = false;
+
+  while (!found && !hasTimedOut()) {
+    found = await retryOnError(async () => {
+      const fleetServerRecord = await kbnClient
+        .request<estypes.SearchResponse>({
+          method: 'POST',
+          path: '/api/console/proxy',
+          query: {
+            path: `${FLEET_SERVER_SERVERS_INDEX}/_search`,
+            method: 'GET',
+          },
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      'host.name': fleetServerHostname,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .then((response) => response.data)
+        .catch(catchAxiosErrorFormatAndThrow);
+
+      return (fleetServerRecord.hits.total as estypes.SearchTotalHits).value === 1;
+    }, RETRYABLE_TRANSIENT_ERRORS);
+
+    if (!found) {
+      // sleep and check again
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
+  if (!found) {
+    throw new Error(
+      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsarch`
+    );
+  }
 };
