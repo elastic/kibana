@@ -251,9 +251,7 @@ export const runTask = async ({
     updatedState.scoresWritten = scoresWritten;
 
     const taskCompletionTime = moment().utc().toISOString();
-
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
-
     const telemetryEvent = {
       scoresWritten,
       taskDurationInSeconds,
@@ -262,8 +260,9 @@ export const runTask = async ({
         taskDurationInSeconds
       ),
     };
-
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
+
+    riskScoreService.scheduleLatestTransformNow();
 
     log('task run completed');
     log(JSON.stringify(telemetryEvent));

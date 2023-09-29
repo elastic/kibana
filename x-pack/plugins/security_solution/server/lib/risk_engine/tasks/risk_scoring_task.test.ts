@@ -408,39 +408,69 @@ describe('Risk Scoring Task', () => {
         });
       });
 
-      it('send success telemetry event', async () => {
-        await runTask({
-          getRiskScoreService,
-          logger: mockLogger,
-          taskInstance: riskScoringTaskInstanceMock,
-          telemetry: mockTelemetry,
-        });
-
-        expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
-        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
-          executionDurationExceededInterval: false,
-          scoresWritten: 10,
-          taskDurationInSeconds: 0,
-        });
-      });
-
-      it('send error telemetry event', async () => {
-        mockRiskScoreService.calculateAndPersistScores.mockReset();
-        mockRiskScoreService.calculateAndPersistScores.mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-        try {
+      describe('when execution was successful', () => {
+        it('send success telemetry event', async () => {
           await runTask({
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
           });
-        } catch (err) {
+
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
+            executionDurationExceededInterval: false,
+            scoresWritten: 10,
+            taskDurationInSeconds: 0,
+          });
+        });
+
+        it('schedules the transform to run now', async () => {
+          await runTask({
+            getRiskScoreService,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe('when execution was unsuccessful', () => {
+        beforeEach(() => {
+          mockRiskScoreService.calculateAndPersistScores.mockReset();
+          mockRiskScoreService.calculateAndPersistScores.mockImplementationOnce(() => {
+            throw new Error();
+          });
+        });
+
+        it('send error telemetry event', async () => {
+          await expect(
+            runTask({
+              getRiskScoreService,
+              logger: mockLogger,
+              taskInstance: riskScoringTaskInstanceMock,
+              telemetry: mockTelemetry,
+            })
+          ).rejects.toThrow();
+
           expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
           expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_error', {});
-        }
+        });
+
+        it('does not schedule the transform to run now', async () => {
+          await expect(
+            runTask({
+              getRiskScoreService,
+              logger: mockLogger,
+              taskInstance: riskScoringTaskInstanceMock,
+              telemetry: mockTelemetry,
+            })
+          ).rejects.toThrow();
+
+          expect(mockRiskScoreService.scheduleLatestTransformNow).not.toHaveBeenCalled();
+        });
       });
     });
   });
