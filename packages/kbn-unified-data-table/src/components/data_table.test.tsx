@@ -432,4 +432,37 @@ describe('UnifiedDataTable', () => {
       expect(tourStep).toEqual('test-expand');
     });
   });
+
+  describe('gridStyleOverride', () => {
+    it('should render the grid with the default style if no gridStyleOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--paddingLarge')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
+    });
+    it('should render the grid with style override if gridStyleOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        gridStyleOverride: {
+          stripes: false,
+          rowHover: 'none',
+          border: 'none',
+        },
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
+    });
+  });
 });

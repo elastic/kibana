@@ -70,6 +70,7 @@
     "@kbn/licensing-plugin",
     "@kbn/aiops-utils",
     "@kbn/lens-embeddable-utils",
+    "@kbn/metrics-data-access-plugin",
     "@kbn/expressions-plugin"
   ],
   "exclude": ["target/**/*"]

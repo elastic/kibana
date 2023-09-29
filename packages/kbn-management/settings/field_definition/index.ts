@@ -30,3 +30,4 @@ export {
 } from './is';
 
 export { getFieldDefinition } from './get_definition';
+export { getFieldDefinitions } from './get_definitions';

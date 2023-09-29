@@ -21,12 +21,12 @@ export function useAssetDetailsRenderProps({ props }: UseAssetDetailsRenderProps
 
   // When the asset asset.name is known we can load the page faster
   // Otherwise we need to use metadata response.
-  const loading = !urlState?.name && !asset.name && !metadata?.name;
+  const loading = !asset.name && !urlState?.name && !metadata?.name;
 
   return {
     asset: {
       ...asset,
-      name: urlState?.name || asset.name || metadata?.name || '',
+      name: asset.name || urlState?.name || metadata?.name || '',
     },
     assetType,
     overrides,

@@ -1003,7 +1003,10 @@ Any modifications made to this file will be overwritten.
     <li><a href="#action_response_properties"><code>action_response_properties</code> - Action response properties</a></li>
     <li><a href="#config_properties_cases_webhook"><code>config_properties_cases_webhook</code> - Connector request properties for Webhook - Case Management connector</a></li>
     <li><a href="#config_properties_d3security"><code>config_properties_d3security</code> - Connector request properties for a D3 Security connector</a></li>
-    <li><a href="#config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a></li>
+    <li><a href="#config_properties_email"><code>config_properties_email</code> - Connector request properties for an email connector</a></li>
+    <li><a href="#config_properties_genai"><code>config_properties_genai</code> - Connector request properties for an OpenAI connector</a></li>
+    <li><a href="#config_properties_genai_oneOf"><code>config_properties_genai_oneOf</code> - </a></li>
+    <li><a href="#config_properties_genai_oneOf_1"><code>config_properties_genai_oneOf_1</code> - </a></li>
     <li><a href="#config_properties_index"><code>config_properties_index</code> - Connector request properties for an index connector</a></li>
     <li><a href="#config_properties_jira"><code>config_properties_jira</code> - Connector request properties for a Jira connector</a></li>
     <li><a href="#config_properties_opsgenie"><code>config_properties_opsgenie</code> - Connector request properties for an Opsgenie connector</a></li>
@@ -1012,6 +1015,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#config_properties_servicenow"><code>config_properties_servicenow</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_servicenow_itom"><code>config_properties_servicenow_itom</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_swimlane"><code>config_properties_swimlane</code> - Connector request properties for a Swimlane connector</a></li>
+    <li><a href="#config_properties_tines"><code>config_properties_tines</code> - Connector request properties for a Tines connector</a></li>
+    <li><a href="#config_properties_torq"><code>config_properties_torq</code> - Connector request properties for a Torq connector</a></li>
     <li><a href="#config_properties_webhook"><code>config_properties_webhook</code> - Connector request properties for a Webhook connector</a></li>
     <li><a href="#config_properties_xmatters"><code>config_properties_xmatters</code> - Connector request properties for an xMatters connector</a></li>
     <li><a href="#connector_response_properties"><code>connector_response_properties</code> - Connector response properties</a></li>
@@ -1032,13 +1037,14 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_response_properties_swimlane"><code>connector_response_properties_swimlane</code> - Connector response properties for a Swimlane connector</a></li>
     <li><a href="#connector_response_properties_teams"><code>connector_response_properties_teams</code> - Connector response properties for a Microsoft Teams connector</a></li>
     <li><a href="#connector_response_properties_tines"><code>connector_response_properties_tines</code> - Connector response properties for a Tines connector</a></li>
+    <li><a href="#connector_response_properties_torq"><code>connector_response_properties_torq</code> - Connector response properties for a Torq connector</a></li>
     <li><a href="#connector_response_properties_webhook"><code>connector_response_properties_webhook</code> - Connector response properties for a Webhook connector</a></li>
     <li><a href="#connector_response_properties_xmatters"><code>connector_response_properties_xmatters</code> - Connector response properties for an xMatters connector</a></li>
     <li><a href="#connector_types"><code>connector_types</code> - Connector types</a></li>
     <li><a href="#create_connector_request_cases_webhook"><code>create_connector_request_cases_webhook</code> - Create Webhook - Case Managment connector request</a></li>
     <li><a href="#create_connector_request_d3security"><code>create_connector_request_d3security</code> - Create D3 Security connector request</a></li>
     <li><a href="#create_connector_request_email"><code>create_connector_request_email</code> - Create email connector request</a></li>
-    <li><a href="#create_connector_request_genai"><code>create_connector_request_genai</code> - Create generative AI connector request</a></li>
+    <li><a href="#create_connector_request_genai"><code>create_connector_request_genai</code> - Create OpenAI connector request</a></li>
     <li><a href="#create_connector_request_index"><code>create_connector_request_index</code> - Create index connector request</a></li>
     <li><a href="#create_connector_request_jira"><code>create_connector_request_jira</code> - Create Jira connector request</a></li>
     <li><a href="#create_connector_request_opsgenie"><code>create_connector_request_opsgenie</code> - Create Opsgenie connector request</a></li>
@@ -1053,6 +1059,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_connector_request_swimlane"><code>create_connector_request_swimlane</code> - Create Swimlane connector request</a></li>
     <li><a href="#create_connector_request_teams"><code>create_connector_request_teams</code> - Create Microsoft Teams connector request</a></li>
     <li><a href="#create_connector_request_tines"><code>create_connector_request_tines</code> - Create Tines connector request</a></li>
+    <li><a href="#create_connector_request_torq"><code>create_connector_request_torq</code> - Create Torq connector request</a></li>
     <li><a href="#create_connector_request_webhook"><code>create_connector_request_webhook</code> - Create Webhook connector request</a></li>
     <li><a href="#create_connector_request_xmatters"><code>create_connector_request_xmatters</code> - Create xMatters connector request</a></li>
     <li><a href="#features"><code>features</code> - </a></li>
@@ -1092,7 +1099,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#run_connector_subaction_pushtoservice_subActionParams_incident_source_ip"><code>run_connector_subaction_pushtoservice_subActionParams_incident_source_ip</code> - </a></li>
     <li><a href="#secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a></li>
     <li><a href="#secrets_properties_d3security"><code>secrets_properties_d3security</code> - Connector secrets properties for a D3 Security connector</a></li>
-    <li><a href="#secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a></li>
+    <li><a href="#secrets_properties_email"><code>secrets_properties_email</code> - Connector secrets properties for an email connector</a></li>
+    <li><a href="#secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for an OpenAI connector</a></li>
     <li><a href="#secrets_properties_jira"><code>secrets_properties_jira</code> - Connector secrets properties for a Jira connector</a></li>
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
     <li><a href="#secrets_properties_pagerduty"><code>secrets_properties_pagerduty</code> - Connector secrets properties for a PagerDuty connector</a></li>
@@ -1102,11 +1110,14 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_slack_webhook"><code>secrets_properties_slack_webhook</code> - Connector secrets properties for a Webhook Slack connector</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
     <li><a href="#secrets_properties_teams"><code>secrets_properties_teams</code> - Connector secrets properties for a Microsoft Teams connector</a></li>
+    <li><a href="#secrets_properties_tines"><code>secrets_properties_tines</code> - Connector secrets properties for a Tines connector</a></li>
+    <li><a href="#secrets_properties_torq"><code>secrets_properties_torq</code> - Connector secrets properties for a Torq connector</a></li>
     <li><a href="#secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a></li>
     <li><a href="#secrets_properties_xmatters"><code>secrets_properties_xmatters</code> - Connector secrets properties for an xMatters connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
     <li><a href="#update_connector_request_d3security"><code>update_connector_request_d3security</code> - Update D3 Security connector request</a></li>
+    <li><a href="#update_connector_request_email"><code>update_connector_request_email</code> - Update email connector request</a></li>
     <li><a href="#update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a></li>
     <li><a href="#update_connector_request_jira"><code>update_connector_request_jira</code> - Update Jira connector request</a></li>
     <li><a href="#update_connector_request_opsgenie"><code>update_connector_request_opsgenie</code> - Update Opsgenie connector request</a></li>
@@ -1119,6 +1130,9 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_slack_webhook"><code>update_connector_request_slack_webhook</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
     <li><a href="#update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a></li>
+    <li><a href="#update_connector_request_tines"><code>update_connector_request_tines</code> - Update Tines connector request</a></li>
+    <li><a href="#update_connector_request_torq"><code>update_connector_request_torq</code> - Update Torq connector request</a></li>
+    <li><a href="#update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a></li>
     <li><a href="#update_connector_request_xmatters"><code>update_connector_request_xmatters</code> - Update xMatters connector request</a></li>
   </ol>
 
@@ -1348,6 +1362,9 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_xmatters">config_properties_xmatters</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_xmatters">secrets_properties_xmatters</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.gen-ai</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1398,11 +1415,52 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="config_properties_email"><code>config_properties_email</code> - Connector request properties for an email connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.email</code>.</div>
+    <div class="field-items">
+      <div class="param">clientId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If <code>service</code> is <code>exchange_server</code>, this property is required. </div>
+<div class="param">from </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The from address for all emails sent by the connector. It must be specified in <code>user@host-name</code> format. </div>
+<div class="param">hasAuth (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Specifies whether a user and password are required inside the secrets configuration. </div>
+<div class="param">host (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The host name of the service provider. If the <code>service</code> is <code>elastic_cloud</code> (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If <code>service</code> is <code>other</code>, this property must be defined. </div>
+<div class="param">oauthTokenUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">port (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The port to connect to on the service provider. If the <code>service</code> is <code>elastic_cloud</code> (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If <code>service</code> is <code>other</code>, this property must be defined. </div>
+<div class="param">secure (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Specifies whether the connection to the service provider will use TLS. If the <code>service</code> is <code>elastic_cloud</code> (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. </div>
+<div class="param">service (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the email service. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">elastic_cloud</div><div class="param-enum">exchange_server</div><div class="param-enum">gmail</div><div class="param-enum">other</div><div class="param-enum">outlook365</div><div class="param-enum">ses</div>
+<div class="param">tenantId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format. If <code>service</code> is <code>exchange_server</code>, this property is required. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_genai"><code>config_properties_genai</code> - Connector request properties for an OpenAI connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines properties for connectors when type is <code>.gen-ai</code>.</div>
     <div class="field-items">
-      <div class="param">apiProvider (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
-<div class="param">apiUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+      <div class="param">apiProvider </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">OpenAI</div>
+<div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+<div class="param">defaultModel (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The default model to use for requests. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_genai_oneOf"><code>config_properties_genai_oneOf</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">apiProvider </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Azure OpenAI</div>
+<div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_genai_oneOf_1"><code>config_properties_genai_oneOf_1</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">apiProvider </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">OpenAI</div>
+<div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
+<div class="param">defaultModel (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The default model to use for requests. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1477,6 +1535,20 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">all</div><div class="param-enum">alerts</div><div class="param-enum">cases</div>
 <div class="param">mappings (optional)</div><div class="param-desc"><span class="param-type"><a href="#Connector_mappings_properties_for_a_Swimlane_connector">Connector_mappings_properties_for_a_Swimlane_connector</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_tines"><code>config_properties_tines</code> - Connector request properties for a Tines connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.tines</code>.</div>
+    <div class="field-items">
+      <div class="param">url </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Tines tenant URL. If you are using the <code>xpack.actions.allowedHosts</code> setting, make sure this hostname is added to the allowed hosts. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_torq"><code>config_properties_torq</code> - Connector request properties for a Torq connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.torq</code>.</div>
+    <div class="field-items">
+      <div class="param">webhookIntegrationUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The endpoint URL of the Elastic Security integration in Torq. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1561,7 +1633,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="connector_response_properties_email"><code>connector_response_properties_email</code> - Connector response properties for an email connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.email</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_email">config_properties_email</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.email</div>
@@ -1783,10 +1855,26 @@ Any modifications made to this file will be overwritten.
     <h3><a name="connector_response_properties_tines"><code>connector_response_properties_tines</code> - Connector response properties for a Tines connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.tines</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_tines">config_properties_tines</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.tines</div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
+<div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
+<div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_response_properties_torq"><code>connector_response_properties_torq</code> - Connector response properties for a Torq connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_torq">config_properties_torq</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.torq</div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
@@ -1861,17 +1949,17 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_connector_request_email"><code>create_connector_request_email</code> - Create email connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The email connector uses the SMTP protocol to send mail messages, using an integration of Nodemailer. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails, Send mail. Email message text is sent as both plain text and html text.</div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.email</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_email">config_properties_email</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.email</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.email</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_email">secrets_properties_email</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="create_connector_request_genai"><code>create_connector_request_genai</code> - Create generative AI connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.</div>
+    <h3><a name="create_connector_request_genai"><code>create_connector_request_genai</code> - Create OpenAI connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The OpenAI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.</div>
     <div class="field-items">
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_genai">config_properties_genai</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
@@ -2035,12 +2123,24 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_connector_request_tines"><code>create_connector_request_tines</code> - Create Tines connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The Tines connector uses Tines Webhook actions to send events via POST request.</div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.tines</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_tines">config_properties_tines</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.tines</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.tines</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_tines">secrets_properties_tines</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_connector_request_torq"><code>create_connector_request_torq</code> - Create Torq connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.</div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_torq">config_properties_torq</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.torq</div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_torq">secrets_properties_torq</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2426,7 +2526,16 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="secrets_properties_email"><code>secrets_properties_email</code> - Connector secrets properties for an email connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.email</code>.</div>
+    <div class="field-items">
+      <div class="param">clientSecret (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Microsoft Exchange Client secret for OAuth 2.0 client credentials authentication. It must be URL-encoded. If <code>service</code> is <code>exchange_server</code>, this property is required. </div>
+<div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The password for HTTP basic authentication. If <code>hasAuth</code> is set to <code>true</code>, this property is required. </div>
+<div class="param">user (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The username for HTTP basic authentication. If <code>hasAuth</code> is set to <code>true</code>, this property is required. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for an OpenAI connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.gen-ai</code>.</div>
     <div class="field-items">
       <div class="param">apiKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API key. </div>
@@ -2502,6 +2611,21 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_tines"><code>secrets_properties_tines</code> - Connector secrets properties for a Tines connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.tines</code>.</div>
+    <div class="field-items">
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The email used to sign in to Tines. </div>
+<div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Tines API token. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="secrets_properties_torq"><code>secrets_properties_torq</code> - Connector secrets properties for a Torq connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.torq</code>.</div>
+    <div class="field-items">
+      <div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The secret of the webhook authentication header. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.webhook</code>.</div>
     <div class="field-items">
@@ -2546,6 +2670,15 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_d3security">config_properties_d3security</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_d3security">secrets_properties_d3security</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_email"><code>update_connector_request_email</code> - Update email connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_email">config_properties_email</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_email">secrets_properties_email</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2648,6 +2781,33 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_teams">secrets_properties_teams</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_tines"><code>update_connector_request_tines</code> - Update Tines connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_tines">config_properties_tines</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_tines">secrets_properties_tines</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_torq"><code>update_connector_request_torq</code> - Update Torq connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_torq">config_properties_torq</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_torq">secrets_properties_torq</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_webhook">config_properties_webhook</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_webhook">secrets_properties_webhook</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

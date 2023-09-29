@@ -39,6 +39,7 @@ export enum ExternalPageName {
   // Ref: packages/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
   mlNotifications = 'ml:notifications',
+  mlMemoryUsage = 'ml:memoryUsage',
   mlAnomalyDetection = 'ml:anomalyDetection',
   mlAnomalyExplorer = 'ml:anomalyExplorer',
   mlSingleMetricViewer = 'ml:singleMetricViewer',
@@ -50,7 +51,7 @@ export enum ExternalPageName {
   mlNodes = 'ml:nodes',
   mlFileUpload = 'ml:fileUpload',
   mlIndexDataVisualizer = 'ml:indexDataVisualizer',
-  mlDataComparison = 'ml:dataComparison',
+  mlDataDrift = 'ml:dataDrift',
   mlExplainLogRateSpikes = 'ml:logRateAnalysis',
   mlLogPatternAnalysis = 'ml:logPatternAnalysis',
   mlChangePointDetections = 'ml:changePointDetections',

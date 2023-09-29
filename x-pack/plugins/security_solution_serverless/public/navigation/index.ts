@@ -27,6 +27,7 @@ export const configureNavigation = (
   if (!serverConfig.developer.disableManagementUrlRedirect) {
     management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
   }
+  management.setIsSidebarEnabled(false);
 
   serverless.setProjectHome(APP_PATH);
   serverless.setSideNavComponent(getSecuritySideNavComponent(services));

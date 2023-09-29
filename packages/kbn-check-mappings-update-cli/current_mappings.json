@@ -42,6 +42,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -1055,6 +1059,24 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "links": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -2928,6 +2950,9 @@
         "type": "date"
       },
       "updatedBy": {
+        "type": "text"
+      },
+      "savedSearchId": {
         "type": "text"
       }
     }

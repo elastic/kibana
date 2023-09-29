@@ -133,6 +133,12 @@ const CloudFormationSetup = ({
             list-style: auto;
           `}
         >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+            />
+          </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage

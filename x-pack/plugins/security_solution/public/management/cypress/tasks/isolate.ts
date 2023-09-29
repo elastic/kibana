@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/no-unnecessary-waiting */
+
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
 
@@ -114,7 +116,7 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
 };
 
 export const filterOutIsolatedHosts = (): void => {
-  cy.getByTestSubj('adminSearchBar').click().type('united.endpoint.Endpoint.state.isolation: true');
+  cy.getByTestSubj('adminSearchBar').type('united.endpoint.Endpoint.state.isolation: true');
   cy.getByTestSubj('querySubmitButton').click();
 };
 

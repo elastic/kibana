@@ -89,7 +89,7 @@ export function Home() {
         <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
           <h1>
             {i18n.translate('xpack.observability_onboarding.home.title', {
-              defaultMessage: 'Get started with Observability',
+              defaultMessage: 'Collect and analyze logs',
             })}
           </h1>
         </EuiTitle>
@@ -139,11 +139,12 @@ export function Home() {
               paddingSize="l"
               display="plain"
               hasBorder
+              onClick={handleClickSystemLogs}
             >
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" textAlign="left">
+              <EuiText color="subdued" size="s" textAlign="center">
                 <p>
                   {i18n.translate(
                     'xpack.observability_onboarding.card.systemLogs.description1',
@@ -177,11 +178,12 @@ export function Home() {
               paddingSize="l"
               display="plain"
               hasBorder
+              onClick={handleClickCustomLogs}
             >
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" textAlign="left">
+              <EuiText color="subdued" size="s" textAlign="center">
                 <p>
                   {i18n.translate(
                     'xpack.observability_onboarding.card.customLogs.description.text',
@@ -263,6 +265,7 @@ export function Home() {
               paddingSize="m"
               display="plain"
               hasBorder
+              onClick={handleClickKubernetesSetupGuide}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
+import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { DESCRIPTION_TITLE_TEST_ID, RULE_SUMMARY_BUTTON_TEST_ID } from './test_ids';
 import {
-  DOCUMENT_DESCRIPTION_TITLE,
-  PREVIEW_RULE_DETAILS,
-  RULE_DESCRIPTION_TITLE,
-} from './translations';
+  DESCRIPTION_TITLE_TEST_ID,
+  RULE_SUMMARY_BUTTON_TEST_ID,
+  DESCRIPTION_DETAILS_TEST_ID,
+} from './test_ids';
 import { Description } from './description';
 import { RightPanelContext } from '../context';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { PreviewPanelKey } from '../../preview';
@@ -59,12 +59,16 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
 
 const renderDescription = (panelContext: RightPanelContext) =>
   render(
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContext}>
-        <Description />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
+    <IntlProvider locale="en">
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContext}>
+          <Description />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </IntlProvider>
   );
+
+const NO_DATA_MESSAGE = "There's no description for this rule.";
 
 describe('<Description />', () => {
   it('should render the component', () => {
@@ -73,48 +77,67 @@ describe('<Description />', () => {
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
+    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
+    expect(getByTestId(DESCRIPTION_DETAILS_TEST_ID)).toHaveTextContent(ruleDescription.values[0]);
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should not render rule preview button if rule name is not available', () => {
-    const { getByTestId, queryByTestId } = renderDescription(
-      panelContextValue([ruleUuid, ruleDescription])
-    );
+  it('should render no data message if rule description is not available', () => {
+    const { getByTestId, getByText } = renderDescription(panelContextValue([ruleUuid]));
 
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(queryByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(DESCRIPTION_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render document title if document is not an alert', () => {
     const { getByTestId } = renderDescription(panelContextValue([ruleDescription]));
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(DOCUMENT_DESCRIPTION_TITLE);
+    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Document description');
   });
 
-  it('should open preview panel when clicking on button', () => {
-    const panelContext = panelContextValue([ruleUuid, ruleDescription, ruleName]);
+  describe('rule preview', () => {
+    it('should render rule preview button as disabled if rule name is not available', () => {
+      const { getByTestId } = renderDescription(panelContextValue([ruleUuid, ruleDescription]));
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+    });
 
-    const { getByTestId } = renderDescription(panelContext);
+    it('should render rule preview button as disabled if rule id is not available', () => {
+      const { getByTestId } = renderDescription(
+        panelContextValue([{ ...ruleUuid, values: [] }, ruleName, ruleDescription])
+      );
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+    });
 
-    getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
+    it('should open preview panel when clicking on button', () => {
+      const panelContext = panelContextValue([ruleUuid, ruleDescription, ruleName]);
 
-    expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-      id: PreviewPanelKey,
-      path: { tab: 'rule-preview' },
-      params: {
-        id: panelContext.eventId,
-        indexName: panelContext.indexName,
-        scopeId: panelContext.scopeId,
-        banner: {
-          title: PREVIEW_RULE_DETAILS,
-          backgroundColor: 'warning',
-          textColor: 'warning',
+      const { getByTestId } = renderDescription(panelContext);
+
+      getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
+
+      expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
+        id: PreviewPanelKey,
+        path: { tab: 'rule-preview' },
+        params: {
+          id: panelContext.eventId,
+          indexName: panelContext.indexName,
+          scopeId: panelContext.scopeId,
+          banner: {
+            title: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
+                defaultMessage="Preview rule details"
+              />
+            ),
+            backgroundColor: 'warning',
+            textColor: 'warning',
+          },
+          ruleId: ruleUuid.values[0],
         },
-        ruleId: ruleUuid.values[0],
-      },
+      });
     });
   });
 });

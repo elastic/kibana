@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import {
   CSPM_NOT_INSTALLED_ACTION_SUBJ,
@@ -37,21 +36,9 @@ import noDataIllustration from '../assets/illustrations/no_data_illustration.svg
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
 
-const NotDeployed = () => {
-  // using an existing hook to get agent id and package policy id
-  const benchmarks = useCspBenchmarkIntegrations({
-    name: '',
-    page: 1,
-    perPage: 1,
-    sortField: 'package_policy.name',
-    sortOrder: 'asc',
-  });
-
-  // the ids are not a must, but as long as we have them we can open the add agent flyout
-  const firstBenchmark = benchmarks.data?.items?.[0];
+const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
-    addAgentToPolicyId: firstBenchmark?.agent_policy.id || '',
-    integration: firstBenchmark?.package_policy.id || '',
+    postureType,
   });
 
   return (
@@ -280,7 +267,7 @@ export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes })
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
   const render = () => {
-    if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
+    if (status === 'not-deployed') return <NotDeployed postureType={posturetype} />; // integration installed, but no agents added
     if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />; // agent added, index timeout hasn't passed since installation
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
     if (status === 'unprivileged')

@@ -112,6 +112,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(testDataStream).to.eql({
           name: testDataStreamName,
+          lifecycle: {
+            enabled: true,
+          },
           privileges: {
             delete_index: true,
           },
@@ -166,6 +169,9 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
           hidden: false,
+          lifecycle: {
+            enabled: true,
+          },
         });
       });
 
@@ -197,6 +203,9 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
           hidden: false,
+          lifecycle: {
+            enabled: true,
+          },
         });
       });
     });

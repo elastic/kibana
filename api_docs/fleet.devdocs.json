@@ -4813,6 +4813,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.AgentClient.getLatestAgentAvailableVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getLatestAgentAvailableVersion",
+            "description": [
+              "\nReturn the latest agent available version"
+            ],
+            "signature": [
+              "(includeCurrentVersion?: boolean | undefined) => Promise<string>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentClient.getLatestAgentAvailableVersion.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeCurrentVersion",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -19680,34 +19714,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-common.FullAgentPolicyOutputPermissions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FullAgentPolicyOutputPermissions",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.FullAgentPolicyOutputPermissions.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[packagePolicyName: string]: { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }",
-            "description": [],
-            "signature": [
-              "[packagePolicyName: string]:  { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.GetAgentPoliciesRequest",
         "type": "Interface",
         "tags": [],
@@ -24465,6 +24471,23 @@
             "text": "Output"
           },
           ", \"type\" | \"hosts\" | \"ca_sha256\"> & { [key: string]: any; proxy_url?: string | undefined; proxy_headers?: any; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FullAgentPolicyOutputPermissions",
+        "type": "Type",
+        "tags": [],
+        "label": "FullAgentPolicyOutputPermissions",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "SecurityRoleDescriptor",
+          "; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,

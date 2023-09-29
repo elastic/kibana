@@ -12,7 +12,6 @@ export {
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
-  rRuleSchema,
   ruleResponseSchema,
   ruleSnoozeScheduleSchema,
 } from './schemas/latest';
@@ -48,7 +47,6 @@ export {
   ruleExecutionStatusSchema as ruleExecutionStatusSchemaV1,
   ruleLastRunSchema as ruleLastRunSchemaV1,
   monitoringSchema as monitoringSchemaV1,
-  rRuleSchema as rRuleSchemaV1,
   ruleResponseSchema as ruleResponseSchemaV1,
   ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
 } from './schemas/v1';

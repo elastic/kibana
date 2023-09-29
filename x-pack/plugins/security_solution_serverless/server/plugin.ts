@@ -42,7 +42,7 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityConfig;
-  private cspmUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
   private readonly logger: Logger;
 
@@ -65,14 +65,12 @@ export class SecuritySolutionServerlessPlugin
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     }
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
-
-    this.cspmUsageReportingTask = new SecurityUsageReportingTask({
+    this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
       config: this.config,
       taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloudSetup,
+      cloudSetup: pluginsSetup.cloud,
       taskType: cloudSecurityMetringTaskProperties.taskType,
       taskTitle: cloudSecurityMetringTaskProperties.taskTitle,
       version: cloudSecurityMetringTaskProperties.version,
@@ -88,7 +86,10 @@ export class SecuritySolutionServerlessPlugin
       version: ENDPOINT_METERING_TASK.VERSION,
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloudSetup,
+      cloudSetup: pluginsSetup.cloud,
+      options: {
+        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
+      },
     });
 
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
@@ -100,7 +101,7 @@ export class SecuritySolutionServerlessPlugin
     const internalESClient = _coreStart.elasticsearch.client.asInternalUser;
     const internalSOClient = _coreStart.savedObjects.createInternalRepository();
 
-    this.cspmUsageReportingTask?.start({
+    this.cloudSecurityUsageReportingTask?.start({
       taskManager: pluginsSetup.taskManager,
       interval: cloudSecurityMetringTaskProperties.interval,
     });

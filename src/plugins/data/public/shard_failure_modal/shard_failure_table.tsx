@@ -7,13 +7,13 @@
  */
 
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiInMemoryTable, EuiInMemoryTableProps, euiScreenReaderOnly } from '@elastic/eui';
 import { ShardFailureDescription } from './shard_failure_description';
-import { ShardFailure } from './shard_failure_types';
 
-export interface ListItem extends ShardFailure {
+export interface ListItem extends estypes.ShardFailure {
   id: string;
 }
 
@@ -24,7 +24,7 @@ const SORTING: EuiInMemoryTableProps<ListItem>['sorting'] = {
   },
 };
 
-export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
+export function ShardFailureTable({ failures }: { failures: estypes.ShardFailure[] }) {
   const itemList = failures.map((failure, idx) => ({ ...{ id: String(idx) }, ...failure }));
 
   const columns = [

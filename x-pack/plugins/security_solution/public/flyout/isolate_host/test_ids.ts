@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const FLYOUT_HEADER_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHeaderTitle';
+import { PREFIX } from '../shared/test_ids';
+
+export const FLYOUT_HEADER_TITLE_TEST_ID = `${PREFIX}HeaderTitle` as const;

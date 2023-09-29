@@ -104,6 +104,8 @@ export interface DocumentCountChartProps {
   brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   /** Optional width */
   width?: number;
+  /** Optional chart height */
+  height?: number;
   /** Data chart points */
   chartPoints: LogRateHistogramItem[];
   /** Data chart points split */
@@ -130,6 +132,8 @@ export interface DocumentCountChartProps {
   deviationBrush?: BrushSettings;
   /** Optional settings override for the 'baseline' brush */
   baselineBrush?: BrushSettings;
+  /** Optional data-test-subject */
+  dataTestSubj?: string;
 }
 
 const SPEC_ID = 'document_count';
@@ -174,9 +178,11 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const {
+    dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
     width,
+    height,
     chartPoints,
     chartPointsSplit,
     timeRangeEarliest,
@@ -417,7 +423,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   return (
     <>
       {isBrushVisible && (
-        <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
+        <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
               label={
@@ -461,11 +467,14 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           </div>
         </div>
       )}
-      <div css={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+      <div
+        css={{ width: width ?? '100%' }}
+        data-test-subj={dataTestSubj ?? 'aiopsDocumentCountChart'}
+      >
         <Chart
           size={{
             width: '100%',
-            height: 120,
+            height: height ?? 120,
           }}
         >
           <Settings

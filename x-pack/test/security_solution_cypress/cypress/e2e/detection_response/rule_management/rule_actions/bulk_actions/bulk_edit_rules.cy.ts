@@ -74,7 +74,8 @@ import {
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
 import {
@@ -165,7 +166,7 @@ describe(
         })
       );
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
     });
 
