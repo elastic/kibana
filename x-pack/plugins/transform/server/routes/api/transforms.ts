@@ -712,6 +712,7 @@ async function deleteTransforms(
           delete_dest_index: deleteDestIndex,
         });
         transformDeleted.success = true;
+        destIndexDeleted.success = deleteDestIndex;
       } catch (deleteTransformJobError) {
         transformDeleted.error = deleteTransformJobError.meta.body.error;
         if (deleteTransformJobError.statusCode === 403) {
