@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
