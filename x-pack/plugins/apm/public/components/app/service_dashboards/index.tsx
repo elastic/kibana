@@ -34,6 +34,7 @@ import { DashboardSelector } from './dashboard_selector';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { getFilters } from '../metrics/static_dashboard';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export interface MergedServiceDashboard extends SavedServiceDashboard {
   title: string;
@@ -51,6 +52,7 @@ export function ServiceDashboards() {
   const [currentDashboard, setCurrentDashboard] =
     useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { dataView } = useApmDataView();
 
@@ -62,6 +64,7 @@ export function ServiceDashboards() {
           {
             params: {
               path: { serviceName },
+              query: { start, end },
             },
           }
         );

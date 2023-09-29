@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { estypes } from '@elastic/elasticsearch';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
@@ -38,10 +42,14 @@ export async function getServicesWithDashboards({
   apmEventClient,
   allLinkedCustomDashboards,
   serviceName,
+  start,
+  end,
 }: {
   apmEventClient: APMEventClient;
   allLinkedCustomDashboards: SavedServiceDashboard[];
   serviceName: string;
+  start: number;
+  end: number;
 }): Promise<SavedServiceDashboard[]> {
   const allKueryPerDashboard = allLinkedCustomDashboards.map(({ kuery }) => ({
     kuery,
@@ -50,6 +58,7 @@ export async function getServicesWithDashboards({
     getSearchRequest([
       ...kqlQuery(dashboard.kuery),
       ...termQuery(SERVICE_NAME, serviceName),
+      ...rangeQuery(start, end),
     ])
   );
 

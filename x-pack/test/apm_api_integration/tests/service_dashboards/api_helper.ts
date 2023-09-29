@@ -7,11 +7,18 @@
 
 import { ApmApiClient } from '../../common/config';
 
-export async function getServiceDashboardApi(apmApiClient: ApmApiClient, serviceName: string) {
+export async function getServiceDashboardApi(
+  apmApiClient: ApmApiClient,
+  serviceName: string,
+  start: number,
+  end: number
+) {
   return apmApiClient.writeUser({
     endpoint: 'GET /internal/apm/services/{serviceName}/dashboards',
     params: {
       path: { serviceName },
+      start: new Date(start).toISOString(),
+      end: new Date(end).toISOString(),
     },
   });
 }

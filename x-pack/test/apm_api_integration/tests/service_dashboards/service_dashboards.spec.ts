@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles empty state', async () => {
-          const response = await getServiceDashboardApi(apmApiClient, 'synth-go');
+          const response = await getServiceDashboardApi(apmApiClient, 'synth-go', start, end);
           expect(response.status).to.be(200);
           expect(response.body.serviceDashboards).to.eql([]);
         });
@@ -113,8 +113,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceDashboard.useContextFilter
         );
 
-        const dasboardForGoService = await getServiceDashboardApi(apmApiClient, 'synth-go');
-        const dashboardForJavaService = await getServiceDashboardApi(apmApiClient, 'synth-java');
+        const dasboardForGoService = await getServiceDashboardApi(
+          apmApiClient,
+          'synth-go',
+          start,
+          end
+        );
+        const dashboardForJavaService = await getServiceDashboardApi(
+          apmApiClient,
+          'synth-java',
+          start,
+          end
+        );
         expect(dashboardForJavaService.body.serviceDashboards.length).to.be(0);
         expect(dasboardForGoService.body.serviceDashboards.length).to.be(1);
       });
@@ -131,7 +141,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ...serviceDashboard,
         });
 
-        const dasboardForGoService = await getServiceDashboardApi(apmApiClient, 'synth-go');
+        const dasboardForGoService = await getServiceDashboardApi(
+          apmApiClient,
+          'synth-go',
+          start,
+          end
+        );
 
         const updateResponse = await getLinkServiceDashboardApi({
           apmApiClient,
@@ -142,7 +157,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(updateResponse.status).to.be(200);
 
-        const updateddasboardForGoService = await getServiceDashboardApi(apmApiClient, 'synth-go');
+        const updateddasboardForGoService = await getServiceDashboardApi(
+          apmApiClient,
+          'synth-go',
+          start,
+          end
+        );
         expect(updateddasboardForGoService.body.serviceDashboards.length).to.be(1);
         expect(updateddasboardForGoService.body.serviceDashboards[0]).to.have.property(
           'useContextFilter',
@@ -153,7 +173,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'service.name: synth-go or agent.name: java'
         );
 
-        const dashboardForJavaService = await getServiceDashboardApi(apmApiClient, 'synth-java');
+        const dashboardForJavaService = await getServiceDashboardApi(
+          apmApiClient,
+          'synth-java',
+          start,
+          end
+        );
         expect(dashboardForJavaService.body.serviceDashboards.length).to.be(1);
       });
     });

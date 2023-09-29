@@ -13,6 +13,7 @@ import { deleteServiceDashboard } from './remove_service_dashboard';
 import { getLinkedCustomDashboards } from './get_linked_custom_dashboards';
 import { getServicesWithDashboards } from './get_services_with_dashboards';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { rangeRt } from '../default_api_types';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-dashboard',
@@ -51,6 +52,7 @@ const serviceDashboardsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
+    query: rangeRt,
   }),
   options: {
     tags: ['access:apm'],
@@ -59,6 +61,8 @@ const serviceDashboardsRoute = createApmServerRoute({
     resources
   ): Promise<{ serviceDashboards: SavedServiceDashboard[] }> => {
     const { context, params } = resources;
+    const { start, end } = params.query;
+
     const { serviceName } = params.path;
 
     const apmEventClient = await getApmEventClient(resources);
@@ -75,6 +79,8 @@ const serviceDashboardsRoute = createApmServerRoute({
       apmEventClient,
       allLinkedCustomDashboards,
       serviceName,
+      start,
+      end,
     });
 
     return { serviceDashboards: servicesWithDashboards };
