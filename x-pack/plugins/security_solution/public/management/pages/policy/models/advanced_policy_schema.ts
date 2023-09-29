@@ -1347,7 +1347,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
       {
         defaultMessage:
-          'Collects image load events and use them for behaviour protection. By default, does not send events to the stack. Default: true',
+          'A value of 'false' overrides other config settings that would enable kernel image load events. Default: true.',
       }
     ),
   },
