@@ -248,9 +248,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                     target="_blank"
                     external
                   >
-                    {i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText', {
-                      defaultMessage: 'Learn more.',
-                    })}
+                    {i18n.translate(
+                      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText',
+                      {
+                        defaultMessage: 'Learn more.',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}
