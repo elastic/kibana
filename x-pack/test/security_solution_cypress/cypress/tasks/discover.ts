@@ -54,7 +54,13 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
   // ESQL input uses the monaco editor which doesn't allow for traditional input updates
   selectCurrentDiscoverEsqlQuery(DISCOVER_ESQL_EDITABLE_INPUT);
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).clear();
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${esqlQuery}{cmd}{enter}`);
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${esqlQuery}`);
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
+  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).realClick();
+};
+
+export const convertNBSPToSP = (str: string) => {
+  return str.replaceAll(String.fromCharCode(160), ' ');
 };
 
 export const verifyDiscoverEsqlQuery = (esqlQueryToVerify: string) => {

@@ -16,7 +16,6 @@ import {
 import {
   addDiscoverEsqlQuery,
   addFieldToTable,
-  switchDataViewTo,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
 import {
@@ -60,7 +59,7 @@ const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 const ESQL_DATAVIEW_NAME = 'ES|QL';
-const esqlQuery = 'from auditbeat-* | where ecs.version == "1.8.0"';
+const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 describe(
   'Discover Timeline State Integration',
@@ -160,7 +159,6 @@ describe(
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
         const column2 = 'ecs.version';
-        switchDataViewTo(ESQL_DATAVIEW_NAME);
         addDiscoverEsqlQuery(esqlQuery);
         addFieldToTable(column1);
         addFieldToTable(column2);
