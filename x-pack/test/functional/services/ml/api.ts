@@ -1417,6 +1417,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           input: {
             field_names: ['common_field'],
           },
+          metadata: {
+            analytics_config: {
+              source: { index: 'test' },
+            },
+          },
         } as PutTrainedModelConfig,
       };
     },
