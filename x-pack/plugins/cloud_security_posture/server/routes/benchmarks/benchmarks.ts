@@ -6,7 +6,7 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspRuleTemplate } from '../../../common/schemas';
 import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
@@ -15,10 +15,10 @@ import {
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark, GetBenchmarkResponse } from '../../../common/types';
+import type { Benchmark } from '../../../common/types';
 import {
   getBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilter,
+  getBenchmarkFilter,
   isNonNullable,
 } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
@@ -38,7 +38,7 @@ export const getRulesCountForPolicy = async (
 ): Promise<number> => {
   const rules = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    filter: getBenchmarkTypeFilter(benchmarkId),
+    filter: getBenchmarkFilter(benchmarkId),
     perPage: 0,
   });
 
@@ -108,19 +108,20 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
         }
 
         const cspContext = await context.csp;
-
+        const excludeVulnMgmtPackages = true;
         try {
-          const cspPackagePolicies = await getCspPackagePolicies(
+          const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
             cspContext.soClient,
             cspContext.packagePolicyService,
             CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
             request.query,
-            POSTURE_TYPE_ALL
+            POSTURE_TYPE_ALL,
+            excludeVulnMgmtPackages
           );
 
           const agentPolicies = await getCspAgentPolicies(
             cspContext.soClient,
-            cspPackagePolicies.items,
+            packagePolicies.items,
             cspContext.agentPolicyService
           );
 
@@ -134,11 +135,11 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             cspContext.soClient,
             agentPolicies,
             agentStatusesByAgentPolicyId,
-            cspPackagePolicies.items
+            packagePolicies.items
           );
 
-          const getBenchmarkResponse: GetBenchmarkResponse = {
-            ...cspPackagePolicies,
+          const getBenchmarkResponse = {
+            ...packagePolicies,
             items: benchmarks,
           };
 

@@ -42,6 +42,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -2928,6 +2932,9 @@
         "type": "date"
       },
       "updatedBy": {
+        "type": "text"
+      },
+      "savedSearchId": {
         "type": "text"
       }
     }

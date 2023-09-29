@@ -10,18 +10,26 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LeftPanelContext } from '../context';
 import { rawEventData, TestProviders } from '../../../common/mock';
-import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
+import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../common/hooks/use_experimental_features');
-
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        data: {
+          search: {
+            search: () => ({
+              subscribe: () => ({
+                unsubscribe: jest.fn(),
+              }),
+            }),
+          },
+        },
         osquery: {
           OsqueryResults: jest.fn().mockReturnValue(null),
           fetchAllLiveQueries: jest.fn().mockReturnValue({
@@ -51,6 +59,9 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+const NO_DATA_MESSAGE =
+  "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actionsExternal link(opens in a new tab or window).";
+
 const defaultContextValue = {
   dataAsNestedObject: {
     _id: 'test',
@@ -76,7 +87,7 @@ const contextWithResponseActions = {
 };
 
 // Renders System Under Test
-const renderSUT = (contextValue: LeftPanelContext) =>
+const renderResponseDetails = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
       <LeftPanelContext.Provider value={contextValue}>
@@ -98,32 +109,35 @@ describe('<ResponseDetails />', () => {
       useIsExperimentalFeatureEnabledMock
     );
   });
+
   it('should render the view with response actions', () => {
-    const wrapper = renderSUT(contextWithResponseActions);
+    const wrapper = renderResponseDetails(contextWithResponseActions);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
-    expect(wrapper.queryByTestId(RESPONSE_EMPTY_TEST_ID)).not.toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).not.toHaveTextContent(NO_DATA_MESSAGE);
   });
+
   it('should render the view with osquery only', () => {
     featureFlags.responseActionsEnabled = true;
     featureFlags.endpointResponseActionsEnabled = false;
 
-    const wrapper = renderSUT(contextWithResponseActions);
+    const wrapper = renderResponseDetails(contextWithResponseActions);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
     expect(wrapper.getByTestId('osqueryViewWrapper')).toBeInTheDocument();
   });
+
   it('should render the empty information', () => {
-    const wrapper = renderSUT(defaultContextValue);
+    const wrapper = renderResponseDetails(defaultContextValue);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
-    expect(wrapper.getByTestId(RESPONSE_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
   });
 });

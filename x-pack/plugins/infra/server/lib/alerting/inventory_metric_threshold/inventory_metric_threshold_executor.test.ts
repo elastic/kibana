@@ -100,9 +100,6 @@ const createMockStaticConfiguration = (sources: any) => ({
   inventory: {
     compositeSize: 2000,
   },
-  logs: {
-    app_target: 'logs-ui',
-  },
   sources,
 });
 

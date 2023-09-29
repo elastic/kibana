@@ -7,8 +7,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { Role } from '@kbn/security-plugin/common';
 import type { ActionDetails } from '../../../common/endpoint/types';
 import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
+import type { SecurityTestUser } from './common/constants';
 
 type PossibleChainable =
   | Cypress.Chainable<any>
@@ -55,4 +57,12 @@ export interface HostActionResponse {
     action: ActionDetails;
     state: { state?: 'success' | 'failure' };
   };
+}
+
+export interface LoadUserAndRoleCyTaskOptions {
+  name: SecurityTestUser;
+}
+
+export interface CreateUserAndRoleCyTaskOptions {
+  role: Role;
 }

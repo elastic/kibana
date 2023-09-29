@@ -60,6 +60,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -294,6 +296,7 @@ describe('resolve()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
@@ -430,6 +433,7 @@ describe('resolve()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({

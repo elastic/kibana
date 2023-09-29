@@ -5784,46 +5784,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
@@ -10556,10 +10516,6 @@
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/server/saved_objects/search.ts"
               },
@@ -10574,6 +10530,10 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "maps",
@@ -10598,6 +10558,10 @@
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",
                 "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",

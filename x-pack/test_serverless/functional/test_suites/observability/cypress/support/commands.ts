@@ -7,27 +7,36 @@
 import 'cypress-axe';
 import 'cypress-real-events/support';
 import URL from 'url';
+import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
+import { LoginState } from '@kbn/security-plugin/common/login_state';
 
 Cypress.Commands.add('loginAsElasticUser', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
   const kibanaUrlWithoutAuth = Cypress.env('kibanaUrlWithoutAuth');
+  const headers = { 'kbn-xsrf': 'e2e_test', 'x-elastic-internal-origin': 'kibana' };
   cy.log(`Logging in as ${username} on ${kibanaUrlWithoutAuth}`);
-  cy.visit('/');
-  cy.request({
-    log: true,
-    method: 'POST',
-    url: `${kibanaUrlWithoutAuth}/internal/security/login`,
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: `${kibanaUrlWithoutAuth}/login`,
-      params: { username, password },
-    },
-    headers: {
-      'kbn-xsrf': 'e2e_test',
-      'x-elastic-internal-origin': 'kibana',
-    },
+  cy.visit('/login');
+
+  cy.request<LoginState>({
+    headers,
+    url: `${kibanaUrlWithoutAuth}/internal/security/login_state`,
+  }).then((loginState) => {
+    const basicProvider = loginState.body.selector.providers.find(
+      (provider) => provider.type === 'basic'
+    );
+    return request({
+      headers,
+      log: true,
+      method: 'POST',
+      url: `${kibanaUrlWithoutAuth}/internal/security/login`,
+      body: {
+        providerType: basicProvider?.type,
+        providerName: basicProvider?.name,
+        currentURL: `${kibanaUrlWithoutAuth}/login`,
+        params: { username, password },
+      },
+    });
   });
   cy.visit('/');
 });

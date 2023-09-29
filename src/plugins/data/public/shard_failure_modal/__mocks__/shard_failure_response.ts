@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
 
 export const shardFailureResponse: estypes.SearchResponse<any> = {
   _shards: {
@@ -33,4 +33,4 @@ export const shardFailureResponse: estypes.SearchResponse<any> = {
       },
     ],
   },
-} as any;
+} as unknown as estypes.SearchResponse<any>;

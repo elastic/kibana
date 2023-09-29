@@ -83,8 +83,8 @@ import {
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
-import { visit } from './login';
 import { openFilterGroupContextMenu } from './common/filter_group';
+import { visitWithTimeRange } from './navigation';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -113,6 +113,7 @@ export const openAddEndpointExceptionFromAlertActionButton = () => {
 };
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
+  cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
@@ -128,6 +129,7 @@ export const expandFirstAlertActions = () => {
   waitForAlerts();
 
   const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible');
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
     cy.get(TIMELINE_CONTEXT_MENU_BTN)
       .first()
@@ -191,6 +193,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
+  cy.scrollTo('top');
   recurse(
     () => {
       cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
@@ -264,7 +267,7 @@ export const goToOpenedAlerts = () => {
 export const openFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(OPEN_ALERT_BTN).should('be.visible');
-  cy.get(OPEN_ALERT_BTN).click({ force: true });
+  cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const openAlerts = () => {
@@ -303,6 +306,7 @@ export const goToAcknowledgedAlerts = () => {
 
 export const markAcknowledgedFirstAlert = () => {
   expandFirstAlertActions();
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
@@ -460,7 +464,7 @@ export const selectAllAlerts = () => {
 export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
   const pageFilterUrlVal = encode(formatPageFilterSearchParam(pageFilters));
   const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
-  visit(newURL);
+  visitWithTimeRange(newURL);
 };
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {

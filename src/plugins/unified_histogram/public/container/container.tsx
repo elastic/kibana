@@ -42,6 +42,7 @@ export type UnifiedHistogramContainerProps = {
     | Promise<UnifiedHistogramCreationOptions>;
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  isChartLoading?: boolean;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -52,7 +53,7 @@ export type UnifiedHistogramContainerProps = {
   | 'timeRange'
   | 'relativeTimeRange'
   | 'columns'
-  | 'resizeRef'
+  | 'container'
   | 'appendHitsCounter'
   | 'children'
   | 'onBrushEnd'
@@ -124,8 +125,7 @@ export const UnifiedHistogramContainer = forwardRef<
       ),
     });
   }, [input$, stateService]);
-
-  const { dataView, query, searchSessionId, requestAdapter } = containerProps;
+  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
@@ -147,6 +147,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestion={currentSuggestion}
+      isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}
       lensSuggestionsApi={lensSuggestionsApi}

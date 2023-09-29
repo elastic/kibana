@@ -543,6 +543,22 @@
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-common.DatePickerDependencies.showFrozenDataTierChoice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showFrozenDataTierChoice",
+            "description": [
+              "\nOptional flag to disable the frozen data tier choice."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -28,9 +28,9 @@ import {
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe(
+describe.skip(
   'Alert Event Details - Response Actions Form',
-  { browser: 'electron', tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;

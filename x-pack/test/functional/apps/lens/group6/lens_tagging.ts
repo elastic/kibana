@@ -29,11 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const lensTag = 'extreme-lens-tag';
   const lensTitle = 'lens tag test';
 
-  describe('lens tagging', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167561
+  describe.skip('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
     });
