@@ -23,7 +23,8 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useLink, useKibanaVersion, useAuthz } from '../../../../hooks';
+import { useAgentVersion } from '../../../../hooks';
+import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
@@ -91,7 +92,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
 
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
@@ -284,7 +285,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
-          {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
+          {isAgentSelectable(agent) &&
+          latestAgentVersion &&
+          isAgentUpgradeable(agent, latestAgentVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                 <EuiIcon size="m" type="warning" color="warning" />
@@ -324,7 +327,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalAgents
           ? showUpgradeable
             ? agents.filter(
-                (agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion)
+                (agent) =>
+                  isAgentSelectable(agent) &&
+                  latestAgentVersion &&
+                  isAgentUpgradeable(agent, latestAgentVersion)
               )
             : agents
           : []
