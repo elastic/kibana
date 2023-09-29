@@ -53,6 +53,9 @@ export interface UseBulkActions {
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
 
+type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh'> &
+  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'>;
+
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
   alerts.filter(
     (alert) =>
@@ -173,7 +176,11 @@ export const useBulkAddToCaseActions = ({
   ]);
 };
 
-export const useBulkUntrackActions = ({ setIsBulkActionsLoading, refresh, clearSelection }) => {
+export const useBulkUntrackActions = ({
+  setIsBulkActionsLoading,
+  refresh,
+  clearSelection,
+}: UseBulkUntrackActionsProps) => {
   const onSuccess = useCallback(() => {
     refresh();
     clearSelection();
@@ -192,8 +199,9 @@ export const useBulkUntrackActions = ({ setIsBulkActionsLoading, refresh, clearS
         if (!alerts) return;
         const alertUuids = alerts.map((alert) => alert._id);
         const indices = alerts.map((alert) => alert._index ?? '');
-        setIsBulkActionsLoading();
+        setIsBulkActionsLoading(true);
         await untrackAlerts({ indices, alertUuids });
+        setIsBulkActionsLoading(false);
         onSuccess();
       },
     },

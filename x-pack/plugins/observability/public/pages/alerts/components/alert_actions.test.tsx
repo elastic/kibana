@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from '@testing-library/react-hooks';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import React from 'react';
@@ -69,6 +70,19 @@ describe('ObservabilityActions component', () => {
   });
 
   const setup = async (pageId: string) => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+      logger: {
+        log: () => {},
+        warn: () => {},
+        error: () => {},
+      },
+    });
+
     const props: Props = {
       config,
       data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
@@ -82,7 +96,11 @@ describe('ObservabilityActions component', () => {
       refresh,
     };
 
-    const wrapper = mountWithIntl(<AlertActions {...props} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <AlertActions {...props} />
+      </QueryClientProvider>
+    );
     await act(async () => {
       await nextTick();
       wrapper.update();

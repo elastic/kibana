@@ -206,7 +206,7 @@ export function AlertActions({
       onClick={handleUntrackAlert}
     >
       {i18n.translate('xpack.observability.alerts.actions.untrack', {
-        defaultMessage: 'Mark alert as untracked',
+        defaultMessage: 'Mark as untracked',
       })}
     </EuiContextMenuItem>,
   ];
