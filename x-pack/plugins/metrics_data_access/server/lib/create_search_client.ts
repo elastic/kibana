@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { InfraPluginRequestHandlerContext } from '../types';
+import { RequestHandlerContext } from '@kbn/core/server';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 
 export const createSearchClient =
-  (requestContext: InfraPluginRequestHandlerContext, framework: KibanaFramework) =>
+  (requestContext: RequestHandlerContext, framework: KibanaFramework) =>
   <Hit = {}, Aggregation = undefined>(
     opts: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
