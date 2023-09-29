@@ -113,8 +113,6 @@ export class LinksEmbeddable
     const { attributes } = await this.attributeService.unwrapAttributes(this.getInput());
     if (this.isDestroyed) return;
 
-    // TODO handle metaInfo
-
     this.dispatch.setAttributes(attributes);
 
     await this.initializeOutput();

@@ -7,10 +7,10 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import { CONTENT_ID } from './constants';
 
-export type LinksContentType = 'links';
+export type LinksContentType = typeof CONTENT_ID;
 
-// TODO does this type need to be versioned?
 export interface SharingSavedObjectProps {
   outcome: SavedObjectsResolveResponse['outcome'];
   aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
