@@ -28,6 +28,123 @@ describe('setAlertsToUntracked()', () => {
     });
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(clusterClient.updateByQuery.mock.lastCall).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "allow_no_indices": true,
+          "body": Object {
+            "conflicts": "proceed",
+            "query": Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "kibana.alert.status": Object {
+                        "value": "active",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "term": Object {
+                            "kibana.alert.rule.uuid": Object {
+                              "value": "test-rule",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "should": Array [],
+                    },
+                  },
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "
+      if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
+        ctx._source.kibana.alert.status = 'untracked';
+      } else {
+        ctx._source['kibana.alert.status'] = 'untracked'
+      }",
+            },
+          },
+          "index": Array [
+            "test-index",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test('should call updateByQuery on provided alertUuids', async () => {
+    await setAlertsToUntracked({
+      logger,
+      esClient: clusterClient,
+      indices: ['test-index'],
+      alertUuids: ['test-alert'],
+    });
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(clusterClient.updateByQuery.mock.lastCall).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "allow_no_indices": true,
+          "body": Object {
+            "conflicts": "proceed",
+            "query": Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "kibana.alert.status": Object {
+                        "value": "active",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "should": Array [],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "term": Object {
+                            "kibana.alert.uuid": Object {
+                              "value": "test-alert",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "
+      if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
+        ctx._source.kibana.alert.status = 'untracked';
+      } else {
+        ctx._source['kibana.alert.status'] = 'untracked'
+      }",
+            },
+          },
+          "index": Array [
+            "test-index",
+          ],
+        },
+      ]
+    `);
   });
 
   test('should retry updateByQuery on failure', async () => {
