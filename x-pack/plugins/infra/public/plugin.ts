@@ -50,7 +50,7 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
-  private metricsExplorerViews: MetricsExplorerViewsService;
+  private metricsExplorerViews?: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private kibanaVersion: string;
@@ -60,7 +60,9 @@ export class Plugin implements InfraClientPluginClass {
     this.config = context.config.get();
 
     this.inventoryViews = new InventoryViewsService();
-    this.metricsExplorerViews = new MetricsExplorerViewsService();
+    this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
+      ? new MetricsExplorerViewsService()
+      : undefined;
     this.telemetry = new TelemetryService();
     this.kibanaVersion = context.env.packageInfo.version;
   }
@@ -105,7 +107,9 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
-      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+      ...(this.config.featureFlags.metricsExplorerEnabled
+        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+        : []),
       { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
     ];
     pluginsSetup.observabilityShared.navigation.registerSections(
@@ -231,13 +235,17 @@ export class Plugin implements InfraClientPluginClass {
         }),
         path: '/hosts',
       },
-      {
-        id: 'metrics-explorer',
-        title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-          defaultMessage: 'Metrics Explorer',
-        }),
-        path: '/explorer',
-      },
+      ...(this.config.featureFlags.metricsExplorerEnabled
+        ? [
+            {
+              id: 'metrics-explorer',
+              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                defaultMessage: 'Metrics Explorer',
+              }),
+              path: '/explorer',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
@@ -266,6 +274,7 @@ export class Plugin implements InfraClientPluginClass {
           coreStart,
           { ...plugins, kibanaVersion: this.kibanaVersion },
           pluginStart,
+          this.config,
           params
         );
       },
@@ -313,7 +322,7 @@ export class Plugin implements InfraClientPluginClass {
       http: core.http,
     });
 
-    const metricsExplorerViews = this.metricsExplorerViews.start({
+    const metricsExplorerViews = this.metricsExplorerViews?.start({
       http: core.http,
     });
 
