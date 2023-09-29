@@ -157,7 +157,7 @@ describe('Differential Functions page', () => {
       });
     });
 
-    it.only('adds kql filter', () => {
+    it('adds kql filter', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         rangeFrom: comparisonRangeFrom,
