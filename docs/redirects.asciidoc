@@ -422,3 +422,8 @@ This page has been deleted. Refer to <<alerting-getting-started>>.
 == Enhancements and bug fixes for 8.10.0
 
 This content has moved. Refer to <<enhancements-and-bug-fixes-v8.10.0-revised>> for 8.10.0.
+
+[role="exclude",id="gen-ai-action-type"]
+== Generative AI connector and action
+
+This connector was renamed. Refer to <<openai-action-type>>.
