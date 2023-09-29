@@ -28,6 +28,10 @@
       "path": "../tsconfig.json",
       "force": true
     },
+    {
+      "path": "../../../test_serverless/tsconfig.json",
+      "force": true
+    },
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin"
