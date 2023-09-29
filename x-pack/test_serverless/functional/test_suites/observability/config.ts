@@ -14,4 +14,8 @@ export default createTestConfig({
     reportName: 'Serverless Observability Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
+  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
 });
