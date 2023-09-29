@@ -9,6 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
@@ -76,6 +77,7 @@ describe('Discover documents layout', () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
+    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
   });
 
   test('should set rounded width to state on resize column', () => {

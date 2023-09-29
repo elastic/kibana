@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderCustomToolbar should render correctly for smaller screens 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  className="dscGridToolbar"
+  data-test-subj="dscGridToolbar"
+  gutterSize="s"
+  justifyContent="spaceBetween"
+  responsive={false}
+  wrap={true}
+>
+  <EuiFlexItem
+    grow={false}
+  />
+  <EuiFlexItem
+    grow={false}
+  >
+    <div
+      className="dscGridToolbarControlGroup"
+    >
+      <div
+        className="dscGridToolbarControl"
+      >
+        keyboard
+      </div>
+      <div
+        className="dscGridToolbarControl"
+      >
+        display
+      </div>
+      <div
+        className="dscGridToolbarControl"
+      >
+        fullScreen
+      </div>
+    </div>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`renderCustomToolbar should render successfully 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  className="dscGridToolbar"
+  data-test-subj="dscGridToolbar"
+  gutterSize="s"
+  justifyContent="spaceBetween"
+  responsive={false}
+  wrap={true}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="dscGridToolbarControlGroup"
+        >
+          <div
+            className="dscGridToolbarControl"
+          >
+            column
+          </div>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="dscGridToolbarControlGroup"
+        >
+          <div
+            className="dscGridToolbarControl"
+          >
+            columnSorting
+          </div>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="dscGridToolbarControlGroup"
+        >
+          <div
+            className="dscGridToolbarControl"
+          >
+            additional
+          </div>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <div
+      className="dscGridToolbarControlGroup"
+    >
+      <div
+        className="dscGridToolbarControl"
+      >
+        keyboard
+      </div>
+      <div
+        className="dscGridToolbarControl"
+      >
+        display
+      </div>
+      <div
+        className="dscGridToolbarControl"
+      >
+        fullScreen
+      </div>
+    </div>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -29,6 +29,7 @@ export const renderCustomToolbar: UnifiedDataTableProps['renderCustomToolbar'] =
       justifyContent="spaceBetween"
       alignItems="center"
       className="dscGridToolbar"
+      data-test-subj="dscGridToolbar"
       wrap
     >
       <EuiFlexItem grow={false}>
