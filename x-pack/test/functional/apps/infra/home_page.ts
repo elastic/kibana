@@ -38,8 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  // Failing: See https://github.com/elastic/kibana/issues/167071
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -318,7 +317,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnNodeDetailsFlyoutOpenAsPage();
 
-          await retry.tryForTime(3 * 1000, async () => {
+          await retry.try(async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
               'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
@@ -334,7 +333,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnGoToNodeDetails();
 
-          await retry.tryForTime(3 * 1000, async () => {
+          await retry.try(async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
           });
