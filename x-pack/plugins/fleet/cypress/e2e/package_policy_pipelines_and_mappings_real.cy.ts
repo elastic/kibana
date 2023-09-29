@@ -17,7 +17,15 @@ const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
 const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
 const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
+import { request } from '../tasks/common';
+import { login } from '../tasks/login';
+import { cleanupAgentPolicies } from '../tasks/cleanup';
+
 describe('Input package create and edit package policy', () => {
+  beforeEach(() => {
+    login();
+  });
+
   const agentPolicyId = 'test-input-package-policy';
   const agentPolicyName = 'Test input package policy';
   const packagePolicyName = 'input-package-policy';
@@ -35,7 +43,7 @@ describe('Input package create and edit package policy', () => {
   before(() => {
     cy.task('installTestPackage', INPUT_TEST_PACKAGE);
 
-    cy.request({
+    request({
       method: 'POST',
       url: `/api/fleet/agent_policies`,
       body: {
@@ -48,18 +56,12 @@ describe('Input package create and edit package policy', () => {
       headers: { 'kbn-xsrf': 'cypress' },
     });
   });
+
   after(() => {
-    // delete agent policy
-    cy.request({
-      method: 'POST',
-      url: `/api/fleet/agent_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress' },
-      body: JSON.stringify({
-        agentPolicyId,
-      }),
-    });
+    cleanupAgentPolicies();
     cy.task('uninstallTestPackage', INPUT_TEST_PACKAGE);
   });
+
   it('should successfully create a package policy', () => {
     cy.visit(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/overview`);
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
@@ -102,6 +104,10 @@ describe('Input package create and edit package policy', () => {
 });
 
 describe('Integration package with custom dataset create and edit package policy', () => {
+  beforeEach(() => {
+    login();
+  });
+
   const agentPolicyId = 'test-logs-integration-package-policy';
   const agentPolicyName = 'Test integration with custom dataset package policy';
   const packagePolicyName = 'logs-integration-package-policy';
@@ -110,7 +116,7 @@ describe('Integration package with custom dataset create and edit package policy
   before(() => {
     cy.task('installTestPackage', INTEGRATION_TEST_PACKAGE);
 
-    cy.request({
+    request({
       method: 'POST',
       url: `/api/fleet/agent_policies`,
       body: {
@@ -123,18 +129,12 @@ describe('Integration package with custom dataset create and edit package policy
       headers: { 'kbn-xsrf': 'cypress' },
     });
   });
+
   after(() => {
-    // delete agent policy
-    cy.request({
-      method: 'POST',
-      url: `/api/fleet/agent_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress' },
-      body: JSON.stringify({
-        agentPolicyId,
-      }),
-    });
+    cleanupAgentPolicies();
     cy.task('uninstallTestPackage', INTEGRATION_TEST_PACKAGE);
   });
+
   it('should successfully create a package policy', () => {
     cy.visit(`/app/integrations/detail/${INTEGRATION_TEST_PACKAGE}/overview`);
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
@@ -167,6 +167,10 @@ describe('Integration package with custom dataset create and edit package policy
 });
 
 describe('Integration package with fixed dataset create and edit package policy', () => {
+  beforeEach(() => {
+    login();
+  });
+
   const agentPolicyId = 'test-integration-package-policy';
   const agentPolicyName = 'Test integration package policy';
   const packagePolicyName = 'integration-package-policy';
@@ -174,7 +178,7 @@ describe('Integration package with fixed dataset create and edit package policy'
   before(() => {
     cy.task('installTestPackage', INTEGRATION_TEST_PACKAGE_NO_DATASET);
 
-    cy.request({
+    request({
       method: 'POST',
       url: `/api/fleet/agent_policies`,
       body: {
@@ -187,18 +191,12 @@ describe('Integration package with fixed dataset create and edit package policy'
       headers: { 'kbn-xsrf': 'cypress' },
     });
   });
+
   after(() => {
-    // delete agent policy
-    cy.request({
-      method: 'POST',
-      url: `/api/fleet/agent_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress' },
-      body: JSON.stringify({
-        agentPolicyId,
-      }),
-    });
+    cleanupAgentPolicies();
     cy.task('uninstallTestPackage', INTEGRATION_TEST_PACKAGE_NO_DATASET);
   });
+
   it('should successfully create a package policy', () => {
     cy.visit(`/app/integrations/detail/${INTEGRATION_TEST_PACKAGE_NO_DATASET}/overview`);
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();

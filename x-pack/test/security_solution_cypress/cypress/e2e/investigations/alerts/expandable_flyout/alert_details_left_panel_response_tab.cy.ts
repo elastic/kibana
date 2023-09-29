@@ -16,7 +16,7 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe('Alert details expandable flyout left panel investigation', () => {
+describe('Alert details expandable flyout left panel investigation', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     cleanKibana();
     login();

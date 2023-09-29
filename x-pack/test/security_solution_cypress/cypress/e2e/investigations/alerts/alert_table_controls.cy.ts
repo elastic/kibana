@@ -42,7 +42,7 @@ import { TIMELINES, ALERTS } from '../../../screens/security_header';
  *
  * */
 
-describe(`Alert Table Controls`, () => {
+describe(`Alert Table Controls`, { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
   });

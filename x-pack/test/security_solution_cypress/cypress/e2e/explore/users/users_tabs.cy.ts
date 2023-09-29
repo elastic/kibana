@@ -19,7 +19,7 @@ import { login, visit, visitUserDetailsPage } from '../../../tasks/login';
 
 import { USERS_URL } from '../../../urls/navigation';
 
-describe('Users stats and tables', () => {
+describe('Users stats and tables', { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'users' });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useValues } from 'kea';
 
@@ -20,6 +20,8 @@ import {
 import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { WelcomeBanner } from '@kbn/search-api-panels';
+
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { ErrorStateCallout } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
@@ -40,8 +42,23 @@ import { IngestionSelector } from './ingestion_selector';
 import './product_selector.scss';
 
 export const ProductSelector: React.FC = () => {
-  const { config, userProfile } = useValues(KibanaLogic);
+  const { config, security } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
+
+  const [user, setUser] = useState<AuthenticatedUser | {}>({});
+
+  useEffect(() => {
+    try {
+      security.authc
+        .getCurrentUser()
+        .then(setUser)
+        .catch(() => {
+          setUser({});
+        });
+    } catch {
+      setUser({});
+    }
+  }, [security.authc]);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
@@ -53,7 +70,7 @@ export const ProductSelector: React.FC = () => {
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
           <EuiText color="ghost">
-            <WelcomeBanner userProfile={userProfile} image={headerImage} showDescription={false} />
+            <WelcomeBanner userProfile={{ user }} image={headerImage} showDescription={false} />
           </EuiText>
         </EuiPageTemplate.Section>
 

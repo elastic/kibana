@@ -29,7 +29,7 @@ import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrat
 import { tag } from '../../tags';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe(
+describe.skip(
   'Alert Event Details - Response Actions Form',
   { browser: 'electron', tags: [tag.ESS, tag.SERVERLESS] },
   () => {

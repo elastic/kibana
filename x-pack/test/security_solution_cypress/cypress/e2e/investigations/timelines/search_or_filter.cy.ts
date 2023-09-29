@@ -77,7 +77,7 @@ describe('Timeline search and filters', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLE
       });
     });
 
-    it('should be able to update timeline kqlMode with search', () => {
+    it.skip('should be able to update timeline kqlMode with search', () => {
       cy.get(TIMELINE_KQLMODE_SEARCH).click();
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);

@@ -63,6 +63,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         index,
         query,
         ignore_unavailable: ignoreUnavailable,
+        allow_no_indices: true,
         refresh: true,
         conflicts: 'proceed',
       });

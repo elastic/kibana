@@ -124,7 +124,7 @@ describe('usePrevalence', () => {
     expect(hookResult.result.current.data).toEqual([
       {
         field: 'host.name',
-        value: 'host-1',
+        values: ['host-1'],
         alertCount: 1,
         docCount: 1,
         hostPrevalence: 0.1,

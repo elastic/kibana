@@ -11,13 +11,19 @@ import {
   AGENT_BINARY_SOURCES_FLYOUT,
   AGENT_POLICY_FORM,
 } from '../screens/fleet';
-import { cleanupDownloadSources } from '../tasks/cleanup';
+import { cleanupAgentPolicies, cleanupDownloadSources } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 import { CONFIRM_MODAL } from '../screens/navigation';
+
+import { request } from '../tasks/common';
+import { login } from '../tasks/login';
 
 describe('Agent binary download source section', () => {
   beforeEach(() => {
     cleanupDownloadSources();
+    cleanupAgentPolicies();
+
+    login();
     navigateTo(FLEET);
   });
 
@@ -72,7 +78,7 @@ describe('Agent binary download source section', () => {
   });
 
   it('the download source is displayed in agent policy settings', () => {
-    cy.request({
+    request({
       method: 'POST',
       url: `api/fleet/agent_download_sources`,
       body: {
@@ -82,7 +88,7 @@ describe('Agent binary download source section', () => {
       },
       headers: { 'kbn-xsrf': 'kibana' },
     });
-    cy.request({
+    request({
       method: 'POST',
       url: '/api/fleet/agent_policies',
       body: {

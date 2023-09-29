@@ -60,6 +60,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   scopeId?: string;
   toggleTopN?: () => void;
   hideQueryToggle?: boolean;
+  applyGlobalQueriesAndFilters?: boolean;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -95,6 +96,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   toggleTopN,
   hideQueryToggle = false,
+  applyGlobalQueriesAndFilters = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 

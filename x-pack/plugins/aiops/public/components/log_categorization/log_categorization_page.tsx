@@ -71,7 +71,7 @@ export const LogCategorizationPage: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedSavedSearch, setSelectedDataView] = useState(savedSearch);
+  const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
@@ -91,7 +91,7 @@ export const LogCategorizationPage: FC = () => {
 
   useEffect(() => {
     if (savedSearch) {
-      setSelectedDataView(savedSearch);
+      setSelectedSavedSearch(savedSearch);
     }
   }, [savedSearch]);
 
@@ -114,7 +114,7 @@ export const LogCategorizationPage: FC = () => {
       // When the user loads saved search and then clear or modify the query
       // we should remove the saved search and replace it with the index pattern id
       if (selectedSavedSearch !== null) {
-        setSelectedDataView(null);
+        setSelectedSavedSearch(null);
       }
 
       setUrlState({

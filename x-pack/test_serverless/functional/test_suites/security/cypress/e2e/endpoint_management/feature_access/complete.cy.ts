@@ -6,6 +6,7 @@
  */
 
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
+import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import { login } from '../../../tasks/login';
 import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
 import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
@@ -30,7 +31,7 @@ describe(
     let password: string;
 
     beforeEach(() => {
-      login('endpoint_operations_analyst').then((response) => {
+      login(ServerlessRoleName.ENDPOINT_OPERATIONS_ANALYST).then((response) => {
         username = response.username;
         password = response.password;
       });

@@ -23,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    after(async () => {
+    afterEach(async () => {
       await deletePackage('apm', '8.8.0');
     });
 
@@ -87,6 +87,61 @@ export default function (providerContext: FtrProviderContext) {
       });
       // datastream rolled over
       expect(Object.keys(ds).length).greaterThan(1);
+    });
+
+    it('should not rollover datastreams when successfully updated mappings', async function () {
+      await supertest
+        .post(`/api/fleet/epm/packages/apm/8.8.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      await es.index({
+        index: 'metrics-apm.app.default-default',
+        document: {
+          '@timestamp': '2023-05-30T07:50:00.000Z',
+          agent: {
+            name: 'go',
+          },
+          data_stream: {
+            dataset: 'metrics-apm.app.default',
+            namespace: 'default',
+            type: 'metrics',
+          },
+          ecs: {
+            version: '8.8.0-dev',
+          },
+          event: {
+            agent_id_status: 'missing',
+            ingested: '2023-05-30T07:57:12Z',
+          },
+          observer: {
+            hostname: '047e282994fb',
+            type: 'apm-server',
+            version: '8.8.0',
+          },
+        },
+      });
+
+      let ds = await es.indices.get({
+        index: 'metrics-apm.app.default*',
+        expand_wildcards: ['open', 'hidden'],
+      });
+      const indicesBefore = Object.keys(ds).length;
+
+      await supertest
+        .post(`/api/fleet/epm/packages/apm/8.8.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      ds = await es.indices.get({
+        index: 'metrics-apm.app.default*',
+        expand_wildcards: ['open', 'hidden'],
+      });
+      const indicesAfter = Object.keys(ds).length;
+      // datastream did not roll over
+      expect(indicesAfter).equal(indicesBefore);
     });
   });
 }

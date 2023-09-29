@@ -45,17 +45,11 @@ export const useAgentGroups = () => {
                 terms: {
                   field: 'local_metadata.os.platform',
                 },
-                aggs: {
-                  policies: {
-                    terms: {
-                      field: 'policy_id',
-                    },
-                  },
-                },
               },
               policies: {
                 terms: {
                   field: 'policy_id',
+                  size: 2000,
                 },
               },
             },

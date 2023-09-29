@@ -13,6 +13,24 @@ import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@bab
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { getExperimentalAllowedValues } from '../../common/experimental_features';
 
+export const isSkipped = (filePath: string): boolean => {
+  const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
+
+  const ast = parser.parse(testFile, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+
+  const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
+    | ExpressionStatement
+    | undefined;
+
+  const callExpression = expressionStatement?.expression;
+
+  // @ts-expect-error
+  return callExpression?.callee?.property?.name === 'skip';
+};
+
 export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeBlockFtrConfig => {
   const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
 

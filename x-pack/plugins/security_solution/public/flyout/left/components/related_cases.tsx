@@ -9,6 +9,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
+import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import { CaseDetailsLink } from '../../../common/components/links';
 import { CORRELATIONS_RELATED_CASES } from '../../shared/translations';
 import {
@@ -31,15 +32,18 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
     name: CORRELATIONS_CASE_NAME_COLUMN_TITLE,
     truncateText: true,
     render: (value: string, caseData: RelatedCase) => (
-      <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
-        {caseData.title}
-      </CaseDetailsLink>
+      <CellTooltipWrapper tooltip={caseData.title}>
+        <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
+          {caseData.title}
+        </CaseDetailsLink>
+      </CellTooltipWrapper>
     ),
   },
   {
     field: 'status',
     name: CORRELATIONS_CASE_STATUS_COLUMN_TITLE,
     truncateText: true,
+    width: '25%',
   },
 ];
 

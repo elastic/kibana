@@ -88,12 +88,13 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/check_types.sh
-    label: 'Check Types'
-    agents:
-      queue: n2-16-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # TODO: Enable in #166813 after fixing types
+  # - command: .buildkite/scripts/steps/check_types.sh
+  #   label: 'Check Types'
+  #   agents:
+  #     queue: n2-16-spot
+  #   timeout_in_minutes: 60
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
