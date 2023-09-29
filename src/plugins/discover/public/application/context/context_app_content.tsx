@@ -66,7 +66,7 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DataGridMemoized = React.memo(UnifiedDataTable);
+const DiscoverGridMemoized = React.memo(UnifiedDataTable);
 const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
 
@@ -189,7 +189,7 @@ export function ContextAppContent({
       {!isLegacy && (
         <div className="dscDocsGrid">
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-            <DataGridMemoized
+            <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
               showColumnTokens
               columns={columns}

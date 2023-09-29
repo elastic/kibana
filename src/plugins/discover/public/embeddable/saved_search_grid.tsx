@@ -30,7 +30,7 @@ export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   savedSearchId?: string;
 }
 
-export const DataGridMemoized = React.memo(UnifiedDataTable);
+export const DiscoverGridMemoized = React.memo(UnifiedDataTable);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, ...gridProps } = props;
@@ -76,7 +76,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
-      <DataGridMemoized
+      <DiscoverGridMemoized
         {...gridProps}
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}

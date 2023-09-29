@@ -71,7 +71,7 @@ const progressStyle = css`
 const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
-const DataGridMemoized = React.memo(UnifiedDataTable);
+const DiscoverGridMemoized = React.memo(UnifiedDataTable);
 
 // export needs for testing
 export const onResize = (
@@ -299,7 +299,7 @@ function DiscoverDocumentsComponent({
             <CellActionsProvider
               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
             >
-              <DataGridMemoized
+              <DiscoverGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
                 showColumnTokens
                 columns={currentColumns}
