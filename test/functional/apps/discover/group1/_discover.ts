@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/146223
-  describe.skip('discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
