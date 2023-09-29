@@ -97,6 +97,7 @@ import { featureUsageService } from './endpoint/services/feature_usage';
 import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
+import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
@@ -107,6 +108,7 @@ import {
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
+import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -169,6 +171,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures);
     appFeaturesService.init(plugins.features);
 
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+
     this.ruleMonitoringService.setup(core, plugins);
 
     if (experimentalFeatures.riskScoringPersistence) {
@@ -177,6 +181,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
         taskManager: plugins.taskManager,
+        telemetry: core.analytics,
       });
     }
 
@@ -209,6 +214,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
       logger,
+      riskEngineIndexPatterns: {
+        all: allRiskScoreIndexPattern,
+        latest: latestRiskScoreIndexPattern,
+      },
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);

@@ -48,7 +48,7 @@ const sendApiLoginRequest = (
 };
 
 interface CyLoginTask {
-  (user?: ServerlessRoleName): ReturnType<typeof sendApiLoginRequest>;
+  (user?: ServerlessRoleName | 'elastic'): ReturnType<typeof sendApiLoginRequest>;
 
   /**
    * Login using any username/password
