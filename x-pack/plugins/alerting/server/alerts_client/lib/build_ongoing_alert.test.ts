@@ -220,7 +220,6 @@ describe('buildOngoingAlert', () => {
         'error' | 'warning',
         'recovered'
       >({
-        // @ts-
         alert: {
           ...existingAlert,
           count: 1,

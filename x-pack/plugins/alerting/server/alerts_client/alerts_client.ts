@@ -93,7 +93,7 @@ export class AlertsClient<
     primaryTerm: Record<string, number | undefined>;
   };
 
-  private rule?: AlertRule;
+  private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
   private indexTemplateAndPattern: IIndexPatternString;
@@ -363,7 +363,7 @@ export class AlertsClient<
             >({
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
-              rule: this.rule!,
+              rule: this.rule,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -379,7 +379,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               legacyAlert: activeAlerts[id],
-              rule: this.rule!,
+              rule: this.rule,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -409,7 +409,7 @@ export class AlertsClient<
               >({
                 alert: this.fetchedAlerts.data[id],
                 legacyAlert: recoveredAlerts[id],
-                rule: this.rule!,
+                rule: this.rule,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
@@ -419,7 +419,7 @@ export class AlertsClient<
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
                 timestamp: currentTime,
-                rule: this.rule!,
+                rule: this.rule,
               })
         );
       } else {

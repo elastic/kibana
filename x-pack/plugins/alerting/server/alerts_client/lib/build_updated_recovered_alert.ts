@@ -33,9 +33,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   return deepmerge.all(
     [
       alert,
+      // Set latest rule configuration
+      rule,
       {
-        // Set latest rule configuration
-        ...rule,
         // Update the timestamp to reflect latest update time
         [TIMESTAMP]: timestamp,
         // Set latest flapping state

@@ -71,9 +71,9 @@ export const buildOngoingAlert = <
     [
       alert,
       cleanedPayload,
+      // Set the latest rule configuration
+      rule,
       {
-        // Set latest rule configuration
-        ...rule,
         // Update the timestamp to reflect latest update time
         [TIMESTAMP]: timestamp,
         [EVENT_ACTION]: 'active',
