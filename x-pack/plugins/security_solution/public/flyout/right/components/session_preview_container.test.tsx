@@ -51,7 +51,7 @@ const renderSessionPreview = () =>
 
 describe('SessionPreviewContainer', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should render component and link in header', () => {
