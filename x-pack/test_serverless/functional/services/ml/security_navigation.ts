@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-// import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningNavigationProviderSecurity({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
-  // const appsMenu = getService('appsMenu');
-  // const browser = getService('browser');
-  // const retry = getService('retry');
+export function MachineLearningNavigationProviderSecurity({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  // const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   async function navigateToArea(id: string) {
     await testSubjects.click('~solutionSideNavItemButton-machine_learning-landing');

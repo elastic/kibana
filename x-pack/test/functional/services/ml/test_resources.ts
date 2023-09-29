@@ -432,7 +432,7 @@ export function MachineLearningTestResourcesProvider(
     ) {
       await retry.waitForWithTimeout(
         `${objectType} with title '${title}' to exist`,
-        20 * 1000,
+        5 * 1000,
         async () => {
           if ((await this.savedObjectExistsByTitle(title, objectType, space)) === true) {
             return true;
