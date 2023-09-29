@@ -195,6 +195,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       return result;
     }
 
-    return 'An error occurred sending your message. If the problem persists, please test the connector configuration. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
+    return 'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
   }
 }
