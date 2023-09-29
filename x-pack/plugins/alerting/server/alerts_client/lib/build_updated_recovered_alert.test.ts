@@ -120,9 +120,6 @@ describe('buildUpdatedRecoveredAlert', () => {
           },
           maintenance_window_ids: ['maint-x'],
           start: '2023-03-28T12:27:28.159Z',
-          rule: {
-            execution: {},
-          },
           status: 'recovered',
           time_range: {
             gte: '2023-03-27T12:27:28.159Z',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, get, merge, omit } from 'lodash';
+import { cloneDeep, get, isEmpty, merge, omit } from 'lodash';
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   const parts = dottedFieldName.split('.');
@@ -21,6 +21,29 @@ export const expandFlattenedAlert = (alert: object) => {
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
     {}
   );
+};
+
+type Obj = Record<string, unknown>;
+
+const compactObject = (obj: Obj) => {
+  return Object.keys(obj)
+    .filter((key: string) => {
+      return (
+        !!obj[key] &&
+        ((typeof obj[key] === 'object' && !isEmpty(obj[key])) || typeof obj[key] !== 'object')
+      );
+    })
+    .reduce<Obj>((acc, curr) => {
+      if (typeof obj[curr] !== 'object' || Array.isArray(obj[curr])) {
+        acc[curr] = obj[curr];
+      } else {
+        const compacted = compactObject(obj[curr] as Obj);
+        if (!isEmpty(compacted)) {
+          acc[curr] = compacted;
+        }
+      }
+      return acc;
+    }, {});
 };
 
 /**
@@ -42,5 +65,5 @@ export const removeUnflattenedFieldsFromAlert = (alert: any, flattenedData: obje
       alertCopy = omit(alertCopy, payloadKey);
     }
   });
-  return alertCopy;
+  return compactObject(alertCopy);
 };

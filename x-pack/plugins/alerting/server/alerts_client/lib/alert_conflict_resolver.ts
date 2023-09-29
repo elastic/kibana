@@ -27,7 +27,7 @@ import { zip, get } from 'lodash';
 // these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
 const REFRESH_FIELDS_CONDITIONAL = [ALERT_STATUS];
-const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
+export const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
 
 export interface ResolveAlertConflictsParams {
   esClient: ElasticsearchClient;

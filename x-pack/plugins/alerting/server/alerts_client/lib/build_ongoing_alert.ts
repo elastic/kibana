@@ -6,16 +6,23 @@
  */
 
 import deepmerge from 'deepmerge';
+import { get } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_TAGS,
+  ALERT_START,
+  ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
+  EVENT_KIND,
   SPACE_IDS,
   TAGS,
   TIMESTAMP,
@@ -27,6 +34,7 @@ import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../t
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { removeUnflattenedFieldsFromAlert } from './format_alert';
+import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -69,6 +77,16 @@ export const buildOngoingAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
+  const refreshableAlertFields = REFRESH_FIELDS_ALL.reduce<Partial<Alert & AlertData>>(
+    (acc, currField) => {
+      const value = get(alert, currField, null);
+      if (value) {
+        acc[currField] = value;
+      }
+      return acc;
+    },
+    {}
+  );
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
@@ -98,14 +116,6 @@ export const buildOngoingAlert = <
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: legacyAlert.getState().duration }
       : {}),
-    // Fields that are explicitly not updated:
-    // event.kind
-    // instance.id
-    // status - ongoing alerts should maintain 'active' status
-    // uuid - ongoing alerts should carry over previous UUID
-    // start - ongoing alerts should keep the initial start time
-    // time_range - ongoing alerts should keep the initial time_range
-    // workflow_status - ongoing alerts should keep the initial workflow status
     [SPACE_IDS]: rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(
@@ -119,6 +129,7 @@ export const buildOngoingAlert = <
   const formattedAlert = removeUnflattenedFieldsFromAlert(alert, {
     ...cleanedPayload,
     ...alertUpdates,
+    ...refreshableAlertFields,
   });
   return deepmerge.all([formattedAlert, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,

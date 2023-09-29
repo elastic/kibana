@@ -21,8 +21,14 @@ import {
   VERSION,
   ALERT_END,
   ALERT_TIME_RANGE,
+  ALERT_INSTANCE_ID,
+  ALERT_START,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_KIND,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
+import { get } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -95,6 +101,7 @@ export const buildRecoveredAlert = <
     // Set end time
     ...(legacyAlert.getState().end && legacyAlert.getState().start
       ? {
+          [ALERT_START]: legacyAlert.getState().start,
           [ALERT_END]: legacyAlert.getState().end,
           [ALERT_TIME_RANGE]: {
             gte: legacyAlert.getState().start,
@@ -102,12 +109,13 @@ export const buildRecoveredAlert = <
           },
         }
       : {}),
-    // Fields that are explicitly not updated:
-    // instance.id
-    // action_group
-    // uuid - recovered alerts should carry over previous UUID
-    // start - recovered alerts should keep the initial start time
-    // workflow_status - recovered alerts should keep the initial workflow_status
+
+    [EVENT_KIND]: 'signal',
+    [ALERT_INSTANCE_ID]: legacyAlert.getId(),
+    [ALERT_UUID]: legacyAlert.getUuid(),
+    [ALERT_WORKFLOW_STATUS]:
+      get(cleanedPayload, ALERT_WORKFLOW_STATUS) ?? get(alert, ALERT_WORKFLOW_STATUS, 'open'),
+
     [SPACE_IDS]: rule[SPACE_IDS],
     // Set latest kibana version
     [VERSION]: kibanaVersion,
