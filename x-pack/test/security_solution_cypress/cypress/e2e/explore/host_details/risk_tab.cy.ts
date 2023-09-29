@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitHostDetailsPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitHostDetailsPage } from '../../../tasks/navigation';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';

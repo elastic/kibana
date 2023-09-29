@@ -17,9 +17,9 @@ import { InstallElasticAgent } from './install_elastic_agent';
 import { SelectLogs } from './select_logs';
 
 interface WizardState {
-  integrationName: string;
+  integrationName?: string;
   lastCreatedIntegrationOptions?: CustomIntegrationOptions;
-  datasetName: string;
+  datasetName?: string;
   serviceName: string;
   logFilePaths: string[];
   namespace: string;
@@ -40,8 +40,8 @@ interface WizardState {
 }
 
 const initialState: WizardState = {
-  integrationName: '',
-  datasetName: '',
+  integrationName: undefined,
+  datasetName: undefined,
   serviceName: '',
   logFilePaths: [''],
   namespace: 'default',

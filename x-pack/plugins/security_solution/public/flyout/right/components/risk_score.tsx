@@ -10,10 +10,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID,
-  FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID,
-} from './test_ids';
+import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 
 /**
@@ -39,17 +36,17 @@ export const RiskScore: FC = memo(() => {
   return (
     <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs" data-test-subj={FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID}>
-          <h5>
+        <EuiTitle size="xxs" data-test-subj={RISK_SCORE_TITLE_TEST_ID}>
+          <h3>
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
               defaultMessage="Risk score:"
             />
-          </h5>
+          </h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <span data-test-subj={FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID}>{alertRiskScore}</span>
+        <span data-test-subj={RISK_SCORE_VALUE_TEST_ID}>{alertRiskScore}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

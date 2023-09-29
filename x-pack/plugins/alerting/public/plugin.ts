@@ -138,7 +138,8 @@ export class AlertingPublicPlugin
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          return navigationHandler(rule);
+          const navUrl = navigationHandler(rule);
+          if (navUrl) return navUrl;
         }
 
         if (rule.viewInAppRelativeUrl) {

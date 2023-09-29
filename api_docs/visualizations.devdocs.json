@@ -6727,15 +6727,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; updateInput: (changes: Partial<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">) => void; openInspector: () => ",
+          " | undefined>; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -6931,7 +6923,15 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">; updateOutput: (outputChanges: Partial<",
+          ">; updateInput: (changes: Partial<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">) => void; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
         ],

@@ -2360,7 +2360,7 @@
             }
           }
         },
-        "enterpriseSearchEsre": {
+        "enterpriseSearchAISearch": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -9924,6 +9924,12 @@
           }
         },
         "labs:dashboard:dashboardControls": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:dashboard:linksPanel": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
