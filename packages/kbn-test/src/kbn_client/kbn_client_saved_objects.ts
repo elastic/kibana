@@ -96,6 +96,7 @@ const STANDARD_LIST_TYPES = [
   'dashboard',
   'search',
   'lens',
+  'links',
   'map',
   'cases',
   // synthetics based objects
