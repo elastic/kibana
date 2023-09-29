@@ -21,6 +21,110 @@
     "functions": [
       {
         "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.categorizeFields",
+        "type": "Function",
+        "tags": [],
+        "label": "categorizeFields",
+        "description": [],
+        "signature": [
+          "(fields: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ", string | number | boolean | (string | number)[] | null | undefined>[]) => ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.CategorizedFields",
+            "text": "CategorizedFields"
+          }
+        ],
+        "path": "packages/kbn-management/settings/utilities/category/categorize_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.categorizeFields.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]"
+            ],
+            "path": "packages/kbn-management/settings/utilities/category/categorize_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getCategoryName",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategoryName",
+        "description": [],
+        "signature": [
+          "(category: string | undefined) => string"
+        ],
+        "path": "packages/kbn-management/settings/utilities/category/get_category_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getCategoryName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-management/settings/utilities/category/get_category_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
         "id": "def-common.getFieldInputValue",
         "type": "Function",
         "tags": [],
@@ -948,7 +1052,7 @@
         "tags": [],
         "label": "useUpdate",
         "description": [
-          "\nHook to provide a standard {@link OnChangeFn} that will send an update to the\nfield.\n"
+          "\nHook to provide a standard {@link OnInputChangeFn} that will send an update to the\nfield.\n"
         ],
         "signature": [
           "<T extends ",
@@ -972,8 +1076,8 @@
             "pluginId": "@kbn/management-settings-types",
             "scope": "common",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.OnChangeFn",
-            "text": "OnChangeFn"
+            "section": "def-common.OnInputChangeFn",
+            "text": "OnInputChangeFn"
           },
           "<T>"
         ],
@@ -1007,7 +1111,7 @@
           }
         ],
         "returnComment": [
-          "An {@link OnChangeFn } that will send an update to the field."
+          "An {@link OnInputChangeFn } that will send an update to the field."
         ],
         "initialIsOpen": false
       }
@@ -1036,12 +1140,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.UseUpdateParameters.onChange",
+            "id": "def-common.UseUpdateParameters.onInputChange",
             "type": "Function",
             "tags": [],
-            "label": "onChange",
+            "label": "onInputChange",
             "description": [
-              "The {@link OnChangeFn} to invoke."
+              "The {@link OnInputChangeFn} to invoke."
             ],
             "signature": [
               "(change?: ",
@@ -1061,7 +1165,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-utilities",
-                "id": "def-common.UseUpdateParameters.onChange.$1",
+                "id": "def-common.UseUpdateParameters.onInputChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
