@@ -378,7 +378,7 @@ export const uiSettings: Record<string, UiSettings> = {
   [profilingUseLegacyFlamegraphAPI]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingUseLegacyFlamegraphAPI', {
-      defaultMessage: 'Use profiling legacy Flamegraph API',
+      defaultMessage: 'Use legacy Flamegraph API in Universal Profiling',
     }),
     value: false,
     schema: schema.boolean(),
