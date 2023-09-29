@@ -496,6 +496,25 @@ describe('create', () => {
     });
 
     it('should not throw an error and fill out missing customFields when they are undefined', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        },
+      ]);
       await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
@@ -523,6 +542,34 @@ describe('create', () => {
       );
     });
 
+    it('should throw an error when required customFields are undefined', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        create({ ...theCase }, clientArgs, casesClient)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Missing required custom fields: first_key"`
+      );
+    });
+
     it('throws error when the customFields array is too long', async () => {
       await expect(
         create(
@@ -534,7 +581,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 5."`
+        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
