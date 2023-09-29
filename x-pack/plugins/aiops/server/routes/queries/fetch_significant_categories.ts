@@ -15,6 +15,7 @@ import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_an
 import { LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD } from '../../../common/constants';
 
 import { fetchCategories } from './fetch_categories';
+import { fetchCategoryCounts } from './fetch_category_counts';
 import { getNormalizedScore } from './get_normalized_score';
 
 const getCategoriesTestData = (categories: Category[]): Histogram[] => {
@@ -55,46 +56,41 @@ export const fetchSignificantCategories = async (
     abortSignal
   );
 
-  const categoriesBaseline = await fetchCategories(
-    esClient,
-    params,
-    fieldNames,
-    params.baselineMin,
-    params.baselineMax,
-    logger,
-    sampleProbability,
-    emitError,
-    abortSignal
-  );
-
-  const categoriesDeviation = await fetchCategories(
-    esClient,
-    params,
-    fieldNames,
-    params.deviationMin,
-    params.deviationMax,
-    logger,
-    sampleProbability,
-    emitError,
-    abortSignal
-  );
-
-  if (
-    categoriesBaseline.length !== fieldNames.length ||
-    categoriesDeviation.length !== fieldNames.length
-  )
-    return [];
+  if (categoriesOverall.length !== fieldNames.length) return [];
 
   const significantCategories: SignificantTerm[] = [];
 
-  fieldNames.forEach((fieldName, i) => {
-    const categoriesBaselineTotalCount = getCategoriesTotalCount(categoriesBaseline[i].categories);
-    const categoriesBaselineTestData = getCategoriesTestData(categoriesBaseline[i].categories);
-
-    const categoriesDeviationTotalCount = getCategoriesTotalCount(
-      categoriesDeviation[i].categories
+  // Using for...of to allow `await` within the loop.
+  for (const [i, fieldName] of fieldNames.entries()) {
+    const categoriesBaseline = await fetchCategoryCounts(
+      esClient,
+      params,
+      fieldName,
+      categoriesOverall[i],
+      params.baselineMin,
+      params.baselineMax,
+      logger,
+      emitError,
+      abortSignal
     );
-    const categoriesDeviationTestData = getCategoriesTestData(categoriesDeviation[i].categories);
+
+    const categoriesDeviation = await fetchCategoryCounts(
+      esClient,
+      params,
+      fieldName,
+      categoriesOverall[i],
+      params.deviationMin,
+      params.deviationMax,
+      logger,
+      emitError,
+      abortSignal
+    );
+
+    const categoriesBaselineTotalCount = getCategoriesTotalCount(categoriesBaseline.categories);
+    const categoriesBaselineTestData = getCategoriesTestData(categoriesBaseline.categories);
+
+    const categoriesDeviationTotalCount = getCategoriesTotalCount(categoriesDeviation.categories);
+    const categoriesDeviationTestData = getCategoriesTestData(categoriesDeviation.categories);
 
     // Get all unique keys from both arrays
     const allKeys: string[] = Array.from(
@@ -133,7 +129,7 @@ export const fetchSignificantCategories = async (
         });
       }
     });
-  });
+  }
 
   return significantCategories;
 };
