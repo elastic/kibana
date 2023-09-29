@@ -80,7 +80,7 @@ describe('Home page', () => {
         cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
         cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
       });
-      it.skip('Select policy for fleet', () => {
+      it('Select policy for fleet', () => {
         checkA11y({ skipFailures: false });
       });
       it('Add your fleet sever host', () => {
