@@ -24,7 +24,7 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
 
-const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
+export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
   runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
@@ -54,7 +54,7 @@ const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
         package_policy_id: {
           top_metrics: {
             metrics: {
-              field: 'cloud_security_posture.package_policy_id',
+              field: 'cloud_security_posture.package_policy.id',
             },
             size: 1,
             sort: {
@@ -66,17 +66,6 @@ const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
           top_metrics: {
             metrics: {
               field: '@timestamp',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
-        benchmark_posture_type: {
-          top_metrics: {
-            metrics: {
-              field: 'rule.benchmark.posture_type',
             },
             size: 1,
             sort: {
@@ -215,7 +204,7 @@ const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
   _source: false,
 });
 
-const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
+export const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
   runtime_mappings: getSafeCloudAccountIdRuntimeMapping(),
   query: {
@@ -245,7 +234,7 @@ const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
         package_policy_id: {
           top_metrics: {
             metrics: {
-              field: 'cloud_security_posture.package_policy_id',
+              field: 'cloud_security_posture.package_policy.id',
             },
             size: 1,
             sort: {
@@ -277,7 +266,7 @@ const cloudBaseStats = (account: AccountEntity) => ({
   latest_doc_updated_timestamp: account.latest_doc_updated_timestamp.top[0].metrics['@timestamp'],
   cloud_provider: account.cloud_provider.top[0].metrics['cloud.provider'],
   package_policy_id:
-    account.package_policy_id.top[0].metrics['cloud_security_posture.package_policy_id'],
+    account.package_policy_id.top[0].metrics['cloud_security_posture.package_policy.id'],
 });
 
 const getPostureManagementStats = (account: AccountEntity) => ({
@@ -303,17 +292,28 @@ const getKspmStats = (account: AccountEntity) => ({
 });
 
 const kspmCloudProviders: Record<CloudProviderKey, string> = {
-  'cis/eks': 'aws',
-  'cis/gke': 'gcp',
-  'cis/k8s': 'self_managed',
-  'cis/ake': 'azure',
+  cis_eks: 'aws',
+  cis_gke: 'gcp',
+  cis_k8s: 'self_managed',
+  cis_ake: 'azure',
 };
+const cspmBenchmarkIds = ['cis_aws', 'cis_azure', 'cis_gcp'];
+const kspmBenchmarkIds = ['cis_eks', 'cis_ake', 'cis_gke', 'cis_k8s'];
 
 const getCloudProvider = (ruleBenchmarkId: CloudProviderKey) => {
   return kspmCloudProviders[ruleBenchmarkId];
 };
 
-const getCloudAccountsStats = (
+const getPostureType = (ruleBenchmarkId: string) => {
+  if (cspmBenchmarkIds.includes(ruleBenchmarkId)) {
+    return CSPM_POLICY_TEMPLATE;
+  } else if (kspmBenchmarkIds.includes(ruleBenchmarkId)) {
+    return KSPM_POLICY_TEMPLATE;
+  }
+  return undefined;
+};
+
+export const getCloudAccountsStats = (
   aggregatedResourcesStats: AccountsStats,
   logger: Logger
 ): CloudSecurityAccountsStats[] => {
@@ -321,8 +321,9 @@ const getCloudAccountsStats = (
 
   const cloudAccountsStats = accounts.map((account) => {
     const cloudAccount = cloudBaseStats(account);
-    const postureType =
-      account.benchmark_posture_type?.top?.[0]?.metrics['rule.benchmark.posture_type'];
+    const postureType = getPostureType(
+      account.benchmark_id?.top?.[0]?.metrics['rule.benchmark.id']
+    );
 
     if (!postureType) {
       return {
@@ -355,7 +356,7 @@ const getCloudAccountsStats = (
   return cloudAccountsStats;
 };
 
-const getIndexAccountStats = async (
+export const getIndexAccountStats = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   index: string,

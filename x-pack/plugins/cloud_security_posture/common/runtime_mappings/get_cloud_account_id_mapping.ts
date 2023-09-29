@@ -14,13 +14,13 @@ export const getSafeCloudAccountIdRuntimeMapping = (): MappingRuntimeFields => (
       source: `
         def cloudAccountIdAvailable = doc.containsKey("cloud.account.id") &&
           !doc["cloud.account.id"].empty;
-        def packagePolicyId = doc.containsKey("cloud_security_posture.package_policy_id") &&
-          !doc["cloud_security_posture.package_policy_id"].empty;
+        def packagePolicyIdExists = doc.containsKey("cloud_security_posture.package_policy.id") &&
+          !doc["cloud_security_posture.package_policy.id"].empty;
         if (cloudAccountIdAvailable) {
           emit(doc["cloud.account.id"].value);
         }
-        if (packagePolicyId) {
-          emit(doc["cloud_security_posture.package_policy_id"].value);
+        if (packagePolicyIdExists) {
+          emit(doc["cloud_security_posture.package_policy.id"].value);
         } 
         `,
     },

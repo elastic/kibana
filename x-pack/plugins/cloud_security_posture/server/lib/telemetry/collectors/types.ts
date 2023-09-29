@@ -17,7 +17,7 @@ export type CloudSecurityUsageCollectorType =
   | 'Alerts'
   | 'Cloud Accounts';
 
-export type CloudProviderKey = 'cis/eks' | 'cis/gke' | 'cis/k8s' | 'cis/ake';
+export type CloudProviderKey = 'cis_eks' | 'cis_gke' | 'cis_k8s' | 'cis_ake';
 export type CloudbeatConfigKeyType =
   | 'cloudbeat/cis_aws'
   | 'cloudbeat/vuln_mgmt_aws'
@@ -72,8 +72,8 @@ export interface CspmResourcesStats {
 export interface CloudSecurityAccountsStats {
   account_id: string;
   product: string;
-  cloud_provider: string;
-  package_policy_id: string;
+  cloud_provider: string | null;
+  package_policy_id: string | null;
   posture_management_stats?: CloudPostureAccountsStats;
   kspm_stats?: KSPMAccountsStats;
   latest_doc_count: number;
@@ -159,10 +159,6 @@ export interface BenchmarkId {
   metrics: { 'rule.benchmark.id': string };
 }
 
-export interface BenchmarkPostureType {
-  metrics: { 'rule.benchmark.posture_type': string };
-}
-
 export interface CloudProvider {
   metrics: { 'cloud.provider': string };
 }
@@ -172,7 +168,7 @@ export interface KubernetesVersion {
 }
 
 export interface PackagePolicyId {
-  metrics: { 'cloud_security_posture.package_policy_id': string };
+  metrics: { 'cloud_security_posture.package_policy.id': string };
 }
 
 export interface LatestDocTimestamp {
@@ -192,7 +188,6 @@ export interface AccountEntity {
   package_policy_id: { top: PackagePolicyId[] };
   cloud_provider: { top: CloudProvider[] };
   latest_doc_updated_timestamp: { top: LatestDocTimestamp[] };
-  benchmark_posture_type: { top: BenchmarkPostureType[] };
   benchmark_id: { top: BenchmarkId[] };
   benchmark_name: { top: BenchmarkName[] };
   benchmark_version: { top: BenchmarkVersion[] };
