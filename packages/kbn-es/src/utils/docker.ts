@@ -218,7 +218,7 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
+export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es01',
     params: [

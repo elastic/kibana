@@ -12,12 +12,15 @@ import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
-import { KnownTypeToMetadata, UiSettingMetadata } from '@kbn/management-settings-types/metadata';
+import {
+  KnownTypeToMetadata,
+  UiSettingMetadata,
+  OnFieldChangeFn,
+} from '@kbn/management-settings-types';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { FieldRow as Component, FieldRow } from '../field_row';
 import { FieldRowProvider } from '../services';
-import { RowOnChangeFn } from '../types';
 
 /**
  * Props for a {@link FieldInput} Storybook story.
@@ -103,10 +106,7 @@ export const storyArgs = {
  * @param type The type of the UiSetting for this {@link FieldRow}.
  * @returns A Storybook Story.
  */
-export const getFieldRowStory = (
-  type: SettingType,
-  settingFields?: Partial<UiSettingMetadata<SettingType>>
-) => {
+export const getFieldRowStory = (type: SettingType, settingFields?: Partial<UiSettingMetadata>) => {
   const Story = ({
     isCustom,
     isDeprecated,
@@ -143,17 +143,17 @@ export const getFieldRowStory = (
       },
     });
 
-    const onChange: RowOnChangeFn<typeof type> = (_id, newChange) => {
+    const onFieldChange: OnFieldChangeFn<typeof type> = (_id, newChange) => {
       setUnsavedChange(newChange);
 
-      action('onChange')({
+      action('onFieldChange')({
         type,
         unsavedValue: newChange?.unsavedValue,
         savedValue: field.savedValue,
       });
     };
 
-    return <FieldRow {...{ field, unsavedChange, isSavingEnabled, onChange }} />;
+    return <FieldRow {...{ field, unsavedChange, isSavingEnabled, onFieldChange }} />;
   };
 
   // In Kibana, the image default value is never anything other than null.  There would be a number

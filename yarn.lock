@@ -3239,6 +3239,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud@link:packages/cloud":
+  version "0.0.0"
+  uid ""
+
 "@kbn/code-editor-mocks@link:packages/shared-ux/code_editor/mocks":
   version "0.0.0"
   uid ""
@@ -4856,6 +4860,10 @@
   uid ""
 
 "@kbn/management-plugin@link:src/plugins/management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-settings-components-field-category@link:packages/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
