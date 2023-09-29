@@ -9,7 +9,7 @@ import { getEsqlRule } from '../../../objects/rule';
 
 import { CUSTOM_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../screens/rule_details';
 
-import { ESQL_QUERY_BAR } from '../../../screens/create_new_rule';
+import { ESQL_QUERY_BAR, ESQL_QUERY_BAR_EXPAND_BTN } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 
@@ -49,7 +49,8 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   it('edits ES|QL rule and checks details page', () => {
     visit(RULES_MANAGEMENT_URL);
     editFirstRule();
-
+    // expands query bar, so query is not obscured on narrow screens
+    cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
     // ensure once edit form opened, correct query is displayed in ES|QL input
     cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
