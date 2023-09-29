@@ -70,7 +70,7 @@ export function ServiceDashboards() {
         );
       }
     },
-    [serviceName]
+    [serviceName, start, end]
   );
 
   useEffect(() => {
