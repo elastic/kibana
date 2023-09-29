@@ -6,102 +6,13 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { cloneDeep, forOwn } from 'lodash';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+
 import { DashboardPanelState } from '../../../../common';
 import { GridData } from '../../../../common/content_management';
+import { PanelPlacementProps, PanelPlacementReturn } from './types';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
-
-export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
-  args: PlacementArgs
-) => PanelPlacementMethodReturn;
-
-interface PanelPlacementMethodReturn {
-  newPanelPlacement: Omit<GridData, 'i'>;
-  otherPanels: { [key: string]: DashboardPanelState };
-}
-
-export interface IPanelPlacementArgs {
-  width: number;
-  height: number;
-  currentPanels: { [key: string]: DashboardPanelState };
-  scrollToPanel?: boolean;
-}
-
-export interface IPanelPlacementBesideArgs extends IPanelPlacementArgs {
-  placeBesideId: string;
-}
-
-// Look for the smallest y and x value where the default panel will fit.
-export function findTopLeftMostOpenSpace({
-  width,
-  height,
-  currentPanels,
-}: IPanelPlacementArgs): PanelPlacementMethodReturn {
-  let maxY = -1;
-
-  const currentPanelsArray = Object.values(currentPanels);
-  currentPanelsArray.forEach((panel) => {
-    maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
-  });
-
-  // Handle case of empty grid.
-  if (maxY < 0) {
-    return { newPanelPlacement: { x: 0, y: 0, w: width, h: height }, otherPanels: currentPanels };
-  }
-
-  const grid = new Array(maxY);
-  for (let y = 0; y < maxY; y++) {
-    grid[y] = new Array(DASHBOARD_GRID_COLUMN_COUNT).fill(0);
-  }
-
-  currentPanelsArray.forEach((panel) => {
-    for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
-      for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
-        const row = grid[y];
-        if (row === undefined) {
-          throw new Error(
-            `Attempted to access a row that doesn't exist at ${y} for panel ${JSON.stringify(
-              panel
-            )}`
-          );
-        }
-        grid[y][x] = 1;
-      }
-    }
-  });
-
-  for (let y = 0; y < maxY; y++) {
-    for (let x = 0; x < DASHBOARD_GRID_COLUMN_COUNT; x++) {
-      if (grid[y][x] === 1) {
-        // Space is filled
-        continue;
-      } else {
-        for (let h = y; h < Math.min(y + height, maxY); h++) {
-          for (let w = x; w < Math.min(x + width, DASHBOARD_GRID_COLUMN_COUNT); w++) {
-            const spaceIsEmpty = grid[h][w] === 0;
-            const fitsPanelWidth = w === x + width - 1;
-            // If the panel is taller than any other panel in the current grid, it can still fit in the space, hence
-            // we check the minimum of maxY and the panel height.
-            const fitsPanelHeight = h === Math.min(y + height - 1, maxY - 1);
-
-            if (spaceIsEmpty && fitsPanelWidth && fitsPanelHeight) {
-              // Found space
-              return {
-                newPanelPlacement: { x, y, w: width, h: height },
-                otherPanels: currentPanels,
-              };
-            } else if (grid[h][w] === 1) {
-              // x, y spot doesn't work, break.
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-  return { newPanelPlacement: { x: 0, y: maxY, w: width, h: height }, otherPanels: currentPanels };
-}
 
 interface IplacementDirection {
   grid: Omit<GridData, 'i'>;
@@ -128,19 +39,19 @@ function comparePanels(a: GridData, b: GridData): number {
   return 1;
 }
 
-export function placePanelBeside({
+export function placeClonePanel({
   width,
   height,
   currentPanels,
   placeBesideId,
-}: IPanelPlacementBesideArgs): PanelPlacementMethodReturn {
+}: PanelPlacementProps & { placeBesideId: string }): PanelPlacementReturn {
   const panelToPlaceBeside = currentPanels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
   const beside = panelToPlaceBeside.gridData;
   const otherPanelGridData: GridData[] = [];
-  _.forOwn(currentPanels, (panel: DashboardPanelState, key: string | undefined) => {
+  forOwn(currentPanels, (panel: DashboardPanelState, key: string | undefined) => {
     otherPanelGridData.push(panel.gridData);
   });
 
@@ -197,7 +108,7 @@ export function placePanelBeside({
 
   for (let j = position + 1; j < grid.length; j++) {
     originalPositionInTheGrid = grid[j].i;
-    const movedPanel = _.cloneDeep(otherPanels[originalPositionInTheGrid]);
+    const movedPanel = cloneDeep(otherPanels[originalPositionInTheGrid]);
     movedPanel.gridData.y = movedPanel.gridData.y + diff;
     otherPanels[originalPositionInTheGrid] = movedPanel;
   }
