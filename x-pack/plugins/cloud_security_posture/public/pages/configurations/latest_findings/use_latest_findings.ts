@@ -14,14 +14,14 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import type { Sort, FindingsBaseEsQuery } from '../../../common/types';
+import type { FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
-  sort: any;
+  sort: string[][];
   enabled: boolean;
 }
 
@@ -42,7 +42,7 @@ interface FindingsAggs {
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam: any) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   query,
-  sort: Object.hasOwn(sort, 'field') ? getSortField(sort) : getMultiFieldsSort(sort),
+  sort: getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
@@ -53,6 +53,7 @@ const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
     return {
       [id]: direction,
+      ...getSortField({ field: id, direction }),
     };
   });
 };
@@ -71,7 +72,7 @@ const fieldsRequiredSortingByPainlessScript = [
  * Generates Painless sorting if the given field is matched or returns default sorting
  * This painless script will sort the field in case-insensitive manner
  */
-const getSortField = ({ field, direction }: Sort<CspFinding>) => {
+const getSortField = ({ field, direction }: { field: string; direction: string }) => {
   if (fieldsRequiredSortingByPainlessScript.includes(field)) {
     return {
       _script: {

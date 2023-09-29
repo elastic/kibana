@@ -8,10 +8,11 @@ import React, { useMemo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord } from '@kbn/discover-utils/types';
+import { Filter, Query } from '@kbn/es-query';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
-import type { FindingsBaseProps } from '../../../common/types';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useLatestFindings } from './use_latest_findings';
@@ -27,11 +28,18 @@ import {
 } from '../../../components/cloud_security_data_table';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 
-const getDefaultQuery = ({ query, filters }: any): any => ({
+const getDefaultQuery = ({
+  query,
+  filters,
+}: {
+  query: Query;
+  filters: Filter[];
+}): FindingsBaseURLQuery & {
+  sort: string[][];
+} => ({
   query,
   filters,
   sort: [['@timestamp', 'desc']],
-  pageIndex: 0,
 });
 
 const defaultColumns: CloudSecurityDefaultColumn[] = [
@@ -45,10 +53,33 @@ const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: '@timestamp' },
 ];
 
-const isCspFinding = (source: any): source is CspFinding => {
+/**
+ * Type Guard for checking if the given source is a CspFinding
+ */
+const isCspFinding = (source: Record<string, any> | undefined): source is CspFinding => {
   return source?.result?.evaluation !== undefined;
 };
 
+/**
+ * This Wrapper component renders the children if the given row is a CspFinding
+ * it uses React's Render Props pattern
+ */
+const CspFindingRenderer = ({
+  row,
+  children,
+}: {
+  row: DataTableRecord;
+  children: ({ finding }: { finding: CspFinding }) => JSX.Element;
+}) => {
+  const source = row.raw._source;
+  const finding = isCspFinding(source) && (source as CspFinding);
+  if (!finding) return <></>;
+  return children({ finding });
+};
+
+/**
+ * Flyout component for the latest findings table
+ */
 const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
   return (
     <CspFindingRenderer row={row}>
@@ -62,19 +93,6 @@ const columnsLocalStorageKey = 'cloudSecurityPostureLatestFindingsColumns';
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableTitle', {
   defaultMessage: 'Findings',
 });
-
-const CspFindingRenderer = ({
-  row,
-  children,
-}: {
-  row: DataTableRecord;
-  children: ({ finding }: { finding: CspFinding }) => JSX.Element;
-}) => {
-  const source = row.raw._source;
-  const finding = isCspFinding(source) && (source as CspFinding);
-  if (!finding) return <></>;
-  return children({ finding });
-};
 
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
@@ -120,7 +138,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
-      pageIndex: 0,
       filters: getFilters({
         filters,
         dataView,
