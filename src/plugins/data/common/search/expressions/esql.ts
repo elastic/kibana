@@ -201,7 +201,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               } else {
                 const { type, reason } = error.err.attributes;
                 if (type === 'parsing_exception') {
-                  error.message = `Couldn't parse Elasticsearch ES|QL query. You may need to add backticks to names containing special characters. Check your query and try again. Error: ${reason}`;
+                  error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
                 } else {
                   error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
                 }
@@ -210,24 +210,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next(finalResponse) {
+              next({ rawResponse }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
                       label: i18n.translate('data.search.es_search.hitsLabel', {
                         defaultMessage: 'Hits',
                       }),
-                      value: `${finalResponse.rawResponse.values.length}`,
+                      value: `${rawResponse.values.length}`,
                       description: i18n.translate('data.search.es_search.hitsDescription', {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
                     },
                   })
                   .json(params)
-                  .ok({ json: finalResponse });
+                  .ok({ json: rawResponse });
               },
               error(error) {
-                logInspectorRequest().json(params).error({ json: error });
+                logInspectorRequest().error({ json: error });
               },
             })
           );

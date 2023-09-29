@@ -67,11 +67,9 @@ const renderRulePreview = () =>
     </TestProviders>
   );
 
-describe('<RulePreview />', () => {
-  beforeEach(() => {
-    // (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
-  });
+const NO_DATA_MESSAGE = 'There was an error displaying data.';
 
+describe('<RulePreview />', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -134,9 +132,10 @@ describe('<RulePreview />', () => {
 
   it('should not render rule preview when rule is null', async () => {
     mockUseRuleWithFallback.mockReturnValue({});
-    const { queryByTestId } = renderRulePreview();
+    const { queryByTestId, getByText } = renderRulePreview();
     await act(async () => {
       expect(queryByTestId(RULE_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
+      expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     });
   });
 });
