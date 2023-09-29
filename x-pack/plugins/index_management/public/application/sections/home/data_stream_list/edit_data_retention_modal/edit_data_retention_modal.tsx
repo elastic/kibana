@@ -124,7 +124,7 @@ const configurationFormSchema: FormSchema = {
     validations: [
       {
         validator: ({ value }) => {
-          if (!value || value === 0) {
+          if (!value) {
             return {
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
@@ -134,12 +134,12 @@ const configurationFormSchema: FormSchema = {
               ),
             };
           }
-          if (value < 0) {
+          if (value <= 0) {
             return {
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldNonNegativeError',
                 {
-                  defaultMessage: `Data retention value can't be negative.`,
+                  defaultMessage: `A positive value is required.`,
                 }
               ),
             };
@@ -237,33 +237,22 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionDocsLink"
-              defaultMessage="Edit the data retention requirements for your data stream. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink
-                    href={documentationService.getUpdateExistingDS()}
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText',
-                      {
-                        defaultMessage: 'Learn more.',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-          <EuiSpacer size="l" />
-
           <UseField
             path="dataRetention"
             component={NumericField}
+            labelAppend={
+              <EuiText size="xs">
+                <EuiLink
+                  href={documentationService.getUpdateExistingDS()}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText', {
+                    defaultMessage: 'How does it work?',
+                  })}
+                </EuiLink>
+              </EuiText>
+            }
             componentProps={{
               fullWidth: false,
               euiFieldProps: {

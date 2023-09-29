@@ -491,7 +491,7 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
     });
 
-    test('with ILM updating data retention should be dissabled', async () => {
+    test('with ILM updating data retention should be disabled', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({
