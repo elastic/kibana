@@ -105,10 +105,16 @@ export const FormContext: React.FC<Props> = ({
       }
 
       for (const [key, value] of Object.entries(customFields)) {
+        let fieldValue = null;
         const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
 
         if (configCustomField) {
-          const fieldValue = isEmpty(value) && typeof value !== 'boolean' ? null : [value];
+          if (!isEmpty(value) && typeof value === 'string') {
+            fieldValue = [value];
+          } else if (typeof value === 'boolean') {
+            fieldValue = value;
+          }
+
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,

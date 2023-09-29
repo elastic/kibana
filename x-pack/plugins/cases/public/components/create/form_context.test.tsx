@@ -47,7 +47,12 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import { CaseSeverity, AttachmentType, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  AttachmentType,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -436,7 +441,15 @@ describe.skip('Create case', () => {
         ...useCaseConfigureResponse,
         data: {
           ...useCaseConfigureResponse.data,
-          customFields: customFieldsConfigurationMock,
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'my custom field label',
+              required: false,
+            },
+          ],
         },
       }));
 
@@ -471,7 +484,14 @@ describe.skip('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          customFields: customFieldsMock,
+          customFields: [
+            ...customFieldsMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              value: null,
+            },
+          ],
         },
       });
     });

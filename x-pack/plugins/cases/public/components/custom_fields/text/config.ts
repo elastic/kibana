@@ -32,7 +32,7 @@ export const getTextFieldConfig = ({
       ...validators,
       {
         validator: ({ value }) => {
-          if (value == null || !required) {
+          if (value == null) {
             return;
           }
 

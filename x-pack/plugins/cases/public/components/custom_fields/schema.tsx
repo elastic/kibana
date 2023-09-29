@@ -38,7 +38,7 @@ export const schema = {
       {
         validator: maxLengthField({
           length: MAX_CUSTOM_FIELD_LABEL_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR('fieldLabel', MAX_CUSTOM_FIELD_LABEL_LENGTH),
+          message: i18n.MAX_LENGTH_ERROR('field label', MAX_CUSTOM_FIELD_LABEL_LENGTH),
         }),
       },
     ],

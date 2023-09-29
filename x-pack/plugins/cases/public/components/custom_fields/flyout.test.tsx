@@ -13,6 +13,8 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CustomFieldFlyout } from './flyout';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
+import * as i18n from './translations';
 
 describe('CustomFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
@@ -57,6 +59,20 @@ describe('CustomFieldFlyout ', () => {
     });
   });
 
+  it('shows error if field label is too long', async () => {
+    appMockRender.render(<CustomFieldFlyout {...props} />);
+
+    const message = 'z'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
+
+    userEvent.type(screen.getByTestId('custom-field-label-input'), message);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(i18n.MAX_LENGTH_ERROR('field label', MAX_CUSTOM_FIELD_LABEL_LENGTH))
+      ).toBeInTheDocument();
+    });
+  });
+
   it('calls onSaveField with serialized data', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
@@ -78,6 +94,10 @@ describe('CustomFieldFlyout ', () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
     userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL))).toBeInTheDocument();
+    });
 
     expect(props.onSaveField).not.toBeCalled();
   });

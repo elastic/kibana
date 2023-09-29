@@ -111,6 +111,35 @@ describe('Create ', () => {
     });
   });
 
+  it('shows error when text is too long and field is optional', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create
+          isLoading={false}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+        />
+      </FormTestComponent>
+    );
+
+    const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
+
+    userEvent.paste(
+      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
+      sampleText
+    );
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
+        )
+      ).toBeInTheDocument();
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
+    });
+  });
+
   it('shows error when text is required but is empty', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
