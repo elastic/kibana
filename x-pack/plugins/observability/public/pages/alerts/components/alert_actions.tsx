@@ -21,8 +21,7 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-
-import { useUntrackAlerts } from '../../../hooks/use_untrack_alerts';
+import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -65,7 +64,7 @@ export function AlertActions({
     application,
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
-  const { mutateAsync: untrackAlerts } = useUntrackAlerts();
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
