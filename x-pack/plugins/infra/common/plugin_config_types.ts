@@ -25,10 +25,14 @@ export interface InfraConfig {
       };
     };
   };
+  featureFlags: {
+    metricsExplorerEnabled: boolean;
+  };
 }
 
 export const publicConfigKeys = {
   sources: true,
+  featureFlags: true,
 } as const;
 
 export type InfraPublicConfigKey = keyof {

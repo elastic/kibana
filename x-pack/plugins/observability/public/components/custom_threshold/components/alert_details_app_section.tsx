@@ -213,19 +213,19 @@ export default function AlertDetailsAppSection({
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" data-test-subj="thresholdAlertRelatedEventsSection">
         {ruleParams.criteria.map((criterion, criterionIndex) =>
-          criterion.metrics?.map(
-            (metric, metricIndex) =>
-              dataView &&
-              dataView.id && (
-                <EmbeddableChangePointChart
-                  key={`embeddableChart-criterion${criterionIndex}-metric${metricIndex}`}
-                  dataViewId={dataView.id}
-                  timeRange={relatedEventsTimeRange(criterion)}
-                  fn={metric.aggType ?? ''}
-                  metricField={metric.field ?? ''}
-                />
-              )
-          )
+          criterion.metrics?.map((metric, metricIndex) => {
+            const id = `embeddableChart-criterion${criterionIndex}-metric${metricIndex}`;
+            return dataView?.id ? (
+              <EmbeddableChangePointChart
+                id={id}
+                key={id}
+                dataViewId={dataView.id}
+                timeRange={relatedEventsTimeRange(criterion)}
+                fn={metric.aggType ?? ''}
+                metricField={metric.field ?? ''}
+              />
+            ) : null;
+          })
         )}
       </EuiFlexGroup>
     </>
