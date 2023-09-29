@@ -25,7 +25,6 @@ import {
   mappingComponentName,
   ilmPolicyName,
   ilmPolicy,
-  getLatestTransformId,
   getTransformOptions,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
@@ -40,6 +39,7 @@ import {
 } from '../../../common/risk_engine';
 import {
   getLegacyTransforms,
+  getLatestTransformId,
   removeLegacyTransforms,
   startTransform,
   createTransform,
