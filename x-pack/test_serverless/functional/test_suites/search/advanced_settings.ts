@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { isEditorFieldSetting } from '../common/advanced_settings';
+import { isEditorFieldSetting } from '../common/management/advanced_settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
