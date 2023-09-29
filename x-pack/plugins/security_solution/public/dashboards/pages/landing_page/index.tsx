@@ -83,8 +83,8 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const { dashboardsLandingCalloutComponent$ } = useKibana().services;
-  const dashboardLandingCallout = useObservable(dashboardsLandingCalloutComponent$);
+  const { getComponent$ } = useKibana().services;
+  const dashboardLandingCallout = useObservable(getComponent$('dashboardsLandingCallout'));
   const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
   const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =

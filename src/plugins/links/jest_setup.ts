@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { createPanelState } from './create_panel_state';
+import { setStubDashboardServices } from '@kbn/dashboard-plugin/public/services/mocks';
+import { setStubKibanaServices } from './public/mocks';
+
+setStubKibanaServices();
+setStubDashboardServices();
