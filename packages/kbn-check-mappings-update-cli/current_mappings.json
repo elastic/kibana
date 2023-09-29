@@ -1353,10 +1353,13 @@
       "category": {
         "type": "keyword"
       },
-      "custom_fields": {
+      "customFields": {
         "type": "nested",
         "properties": {
           "key": {
+            "type": "keyword"
+          },
+          "type": {
             "type": "keyword"
           },
           "value": {
@@ -1367,7 +1370,8 @@
                 "ignore_malformed": true
               },
               "boolean": {
-                "type": "boolean"
+                "type": "boolean",
+                "ignore_malformed": true
               },
               "string": {
                 "type": "text"
