@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
-import { DATA_TEST_SUBJ_SETTINGS_TITLE } from '@kbn/management-settings-application/application';
 import * as settings from '@kbn/management-settings-ids';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -39,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the page', async () => {
       await retry.waitFor('title to be visible', async () => {
-        return await testSubjects.exists(DATA_TEST_SUBJ_SETTINGS_TITLE);
+        return await testSubjects.exists('managementSettingsTitle');
       });
 
       const url = await browser.getCurrentUrl();
