@@ -56,8 +56,16 @@ describe('Public assets client', () => {
     it('should include specified "from" and "to" parameters in http.get query', async () => {
       const client = new PublicAssetsClient(http);
       await client.getServices({ from: 'x', to: 'y' });
-      expect(http.get).toBeCalledWith(expect.stringContaining('/api/'), {
+      expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
         query: { from: 'x', to: 'y' },
+      });
+    });
+
+    it('should include specified "parent" parameter in http.get query', async () => {
+      const client = new PublicAssetsClient(http);
+      await client.getServices({ from: 'x', to: 'y', parent: 'container:123' });
+      expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
+        query: { from: 'x', to: 'y', parent: 'container:123' },
       });
     });
 

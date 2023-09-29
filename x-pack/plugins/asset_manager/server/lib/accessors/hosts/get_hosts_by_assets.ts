@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { GetHostsOptionsInjected } from './shared_types';
 import { Asset } from '../../../../common/types_api';
-import { GetHostsOptionsInjected } from '.';
 import { getAssets } from '../../get_assets';
 
 export async function getHostsByAssets(

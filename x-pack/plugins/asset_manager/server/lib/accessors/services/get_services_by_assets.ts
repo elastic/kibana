@@ -6,7 +6,7 @@
  */
 
 import { Asset } from '../../../../common/types_api';
-import { GetServicesOptionsInjected } from '.';
+import { GetServicesOptionsInjected } from './shared_types';
 import { getAssets } from '../../get_assets';
 import { getAllRelatedAssets } from '../../get_all_related_assets';
 

@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import { AssetClientDependencies } from '../../../types';
-import { GetServicesOptionsPublic } from '../../../../common/types_client';
-import { OptionsWithInjectedValues } from '..';
-
-export type GetServicesOptions = GetServicesOptionsPublic & AssetClientDependencies;
-export type GetServicesOptionsInjected = OptionsWithInjectedValues<GetServicesOptions>;
-
-export interface ServiceIdentifier {
-  'asset.ean': string;
-  'asset.id': string;
-  'asset.name'?: string;
-  'service.environment'?: string;
-}
+export type { GetServicesOptions, GetServicesOptionsInjected } from './shared_types';
+export { getServicesByAssets } from './get_services_by_assets';
+export { getServicesBySignals } from './get_services_by_signals';

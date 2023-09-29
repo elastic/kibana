@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export type { GetHostsOptions, GetHostsOptionsInjected } from './shared_types';
-export { getHostsByAssets } from './get_hosts_by_assets';
-export { getHostsBySignals } from './get_hosts_by_signals';
+export function parseEan(ean: string) {
+  const [kind, id, ...rest] = ean.split(':');
+
+  if (!kind || !id || rest.length > 0) {
+    throw new Error(`${ean} is not a valid EAN`);
+  }
+
+  return { kind, id };
+}

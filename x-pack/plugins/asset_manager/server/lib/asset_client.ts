@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
-import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { AssetManagerConfig } from '../../common/config';
 import { Asset } from '../../common/types_api';
-import { OptionsWithInjectedValues } from './accessors';
-import { GetHostsOptions } from './accessors/hosts';
-import { GetServicesOptions } from './accessors/services';
-import { getHostsByAssets } from './accessors/hosts/get_hosts_by_assets';
-import { getHostsBySignals } from './accessors/hosts/get_hosts_by_signals';
-import { getServicesByAssets } from './accessors/services/get_services_by_assets';
-import { getServicesBySignals } from './accessors/services/get_services_by_signals';
-
-interface AssetClientClassOptions {
-  sourceIndices: AssetManagerConfig['sourceIndices'];
-  source: AssetManagerConfig['lockedSource'];
-  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
-  metricsClient: MetricsDataClient;
-}
+import { getHostsByAssets, getHostsBySignals, GetHostsOptions } from './accessors/hosts';
+import {
+  getServicesByAssets,
+  getServicesBySignals,
+  GetServicesOptions,
+} from './accessors/services';
+import {
+  AssetClientClassOptions,
+  AssetClientOptionsWithInjectedValues,
+} from './asset_client_types';
 
 export class AssetClient {
   constructor(private baseOptions: AssetClientClassOptions) {}
 
-  injectOptions<T extends object = {}>(options: T): OptionsWithInjectedValues<T> {
+  injectOptions<T extends object = {}>(options: T): AssetClientOptionsWithInjectedValues<T> {
     return {
       ...options,
       sourceIndices: this.baseOptions.sourceIndices,

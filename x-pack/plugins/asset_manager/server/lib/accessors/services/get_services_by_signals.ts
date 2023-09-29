@@ -6,8 +6,9 @@
  */
 
 import { Asset } from '../../../../common/types_api';
-import { GetServicesOptionsInjected } from '.';
+import { GetServicesOptionsInjected } from './shared_types';
 import { collectServices } from '../../collectors/services';
+import { parseEan } from '../../parse_ean';
 
 export async function getServicesBySignals(
   options: GetServicesOptionsInjected
@@ -15,15 +16,25 @@ export async function getServicesBySignals(
   const filters = [];
 
   if (options.parent) {
-    filters.push({
-      bool: {
-        should: [
-          { term: { 'host.name': options.parent } },
-          { term: { 'host.hostname': options.parent } },
-        ],
-        minimum_should_match: 1,
-      },
-    });
+    const { kind, id } = parseEan(options.parent);
+
+    if (kind === 'host') {
+      filters.push({
+        bool: {
+          should: [{ term: { 'host.name': id } }, { term: { 'host.hostname': id } }],
+          minimum_should_match: 1,
+        },
+      });
+    }
+
+    if (kind === 'container') {
+      filters.push({
+        bool: {
+          should: [{ term: { 'container.id': id } }],
+          minimum_should_match: 1,
+        },
+      });
+    }
   }
 
   const apmIndices = await options.getApmIndices(options.savedObjectsClient);
