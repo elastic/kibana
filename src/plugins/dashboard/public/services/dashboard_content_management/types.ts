@@ -92,8 +92,12 @@ export interface SaveDashboardReturn {
  */
 export interface FindDashboardsService {
   search: (
-    props: Pick<SearchDashboardsArgs, 'hasReference' | 'hasNoReference' | 'search' | 'size'>
+    props: Pick<
+      SearchDashboardsArgs,
+      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
+    >
   ) => Promise<SearchDashboardsResponse>;
+  findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;
 }
