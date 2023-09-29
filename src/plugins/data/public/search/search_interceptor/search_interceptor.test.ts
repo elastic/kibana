@@ -1008,6 +1008,25 @@ describe('SearchInterceptor', () => {
         expect(fetchMock).toBeCalledTimes(1);
       });
 
+      test('should deliver error to all replays', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: {},
+          },
+        ];
+
+        mockFetchImplementation(responses);
+
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(fetchMock).toBeCalledTimes(1);
+        expect(error).toBeCalledTimes(2);
+        expect(error.mock.calls[0][0].message).toEqual('Aborted');
+        expect(error.mock.calls[1][0].message).toEqual('Aborted');
+      });
+
       test('should ignore preference when hashing', async () => {
         mockFetchImplementation(basicCompleteResponse);
 
