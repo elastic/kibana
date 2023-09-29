@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const CreateDataViewButton = ({
@@ -19,9 +19,10 @@ export const CreateDataViewButton = ({
 }) => {
   const { dataViewEditor } = useMlKibana().services;
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-  const closeDataViewEditor = useRef<() => void | undefined>();
+  const dataViewEditorRef = useRef<() => void | undefined>();
+
   const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor?.openEditor({
+    dataViewEditorRef.current = dataViewEditor?.openEditor({
       onSave: async (dataView) => {
         if (dataView.id && onDataViewCreated) {
           onDataViewCreated(dataView.id, 'index-pattern', dataView.name);
@@ -45,7 +46,5 @@ export const CreateDataViewButton = ({
         defaultMessage="Create a data view"
       />
     </EuiButton>
-  ) : (
-    <Fragment />
-  );
+  ) : null;
 };
