@@ -182,6 +182,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
           let wroteWarningStatus = false;
+          let warningMessage;
           let hasError = false;
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
@@ -250,11 +251,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
-              wroteWarningStatus = await hasReadIndexPrivileges({
-                privileges,
-                ruleExecutionLogger,
-                uiSettingsClient,
-              });
+              const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
+                await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
+
+              wroteWarningStatus = wroteWarningMessage;
+              warningMessage = readIndexWarningMessage;
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
@@ -272,14 +277,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
 
-                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
-                  await hasTimestampFields({
-                    timestampField: primaryTimestamp,
-                    timestampFieldCapsResponse: timestampFieldCaps,
-                    inputIndices: inputIndex,
-                    ruleExecutionLogger,
-                  });
+                const {
+                  wroteWarningStatus: wroteWarningStatusResult,
+                  foundNoIndices,
+                  warningMessage: warningMissingTimestampFieldsMessage,
+                } = await hasTimestampFields({
+                  timestampField: primaryTimestamp,
+                  timestampFieldCapsResponse: timestampFieldCaps,
+                  inputIndices: inputIndex,
+                  ruleExecutionLogger,
+                });
                 wroteWarningStatus = wroteWarningStatusResult;
+                warningMessage = warningMissingTimestampFieldsMessage;
                 skipExecution = foundNoIndices;
               }
             }
@@ -447,6 +456,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus['partial failure'],
                 message: truncateList(result.warningMessages).join(),
+                metrics: {
+                  searchDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
+                },
               });
             }
 
@@ -468,6 +482,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatus.succeeded,
                   message: 'Rule execution completed successfully',
+                  metrics: {
+                    searchDurations: result.searchAfterTimes,
+                    indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
+                  },
+                });
+              } else if (wroteWarningStatus && !hasError && !result.warning) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatus['partial failure'],
+                  message: warningMessage,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
