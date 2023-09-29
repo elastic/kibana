@@ -13868,10 +13868,10 @@ cypress-recurse@^1.35.2:
   dependencies:
     humanize-duration "^3.27.3"
 
-cypress@^13.2.0:
-  version "13.2.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-13.2.0.tgz#10f73d06a0764764ffbb903a31e96e2118dcfc1d"
-  integrity sha512-AvDQxBydE771GTq0TR4ZUBvv9m9ffXuB/ueEtpDF/6gOcvFR96amgwSJP16Yhqw6VhmwqspT5nAGzoxxB+D89g==
+cypress@^13.3.0:
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-13.3.0.tgz#d00104661b337d662c5a4280a051ee59f8aa1e31"
+  integrity sha512-mpI8qcTwLGiA4zEQvTC/U1xGUezVV4V8HQCOYjlEOrVmU1etVvxOjkCXHGwrlYdZU/EPmUiWfsO3yt1o+Q2bgw==
   dependencies:
     "@cypress/request" "^3.0.0"
     "@cypress/xvfb" "^1.2.4"
