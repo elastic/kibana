@@ -90,6 +90,8 @@ class DocLinks {
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
   public connectorsSlack: string;
+  public connectorsTeams: string;
+  public connectorsZoom: string;
   public connectorsWorkplaceSearch: string;
   public consoleGuide: string;
   public crawlerExtractionRules: string;
@@ -256,6 +258,8 @@ class DocLinks {
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
     this.connectorsSlack = '';
+    this.connectorsTeams = '';
+    this.connectorsZoom = '';
     this.connectorsWorkplaceSearch = '';
     this.consoleGuide = '';
     this.crawlerExtractionRules = '';
@@ -423,6 +427,8 @@ class DocLinks {
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
     this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
+    this.connectorsTeams = docLinks.links.enterpriseSearch.connectorsTeams;
+    this.connectorsZoom = docLinks.links.enterpriseSearch.connectorsZoom;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
