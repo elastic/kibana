@@ -28,7 +28,7 @@ import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
   data:
@@ -84,9 +84,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const isNewRiskScoreModuleInstalled =
-    riskScoreEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
       ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)

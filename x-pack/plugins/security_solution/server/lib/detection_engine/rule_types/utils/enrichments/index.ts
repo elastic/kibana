@@ -34,8 +34,6 @@ export const enrichEvents: EnrichEventsFunction = async ({
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
 
-    // TODO: Remove isNewRiskScoreModuleInstalled once the legacy risk score module is removed
-    // we check for existing of new risk score index here to determine if the new risk score module is installed
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {
       isNewRiskScoreModuleInstalled = await getIsHostRiskScoreAvailable({
