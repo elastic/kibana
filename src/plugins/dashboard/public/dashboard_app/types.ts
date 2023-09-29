@@ -7,17 +7,12 @@
  */
 
 import { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
-import { MountPoint } from '@kbn/core/public';
 
 export interface DashboardEmbedSettings {
-  forceHideDatePicker?: boolean;
   forceHideFilterBar?: boolean;
-  forceHideQueryInput?: boolean;
   forceShowTopNavMenu?: boolean;
-  showQueryInput?: boolean;
-  showDatePicker?: boolean;
-  showBorderBottom?: boolean;
-  setHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
+  forceShowQueryInput?: boolean;
+  forceShowDatePicker?: boolean;
 }
 
 export interface DashboardMountContextProps {

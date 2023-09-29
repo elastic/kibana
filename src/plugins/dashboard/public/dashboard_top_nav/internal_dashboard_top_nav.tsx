@@ -20,6 +20,7 @@ import classNames from 'classnames';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
+import { MountPoint } from '@kbn/core/public';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -41,8 +42,12 @@ import { DashboardRedirect } from '../dashboard_container/types';
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
+  forceHideDatePicker?: boolean;
+  forceHideQueryInput?: boolean;
   redirectTo: DashboardRedirect;
   originatingApp?: string;
+  setCustomHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
+  showBorderBottom?: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -50,8 +55,12 @@ const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
+  forceHideDatePicker,
+  forceHideQueryInput,
   redirectTo,
   originatingApp,
+  setCustomHeaderActionMenu,
+  showBorderBottom,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
@@ -233,27 +242,36 @@ export function InternalDashboardTopNav({
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = Boolean(embedSettings?.forceHideQueryInput)
+    const showQueryInput = Boolean(forceHideQueryInput)
       ? false
       : shouldShowNavBarComponent(
-          Boolean(embedSettings?.showQueryInput || viewMode === ViewMode.PRINT)
+          Boolean(embedSettings?.forceShowQueryInput || viewMode === ViewMode.PRINT)
         );
-    const showDatePicker = Boolean(embedSettings?.forceHideDatePicker)
+    const showDatePicker = Boolean(forceHideDatePicker)
       ? false
-      : shouldShowNavBarComponent(Boolean(embedSettings?.showDatePicker));
+      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
-    const showBorderBottom = embedSettings?.showBorderBottom ?? true;
     return {
       showTopNavMenu,
       showSearchBar,
       showFilterBar,
       showQueryInput,
       showDatePicker,
-      showBorderBottom,
     };
-  }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
+  }, [
+    embedSettings?.forceHideFilterBar,
+    embedSettings?.forceShowDatePicker,
+    embedSettings?.forceShowQueryInput,
+    embedSettings?.forceShowTopNavMenu,
+    filterManager,
+    forceHideDatePicker,
+    forceHideQueryInput,
+    fullScreenMode,
+    isChromeVisible,
+    viewMode,
+  ]);
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
@@ -329,7 +347,7 @@ export function InternalDashboardTopNav({
         visible={viewMode !== ViewMode.PRINT}
         setMenuMountPoint={
           embedSettings || fullScreenMode
-            ? embedSettings?.setHeaderActionMenu ?? undefined
+            ? setCustomHeaderActionMenu ?? undefined
             : setHeaderActionMenu
         }
         className={classNames({
@@ -359,7 +377,7 @@ export function InternalDashboardTopNav({
       {viewMode === ViewMode.EDIT ? (
         <DashboardEditingToolbar originatingApp={originatingApp} isDisabled={!!focusedPanelId} />
       ) : null}
-      <EuiHorizontalRule margin="none" />
+      {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
   );
 }

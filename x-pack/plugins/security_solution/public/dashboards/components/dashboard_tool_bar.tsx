@@ -24,7 +24,6 @@ const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => vo
 
   const viewMode =
     dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
-  const managed = dashboardContainer.select((state) => state.componentState.managed);
 
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -74,24 +73,24 @@ const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => vo
     () => ({
       forceHideFilterBar: true,
       forceShowTopNavMenu: true,
-      showQueryInput: false,
-      forceHideQueryInput: true,
-      showDatePicker: false,
-      forceHideDatePicker: true,
-      showBorderBottom: false,
-      setHeaderActionMenu,
+      forceShowQueryInput: false,
+      forceShowDatePicker: false,
     }),
-    [setHeaderActionMenu]
+    []
   );
   const { showWriteControls } = useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 
-  return !managed && showWriteControls ? (
+  return showWriteControls ? (
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
-      redirectTo={redirectTo}
       dashboardContainer={dashboardContainer}
+      forceHideDatePicker={true}
+      forceHideQueryInput={true}
       embedSettings={embedSettings}
       originatingApp={APP_UI_ID}
+      redirectTo={redirectTo}
+      showBorderBottom={false}
+      setCustomHeaderActionMenu={setHeaderActionMenu}
     />
   ) : null;
 };

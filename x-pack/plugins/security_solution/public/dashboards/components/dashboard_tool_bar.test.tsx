@@ -112,7 +112,7 @@ describe('DashboardToolBar', () => {
         setHeaderActionMenu: undefined,
         showBorderBottom: false,
         showDatePicker: false,
-        showQueryInput: false,
+        forceShowQueryInput: false,
       })
     );
   });

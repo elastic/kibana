@@ -54,7 +54,6 @@ const StartAppComponent: FC<StartAppComponent> = ({
     application: { capabilities },
     uiActions,
     upselling,
-    setHeaderActionMenu,
   } = services;
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -105,7 +104,6 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -115,7 +113,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
-  setHeaderActionMenu,
   store,
   theme$,
 }) => {

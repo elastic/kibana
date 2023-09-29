@@ -16,7 +16,6 @@ export const renderApp = ({
   element,
   history,
   onAppLeave,
-  setHeaderActionMenu,
   services,
   store,
   usageCollection,
@@ -31,7 +30,6 @@ export const renderApp = ({
       history={history}
       onAppLeave={onAppLeave}
       services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
       store={store}
       theme$={theme$}
     >

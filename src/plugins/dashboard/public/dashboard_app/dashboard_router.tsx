@@ -91,8 +91,8 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   ): DashboardEmbedSettings | undefined => {
     return {
       forceShowTopNavMenu: routeParams[dashboardUrlParams.showTopMenu] === 'true',
-      showQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
-      showDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
+      forceShowQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
+      forceShowDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
       forceHideFilterBar: routeParams[dashboardUrlParams.hideFilterBar] === 'true',
     };
   };
