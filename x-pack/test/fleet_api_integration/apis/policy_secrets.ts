@@ -11,7 +11,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { FullAgentPolicy, LogstashOutput } from '@kbn/fleet-plugin/common';
+import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -481,6 +481,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
 
       const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+      // @ts-expect-error
       expect(output.secrets.password.id).to.eql(passwordSecretId);
     });
 
