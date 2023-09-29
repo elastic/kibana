@@ -10,10 +10,16 @@ import { i18n } from '@kbn/i18n';
 
 export const OptionsListStrings = {
   control: {
-    getSeparator: () =>
-      i18n.translate('controls.optionsList.control.separator', {
+    getSeparator: (type?: string) => {
+      if (type === 'date') {
+        return i18n.translate('controls.optionsList.control.dateSeparator', {
+          defaultMessage: ';  ',
+        });
+      }
+      return i18n.translate('controls.optionsList.control.separator', {
         defaultMessage: ', ',
-      }),
+      });
+    },
     getPlaceholder: () =>
       i18n.translate('controls.optionsList.control.placeholder', {
         defaultMessage: 'Any',

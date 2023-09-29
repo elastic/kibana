@@ -110,7 +110,7 @@ export const OptionsListControl = ({
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
-    const delimiter = fieldSpec?.type === 'date' ? '; ' : OptionsListStrings.control.getSeparator();
+    const delimiter = OptionsListStrings.control.getSeparator(fieldSpec?.type);
 
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
