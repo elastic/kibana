@@ -10,7 +10,7 @@ import { FieldState } from '@kbn/advanced-settings-plugin/public';
 import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityApp } from '../../typings/common';
 
 function getEditableConfig({
   settingsKeys,
@@ -41,15 +41,13 @@ function getEditableConfig({
   return config;
 }
 
-export function useApmEditableSettings(settingsKeys: string[]) {
+export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
   const { services } = useKibana();
-  const trackApmEvent = useUiTracker({ app: 'apm' });
+
   const { uiSettings } = services;
   const [isSaving, setIsSaving] = useState(false);
   const [forceReloadSettings, setForceReloadSettings] = useState(0);
-  const [unsavedChanges, setUnsavedChanges] = useState<
-    Record<string, FieldState>
-  >({});
+  const [unsavedChanges, setUnsavedChanges] = useState<Record<string, FieldState>>({});
 
   const settingsEditableConfig = useMemo(
     () => {
@@ -78,7 +76,7 @@ export function useApmEditableSettings(settingsKeys: string[]) {
     setUnsavedChanges({});
   }
 
-  async function saveAll({ trackMetricName }: { trackMetricName: string }) {
+  async function saveAll() {
     if (uiSettings && !isEmpty(unsavedChanges)) {
       try {
         setIsSaving(true);
@@ -87,7 +85,6 @@ export function useApmEditableSettings(settingsKeys: string[]) {
         );
 
         await Promise.all(arr);
-        trackApmEvent({ metric: trackMetricName });
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
       } finally {
