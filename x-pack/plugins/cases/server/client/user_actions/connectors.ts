@@ -143,6 +143,11 @@ const getConnectorsInfo = async ({
     await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
+  /**
+   * TODO: Remove when all connectors support the status and
+   * the severity user actions or if there is a mechanism to
+   * define supported user actions per connector type
+   */
   const hasCasesWebhookConnector = actionConnectors.some(
     (actionConnector) => actionConnector.actionTypeId === ConnectorTypes.casesWebhook
   );
@@ -302,6 +307,11 @@ const createConnectorInfoResult = ({
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
     const latestUserActionCreatedAt = getDate(
+      /**
+       * TODO: Remove when all connectors support the status and
+       * the severity user actions or if there is a mechanism to
+       * define supported user actions per connector type
+       */
       connectorDetails?.actionTypeId === ConnectorTypes.casesWebhook
         ? latestUserActionCasesWebhook?.attributes.created_at
         : latestUserAction?.attributes.created_at
