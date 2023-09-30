@@ -31611,7 +31611,6 @@
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionInsufficientLicense": "已配置告警阻止，但由于许可不足而无法应用",
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution": "一次规则执行",
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription": "对缺失字段的事件阻止告警并进行分组",
-    "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview": "技术预览",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel": "事件类别字段",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlTiebreakerFieldLabel": "决胜字段",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlTimestampFieldLabel": "时间戳字段",

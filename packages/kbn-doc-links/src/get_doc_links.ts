@@ -843,6 +843,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
     },
+    esql: {
+      statsBy: `${ELASTICSEARCH_DOCS}esql-stats-by.html`,
+    },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
