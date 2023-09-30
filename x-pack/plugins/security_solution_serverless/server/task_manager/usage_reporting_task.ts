@@ -110,6 +110,8 @@ export class SecurityUsageReportingTask {
     meteringCallback: MeteringCallback,
     lookBackLimitMinutes?: number
   ) => {
+    this.logger.info(`starting ${this.taskType} task run`);
+
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
@@ -126,6 +128,7 @@ export class SecurityUsageReportingTask {
 
     const lastSuccessfulReport =
       taskInstance.state.lastSuccessfulReport && new Date(taskInstance.state.lastSuccessfulReport);
+    this.logger.info(`lastSuccessfulReport: ${String(lastSuccessfulReport)}`);
 
     let usageRecords: UsageRecord[] = [];
     // save usage record query time so we can use it to know where
@@ -146,7 +149,7 @@ export class SecurityUsageReportingTask {
       return;
     }
 
-    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
+    this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
@@ -168,6 +171,7 @@ export class SecurityUsageReportingTask {
       }
     }
 
+    this.logger.info(`usage record response: ${JSON.stringify(usageReportResponse)}`);
     const state = {
       lastSuccessfulReport: this.shouldUpdateLastSuccessfulReport(usageRecords, usageReportResponse)
         ? meteringCallbackTime.toISOString()
@@ -185,15 +189,23 @@ export class SecurityUsageReportingTask {
     lastSuccessfulReport: Date,
     lookBackLimitMinutes?: number
   ): Date {
+    this.logger.info(
+      `getting getFailedLastSuccessfulReportTime. meteringCallbackTime: ${meteringCallbackTime} | lastSuccessfulReport ${lastSuccessfulReport} | lookBackLimitMinutes: ${lookBackLimitMinutes}`
+    );
     const nextLastSuccessfulReport = lastSuccessfulReport || meteringCallbackTime;
+    this.logger.info(`nextLastSuccessfulReport: ${nextLastSuccessfulReport}`);
 
     if (!lookBackLimitMinutes) {
       return nextLastSuccessfulReport;
     }
 
     const lookBackLimitTime = new Date(meteringCallbackTime.setMinutes(-lookBackLimitMinutes));
+    this.logger.info(`lookBackLimitTime: ${lookBackLimitTime}`);
 
     if (nextLastSuccessfulReport > lookBackLimitTime) {
+      this.logger.info(
+        `nextLastSuccessfulReport within threshold, returning ${nextLastSuccessfulReport}`
+      );
       return nextLastSuccessfulReport;
     }
 
@@ -207,7 +219,9 @@ export class SecurityUsageReportingTask {
     usageRecords: UsageRecord[],
     usageReportResponse: Response | undefined
   ): boolean {
-    return !usageRecords.length || usageReportResponse?.status === 201;
+    const foo = !usageRecords.length || usageReportResponse?.status === 201;
+    this.logger.info(`shouldUpdateLastSuccessfulReport: ${foo}`);
+    return foo;
   }
 
   private get taskId() {

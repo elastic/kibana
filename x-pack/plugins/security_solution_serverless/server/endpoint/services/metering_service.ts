@@ -31,7 +31,9 @@ export class EndpointMeteringService {
     logger,
   }: MeteringCallbackInput): Promise<UsageRecord[]> => {
     this.setType(config);
+    logger.info(`getUsageRecords called. config: ${config}, type: ${this.type}`);
     if (!this.type) {
+      logger.info(`getUsageRecords no type, returning empty array`);
       return [];
     }
 
@@ -42,6 +44,7 @@ export class EndpointMeteringService {
       abortController,
       lastSuccessfulReport
     );
+    logger.info(`getUsageRecords heartbeatsResponse: ${JSON.stringify(heartbeatsResponse)}`);
 
     if (!heartbeatsResponse?.hits?.hits) {
       return [];
