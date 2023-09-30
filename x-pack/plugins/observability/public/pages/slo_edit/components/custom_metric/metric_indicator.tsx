@@ -28,7 +28,7 @@ import { QueryBuilder } from '../common/query_builder';
 
 interface MetricIndicatorProps {
   type: 'good' | 'total';
-  indexFields: Field[] | undefined;
+  indexFields: Field[];
   isLoadingIndex: boolean;
 }
 
@@ -91,9 +91,7 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
   );
 
   const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
-  const metricFields = (indexFields ?? []).filter((field) =>
-    SUPPORTED_FIELD_TYPES.includes(field.type)
-  );
+  const metricFields = indexFields.filter((field) => SUPPORTED_FIELD_TYPES.includes(field.type));
 
   const { fields, append, remove } = useFieldArray({
     control,
