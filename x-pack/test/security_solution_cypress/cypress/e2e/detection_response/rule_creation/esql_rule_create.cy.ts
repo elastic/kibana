@@ -41,6 +41,7 @@ import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 
 // Failing: See https://github.com/elastic/kibana/issues/167716
+// Failing: See https://github.com/elastic/kibana/issues/167717
 describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
