@@ -310,12 +310,7 @@ export function resolveDockerImage({
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
   if (options.port) {
-    return [
-      '-p',
-      `127.0.0.1:${options.port}:${options.port}`,
-      '--env',
-      `http.port=${options.port}`,
-    ];
+    return ['-p', `0.0.0.0:${options.port}:${options.port}`, '--env', `http.port=${options.port}`];
   }
 
   return ['-p', `127.0.0.1:${DEFAULT_PORT}:${DEFAULT_PORT}`];

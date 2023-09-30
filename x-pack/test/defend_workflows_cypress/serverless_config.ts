@@ -12,7 +12,11 @@ import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/exper
 import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
+  const defendWorkflowsCypressConfig = await readConfigFile(
+    require.resolve(
+      '../../test_serverless/functional/test_suites/security/cypress/security_config.base.ts'
+    )
+  );
   const config = defendWorkflowsCypressConfig.getAll();
   const hostIp = getLocalhostRealIp();
 
@@ -20,6 +24,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...config,
+
+    esTestCluster: {
+      ...config.esTestCluster,
+      serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
+    },
 
     servers: {
       ...config.servers,
