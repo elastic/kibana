@@ -17329,7 +17329,6 @@
     "xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle": "创建旧版模板",
     "xpack.idxMgmt.createTemplate.createTemplatePageTitle": "创建模板",
     "xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel": "关闭",
-    "xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel": "删除数据流",
     "xpack.idxMgmt.dataStreamDetailPanel.generationTitle": "世代",
     "xpack.idxMgmt.dataStreamDetailPanel.generationToolTip": "为数据流创建的后备索引的累积计数",
     "xpack.idxMgmt.dataStreamDetailPanel.healthTitle": "运行状况",
