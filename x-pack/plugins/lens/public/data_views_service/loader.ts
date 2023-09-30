@@ -50,6 +50,7 @@ export function convertDataViewIntoLensIndexPattern(
         runtime: Boolean(field.runtimeField),
         timeSeriesDimension: field.timeSeriesDimension,
         timeSeriesMetric: field.timeSeriesMetric,
+        timeSeriesDimension: field.timeSeriesDimension,
         timeSeriesRollup: field.isRolledUpField,
         partiallyApplicableFunctions: field.isRolledUpField
           ? {

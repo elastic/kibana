@@ -76,6 +76,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
+  time_series_dimension: { iconType: 'tokenTag' },
 };
 
 /**

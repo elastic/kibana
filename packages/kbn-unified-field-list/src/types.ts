@@ -54,6 +54,7 @@ export interface FieldListItem {
   displayName?: DataViewField['displayName'];
   count?: DataViewField['count'];
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
+  timeSeriesDimension?: DataViewField['timeSeriesDimension'];
   esTypes?: DataViewField['esTypes'];
   scripted?: DataViewField['scripted'];
 }

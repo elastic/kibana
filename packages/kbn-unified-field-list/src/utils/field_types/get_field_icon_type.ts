@@ -23,6 +23,9 @@ export function getFieldIconType<T extends FieldListItem = DataViewField>(
 ): string {
   const type = getCustomFieldType ? getCustomFieldType(field) : getFieldType<T>(field);
   const esType = field.esTypes?.[0] || null;
+  if (field.timeSeriesDimension) {
+    return 'time_series_dimension';
+  }
   if (esType && ['_id', '_index'].includes(esType) && type === 'string') {
     return 'keyword';
   }
