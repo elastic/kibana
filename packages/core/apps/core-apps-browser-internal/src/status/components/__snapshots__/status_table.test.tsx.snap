@@ -60,6 +60,7 @@ exports[`StatusTable renders when statuses is provided 1`] = `
   }
   responsive={true}
   rowProps={[Function]}
+  searchFormat="eql"
   sorting={
     Object {
       "sort": Object {

@@ -231,12 +231,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   return (
     <>
       <EuiTitle size="xs">
-        <h4>
+        <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
             defaultMessage="Host"
           />
-        </h4>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ExpandablePanel
@@ -249,12 +249,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
-          <h5>
+          <h4>
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsInfoTitle"
               defaultMessage="Host information"
             />
-          </h5>
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <AnomalyTableProvider
@@ -289,12 +289,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTitle"
                     defaultMessage="Related users"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

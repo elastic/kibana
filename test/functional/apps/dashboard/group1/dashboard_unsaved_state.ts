@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let unsavedPanelCount = 0;
   const testQuery = 'Test Query';
 
-  describe('dashboard unsaved state', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167661
+  describe.skip('dashboard unsaved state', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(

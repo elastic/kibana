@@ -12,6 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import pMap from 'p-map';
+import { isResponseError } from '@kbn/es-errors';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -662,7 +663,11 @@ function getBaseTemplate({
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
   logger: Logger,
-  templates: IndexTemplateEntry[]
+  templates: IndexTemplateEntry[],
+  options?: {
+    ignoreMappingUpdateErrors?: boolean;
+    skipDataStreamRollover?: boolean;
+  }
 ): Promise<void> => {
   if (!templates.length) return;
 
@@ -677,7 +682,7 @@ export const updateCurrentWriteIndices = async (
     return true;
   });
   if (!allUpdatablesIndices.length) return;
-  return updateAllDataStreams(allUpdatablesIndices, esClient, logger);
+  return updateAllDataStreams(allUpdatablesIndices, esClient, logger, options);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -729,7 +734,11 @@ const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClien
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  options?: {
+    ignoreMappingUpdateErrors?: boolean;
+    skipDataStreamRollover?: boolean;
+  }
 ): Promise<void> => {
   await pMap(
     indexNameWithTemplates,
@@ -738,6 +747,7 @@ const updateAllDataStreams = async (
         esClient,
         logger,
         dataStreamName: templateEntry.dataStreamName,
+        options,
       });
     },
     {
@@ -751,10 +761,15 @@ const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
   logger,
+  options,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
   logger: Logger;
+  options?: {
+    ignoreMappingUpdateErrors?: boolean;
+    skipDataStreamRollover?: boolean;
+  };
 }) => {
   const existingDs = await esClient.indices.get({
     index: dataStreamName,
@@ -804,18 +819,45 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
-    logger.info(`Triggering a rollover for ${dataStreamName}`);
-    await rolloverDataStream(dataStreamName, esClient);
-    return;
+    if (
+      isResponseError(err) &&
+      err.statusCode === 400 &&
+      err.body?.error?.type === 'illegal_argument_exception'
+    ) {
+      logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+      if (options?.skipDataStreamRollover === true) {
+        logger.info(
+          `Skipping rollover for ${dataStreamName} as "skipDataStreamRollover" is enabled`
+        );
+        return;
+      } else {
+        logger.info(`Triggering a rollover for ${dataStreamName}`);
+        await rolloverDataStream(dataStreamName, esClient);
+        return;
+      }
+    }
+    logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
+    if (options?.ignoreMappingUpdateErrors === true) {
+      logger.info(`Ignore mapping update errors as "ignoreMappingUpdateErrors" is enabled`);
+      return;
+    } else {
+      throw err;
+    }
   }
 
   // Trigger a rollover if the index mode or source type has changed
   if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
-    logger.info(
-      `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
-    );
-    await rolloverDataStream(dataStreamName, esClient);
+    if (options?.skipDataStreamRollover === true) {
+      logger.info(
+        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
+      );
+      return;
+    } else {
+      logger.info(
+        `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+      );
+      await rolloverDataStream(dataStreamName, esClient);
+    }
   }
 
   if (lifecycle?.data_retention) {
