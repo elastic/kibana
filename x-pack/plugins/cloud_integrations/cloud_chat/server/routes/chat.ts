@@ -27,6 +27,7 @@ export const registerChatRoute = ({
   security,
   isDev,
   getChatVariant,
+  getChatDisabledThroughExperiments,
 }: {
   router: IRouter;
   chatIdentitySecret: string;
@@ -35,6 +36,11 @@ export const registerChatRoute = ({
   security?: SecurityPluginSetup;
   isDev: boolean;
   getChatVariant: () => Promise<ChatVariant>;
+  /**
+   * Returns true if chat is disabled in LaunchDarkly
+   * Meant to be used as a runtime kill switch
+   */
+  getChatDisabledThroughExperiments: () => Promise<boolean>;
 }) => {
   if (!security) {
     return;
@@ -77,6 +83,12 @@ export const registerChatRoute = ({
       if (!trialEndDate || !isTodayInDateWindow(trialEndDate, trialBuffer)) {
         return response.badRequest({
           body: 'Chat can only be started during trial and trial chat buffer',
+        });
+      }
+
+      if (await getChatDisabledThroughExperiments()) {
+        return response.badRequest({
+          body: 'Chat is disabled through experiments',
         });
       }
 

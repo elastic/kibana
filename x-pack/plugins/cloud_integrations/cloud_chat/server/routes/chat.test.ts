@@ -19,6 +19,7 @@ import { ChatVariant } from '../../common/types';
 
 describe('chat route', () => {
   const getChatVariant = async (): Promise<ChatVariant> => 'header';
+  const getChatDisabledThroughExperiments = async (): Promise<boolean> => false;
 
   test('do not add the route if security is not enabled', async () => {
     const router = httpServiceMock.createRouter();
@@ -28,6 +29,7 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 60,
       getChatVariant,
+      getChatDisabledThroughExperiments,
     });
     expect(router.get.mock.calls).toEqual([]);
   });
@@ -45,6 +47,7 @@ describe('chat route', () => {
       trialBuffer: 60,
       trialEndDate: new Date(),
       getChatVariant,
+      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -81,6 +84,7 @@ describe('chat route', () => {
       chatIdentitySecret: 'secret',
       trialBuffer: 2,
       getChatVariant,
+      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -120,6 +124,7 @@ describe('chat route', () => {
       trialBuffer: 2,
       trialEndDate,
       getChatVariant,
+      getChatDisabledThroughExperiments,
     });
 
     const [_config, handler] = router.get.mock.calls[0];
@@ -134,6 +139,42 @@ describe('chat route', () => {
           "status": 400,
         }
       `);
+  });
+
+  test('error if disabled in experiments', async () => {
+    const security = securityMock.createSetup();
+    const username = 'user.name';
+    const email = 'user@elastic.co';
+
+    security.authc.getCurrentUser.mockReturnValueOnce({
+      username,
+      metadata: {
+        saml_email: [email],
+      },
+    });
+
+    const router = httpServiceMock.createRouter();
+    registerChatRoute({
+      router,
+      security,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 60,
+      trialEndDate: new Date(),
+      getChatVariant,
+      getChatDisabledThroughExperiments: async () => true,
+    });
+    const [_config, handler] = router.get.mock.calls[0];
+    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
+      .toMatchInlineSnapshot(`
+      KibanaResponse {
+        "options": Object {
+          "body": "Chat is disabled through experiments",
+        },
+        "payload": "Chat is disabled through experiments",
+        "status": 400,
+      }
+    `);
   });
 
   test('returns user information taken from saml metadata and a token', async () => {
@@ -157,6 +198,7 @@ describe('chat route', () => {
       trialBuffer: 60,
       trialEndDate: new Date(),
       getChatVariant,
+      getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
@@ -197,6 +239,7 @@ describe('chat route', () => {
       trialBuffer: 60,
       trialEndDate: new Date(),
       getChatVariant,
+      getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
@@ -242,6 +285,7 @@ describe('chat route', () => {
       trialBuffer: 60,
       trialEndDate: new Date(),
       getChatVariant: async () => 'bubble',
+      getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves

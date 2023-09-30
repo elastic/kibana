@@ -54,6 +54,17 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
                 .catch(() => 'header');
             }
           }),
+        getChatDisabledThroughExperiments: () =>
+          core.getStartServices().then(([_, { cloudExperiments }]) => {
+            if (!cloudExperiments) {
+              return false;
+            } else {
+              return cloudExperiments
+                .getVariation<boolean>('cloud-chat.enabled', true)
+                .then((enabled) => !enabled)
+                .catch(() => false);
+            }
+          }),
       });
     }
   }

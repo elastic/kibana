@@ -29,6 +29,11 @@ export enum FEATURE_FLAG_NAMES {
   'security-solutions.guided-onboarding-content' = 'security-solutions.guided-onboarding-content',
 
   /**
+   * Used in cloud chat plugin to enable/disable the chat.
+   * The expectation that the chat is enabled by default and the flag is used as a runtime kill switch.
+   */
+  'cloud-chat.enabled' = 'cloud-chat.enabled',
+  /**
    * Used in cloud chat plugin to switch between the chat variants.
    * Options are: 'header' (the chat button appears as part of the kibana header) and 'bubble' (floating chat button at the bottom of the screen).
    */
