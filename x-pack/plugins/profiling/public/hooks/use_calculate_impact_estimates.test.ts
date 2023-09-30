@@ -4,10 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { calculateImpactEstimates } from '.';
+import { useCalculateImpactEstimate } from './use_calculate_impact_estimates';
+import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import {
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
+} from '@kbn/observability-plugin/common';
 
-describe('calculateImpactEstimates', () => {
+jest.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
+
+describe('useCalculateImpactEstimate', () => {
+  beforeAll(() => {
+    (useProfilingDependencies as jest.Mock).mockReturnValue({
+      start: {
+        core: {
+          uiSettings: {
+            get: (key: string) => {
+              if (key === profilingPerCoreWatt) {
+                return 7;
+              }
+              if (key === profilingCo2PerKWH) {
+                return 0.000379069;
+              }
+              if (key === profilingDatacenterPUE) {
+                return 1.7;
+              }
+            },
+          },
+        },
+      },
+    });
+  });
+
   it('calculates impact when countExclusive is lower than countInclusive', () => {
+    const calculateImpactEstimates = useCalculateImpactEstimate();
     const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
       countExclusive: 500,
       countInclusive: 1000,
@@ -47,6 +78,7 @@ describe('calculateImpactEstimates', () => {
   });
 
   it('calculates impact', () => {
+    const calculateImpactEstimates = useCalculateImpactEstimate();
     const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
       countExclusive: 1000,
       countInclusive: 1000,
