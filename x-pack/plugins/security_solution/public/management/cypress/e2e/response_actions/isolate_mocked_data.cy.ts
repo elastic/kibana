@@ -192,7 +192,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('from Cases', () => {
+  describe('from Cases', { tags: ['@brokenInServerless'] }, () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;

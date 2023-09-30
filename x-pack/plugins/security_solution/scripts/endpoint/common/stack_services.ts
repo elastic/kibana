@@ -11,7 +11,6 @@ import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
-import nodeFetch from 'node-fetch';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
@@ -117,7 +116,9 @@ export const createRuntimeServices = async ({
   let password = _password;
 
   if (asSuperuser) {
-    await waitForKibana(kibanaUrl);
+    await waitForKibana(
+      new KbnClient({ log, url: kibanaUrl, certificateAuthorities: [CA_CERTIFICATE] })
+    );
     const tmpEsClient = createEsClient({
       url: elasticsearchUrl,
       username,
@@ -308,22 +309,13 @@ export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusRes
  * Checks to ensure Kibana is up and running
  * @param kbnUrl
  */
-export const waitForKibana = async (kbnUrl: string): Promise<void> => {
-  const url = (() => {
-    const u = new URL(kbnUrl);
-    // This API seems to be available even if user is not authenticated
-    u.pathname = '/api/status';
-    return u.toString();
-  })();
-
+export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
     async () => {
-      const response = await nodeFetch(url);
-
-      if (response.status !== 200) {
-        throw new Error(
-          `Kibana not available. Returned: [${response.status}]: ${response.statusText}`
-        );
+      try {
+        await kbnClient.status.get();
+      } catch (err) {
+        throw new Error(`Kibana not available: ${err.message}`);
       }
     },
     { maxTimeout: 10000 }
