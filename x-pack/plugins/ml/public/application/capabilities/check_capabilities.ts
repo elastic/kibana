@@ -6,8 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatest, from, type Subscription, timer } from 'rxjs';
-import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  type Subscription,
+  timer,
+  firstValueFrom,
+} from 'rxjs';
+import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo, useRef } from 'react';
@@ -16,11 +23,12 @@ import { hasLicenseExpired } from '../license';
 
 import {
   getDefaultCapabilities,
-  MlCapabilities,
-  MlCapabilitiesKey,
+  type MlCapabilities,
+  type MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import { type MlApiServices } from '../services/ml_api_service';
+import type { MlApiServices } from '../services/ml_api_service';
+import type { MlGlobalServices } from '../app';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
@@ -36,6 +44,10 @@ export class MlCapabilitiesService {
   private _updateRequested$ = new BehaviorSubject<number>(Date.now());
 
   private _capabilities$ = new BehaviorSubject<MlCapabilities | null>(null);
+  private _capabilitiesObs$ = this._capabilities$.asObservable();
+
+  private _isPlatinumOrTrialLicense$ = new BehaviorSubject<boolean | null>(null);
+  private _mlFeatureEnabledInSpace$ = new BehaviorSubject<boolean | null>(null);
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
@@ -59,6 +71,8 @@ export class MlCapabilitiesService {
       )
       .subscribe((results) => {
         this._capabilities$.next(results.capabilities);
+        this._isPlatinumOrTrialLicense$.next(results.isPlatinumOrTrialLicense);
+        this._mlFeatureEnabledInSpace$.next(results.mlFeatureEnabledInSpace);
         this._isLoading$.next(false);
 
         /**
@@ -70,6 +84,18 @@ export class MlCapabilitiesService {
 
   public getCapabilities(): MlCapabilities | null {
     return this._capabilities$.getValue();
+  }
+
+  public isPlatinumOrTrialLicense(): boolean | null {
+    return this._isPlatinumOrTrialLicense$.getValue();
+  }
+
+  public mlFeatureEnabledInSpace(): boolean | null {
+    return this._mlFeatureEnabledInSpace$.getValue();
+  }
+
+  public getCapabilities$() {
+    return this._capabilitiesObs$;
   }
 
   public refreshCapabilities() {
@@ -111,23 +137,34 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
   }, [capabilities]);
 }
 
-export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
-  return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    checkMlCapabilities()
-      .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
-        _capabilities = capabilities;
-        // Loop through all capabilities to ensure they are all set to true.
-        const isManageML = Object.values(_capabilities).every((p) => p === true);
+export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalServices) {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const capabilities = await firstValueFrom(
+        mlCapabilities.getCapabilities$().pipe(filter((c) => !!c))
+      );
 
-        if (isManageML === true && isPlatinumOrTrialLicense === true) {
-          return resolve({ mlFeatureEnabledInSpace });
-        } else {
-          return reject({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace });
-        }
-      })
-      .catch((e) => {
+      if (capabilities === null) {
         return reject();
-      });
+      }
+      _capabilities = capabilities;
+      const isManageML =
+        (capabilities.isADEnabled && capabilities.canCreateJob) ||
+        (capabilities.isDFAEnabled && capabilities.canCreateDataFrameAnalytics) ||
+        (capabilities.isNLPEnabled && capabilities.canCreateTrainedModels);
+      if (isManageML === true) {
+        return resolve();
+      } else {
+        // reject with possible reasons why capabilities are false
+        return reject({
+          capabilities,
+          isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
+          mlFeatureEnabledInSpace: mlCapabilities.mlFeatureEnabledInSpace(),
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 

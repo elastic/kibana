@@ -17,17 +17,17 @@ import {
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
 } from '../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
   goToExceptionsTab,
   openEditException,
   removeException,
+  visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -45,7 +45,7 @@ describe(
   'Add exception using data views from rule details',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+    const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const ITEM_NAME = 'Sample Exception List Item';
 
     before(() => {
@@ -69,7 +69,7 @@ describe(
           interval: '10s',
           rule_id: 'rule_testing',
         })
-      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+      ).then((rule) => visitRuleDetailsPage(rule.body.id));
       waitForAlertsToPopulate();
     });
 
@@ -87,8 +87,8 @@ describe(
       addFirstExceptionFromRuleDetails(
         {
           field: 'agent.name',
-          operator: 'is',
-          values: ['foo'],
+          operator: 'is one of',
+          values: ['foo', 'FOO', 'bar'],
         },
         ITEM_NAME
       );

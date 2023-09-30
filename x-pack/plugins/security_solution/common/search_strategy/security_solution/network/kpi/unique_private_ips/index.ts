@@ -7,14 +7,11 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
 
 export interface NetworkKpiHistogramData {
   x?: Maybe<number>;
   y?: Maybe<number>;
 }
-
-export type NetworkKpiUniquePrivateIpsRequestOptions = RequestBasicOptions;
 
 export interface NetworkKpiUniquePrivateIpsStrategyResponse extends IEsSearchResponse {
   uniqueSourcePrivateIps: number;

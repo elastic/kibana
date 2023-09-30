@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
@@ -18,7 +18,7 @@ export const EmptyState = memo<{
 }>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
     <ManagementEmptyStateWrapper>
-      <EuiEmptyPrompt
+      <EuiPageTemplate.EmptyPrompt
         data-test-subj="trustedAppEmptyState"
         iconType="plusInCircle"
         title={

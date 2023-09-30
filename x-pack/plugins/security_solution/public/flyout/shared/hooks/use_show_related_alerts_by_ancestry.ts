@@ -24,11 +24,11 @@ export interface UseShowRelatedAlertsByAncestryParams {
   /**
    * An object with top level fields from the ECS object
    */
-  dataAsNestedObject: Ecs | null;
+  dataAsNestedObject: Ecs;
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
 
 export interface UseShowRelatedAlertsByAncestryResult {
@@ -57,9 +57,7 @@ export const useShowRelatedAlertsByAncestry = ({
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
-  const hasProcessEntityInfo = isInvestigateInResolverActionEnabled(
-    dataAsNestedObject || undefined
-  );
+  const hasProcessEntityInfo = isInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const originalDocumentId = getField(getFieldsData(ANCESTOR_ID));
 

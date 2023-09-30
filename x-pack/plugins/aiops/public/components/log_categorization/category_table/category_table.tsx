@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+
 import {
   useEuiBackgroundColor,
   EuiInMemoryTable,
@@ -19,14 +18,25 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
-import { MiniHistogram } from '../../mini_histogram';
+
+import type {
+  Category,
+  SparkLinesPerCategory,
+} from '../../../../common/api/log_categorization/types';
+
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { LogCategorizationAppState } from '../../../application/utils/url_state';
-import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
+
+import { MiniHistogram } from '../../mini_histogram';
+
+import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
+import type { EventRate } from '../use_categorize_request';
+
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
 

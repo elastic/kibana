@@ -7,7 +7,6 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type {
   UseShowRelatedAlertsByAncestryParams,
   UseShowRelatedAlertsByAncestryResult,
@@ -15,7 +14,8 @@ import type {
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../common/hooks/use_license';
-import { mockDataAsNestedObject, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
+import { mockDataAsNestedObject } from '../mocks/mock_data_as_nested_object';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/hooks/use_license', () => {
@@ -31,7 +31,7 @@ jest.mock('../../../common/hooks/use_license', () => {
 });
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
-const dataAsNestedObject = mockDataAsNestedObject as unknown as Ecs;
+const dataAsNestedObject = mockDataAsNestedObject;
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 describe('useShowRelatedAlertsByAncestry', () => {

@@ -81,6 +81,7 @@ const ruleType: NormalizedRuleType<
     mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
   },
   autoRecoverAlerts: false,
+  validLegacyConsumers: [],
 };
 const rule = {
   id: '1',

@@ -67,11 +67,14 @@ const DataViewFlyoutContentContainer = ({
         await dataViews.refreshFields(saveResponse);
 
         if (persist) {
-          const message = i18n.translate('indexPatternEditor.saved', {
-            defaultMessage: "Saved '{indexPatternName}'",
-            values: { indexPatternName: saveResponse.getName() },
+          const title = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: 'Saved',
           });
-          notifications.toasts.addSuccess(message);
+          const text = `'${saveResponse.getName()}'`;
+          notifications.toasts.addSuccess({
+            title,
+            text,
+          });
         }
         await onSave(saveResponse);
       }

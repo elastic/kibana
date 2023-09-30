@@ -11,12 +11,11 @@ import type { LinkItem } from '@kbn/security-solution-plugin/public';
 import { ExternalPageName, SecurityPagePath } from '../constants';
 import type { ProjectLinkCategory, ProjectNavigationLink } from '../types';
 import {
-  IconGraphLazy,
-  IconLoggingLazy,
-  IconIndexManagementLazy,
-  IconSecurityShieldLazy,
   IconMapServicesLazy,
-  IconProductFeaturesAlertingLazy,
+  IconIndexManagementLazy,
+  IconUsersRolesLazy,
+  IconReportingLazy,
+  IconVisualizationLazy,
 } from '../../../common/lazy_icons';
 import * as i18n from './project_settings_translations';
 
@@ -43,7 +42,7 @@ export const createProjectSettingsLinkFromManage = (manageLink: LinkItem): LinkI
 
   return {
     ...projectSettingsAppLink,
-    links: projectSettingsSubLinks, // cloudDefend and endpoints links are added in the projectAppLinksSwitcher on runtime
+    links: projectSettingsSubLinks,
   };
 };
 
@@ -70,7 +69,6 @@ export const projectSettingsNavCategories: ProjectLinkCategory[] = [
     categories: [
       {
         label: i18n.DATA_CATEGORY_TITLE,
-        iconType: IconIndexManagementLazy,
         linkIds: [
           ExternalPageName.managementIndexManagement,
           ExternalPageName.managementTransforms,
@@ -82,7 +80,6 @@ export const projectSettingsNavCategories: ProjectLinkCategory[] = [
       },
       {
         label: i18n.ALERTS_INSIGHTS_CATEGORY_TITLE,
-        iconType: IconProductFeaturesAlertingLazy,
         linkIds: [
           ExternalPageName.managementCases,
           ExternalPageName.managementTriggersActionsConnectors,
@@ -91,7 +88,6 @@ export const projectSettingsNavCategories: ProjectLinkCategory[] = [
       },
       {
         label: i18n.CONTENT_CATEGORY_TITLE,
-        iconType: IconSecurityShieldLazy,
         linkIds: [
           ExternalPageName.managementObjects,
           ExternalPageName.managementFiles,
@@ -101,7 +97,6 @@ export const projectSettingsNavCategories: ProjectLinkCategory[] = [
       },
       {
         label: i18n.OTHER_CATEGORY_TITLE,
-        iconType: IconMapServicesLazy,
         linkIds: [ExternalPageName.managementApiKeys, ExternalPageName.managementSettings],
       },
     ],
@@ -114,19 +109,31 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
     id: ExternalPageName.cloudUsersAndRoles,
     title: i18n.CLOUD_USERS_ROLES_TITLE,
     description: i18n.CLOUD_USERS_ROLES_DESCRIPTION,
-    landingIcon: IconGraphLazy,
+    landingIcon: IconUsersRolesLazy,
   },
   {
     id: ExternalPageName.cloudBilling,
     title: i18n.CLOUD_BILLING_TITLE,
     description: i18n.CLOUD_BILLING_DESCRIPTION,
-    landingIcon: IconLoggingLazy,
+    landingIcon: IconReportingLazy,
   },
   {
     id: ExternalPageName.integrationsSecurity,
     title: i18n.INTEGRATIONS_TITLE,
     description: i18n.INTEGRATIONS_DESCRIPTION,
     landingIcon: IconIndexManagementLazy,
+  },
+  {
+    id: ExternalPageName.maps,
+    title: i18n.MAPS_TITLE,
+    description: i18n.MAPS_DESCRIPTION,
+    landingIcon: IconMapServicesLazy,
+  },
+  {
+    id: ExternalPageName.visualize,
+    title: i18n.VISUALIZE_TITLE,
+    description: i18n.VISUALIZE_DESCRIPTION,
+    landingIcon: IconVisualizationLazy,
   },
   {
     id: ExternalPageName.managementIndexManagement,
@@ -187,17 +194,5 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
   {
     id: ExternalPageName.managementSettings,
     title: i18n.MANAGEMENT_SETTINGS_TITLE,
-  },
-  {
-    id: ExternalPageName.maps,
-    title: i18n.MAPS_TITLE,
-    description: i18n.MAPS_DESCRIPTION,
-    landingIcon: IconGraphLazy,
-  },
-  {
-    id: ExternalPageName.visualize,
-    title: i18n.VISUALIZE_TITLE,
-    description: i18n.VISUALIZE_DESCRIPTION,
-    landingIcon: IconGraphLazy,
   },
 ];

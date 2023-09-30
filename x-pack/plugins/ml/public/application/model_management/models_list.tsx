@@ -63,6 +63,7 @@ import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
+import { useEnabledFeatures } from '../contexts/ml';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -103,6 +104,8 @@ export const ModelsList: FC<Props> = ({
       application: { capabilities },
     },
   } = useMlKibana();
+
+  const { isNLPEnabled } = useEnabledFeatures();
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -184,6 +187,7 @@ export const ModelsList: FC<Props> = ({
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
+        with_indices: true,
       });
 
       const newItems: ModelItem[] = [];
@@ -582,6 +586,11 @@ export const ModelsList: FC<Props> = ({
   };
 
   const resultItems = useMemo<ModelItem[]>(() => {
+    if (isNLPEnabled === false) {
+      // don't add any of the built in models (e.g. elser) if NLP is disabled
+      return items;
+    }
+
     const idSet = new Set(items.map((i) => i.model_id));
     const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
       .filter(([modelId]) => !idSet.has(modelId))
@@ -594,8 +603,10 @@ export const ModelsList: FC<Props> = ({
           description: modelDefinition.description,
         } as ModelItem;
       });
-    return [...items, ...notDownloaded];
-  }, [items]);
+    const result = [...items, ...notDownloaded];
+
+    return result;
+  }, [isNLPEnabled, items]);
 
   if (!isInitialized) return null;
 

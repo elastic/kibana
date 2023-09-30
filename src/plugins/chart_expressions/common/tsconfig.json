@@ -15,5 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/core-execution-context-common",
+    "@kbn/expressions-plugin",
+    "@kbn/data-plugin",
   ]
 }

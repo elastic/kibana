@@ -175,6 +175,7 @@ describe('RiskEngineDataClient', () => {
                 "dynamic": "strict",
                 "properties": Object {
                   "@timestamp": Object {
+                    "ignore_malformed": false,
                     "type": "date",
                   },
                   "host": Object {
@@ -360,6 +361,7 @@ describe('RiskEngineDataClient', () => {
                 dynamic: 'strict',
                 properties: {
                   '@timestamp': {
+                    ignore_malformed: false,
                     type: 'date',
                   },
                   host: {
@@ -560,7 +562,7 @@ describe('RiskEngineDataClient', () => {
               namespace: 'default',
             });
             expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: false,
+              isMaxAmountOfRiskEnginesReached: true,
               riskEngineStatus: 'ENABLED',
               legacyRiskEngineStatus: 'NOT_INSTALLED',
             });

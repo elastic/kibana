@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import type { OsqueryResponseActionsParamsFormProps } from './osquery_response_action_type';
 
@@ -16,7 +17,7 @@ export const getLazyOsqueryResponseActionTypeForm =
     const { onError, defaultValues, onChange } = props;
 
     return (
-      <Suspense fallback={null}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
         <OsqueryResponseActionParamsForm
           onChange={onChange}
           defaultValues={defaultValues}

@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
-import { mockContextValue } from '../mocks/mock_right_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ResponseButton } from './response_button';
@@ -34,40 +35,32 @@ const mockInvalidSearchHit = {
   fields: {},
 } as unknown as SearchHit;
 
+const renderResponseButton = (panelContextValue: RightPanelContext = mockContextValue) =>
+  render(
+    <IntlProvider locale="en">
+      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ResponseButton />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </IntlProvider>
+  );
 describe('<ResponseButton />', () => {
   it('should render response button correctly', () => {
-    const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-        <RightPanelContext.Provider value={{ ...mockContextValue, searchHit: mockValidSearchHit }}>
-          <ResponseButton />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    );
+    const panelContextValue = { ...mockContextValue, searchHit: mockValidSearchHit };
+    const { getByTestId, queryByTestId } = renderResponseButton(panelContextValue);
     expect(getByTestId(RESPONSE_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render response button when searchHit is undefined', () => {
-    const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-        <RightPanelContext.Provider value={mockContextValue}>
-          <ResponseButton />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    );
-
-    expect(getByTestId(RESPONSE_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RESPONSE_BUTTON_TEST_ID)).toHaveTextContent('Response');
+    expect(queryByTestId(RESPONSE_EMPTY_TEST_ID)).not.toBeInTheDocument();
   });
 
   it(`should not render investigation guide button when searchHit doesn't have correct data`, () => {
-    const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-        <RightPanelContext.Provider
-          value={{ ...mockContextValue, searchHit: mockInvalidSearchHit }}
-        >
-          <ResponseButton />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    );
+    const panelContextValue = { ...mockContextValue, searchHit: mockInvalidSearchHit };
+    const { getByTestId, queryByTestId } = renderResponseButton(panelContextValue);
     expect(getByTestId(RESPONSE_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RESPONSE_EMPTY_TEST_ID)).toHaveTextContent(
+      'There are no response actions defined for this event.'
+    );
+    expect(queryByTestId(RESPONSE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

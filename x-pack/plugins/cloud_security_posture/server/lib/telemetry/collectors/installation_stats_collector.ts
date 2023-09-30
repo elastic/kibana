@@ -25,7 +25,7 @@ const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
 const getAccountTypeField = (
   packagePolicy: PackagePolicy
 ): CloudSecurityInstallationStats['account_type'] => {
-  if (packagePolicy.vars?.posture.value !== 'cspm') return;
+  if (packagePolicy.vars?.posture?.value !== 'cspm') return;
 
   const inputStreamVars = getEnabledInputStreamVars(packagePolicy);
   const cloudProvider = packagePolicy.vars?.deployment?.value;

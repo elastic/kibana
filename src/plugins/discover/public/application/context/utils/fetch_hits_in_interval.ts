@@ -17,7 +17,6 @@ import {
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import type { SurrDocType } from '../services/context';
 import type { DiscoverServices } from '../../../build_services';
 
@@ -91,7 +90,7 @@ export async function fetchHitsInInterval(
     .setField('sort', sort)
     .setField('version', true)
     .fetch$({
-      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      disableWarningToasts: true,
       inspector: {
         adapter,
         title: type,
@@ -107,9 +106,6 @@ export async function fetchHitsInInterval(
     interceptedWarnings: getSearchResponseInterceptedWarnings({
       services,
       adapter,
-      options: {
-        disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-      },
     }),
   };
 }

@@ -12,7 +12,7 @@ import { KnownTypeToValue, SettingType } from './setting_type';
 /**
  * Creating this type based on {@link UiSettingsClientCommon} and exporting for ease.
  */
-type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
+export type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
 
 /**
  * This is an type-safe abstraction over the {@link UiSetting} type, whose fields
@@ -21,8 +21,10 @@ type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
  *
  * @public
  */
-export interface UiSettingMetadata<T extends SettingType, V = KnownTypeToValue<T> | null>
-  extends UiSetting<V> {
+export interface UiSettingMetadata<
+  T extends SettingType = SettingType,
+  V = KnownTypeToValue<T> | null
+> extends UiSetting<V> {
   /**
    * The type of setting being represented.
    * @see{@link SettingType}

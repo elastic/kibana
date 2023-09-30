@@ -7,6 +7,8 @@
 import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type {
   ExpandedEventFieldsObject,
@@ -15,7 +17,6 @@ import type {
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
-import { RESPONSE_EMPTY, RESPONSE_TITLE } from './translations';
 
 /**
  * Response button that opens Response section in the left panel
@@ -45,14 +46,28 @@ export const ResponseButton: React.FC = () => {
   return (
     <>
       {!responseActions ? (
-        <div data-test-subj={RESPONSE_EMPTY_TEST_ID}>{RESPONSE_EMPTY}</div>
+        <p data-test-subj={RESPONSE_EMPTY_TEST_ID}>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.response.noDataDescription"
+            defaultMessage="There are no response actions defined for this event."
+          />
+        </p>
       ) : (
         <EuiButton
           onClick={goToResponseTab}
           iconType="documentation"
           data-test-subj={RESPONSE_BUTTON_TEST_ID}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.response.responseButtonAriaLabel',
+            {
+              defaultMessage: 'Response',
+            }
+          )}
         >
-          {RESPONSE_TITLE}
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.response.responseButtonLabel"
+            defaultMessage="Response"
+          />
         </EuiButton>
       )}
     </>

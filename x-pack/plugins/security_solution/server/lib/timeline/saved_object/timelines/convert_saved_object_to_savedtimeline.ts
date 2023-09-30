@@ -81,6 +81,7 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
               ? savedTimeline.attributes.sort
               : [savedTimeline.attributes.sort]
             : [],
+        savedSearchId: savedTimeline.attributes.savedSearchId,
       };
 
       return {

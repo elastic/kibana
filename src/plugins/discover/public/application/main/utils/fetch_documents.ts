@@ -13,7 +13,6 @@ import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-uti
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -60,7 +59,7 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
-      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      disableWarningToasts: true,
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
@@ -75,9 +74,6 @@ export const fetchDocuments = (
       ? getSearchResponseInterceptedWarnings({
           services,
           adapter,
-          options: {
-            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-          },
         })
       : [];
 

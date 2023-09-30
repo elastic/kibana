@@ -78,16 +78,44 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/security_serverless.sh
+    label: 'Serverless Security Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
+    label: 'Serverless Explore - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
+    label: 'Serverless Investigations - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
     label: Trigger unsupported ftr tests
-    timeout_in_minutes: 10
-    depends_on:
-      - build
-    agents:
-      queue: 'kibana-default'
-
-  - command: '.buildkite/scripts/steps/functional/on_merge_serverless_ftrs.sh'
-    label: Trigger serverless ftr tests
     timeout_in_minutes: 10
     depends_on:
       - build
