@@ -65,6 +65,7 @@ export const StatusFilter: React.FC<Props> = ({ selectedStatus, onStatusChanged 
       valueOfSelected={selectedStatus}
       onChange={onStatusChanged}
       data-test-subj="case-status-filter"
+      fullWidth={true}
     />
   );
 };
