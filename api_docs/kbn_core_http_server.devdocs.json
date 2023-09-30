@@ -6290,6 +6290,10 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },

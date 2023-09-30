@@ -470,6 +470,7 @@ x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/license_api_guard @elastic/platform-deployment-management
 x-pack/plugins/license_management @elastic/platform-deployment-management
 x-pack/plugins/licensing @elastic/kibana-core
+src/plugins/links @elastic/kibana-presentation
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
@@ -484,6 +485,7 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/settings/application @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_category @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management
@@ -1210,9 +1212,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 
 ## Explore owner connectors
-/x-pack/plugins/stack_connectors/public/connector_types/gen_ai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/server/connector_types/gen_ai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/common/gen_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/common/openai @elastic/security-threat-hunting-explore
 
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
@@ -1272,6 +1274,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/risk_engine @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engine

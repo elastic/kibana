@@ -47,6 +47,8 @@
       "files",
       "controls",
       "dataViewEditor",
+      "savedObjectsManagement",
+      "expressions",
       "stackConnectors",
       "discover",
       "notifications",
