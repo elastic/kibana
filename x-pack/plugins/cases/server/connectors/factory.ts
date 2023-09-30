@@ -29,5 +29,4 @@ const isConnectorTypeSupported = (type: string): type is ConnectorTypes =>
 export const casesConnectors: CasesConnectorsMap = {
   get: (type: string): ICasesConnector | undefined | null =>
     isConnectorTypeSupported(type) ? mapping[type] : undefined,
-  getConnectorTotalTypes: () => Object.keys(mapping),
 };

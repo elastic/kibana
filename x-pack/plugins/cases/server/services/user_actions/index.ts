@@ -14,7 +14,6 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import type { UserActionType } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../../common/api';
 import {
@@ -237,7 +236,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string,
-    supportedUserActions: UserActionType[]
+    isCasesWebhook = false
   ): Promise<UserActionSavedObjectTransformed | undefined> {
     try {
       this.context.log.debug(
@@ -248,7 +247,13 @@ export class CaseUserActionService {
       const type = CASE_SAVED_OBJECT;
 
       const connectorsFilter = buildFilter({
-        filters: supportedUserActions,
+        filters: [
+          UserActionTypes.comment,
+          UserActionTypes.description,
+          UserActionTypes.tags,
+          UserActionTypes.title,
+          ...(isCasesWebhook ? [UserActionTypes.severity, UserActionTypes.status] : []),
+        ],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,

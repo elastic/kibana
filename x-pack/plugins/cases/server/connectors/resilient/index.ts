@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UserActionTypes } from '../../../common/types/domain';
 import { getMapping } from './mapping';
 import { format } from './format';
 import type { ResilientCaseConnector } from './types';
@@ -13,10 +12,4 @@ import type { ResilientCaseConnector } from './types';
 export const getCaseConnector = (): ResilientCaseConnector => ({
   getMapping,
   format,
-  getSupportedUserActions: () => [
-    UserActionTypes.comment,
-    UserActionTypes.description,
-    UserActionTypes.tags,
-    UserActionTypes.title,
-  ],
 });
