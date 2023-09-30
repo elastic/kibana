@@ -16,10 +16,13 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isNewTermsRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -44,6 +47,9 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setThreshold = useCallback(() => setType('threshold'), [setType]);
     const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
+    const setEsql = useCallback(() => setType('esql'), [setType]);
+
+    const isEsqlFeatureEnabled = !useIsExperimentalFeatureEnabled('esqlRulesDisabled');
 
     const eqlSelectableConfig = useMemo(
       () => ({
@@ -92,6 +98,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
         isSelected: isNewTermsRule(ruleType),
       }),
       [ruleType, setNewTerms]
+    );
+
+    const esqlSelectableConfig = useMemo(
+      () => ({
+        onClick: setEsql,
+        isSelected: isEsqlRule(ruleType),
+      }),
+      [ruleType, setEsql]
     );
 
     return (
@@ -177,6 +191,19 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
                 icon={<EuiIcon size="l" type="magnifyWithPlus" />}
                 selectable={newTermsSelectableConfig}
+                layout="horizontal"
+              />
+            </EuiFlexItem>
+          )}
+          {isEsqlFeatureEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
+            <EuiFlexItem>
+              <EuiCard
+                data-test-subj="esqlRuleType"
+                title={<TechnicalPreviewBadge label={i18n.ESQL_TYPE_TITLE} />}
+                titleSize="xs"
+                description={i18n.ESQL_TYPE_DESCRIPTION}
+                icon={<EuiIcon type="logoElasticsearch" size="l" />}
+                selectable={esqlSelectableConfig}
                 layout="horizontal"
               />
             </EuiFlexItem>

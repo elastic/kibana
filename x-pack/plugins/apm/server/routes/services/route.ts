@@ -234,17 +234,18 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { start, end, environment } = params.query;
 
     const serviceMetadataDetails = await getServiceMetadataDetails({
       serviceName,
+      environment,
       apmEventClient,
       start,
       end,

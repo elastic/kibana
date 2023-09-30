@@ -182,11 +182,11 @@ export class DashboardPageObject extends FtrService {
 
   public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
-      `last breadcrumb to have dashboard title: ${expectedTitle}`,
+      `last breadcrumb to have dashboard title: ${expectedTitle} OR Editing ${expectedTitle}`,
       async () => {
         const actualTitle = await this.globalNav.getLastBreadcrumb();
         this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
-        return actualTitle === expectedTitle;
+        return actualTitle === expectedTitle || actualTitle === `Editing ${expectedTitle}`;
       }
     );
   }
@@ -612,8 +612,12 @@ export class DashboardPageObject extends FtrService {
     return visibilities;
   }
 
+  public async getPanels() {
+    return await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+  }
+
   public async getPanelDimensions() {
-    const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+    const panels = await this.getPanels();
     return await Promise.all(
       panels.map(async (panel) => {
         const size = await panel.getSize();

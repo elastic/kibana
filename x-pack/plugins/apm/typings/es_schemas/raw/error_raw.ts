@@ -18,7 +18,7 @@ import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
 
-interface Processor {
+export interface Processor {
   name: 'error';
   event: 'error';
 }

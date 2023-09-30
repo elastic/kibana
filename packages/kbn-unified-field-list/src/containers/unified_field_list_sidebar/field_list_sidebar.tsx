@@ -60,6 +60,11 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   showFieldList?: boolean;
 
   /**
+   * Make the field list full width
+   */
+  fullWidth?: boolean;
+
+  /**
    * Compressed view
    */
   compressed?: boolean;
@@ -145,6 +150,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   trackUiMetric,
   showFieldList = true,
   compressed = true,
+  fullWidth,
   isAffectedByGlobalFilter,
   prepend,
   onAddFieldToWorkspace,
@@ -306,6 +312,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
     className: classnames('unifiedFieldListSidebar', {
       'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
+      ['unifiedFieldListSidebar--fullWidth']: fullWidth,
     }),
     'aria-label': i18n.translate(
       'unifiedFieldList.fieldListSidebar.indexAndFieldsSectionAriaLabel',

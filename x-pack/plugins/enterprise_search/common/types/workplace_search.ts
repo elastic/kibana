@@ -14,13 +14,14 @@ export interface Account {
 }
 
 export interface Organization {
-  name: string;
   defaultOrgName: string;
+  kibanaUIsEnabled: boolean;
+  name: string;
 }
 
 export interface WorkplaceSearchInitialData {
-  organization: Organization;
   account: Account;
+  organization: Organization;
 }
 
 export interface ConfiguredLimits {

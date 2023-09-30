@@ -47,9 +47,13 @@
       "files",
       "controls",
       "dataViewEditor",
+      "savedObjectsManagement",
+      "expressions",
       "stackConnectors",
       "discover",
-      "notifications"
+      "notifications",
+      "savedObjects",
+      "savedSearch"
     ],
     "optionalPlugins": [
       "cloudExperiments",

@@ -142,13 +142,14 @@ const loginWithUsernameAndPassword = (username: string, password: string) => {
       const basicProvider = loginState.body.selector.providers.find(
         (provider) => provider.type === 'basic'
       );
+
       return cy.request({
         url: `${baseUrl}/internal/security/login`,
         method: 'POST',
         headers,
         body: {
-          providerType: basicProvider.type,
-          providerName: basicProvider.name,
+          providerType: basicProvider?.type,
+          providerName: basicProvider?.name,
           currentURL: '/',
           params: { username, password },
         },
