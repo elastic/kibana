@@ -16,14 +16,13 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
-  spaces: SpacesPluginSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
