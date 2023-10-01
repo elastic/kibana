@@ -123,7 +123,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(await tagModal.isOpened()).to.be(false);
 
-        await PageObjects.common.clickAndWaitForSaveModalToClose('confirmSaveSavedObjectButton');
+        await PageObjects.dashboard.clickSave();
+        await PageObjects.common.waitForSaveModalToClose();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await listingTable.waitUntilTableIsLoaded();

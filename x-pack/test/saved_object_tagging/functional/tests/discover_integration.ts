@@ -146,7 +146,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
         expect(await tagModal.isOpened()).to.be(false);
-        await PageObjects.common.clickAndWaitForSaveModalToClose('confirmSaveSavedObjectButton');
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        await PageObjects.common.waitForSaveModalToClose();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.openLoadSavedSearchPanel();
         await selectFilterTags('my-new-tag');

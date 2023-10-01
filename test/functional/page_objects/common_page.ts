@@ -496,12 +496,12 @@ export class CommonPageObject extends FtrService {
     return await body.getVisibleText();
   }
 
-  async clickAndWaitForSaveModalToClose(testSubjectSelector: string) {
-    this.log.debug(`Click save modal button '${testSubjectSelector}'`);
+  async waitForSaveModalToClose() {
+    this.log.debug('Waiting for save modal to close');
     await this.retry.try(async () => {
-      await this.testSubjects.click(testSubjectSelector);
-      this.log.debug('Waiting for save modal to close');
-      await this.testSubjects.waitForDeleted('savedObjectSaveModal');
+      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
+        throw new Error('save modal still open');
+      }
     });
   }
 

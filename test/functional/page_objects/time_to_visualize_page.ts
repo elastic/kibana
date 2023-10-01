@@ -77,7 +77,6 @@ export class TimeToVisualizePageObject extends FtrService {
       if (dashboardId) {
         await this.testSubjects.click('open-dashboard-picker');
         await this.testSubjects.setValue('dashboard-picker-search', dashboardId);
-        await this.common.sleep(1000);
         await this.testSubjects.click(
           `dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`
         );
@@ -128,6 +127,8 @@ export class TimeToVisualizePageObject extends FtrService {
     await this.setSaveModalValues(vizName, saveModalArgs);
     this.log.debug('Click Save Visualization button');
 
-    await this.common.clickAndWaitForSaveModalToClose('confirmSaveSavedObjectButton');
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+
+    await this.common.waitForSaveModalToClose();
   }
 }

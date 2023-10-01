@@ -473,13 +473,12 @@ export class DashboardPageObject extends FtrService {
         await this.clickSave();
       }
 
-      await this.testSubjects.waitForDeleted('savedObjectSaveModal');
-
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
     const message = await this.common.closeToast();
     await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitForSaveModalToClose();
 
     const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {
