@@ -172,6 +172,8 @@ Data can also be generated using the [kbn-apm-synthtrace](../../../../packages/k
   - Prefer to keep the Synthtrace scenario in the same file. This makes it easier to see what's going on.
   - If you do end up moving the Synthtrace scenario to another file because it gets too long, make sure the inputs are passed as parameters to a function. This keeps the information information in the test file and prevents the reader from navigating back and forth.
   - Avoid re-using the same Synthtrace scenario across multiple files (in the same file it's mostly fine, but a test-specific Synthtrace scenario doesn't hurt). Re-using it will result in less specific scenarios, making it harder to write specific tests. The single scenario will grow unwieldy. It's akin to using ES archives.
+- **ML**: For tests that require ML data, use the `createAndRunApmMlJob` helper function. This starts an ML job and returns only when it has completed, including any anomalies that are generated.
+- **Alerting**: For tests that require alerting data, use the `createApmRule` and `waitForRuleStatus` helpers. `createApmRule` sets some defaults when creating a rule, and `waitForRuleStatus` only return when a certain status is matching your expectations. This allows you to e.g. wait until an alert fires or recovers after exceeding a threshold
 
 ### 3. Scope of tests:
 
