@@ -83,6 +83,11 @@ export const allowedExperimentalValues = Object.freeze({
    **/
   alertsPageFiltersEnabled: true,
 
+  /**
+   * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
+   */
+  assistantModelEvaluation: false,
+
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -106,9 +111,14 @@ export const allowedExperimentalValues = Object.freeze({
   discoverInTimeline: true,
 
   /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
+
+  /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
-  protectionUpdatesEnabled: false,
+  protectionUpdatesEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
