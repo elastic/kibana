@@ -8,12 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type ElserVersion } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { MlFeatures, RouteInitialization } from '../types';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -101,7 +100,7 @@ export function trainedModelsRoutes(
             ...getTrainedModelsRequestParams,
             ...(modelId ? { model_id: modelId } : {}),
             size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
-          } as MlGetTrainedModelsRequest);
+          } as estypes.MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];

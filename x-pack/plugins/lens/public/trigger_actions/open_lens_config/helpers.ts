@@ -21,7 +21,9 @@ interface Context {
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {
-  return Boolean(isLensEmbeddable(embeddable) && embeddable.isTextBasedLanguage());
+  // display the action only if dashboard is on editable mode
+  const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
+  return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
 }
 
 export async function executeAction({ embeddable, startDependencies, overlays, theme }: Context) {

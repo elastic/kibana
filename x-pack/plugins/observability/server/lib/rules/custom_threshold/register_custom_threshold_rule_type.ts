@@ -69,7 +69,6 @@ export function thresholdRuleType(
     comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
-    warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
 
   const nonCountCriterion = schema.object({

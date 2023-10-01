@@ -97,7 +97,7 @@ export const getTextExpansionError = (
         title: i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.title',
           {
-            defaultMessage: 'Error with ELSER deployment',
+            defaultMessage: 'Error with ELSER v2 deployment',
           }
         ),
         message: getErrorsFromHttpResponse(createError)[0],
@@ -107,7 +107,7 @@ export const getTextExpansionError = (
         title: i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
           {
-            defaultMessage: 'Error starting ELSER deployment',
+            defaultMessage: 'Error starting ELSER v2 deployment',
           }
         ),
         message: getErrorsFromHttpResponse(startError)[0],
@@ -117,7 +117,7 @@ export const getTextExpansionError = (
         title: i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
           {
-            defaultMessage: 'Error fetching ELSER model',
+            defaultMessage: 'Error fetching ELSER v2 model',
           }
         ),
         message: getErrorsFromHttpResponse(fetchError)[0],

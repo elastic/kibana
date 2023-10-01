@@ -18,7 +18,7 @@ import { take } from 'rxjs/operators';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -54,12 +54,20 @@ import {
   MlSharedServices,
 } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
-import { MlLocatorDefinition, type MlLocator } from './locator';
+import { MlLocatorDefinition, MlLocatorParams, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import {
+  initEnabledFeatures,
+  type MlFeatures,
+  ML_APP_ROUTE,
+  PLUGIN_ICON_SOLUTION,
+  PLUGIN_ID,
+  type ConfigSchema,
+} from '../common/constants/app';
 import type { MlCapabilities } from './shared';
+import { ElasticModels } from './application/services/elastic_models_service';
 
 export interface MlStartDependencies {
   dataViewEditor: DataViewEditorStart;
@@ -113,12 +121,21 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private sharedMlServices: MlSharedServices | undefined;
 
   private isServerless: boolean = false;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
   }
 
-  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+  setup(
+    core: MlCoreSetup,
+    pluginsSetup: MlSetupDependencies
+  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
     this.sharedMlServices = getMlSharedServices(core.http);
 
     core.application.register({
@@ -164,7 +181,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             presentationUtil: pluginsStart.presentationUtil,
           },
           params,
-          this.isServerless
+          this.isServerless,
+          this.enabledFeatures
         );
       },
     });
@@ -180,7 +198,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         {
           usageCollection: pluginsSetup.usageCollection,
         },
-        this.isServerless
+        this.isServerless,
+        this.enabledFeatures
       ).enable();
     }
 
@@ -208,13 +227,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerMapExtension,
           registerCasesAttachments,
         } = await import('./register_helper');
-        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
+        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
         if (fullLicense) {
-          registerMlUiActions(pluginsSetup.uiActions, core, this.isServerless);
+          registerMlUiActions(pluginsSetup.uiActions, core);
 
-          if (mlCapabilities.isADEnabled) {
-            registerEmbeddables(pluginsSetup.embeddable, core, this.isServerless);
+          if (this.enabledFeatures.ad) {
+            registerEmbeddables(pluginsSetup.embeddable, core);
 
             if (pluginsSetup.cases) {
               registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
@@ -247,10 +266,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices.elasticModels,
     };
   }
 
-  start(core: CoreStart, deps: MlStartDependencies) {
+  start(
+    core: CoreStart,
+    deps: MlStartDependencies
+  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,

@@ -18,6 +18,7 @@ import {
   EmbeddableInput,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
+  isExplicitInputWithAttributes,
 } from '../../../lib';
 import { ViewMode } from '../../../lib/types';
 import { EmbeddableStart } from '../../../plugin';
@@ -75,6 +76,7 @@ export class EditPanelAction implements Action<ActionContext> {
     const canEditEmbeddable = Boolean(
       embeddable &&
         embeddable.getOutput().editable &&
+        !embeddable.getOutput().inlineEditable &&
         (embeddable.getOutput().editUrl ||
           (embeddable.getOutput().editApp && embeddable.getOutput().editPath) ||
           embeddable.getOutput().editableWithExplicitInput)
@@ -94,7 +96,19 @@ export class EditPanelAction implements Action<ActionContext> {
       }
 
       const oldExplicitInput = embeddable.getExplicitInput();
-      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput);
+      let newExplicitInput: Partial<EmbeddableInput>;
+      try {
+        const explicitInputReturn = await factory.getExplicitInput(
+          oldExplicitInput,
+          embeddable.parent
+        );
+        newExplicitInput = isExplicitInputWithAttributes(explicitInputReturn)
+          ? explicitInputReturn.newInput
+          : explicitInputReturn;
+      } catch (e) {
+        // error likely means user canceled editing
+        return;
+      }
       embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
       return;
     }

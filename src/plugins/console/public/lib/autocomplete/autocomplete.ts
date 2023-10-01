@@ -999,7 +999,7 @@ export default function ({
         // will simulate autocomplete on 'GET /a/b/' with a filter by index
         return {
           tokenPath: context.urlTokenPath?.slice(0, -1),
-          predicate: (term: any) => term.meta === 'index',
+          predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => term.meta === 'index',
         };
       } else {
         // will do nothing special
