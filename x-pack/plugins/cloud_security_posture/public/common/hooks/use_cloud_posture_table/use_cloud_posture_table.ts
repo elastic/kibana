@@ -15,9 +15,11 @@ import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 
 export interface CloudPostureTableResult {
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   setUrlQuery: (query: any) => void;
-  // TODO: remove any, this sorting is used for both EuiGrid and EuiTable which uses different types of sorts
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   sort: any;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   filters: any[];
   query?: { bool: BoolQuery };
   queryError?: Error;
@@ -25,12 +27,14 @@ export interface CloudPostureTableResult {
   // TODO: remove any, urlQuery is an object with query fields but we also add custom fields to it, need to assert usages
   urlQuery: any;
   setTableOptions: (options: CriteriaWithPagination<object>) => void;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   handleUpdateQuery: (query: any) => void;
   pageSize: number;
   setPageSize: Dispatch<SetStateAction<number | undefined>>;
   onChangeItemsPerPage: (newPageSize: number) => void;
   onChangePage: (newPageIndex: number) => void;
-  onSort: (sort: string[][]) => void;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  onSort: (sort: any) => void;
   onResetFilters: () => void;
   columnsLocalStorageKey: string;
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
@@ -45,6 +49,7 @@ export const useCloudPostureTable = ({
   paginationLocalStorageKey,
   columnsLocalStorageKey,
 }: {
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
   defaultQuery?: (params: any) => any;
   dataView: DataView;
   paginationLocalStorageKey: string;
