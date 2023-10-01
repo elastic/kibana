@@ -440,6 +440,8 @@ const prepareDefinitionSectionListItems = (
       title = descriptionStepI18n.SAVED_QUERY_LABEL;
     } else if (rule.type === 'eql') {
       title = descriptionStepI18n.EQL_QUERY_LABEL;
+    } else if (rule.type === 'esql') {
+      title = descriptionStepI18n.ESQL_QUERY_LABEL;
     }
 
     definitionSectionListItems.push({

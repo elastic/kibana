@@ -28,6 +28,13 @@ export const EQL_QUERY_LABEL = i18n.translate(
   }
 );
 
+export const ESQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlQueryLabel',
+  {
+    defaultMessage: 'ES|QL query',
+  }
+);
+
 export const THREAT_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatQueryLabel',
   {
