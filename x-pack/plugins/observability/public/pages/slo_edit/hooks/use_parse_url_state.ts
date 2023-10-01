@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { RecursivePartial } from '@elastic/eui';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { CreateSLOInput } from '@kbn/slo-schema';
-import { RecursivePartial } from '@kbn/utility-types';
 import { useHistory } from 'react-router-dom';
 import { transformPartialUrlStateToFormState } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';

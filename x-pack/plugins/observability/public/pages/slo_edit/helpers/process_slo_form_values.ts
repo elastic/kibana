@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { RecursivePartial } from '@elastic/eui';
 import { CreateSLOInput, Indicator, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { RecursivePartial } from '@kbn/utility-types';
 import { toDuration } from '../../../utils/slo/duration';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
