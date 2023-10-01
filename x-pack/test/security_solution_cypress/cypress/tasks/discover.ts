@@ -47,7 +47,7 @@ export const waitForDiscoverGridToLoad = () => {
 export const selectCurrentDiscoverEsqlQuery = (discoverEsqlInput = DISCOVER_ESQL_INPUT) => {
   cy.get(discoverEsqlInput).click();
   cy.get(discoverEsqlInput).focused();
-  cy.get(discoverEsqlInput).type('{cmd}a');
+  cy.get(discoverEsqlInput).type('{cmd+a}');
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {

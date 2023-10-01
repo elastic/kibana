@@ -114,7 +114,6 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
-  const dataViewCustomization = useDiscoverCustomization('data_view');
 
   const topNavMenu = useMemo(
     () =>
@@ -173,11 +172,20 @@ export const DiscoverTopNav = ({
   if (isESQLModeEnabled) {
     supportedTextBasedLanguages.push('ESQL');
   }
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
+
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
+  );
+
+  const shouldHideDefaultDataviewPicker = !!searchBarCustomization?.CustomDataViewPicker;
+
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      isDisabled: dataViewCustomization?.disableDataViewPicker,
       title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,
@@ -204,13 +212,6 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
-  const searchBarCustomization = useDiscoverCustomization('search_bar');
-
-  const SearchBar = useMemo(
-    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
-    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
-  );
-
   return (
     <SearchBar
       appName="discover"
@@ -232,7 +233,7 @@ export const DiscoverTopNav = ({
         ) : undefined
       }
       dataViewPickerComponentProps={
-        searchBarCustomization?.CustomDataViewPicker ? undefined : dataViewPickerProps
+        shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
       }
       displayStyle="detached"
       textBasedLanguageModeErrors={

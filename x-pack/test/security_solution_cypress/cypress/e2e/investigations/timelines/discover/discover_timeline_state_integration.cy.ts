@@ -144,7 +144,8 @@ describe(
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             gotToDiscoverTab();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
+            // TODO: remove if we hide dataview picker
+            // cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
@@ -171,7 +172,8 @@ describe(
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
             // reload the page with the exact url
             cy.reload();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
+            // TODO: remove if we hide dataview picker
+            // cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
@@ -196,7 +198,7 @@ describe(
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             gotToDiscoverTab();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
+            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
           });
       });
     });

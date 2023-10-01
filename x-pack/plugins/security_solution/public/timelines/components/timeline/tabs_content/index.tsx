@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
@@ -44,6 +44,7 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 import { initializeTimelineSettings } from '../../../store/timeline/actions';
+import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -248,8 +249,18 @@ const CountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
+const StyledEuiBetaBadge = styled(EuiBetaBadge)`
+  vertical-align: middle;
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
 const StyledEuiTab = styled(EuiTab)`
   .euiTab__content {
+    align-items: center;
     display: flex;
     flex-direction: row;
     white-space: pre;
@@ -397,6 +408,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.discover}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+              <StyledEuiBetaBadge label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW} size="s" />
             </StyledEuiTab>
           )}
           {timelineType === TimelineType.default && (
