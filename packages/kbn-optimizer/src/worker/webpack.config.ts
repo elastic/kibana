@@ -245,7 +245,7 @@ export function getWebpackConfig(
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mjs'],
-      mainFields: ['browser', 'module', 'main'],
+      mainFields: ['browser', 'main', 'module'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
