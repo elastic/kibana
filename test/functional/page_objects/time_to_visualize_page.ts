@@ -78,6 +78,7 @@ export class TimeToVisualizePageObject extends FtrService {
         await this.testSubjects.waitForEnabled('open-dashboard-picker');
         await this.testSubjects.click('open-dashboard-picker');
         await this.testSubjects.setValue('dashboard-picker-search', dashboardId);
+        await this.common.sleep(150); // wait for input debounce so loading starts
         await this.testSubjects.waitForEnabled('open-dashboard-picker');
         await this.testSubjects.click(
           `dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`
