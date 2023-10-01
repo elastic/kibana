@@ -180,7 +180,8 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
   );
 
-  const shouldHideDefaultDataviewPicker = !!searchBarCustomization?.CustomDataViewPicker;
+  const shouldHideDefaultDataviewPicker =
+    !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {

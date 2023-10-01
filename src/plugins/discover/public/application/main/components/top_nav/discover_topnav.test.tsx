@@ -39,11 +39,13 @@ const mockTopNavCustomization: TopNavCustomization = {
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
   CustomDataViewPicker: jest.fn(() => <div data-test-subj="custom-data-view-picker" />),
+  hideDataViewPicker: false,
 };
 
 const mockSearchBarCustomizationWithCustomSearchBar: SearchBarCustomization = {
   id: 'search_bar',
   CustomSearchBar: MockCustomSearchBar,
+  hideDataViewPicker: false,
 };
 
 let mockUseCustomizations = false;
