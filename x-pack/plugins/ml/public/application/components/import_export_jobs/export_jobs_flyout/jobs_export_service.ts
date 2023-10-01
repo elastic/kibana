@@ -30,7 +30,9 @@ export class JobsExportService {
   constructor(private _mlApiServices: MlApiServices) {}
 
   public async exportAnomalyDetectionJobs(jobIds: string[]) {
-    const configs = await Promise.all(jobIds.map(this._mlApiServices.jobs.jobForCloning));
+    const configs = await Promise.all(
+      jobIds.map((id) => this._mlApiServices.jobs.jobForCloning(id, true))
+    );
     this._export(configs, 'anomaly-detector');
   }
 

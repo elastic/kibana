@@ -16,6 +16,7 @@ import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exceptio
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
@@ -24,6 +25,7 @@ import {
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
+  isEsqlParams,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -169,11 +171,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           };
 
           const {
-            actions,
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          const refresh = actions.length ? 'wait_for' : false;
+          const refresh = isPreview ? false : true;
 
           ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
 
@@ -183,6 +184,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
           let wroteWarningStatus = false;
+          let warningMessage;
           let hasError = false;
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
@@ -209,13 +211,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           /**
            * Data Views Logic
-           * Use of data views is supported for all rules other than ML.
+           * Use of data views is supported for all rules other than ML and Esql.
            * Rules can define both a data view and index pattern, but on execution:
            *  - Data view is used if it is defined
            *    - Rule exits early if data view defined is not found (ie: it's been deleted)
            *  - If no data view defined, falls to using existing index logic
+           * Esql rules has index in query, which can be retrieved
            */
-          if (!isMachineLearningParams(params)) {
+          if (isEsqlParams(params)) {
+            inputIndex = getIndexListFromEsqlQuery(params.query);
+          } else if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,
@@ -251,11 +256,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
-              wroteWarningStatus = await hasReadIndexPrivileges({
-                privileges,
-                ruleExecutionLogger,
-                uiSettingsClient,
-              });
+              const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
+                await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
+
+              wroteWarningStatus = wroteWarningMessage;
+              warningMessage = readIndexWarningMessage;
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
@@ -273,14 +282,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
 
-                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
-                  await hasTimestampFields({
-                    timestampField: primaryTimestamp,
-                    timestampFieldCapsResponse: timestampFieldCaps,
-                    inputIndices: inputIndex,
-                    ruleExecutionLogger,
-                  });
+                const {
+                  wroteWarningStatus: wroteWarningStatusResult,
+                  foundNoIndices,
+                  warningMessage: warningMissingTimestampFieldsMessage,
+                } = await hasTimestampFields({
+                  timestampField: primaryTimestamp,
+                  timestampFieldCapsResponse: timestampFieldCaps,
+                  inputIndices: inputIndex,
+                  ruleExecutionLogger,
+                });
                 wroteWarningStatus = wroteWarningStatusResult;
+                warningMessage = warningMissingTimestampFieldsMessage;
                 skipExecution = foundNoIndices;
               }
             }
@@ -314,7 +327,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isMachineLearningParams(params)) {
+          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
               dataViews: services.dataViews,
@@ -448,6 +461,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus['partial failure'],
                 message: truncateList(result.warningMessages).join(),
+                metrics: {
+                  searchDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
+                },
               });
             }
 
@@ -469,6 +487,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatus.succeeded,
                   message: 'Rule execution completed successfully',
+                  metrics: {
+                    searchDurations: result.searchAfterTimes,
+                    indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
+                  },
+                });
+              } else if (wroteWarningStatus && !hasError && !result.warning) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatus['partial failure'],
+                  message: warningMessage,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,

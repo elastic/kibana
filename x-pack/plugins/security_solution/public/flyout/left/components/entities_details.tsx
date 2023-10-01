@@ -12,7 +12,7 @@ import { useLeftPanelContext } from '../context';
 import { getField } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
-import { ENTITIES_DETAILS_NO_DATA_TEST_ID, ENTITIES_DETAILS_TEST_ID } from './test_ids';
+import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
 
 export const ENTITIES_TAB_ID = 'entities-details';
 
@@ -45,12 +45,10 @@ export const EntitiesDetails: React.FC = () => {
           )}
         </EuiFlexGroup>
       ) : (
-        <p data-test-subj={ENTITIES_DETAILS_NO_DATA_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.entities.noDataDescription"
-            defaultMessage="Host and user information are unavailable for this alert."
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.entities.noDataDescription"
+          defaultMessage="Host and user information are unavailable for this alert."
+        />
       )}
     </>
   );

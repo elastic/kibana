@@ -21,6 +21,8 @@ const panelContextValue = {
   ...mockContextValue,
 };
 
+const NO_DATA_MESSAGE = 'There was an error displaying data.';
+
 describe('<AlertReasonPreview />', () => {
   it('should render alert reason preview', () => {
     const { getByTestId } = render(
@@ -34,5 +36,18 @@ describe('<AlertReasonPreview />', () => {
     );
     expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toHaveTextContent('Alert reason');
+  });
+
+  it('should render no data message if alert reason is not available', () => {
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <PreviewPanelContext.Provider value={{} as unknown as PreviewPanelContext}>
+          <ThemeProvider theme={mockTheme}>
+            <AlertReasonPreview />
+          </ThemeProvider>
+        </PreviewPanelContext.Provider>
+      </IntlProvider>
+    );
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });

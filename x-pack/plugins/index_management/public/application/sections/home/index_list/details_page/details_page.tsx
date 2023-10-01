@@ -59,7 +59,7 @@ const defaultTabs = [
 
 const statsTab = {
   id: IndexDetailsSection.Stats,
-  name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Stats" />,
+  name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Statistics" />,
 };
 
 const getSelectedTabContent = ({
