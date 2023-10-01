@@ -40,7 +40,9 @@ import { visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 
-describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/167716
+// Failing: See https://github.com/elastic/kibana/issues/167717
+describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
     login();
