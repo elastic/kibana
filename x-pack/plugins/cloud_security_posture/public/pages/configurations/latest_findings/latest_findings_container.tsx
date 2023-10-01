@@ -90,7 +90,7 @@ const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.E
 
 const columnsLocalStorageKey = 'cloudSecurityPostureLatestFindingsColumns';
 
-const title = i18n.translate('xpack.csp.findings.latestFindings.tableTitle', {
+const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
   defaultMessage: 'Findings',
 });
 
