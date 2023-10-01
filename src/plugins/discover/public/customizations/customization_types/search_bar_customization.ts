@@ -15,5 +15,5 @@ export interface SearchBarCustomization {
   CustomDataViewPicker?: ComponentType;
   PrependFilterBar?: ComponentType;
   CustomSearchBar?: ComponentType<TopNavMenuProps<AggregateQuery>>;
-  hideDataViewPicker: boolean;
+  hideDataViewPicker?: boolean;
 }
