@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RULES_TABLE_BREADCRUMB =
+export const RULE_MANAGEMENT_PAGE_BREADCRUMB =
   '[data-test-subj~="breadcrumb"][title="Detection rules (SIEM)"]';
 
 export const LAST_BREADCRUMB = `[data-test-subj~="last"]`;
