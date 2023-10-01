@@ -45,7 +45,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
-import { goBackToRulesTableViaBreadcrumbs } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/navigation';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
@@ -87,7 +87,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       fillScheduleRuleAndContinue(rule);
       cy.intercept('POST', '/api/detection_engine/rules').as('savedQueryRule');
       createAndEnableRule();
-      goBackToRulesTableViaBreadcrumbs();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.wait('@savedQueryRule').then(({ response }) => {
         // created rule should have saved_query type

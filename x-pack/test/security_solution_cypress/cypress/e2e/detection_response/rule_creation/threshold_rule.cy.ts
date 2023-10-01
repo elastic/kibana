@@ -55,7 +55,7 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
-import { goBackToRulesTableViaBreadcrumbs, visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs, visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
@@ -82,7 +82,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
-    goBackToRulesTableViaBreadcrumbs();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

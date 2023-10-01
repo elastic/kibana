@@ -57,7 +57,7 @@ import {
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
-import { goBackToRulesTableViaBreadcrumbs } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -86,7 +86,7 @@ describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
-      goBackToRulesTableViaBreadcrumbs();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

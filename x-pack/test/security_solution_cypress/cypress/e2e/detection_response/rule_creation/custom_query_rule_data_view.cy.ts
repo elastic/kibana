@@ -63,7 +63,7 @@ import {
 } from '../../../tasks/create_new_rule';
 
 import { login } from '../../../tasks/login';
-import { goBackToRulesTableViaBreadcrumbs, visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs, visit } from '../../../tasks/navigation';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
@@ -97,7 +97,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
-      goBackToRulesTableViaBreadcrumbs();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -162,7 +162,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
 
       fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
-      goBackToRulesTableViaBreadcrumbs();
+      openRuleManagementPageViaBreadcrumbs();
 
       goToRuleDetailsOf(rule.name);
 

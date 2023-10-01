@@ -92,7 +92,7 @@ export const visitUserDetailsPage = (userName = 'test') => {
   visitWithTimeRange(userDetailsUrl(userName));
 };
 
-export function goBackToRulesTableViaBreadcrumbs(): void {
+export function openRuleManagementPageViaBreadcrumbs(): void {
   cy.log('Navigate back to rules table via breadcrumbs');
   cy.get(`${RULE_MANAGEMENT_PAGE_BREADCRUMB}:not(${LAST_BREADCRUMB})`).click();
   cy.get(`${RULE_MANAGEMENT_PAGE_BREADCRUMB}${LAST_BREADCRUMB}`).should('exist');
