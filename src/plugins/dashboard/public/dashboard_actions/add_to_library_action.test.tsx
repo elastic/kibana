@@ -21,6 +21,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 
 import { buildMockDashboard } from '../mocks';
 import { pluginServices } from '../services/plugin_services';
@@ -80,6 +81,18 @@ test('Add to library is incompatible with Error Embeddables', async () => {
     embeddable.getRoot() as IContainer
   );
   expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
+});
+
+test('Add to library is incompatible with ES|QL Embeddables', async () => {
+  const action = new AddToLibraryAction();
+  const mockGetFilters = jest.fn(async () => [] as Filter[]);
+  const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
+  const filterableEmbeddable = embeddablePluginMock.mockFilterableEmbeddable(embeddable, {
+    getFilters: () => mockGetFilters(),
+    getQuery: () => mockGetQuery(),
+  });
+  mockGetQuery.mockResolvedValue({ esql: 'from logstash-* | limit 10' } as AggregateQuery);
+  expect(await action.isCompatible({ embeddable: filterableEmbeddable })).toBe(false);
 });
 
 test('Add to library is incompatible on visualize embeddable without visualize save permissions', async () => {
