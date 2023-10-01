@@ -28,6 +28,8 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
+
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 const CLOUD_ID =
