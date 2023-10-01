@@ -97,6 +97,7 @@ export const clearFieldSearch = () => {
 
 export const addFieldToTable = (fieldId: string) => {
   searchForField(fieldId);
+  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).should('exist');
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
   clearFieldSearch();
 };
