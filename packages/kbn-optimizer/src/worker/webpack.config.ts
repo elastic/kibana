@@ -215,7 +215,7 @@ export function getWebpackConfig(
         },
         {
           test: /\.(js|tsx?)$/,
-          exclude: /node_modules/,
+          exclude: /node_modules\/(?!(mermaid\/dist)\/).*/,
           use: {
             loader: 'babel-loader',
             options: {
@@ -235,12 +235,17 @@ export function getWebpackConfig(
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
+        {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
       ],
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.mjs'],
+      mainFields: ['browser', 'module', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
