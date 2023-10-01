@@ -16,7 +16,7 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
-import { getFindingsPageSizeInfo, getFilters } from '../utils/utils';
+import { getFilters } from '../utils/utils';
 import { LimitedResultsBar } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
@@ -123,14 +123,8 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                   type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
                     defaultMessage: 'Resources',
                   }),
-                  total: findingsGroupByResource.data.total,
                   passed: findingsGroupByResource.data.count.passed,
                   failed: findingsGroupByResource.data.count.failed,
-                  ...getFindingsPageSizeInfo({
-                    pageIndex: urlQuery.pageIndex,
-                    pageSize,
-                    currentPageSize: slicedPage.length,
-                  }),
                 }}
               />
               <EuiSpacer size="l" />
@@ -139,7 +133,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                   <CurrentPageOfTotal
                     pageStart={urlQuery.pageIndex * pageSize + 1}
                     pageEnd={urlQuery.pageIndex * pageSize + slicedPage.length}
-                    total={limitedTotalItemCount}
+                    total={findingsGroupByResource.data.total}
                     type={i18n.translate(
                       'xpack.csp.findings.findingsByResource.tableRowTypeLabel',
                       {
