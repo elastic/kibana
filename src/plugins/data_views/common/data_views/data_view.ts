@@ -135,6 +135,17 @@ export class DataView extends AbstractDataView implements DataViewBase {
         ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
         : undefined;
 
+    // if fields aren't included, don't include count
+    const fieldAttrs = cloneDeep(this.fieldAttrs);
+    if (!includeFields) {
+      Object.keys(fieldAttrs).forEach((key) => {
+        delete fieldAttrs[key].count;
+        if (Object.keys(fieldAttrs[key]).length === 0) {
+          delete fieldAttrs[key];
+        }
+      });
+    }
+
     const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
@@ -146,7 +157,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       type: this.type,
       fieldFormats: { ...this.fieldFormatMap },
       runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
-      fieldAttrs: cloneDeep(this.fieldAttrs),
+      fieldAttrs,
       allowNoIndex: this.allowNoIndex,
       name: this.name,
     };
