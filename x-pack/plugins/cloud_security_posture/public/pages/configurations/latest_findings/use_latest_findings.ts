@@ -52,7 +52,6 @@ export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam:
 const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
     return {
-      [id]: direction,
       ...getSortField({ field: id, direction }),
     };
   });
