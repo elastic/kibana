@@ -601,6 +601,9 @@ export interface DocLinks {
   readonly synthetics: {
     readonly featureRoles: string;
   };
+  readonly esql: {
+    readonly statsBy: string;
+  };
   readonly telemetry: {
     readonly settings: string;
   };
