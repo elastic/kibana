@@ -39,8 +39,6 @@ const getDefaultQuery = ({
   sort: { field: 'compliance_score' as keyof CspFinding, direction: 'asc' },
 });
 
-const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
-
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
   <Routes>
     <Route
