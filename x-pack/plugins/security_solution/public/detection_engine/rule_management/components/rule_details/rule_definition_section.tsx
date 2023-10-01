@@ -34,7 +34,7 @@ import type { RequiredFieldArray } from '../../../../../common/api/detection_eng
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../../detections/components/rules/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { TechnicalPreviewBadge } from '../../../../detections/components/rules/description_step/technical_preview_badge';
+import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/components/rules/description_step/alert_suppression_technical_preview_badge';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useLicense } from '../../../../common/hooks/use_license';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
@@ -318,7 +318,7 @@ interface TitleWithTechnicalPreviewBadgeProps {
 const TitleWithTechnicalPreviewBadge = ({ title }: TitleWithTechnicalPreviewBadgeProps) => {
   const license = useLicense();
 
-  return <TechnicalPreviewBadge label={title} license={license} />;
+  return <AlertSuppressionTechnicalPreviewBadge label={title} license={license} />;
 };
 
 interface SuppressAlertsByFieldProps {
