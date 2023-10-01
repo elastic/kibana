@@ -16,6 +16,7 @@ import {
 } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import {
+  EuiButtonEmpty,
   EuiDataGridCellValueElementProps,
   EuiDataGridStyle,
   EuiFlexItem,
@@ -32,6 +33,7 @@ import { FindingsGroupBySelector } from '../../pages/configurations/layout/findi
 import { EmptyState } from '../empty_state';
 import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
+import { i18n } from '@kbn/i18n';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
@@ -264,8 +266,23 @@ const AdditionalControls = ({ total, title }: { total: number; title: string }) 
   const styles = useStyles();
   return (
     <>
-      <EuiFlexItem>
+      <EuiFlexItem grow={0}>
         <span className="cspDataTableTotal">{`${formatNumber(total)} ${title}`}</span>
+      </EuiFlexItem>
+      <EuiFlexItem grow={0}>
+        <EuiButtonEmpty
+          className="cspDataTableFields"
+          iconType="tableOfContents"
+          onClick={() => {
+            console.log('fields');
+          }}
+          size="xs"
+          color="text"
+        >
+          {i18n.translate('xpack.csp.dataTable.fields', {
+            defaultMessage: 'Fields',
+          })}
+        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className={styles.groupBySelector}>
         <FindingsGroupBySelector type="default" />
