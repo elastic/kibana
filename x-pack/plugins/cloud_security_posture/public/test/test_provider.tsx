@@ -27,7 +27,7 @@ import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
   core: CoreStart;
-  deps: CspClientPluginStartDeps;
+  deps: Partial<CspClientPluginStartDeps>;
   params: AppMountParameters;
 }
 
