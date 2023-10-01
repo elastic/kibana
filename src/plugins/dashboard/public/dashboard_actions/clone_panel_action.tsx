@@ -22,10 +22,9 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { type DashboardPanelState } from '../../common';
 import { pluginServices } from '../services/plugin_services';
-import { createPanelState } from '../dashboard_container/component/panel';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
+import { placeClonePanel } from '../dashboard_container/component/panel_placement';
 import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
-import { placePanelBeside } from '../dashboard_container/component/panel/dashboard_panel_placement';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -82,6 +81,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       throw new PanelNotFoundError();
     }
 
+    // Clone panel input
     const clonedPanelState: PanelState<EmbeddableInput> = await (async () => {
       const newTitle = await this.getCloneTitle(embeddable, embeddable.getTitle() || '');
       const id = uuidv4();
@@ -110,18 +110,20 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       'data-test-subj': 'addObjectToContainerSuccess',
     });
 
-    const { otherPanels, newPanel } = createPanelState(
-      clonedPanelState,
-      dashboard.getInput().panels,
-      placePanelBeside,
-      {
-        width: panelToClone.gridData.w,
-        height: panelToClone.gridData.h,
-        currentPanels: dashboard.getInput().panels,
-        placeBesideId: panelToClone.explicitInput.id,
-        scrollToPanel: true,
-      }
-    );
+    const { newPanelPlacement, otherPanels } = placeClonePanel({
+      width: panelToClone.gridData.w,
+      height: panelToClone.gridData.h,
+      currentPanels: dashboard.getInput().panels,
+      placeBesideId: panelToClone.explicitInput.id,
+    });
+
+    const newPanel = {
+      ...clonedPanelState,
+      gridData: {
+        ...newPanelPlacement,
+        i: clonedPanelState.explicitInput.id,
+      },
+    };
 
     dashboard.updateInput({
       panels: {

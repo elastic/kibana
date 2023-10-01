@@ -24,7 +24,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { TransformListRow } from '../../common';
 import { isTransformStats } from '../../../../common/types/transform_stats';
 import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
-import { useIsServerless } from '../../serverless_context';
+import { useEnabledFeatures } from '../../serverless_context';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
@@ -75,7 +75,7 @@ const ErrorMessageCallout: FC<{
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
-  const hideNodeInfo = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const deleteTransforms = useDeleteTransforms();
 
@@ -92,7 +92,7 @@ export const TransformManagement: FC = () => {
     error: transformsErrorMessage,
     data: { transforms: transformsWithoutStats, transformIdsWithoutConfig },
   } = useGetTransforms({
-    enabled: !transformNodesInitialLoading && (transformNodes > 0 || hideNodeInfo),
+    enabled: !transformNodesInitialLoading && transformNodes > 0,
   });
 
   const {
@@ -100,7 +100,7 @@ export const TransformManagement: FC = () => {
     error: transformsStatsErrorMessage,
     data: transformsStats,
   } = useGetTransformsStats({
-    enabled: !transformNodesInitialLoading && (transformNodes > 0 || hideNodeInfo),
+    enabled: !transformNodesInitialLoading && transformNodes > 0,
   });
 
   const transforms: TransformListRow[] = useMemo(() => {
@@ -224,7 +224,7 @@ export const TransformManagement: FC = () => {
           <>
             {unauthorizedTransformsWarning}
 
-            {!hideNodeInfo && transformNodesErrorMessage !== null && (
+            {showNodeInfo && transformNodesErrorMessage !== null && (
               <ErrorMessageCallout
                 text={
                   <FormattedMessage

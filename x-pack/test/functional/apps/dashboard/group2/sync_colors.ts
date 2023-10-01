@@ -68,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
+        palette: { mode: 'legacy', id: 'default' },
       });
 
       await PageObjects.lens.save('vis1', false, true);
@@ -84,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
+        palette: { mode: 'legacy', id: 'default' },
       });
 
       await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });

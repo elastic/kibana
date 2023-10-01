@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo, type FC } from 'react';
 import moment from 'moment-timezone';
+import { css } from '@emotion/react';
 
 import {
   EuiButtonEmpty,
   EuiLoadingSpinner,
-  EuiTabbedContent,
   EuiFlexGroup,
   useEuiTheme,
   EuiCallOut,
   EuiFlexItem,
+  EuiTabbedContent,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -25,8 +25,8 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
-import { useIsServerless } from '../../../../serverless_context';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import { TransformListRow } from '../../../../common';
@@ -86,39 +86,13 @@ const NoStatsFallbackTabContent = ({
 };
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoading }) => {
-  const hideNodeInfo = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const stateItems: Item[] = [];
   stateItems.push({
     title: 'ID',
     description: item.id,
   });
-  if (isTransformListRowWithStats(item)) {
-    stateItems.push({
-      title: 'state',
-      description: item.stats.state,
-    });
-
-    if (!hideNodeInfo && item.stats.node !== undefined) {
-      stateItems.push({
-        title: 'node.name',
-        description: item.stats.node.name,
-      });
-    }
-    if (item.stats.health !== undefined) {
-      stateItems.push({
-        title: 'health',
-        description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
-      });
-    }
-  }
-
-  const state: SectionConfig = {
-    title: 'State',
-    items: stateItems,
-    position: 'right',
-  };
-
   const configItems = useMemo(() => {
     const configs: Item[] = [
       {
@@ -166,14 +140,25 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.config]);
 
-  const general: SectionConfig = {
-    title: 'General',
-    items: configItems,
-    position: 'left',
-  };
-
   const checkpointingItems: Item[] = [];
   if (isTransformListRowWithStats(item)) {
+    stateItems.push({
+      title: 'state',
+      description: item.stats.state,
+    });
+    if (showNodeInfo && item.stats.node !== undefined) {
+      stateItems.push({
+        title: 'node.name',
+        description: item.stats.node.name,
+      });
+    }
+    if (item.stats.health !== undefined) {
+      stateItems.push({
+        title: 'health',
+        description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
+      });
+    }
+
     if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
       checkpointingItems.push({
         title: 'changes_last_detected_at',
@@ -238,6 +223,18 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
     }
   }
 
+  const state: SectionConfig = {
+    title: 'State',
+    items: stateItems,
+    position: 'right',
+  };
+
+  const general: SectionConfig = {
+    title: 'General',
+    items: configItems,
+    position: 'left',
+  };
+
   const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
     return {
       title: (
@@ -274,7 +271,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: item.stats
+    items: isTransformListRowWithStats(item)
       ? Object.entries(item.stats.stats).map((s) => {
           return { title: s[0].toString(), description: getItemDescription(s[1]) };
         })
@@ -315,7 +312,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
           defaultMessage: 'Stats',
         }
       ),
-      content: item.stats ? (
+      content: isTransformListRowWithStats(item) ? (
         <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
       ) : (
         <NoStatsFallbackTabContent transformsStatsLoading={transformsStatsLoading} />

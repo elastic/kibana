@@ -6,11 +6,11 @@
  */
 
 import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { MlFeatures } from '../../common/constants/app';
 import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
 } from '../../common/constants/cases';
-import type { MlFeatures } from '../types';
 
 export function registerCasesPersistableState(cases: CasesSetup, enabledFeatures: MlFeatures) {
   if (enabledFeatures.ad === true) {

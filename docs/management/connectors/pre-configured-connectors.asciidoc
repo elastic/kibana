@@ -120,6 +120,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-slack-configuration>>
 * <<preconfigured-swimlane-configuration>>
 * <<preconfigured-torq-configuration>>
+* <<preconfigured-tines-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
@@ -281,15 +282,15 @@ secrets:
 
 [float]
 [[preconfigured-gen-ai-configuration]]
-==== Generative AI connectors
+==== OpenAI connectors
 
-The following example creates a <<gen-ai-action-type,generative AI connector>>:
+The following example creates a <<openai-action-type,OpenAI connector>>:
 
 [source,text]
 --
 xpack.actions.preconfigured:
-  my-gen-ai:
-    name: preconfigured-gen-ai-connector-type
+  my-open-ai:
+    name: preconfigured-openai-connector-type
     actionTypeId: .gen-ai
     config:
       apiUrl: https://api.openai.com/v1/chat/completions <1>
@@ -529,6 +530,28 @@ xpack.actions.preconfigured:
 <2> The {swimlane} application identifier.
 <3> Field mappings for properties such as the alert identifer, severity, and rule name.
 <4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+[float]
+[[preconfigured-tines-configuration]]
+==== Tines connectors
+
+The following example creates a <<tines-action-type,Tines connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+my-tines:
+    name: preconfigured-tines-connector-type
+    actionTypeId: .tines
+    config:
+      url: https://some-tenant-2345.tines.com <1>
+    secrets:
+      email: some.address@test.com <2>
+      token: ausergeneratedapitoken <3>
+--
+<1> The Tines tenant URL.
+<2> The email used to sign in to Tines.
+<3> The Tines API token.
 
 [float]
 [[preconfigured-torq-configuration]]
