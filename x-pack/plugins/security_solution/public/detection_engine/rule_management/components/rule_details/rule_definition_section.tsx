@@ -423,9 +423,7 @@ const prepareDefinitionSectionListItems = (
 
   if ('filters' in rule && 'data_view_id' in rule && rule.filters?.length) {
     definitionSectionListItems.push({
-      title: savedQuery
-        ? descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL
-        : descriptionStepI18n.FILTERS_LABEL,
+      title: descriptionStepI18n.FILTERS_LABEL,
       description: (
         <Filters
           filters={rule.filters as Filter[]}
@@ -537,9 +535,7 @@ const prepareDefinitionSectionListItems = (
 
   if ('threat_query' in rule && rule.threat_query) {
     definitionSectionListItems.push({
-      title: savedQuery
-        ? descriptionStepI18n.SAVED_QUERY_LABEL
-        : descriptionStepI18n.THREAT_QUERY_LABEL,
+      title: descriptionStepI18n.THREAT_QUERY_LABEL,
       description: <Query query={rule.threat_query} />,
     });
   }
