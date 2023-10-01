@@ -55,13 +55,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
           refresh: true,
         }),
       ]),
-    add: async <
-      T extends {
-        '@timestamp'?: string;
-      }
-    >(
-      findingsMock: T[]
-    ) => {
+    add: async (findingsMock: Array<Record<string, unknown>>) => {
       await Promise.all([
         ...findingsMock.map((finding) =>
           es.index({
@@ -131,15 +125,16 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getHeaders() {
       const element = await this.getElement();
-      return await element.findAllByCssSelector('[data-test-subj="dataGridHeader"] div');
+      return await element.findAllByCssSelector('.euiDataGridHeader');
     },
 
     async getColumnIndex(columnName: string) {
-      const headers = await this.getHeaders();
-      const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
-      const columnIndex = texts.findIndex((i) => i === columnName);
+      const element = await this.getElement();
+      const columnIndex = await (
+        await element.findByCssSelector(`[data-gridcell-column-id="${columnName}"]`)
+      ).getAttribute('data-gridcell-column-index');
       expect(columnIndex).to.be.greaterThan(-1);
-      return columnIndex + 1;
+      return columnIndex;
     },
 
     async getColumnHeaderCell(columnName: string) {
@@ -151,7 +146,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getRowsCount() {
       const element = await this.getElement();
-      const rows = await element.findAllByCssSelector('tbody tr');
+      const rows = await element.findAllByCssSelector('.euiDataGridRow');
       return rows.length;
     },
 
@@ -165,13 +160,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const values = await this.getColumnValues(columnName);
       const rowIndex = values.indexOf(value);
       expect(rowIndex).to.be.greaterThan(-1);
-      return rowIndex + 1;
+      return rowIndex;
     },
 
-    async getFilterElementButton(rowIndex: number, columnIndex: number, negated = false) {
+    async getFilterElementButton(rowIndex: number, columnIndex: number | string, negated = false) {
       const tableElement = await this.getElement();
       const button = negated ? 'filterOutButton' : 'filterForButton';
-      const selector = `[data-grid-row-index="${rowIndex}"] [data-gridcell-column-index="${columnIndex}"] button[data-test-subj="${button}"]`;
+      const selector = `[data-gridcell-row-index="${rowIndex}"][data-gridcell-column-index="${columnIndex}"] button[data-test-subj="${button}"]`;
       return tableElement.findByCssSelector(selector);
     },
 
@@ -184,8 +179,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getColumnValues(columnName: string) {
       const tableElement = await this.getElement();
-      const columnIndex = await this.getColumnIndex(columnName);
-      const selector = `[data-gridcell-column-index="${columnIndex}]`;
+      const selector = `.euiDataGridRowCell[data-gridcell-column-id="${columnName}"]`;
       const columnCells = await tableElement.findAllByCssSelector(selector);
 
       return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
@@ -197,31 +191,33 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     async toggleColumnSort(columnName: string, direction: 'asc' | 'desc') {
-      const element = await this.getColumnHeaderCell(columnName);
-      const currentSort = await element.getAttribute('aria-sort');
-      if (currentSort === 'none') {
-        // a click is needed to focus on Eui column header
-        await element.click();
+      const currentSorting = await testSubjects.find('dataGridColumnSortingButton');
+      const currentSortingText = await currentSorting.getVisibleText();
+      await currentSorting.click();
 
-        // default is ascending
-        if (direction === 'desc') {
-          const nonStaleElement = await this.getColumnHeaderCell(columnName);
-          await nonStaleElement.click();
-        }
+      if (currentSortingText !== 'Sort fields') {
+        const clearSortButton = await testSubjects.find('dataGridColumnSortingClearButton');
+        await clearSortButton.click();
       }
-      if (
-        (currentSort === 'ascending' && direction === 'desc') ||
-        (currentSort === 'descending' && direction === 'asc')
-      ) {
-        // Without getting the element again, the click throws an error (stale element reference)
-        const nonStaleElement = await this.getColumnHeaderCell(columnName);
-        await nonStaleElement.click();
-      }
+
+      const selectSortFieldButton = await testSubjects.find('dataGridColumnSortingSelectionButton');
+      await selectSortFieldButton.click();
+
+      const sortField = await testSubjects.find(
+        `dataGridColumnSortingPopoverColumnSelection-${columnName}`
+      );
+      await sortField.click();
+
+      const sortDirection = await testSubjects.find(
+        `euiDataGridColumnSorting-sortColumn-${columnName}-${direction}`
+      );
+      await sortDirection.click();
+      await currentSorting.click();
     },
 
     async openFlyoutAt(rowIndex: number) {
       const table = await this.getElement();
-      const flyoutButton = await table.findAllByTestSubject('findings_table_expand_column');
+      const flyoutButton = await table.findAllByTestSubject('docTableExpandToggleColumn');
       await flyoutButton[rowIndex].click();
     },
   });
