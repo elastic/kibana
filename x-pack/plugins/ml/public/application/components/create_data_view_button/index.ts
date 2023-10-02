@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const ReadTagsResponse = t.array(t.string);
-export type ReadTagsResponse = t.TypeOf<typeof ReadTagsResponse>;
+export { CreateDataViewButton } from './create_data_view_button';
