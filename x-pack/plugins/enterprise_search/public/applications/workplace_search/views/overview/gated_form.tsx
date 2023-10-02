@@ -668,11 +668,6 @@ export const WorkplaceSearchGate: React.FC = () => {
                   : participateInUXLabsChoice.no.value
               )
             }
-            // value={
-            //   participateInUXLabs
-            //     ? participateInUXLabsChoice.yes.choice
-            //     : participateInUXLabsChoice.no.choice
-            // }
             value={
               participateInUXLabs != null
                 ? participateInUXLabs

@@ -222,7 +222,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
 
     registerConfigDataRoute(dependencies);
-
     if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
     if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
