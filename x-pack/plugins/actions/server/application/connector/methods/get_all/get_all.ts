@@ -79,7 +79,7 @@ export async function getAll({
   });
 }
 
-export async function getAllSystemActions({
+export async function getAllSystemConnectors({
   context,
 }: {
   context: GetAllParams['context'];
@@ -97,23 +97,25 @@ export async function getAllSystemActions({
     throw error;
   }
 
-  const systemActions = context.inMemoryConnectors.filter((connector) => connector.isSystemAction);
+  const systemConnectors = context.inMemoryConnectors.filter(
+    (connector) => connector.isSystemAction
+  );
 
-  const transformedSystemActions = systemActions
-    .map((systemAction) => ({
-      id: systemAction.id,
-      actionTypeId: systemAction.actionTypeId,
-      name: systemAction.name,
-      isPreconfigured: systemAction.isPreconfigured,
-      isDeprecated: isConnectorDeprecated(systemAction),
-      isSystemAction: systemAction.isSystemAction,
+  const transformedSystemConnectors = systemConnectors
+    .map((systemConnector) => ({
+      id: systemConnector.id,
+      actionTypeId: systemConnector.actionTypeId,
+      name: systemConnector.name,
+      isPreconfigured: systemConnector.isPreconfigured,
+      isDeprecated: isConnectorDeprecated(systemConnector),
+      isSystemAction: systemConnector.isSystemAction,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return await injectExtraFindData({
     kibanaIndices: context.kibanaIndices,
     scopedClusterClient: context.scopedClusterClient,
-    connectors: transformedSystemActions,
+    connectors: transformedSystemConnectors,
   });
 }
 

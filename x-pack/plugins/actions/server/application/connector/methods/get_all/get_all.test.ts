@@ -554,7 +554,7 @@ describe('getAll()', () => {
     });
   });
 
-  describe('getAllSystemActions()', () => {
+  describe('getAllSystemConnectors()', () => {
     describe('authorization', () => {
       function getAllOperation(): ReturnType<ActionsClient['getAll']> {
         scopedClusterClient.asInternalUser.search.mockResponse(
@@ -594,7 +594,7 @@ describe('getAll()', () => {
           getEventLogClient,
         });
 
-        return actionsClient.getAllSystemActions();
+        return actionsClient.getAllSystemConnectors();
       }
 
       test('ensures user is authorised to get the type of action', async () => {
@@ -619,7 +619,7 @@ describe('getAll()', () => {
       test('logs audit event when not authorised to search connectors', async () => {
         authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-        await expect(actionsClient.getAllSystemActions()).rejects.toThrow();
+        await expect(actionsClient.getAllSystemConnectors()).rejects.toThrow();
 
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -685,7 +685,7 @@ describe('getAll()', () => {
         getEventLogClient,
       });
 
-      const result = await actionsClient.getAllSystemActions();
+      const result = await actionsClient.getAllSystemConnectors();
 
       expect(result).toEqual([
         {

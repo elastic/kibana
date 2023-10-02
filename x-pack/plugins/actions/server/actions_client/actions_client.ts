@@ -90,7 +90,7 @@ import {
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
-import { getAllSystemActions } from '../application/connector/methods/get_all/get_all';
+import { getAllSystemConnectors } from '../application/connector/methods/get_all/get_all';
 
 interface ActionUpdate {
   name: string;
@@ -485,8 +485,8 @@ export class ActionsClient {
   /**
    * Get all system connectors
    */
-  public async getAllSystemActions(): Promise<FindConnectorResult[]> {
-    return getAllSystemActions({ context: this.context });
+  public async getAllSystemConnectors(): Promise<FindConnectorResult[]> {
+    return getAllSystemConnectors({ context: this.context });
   }
 
   /**
