@@ -1,50 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<RolesGridPage /> renders permission denied if required 1`] = `
-<div
-  class="euiPanel euiPanel--danger euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-danger"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-danger"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+    class="emotion-euiPageSection__content-l-center"
   >
     <div
-      class="euiEmptyPrompt__main"
+      class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
     >
       <div
-        class="euiEmptyPrompt__icon"
-      >
-        <span
-          color="subdued"
-          data-euiicon-type="securityApp"
-        />
-      </div>
-      <div
-        class="euiEmptyPrompt__content"
+        class="euiEmptyPrompt__main"
       >
         <div
-          class="euiEmptyPrompt__contentInner"
+          class="euiEmptyPrompt__icon"
         >
-          <h2
-            class="euiTitle emotion-euiTitle-m"
-          >
-            You need permission to manage roles
-          </h2>
-          <div
-            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          <span
+            color="subdued"
+            data-euiicon-type="securityApp"
           />
+        </div>
+        <div
+          class="euiEmptyPrompt__content"
+        >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiEmptyPrompt__contentInner"
           >
-            <p
-              data-test-subj="permissionDeniedMessage"
+            <h2
+              class="euiTitle emotion-euiTitle-m"
             >
-              Contact your system administrator.
-            </p>
+              You need permission to manage roles
+            </h2>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p
+                data-test-subj="permissionDeniedMessage"
+              >
+                Contact your system administrator.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</section>
 `;

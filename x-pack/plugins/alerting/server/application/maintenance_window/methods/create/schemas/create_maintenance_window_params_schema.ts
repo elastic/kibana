@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { maintenanceWindowCategoryIdsSchema } from '../../../schemas';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
 
 export const createMaintenanceWindowParamsSchema = schema.object({
@@ -13,5 +14,6 @@ export const createMaintenanceWindowParamsSchema = schema.object({
     title: schema.string(),
     duration: schema.number(),
     rRule: rRuleRequestSchema,
+    categoryIds: maintenanceWindowCategoryIdsSchema,
   }),
 });
