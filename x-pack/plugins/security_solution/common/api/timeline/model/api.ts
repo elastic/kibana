@@ -19,7 +19,7 @@ import {
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
 } from '../../detection_engine/model/rule_schema';
-import { errorSchema, success, success_count as successCount } from '../../detection_engine';
+import { ErrorSchema, success, success_count as successCount } from '../../detection_engine';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -499,7 +499,7 @@ export const importTimelineResultSchema = runtimeTypes.exact(
     success_count: successCount,
     timelines_installed: PositiveInteger,
     timelines_updated: PositiveInteger,
-    errors: runtimeTypes.array(errorSchema),
+    errors: runtimeTypes.array(ErrorSchema),
   })
 );
 

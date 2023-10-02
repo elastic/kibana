@@ -25,7 +25,7 @@ import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import type { PercentileIndexPatternColumn } from '../percentile';
 
 import type { FormBasedLayer } from '../../../types';
-import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
+import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import { isColumnOfType } from '../helpers';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
@@ -326,4 +326,9 @@ export function getFieldsByValidationState(
     validFields,
     invalidFields,
   };
+}
+
+export function getOtherBucketSwitchDefault(column: TermsIndexPatternColumn, size: number) {
+  const otherBucketValue = column.params.otherBucket;
+  return (otherBucketValue || otherBucketValue === undefined) && size < MAX_TERMS_OTHER_ENABLED;
 }
