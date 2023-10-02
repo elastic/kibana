@@ -64,6 +64,7 @@ Morbi dapibus sapien lacus, vitae suscipit ex egestas pharetra. In velit eros, f
 
 Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursus dolor. Pellentesque pellentesque lorem eu odio auctor convallis. Sed sodales felis at velit tempus tincidunt. Nulla sed ante cursus nibh mollis blandit. In mattis imperdiet tellus. Vestibulum nisl turpis, efficitur quis sollicitudin id, mollis in arcu. Vestibulum pulvinar tincidunt magna, vitae facilisis massa congue quis. Cras commodo efficitur tellus, et commodo risus rutrum at.`}
           loading={false}
+          onActionClick={async () => {}}
         />
       }
       controls={

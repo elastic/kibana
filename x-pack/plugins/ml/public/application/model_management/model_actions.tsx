@@ -540,6 +540,40 @@ export function useModelActions({
           return canTestTrainedModels && isTestable(item, true) && !isLoading;
         },
       },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        description: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
+        icon: 'visTagCloud',
+        type: 'icon',
+        isPrimary: true,
+        available: (item) => {
+          return (
+            item?.metadata?.analytics_config !== undefined ||
+            (Array.isArray(item.indices) && item.indices.length > 0)
+          );
+        },
+        onClick: async (item) => {
+          let indexPatterns: string[] | undefined = item?.indices
+            ?.map((o) => Object.keys(o))
+            .flat();
+
+          if (item?.metadata?.analytics_config?.dest?.index !== undefined) {
+            const destIndex = item.metadata.analytics_config.dest?.index;
+            indexPatterns = [destIndex];
+          }
+          const path = await urlLocator.getUrl({
+            page: ML_PAGES.DATA_DRIFT_CUSTOM,
+            pageState: indexPatterns ? { comparison: indexPatterns.join(',') } : {},
+          });
+
+          await navigateToPath(path, false);
+        },
+      },
     ],
     [
       urlLocator,

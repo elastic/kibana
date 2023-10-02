@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { INSIGHTS_ENTITIES_NO_DATA_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
+import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
 import { getField } from '../../shared/utils';
@@ -52,7 +52,15 @@ export const EntitiesOverview: React.FC = () => {
               defaultMessage="Entities"
             />
           ),
-          callback: goToEntitiesTab,
+          link: {
+            callback: goToEntitiesTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+                defaultMessage="Show all entities"
+              />
+            ),
+          },
           iconType: 'arrowStart',
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
@@ -72,12 +80,10 @@ export const EntitiesOverview: React.FC = () => {
             )}
           </EuiFlexGroup>
         ) : (
-          <p data-test-subj={INSIGHTS_ENTITIES_NO_DATA_TEST_ID}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.entities.noDataDescription"
-              defaultMessage="Host and user information are unavailable for this alert."
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.entities.noDataDescription"
+            defaultMessage="Host and user information are unavailable for this alert."
+          />
         )}
       </ExpandablePanel>
     </>

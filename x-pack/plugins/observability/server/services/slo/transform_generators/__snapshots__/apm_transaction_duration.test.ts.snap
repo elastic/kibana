@@ -24,7 +24,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -130,7 +130,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -163,7 +163,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -277,7 +277,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -391,7 +391,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -505,7 +505,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -739,6 +739,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -765,7 +766,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -1013,6 +1014,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -1039,7 +1041,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },

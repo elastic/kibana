@@ -224,7 +224,7 @@ export const getGaugeVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette,
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
         ticksPosition: 'auto',
         labelMajorMode: 'auto',
       }

@@ -514,13 +514,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
       return {
         id: 'syntheticsMonitorConfigIsAlertEnabled',
-        label: field?.value
-          ? i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-              defaultMessage: 'Disable status alerts on this monitor',
-            })
-          : i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
-              defaultMessage: 'Enable status alerts on this monitor',
-            }),
+        label: i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
+          defaultMessage: 'Enable status alerts on this monitor',
+        }),
         checked: field?.value || false,
         onChange: async (event) => {
           setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
@@ -541,13 +537,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
       return {
         id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
-        label: field?.value
-          ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
-              defaultMessage: 'Disable TLS alerts on this monitor.',
-            })
-          : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
-              defaultMessage: 'Enable TLS alerts on this monitor.',
-            }),
+        label: i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
+          defaultMessage: 'Enable TLS alerts on this monitor.',
+        }),
         checked: field?.value || false,
         onChange: async (event) => {
           setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);

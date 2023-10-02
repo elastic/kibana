@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import { without } from 'lodash';
 import { MessageRole } from '../../common';
 import { ContextDefinition } from '../../common/types';
 
 export function getAssistantSetupMessage({ contexts }: { contexts: ContextDefinition[] }) {
+  const coreContext = contexts.find((context) => context.name === 'core')!;
+
+  const otherContexts = without(contexts.concat(), coreContext);
   return {
     '@timestamp': new Date().toISOString(),
     message: {
       role: MessageRole.System as const,
-      content: contexts.map((context) => context.description).join('\n'),
+      content: [coreContext, ...otherContexts].map((context) => context.description).join('\n'),
     },
   };
 }

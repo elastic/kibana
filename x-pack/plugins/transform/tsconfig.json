@@ -40,7 +40,6 @@
     "@kbn/std",
     "@kbn/es-query",
     "@kbn/ml-agg-utils",
-    "@kbn/utility-types",
     "@kbn/ml-string-hash",
     "@kbn/ui-theme",
     "@kbn/field-types",

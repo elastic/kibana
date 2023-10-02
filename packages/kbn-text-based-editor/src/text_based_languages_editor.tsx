@@ -56,6 +56,7 @@ import {
   MonacoError,
   getWrappedInPipesCode,
   parseErrors,
+  getIndicesForAutocomplete,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -130,7 +131,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   const [editorHeight, setEditorHeight] = useState(
@@ -157,6 +158,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     useState<LanguageDocumentationSections>();
 
   const policiesRef = useRef<SerializedEnrichPolicy[]>([]);
+
+  // Registers a command to redirect users to the index management page
+  // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
+  monaco.editor.registerCommand('esql.policies.create', (...args) => {
+    application?.navigateToApp('management', {
+      path: 'data/index_management/enrich_policies/create',
+      openInNewTab: true,
+    });
+  });
+
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
     isCompactFocused,
@@ -398,12 +409,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [language, documentationSections]);
 
   const getSources: ESQLCustomAutocompleteCallbacks['getSources'] = useCallback(async () => {
-    const indices = await dataViews.getIndices({
-      showAllIndices: false,
-      pattern: '*',
-      isRollupIndex: () => false,
-    });
-    return indices.map((i) => i.name);
+    return await getIndicesForAutocomplete(dataViews);
   }, [dataViews]);
 
   const getFields: ESQLCustomAutocompleteCallbacks['getFields'] = useCallback(
@@ -492,7 +498,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     scrollBeyondLastLine: false,
     quickSuggestions: true,
     minimap: { enabled: false },
-    wordWrap: isWordWrapped ? 'on' : 'off',
+    wordWrap: 'on',
     lineNumbers: showLineNumbers ? 'on' : 'off',
     theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
     lineDecorationsWidth: 12,

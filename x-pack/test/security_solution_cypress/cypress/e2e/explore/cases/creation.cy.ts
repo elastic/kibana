@@ -49,11 +49,13 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { loginWithUser, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { loginWithUser } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
-describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
@@ -71,7 +73,7 @@ describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =
 
   it('Creates a new case with timeline and opens the timeline', function () {
     loginWithUser({ username: 'elastic', password: 'changeme' });
-    visitWithoutDateRange(CASES_URL);
+    visit(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
     attachTimeline(this.mycase);
@@ -121,7 +123,7 @@ describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =
     cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
 
-    visit(OVERVIEW_URL);
+    visitWithTimeRange(OVERVIEW_URL);
     cy.get(OVERVIEW_CASE_NAME).should('have.text', this.mycase.name);
     cy.get(OVERVIEW_CASE_DESCRIPTION).should(
       'have.text',

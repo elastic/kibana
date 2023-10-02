@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiCallOut, EuiText, EuiPanelProps } from '@elastic/eui';
+import { EuiSpacer, EuiPanelProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -73,21 +73,6 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
       />
       <EuiSpacer />
       <Link language={language} assetBasePath={assetBasePath} />
-      <EuiSpacer />
-      <EuiCallOut
-        iconType="iInCircle"
-        title={i18n.translate('searchApiPanels.welcomeBanner.apiCallOut.title', {
-          defaultMessage: 'Call the API with Console',
-        })}
-        color="primary"
-      >
-        <EuiText size="s">
-          {i18n.translate('searchApiPanels.welcomeBanner.apiCallout.content', {
-            defaultMessage:
-              'Console enables you to call Elasticsearch and Kibana REST APIs directly, without needing to install a language client.',
-          })}
-        </EuiText>
-      </EuiCallOut>
     </>
   );
   return (

@@ -10,10 +10,16 @@ const env = process.env;
 
 /**
  * `kibana-dev` service account token for connecting to ESS
- * See packages/kbn-es/src/ess_resources/README.md
+ * See packages/kbn-es/src/serverless_resources/README.md
  */
 export const kibanaDevServiceAccount = {
   token:
     env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
     'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+};
+
+export const fleetServerDevServiceAccount = {
+  token:
+    env.TEST_FLEET_SERVER_SERVICE_ACCOUNT_TOKEN ||
+    'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ',
 };

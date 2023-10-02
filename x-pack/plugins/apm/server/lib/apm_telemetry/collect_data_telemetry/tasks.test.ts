@@ -12,6 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/es_fields/apm';
+import { IndicesStatsResponse } from '../telemetry_client';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -376,74 +377,223 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
     it('returns a map of index stats', async () => {
-      const indicesStats = jest.fn().mockResolvedValue({
-        _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
-        _shards: { total: 1 },
-      });
-
-      const statsResponse = {
-        shards: {
-          total: 1,
+      const indicesStatsResponse: IndicesStatsResponse = {
+        _shards: {
+          total: 2,
         },
-        all: {
+        _all: {
           total: {
+            store: {
+              size_in_bytes: 100,
+            },
+            docs: {
+              count: 2,
+            },
+          },
+          primaries: {
             docs: {
               count: 1,
             },
             store: {
-              size_in_bytes: 1,
+              size_in_bytes: 50,
+              total_data_set_size_in_bytes: 50,
             },
           },
         },
       };
 
+      const searchResponse = {
+        aggregations: {
+          metricsets: {
+            buckets: [
+              {
+                key: 'service_transaction',
+                doc_count: 3240,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'transaction',
+                doc_count: 3240,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'service_destination',
+                doc_count: 1620,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'service_summary',
+                doc_count: 30,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '1m',
+                      doc_count: 12,
+                      metrics_value_count: {
+                        value: 12,
+                      },
+                    },
+                    {
+                      key: '10m',
+                      doc_count: 9,
+                      metrics_value_count: {
+                        value: 9,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 9,
+                      metrics_value_count: {
+                        value: 9,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'span_breakdown',
+                doc_count: 12,
+                rollup_interval: {
+                  buckets: [],
+                },
+              },
+              {
+                key: 'app',
+                doc_count: 6,
+                rollup_interval: {
+                  buckets: [],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
+      const search = jest.fn().mockResolvedValue(searchResponse);
+
       expect(
         await task?.executor({
           indices,
-          telemetryClient: { indicesStats },
-        } as any)
-      ).toEqual({
-        indices: {
-          ...statsResponse,
-          metric: statsResponse,
-          traces: statsResponse,
-        },
-      });
-    });
-
-    describe('with no results', () => {
-      it('returns zero values', async () => {
-        const indicesStats = jest.fn().mockResolvedValue({});
-
-        const statsResponse = {
-          shards: {
-            total: 0,
+          telemetryClient: {
+            indicesStats,
+            search,
           },
-          all: {
-            total: {
-              docs: {
-                count: 0,
-              },
-              store: {
-                size_in_bytes: 0,
-              },
+        } as any)
+      ).toMatchSnapshot();
+    });
+    it('with no results', async () => {
+      const indicesStatsResponse: IndicesStatsResponse = {
+        _shards: {
+          total: 0,
+        },
+        _all: {
+          total: {
+            store: {
+              size_in_bytes: 0,
+            },
+            docs: {
+              count: 0,
             },
           },
-        };
-
-        expect(
-          await task?.executor({
-            indices,
-            telemetryClient: { indicesStats },
-          } as any)
-        ).toEqual({
-          indices: {
-            ...statsResponse,
-            metric: statsResponse,
-            traces: statsResponse,
+          primaries: {
+            docs: {
+              count: 0,
+            },
+            store: {
+              size_in_bytes: 0,
+              total_data_set_size_in_bytes: 0,
+            },
           },
-        });
-      });
+        },
+      };
+
+      const searchResponse = {};
+
+      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
+      const search = jest.fn().mockResolvedValue(searchResponse);
+
+      expect(
+        await task?.executor({
+          indices,
+          telemetryClient: {
+            indicesStats,
+            search,
+          },
+        } as any)
+      ).toMatchSnapshot();
     });
   });
 

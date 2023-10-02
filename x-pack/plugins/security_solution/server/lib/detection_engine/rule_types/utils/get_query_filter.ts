@@ -20,18 +20,27 @@ export const getQueryFilter = ({
   filters,
   index,
   exceptionFilter,
-  fields = [],
-}: {
-  query: RuleQuery;
-  language: Language;
-  filters: unknown;
-  index: IndexPatternArray;
-  exceptionFilter: Filter | undefined;
-  fields?: DataViewFieldBase[];
-}): ESBoolQuery => {
+  fields,
+}:
+  | {
+      query: RuleQuery;
+      language: Language;
+      filters: unknown;
+      index: IndexPatternArray;
+      exceptionFilter: Filter | undefined;
+      fields?: DataViewFieldBase[];
+    }
+  | {
+      index: undefined;
+      query: RuleQuery;
+      language: 'esql';
+      filters: unknown;
+      exceptionFilter: Filter | undefined;
+      fields?: DataViewFieldBase[];
+    }): ESBoolQuery => {
   const indexPattern: DataViewBase = {
-    fields,
-    title: index.join(),
+    fields: fields ?? [],
+    title: (index ?? []).join(),
   };
 
   const config: EsQueryConfig = {
