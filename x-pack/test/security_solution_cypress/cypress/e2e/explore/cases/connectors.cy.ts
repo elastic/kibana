@@ -10,7 +10,7 @@ import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../.
 import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../../tasks/all_cases';
-import { cleanKibana, deleteCases, deleteConnectors } from '../../../tasks/common';
+import { cleanKibana, deleteAllCasesItems, deleteConnectors } from '../../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
@@ -54,7 +54,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    deleteCases();
+    deleteAllCasesItems();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,
       body: getServiceNowITSMHealthResponse(),
