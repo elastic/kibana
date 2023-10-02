@@ -29,6 +29,12 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'chrome' && browser.isHeadless) {
+          launchOptions.args.push('--headless');
+        }
+        return launchOptions;
+      });
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
