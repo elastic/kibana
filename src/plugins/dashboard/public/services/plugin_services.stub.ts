@@ -19,7 +19,7 @@ import { applicationServiceFactory } from './application/application.stub';
 import { chromeServiceFactory } from './chrome/chrome.stub';
 import { coreContextServiceFactory } from './core_context/core_context.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
-import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage.stub';
+import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup.stub';
 import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links.stub';
@@ -51,7 +51,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
   coreContext: new PluginServiceProvider(coreContextServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
-  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory),
+  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),

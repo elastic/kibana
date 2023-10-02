@@ -9,7 +9,7 @@ import LaunchDarkly, {
   type LDClient,
   type LDFlagSet,
   type LDLogLevel,
-  type LDUser,
+  type LDSingleKindContext,
 } from 'launchdarkly-node-server-sdk';
 import type { Logger } from '@kbn/core/server';
 
@@ -41,7 +41,7 @@ export interface LaunchDarklyGetAllFlags {
 
 export class LaunchDarklyClient {
   private readonly launchDarklyClient: LDClient;
-  private launchDarklyUser?: LDUser;
+  private launchDarklyUser?: LDSingleKindContext;
 
   constructor(ldConfig: LaunchDarklyClientConfig, private readonly logger: Logger) {
     this.launchDarklyClient = LaunchDarkly.init(ldConfig.sdk_key, {
@@ -59,19 +59,11 @@ export class LaunchDarklyClient {
   }
 
   public updateUserMetadata(userMetadata: LaunchDarklyUserMetadata) {
-    const { userId, name, firstName, lastName, email, avatar, ip, country, ...custom } =
-      userMetadata;
+    const { userId, ...userMetadataWithoutUserId } = userMetadata;
     this.launchDarklyUser = {
+      ...userMetadataWithoutUserId,
+      kind: 'user',
       key: userId,
-      name,
-      firstName,
-      lastName,
-      email,
-      avatar,
-      ip,
-      country,
-      // This casting is needed because LDUser does not allow `Record<string, undefined>`
-      custom: custom as Record<string, string | boolean | number>,
     };
   }
 
