@@ -72,7 +72,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       {
         range: {
           '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}`,
+            gte: `now-${slo.timeWindow.duration.format()}/d`,
           },
         },
       },

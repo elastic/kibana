@@ -6,12 +6,16 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
 import { assetDetailsDashboards } from '../../../../../common/visualizations';
-import { MetricsSectionTitle, NginxMetricsSectionTitle } from '../../../components/section_titles';
+import {
+  MetricsSectionTitle,
+  NginxMetricsSectionTitle,
+  KubernetesMetricsSectionTitle,
+} from '../../../components/section_titles';
 import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
 
@@ -22,26 +26,38 @@ interface Props {
   logsDataView?: DataView;
 }
 
-const { host, nginx } = assetDetailsDashboards;
+const { host, nginx, kubernetes } = assetDetailsDashboards;
 
 export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="s">
       <Section title={MetricsSectionTitle}>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
           charts={host.hostMetricChartsFullPage}
+          filterFieldName={host.keyField}
           metricsDataView={metricsDataView}
           logsDataView={logsDataView}
           data-test-subj="infraAssetDetailsMetricsChart"
         />
       </Section>
-      <EuiSpacer size="s" />
-      <Section dependsOn={['nginx.stubstatus', 'nginx.access']} title={NginxMetricsSectionTitle}>
+      <Section dependsOn={kubernetes.dependsOn} title={KubernetesMetricsSectionTitle}>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
+          filterFieldName={kubernetes.keyField}
+          charts={kubernetes.kubernetesCharts}
+          metricsDataView={metricsDataView}
+          logsDataView={logsDataView}
+          data-test-subj="infraAssetDetailsKubernetesMetricsChart"
+        />
+      </Section>
+      <Section dependsOn={nginx.dependsOn} title={NginxMetricsSectionTitle}>
+        <MetricsGrid
+          assetName={assetName}
+          dateRange={dateRange}
+          filterFieldName={nginx.keyField}
           charts={[
             ...nginx.nginxStubstatusCharts.map((chart) => ({
               ...chart,
@@ -57,7 +73,7 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
           data-test-subj="infraAssetDetailsNginxMetricsChart"
         />
       </Section>
-    </>
+    </EuiFlexGroup>
   );
 };
 
@@ -71,6 +87,7 @@ export const MetricsSectionCompact = ({
     <MetricsGrid
       assetName={assetName}
       dateRange={dateRange}
+      filterFieldName={host.keyField}
       charts={host.hostMetricFlyoutCharts}
       metricsDataView={metricsDataView}
       logsDataView={logsDataView}

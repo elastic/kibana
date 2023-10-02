@@ -10,6 +10,13 @@ import { getInputStory, getStory } from './common';
 
 const argTypes = {
   value: {
+    name: 'Default value',
+    control: {
+      type: 'select',
+      options: ['option1', 'option2', 'option3'],
+    },
+  },
+  userValue: {
     name: 'Current saved value',
     control: {
       type: 'select',
@@ -25,3 +32,9 @@ const settingFields = {
 
 export default getStory('Select Input', 'An input with multiple values.');
 export const SelectInput = getInputStory('select' as const, { argTypes, settingFields });
+
+SelectInput.args = {
+  isSavingEnabled: true,
+  value: 'option1',
+  userValue: 'option2',
+};

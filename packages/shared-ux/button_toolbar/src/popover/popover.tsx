@@ -35,6 +35,7 @@ export const ToolbarPopover = ({
   iconType,
   size = 'm',
   children,
+  isDisabled,
   ...popover
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +47,7 @@ export const ToolbarPopover = ({
     <ToolbarButton
       onClick={onButtonClick}
       size={size}
+      isDisabled={isDisabled}
       {...{ type, label, iconType: iconType || 'arrowDown', iconSide: iconType ? 'left' : 'right' }}
     />
   );

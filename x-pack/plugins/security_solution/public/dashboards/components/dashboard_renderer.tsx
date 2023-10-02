@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
@@ -13,9 +13,14 @@ import type { Filter, Query } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
+import { useKibana } from '../../common/lib/kibana';
+import { APP_UI_ID } from '../../../common';
+import { useSecurityTags } from '../context/dashboard_context';
+import { DASHBOARDS_PATH } from '../../../common/constants';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
+  dashboardContainer,
   filters,
   id,
   inputId = InputsModelId.global,
@@ -23,8 +28,10 @@ const DashboardRendererComponent = ({
   query,
   savedObjectId,
   timeRange,
+  viewMode = ViewMode.VIEW,
 }: {
   canReadDashboard: boolean;
+  dashboardContainer?: DashboardAPI;
   filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
@@ -37,17 +44,36 @@ const DashboardRendererComponent = ({
     to: string;
     toStr?: string | undefined;
   };
+  viewMode?: ViewMode;
 }) => {
+  const { embeddable } = useKibana().services;
   const dispatch = useDispatch();
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
 
-  const getCreationOptions = useCallback(
+  const securityTags = useSecurityTags();
+  const firstSecurityTagId = securityTags?.[0]?.id;
+
+  const isCreateDashboard = !savedObjectId;
+
+  const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(
     () =>
       Promise.resolve({
-        getInitialInput: () => ({ timeRange, viewMode: ViewMode.VIEW, query, filters }),
+        useSessionStorageIntegration: true,
         useControlGroupIntegration: true,
+        getInitialInput: () => ({
+          timeRange,
+          viewMode,
+          query,
+          filters,
+        }),
+        getIncomingEmbeddable: () =>
+          embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
+        getEmbeddableAppContext: (dashboardId?: string) => ({
+          getCurrentPath: () =>
+            dashboardId ? `${DASHBOARDS_PATH}/${dashboardId}/edit` : `${DASHBOARDS_PATH}/create`,
+          currentAppId: APP_UI_ID,
+        }),
       }),
-    [filters, query, timeRange]
+    [embeddable, filters, query, timeRange, viewMode]
   );
 
   const refetchByForceRefresh = useCallback(() => {
@@ -73,20 +99,33 @@ const DashboardRendererComponent = ({
     dashboardContainer?.updateInput({ timeRange, query, filters });
   }, [dashboardContainer, filters, query, timeRange]);
 
-  const handleDashboardLoaded = useCallback(
-    (container: DashboardAPI) => {
-      setDashboardContainer(container);
-      onDashboardContainerLoaded?.(container);
-    },
-    [onDashboardContainerLoaded]
-  );
-  return savedObjectId && canReadDashboard ? (
-    <DashboardContainerRenderer
-      ref={handleDashboardLoaded}
-      savedObjectId={savedObjectId}
-      getCreationOptions={getCreationOptions}
-    />
-  ) : null;
+  useEffect(() => {
+    if (isCreateDashboard && firstSecurityTagId)
+      dashboardContainer?.updateInput({ tags: [firstSecurityTagId] });
+  }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
+
+  /** Dashboard renderer is stored in the state as it's a temporary solution for
+   *  https://github.com/elastic/kibana/issues/167751
+   **/
+  const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
+    React.ReactElement | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setDashboardContainerRenderer(
+      <DashboardContainerRenderer
+        ref={onDashboardContainerLoaded}
+        savedObjectId={savedObjectId}
+        getCreationOptions={getCreationOptions}
+      />
+    );
+
+    return () => {
+      setDashboardContainerRenderer(undefined);
+    };
+  }, [getCreationOptions, onDashboardContainerLoaded, refetchByForceRefresh, savedObjectId]);
+
+  return canReadDashboard ? <>{dashboardContainerRenderer}</> : null;
 };
 DashboardRendererComponent.displayName = 'DashboardRendererComponent';
 export const DashboardRenderer = React.memo(DashboardRendererComponent);

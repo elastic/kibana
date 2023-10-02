@@ -25,7 +25,7 @@ import {
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
-import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -38,6 +38,7 @@ import {
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
 } from '../../../tasks/prebuilt_rules';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe(
@@ -50,7 +51,7 @@ describe(
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
     });
 
     describe('Installation of prebuilt rules package via Fleet', () => {

@@ -13,13 +13,6 @@ export * from './kpi';
 export * from './observed_details';
 export * from './authentications';
 
-export enum UsersQueries {
-  observedDetails = 'observedUserDetails',
-  managedDetails = 'managedUserDetails',
-  kpiTotalUsers = 'usersKpiTotalUsers',
-  users = 'allUsers',
-  authentications = 'authentications',
-  kpiAuthentications = 'usersKpiAuthentications',
-}
+export { UsersQueries } from '../../../api/search_strategy';
 
 export type UsersKpiStrategyResponse = Omit<TotalUsersKpiStrategyResponse, 'rawResponse'>;
