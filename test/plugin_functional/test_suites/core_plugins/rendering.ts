@@ -297,7 +297,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
-        'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
+        'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];
