@@ -83,8 +83,8 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const { dashboardsLandingCalloutComponent$ } = useKibana().services;
-  const dashboardLandingCallout = useObservable(dashboardsLandingCalloutComponent$);
+  const { getComponent$ } = useKibana().services;
+  const dashboardLandingCallout = useObservable(getComponent$('dashboardsLandingCallout'));
   const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
   const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =
@@ -99,20 +99,18 @@ export const DashboardsLandingPage = () => {
       })}`,
     [getSecuritySolutionUrl]
   );
-  const { isLoading: loadingCreateDashboardUrl, url: createDashboardUrl } =
-    useCreateSecurityDashboardLink();
-
-  const getHref = useCallback(
-    (id: string | undefined) => (id ? getSecuritySolutionDashboardUrl(id) : createDashboardUrl),
-    [createDashboardUrl, getSecuritySolutionDashboardUrl]
-  );
 
   const goToDashboard = useCallback(
     (dashboardId: string | undefined) => {
       track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
-      navigateTo({ url: getHref(dashboardId) });
+      navigateTo({
+        url: getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.dashboards,
+          path: dashboardId ?? 'create',
+        }),
+      });
     },
-    [getHref, navigateTo]
+    [getSecuritySolutionUrl, navigateTo]
   );
 
   const securityTags = useSecurityTags();
@@ -151,7 +149,7 @@ export const DashboardsLandingPage = () => {
           <EuiHorizontalRule margin="s" />
           <EuiSpacer size="m" />
           <DashboardListingTable
-            disableCreateDashboardButton={loadingCreateDashboardUrl}
+            disableCreateDashboardButton={!canCreateDashboard}
             getDashboardUrl={getSecuritySolutionDashboardUrl}
             goToDashboard={goToDashboard}
             initialFilter={initialFilter}
