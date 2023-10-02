@@ -20,5 +20,5 @@ const required = t.exact(
   })
 );
 
-export const warningSchema = t.intersection([partial, required]);
-export type WarningSchema = t.TypeOf<typeof warningSchema>;
+export const WarningSchema = t.intersection([partial, required]);
+export type WarningSchema = t.TypeOf<typeof WarningSchema>;
