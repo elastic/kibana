@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Security ML', function () {
+  describe('Search ML', function () {
     loadTestFile(require.resolve('./trained_models_list'));
     loadTestFile(require.resolve('./search_bar_features'));
   });
