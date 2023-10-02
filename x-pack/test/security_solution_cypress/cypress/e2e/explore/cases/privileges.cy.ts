@@ -9,7 +9,7 @@ import type { TestCaseWithoutTimeline } from '../../../objects/case';
 import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../../screens/all_cases';
 
 import { goToCreateNewCase } from '../../../tasks/all_cases';
-import { cleanKibana, deleteCases } from '../../../tasks/common';
+import { cleanKibana, deleteAllCasesItems } from '../../../tasks/common';
 
 import {
   backToCases,
@@ -61,7 +61,7 @@ describe('Cases privileges', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   beforeEach(() => {
     login();
-    deleteCases();
+    deleteAllCasesItems();
   });
 
   for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {
