@@ -782,14 +782,18 @@ export const ModelsList: FC<Props> = ({
                 >
                   <FormattedMessage
                     id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
-                    defaultMessage="ELSER model v2 release shows faster performance and better relevance for improved information retrieval."
-                  />{' '}
-                  <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
-                      defaultMessage="View documentation"
-                    />
-                  </EuiLink>
+                    defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it"
+                    values={{
+                      docLink: (
+                        <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                            defaultMessage="View documentation"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
                 </EuiCallOut>
                 <EuiSpacer size="m" />
               </>
