@@ -77,7 +77,7 @@ export async function registerFunctions({
         registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
         registerLensFunction({ service, pluginsStart, registerFunction });
-        registerGetDatasetInfoFunction({ service, registerFunction });
+
       } else {
         description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
       }
@@ -86,6 +86,7 @@ export async function registerFunctions({
       registerEsqlFunction({ service, registerFunction });
       registerKibanaFunction({ service, registerFunction, coreStart });
       registerAlertsFunction({ service, registerFunction });
+      registerGetDatasetInfoFunction({ service, registerFunction });
 
       registerContext({
         name: 'core',

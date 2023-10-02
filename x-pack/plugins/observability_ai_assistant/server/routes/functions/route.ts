@@ -323,16 +323,6 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
     }
 
     if (indices.length === 0) {
-      try {
-        const body = await esClient.indices.resolveIndex({
-          name: '*',
-          expand_wildcards: 'open',
-        });
-        indices = body.indices.map((i) => i.name);
-      } catch (e) {
-        indices = [];
-      }
-
       return {
         indices,
         fields: [],

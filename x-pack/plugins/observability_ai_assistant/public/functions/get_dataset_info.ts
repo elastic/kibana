@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Serializable } from '@kbn/utility-types';
-import { RegisterFunctionDefinition } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import type {Serializable} from '@kbn/utility-types';
+import {FunctionVisibility, RegisterFunctionDefinition} from '../../common/types';
+import type {ObservabilityAIAssistantService} from '../types';
 
 export function registerGetDatasetInfoFunction({
   service,
@@ -20,10 +20,10 @@ export function registerGetDatasetInfoFunction({
     {
       name: 'get_dataset_info',
       contexts: ['core'],
+      visibility: FunctionVisibility.System,
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
       providing empty string as index name will retrieve all indices
-      if index is provided and it doesnt match any indices in elasticsearch list of all indices will be provided as well
       else list of all fields for the given index will be given. if no fields are returned this means no indices were matched by provided index pattern.
       wildcards can be part of index name.`,
       descriptionForUser:

@@ -54,7 +54,6 @@ function Lens({
 
   const dataViewAsync = useAsync(() => {
     return dataViews.create({
-      id: indexPattern,
       title: indexPattern,
       timeFieldName: timeField,
     });
