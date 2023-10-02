@@ -75,11 +75,13 @@ export {
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   // Authz
   ENDPOINT_PRIVILEGES,
+  ENDPOINT_EXCEPTIONS_PRIVILEGES,
   // Message signing service
   MESSAGE_SIGNING_SERVICE_API_ROUTES,
   // secrets
   SECRETS_ENDPOINT_PATH,
   SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  type PrivilegeMapObject,
 } from '../../common/constants';
 
 export {
