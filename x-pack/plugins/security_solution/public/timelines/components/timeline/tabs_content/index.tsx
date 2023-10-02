@@ -234,7 +234,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             $isVisible={TimelineTabs.discover === activeTimelineTab}
             data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
           >
-            <DiscoverTab />
+            <DiscoverTab timelineId={timelineId} />
           </HideShowContainer>
         )}
       </>

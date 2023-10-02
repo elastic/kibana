@@ -68,6 +68,17 @@ export class ESTestIndexTool {
     );
   }
 
+  async indexDoc(source: string, reference?: string) {
+    return await this.es.index({
+      index: this.index,
+      document: {
+        source,
+        reference,
+      },
+      refresh: true,
+    });
+  }
+
   async destroy() {
     const indexExists = await this.es.indices.exists({ index: this.index });
     if (indexExists) {
