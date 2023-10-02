@@ -32,7 +32,7 @@ export const InstallAzureArmTemplateManagedAgentStep = ({
   enrollToken?: string;
   isComplete?: boolean;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
