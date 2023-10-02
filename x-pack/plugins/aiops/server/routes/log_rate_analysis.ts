@@ -52,6 +52,7 @@ import { fetchSignificantCategories } from './queries/fetch_significant_categori
 import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
 import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
+import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantTermGroups } from './queries/get_significant_term_groups';
@@ -510,6 +511,25 @@ export const defineLogRateAnalysisRoute = (
                     abortSignal
                   );
 
+                  if (significantCategories.length > 0) {
+                    const { fields: significantCategoriesFields, df: significantCategoriesDf } =
+                      await fetchTerms2CategoriesCounts(
+                        client,
+                        request.body,
+                        JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
+                        significantTerms,
+                        significantCategories,
+                        request.body.deviationMin,
+                        request.body.deviationMax,
+                        logger,
+                        pushError,
+                        abortSignal
+                      );
+
+                    fields.push(...significantCategoriesFields);
+                    df.push(...significantCategoriesDf);
+                  }
+
                   if (shouldStop) {
                     logDebugMessage('shouldStop after fetching frequent_item_sets.');
                     end();
@@ -519,7 +539,7 @@ export const defineLogRateAnalysisRoute = (
                   if (fields.length > 0 && df.length > 0) {
                     const significantTermGroups = getSignificantTermGroups(
                       df,
-                      significantTerms,
+                      [...significantTerms, ...significantCategories],
                       fields
                     );
 
