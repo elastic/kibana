@@ -112,6 +112,7 @@ export const MonitorType = t.intersection([
       id: t.string,
       name: t.string,
     }),
+    origin: t.union([t.literal('ui'), t.literal('project')]),
   }),
 ]);
 
