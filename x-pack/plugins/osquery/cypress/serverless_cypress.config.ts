@@ -6,8 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { setupUserDataLoader } from '../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
+import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
