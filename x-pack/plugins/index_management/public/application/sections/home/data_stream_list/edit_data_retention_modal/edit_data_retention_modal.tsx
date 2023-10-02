@@ -239,7 +239,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                 {i18n.translate(
                   'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.techPreviewLabel',
                   {
-                    defaultMessage: 'Tech preview',
+                    defaultMessage: 'Technical preview',
                   }
                 )}
               </EuiText>
