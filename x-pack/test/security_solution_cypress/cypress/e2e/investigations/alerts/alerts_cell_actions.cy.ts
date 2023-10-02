@@ -29,7 +29,6 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
-  clearKqlQueryBar,
   fillAddFilterForm,
   fillKqlQueryBar,
   openAddFilterPopover,
@@ -70,8 +69,6 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
       filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
 
       cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
-
-      clearKqlQueryBar();
     });
 
     it('should filter out a non-empty property', () => {
@@ -95,8 +92,6 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
       filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
 
       cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
-
-      clearKqlQueryBar();
     });
   });
 
