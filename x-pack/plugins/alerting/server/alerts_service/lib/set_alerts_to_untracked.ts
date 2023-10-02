@@ -9,6 +9,8 @@ import { isEmpty } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -20,16 +22,28 @@ export interface SetAlertsToUntrackedOpts {
   indices: string[];
   ruleIds?: string[];
   alertUuids?: string[];
+  ensureAuthorized?: (opts: { ruleTypeId: string; consumer: string }) => Promise<unknown>;
 }
 
 type UntrackedAlertsResult = Array<{ [ALERT_RULE_UUID]: string; [ALERT_UUID]: string }>;
+interface ConsumersAndRuleTypesAggregation {
+  ruleTypeIds: {
+    buckets: Array<{
+      key: string;
+      consumers: {
+        buckets: Array<{ key: string }>;
+      };
+    }>;
+  };
+}
 
 export async function setAlertsToUntracked({
   logger,
   esClient,
   indices,
   ruleIds = [],
-  alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default
+  alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
+  ensureAuthorized,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -74,6 +88,39 @@ export async function setAlertsToUntracked({
       },
     },
   ];
+
+  if (ensureAuthorized) {
+    const response = await esClient.search<never, ConsumersAndRuleTypesAggregation>({
+      index: indices,
+      allow_no_indices: true,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            must,
+          },
+        },
+        aggs: {
+          ruleTypeIds: {
+            terms: { field: ALERT_RULE_TYPE_ID },
+            aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER } } },
+          },
+        },
+      },
+    });
+    const ruleTypeIdBuckets = response.aggregations?.ruleTypeIds.buckets;
+    if (!ruleTypeIdBuckets) throw new Error('Unable to fetch ruleTypeIds for authorization');
+    for (const {
+      key: ruleTypeId,
+      consumers: { buckets: consumerBuckets },
+    } of ruleTypeIdBuckets) {
+      const consumers = consumerBuckets.map((b) => b.key);
+      for (const consumer of consumers) {
+        if (consumer === 'siem') throw new Error('Untracking SIEM alerts is not permitted');
+        await ensureAuthorized({ ruleTypeId, consumer });
+      }
+    }
+  }
 
   try {
     // Retry this updateByQuery up to 3 times to make sure the number of documents

@@ -7,9 +7,11 @@
 
 import { omitBy } from 'lodash';
 import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { bulkUntrackBodySchema } from './schemas';
 import type { BulkUntrackBody } from './types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
@@ -39,7 +41,25 @@ async function bulkUntrackAlertsWithOCC(
 ) {
   try {
     if (!context.alertsService) throw new Error('unable to access alertsService');
-    const result = await context.alertsService.setAlertsToUntracked({ indices, alertUuids });
+    const result = await context.alertsService.setAlertsToUntracked({
+      indices,
+      alertUuids,
+      ensureAuthorized: async ({
+        ruleTypeId,
+        consumer,
+      }: {
+        ruleTypeId: string;
+        consumer: string;
+      }) =>
+        await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+          context.authorization.ensureAuthorized({
+            ruleTypeId,
+            consumer,
+            operation: WriteOperations.Update,
+            entity: AlertingAuthorizationEntity.Alert,
+          })
+        ),
+    });
 
     // Clear alert instances from their corresponding tasks so that they can remain untracked
     const taskIds = [...new Set(result.map((doc) => doc[ALERT_RULE_UUID]))];

@@ -49,13 +49,6 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     attributes = alert.attributes;
   }
 
-  await untrackRuleAlerts(
-    context,
-    id,
-    // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
-    attributes as unknown as Rule<never>
-  );
-
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -73,6 +66,13 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     );
     throw error;
   }
+
+  await untrackRuleAlerts(
+    context,
+    id,
+    // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
+    attributes as unknown as Rule<never>
+  );
 
   // migrate legacy actions only for SIEM rules
   if (attributes.consumer === AlertConsumers.SIEM) {

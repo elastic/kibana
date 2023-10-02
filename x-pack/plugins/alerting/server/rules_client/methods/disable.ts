@@ -44,13 +44,6 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     references = alert.references;
   }
 
-  await untrackRuleAlerts(
-    context,
-    id,
-    // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
-    attributes as unknown as Rule<never>
-  );
-
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -68,6 +61,13 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     );
     throw error;
   }
+
+  await untrackRuleAlerts(
+    context,
+    id,
+    // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
+    attributes as unknown as Rule<never>
+  );
 
   context.auditLogger?.log(
     ruleAuditEvent({
