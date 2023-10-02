@@ -113,7 +113,7 @@ export const InsightsTab: React.FC = memo(() => {
         color="primary"
         name="coarsness"
         legend={i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.buttonGroupButtonLabel',
+          'xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel',
           {
             defaultMessage: 'Insights options',
           }

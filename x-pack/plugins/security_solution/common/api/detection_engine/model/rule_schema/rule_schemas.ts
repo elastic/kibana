@@ -213,6 +213,7 @@ export enum QueryLanguage {
   'kuery' = 'kuery',
   'lucene' = 'lucene',
   'eql' = 'eql',
+  'esql' = 'esql',
 }
 
 export type KqlQueryLanguage = t.TypeOf<typeof KqlQueryLanguage>;
@@ -252,6 +253,37 @@ export const EqlRulePatchProps = t.intersection([SharedPatchProps, eqlSchema.pat
 
 export type EqlPatchParams = t.TypeOf<typeof EqlPatchParams>;
 export const EqlPatchParams = eqlSchema.patch;
+
+// -------------------------------------------------------------------------------------------------
+// ES|QL rule schema
+
+export type EsqlQueryLanguage = t.TypeOf<typeof EsqlQueryLanguage>;
+export const EsqlQueryLanguage = t.literal('esql');
+
+const esqlSchema = buildRuleSchemas({
+  required: {
+    type: t.literal('esql'),
+    language: EsqlQueryLanguage,
+    query: RuleQuery,
+  },
+  optional: {},
+  defaultable: {},
+});
+
+export type EsqlRule = t.TypeOf<typeof EsqlRule>;
+export const EsqlRule = t.intersection([SharedResponseProps, esqlSchema.response]);
+
+export type EsqlRuleCreateProps = t.TypeOf<typeof EsqlRuleCreateProps>;
+export const EsqlRuleCreateProps = t.intersection([SharedCreateProps, esqlSchema.create]);
+
+export type EsqlRuleUpdateProps = t.TypeOf<typeof EsqlRuleUpdateProps>;
+export const EsqlRuleUpdateProps = t.intersection([SharedUpdateProps, esqlSchema.create]);
+
+export type EsqlRulePatchProps = t.TypeOf<typeof EsqlRulePatchProps>;
+export const EsqlRulePatchProps = t.intersection([SharedPatchProps, esqlSchema.patch]);
+
+export type EsqlPatchParams = t.TypeOf<typeof EsqlPatchParams>;
+export const EsqlPatchParams = esqlSchema.patch;
 
 // -------------------------------------------------------------------------------------------------
 // Indicator Match rule schema
@@ -500,6 +532,7 @@ export const NewTermsPatchParams = newTermsSchema.patch;
 export type TypeSpecificCreateProps = t.TypeOf<typeof TypeSpecificCreateProps>;
 export const TypeSpecificCreateProps = t.union([
   eqlSchema.create,
+  esqlSchema.create,
   threatMatchSchema.create,
   querySchema.create,
   savedQuerySchema.create,
@@ -511,6 +544,7 @@ export const TypeSpecificCreateProps = t.union([
 export type TypeSpecificPatchProps = t.TypeOf<typeof TypeSpecificPatchProps>;
 export const TypeSpecificPatchProps = t.union([
   eqlSchema.patch,
+  esqlSchema.patch,
   threatMatchSchema.patch,
   querySchema.patch,
   savedQuerySchema.patch,
@@ -522,6 +556,7 @@ export const TypeSpecificPatchProps = t.union([
 export type TypeSpecificResponse = t.TypeOf<typeof TypeSpecificResponse>;
 export const TypeSpecificResponse = t.union([
   eqlSchema.response,
+  esqlSchema.response,
   threatMatchSchema.response,
   querySchema.response,
   savedQuerySchema.response,

@@ -14,7 +14,8 @@ import {
 } from '../../../../screens/discover';
 import { waitForDiscoverGridToLoad } from '../../../../tasks/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
@@ -32,7 +33,7 @@ describe.skip(
   () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);

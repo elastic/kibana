@@ -28,7 +28,8 @@ import {
 } from '../../../../tasks/expandable_flyout/alert_details_preview_panel_rule_preview';
 import { clickRuleSummaryButton } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';

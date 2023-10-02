@@ -73,7 +73,8 @@
     "@kbn/unified-data-table",
     "@kbn/no-data-page-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/resizable-layout"
   ],
   "exclude": [
     "target/**/*"

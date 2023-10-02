@@ -37,12 +37,12 @@ export const RiskScore: FC = memo(() => {
     <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" data-test-subj={RISK_SCORE_TITLE_TEST_ID}>
-          <h5>
+          <h3>
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
               defaultMessage="Risk score:"
             />
-          </h5>
+          </h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

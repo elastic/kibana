@@ -208,6 +208,18 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.find('datasetSelectorUncategorizedTab');
     },
 
+    getDataViewsContextMenu() {
+      return testSubjects.find('dataViewsContextMenu');
+    },
+
+    getDataViewsContextMenuTitle(panelTitleNode: WebElementWrapper) {
+      return panelTitleNode.getVisibleText().then((title) => title.split('\n')[0]);
+    },
+
+    getDataViewsTab() {
+      return testSubjects.find('datasetSelectorDataViewsTab');
+    },
+
     getPanelTitle(contextMenu: WebElementWrapper) {
       return contextMenu.findByClassName('euiContextMenuPanelTitle');
     },
