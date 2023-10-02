@@ -78,7 +78,7 @@ const renderUserEntityOverview = () =>
 
 describe('<UserEntityOverview />', () => {
   describe('license is valid', () => {
-    it('should render user domain and user risk classification', () => {
+    it('should render user domain and user risk level', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
