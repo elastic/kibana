@@ -75,15 +75,10 @@ const DashboardRendererComponent = ({
       }),
     [embeddable, filters, query, timeRange, viewMode]
   );
-  const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
-    React.ReactElement | undefined
-  >(undefined);
 
   const refetchByForceRefresh = useCallback(() => {
     dashboardContainer?.forceRefresh();
   }, [dashboardContainer]);
-
-  const wrapperRef = useRef(null);
 
   useEffect(() => {
     dispatch(
@@ -112,23 +107,25 @@ const DashboardRendererComponent = ({
   /** Dashboard renderer is stored in the state as it's a temporary solution for
    *  https://github.com/elastic/kibana/issues/167751
    **/
+  const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
+    React.ReactElement | undefined
+  >(undefined);
+
   useEffect(() => {
-    if (wrapperRef) {
-      setDashboardContainerRenderer(
-        <DashboardContainerRenderer
-          ref={onDashboardContainerLoaded}
-          savedObjectId={savedObjectId}
-          getCreationOptions={getCreationOptions}
-        />
-      );
-    }
+    setDashboardContainerRenderer(
+      <DashboardContainerRenderer
+        ref={onDashboardContainerLoaded}
+        savedObjectId={savedObjectId}
+        getCreationOptions={getCreationOptions}
+      />
+    );
 
     return () => {
       setDashboardContainerRenderer(undefined);
     };
   }, [getCreationOptions, onDashboardContainerLoaded, refetchByForceRefresh, savedObjectId]);
 
-  return canReadDashboard ? <div ref={wrapperRef}>{dashboardContainerRenderer}</div> : null;
+  return canReadDashboard ? <>{dashboardContainerRenderer}</> : null;
 };
 DashboardRendererComponent.displayName = 'DashboardRendererComponent';
 export const DashboardRenderer = React.memo(DashboardRendererComponent);
