@@ -238,6 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           reason: string;
           value: string;
           host: string;
+          group: string;
         }>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
