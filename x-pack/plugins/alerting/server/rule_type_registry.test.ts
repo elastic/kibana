@@ -63,6 +63,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -87,6 +88,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -125,6 +127,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -152,6 +155,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -181,6 +185,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         validate: {
@@ -210,6 +215,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
@@ -239,6 +245,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
@@ -288,6 +295,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -319,6 +327,7 @@ describe('Create Lifecycle', () => {
             name: 'Back To Awesome',
           },
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -356,6 +365,7 @@ describe('Create Lifecycle', () => {
           defaultActionGroupId: 'default',
           ruleTaskTimeout: '13m',
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -399,6 +409,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -427,6 +438,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         validate: {
@@ -458,6 +470,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -484,6 +497,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -503,6 +517,7 @@ describe('Create Lifecycle', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           validate: {
             params: { validate: (params) => params },
@@ -526,6 +541,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         alerts: {
           context: 'test',
@@ -557,6 +573,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -583,6 +600,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -606,6 +624,7 @@ describe('Create Lifecycle', () => {
             "params": Array [],
             "state": Array [],
           },
+          "category": "test",
           "defaultActionGroupId": "default",
           "executor": [MockFunction],
           "id": "test",
@@ -659,6 +678,7 @@ describe('Create Lifecycle', () => {
         ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -698,6 +718,7 @@ describe('Create Lifecycle', () => {
                 },
               },
             },
+            "category": "test",
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
@@ -779,6 +800,7 @@ describe('Create Lifecycle', () => {
         ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -805,6 +827,7 @@ describe('Create Lifecycle', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         isExportable: true,
         minimumLicenseRequired: 'basic',
@@ -855,6 +878,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },
