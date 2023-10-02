@@ -15,11 +15,11 @@ import { servicesRoutes } from './assets/services';
 
 export function setupRoutes<T extends RequestHandlerContext>({
   router,
-  assetAccessor,
+  assetClient,
 }: SetupRouteOptions<T>) {
-  pingRoute<T>({ router, assetAccessor });
-  assetsRoutes<T>({ router, assetAccessor });
-  sampleAssetsRoutes<T>({ router, assetAccessor });
-  hostsRoutes<T>({ router, assetAccessor });
-  servicesRoutes<T>({ router, assetAccessor });
+  pingRoute<T>({ router, assetClient });
+  assetsRoutes<T>({ router, assetClient });
+  sampleAssetsRoutes<T>({ router, assetClient });
+  hostsRoutes<T>({ router, assetClient });
+  servicesRoutes<T>({ router, assetClient });
 }
