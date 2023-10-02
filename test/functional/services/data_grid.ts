@@ -93,8 +93,8 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
-  private getCellActionButton(rowIndex: number = 0, columnIndex: number = 0, selector: string) {
-    let actionButton;
+  private async getCellActionButton(rowIndex: number = 0, columnIndex: number = 0, selector: string): Promise<WebElementWrapper> {
+    let actionButton: WebElementWrapper | undefined;
     await this.retry.try(async () => {
       const cell = await this.getCellElement(rowIndex, columnIndex);
       await cell.click();
@@ -103,7 +103,7 @@ export class DataGridService extends FtrService {
         throw new Error(`Unable to find cell action button ${selector}`);
       }
     });
-    return actionButton;
+    return actionButton!;
   }
 
   /**
