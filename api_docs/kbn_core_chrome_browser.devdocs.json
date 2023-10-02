@@ -700,6 +700,9 @@
             "tags": [],
             "label": "href",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -710,6 +713,36 @@
             "type": "string",
             "tags": [],
             "label": "iconType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpMenuLink.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpMenuLink.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
             "description": [],
             "signature": [
               "string | undefined"
