@@ -186,7 +186,15 @@ export const useBulkUntrackActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
+  const { application } = useKibana().services;
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  // Check if at least one Observability feature is enabled
+  if (!application?.capabilities) return [];
+  const hasApmPermission = application.capabilities.apm?.['alerting:show'];
+  const hasInfrastructurePermission = application.capabilities.infrastructure?.show;
+  const hasLogsPermission = application.capabilities.logs?.show;
+
+  if (!hasApmPermission && !hasInfrastructurePermission && !hasLogsPermission) return [];
 
   return [
     {
