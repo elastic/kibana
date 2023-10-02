@@ -114,6 +114,7 @@ export interface XYReferenceLineLayerConfig {
 }
 
 export interface XYByValueAnnotationLayerConfig {
+  title?: string;
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];

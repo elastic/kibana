@@ -71,6 +71,18 @@ describe('layer header', () => {
           .text()
           .trim()
       ).toBe(byRefGroupTitle);
+
+      const cachedTitle = 'A cached title';
+      expect(
+        mountWithIntl(
+          <LayerHeader
+            {...props}
+            state={getStateWithLayers([{ ...byRefLayer, title: cachedTitle }])}
+          />
+        )
+          .text()
+          .trim()
+      ).toBe(cachedTitle);
     });
   });
 });

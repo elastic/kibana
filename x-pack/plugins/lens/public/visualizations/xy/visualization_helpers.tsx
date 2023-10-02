@@ -178,6 +178,10 @@ export const isPersistedLinkedByValueAnnotationsLayer = (
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
 
+export const getAnnotationLayerTitle = (layer: XYAnnotationLayerConfig): string => {
+  return layer.title || (isByReferenceAnnotationsLayer(layer) && layer.__lastSaved.title) || '';
+};
+
 export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;

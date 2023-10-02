@@ -42,6 +42,7 @@ import {
   isByReferenceAnnotationsLayer,
   isPersistedByValueAnnotationsLayer,
   isPersistedAnnotationsLayer,
+  getAnnotationLayerTitle,
 } from './visualization_helpers';
 import { nonNullable } from '../../utils';
 
@@ -187,6 +188,7 @@ export function getPersistableState(state: XYState) {
         } else {
           const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
             persistanceType: 'linked',
+            title: getAnnotationLayerTitle(layer),
             layerId: layer.layerId,
             layerType: layer.layerType,
             annotationGroupRef: referenceName,
@@ -298,6 +300,7 @@ export function injectReferences(
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
               annotations: cloneDeep(persistedLayer.annotations),
+              title: persistedLayer.title,
             };
           }
         }
