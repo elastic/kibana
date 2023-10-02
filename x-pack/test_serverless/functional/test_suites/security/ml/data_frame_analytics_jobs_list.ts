@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const svlMml = getService('svlMl');
+  const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
   const dfaJobId = 'iph_outlier_permission';
 
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('page navigation', () => {
       it('renders job list and finds created job', async () => {
         await ml.testExecution.logTestStep('should load the DFA job management page');
-        await svlMml.navigation.security.navigateToDataFrameAnalytics();
+        await svlMl.navigation.security.navigateToDataFrameAnalytics();
 
         await ml.testExecution.logTestStep('should display the stats bar and the analytics table');
         await ml.dataFrameAnalytics.assertAnalyticsStatsBarExists();

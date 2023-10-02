@@ -25,10 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should load the trained models page');
 
         await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with 1 installed trained model and 4 models in the table'
+          'should display the stats bar and the analytics table with 1 installed trained model and built in elser models in the table'
         );
         await ml.trainedModels.assertStats(1);
-        await ml.trainedModelsTable.assertNumberOfRowsInTable(4);
+        await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });
   });

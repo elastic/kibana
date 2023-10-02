@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
-  const svlMml = getService('svlMl');
+  const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
   const adJobId = 'fq_single_permission';
 
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('renders job list and finds created job', async () => {
         await ml.navigation.navigateToMl();
         await ml.testExecution.logTestStep('loads the anomaly detection area');
-        await svlMml.navigation.observability.navigateToAnomalyDetection();
+        await svlMl.navigation.observability.navigateToAnomalyDetection();
 
         await ml.testExecution.logTestStep('should display the stats bar and the AD job table');
         await ml.jobManagement.assertJobStatsBarExists();
@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.jobManagement.assertCreateNewJobButtonEnabled(true);
 
         await ml.testExecution.logTestStep('should display the AD job in the list');
-        // await new Promise((e) => setTimeout(e, 500000));
         await ml.jobTable.filterWithSearchString(adJobId, 1);
 
         await ml.testExecution.logTestStep('should display enabled AD job result links');

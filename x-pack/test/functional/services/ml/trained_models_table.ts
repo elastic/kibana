@@ -162,12 +162,18 @@ export function TrainedModelsTableProvider(
       );
     }
 
-    public async assertNumberOfRowsInTable(rowCount: number) {
+    public async assertTableIsPopulated() {
       await this.waitForModelsToLoad();
       const rows = await this.parseModelsTable();
-      expect(rowCount).to.eql(
-        rows.length,
-        `Expected trained model row count to be '${rowCount}' (got '${rows.length}')`
+      expect(rows.length).to.not.eql(0, `Expected trained model row count to be '>0' (got '0')`);
+    }
+
+    public async assertTableIsNotPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.eql(
+        0,
+        `Expected trained model row count to be '0' (got '${rows.length}')`
       );
     }
 

@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
-  const svlMml = getService('svlMl');
+  const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
   describe('Trained models list', () => {
@@ -24,13 +24,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('renders trained models list', async () => {
         await ml.navigation.navigateToMl();
         await ml.testExecution.logTestStep('should load the trained models page');
-        await svlMml.navigation.security.navigateToTrainedModels();
+        await svlMl.navigation.security.navigateToTrainedModels();
 
         await ml.testExecution.logTestStep(
           'should display the stats bar and the analytics table with no trained models'
         );
         await ml.trainedModels.assertStats(0);
-        await ml.trainedModelsTable.assertNumberOfRowsInTable(0);
+        await ml.trainedModelsTable.assertTableIsNotPopulated();
       });
     });
   });
