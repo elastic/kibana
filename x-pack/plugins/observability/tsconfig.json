@@ -76,7 +76,6 @@
     "@kbn/field-types",
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server",
-    "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
     "@kbn/stack-alerts-plugin",
     "@kbn/data-view-editor-plugin",
@@ -89,6 +88,7 @@
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
     "@kbn/deeplinks-observability",
+    "@kbn/core-application-common",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme"
   ],

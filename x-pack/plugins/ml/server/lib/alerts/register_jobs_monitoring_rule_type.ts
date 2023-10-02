@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   MlDatafeedState,
   MlJobState,
@@ -137,6 +137,7 @@ export function registerJobsMonitoringRuleType({
         },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
