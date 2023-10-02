@@ -53,7 +53,7 @@ export interface UseBulkActions {
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
 
-type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh'> &
+type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'>;
 
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
@@ -177,6 +177,7 @@ export const useBulkAddToCaseActions = ({
 };
 
 export const useBulkUntrackActions = ({
+  casesConfig,
   setIsBulkActionsLoading,
   refresh,
   clearSelection,
@@ -186,10 +187,12 @@ export const useBulkUntrackActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
-  const { application } = useKibana().services;
+  const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
+
+  const userCasesPermissions = casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
-  if (!application?.capabilities.rulesSettings.save) return [];
+  if (!userCasesPermissions?.update) return [];
 
   return [
     {
@@ -232,6 +235,7 @@ export function useBulkActions({
   };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
   const untrackBulkActions = useBulkUntrackActions({
+    casesConfig,
     setIsBulkActionsLoading,
     refresh,
     clearSelection,
