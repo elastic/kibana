@@ -67,6 +67,8 @@ node scripts/chromium_version.js [PuppeteerVersion]
 When bumping the Puppeteer version, make sure you also update the `ChromiumArchivePaths.revision` variable in
 `x-pack/plugins/reporting/server/browsers/chromium/paths.ts`.
 
+In some cases the revision number might not be available for the darwin or windows builds in `https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html`. For example, 1181205 was not available for darwin arm64 or windows. In that case, the next available revision numbers 1181286 and 1181280 were used. 
+
 ## Build args
 
 A good how-to on building Chromium from source is
