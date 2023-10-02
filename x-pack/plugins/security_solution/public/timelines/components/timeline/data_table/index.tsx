@@ -90,11 +90,11 @@ const DROP_PROPS = {
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
   return {
     originatingApp: 'security_solution',
-    localStorageKeyPrefix: 'examples',
+    localStorageKeyPrefix: 'securitySolution',
     timeRangeUpdatesType: 'timefilter',
     compressed: true,
     showSidebarToggleButton: true,
-    disablePopularFields: true,
+    disablePopularFields: false,
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
         defaultMessage: 'Add field as column',
@@ -718,7 +718,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         <UnifiedFieldListSidebarContainer
-          // ref={initializeUnifiedFieldListSidebarContainerApi}
+          showFieldList={true}
           variant="responsive"
           getCreationOptions={getCreationOptions}
           services={fieldListSidebarServices}
@@ -728,7 +728,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           onAddFieldToWorkspace={onAddFieldToWorkspace}
           onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
           onAddFilter={onAddFilter}
-          onFieldEdited={async (options) => await refetch()}
+          onFieldEdited={async () => Promise.resolve(refetch())}
         />
       </EuiFlexItem>
       <EuiHideFor sizes={['xs', 's']}>

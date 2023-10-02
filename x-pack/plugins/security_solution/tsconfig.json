@@ -175,6 +175,7 @@
     "@kbn/subscription-tracking",
     "@kbn/openapi-generator",
     "@kbn/unified-data-table",
-    "@kbn/unified-doc-viewer"
+    "@kbn/unified-doc-viewer",
+    "@kbn/unified-field-list"
   ]
 }
