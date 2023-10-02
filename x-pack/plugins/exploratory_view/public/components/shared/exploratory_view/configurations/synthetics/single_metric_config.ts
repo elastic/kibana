@@ -72,7 +72,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         },
         columnFilter: {
           language: 'kuery',
-          query: 'summary.final_attempt: true or ( not summary.final_attempt: * and summary:*)',
+          query: 'summary.final_attempt: true or (not summary.final_attempt: * and summary:*)',
         },
       },
       {
