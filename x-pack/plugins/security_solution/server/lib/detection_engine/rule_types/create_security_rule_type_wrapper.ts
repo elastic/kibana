@@ -16,6 +16,7 @@ import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exceptio
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
@@ -24,6 +25,7 @@ import {
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
+  isEsqlParams,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -209,13 +211,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           /**
            * Data Views Logic
-           * Use of data views is supported for all rules other than ML.
+           * Use of data views is supported for all rules other than ML and Esql.
            * Rules can define both a data view and index pattern, but on execution:
            *  - Data view is used if it is defined
            *    - Rule exits early if data view defined is not found (ie: it's been deleted)
            *  - If no data view defined, falls to using existing index logic
+           * Esql rules has index in query, which can be retrieved
            */
-          if (!isMachineLearningParams(params)) {
+          if (isEsqlParams(params)) {
+            inputIndex = getIndexListFromEsqlQuery(params.query);
+          } else if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,
@@ -322,7 +327,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isMachineLearningParams(params)) {
+          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
               dataViews: services.dataViews,
