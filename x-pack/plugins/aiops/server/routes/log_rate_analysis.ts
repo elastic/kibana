@@ -381,8 +381,6 @@ export const defineLogRateAnalysisRoute = (
                   push(addSignificantTermsAction(pValues));
                 }
 
-                fieldValuePairsCount = significantCategories.length + significantTerms.length;
-
                 push(
                   updateLoadingStateAction({
                     ccsWarning: false,
@@ -415,6 +413,8 @@ export const defineLogRateAnalysisRoute = (
                 }
               });
               await pValuesQueue.drain();
+
+              fieldValuePairsCount = significantCategories.length + significantTerms.length;
 
               if (fieldValuePairsCount === 0) {
                 logDebugMessage('Stopping analysis, did not find significant terms.');
