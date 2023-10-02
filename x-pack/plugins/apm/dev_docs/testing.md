@@ -193,4 +193,4 @@ Data can also be generated using the [kbn-apm-synthtrace](../../../../packages/k
 
 ### 4. Security and access control:
 
-- **User privileges**: If your endpoint requires write privileges, use `apm.writeUser`. Or any of the other predefined roles, whichever apply. Don't use roles with higher access levels unless required.
+- **User privileges**: For calling APIs use `apm.readUser` whenever possible. If the endpoint requires write privileges, use `apm.writeUser` or any of the other predefined roles, whichever apply. Don't use roles with higher access levels unless required.
