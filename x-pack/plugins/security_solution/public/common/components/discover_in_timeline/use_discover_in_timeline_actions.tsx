@@ -80,7 +80,7 @@ export const useDiscoverInTimelineActions = (
 
     return {
       query: {
-        esql: dataView ? `from ${dataView?.getIndexPattern()} | limit 10` : '',
+        esql: dataView ? `from ${dataView.getIndexPattern()} | limit 10` : '',
       },
       sort: [['@timestamp', 'desc']],
       columns: [],
