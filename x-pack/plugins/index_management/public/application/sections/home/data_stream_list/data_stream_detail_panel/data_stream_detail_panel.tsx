@@ -7,6 +7,7 @@
 
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,6 +23,10 @@ import {
   EuiIconTip,
   EuiLink,
   EuiTitle,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 
 import { DiscoverLink } from '../../../../lib/discover_link';
@@ -29,6 +34,7 @@ import { SectionLoading, reactRouterNavigate } from '../../../../../shared_impor
 import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
+import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
@@ -70,7 +76,10 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
 
   const midpoint = Math.ceil(descriptionListItems.length / 2);
   const descriptionListColumnOne = descriptionListItems.slice(0, midpoint);
-  const descriptionListColumnTwo = descriptionListItems.slice(-midpoint);
+  const descriptionListColumnTwo = descriptionListItems.slice(
+    midpoint,
+    descriptionListItems.length
+  );
 
   return (
     <EuiFlexGroup>
@@ -93,9 +102,11 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
 }) => {
-  const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
-
+  const [isManagePopOverOpen, setManagePopOver] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isEditingDataRetention, setIsEditingDataRetention] = useState<boolean>(false);
+
+  const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
   const { history } = useAppContext();
@@ -275,9 +286,74 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     content = <DetailsList details={details} />;
   }
 
+  const closePopover = () => {
+    setManagePopOver(false);
+  };
+
+  const button = (
+    <EuiButton
+      fill
+      iconType="arrowDown"
+      iconSide="right"
+      data-test-subj="manageDataStreamButton"
+      onClick={() => setManagePopOver(!isManagePopOverOpen)}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.dataStreamsDetailsPanel.manageButtonLabel"
+        defaultMessage="Manage"
+      />
+    </EuiButton>
+  );
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      title: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelTitle', {
+        defaultMessage: 'Data stream options',
+      }),
+      items: [
+        ...(!dataStream?.ilmPolicyName && dataStream?.privileges?.manage_data_stream_lifecycle
+          ? [
+              {
+                key: 'editDataRetention',
+                name: i18n.translate(
+                  'xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention',
+                  {
+                    defaultMessage: 'Edit data retention',
+                  }
+                ),
+                'data-test-subj': 'editDataRetentionButton',
+                icon: <EuiIcon type="pencil" size="m" />,
+                onClick: () => {
+                  closePopover();
+                  setIsEditingDataRetention(true);
+                },
+              },
+            ]
+          : []),
+        ...(dataStream?.privileges?.delete_index
+          ? [
+              {
+                key: 'deleteDataStream',
+                name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelDelete', {
+                  defaultMessage: 'Delete',
+                }),
+                'data-test-subj': 'deleteDataStreamButton',
+                icon: <EuiIcon type="trash" size="m" color="danger" />,
+                onClick: () => {
+                  closePopover();
+                  setIsDeleting(true);
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  ];
+
   return (
     <>
-      {isDeleting ? (
+      {isDeleting && (
         <DeleteDataStreamConfirmationModal
           onClose={(data) => {
             if (data && data.hasDeletedDataStreams) {
@@ -288,7 +364,21 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           }}
           dataStreams={[dataStreamName]}
         />
-      ) : null}
+      )}
+
+      {isEditingDataRetention && (
+        <EditDataRetentionModal
+          onClose={(data) => {
+            if (data && data?.hasUpdatedDataRetention) {
+              onClose(true);
+            } else {
+              setIsEditingDataRetention(false);
+            }
+          }}
+          dataStreamName={dataStreamName}
+          dataRetention={dataStream?.lifecycle?.data_retention as string}
+        />
+      )}
 
       <EuiFlyout
         onClose={() => onClose()}
@@ -324,20 +414,19 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            {!isLoading && !error && dataStream?.privileges.delete_index ? (
+            {!isLoading && !error && panels[0].items?.length && (
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="danger"
-                  iconType="trash"
-                  onClick={() => setIsDeleting(true)}
-                  data-test-subj="deleteDataStreamButton"
+                <EuiPopover
+                  button={button}
+                  isOpen={isManagePopOverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
                 >
-                  {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel', {
-                    defaultMessage: 'Delete data stream',
-                  })}
-                </EuiButton>
+                  <EuiContextMenu initialPanelId={0} panels={panels} />
+                </EuiPopover>
               </EuiFlexItem>
-            ) : null}
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
