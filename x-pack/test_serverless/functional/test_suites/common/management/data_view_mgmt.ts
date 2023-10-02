@@ -19,9 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165804
-  // FLAKY: https://github.com/elastic/kibana/issues/165796
-  // FLAKY: https://github.com/elastic/kibana/issues/165425
   describe('Data View Management', function () {
     this.beforeAll(async () => {
       await PageObjects.svlCommonPage.login();
