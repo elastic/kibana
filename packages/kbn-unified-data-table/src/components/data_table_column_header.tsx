@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -23,7 +23,11 @@ interface DataTableColumnHeaderProps {
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
   const { columnDisplayName } = props;
-  const columnToken = getRenderedToken(props);
+  const columnToken = useMemo(
+    () => getRenderedToken(props),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.dataView, props.columnName, props.columnTypes]
+  );
 
   return (
     <EuiFlexGroup

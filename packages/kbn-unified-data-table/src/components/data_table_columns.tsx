@@ -29,6 +29,8 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader } from './data_table_column_header';
 
+const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
+
 const openDetails = {
   id: 'openDetails',
   width: 26,
@@ -128,7 +130,7 @@ function buildEuiGridColumn({
     schema: getSchemaByKbnType(dataViewField?.type),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     display: showColumnTokens ? (
-      <DataTableColumnHeader
+      <DataTableColumnHeaderMemoized
         dataView={dataView}
         columnName={columnName}
         columnDisplayName={columnDisplayName}
