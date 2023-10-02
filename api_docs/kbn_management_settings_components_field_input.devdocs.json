@@ -96,31 +96,23 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputKibanaDependencies.toasts",
+            "id": "def-common.FieldInputKibanaDependencies.notifications",
             "type": "Object",
             "tags": [],
-            "label": "toasts",
+            "label": "notifications",
             "description": [
               "The portion of the {@link ToastsStart} contract used by this component."
             ],
             "signature": [
-              "{ addDanger: (toastOrTitle: ",
+              "{ toasts: Pick<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
-                "text": "ToastInput"
+                "section": "def-common.IToasts",
+                "text": "IToasts"
               },
-              ", options?: any) => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
-                "text": "Toast"
-              },
-              "; }"
+              ", \"addDanger\">; }"
             ],
             "path": "packages/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,

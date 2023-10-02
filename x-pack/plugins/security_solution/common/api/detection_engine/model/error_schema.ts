@@ -31,5 +31,5 @@ const required = t.exact(
   })
 );
 
-export const errorSchema = t.intersection([partial, required]);
-export type ErrorSchema = t.TypeOf<typeof errorSchema>;
+export const ErrorSchema = t.intersection([partial, required]);
+export type ErrorSchema = t.TypeOf<typeof ErrorSchema>;

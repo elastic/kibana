@@ -201,6 +201,8 @@ export const getTabCountsMarkdownComment = (
 ): string =>
   `### **${i18n.INCOMPATIBLE_FIELDS}** ${getCodeFormattedValue(
     `${partitionedFieldMetadata.incompatible.length}`
+  )} **${i18n.SAME_FAMILY}** ${getCodeFormattedValue(
+    `${partitionedFieldMetadata.sameFamily.length}`
   )} **${i18n.CUSTOM_FIELDS}** ${getCodeFormattedValue(
     `${partitionedFieldMetadata.custom.length}`
   )} **${i18n.ECS_COMPLIANT_FIELDS}** ${getCodeFormattedValue(
