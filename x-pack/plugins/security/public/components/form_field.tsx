@@ -65,7 +65,6 @@ export function FormField<T extends ElementType = typeof EuiFieldText>({
         if (setTouchedOnBlur) {
           helpers.setTouched(setTouchedOnBlur); // Marking as touched manually here since some EUI components don't pass on the native blur event which is required by `field.onBlur()`.
         }
-
         onBlur?.(event);
       }}
     />
