@@ -24,10 +24,13 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
         <>{children}</>
       ) : (
         <>
+          {/* Main navigation content */}
           <EuiFlyoutBody scrollableTabIndex={-1} data-test-subj={dataTestSubj}>
             {children}
           </EuiFlyoutBody>
           {footerChildren && <EuiFlyoutFooter>{footerChildren}</EuiFlyoutFooter>}
+
+          {/* Right side panel navigation */}
           <NavigationPanel />
         </>
       )}

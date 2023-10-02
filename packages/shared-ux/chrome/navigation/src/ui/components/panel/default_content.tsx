@@ -6,16 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React, { type FC } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { Fragment, type FC } from 'react';
 
-import { PanelNavNode } from './types';
+import { PanelGroup } from './panel_group';
+import type { PanelNavNode } from './types';
 
 interface Props {
   activeNode: PanelNavNode;
 }
 
 export const DefaultContent: FC<Props> = ({ activeNode }) => {
+  const totalChildren = activeNode.children?.length ?? 0;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
       <EuiFlexItem>
@@ -27,12 +30,21 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
           activeNode.title
         )}
       </EuiFlexItem>
+
       <EuiFlexItem style={{ width: '100%' }}>
-        {activeNode.children && (
-          <>
-            <div>Render {activeNode.children.length} children here.</div>
-          </>
-        )}
+        <>
+          <EuiSpacer size="l" />
+          {activeNode.children && (
+            <>
+              {activeNode.children.map((child, i) => (
+                <Fragment key={child.id}>
+                  <PanelGroup navNode={child} />
+                  {i < totalChildren - 1 && <EuiSpacer size="l" />}
+                </Fragment>
+              ))}
+            </>
+          )}
+        </>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

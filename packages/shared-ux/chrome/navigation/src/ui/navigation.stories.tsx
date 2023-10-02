@@ -100,7 +100,7 @@ const baseDeeplink: ChromeNavLink = {
   id: 'foo',
   title: 'Title from deep link',
   href: 'https://elastic.co',
-  url: '',
+  url: '/dashboard-mocked',
   baseUrl: '',
 };
 
@@ -334,7 +334,7 @@ const panelContentProvider: ContentProvider = (id: string) => {
   }
 };
 
-const navigationDefinitionWithPanel: ProjectNavigationDefinition = {
+const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
   navigationTree: {
     body: [
       // My custom project
@@ -366,16 +366,44 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition = {
             openPanel: true,
             children: [
               {
-                link: 'group:settings.logs',
-                title: 'Logs',
+                id: 'group1',
+                title: 'Group 1',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                    withBadge: true, // Default to "Beta" badge
+                  },
+                ],
               },
               {
-                link: 'group:settings.signals',
-                title: 'Signals',
-              },
-              {
-                link: 'group:settings.tracing',
-                title: 'Tracing',
+                id: 'group2',
+                title: 'Group 2',
+                children: [
+                  {
+                    id: 'group2:settings.logs',
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    id: 'group2:settings.signals',
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group2:settings.tracing',
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
               },
             ],
           },
@@ -418,7 +446,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition = {
             ],
           },
         ],
-      } as GroupDefinition<any>,
+      },
     ],
   },
 };

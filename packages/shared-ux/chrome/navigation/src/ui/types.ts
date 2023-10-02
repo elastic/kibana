@@ -115,17 +115,17 @@ export type ProjectNavigationTreeDefinition<
  *
  * Definition for the complete navigation tree, including body and footer
  */
-export interface NavigationTreeDefinition {
+export interface NavigationTreeDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
   /**
    * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
-  body?: RootNavigationItemDefinition[];
+  body?: Array<RootNavigationItemDefinition<LinkId>>;
   /**
    * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
-  footer?: RootNavigationItemDefinition[];
+  footer?: Array<RootNavigationItemDefinition<LinkId>>;
 }
 
 /**
@@ -134,19 +134,19 @@ export interface NavigationTreeDefinition {
  * A project navigation definition that can be passed to the `<DefaultNavigation />` component
  * or when calling `setNavigation()` on the serverless plugin.
  */
-export interface ProjectNavigationDefinition {
+export interface ProjectNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave
    * all the other navigation items to the default (Recently viewed items, Management, etc.)
    */
-  projectNavigationTree?: ProjectNavigationTreeDefinition;
+  projectNavigationTree?: ProjectNavigationTreeDefinition<LinkId>;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
    * if both are provided.
    */
-  navigationTree?: NavigationTreeDefinition;
+  navigationTree?: NavigationTreeDefinition<LinkId>;
 }
 
 /**
