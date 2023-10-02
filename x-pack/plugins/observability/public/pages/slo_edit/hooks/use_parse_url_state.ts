@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { RecursivePartial } from '@elastic/eui';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { useHistory } from 'react-router-dom';
-import { transformPartialCreateSLOInputToPartialCreateSLOForm } from '../helpers/process_slo_form_values';
+import { transformPartialUrlStateToFormState } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 
 export function useParseUrlState(): Partial<CreateSLOForm> | null {
@@ -19,7 +20,7 @@ export function useParseUrlState(): Partial<CreateSLOForm> | null {
     useHashQuery: false,
   });
 
-  const urlParams = urlStateStorage.get<Partial<CreateSLOInput>>('_a');
+  const urlParams = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
 
-  return !!urlParams ? transformPartialCreateSLOInputToPartialCreateSLOForm(urlParams) : null;
+  return !!urlParams ? transformPartialUrlStateToFormState(urlParams) : null;
 }
