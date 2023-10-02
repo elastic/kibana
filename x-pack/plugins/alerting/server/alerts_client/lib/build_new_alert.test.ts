@@ -6,19 +6,8 @@
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
-import type { AlertRule } from '../types';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import {
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PARAMETERS,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_REVISION,
-  ALERT_RULE_TAGS,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
   SPACE_IDS,
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
@@ -37,36 +26,7 @@ import {
   VERSION,
   ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
-
-const rule = {
-  category: 'My test rule',
-  consumer: 'bar',
-  execution: {
-    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-  },
-  name: 'rule-name',
-  parameters: {
-    bar: true,
-  },
-  producer: 'alerts',
-  revision: 0,
-  rule_type_id: 'test.rule-type',
-  tags: ['rule-', '-tags'],
-  uuid: '1',
-};
-const alertRule: AlertRule = {
-  [ALERT_RULE_CATEGORY]: rule.category,
-  [ALERT_RULE_CONSUMER]: rule.consumer,
-  [ALERT_RULE_EXECUTION_UUID]: rule.execution.uuid,
-  [ALERT_RULE_NAME]: rule.name,
-  [ALERT_RULE_PARAMETERS]: rule.parameters,
-  [ALERT_RULE_PRODUCER]: rule.producer,
-  [ALERT_RULE_REVISION]: rule.revision,
-  [ALERT_RULE_TYPE_ID]: rule.rule_type_id,
-  [ALERT_RULE_TAGS]: rule.tags,
-  [ALERT_RULE_UUID]: rule.uuid,
-  [SPACE_IDS]: ['default'],
-};
+import { alertRule } from './test_fixtures';
 
 describe('buildNewAlert', () => {
   test('should build alert document with info from legacy alert', () => {
