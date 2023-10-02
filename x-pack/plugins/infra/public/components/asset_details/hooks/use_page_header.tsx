@@ -110,17 +110,22 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 
 const useFeatureFlagTabs = () => {
   const { featureFlags } = usePluginConfig();
-  const featureFlagTabs: Partial<Record<ContentTabIds, { isEnabled: () => boolean }>> = useMemo(
+  const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: {
-        isEnabled: () => featureFlags.osqueryEnabled,
-      },
+      [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
     }),
     [featureFlags.osqueryEnabled]
   );
 
+  const isTabEnabled = useCallback(
+    (tabItem: Tab) => {
+      return featureFlagControlledTabs[tabItem.id] ?? true;
+    },
+    [featureFlagControlledTabs]
+  );
+
   return {
-    featureFlagTabs,
+    isTabEnabled,
   };
 };
 
@@ -128,7 +133,7 @@ const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { euiTheme } = useEuiTheme();
-  const { featureFlagTabs } = useFeatureFlagTabs();
+  const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -166,22 +171,20 @@ const useTabs = (tabs: Tab[]) => {
 
   const tabEntries: TabItem[] = useMemo(
     () =>
-      tabs
-        .filter((tab) => featureFlagTabs[tab.id]?.isEnabled() ?? true)
-        .map(({ name, ...tab }) => {
-          if (tab.id === ContentTabIds.LINK_TO_APM) {
-            return getTabToApmTraces(name);
-          }
+      tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
+        if (tab.id === ContentTabIds.LINK_TO_APM) {
+          return getTabToApmTraces(name);
+        }
 
-          return {
-            ...tab,
-            'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
-            onClick: () => onTabClick(tab.id),
-            isSelected: tab.id === activeTabId,
-            label: name,
-          };
-        }),
-    [activeTabId, featureFlagTabs, getTabToApmTraces, onTabClick, tabs]
+        return {
+          ...tab,
+          'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
+          onClick: () => onTabClick(tab.id),
+          isSelected: tab.id === activeTabId,
+          label: name,
+        };
+      }),
+    [activeTabId, isTabEnabled, getTabToApmTraces, onTabClick, tabs]
   );
 
   return { tabEntries };

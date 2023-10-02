@@ -25,7 +25,7 @@ export const Osquery = () => {
   // avoids component rerender when resizing the popover
   const content = useMemo(() => {
     if (!featureFlags.osqueryEnabled) {
-      return <></>;
+      return null;
     }
     // TODO: Add info when Osquery plugin is not available
     if (metadataLoading || !OsqueryAction) {
