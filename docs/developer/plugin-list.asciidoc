@@ -238,6 +238,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
+|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
+
+
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual management section into it. This plugin does not contain any individual
@@ -451,8 +455,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
-|This plugin provides access to the asset data stored in assets-* indices, primarily
-for inventory and topology purposes.
+|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -473,10 +476,6 @@ for inventory and topology purposes.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
 |Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat_provider/README.md[cloudChatProvider]
-|This plugin exists as a workaround for using cloudChat plugin in plugins which can't have a direct dependency on security plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]

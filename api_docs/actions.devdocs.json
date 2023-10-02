@@ -5273,13 +5273,13 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GeneralConnectorFeatureId",
+        "id": "def-common.GenerativeAIConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GeneralConnectorFeatureId",
+        "label": "GenerativeAIConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"general\""
+          "\"generativeAI\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5613,10 +5613,10 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GeneralFeature",
+        "id": "def-common.GenerativeAIFeature",
         "type": "Object",
         "tags": [],
-        "label": "GeneralFeature",
+        "label": "GenerativeAIFeature",
         "description": [],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5624,7 +5624,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.id",
+            "id": "def-common.GenerativeAIFeature.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -5635,7 +5635,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.name",
+            "id": "def-common.GenerativeAIFeature.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -5646,7 +5646,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.compatibility",
+            "id": "def-common.GenerativeAIFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

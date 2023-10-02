@@ -73,25 +73,6 @@ exports[`render should render local cluster details from _shards 1`] = `
   <EuiSpacer
     size="m"
   />
-  <ClustersHealth
-    clusters={
-      Object {
-        "(local)": Object {
-          "_shards": Object {
-            "failed": 0,
-            "skipped": 0,
-            "successful": 2,
-            "total": 2,
-          },
-          "failures": undefined,
-          "indices": "",
-          "status": "successful",
-          "timed_out": undefined,
-          "took": undefined,
-        },
-      }
-    }
-  />
   <ClustersTable
     clusters={
       Object {
