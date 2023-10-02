@@ -26,7 +26,7 @@ import { IncompatibleCallout } from '.';
 
 const content = 'Is your name Michael?';
 
-const eventCategoryWithWIldcard: EnrichedFieldMetadata = {
+const eventCategoryWithWildcard: EnrichedFieldMetadata = {
   ...eventCategory, // `event.category` is a `keyword` per the ECS spec
   indexFieldType: 'wildcard', // this index has a mapping of `wildcard` instead of `keyword`
   isInSameFamily: true, // `wildcard` and `keyword` are in the same family
@@ -39,7 +39,7 @@ describe('IncompatibleCallout', () => {
       <TestProviders>
         <IncompatibleCallout
           enrichedFieldMetadata={[
-            eventCategoryWithWIldcard, // `wildcard` and `keyword`
+            eventCategoryWithWildcard, // `wildcard` and `keyword`
             eventCategoryWithUnallowedValues, // `keyword` and `keyword`
             hostNameWithTextMapping, // `keyword` and `text`
             sourceIpWithTextMapping, // `ip` is not a member of any families
