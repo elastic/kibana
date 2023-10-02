@@ -21,6 +21,7 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_PATH,
   SERVER_APP_ID,
@@ -172,6 +173,13 @@ export const isDetectionsPath = (pathname: string): boolean => {
     strict: false,
   });
 };
+
+export const isDashboardViewPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: `/${DASHBOARDS_PATH}/:id`,
+    exact: false,
+    strict: false,
+  }) != null;
 
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
