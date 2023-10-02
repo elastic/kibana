@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { waitForAlertsToPopulate } from 'cypress/tasks/create_new_rule';
 import {
   ALERT_FLYOUT,
   CELL_TEXT,
@@ -13,11 +14,7 @@ import {
   TABLE_ROWS,
 } from '../../screens/alerts_details';
 
-import {
-  expandFirstAlert,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { expandFirstAlert } from '../../tasks/alerts';
 import { openJsonView, openTable } from '../../tasks/alerts_details';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -32,12 +29,9 @@ describe('Alert details with unmapped fields', () => {
   beforeEach(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getUnmappedRule());
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
+    waitForAlertsToPopulate();
     expandFirstAlert();
   });
 
