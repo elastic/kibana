@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const CreateDataViewButton = ({
@@ -19,10 +19,10 @@ export const CreateDataViewButton = ({
 }) => {
   const { dataViewEditor } = useMlKibana().services;
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-  const dataViewEditorRef = useRef<() => void | undefined>();
+  const closeDataViewEditorRef = useRef<() => void | undefined>();
 
   const createNewDataView = useCallback(() => {
-    dataViewEditorRef.current = dataViewEditor?.openEditor({
+    closeDataViewEditorRef.current = dataViewEditor?.openEditor({
       onSave: async (dataView) => {
         if (dataView.id && onDataViewCreated) {
           onDataViewCreated(dataView.id, 'index-pattern', dataView.name);
@@ -32,6 +32,15 @@ export const CreateDataViewButton = ({
       allowAdHocDataView,
     });
   }, [onDataViewCreated, dataViewEditor, allowAdHocDataView]);
+
+  useEffect(function cleanUpFlyout() {
+    return () => {
+      // Close the editor when unmounting
+      if (closeDataViewEditorRef.current) {
+        closeDataViewEditorRef.current();
+      }
+    };
+  }, []);
 
   return canEditDataView ? (
     <EuiButton

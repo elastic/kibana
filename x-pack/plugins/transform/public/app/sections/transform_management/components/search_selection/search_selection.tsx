@@ -8,7 +8,7 @@
 import { EuiButton, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, Fragment, useCallback, useRef } from 'react';
+import React, { type FC, Fragment, useCallback, useEffect, useRef } from 'react';
 
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
@@ -39,6 +39,15 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected, on
       allowAdHocDataView: true,
     });
   }, [dataViewEditor, onCloseModal, onSearchSelected]);
+
+  useEffect(function cleanUpFlyout() {
+    return () => {
+      // Close the editor when unmounting
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
+      }
+    };
+  }, []);
 
   return (
     <>
