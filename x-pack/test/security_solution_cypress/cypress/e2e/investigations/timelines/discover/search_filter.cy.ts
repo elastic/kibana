@@ -38,7 +38,7 @@ describe(
   'Basic discover search and filter operations',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess'],
   },
   () => {
     beforeEach(() => {

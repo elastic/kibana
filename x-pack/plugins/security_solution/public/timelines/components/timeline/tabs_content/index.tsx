@@ -14,6 +14,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
@@ -408,7 +409,17 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.discover}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
-              <StyledEuiBetaBadge label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW} size="s" />
+              <StyledEuiBetaBadge
+                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
+                size="s"
+                iconType="beaker"
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
+                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                  />
+                }
+              />
             </StyledEuiTab>
           )}
           {timelineType === TimelineType.default && (

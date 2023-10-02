@@ -37,7 +37,7 @@ describe(
   'Discover State',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: ['@ess'],
   },
   () => {
     beforeEach(() => {
@@ -49,8 +49,6 @@ describe(
     });
     it('should not allow the dataview to be changed', () => {
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
-      // TODO: remove if we hide dataview picker
-      // cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
     });
     it('should have the default esql query on load', () => {
       verifyDiscoverEsqlQuery(DEFAULT_ESQL_QUERY);
@@ -66,15 +64,6 @@ describe(
 
       verifyDiscoverEsqlQuery(esqlQuery);
     });
-    // TODO: Remove if we hide dataview picker
-    // it('should remember dataView when navigating away and back to discover ', () => {
-    //   const dataviewName = 'ES|QL';
-    //   navigateFromHeaderTo(CSP_FINDINGS);
-    //   navigateFromHeaderTo(ALERTS);
-    //   openActiveTimeline();
-    //   gotToDiscoverTab();
-    //   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-    // });
     it('should remember columns when navigating away and back to discover ', () => {
       addFieldToTable('host.name');
       addFieldToTable('user.name');

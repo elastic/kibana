@@ -58,7 +58,6 @@ const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
 const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
-const ESQL_DATAVIEW_NAME = 'ES|QL';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 describe(
@@ -144,8 +143,6 @@ describe(
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             gotToDiscoverTab();
-            // TODO: remove if we hide dataview picker
-            // cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
@@ -172,8 +169,6 @@ describe(
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
             // reload the page with the exact url
             cy.reload();
-            // TODO: remove if we hide dataview picker
-            // cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', ESQL_DATAVIEW_NAME);
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');

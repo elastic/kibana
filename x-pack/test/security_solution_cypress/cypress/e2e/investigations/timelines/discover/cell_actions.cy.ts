@@ -27,7 +27,7 @@ describe.skip(
   `Discover Datagrid Cell Actions`,
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@ess'],
   },
   () => {
     beforeEach(() => {
