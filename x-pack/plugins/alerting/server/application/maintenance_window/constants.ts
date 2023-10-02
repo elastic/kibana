@@ -11,3 +11,10 @@ export const maintenanceWindowStatus = {
   FINISHED: 'finished',
   ARCHIVED: 'archived',
 } as const;
+
+export const maintenanceWindowCategoryIdTypes = {
+  KIBANA: 'kibana',
+  OBSERVABILITY: 'observability',
+  SECURITY_SOLUTION: 'securitySolution',
+  MANAGEMENT: 'management',
+} as const;

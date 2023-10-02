@@ -92,7 +92,11 @@ export const EditControlFlyout = ({
     }
 
     closeFlyout();
-    await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
+    if (panel.type === type) {
+      controlGroup.updateInputForChild(embeddable.id, inputToReturn);
+    } else {
+      await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
+    }
   };
 
   return (
