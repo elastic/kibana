@@ -93,7 +93,11 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
-  private async getCellActionButton(rowIndex: number = 0, columnIndex: number = 0, selector: string): Promise<WebElementWrapper> {
+  private async getCellActionButton(
+    rowIndex: number = 0,
+    columnIndex: number = 0,
+    selector: string
+  ): Promise<WebElementWrapper> {
     let actionButton: WebElementWrapper | undefined;
     await this.retry.try(async () => {
       const cell = await this.getCellElement(rowIndex, columnIndex);
@@ -112,7 +116,11 @@ export class DataGridService extends FtrService {
    * @param columnIndex column index starting from 0 (0 means 1st column)
    */
   public async clickCellExpandButton(rowIndex: number = 0, columnIndex: number = 0) {
-    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'euiDataGridCellExpandButton');
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      columnIndex,
+      'euiDataGridCellExpandButton'
+    );
     await actionButton.click();
   }
 
