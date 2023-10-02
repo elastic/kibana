@@ -41,11 +41,13 @@ export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
      * payload on the `secrets` key. This ensures performant decryption. */
     ...secretKeys,
   ]),
-  attributesToExcludeFromAAD: new Set([
-    ConfigKey.ALERT_CONFIG,
-    ConfigKey.METADATA,
-    ...legacyConfigKeys,
-  ]),
+
+  // attributesToExcludeFromAAD: new Set([
+  //   ConfigKey.ALERT_CONFIG,
+  //   ConfigKey.METADATA,
+  //   ...legacyConfigKeys,
+  // ]),
+
   // name: {
   // type: {
   // urls: {

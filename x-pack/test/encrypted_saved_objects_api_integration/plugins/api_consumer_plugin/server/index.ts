@@ -75,7 +75,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
           'privateProperty',
           { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
         ]),
-        attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
+        attributesToIncludeInAAD: new Set(['publicProperty']),
       });
     }
 
