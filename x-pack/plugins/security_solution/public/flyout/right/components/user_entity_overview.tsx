@@ -13,14 +13,12 @@ import {
   EuiLink,
   useEuiTheme,
   useEuiFontSize,
-  EuiIconTip,
   EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
@@ -34,14 +32,14 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import {
   USER_DOMAIN,
   LAST_SEEN,
-  USER_RISK_CLASSIFICATION,
+  USER_RISK_LEVEL,
 } from '../../../overview/components/user_overview/translations';
 import {
   ENTITIES_USER_OVERVIEW_TEST_ID,
@@ -49,23 +47,23 @@ import {
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
+import { RiskScoreDocTooltip } from '../../../overview/components/common';
 
 const USER_ICON = 'user';
 const CONTEXT_ID = `flyout-user-entity-overview`;
 
 export interface UserEntityOverviewProps {
   /**
-   * User name for looking up user related ip addresses and risk classification
+   * User name for looking up user related ip addresses and risk level
    */
   userName: string;
 }
 
 /**
- * User preview content for the entities preview in right flyout. It contains ip addresses and risk classification
+ * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
@@ -157,35 +155,17 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     return [
       {
         title: (
-          <>
-            {USER_RISK_CLASSIFICATION}
-            <EuiIconTip
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewButtonLabel"
-                  defaultMessage="Technical preview"
-                />
-              }
-              size="m"
-              type="iInCircle"
-              content={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewTooltip"
-                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                />
-              }
-              position="bottom"
-              iconProps={{
-                className: 'eui-alignTop',
-              }}
-              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
-            />
-          </>
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{USER_RISK_LEVEL}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
         description: (
           <>
             {userRiskData ? (
-              <RiskScore severity={userRiskData.user.risk.calculated_level} />
+              <RiskScoreLevel severity={userRiskData.user.risk.calculated_level} />
             ) : (
               getEmptyTagValue()
             )}
@@ -252,5 +232,3 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     </EuiFlexGroup>
   );
 };
-
-UserEntityOverview.displayName = 'UserEntityOverview';

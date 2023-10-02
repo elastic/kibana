@@ -5279,7 +5279,7 @@
         "label": "GenerativeAIConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"general\""
+          "\"generativeAI\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,

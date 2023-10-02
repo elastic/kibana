@@ -413,6 +413,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
       shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
       sortSearch: `${ELASTICSEARCH_DOCS}sort-search-results.html`,
+      tutorialUpdateExistingDataStream: `${ELASTICSEARCH_DOCS}tutorial-manage-existing-data-stream.html`,
       transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
       typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
       setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
@@ -431,6 +432,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {
+      artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
@@ -841,6 +843,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+    },
+    esql: {
+      statsBy: `${ELASTICSEARCH_DOCS}esql-stats-by.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
