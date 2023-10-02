@@ -76,6 +76,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}
+            basePath={'https://localhost:5601/kbn'}
             defaultAllow={[]}
             defaultAllowReplacement={[]}
             docLinks={{
