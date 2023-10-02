@@ -6019,10 +6019,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-framework@link:packages/kbn-ui-framework":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ui-settings-plugin@link:test/plugin_functional/plugins/ui_settings_plugin":
   version "0.0.0"
   uid ""
