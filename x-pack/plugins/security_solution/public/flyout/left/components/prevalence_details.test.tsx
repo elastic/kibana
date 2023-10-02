@@ -18,6 +18,7 @@ import {
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { TestProviders } from '../../../common/mock';
@@ -54,6 +55,8 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: [],
 } as unknown as LeftPanelContext;
 
+const UPSELL_MESSAGE = 'Host and user prevalence are only available with a';
+
 const renderPrevalenceDetails = () =>
   render(
     <TestProviders>
@@ -70,7 +73,7 @@ describe('PrevalenceDetails', () => {
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
   });
 
-  it('should render the table with all columns if license is platinum', () => {
+  it('should render the table with all data if license is platinum', () => {
     const field1 = 'field1';
     const field2 = 'field2';
     (usePrevalence as jest.Mock).mockReturnValue({
@@ -115,6 +118,38 @@ describe('PrevalenceDetails', () => {
     ).toBeGreaterThan(1);
     expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it('should hide data in prevalence columns if license is not platinum', () => {
+    const field1 = 'field1';
+
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: field1,
+          values: ['value1'],
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+      ],
+    });
+
+    const { getByTestId, getAllByTestId } = renderPrevalenceDetails();
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).toHaveTextContent(UPSELL_MESSAGE);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID).length).toEqual(2);
+    expect(
+      getByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID)
+    ).not.toHaveTextContent('5%');
+    expect(
+      getByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID)
+    ).not.toHaveTextContent('10%');
   });
 
   it('should render formatted numbers for the alert and document count columns', () => {
