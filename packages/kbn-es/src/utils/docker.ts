@@ -37,6 +37,7 @@ import {
 } from './serverless_file_realm';
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
+import { getLocalhostRealIp } from './get_localhost_real_ip';
 
 interface ImageOptions {
   image?: string;
@@ -309,11 +310,19 @@ export function resolveDockerImage({
  * Determine the port to bind the Serverless index node or Docker node to
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
+  const port = options.port || DEFAULT_PORT;
+  const value = ['-p', `127.0.0.1:${port}:${port}`];
+  const realLocalhostIp = getLocalhostRealIp();
+
   if (options.port) {
-    return ['-p', `0.0.0.0:${options.port}:${options.port}`, '--env', `http.port=${options.port}`];
+    value.push('--env', `http.port=${options.port}`);
   }
 
-  return ['-p', `127.0.0.1:${DEFAULT_PORT}:${DEFAULT_PORT}`];
+  if (realLocalhostIp) {
+    value.push('-p', `${realLocalhostIp}:${port}:${port}`);
+  }
+
+  return value;
 }
 
 /**
