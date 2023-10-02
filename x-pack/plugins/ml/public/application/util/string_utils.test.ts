@@ -14,6 +14,7 @@ import {
   toLocaleString,
   mlEscape,
   escapeForElasticsearchQuery,
+  getEscapedKueryForSelectionInfluencer,
 } from './string_utils';
 
 describe('ML - string utils', () => {
@@ -158,6 +159,15 @@ describe('ML - string utils', () => {
       expect(escapeForElasticsearchQuery('foo:bar')).toBe('foo\\:bar');
       expect(escapeForElasticsearchQuery('foo\\bar')).toBe('foo\\\\bar');
       expect(escapeForElasticsearchQuery('foo/bar')).toBe('foo\\/bar');
+    });
+  });
+  describe('getEscapedKueryForSelectionInfluencer', () => {
+    test('should return correct escaping of kuery values', () => {
+      expect(getEscapedKueryForSelectionInfluencer('fieldName', '')).toBe('fieldName:""');
+      expect(getEscapedKueryForSelectionInfluencer('', 'fieldValue')).toBe('"":fieldValue');
+      expect(getEscapedKueryForSelectionInfluencer('@#specialCharsName%', '<>:;[})')).toBe(
+        '@#specialCharsName%:\\<\\>\\:;[}\\)'
+      );
     });
   });
 });
