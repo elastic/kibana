@@ -44,7 +44,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         permissions: userCapabilities.generalCases,
         basePath: '/',
         features: { alerts: { enabled: false } },
-        releasePhase: 'experimental',
+        releasePhase: 'ga',
       })}
     </Wrapper>
   );
