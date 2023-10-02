@@ -22,12 +22,13 @@ export const policyFactory = (
   return {
     meta: {
       license,
-      license_uid: licenseUid,
+      license_uuid: licenseUid,
       cluster_uuid: clusterUuid,
       cluster_name: clusterName,
       cloud,
       serverless,
     },
+    global_manifest_version: 'latest',
     windows: {
       events: {
         credential_access: true,

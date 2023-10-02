@@ -195,11 +195,12 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
   meta: {
     license: '',
     cloud: false,
-    license_uid: '',
+    license_uuid: '',
     cluster_name: '',
     cluster_uuid: '',
     serverless: false,
   },
+  global_manifest_version: 'latest',
   windows: {
     events: {
       credential_access: true,
