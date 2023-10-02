@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DashboardAPI, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -75,10 +75,15 @@ const DashboardRendererComponent = ({
       }),
     [embeddable, filters, query, timeRange, viewMode]
   );
+  const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
+    React.ReactElement | undefined
+  >(undefined);
 
   const refetchByForceRefresh = useCallback(() => {
     dashboardContainer?.forceRefresh();
   }, [dashboardContainer]);
+
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     dispatch(
@@ -104,13 +109,26 @@ const DashboardRendererComponent = ({
       dashboardContainer?.updateInput({ tags: [firstSecurityTagId] });
   }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
 
-  return canReadDashboard ? (
-    <DashboardContainerRenderer
-      ref={onDashboardContainerLoaded}
-      savedObjectId={savedObjectId}
-      getCreationOptions={getCreationOptions}
-    />
-  ) : null;
+  /** Dashboard renderer is stored in the state as it's a temporary solution for
+   *  https://github.com/elastic/kibana/issues/167751
+   **/
+  useEffect(() => {
+    if (wrapperRef) {
+      setDashboardContainerRenderer(
+        <DashboardContainerRenderer
+          ref={onDashboardContainerLoaded}
+          savedObjectId={savedObjectId}
+          getCreationOptions={getCreationOptions}
+        />
+      );
+    }
+
+    return () => {
+      setDashboardContainerRenderer(undefined);
+    };
+  }, [getCreationOptions, onDashboardContainerLoaded, refetchByForceRefresh, savedObjectId]);
+
+  return canReadDashboard ? <div ref={wrapperRef}>{dashboardContainerRenderer}</div> : null;
 };
 DashboardRendererComponent.displayName = 'DashboardRendererComponent';
 export const DashboardRenderer = React.memo(DashboardRendererComponent);
