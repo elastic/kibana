@@ -158,7 +158,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/cloud-chat-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
@@ -175,6 +174,7 @@
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
     "@kbn/subscription-tracking",
+    "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es"
   ]
