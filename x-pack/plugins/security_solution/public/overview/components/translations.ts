@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { i18n } from '@kbn/i18n';
 
-export const ReadTagsResponse = t.array(t.string);
-export type ReadTagsResponse = t.TypeOf<typeof ReadTagsResponse>;
+export const INFORMATION_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.overview.informationAriaLabel',
+  {
+    defaultMessage: 'Information',
+  }
+);
