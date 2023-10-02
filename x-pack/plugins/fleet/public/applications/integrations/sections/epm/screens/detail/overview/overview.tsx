@@ -64,7 +64,7 @@ const SideBar = styled(EuiFlexItem)`
   padding-left: 10px;
   text-overflow: ellipsis;
   max-width: 180px;
-  max-height: 1200px;
+  max-height: 500px;
 `;
 const StyledSideNav = styled(EuiSideNav)`
   overflow-y: auto;
