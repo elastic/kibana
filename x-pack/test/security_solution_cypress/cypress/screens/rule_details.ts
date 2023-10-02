@@ -25,6 +25,8 @@ export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
 export const EQL_QUERY_DETAILS = 'EQL query';
 
+export const ESQL_QUERY_DETAILS = 'ES|QL query';
+
 export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
 
 export const SAVED_QUERY_DETAILS = /^Saved query$/;

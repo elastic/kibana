@@ -212,7 +212,7 @@ const getRuleTypeDescription = (ruleType: Type) => {
     case 'eql':
       return descriptionStepI18n.EQL_TYPE_DESCRIPTION;
     case 'esql':
-      return descriptionStepI18n.ESQL_TYPE_DESCRIPTION;
+      return <TitleWithTechnicalPreviewBadge title={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
     case 'threat_match':
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
