@@ -49,7 +49,7 @@ export const useDiscoverInTimelineActions = (
 
   const dispatch = useDispatch();
 
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const { dataViewId, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline = useShallowEqualSelector(
@@ -78,9 +78,11 @@ export const useDiscoverInTimelineActions = (
 
     const dataView = await dataViewService.get(localDataViewId);
 
+    const indexPatterns = dataView ? dataView?.getIndexPattern() : indexPattern.title;
+
     return {
       query: {
-        esql: `from ${dataView?.getIndexPattern()} | limit 10`,
+        esql: `from ${indexPatterns} | limit 10`,
       },
       sort: [['@timestamp', 'desc']],
       columns: [],
@@ -89,7 +91,7 @@ export const useDiscoverInTimelineActions = (
       hideChart: false,
       grid: {},
     };
-  }, [dataViewService, dataViewId]);
+  }, [dataViewId, dataViewService, indexPattern.title]);
 
   /*
    * generates Appstate from a given saved Search object

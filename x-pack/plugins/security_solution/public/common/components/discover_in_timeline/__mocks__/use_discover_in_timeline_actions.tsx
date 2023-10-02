@@ -7,21 +7,21 @@
 
 export const useDiscoverInTimelineActions = () => {
   return {
-    resetDiscoverAppState: jest.fn(),
+    resetDiscoverAppState: jest.fn().mockResolvedValue(true),
     restoreDiscoverAppStateFromSavedSearch: jest.fn(),
     updateSavedSearch: jest.fn(),
     getAppStateFromSavedSearch: jest.fn(),
     getDefaultDiscoverAppState: () => ({
       query: {
         query: '',
-        language: 'kuery',
+        language: 'esql',
       },
       sort: [['@timestamp', 'desc']],
       columns: [],
       index: 'security-solution-default',
       interval: 'auto',
       filters: [],
-      hideChart: true,
+      hideChart: false,
       grid: {},
     }),
   };
