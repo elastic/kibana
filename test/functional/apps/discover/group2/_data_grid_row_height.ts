@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const security = getService('security');
@@ -47,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
     });
 
-    it('should allow to change row height and reset it', async () => {
+    it('should allow to change row height', async () => {
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
 
@@ -59,13 +60,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Single');
 
-      await dataGrid.resetRowHeightValue();
-
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      // we hide "Reset to default" action in Discover
+      await testSubjects.missingOrFail('resetDisplaySelector');
 
       await dataGrid.changeRowHeightValue('Custom');
 
-      await dataGrid.resetRowHeightValue();
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
+
+      await testSubjects.missingOrFail('resetDisplaySelector');
+
+      await dataGrid.changeRowHeightValue('Auto fit');
 
       expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
     });
