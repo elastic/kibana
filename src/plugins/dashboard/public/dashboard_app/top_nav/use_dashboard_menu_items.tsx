@@ -38,6 +38,7 @@ export const useDashboardMenuItems = ({
    */
   const {
     share,
+    dashboardBackup,
     settings: { uiSettings },
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
@@ -127,18 +128,24 @@ export const useDashboardMenuItems = ({
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
       dashboard.clearOverlays();
-      if (hasUnsavedChanges) {
-        confirmDiscardUnsavedChanges(() => {
-          batch(() => {
-            dashboard.resetToLastSavedState();
-            if (switchToViewMode) dashboard.dispatch.setViewMode(ViewMode.VIEW);
-          });
-        }, viewMode);
-      } else {
-        if (switchToViewMode) dashboard.dispatch.setViewMode(ViewMode.VIEW);
+      const switchModes = switchToViewMode
+        ? () => {
+            dashboard.dispatch.setViewMode(ViewMode.VIEW);
+            dashboardBackup.storeViewMode(ViewMode.VIEW);
+          }
+        : undefined;
+      if (!hasUnsavedChanges) {
+        switchModes?.();
+        return;
       }
+      confirmDiscardUnsavedChanges(() => {
+        batch(() => {
+          dashboard.resetToLastSavedState();
+          switchModes?.();
+        });
+      }, viewMode);
     },
-    [dashboard, hasUnsavedChanges, viewMode]
+    [dashboard, dashboardBackup, hasUnsavedChanges, viewMode]
   );
 
   /**
@@ -170,6 +177,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
+          dashboardBackup.storeViewMode(ViewMode.EDIT);
           dashboard.dispatch.setViewMode(ViewMode.EDIT);
           dashboard.clearOverlays();
         },
@@ -231,18 +239,19 @@ export const useDashboardMenuItems = ({
       } as TopNavMenuData,
     };
   }, [
-    disableTopNav,
+    quickSaveDashboard,
     isSaveInProgress,
     hasRunMigrations,
     hasUnsavedChanges,
+    dashboardBackup,
+    saveDashboardAs,
+    setIsLabsShown,
+    disableTopNav,
+    resetChanges,
+    isLabsShown,
     lastSavedId,
     showShare,
     dashboard,
-    setIsLabsShown,
-    isLabsShown,
-    quickSaveDashboard,
-    saveDashboardAs,
-    resetChanges,
     clone,
   ]);
 

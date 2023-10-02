@@ -49,6 +49,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -134,6 +135,7 @@ export interface StartPlugins {
   fieldFormats: FieldFormatsStartCommon;
   discover: DiscoverStart;
   navigation: NavigationPublicPluginStart;
+  expressions: ExpressionsStart;
   dataViewEditor: DataViewEditorStart;
   savedSearch: SavedSearchPublicPluginStart;
 }

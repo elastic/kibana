@@ -1176,6 +1176,18 @@
             "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
           },
           {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
           },
@@ -1226,18 +1238,6 @@
           {
             "plugin": "licenseManagement",
             "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
             "plugin": "maps",
@@ -3350,6 +3350,14 @@
             "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
           },
@@ -3452,14 +3460,6 @@
           {
             "plugin": "telemetry",
             "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
             "plugin": "maps",
