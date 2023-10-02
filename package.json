@@ -1565,6 +1565,7 @@
     "pngjs": "^3.4.0",
     "postcss": "^8.4.31",
     "postcss-loader": "^4.2.0",
+    "postcss-scss": "^4.0.4",
     "prettier": "^2.7.1",
     "proxy": "^2.1.1",
     "q": "^1.5.1",
