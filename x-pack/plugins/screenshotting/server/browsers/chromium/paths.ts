@@ -59,7 +59,7 @@ export class ChromiumArchivePaths {
       archiveChecksum: '',
       binaryChecksum: '361f7cbac5bcac1d9974a43e29bf4bf5',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1181286, //1181205 is not available 
+      revision: 1181286, // 1181205 is not available
       location: 'common',
       archivePath: 'Mac_Arm',
       isPreInstalled: false,
@@ -90,10 +90,10 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '', //'76b6c8aa15f0b16df18f793c9953f59f',
+      archiveChecksum: '', // '76b6c8aa15f0b16df18f793c9953f59f',
       binaryChecksum: '1623fed921c9acee7221b2de98abe54e',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
-      revision: 1181280, //1181205 is not available 
+      revision: 1181280, // 1181205 is not available
       location: 'common',
       archivePath: 'Win',
       isPreInstalled: true,
