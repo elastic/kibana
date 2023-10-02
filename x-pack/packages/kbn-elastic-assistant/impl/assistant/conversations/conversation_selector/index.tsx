@@ -63,13 +63,19 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
   }) => {
-    const { allSystemPrompts } = useAssistantContext();
+    const { allSystemPrompts, conversations } = useAssistantContext();
 
     const { deleteConversation, setConversation } = useConversation();
 
-    const { conversations } = useAssistantContext();
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
+      console.log(
+        'VALS',
+        Object.values(conversations).map((conversation) => ({
+          value: { isDefault: conversation.isDefault ?? false },
+          label: conversation.id,
+        }))
+      );
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
         label: conversation.id,
@@ -255,6 +261,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         `}
       >
         <EuiComboBox
+          data-test-subj="conversation-selector"
           aria-label={i18n.CONVERSATION_SELECTOR_ARIA_LABEL}
           customOptionText={`${i18n.CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT} {searchValue}`}
           placeholder={i18n.CONVERSATION_SELECTOR_PLACE_HOLDER}
