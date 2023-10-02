@@ -16,6 +16,7 @@ import type {
   SpaceHealthSnapshot,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
+import { DETECTION_RULES_FILTER } from './filters';
 import {
   getClusterHealthAggregation,
   normalizeClusterHealthAggregationResult,
@@ -69,7 +70,12 @@ export const createRuleObjectsHealthClient = (
 
     async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
       const aggs = getSpaceHealthAggregation();
-      const aggregations = await rulesClient.aggregate({ aggs });
+      const aggregations = await rulesClient.aggregate({
+        options: {
+          filter: DETECTION_RULES_FILTER, // make sure to query only detection rules
+        },
+        aggs,
+      });
 
       return {
         state_at_the_moment: normalizeSpaceHealthAggregationResult(aggregations),
@@ -86,6 +92,7 @@ export const createRuleObjectsHealthClient = (
       const aggs = getClusterHealthAggregation();
       const response = await internalSavedObjectsClient.find<unknown, Record<string, unknown>>({
         type: RULE_SAVED_OBJECT_TYPE, // query rules
+        filter: DETECTION_RULES_FILTER, // make sure to query only detection rules
         namespaces: ['*'], // aggregate rules in all Kibana spaces
         perPage: 0, // don't return rules in the response, we only need aggs
         aggs,

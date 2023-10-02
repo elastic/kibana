@@ -65,6 +65,9 @@ export const createEventLogHealthClient = (
   ruleSpacesClient: IRuleSpacesClient,
   logger: Logger
 ): IEventLogHealthClient => {
+  const EVENT_PROVIDERS = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
+  const EVENT_PROVIDERS_FILTER = `${f.EVENT_PROVIDER}: (${kqlOr(EVENT_PROVIDERS)})`;
+
   async function aggregateEventsForRules(
     ruleIds: string[],
     interval: HealthInterval,
@@ -72,13 +75,11 @@ export const createEventLogHealthClient = (
   ) {
     const soType = RULE_SAVED_OBJECT_TYPE;
     const soIds = ruleIds;
-    const eventProviders = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
-    const kqlFilter = `${f.EVENT_PROVIDER}:${kqlOr(eventProviders)}`;
 
     const result = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
       start: interval.from,
       end: interval.to,
-      filter: kqlFilter,
+      filter: EVENT_PROVIDERS_FILTER,
       aggs,
     });
 
@@ -92,8 +93,6 @@ export const createEventLogHealthClient = (
   ) {
     const soType = RULE_SAVED_OBJECT_TYPE;
     const authFilter = {} as KueryNode;
-    const eventProviders = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
-    const kqlFilter = `${f.EVENT_PROVIDER}:${kqlOr(eventProviders)}`;
 
     // The `aggregateEventsWithAuthFilter` method accepts "namespace ids" instead of "space ids".
     // If you have two Kibana spaces with ids ['default', 'space-x'],
@@ -106,7 +105,7 @@ export const createEventLogHealthClient = (
       {
         start: interval.from,
         end: interval.to,
-        filter: kqlFilter,
+        filter: EVENT_PROVIDERS_FILTER,
         aggs,
       },
       namespaces

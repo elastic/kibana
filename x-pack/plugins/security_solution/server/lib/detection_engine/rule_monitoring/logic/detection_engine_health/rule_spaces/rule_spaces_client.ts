@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
+import { DETECTION_RULES_FILTER } from '../rule_objects/filters';
 import { getSpacesAggregation, normalizeSpacesAggregation } from './aggregations/spaces';
 
 /**
@@ -38,6 +39,7 @@ export const createRuleSpacesClient = (
       const aggs = getSpacesAggregation();
       const response = await internalSavedObjectsClient.find<unknown, Record<string, unknown>>({
         type: RULE_SAVED_OBJECT_TYPE, // query rules
+        filter: DETECTION_RULES_FILTER, // make sure to query only detection rules
         namespaces: ['*'], // aggregate rules in all Kibana spaces
         perPage: 0, // don't return rules in the response, we only need aggs
         aggs,
