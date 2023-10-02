@@ -109,7 +109,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expect(createResponse.body).to.have.property('kuery', serviceDashboard.kuery);
         expect(createResponse.body).to.have.property(
-          'serviceFiltersEnabled',
+          'serviceEnvironmentFilterEnabled',
+          serviceDashboard.serviceFiltersEnabled
+        );
+        expect(createResponse.body).to.have.property(
+          'serviceNameFilterEnabled',
           serviceDashboard.serviceFiltersEnabled
         );
 
