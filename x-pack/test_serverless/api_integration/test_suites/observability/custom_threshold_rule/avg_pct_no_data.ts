@@ -46,6 +46,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+      });
+      await esClient.deleteByQuery({
+        index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },
       });
       await dataViewApi.delete({
