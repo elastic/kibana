@@ -529,6 +529,197 @@ When user opens the Rule Management page
 Then user should NOT see the Rule Updates tab until the package installation is completed and there are rules available for upgrade
 ```
 
+### Previewing a rule before installation or upgrade
+Assumptions: 
+  - if a section in the Overview tab doesn't contain any properties, it should not be displayed
+
+```Gherkin
+Shared properties examples:
+  | section    | shared_property           |
+  | About      | Author                    |
+  | About      | Building block            |
+  | About      | Severity                  |
+  | About      | Severity override         |
+  | About      | Risk score                |
+  | About      | Risk score override       |
+  | About      | Reference URLs            |
+  | About      | False positive examples   |
+  | About      | Custom highlighted fields |
+  | About      | License                   |
+  | About      | Rule name override        |
+  | About      | MITRE ATT&CK™             |
+  | About      | Timestamp override        |
+  | About      | Tags                      |
+  | Definition | Related integrations      |
+  | Definition | Required fields           |
+  | Definition | Timeline template         |
+  | Schedule   | Runs every                |
+  | Schedule   | Additional look-back time |
+
+Custom query properties examples:
+  | custom_query_property |
+  | Custom query          |
+  | Filters               |
+
+Saved query properties examples:
+  | saved_query_property |
+  | Saved query name     |
+  | Saved query filters  |
+  | Saved query          |
+```
+
+#### **Scenario: Custom Query rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+Given a Custom Query rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "Custom query"
+And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
+And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
+And if the rule has a custom query then for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
+And if the rule has a saved query then for each <saved_query_property> defined in the rule a corresponding value should be displayed under the Definition section
+And if the rule has alert suppression settings then for each <alert_suppression_property> defined in the rule a corresponding value should be displayed under the Definition section
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+
+Alert suppression examples:
+  | alert_suppression_property        |
+  | Suppress alerts by                |
+  | Suppress alerts for               |
+  | If a suppression field is missing |
+```
+
+#### **Scenario: Machine Learning rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+Given a Machine Learning rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "Machine Learning"
+And all the <machine_learning_property> properties should be displayed along with their values under the Definition section
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+
+Machine Learning properties examples:
+  | machine_learning_property |
+  | Anomaly score threshold   |
+  | Machine Learning job      |
+```
+
+#### **Scenario: Threshold rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+Given a Threshold rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "Threshold"
+And the Threshold field should be displayed under the Definition section along with its value
+And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
+And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
+And for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+```
+
+#### **Scenario: EQL rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+Given a EQL rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "Event Correlation"
+And the "EQL query" field should be displayed under the Definition section along with its value
+And if EQL filters are defined in the rule then the "Filters" label should be displayed under the Definition section along with its value
+And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
+And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+```
+
+#### **Scenario: Indicator Match rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+Given an Indicator Match rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "Indicator Match"
+And for each <indicator_match_property> defined in the rule a corresponding value should be displayed under the Definition section
+And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
+And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
+And for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+
+Examples:
+  | indicator_match_property |
+  | Indicator index patterns |
+  | Indicator mapping        |
+  | Indicator filters        |
+  | Indicator index query    |
+```
+
+#### **Scenario: New Terms rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+Given a New Terms rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "New Terms"
+And for each <new_terms_property> defined in the rule a corresponding value should be displayed under the Definition section
+And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
+And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
+And for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+
+Examples:
+  | new_terms_property  |
+  | Fields              |
+  | History Window Size |
+```
+
+#### **Scenario: ES|QL rule - Overview tab**
+**Automation**: 1 e2e test
+```Gherkin
+"Rule type" should be "ES|QL"
+Might have setup guide
+Includes all shared About section properties.
+Includes all shared Schedule section properties.
+
+Given an ES|QL rule
+When the user opens the rule preview
+Then the "Rule type" property under the Definition section should be "ES|QL"
+And "ES|QL query" field should be displayed under the Definition section along with its value
+And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
+And if the rule has a setup guide then it should be displayed under the Setup Guide section
+```
+
+#### **Scenario: All rule types - Investigation guide**
+**Automation**: 1 e2e test
+```Gherkin
+  Given a rule of any type
+  When the user opens the rule preview
+  Then the "Investigation guide" tab should be displayed if the rule has an investigation guide
+  But the "Investigation guide" tab should not be displayed if the rule doesn't have an investigation guide
+```
+
+#### **Scenario: All rule types - Installing a rule**
+**Automation**: 1 e2e test
+```Gherkin
+  Given a not installed prebuilt rule
+  When the user opens the rule preview
+  Then the "Install" button should be displayed and enabled
+  And clicking the "Install" button should install the rule
+  And a newly installed rule should be displayed on the Rule Management page
+```
+
+#### **Scenario: All rule types - Upgrading a rule**
+**Automation**: 1 e2e test
+```Gherkin
+  Given an installed prebuilt rule that has a new version available
+  When the user opens the rule preview for this rule
+  Then the new version of the rule should be displayed
+  And the "Upgrade" button should be displayed and enabled
+  And clicking the "Upgrade" button should install the upgraded version of the rule
+```
+
+
+
 ### Error handling
 
 #### **Scenario: Error is handled when any operation on prebuilt rules fails**
