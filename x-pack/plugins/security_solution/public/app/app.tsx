@@ -38,7 +38,6 @@ interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -46,7 +45,6 @@ interface StartAppComponent {
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
   history,
-  setHeaderActionMenu,
   onAppLeave,
   store,
   theme$,
@@ -79,11 +77,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                             >
                               <UpsellingProvider upsellingService={upselling}>
                                 <DiscoverInTimelineContextProvider>
-                                  <PageRouter
-                                    history={history}
-                                    onAppLeave={onAppLeave}
-                                    setHeaderActionMenu={setHeaderActionMenu}
-                                  >
+                                  <PageRouter history={history} onAppLeave={onAppLeave}>
                                     {children}
                                   </PageRouter>
                                 </DiscoverInTimelineContextProvider>
@@ -113,7 +107,6 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -123,7 +116,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
-  setHeaderActionMenu,
   store,
   theme$,
 }) => {
@@ -137,13 +129,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       }}
     >
       <CloudProvider>
-        <StartApp
-          history={history}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          store={store}
-          theme$={theme$}
-        >
+        <StartApp history={history} onAppLeave={onAppLeave} store={store} theme$={theme$}>
           {children}
         </StartApp>
       </CloudProvider>
