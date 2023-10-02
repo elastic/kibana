@@ -51,7 +51,6 @@ export async function initDiagnosticsBundle({
   const kibanaClient = axios.create({
     baseURL: kbHost ?? kibanaHost,
     auth,
-    // @ts-expect-error
     headers: { 'kbn-xsrf': 'true', ...apiKeyHeader },
   });
   const apmIndices = await getApmIndices(kibanaClient);

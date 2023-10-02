@@ -60,7 +60,7 @@ export class BetterTestError extends Error {
     const req = res.req as any;
     super(
       `Unhandled BetterTestError:
-Status: "${res.status}"      
+Status: "${res.status}"
 Path: "${req.method} ${req.path}"
 Body: ${JSON.stringify(res.body)}`
     );

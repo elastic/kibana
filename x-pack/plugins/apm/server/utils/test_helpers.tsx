@@ -60,7 +60,6 @@ export async function inspectSearchParams(
     span: 'myIndex',
     transaction: 'myIndex',
     metric: 'myIndex',
-    sourcemap: 'myIndex',
   };
   const mockConfig = new Proxy(
     {},

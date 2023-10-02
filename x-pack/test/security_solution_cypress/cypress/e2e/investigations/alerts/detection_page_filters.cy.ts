@@ -262,21 +262,19 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
   });
 
   it(`URL is updated when filters are updated`, () => {
-    cy.on('url:changed', (urlString) => {
-      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-        return {
-          ...filter,
-          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
-        };
-      });
-      const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
-      expect(urlString).to.contain.text(expectedVal);
-    });
-
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({});
     closePageFilterPopover(1);
+
+    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
+      return {
+        ...filter,
+        selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
+      };
+    });
+    const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
+    cy.url().should('include', expectedVal);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
