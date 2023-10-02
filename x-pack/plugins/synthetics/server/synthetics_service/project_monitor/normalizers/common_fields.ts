@@ -84,6 +84,7 @@ export const getNormalizeCommonFields = ({
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
+    [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(monitor),
     [ConfigKey.PARAMS]: Object.keys(monitor.params || {}).length
       ? JSON.stringify(monitor.params)
       : defaultFields[ConfigKey.PARAMS],
@@ -115,6 +116,19 @@ const getAlertConfig = (monitor: ProjectMonitor) => {
         },
       }
     : defaultFields[ConfigKey.ALERT_CONFIG];
+};
+
+const ONL_ONE_ATTEMPT = 1;
+
+const getMaxAttempts = (monitor: ProjectMonitor) => {
+  const defaultFields = DEFAULT_COMMON_FIELDS;
+  const retestOnFailure = monitor.retestOnFailure;
+  if (retestOnFailure) {
+    return defaultFields[ConfigKey.MAX_ATTEMPTS];
+  } else if (monitor.retestOnFailure === false) {
+    return ONL_ONE_ATTEMPT;
+  }
+  return defaultFields[ConfigKey.MAX_ATTEMPTS];
 };
 
 export const getCustomHeartbeatId = (
