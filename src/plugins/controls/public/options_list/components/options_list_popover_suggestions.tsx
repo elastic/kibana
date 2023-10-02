@@ -12,13 +12,12 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import useMount from 'react-use/lib/useMount';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
-import { pluginServices } from '../../services';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -30,9 +29,6 @@ export const OptionsListPopoverSuggestions = ({
   loadMoreSuggestions,
 }: OptionsListPopoverSuggestionsProps) => {
   const optionsList = useOptionsList();
-  const {
-    dataViews: { get: getDataViewById },
-  } = pluginServices.getServices();
 
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
@@ -48,28 +44,11 @@ export const OptionsListPopoverSuggestions = ({
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
   const dataViewId = optionsList.select((state) => state.output.dataViewId);
-
-  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
-
-  /**
-   * derive field formatter from fieldSpec and dataViewId
-   */
-  useMount(() => {
-    (async () => {
-      if (!dataViewId || !fieldSpec) return;
-      // dataViews are cached, and should always be available without having to hit ES.
-      const dataView = await getDataViewById(dataViewId);
-      setFieldFormatter(
-        () =>
-          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: string) => toFormat)
-      );
-    })();
-  });
-
   const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
   const listRef = useRef<HTMLDivElement>(null);
+
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   const canLoadMoreSuggestions = useMemo(
     () =>
