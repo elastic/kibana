@@ -26,13 +26,12 @@ import {
   MarkdownFieldDefinition,
   NumberFieldDefinition,
   SelectFieldDefinition,
-  SettingType,
   StringFieldDefinition,
   UndefinedFieldDefinition,
 } from '@kbn/management-settings-types';
 
 /** Simplifed type for a {@link FieldDefinition} */
-type Definition = Pick<FieldDefinition<SettingType>, 'type'>;
+type Definition = Pick<FieldDefinition, 'type'>;
 
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link ArrayFieldDefinition},
