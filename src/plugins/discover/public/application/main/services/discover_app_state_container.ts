@@ -73,6 +73,12 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
+
+  /*
+   * Get updated AppState when given a saved search
+   *
+   * */
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -174,6 +180,13 @@ export const getDiscoverAppStateContainer = ({
     return !isEqualState(initialState, appStateContainer.getState());
   };
 
+  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
+    return getStateDefaults({
+      savedSearch: newSavedSearch,
+      services,
+    });
+  };
+
   const resetToState = (state: DiscoverAppState) => {
     addLog('[appState] reset state to', state);
     previousState = state;
@@ -264,6 +277,7 @@ export const getDiscoverAppStateContainer = ({
     replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
+    getAppStateFromSavedSearch,
   };
 };
 

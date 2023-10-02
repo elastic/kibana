@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Blocked API: index_not_found_exception: no such index [.alerts-observability.threshold.alerts-default]
   // Issue: https://github.com/elastic/kibana/issues/165138
+  // Failing: See https://github.com/elastic/kibana/issues/167629
   describe.skip('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
