@@ -72,14 +72,15 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.DATA_VIEWS]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
-      defaultMessage: 'Create and manage the objects that retrieve data from Elasticsearch.',
+      defaultMessage: 'Create and manage the Elasticsearch data you selected for exploration.',
     }),
     icon: <EuiIcon size="l" type="indexEdit" />,
   },
   [appIds.ML]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
-      defaultMessage: 'Identify, analyze, and process your data using advanced data analysis.',
+      defaultMessage:
+        'Identify, analyze, and process your data using advanced analysis techniques.',
     }),
     icon: <EuiIcon size="l" type="indexMapping" />,
   },
