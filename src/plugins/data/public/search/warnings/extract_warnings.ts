@@ -9,12 +9,19 @@
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { IInspectorInfo } from '../../../common/search/search_source';
 import { SearchResponseWarning } from '../types';
 
 /**
  * @internal
  */
-export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResponseWarning[] {
+export function extractWarnings(
+  rawResponse: estypes.SearchResponse,
+  inspectorService: InspectorStartContract,
+  inspector?: IInspectorInfo
+): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
   const isPartial = rawResponse._clusters
@@ -48,6 +55,29 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
               failures: rawResponse._shards.failures,
             },
           },
+      openInInspector: () => {
+        const adapter = inspector?.adapter ? inspector.adapter : new RequestAdapter();
+        if (!inspector?.adapter) {
+          const requestResponder = adapter.start(
+            i18n.translate('data.search.searchSource.anonymousRequestTitle', {
+              defaultMessage: 'Request',
+            })
+          );
+          requestResponder.ok({ json: rawResponse });
+        }
+
+        inspectorService.open(
+          {
+            requests: adapter,
+          },
+          {
+            options: {
+              initialRequestId: inspector?.id,
+              initialTabs: ['clusters', 'response'],
+            },
+          }
+        );
+      },
     });
   }
 
