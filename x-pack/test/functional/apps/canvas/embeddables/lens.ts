@@ -82,7 +82,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         const panelHeader = await testSubjects.find('embeddablePanelHeading-');
         await dashboardPanelActions.openContextMenu(panelHeader);
         await dashboardPanelActions.clickEdit();
-        await await PageObjects.lens.saveAndReturn();
+        await PageObjects.lens.saveAndReturn();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.exists('xyVisChart');
       });

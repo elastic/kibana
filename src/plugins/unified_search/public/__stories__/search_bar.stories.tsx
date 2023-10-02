@@ -174,11 +174,20 @@ const services = {
   },
 };
 
+const defaultCapabilities = {
+  savedObjectsManagement: {
+    edit: true,
+  },
+};
+
 setIndexPatterns({
   get: () => Promise.resolve(mockIndexPatterns[0]),
 } as unknown as DataViewsContract);
 
-function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
+function wrapSearchBarInContext(
+  testProps: Partial<SearchBarProps<Query>>,
+  capabilities: typeof defaultCapabilities = defaultCapabilities
+) {
   const defaultOptions = {
     appName: 'test',
     timeHistory: mockTimeHistory,
@@ -197,9 +206,16 @@ function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
     onFiltersUpdated: action('onFiltersUpdated'),
   } as unknown as SearchBarProps<Query>;
 
+  const kbnServices = {
+    ...services,
+    application: {
+      capabilities,
+    },
+  };
+
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={kbnServices}>
         <SearchBar<Query> {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
@@ -219,7 +235,7 @@ storiesOf('SearchBar', module)
         },
         onChangeDataView: action('onChangeDataView'),
       },
-    } as SearchBarProps)
+    })
   )
   .add('with dataviewPicker enhanced', () =>
     wrapSearchBarInContext({
@@ -234,41 +250,56 @@ storiesOf('SearchBar', module)
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
       },
-    } as SearchBarProps)
+    })
   )
   .add('with filterBar off', () =>
     wrapSearchBarInContext({
       showFilterBar: false,
-    } as SearchBarProps)
+    })
   )
   .add('with query input off', () =>
     wrapSearchBarInContext({
       showQueryInput: false,
-    } as SearchBarProps)
+    })
   )
   .add('with date picker off', () =>
     wrapSearchBarInContext({
       showDatePicker: false,
-    } as SearchBarProps)
+    })
+  )
+  .add('with disabled "Save query" menu', () =>
+    wrapSearchBarInContext({
+      showSaveQuery: false,
+    })
+  )
+  .add('with hidden "Manage saved objects" link in "Load saved query" menu', () =>
+    wrapSearchBarInContext(
+      {},
+      {
+        savedObjectsManagement: {
+          edit: false,
+        },
+      }
+    )
   )
   .add('with the default date picker auto refresh interval on', () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       onRefreshChange: action('onRefreshChange'),
-    } as SearchBarProps)
+    })
   )
   .add('with the default date picker auto refresh interval off', () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       isAutoRefreshDisabled: true,
-    } as SearchBarProps)
+    })
   )
   .add('with only the date picker on', () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       showFilterBar: false,
       showQueryInput: false,
-    } as SearchBarProps)
+    })
   )
   .add('with additional filters used for suggestions', () =>
     wrapSearchBarInContext({
@@ -470,12 +501,12 @@ storiesOf('SearchBar', module)
         />
       ),
       showQueryInput: true,
-    } as SearchBarProps)
+    })
   )
   .add('without switch query language', () =>
     wrapSearchBarInContext({
       disableQueryLanguageSwitcher: true,
-    } as SearchBarProps)
+    })
   )
   .add('show only query bar without submit', () =>
     wrapSearchBarInContext({
@@ -484,7 +515,7 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('show only datepicker without submit', () =>
     wrapSearchBarInContext({
@@ -493,7 +524,7 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: false,
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('show only query bar and timepicker without submit', () =>
     wrapSearchBarInContext({
@@ -502,7 +533,7 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('with filter bar on but pinning option is hidden from menus', () =>
     wrapSearchBarInContext({
@@ -621,7 +652,7 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       isDisabled: true,
-    } as SearchBarProps)
+    })
   )
   .add('no submit button', () =>
     wrapSearchBarInContext({
@@ -635,7 +666,7 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('submit button always as icon', () =>
     wrapSearchBarInContext({
@@ -649,7 +680,7 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'iconOnly',
-    } as SearchBarProps)
+    })
   )
   .add('submit button always as a full button', () =>
     wrapSearchBarInContext({
@@ -663,5 +694,5 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'full',
-    } as SearchBarProps)
+    })
   );

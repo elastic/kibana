@@ -58,12 +58,12 @@ describe('convertHighlightedFieldsToPrevalenceFilters', () => {
         values: ['host-1'],
       },
       'user.name': {
-        values: ['user-1'],
+        values: ['user-1', 'user-2'],
       },
     };
     expect(convertHighlightedFieldsToPrevalenceFilters(highlightedFields)).toEqual({
-      'host.name': { match: { 'host.name': 'host-1' } },
-      'user.name': { match: { 'user.name': 'user-1' } },
+      'host.name': { terms: { 'host.name': ['host-1'] } },
+      'user.name': { terms: { 'user.name': ['user-1', 'user-2'] } },
     });
   });
 });

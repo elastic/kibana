@@ -24,6 +24,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { MobileSearchBar } from '../../../app/mobile/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
+import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
@@ -57,7 +58,7 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/mobile-services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -116,12 +117,13 @@ function TemplateWithContext({
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
+                    environment={environment}
                     start={start}
                     end={end}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge />
+                  <BetaBadge icon="beta" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

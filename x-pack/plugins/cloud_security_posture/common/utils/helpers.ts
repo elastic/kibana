@@ -20,6 +20,7 @@ import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
+  AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
 import type {
   BenchmarkId,
@@ -27,6 +28,8 @@ import type {
   BaseCspSetupStatus,
   AwsCredentialsType,
   GcpCredentialsType,
+  AzureCredentialsType,
+  RuleSection,
 } from '../types';
 
 /**
@@ -46,8 +49,12 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
+    section
+      ? ` AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+      : ''
+  }`;
 
 export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
   input.enabled;
@@ -114,6 +121,8 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
   const gcpCredentialType: GcpCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['gcp.credentials.type']?.value;
+  const azureCredentialType: AzureCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['azure.credentials.type']?.value;
 
   if (awsCredentialType || gcpCredentialType) {
     let credsToKeep: string[] = [' '];
@@ -124,6 +133,9 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     } else if (gcpCredentialType) {
       credsToKeep = GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP[gcpCredentialType];
       credFields = Object.values(GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    } else if (azureCredentialType) {
+      credsToKeep = AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP[azureCredentialType];
+      credFields = Object.values(AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
     }
 
     if (credsToKeep) {
