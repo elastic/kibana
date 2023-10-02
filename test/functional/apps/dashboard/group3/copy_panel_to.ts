@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const find = getService('find');
 
   const PageObjects = getPageObjects([
     'header',

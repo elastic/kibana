@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 const enabledSchema = schema.maybe(
   schema.object({
@@ -17,5 +17,3 @@ export const configSchema = schema.object({
   dfa: enabledSchema,
   nlp: enabledSchema,
 });
-
-export type ConfigSchema = TypeOf<typeof configSchema>;

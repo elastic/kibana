@@ -6,9 +6,10 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
-import { EuiTreeView } from '@elastic/eui';
+import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useRightPanelContext } from '../context';
@@ -41,7 +42,7 @@ export const AnalyzerPreview: React.FC = () => {
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);
   const indices = index?.values ?? [];
 
-  const { statsNodes } = useAlertPrevalenceFromProcessTree({
+  const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimeline(scopeId),
     documentId: processDocumentId,
     indices,
@@ -58,24 +59,36 @@ export const AnalyzerPreview: React.FC = () => {
     [cache.statsNodes]
   );
 
-  if (!documentId || !index || !items || items.length === 0) {
-    return null;
-  }
+  const showAnalyzerTree = documentId && index && items && items.length > 0 && !error;
 
-  return (
-    <div data-test-subj={ANALYZER_PREVIEW_TEST_ID}>
-      <EuiTreeView
-        items={items}
-        display="compressed"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
-          {
-            defaultMessage: 'Analyzer preview',
-          }
-        )}
-        showExpansionArrows
-      />
-    </div>
+  return loading ? (
+    <EuiSkeletonText
+      data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
+      contentAriaLabel={i18n.translate(
+        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+        {
+          defaultMessage: 'analyzer preview',
+        }
+      )}
+    />
+  ) : showAnalyzerTree ? (
+    <EuiTreeView
+      items={items}
+      display="compressed"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
+        {
+          defaultMessage: 'Analyzer preview',
+        }
+      )}
+      showExpansionArrows
+      data-test-subj={ANALYZER_PREVIEW_TEST_ID}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+      defaultMessage="An error is preventing this alert from being analyzed."
+    />
   );
 };
 
