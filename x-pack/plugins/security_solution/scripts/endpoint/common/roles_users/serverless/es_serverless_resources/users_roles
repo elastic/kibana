@@ -1,0 +1,13 @@
+superuser:elastic_serverless
+system_indices_superuser:system_indices_superuser
+t1_analyst:t1_analyst
+t2_analyst:t2_analyst
+t3_analyst:t3_analyst
+threat_intelligence_analyst:threat_intelligence_analyst
+rule_author:rule_author
+soc_manager:soc_manager
+detections_admin:detections_admin
+platform_engineer:platform_engineer
+endpoint_operations_analyst:endpoint_operations_analyst
+endpoint_policy_manager:endpoint_policy_manager
+reader:reader

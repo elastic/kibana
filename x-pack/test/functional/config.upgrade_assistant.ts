@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'cluster.routing.allocation.disk.threshold_enabled=true', // make sure disk thresholds are enabled for UA cluster testing
         'cluster.routing.allocation.disk.watermark.low=30%',
         'cluster.info.update.interval=10s',
-        'cluster.max_shards_per_node=27',
+        'cluster.max_shards_per_node=29',
       ],
     },
   };

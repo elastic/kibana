@@ -14,7 +14,10 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { rulesLocatorID } from '../../../common';
+import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -53,6 +56,9 @@ function InternalAlertsPage() {
     },
     http,
     notifications: { toasts },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       getAlertsSearchBar: AlertsSearchBar,
@@ -179,13 +185,21 @@ function InternalAlertsPage() {
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
           ),
-          rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
+          rightSideItems: renderRuleStats(
+            ruleStats,
+            manageRulesHref,
+            ruleStatsLoading,
+            locators.get<RulesParams>(rulesLocatorID)
+          ),
         }}
       >
         <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+            <MaintenanceWindowCallout
+              kibanaServices={kibanaServices}
+              categories={[DEFAULT_APP_CATEGORIES.observability.id]}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <ObservabilityAlertSearchBar

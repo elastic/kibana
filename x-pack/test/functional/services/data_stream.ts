@@ -8,15 +8,14 @@
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-const waitFor = (time: number = 1000) => new Promise((r) => setTimeout(r, time));
-
 /**
  * High level interface to operate with Elasticsearch data stream and TSDS.
  */
-export function DataStreamProvider({ getService }: FtrProviderContext) {
+export function DataStreamProvider({ getService, getPageObject }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
+  const common = getPageObject('common');
 
   const downsampleDefaultOptions = {
     isStream: true,
@@ -65,7 +64,7 @@ export function DataStreamProvider({ getService }: FtrProviderContext) {
             waitTime / 1000
           }s before running the downsampling to avoid a null_pointer_exception`
         );
-        await waitFor(waitTime);
+        await common.sleep(waitTime);
 
         try {
           log.info(`downsampling "${sourceIndex}" index...`);
