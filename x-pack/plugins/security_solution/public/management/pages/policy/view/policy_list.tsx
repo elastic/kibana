@@ -84,6 +84,11 @@ export const PolicyList = memo(() => {
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
+  const shouldShowOnboarding = useMemo(
+    () => !policyIsFetching && totalItemCount === 0 && !error,
+    [policyIsFetching, totalItemCount, error]
+  );
+
   const policyListPath = useMemo(() => getPoliciesPath(search), [search]);
 
   const backLink: PolicyDetailsRouteState['backLink'] = useMemo(() => {
@@ -372,7 +377,7 @@ export const PolicyList = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
-      hideHeader={totalItemCount === 0}
+      hideHeader={shouldShowOnboarding}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
         defaultMessage: 'Policies',
       })}
@@ -381,7 +386,7 @@ export const PolicyList = memo(() => {
           'Use policies to customize endpoint and cloud workload protections and other configurations',
       })}
     >
-      {totalItemCount > 0 ? (
+      {!shouldShowOnboarding ? (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage
