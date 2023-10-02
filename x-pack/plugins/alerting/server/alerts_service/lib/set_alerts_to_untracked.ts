@@ -90,6 +90,7 @@ export async function setAlertsToUntracked({
   ];
 
   if (ensureAuthorized) {
+    // Fetch all rule type IDs and rule consumers, then run the provided ensureAuthorized check for each of them
     const response = await esClient.search<never, ConsumersAndRuleTypesAggregation>({
       index: indices,
       allow_no_indices: true,
