@@ -302,7 +302,7 @@ describe('bulk action hooks', () => {
       mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
     });
 
-    it('appends the case bulk actions', async () => {
+    it('appends the case and untrack bulk actions', async () => {
       const { result } = renderHook(
         () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh }),
         {
@@ -329,6 +329,14 @@ describe('bulk action hooks', () => {
                 "disabledLabel": "Add to existing case",
                 "key": "attach-existing-case",
                 "label": "Add to existing case",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "mark-as-untracked",
+                "disableOnQuery": true,
+                "disabledLabel": "Mark as untracked",
+                "key": "mark-as-untracked",
+                "label": "Mark as untracked",
                 "onClick": [Function],
               },
             ],

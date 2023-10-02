@@ -843,7 +843,7 @@ describe('AlertsTableState', () => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
         expect(
           getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
+            .querySelectorAll('.euiDataGridHeaderCell__content')[3]
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });
