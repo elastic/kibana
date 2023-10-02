@@ -184,6 +184,21 @@
       },
       {
         "parentPluginId": "@kbn/core-base-common",
+        "id": "def-common.EUI_STYLES_UTILS",
+        "type": "string",
+        "tags": [],
+        "label": "EUI_STYLES_UTILS",
+        "description": [],
+        "signature": [
+          "\"eui-utilities\""
+        ],
+        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-base-common",
         "id": "def-common.PluginName",
         "type": "Type",
         "tags": [],

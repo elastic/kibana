@@ -14,12 +14,12 @@ describe('list_client', () => {
   describe('Mock client checks (not exhaustive tests against it)', () => {
     test('it returns the get list index as expected', () => {
       const mock = getListClientMock();
-      expect(mock.getListIndex()).toEqual(LIST_INDEX);
+      expect(mock.getListName()).toEqual(LIST_INDEX);
     });
 
     test('it returns the get list item index as expected', () => {
       const mock = getListClientMock();
-      expect(mock.getListItemIndex()).toEqual(LIST_ITEM_INDEX);
+      expect(mock.getListItemName()).toEqual(LIST_ITEM_INDEX);
     });
 
     test('it returns a mock list item', async () => {

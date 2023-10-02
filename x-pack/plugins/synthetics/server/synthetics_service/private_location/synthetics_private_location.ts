@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import {
+  BROWSER_TEST_NOW_RUN,
+  LIGHTWEIGHT_TEST_NOW_RUN,
+} from '../synthetics_monitor/synthetics_monitor_client';
+import { scheduleCleanUpTask } from './clean_up_task';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
@@ -16,10 +20,10 @@ import {
   ConfigKey,
   HeartbeatConfig,
   MonitorFields,
-  PrivateLocation,
   SourceType,
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -64,10 +68,12 @@ export class SyntheticsPrivateLocation {
 
   generateNewPolicy(
     config: HeartbeatConfig,
-    privateLocation: PrivateLocation,
+    privateLocation: PrivateLocationAttributes,
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
-    globalParams: Record<string, string>
+    globalParams: Record<string, string>,
+    testRunId?: string,
+    runOnce?: boolean
   ): (NewPackagePolicy & { policy_id: string }) | null {
     const { label: locName } = privateLocation;
 
@@ -76,10 +82,15 @@ export class SyntheticsPrivateLocation {
     try {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
-      if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
-        newPolicy.name = `${config.id}-${locName}`;
+      if (testRunId) {
+        newPolicy.name =
+          config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
       } else {
-        newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
+        if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
+          newPolicy.name = `${config.id}-${locName}`;
+        } else {
+          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
+        }
       }
       newPolicy.namespace = config[ConfigKey.NAMESPACE];
 
@@ -91,8 +102,18 @@ export class SyntheticsPrivateLocation {
           config_id: config.fields?.config_id,
           location_name: stringifyString(privateLocation.label),
           location_id: privateLocation.id,
-          'monitor.project.id': stringifyString(config.fields?.['monitor.project.name']),
-          'monitor.project.name': stringifyString(config.fields?.['monitor.project.name']),
+          'monitor.project.id':
+            config.fields?.['monitor.project.id'] ?? config[ConfigKey.PROJECT_ID],
+          'monitor.project.name':
+            config.fields?.['monitor.project.name'] ?? config[ConfigKey.PROJECT_ID],
+          ...(testRunId
+            ? {
+                test_run_id: testRunId,
+                'monitor.id': config[ConfigKey.MONITOR_QUERY_ID],
+                id: testRunId,
+              }
+            : {}),
+          ...(runOnce ? { run_once: runOnce } : {}),
         },
         globalParams
       );
@@ -106,27 +127,25 @@ export class SyntheticsPrivateLocation {
 
   async createPackagePolicies(
     configs: PrivateConfig[],
-    request: KibanaRequest,
-    privateLocations: PrivateLocation[],
-    spaceId: string
+    privateLocations: PrivateLocationAttributes[],
+    spaceId: string,
+    testRunId?: string,
+    runOnce?: boolean
   ) {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
 
     const newPolicies: NewPackagePolicyWithId[] = [];
-
     const newPolicyTemplate = await this.buildNewPolicy();
 
     for (const { config, globalParams } of configs) {
       try {
         const { locations } = config;
-
         const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
 
         for (const privateLocation of fleetManagedLocations) {
           const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
-
           if (!location) {
             throw new Error(
               `Unable to find Synthetics private location for agentId ${privateLocation.id}`
@@ -138,7 +157,9 @@ export class SyntheticsPrivateLocation {
             location,
             newPolicyTemplate,
             spaceId,
-            globalParams
+            globalParams,
+            testRunId,
+            runOnce
           );
 
           if (!newPolicy) {
@@ -149,7 +170,14 @@ export class SyntheticsPrivateLocation {
             );
           }
           if (newPolicy) {
-            newPolicies.push({ ...newPolicy, id: this.getPolicyId(config, location.id, spaceId) });
+            if (testRunId) {
+              newPolicies.push(newPolicy as NewPackagePolicyWithId);
+            } else {
+              newPolicies.push({
+                ...newPolicy,
+                id: this.getPolicyId(config, location.id, spaceId),
+              });
+            }
           }
         }
       } catch (e) {
@@ -163,7 +191,12 @@ export class SyntheticsPrivateLocation {
     }
 
     try {
-      return await this.createPolicyBulk(newPolicies);
+      const result = await this.createPolicyBulk(newPolicies);
+      if (result?.created && result?.created?.length > 0 && testRunId) {
+        // ignore await here, we don't want to wait for this to finish
+        scheduleCleanUpTask(this.server);
+      }
+      return result;
     } catch (e) {
       this.server.logger.error(e);
       throw e;
@@ -176,7 +209,7 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations,
   }: {
     privateConfig?: PrivateConfig;
-    allPrivateLocations: PrivateLocation[];
+    allPrivateLocations: PrivateLocationAttributes[];
     spaceId: string;
   }) {
     if (!privateConfig) {
@@ -215,8 +248,7 @@ export class SyntheticsPrivateLocation {
 
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
-    request: KibanaRequest,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     if (configs.length === 0) {
@@ -303,7 +335,7 @@ export class SyntheticsPrivateLocation {
 
   async getExistingPolicies(
     configs: HeartbeatConfig[],
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
@@ -354,18 +386,22 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient && policyIdsToDelete.length > 0) {
-      return await this.server.fleet.packagePolicyService.delete(
-        soClient,
-        esClient,
-        policyIdsToDelete,
-        {
-          force: true,
-        }
-      );
+      try {
+        return await this.server.fleet.packagePolicyService.delete(
+          soClient,
+          esClient,
+          policyIdsToDelete,
+          {
+            force: true,
+          }
+        );
+      } catch (e) {
+        this.server.logger.error(e);
+      }
     }
   }
 
-  async deleteMonitors(configs: HeartbeatConfig[], request: KibanaRequest, spaceId: string) {
+  async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.uptimeEsClient.baseESClient;
 
@@ -376,12 +412,7 @@ export class SyntheticsPrivateLocation {
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of monitorPrivateLocations) {
-        try {
-          policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
-        } catch (e) {
-          this.server.logger.error(e);
-          throw new Error(deletePolicyError(config[ConfigKey.NAME], privateLocation.label));
-        }
+        policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
       }
     }
     if (policyIdsToDelete.length > 0) {
@@ -393,7 +424,9 @@ export class SyntheticsPrivateLocation {
           force: true,
         }
       );
-      const failedPolicies = result?.filter((policy) => !policy.success);
+      const failedPolicies = result?.filter((policy) => {
+        return !policy.success && policy?.statusCode !== 404;
+      });
       if (failedPolicies?.length === policyIdsToDelete.length) {
         throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
       }
@@ -402,9 +435,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    const agentPolicies = await getAgentPoliciesAsInternalUser(this.server);
-
-    return agentPolicies.items;
+    return await getAgentPoliciesAsInternalUser(this.server);
   }
 }
 

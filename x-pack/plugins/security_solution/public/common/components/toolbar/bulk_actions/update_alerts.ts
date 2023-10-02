@@ -44,8 +44,8 @@ export const updateAlertStatus = ({
   signal,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
-    return updateAlertStatusByIds({ status, signalIds, signal }).then(({ items }) => ({
-      updated: items.length,
+    return updateAlertStatusByIds({ status, signalIds, signal }).then(({ updated }) => ({
+      updated: updated ?? 0,
       version_conflicts: 0,
     }));
   } else if (query) {

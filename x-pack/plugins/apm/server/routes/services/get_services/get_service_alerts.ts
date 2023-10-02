@@ -6,10 +6,6 @@
  */
 
 import {
-  AggregationsCardinalityAggregate,
-  AggregationsFilterAggregate,
-} from '@elastic/elasticsearch/lib/api/types';
-import {
   kqlQuery,
   termQuery,
   rangeQuery,
@@ -26,15 +22,6 @@ import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
-
-interface ServiceAggResponse {
-  buckets: Array<
-    AggregationsFilterAggregate & {
-      key: string;
-      alerts_count: AggregationsCardinalityAggregate;
-    }
-  >;
-}
 
 export type ServiceAlertsResponse = Array<{
   serviceName: string;
@@ -62,6 +49,7 @@ export async function getServicesAlerts({
 }): Promise<ServiceAlertsResponse> {
   const params = {
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [
@@ -94,9 +82,7 @@ export async function getServicesAlerts({
 
   const result = await apmAlertsClient.search(params);
 
-  const { buckets: filterAggBuckets } = (result.aggregations?.services ?? {
-    buckets: [],
-  }) as ServiceAggResponse;
+  const filterAggBuckets = result.aggregations?.services.buckets ?? [];
 
   const servicesAlertsCount: Array<{
     serviceName: string;

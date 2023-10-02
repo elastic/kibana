@@ -14,6 +14,7 @@ import type {
   OutputType,
   ShipperOutput,
   KafkaAcknowledgeReliabilityLevel,
+  KafkaConnectionTypeType,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -159,6 +160,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   compression?: ValueOf<KafkaCompressionType>;
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string;
   password?: string;
   sasl?: {
@@ -188,8 +190,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   }>;
   timeout?: number;
   broker_timeout?: number;
-  broker_buffer_size?: number;
-  broker_ack_reliability?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
 }
 
 export type OutputSOAttributes =
@@ -201,6 +202,7 @@ export interface SettingsSOAttributes {
   prerelease_integrations_enabled: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
+  secret_storage_requirements_met?: boolean;
 }
 
 export interface DownloadSourceSOAttributes {
@@ -208,6 +210,7 @@ export interface DownloadSourceSOAttributes {
   host: string;
   is_default: boolean;
   source_id?: string;
+  proxy_id?: string | null;
 }
 export interface SimpleSOAssetAttributes {
   title?: string;

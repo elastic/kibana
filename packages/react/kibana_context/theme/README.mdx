@@ -1,0 +1,66 @@
+---
+id: react/context/theme
+slug: /react/context/theme
+title: React Context - Theme
+description: This context allows a one to alter the theme for a given component.  This is likely to be the context that is used most often.
+tags: ['shared-ux', 'react', 'context']
+date: 2023-07-25
+---
+
+## Description
+
+This package contains a "theming" context for Kibana.  A corollary to EUI's `EuiThemeProvider`, it uses Kibana services to ensure the EUI Theme is customized correctly.
+
+Up until now, there has been some confusion as to the difference between `EuiThemeProvider` and `EuiProvider`.  They've been used interchangeably, which created some unnoticed
+side effects.  In addition, _nesting_ of `EuiThemeProvider` has led to additional nodes being rendered to the DOM.
+
+This context allows us to have a single source of truth for the theme in Kibana, and ensures that the theme is applied correctly.  It also abstracts away any updates or changes
+made to the `EuiThemeProvider` in the future.
+
+```ts
+
+// Make a component always display in dark mode.
+import { BehaviorSubject } from 'rxjs';
+import { KibanaThemeContextProvider, type KibanaTheme } from '@kbn/react-kibana-context-theme';
+
+import { MyComponent } from './my_component';
+
+export const AlwaysDarkMode = () => {
+  // We've purposefully excluded `colorMode` from the props of the provider
+  // to enforce the use of the `theme$` observable.  This prevents consumers
+  // from confusing which takes precedence, (or what needs to be set in most
+  // cases).
+  const theme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true }));
+
+  return (
+    <KibanaThemeContextProvider theme={{ theme$ }}>
+      <MyComponent />
+    </KibanaThemeContextProvider>
+  );
+};
+
+
+import { EuiThemeShape, RecursivePartial } from '@elastic/eui';
+
+// Change the EUI theme colors in dark and light mode.
+export const ChangeEuiTheme = ({ theme }: CoreStart) => {
+  const modify: RecursivePartial<EuiThemeShape> = {
+    colors: {
+      DARK: {
+        text: '#abc',
+        accent: '#123',
+      },
+      LIGHT: {
+        text: '#123',
+        accent: '#abc',
+      },
+    },
+  };
+
+  return (
+    <KibanaThemeProvider {...{ theme, modify }}>
+      <MyComponent />
+    </KibanaThemeProvider>
+  );
+};
+```

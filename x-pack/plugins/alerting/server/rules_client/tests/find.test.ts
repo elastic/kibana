@@ -6,7 +6,11 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -36,6 +40,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -46,16 +51,20 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -80,8 +89,12 @@ describe('find()', () => {
       isExportable: true,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     },
   ]);
   beforeEach(() => {
@@ -137,11 +150,15 @@ describe('find()', () => {
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
           isExportable: true,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -296,6 +313,103 @@ describe('find()', () => {
     `);
   });
 
+  test('finds rules with actions using system connectors', async () => {
+    unsecuredSavedObjectsClient.find.mockReset();
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                actionRef: 'system_action:system_action-id',
+                params: {},
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+      ],
+    });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {} });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+              Object {
+                "group": "default",
+                "id": "system_action-id",
+                "params": Object {},
+              },
+            ],
+            "alertTypeId": "myType",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "1",
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "snoozeSchedule": Array [],
+            "updatedAt": 2019-02-12T21:01:22.479Z,
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 1,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "fields": undefined,
+          "filter": null,
+          "sortField": undefined,
+          "type": "alert",
+        },
+      ]
+    `);
+  });
+
   test('calls mapSortField', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
@@ -354,8 +468,12 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -370,10 +488,12 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -386,6 +506,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -394,6 +515,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,
@@ -560,8 +682,12 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -576,10 +702,12 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -592,6 +720,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -600,6 +729,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,

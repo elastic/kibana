@@ -8,22 +8,25 @@
 import React from 'react';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 
-import { Anomalies, type AnomaliesProps } from './anomalies';
+import { Anomalies } from './anomalies';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { DecorateWithKibanaContext } from '../../__stories__/decorator';
+import {
+  DecorateWithKibanaContext,
+  DecorateWithAssetDetailsStateContext,
+} from '../../__stories__/decorator';
 
-const stories: Meta<AnomaliesProps> = {
+const stories: Meta = {
   title: 'infra/Asset Details View/Components/Anomalies',
-  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
+  decorators: [
+    decorateWithGlobalStorybookThemeProviders,
+    DecorateWithKibanaContext,
+    DecorateWithAssetDetailsStateContext,
+  ],
   component: Anomalies,
-  args: {
-    nodeName: 'host-1',
-    onClose: () => {},
-  },
 };
 
-const Template: Story<AnomaliesProps> = (args) => {
-  return <Anomalies {...args} />;
+const Template: Story = () => {
+  return <Anomalies />;
 };
 
 export const Default = Template.bind({});

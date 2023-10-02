@@ -1,14 +1,29 @@
 {
   "reindex": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "refresh": "__flag__",
-      "timeout": "",
-      "wait_for_active_shards": "",
-      "wait_for_completion": "__flag__",
       "requests_per_second": "",
-      "scroll": "",
-      "slices": "",
-      "max_docs": "all documents"
+      "scroll": [
+        "-1",
+        "0"
+      ],
+      "slices": [
+        "auto"
+      ],
+      "timeout": [
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "all",
+        "index-setting"
+      ],
+      "wait_for_completion": "__flag__",
+      "require_alias": "__flag__"
     },
     "methods": [
       "POST"
@@ -16,6 +31,10 @@
     "patterns": [
       "_reindex"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

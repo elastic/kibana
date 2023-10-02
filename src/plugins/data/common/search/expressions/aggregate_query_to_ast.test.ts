@@ -10,14 +10,14 @@ import { aggregateQueryToAst } from './aggregate_query_to_ast';
 
 describe('aggregateQueryToAst', () => {
   it('should return a function', () => {
-    expect(aggregateQueryToAst({ sql: 'SELECT * from foo' })).toHaveProperty('type', 'function');
+    expect(aggregateQueryToAst({ esql: 'from foo' })).toHaveProperty('type', 'function');
   });
 
   it('should forward arguments', () => {
-    expect(aggregateQueryToAst({ sql: 'SELECT * from foo' }, 'baz')).toHaveProperty(
+    expect(aggregateQueryToAst({ esql: 'from foo' }, 'baz')).toHaveProperty(
       'arguments',
       expect.objectContaining({
-        query: ['SELECT * from foo'],
+        query: ['from foo'],
         timeField: ['baz'],
       })
     );

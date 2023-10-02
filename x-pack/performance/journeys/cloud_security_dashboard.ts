@@ -7,6 +7,7 @@
 
 import { Journey } from '@kbn/journeys';
 import expect from '@kbn/expect';
+import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
   beforeSteps: async ({ kibanaServer, retry }) => {
@@ -47,5 +48,5 @@ export const journey = new Journey({
   },
 }).step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
   await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
-  await page.waitForSelector(`[data-test-subj="csp:dashboard-sections-table-header-score"]`);
+  await page.waitForSelector(subj('csp:dashboard-sections-table-header-score'));
 });

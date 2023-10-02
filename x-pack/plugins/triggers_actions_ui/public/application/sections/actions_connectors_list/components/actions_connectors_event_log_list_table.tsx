@@ -15,7 +15,6 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiDataGridSorting,
-  Pagination,
   EuiSuperDatePicker,
   OnTimeChangeProps,
   EuiSwitch,
@@ -38,6 +37,7 @@ import { RefineSearchPrompt } from '../../common/components/refine_search_prompt
 import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import {
   EventLogDataGrid,
+  type EventLogDataGrid as EventLogDataGridProps,
   EventLogListStatusFilter,
   getIsColumnSortable,
 } from '../../common/components/event_log';
@@ -136,7 +136,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [filter, setFilter] = useState<string[]>([]);
   const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<EventLogDataGridProps['pagination']>({
     pageIndex: 0,
     pageSize: initialPageSize,
     totalItemCount: 0,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -19,41 +19,45 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useAppDependencies } from '../app_dependencies';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
-// Because of the use of `toMountPoint`, `useKibanaContext` doesn't work via `useAppDependencies`.
-// That's why we need to pass in `overlays` as a prop cannot get it via context.
 interface ToastNotificationTextProps {
-  overlays: CoreStart['overlays'];
-  theme: CoreStart['theme'];
   text: any;
   previewTextLength?: number;
+  inline?: boolean;
+  forceModal?: boolean;
 }
 
 export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
-  overlays,
   text,
-  theme,
   previewTextLength,
+  inline = false,
+  forceModal = false,
 }) => {
-  if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
+  const { overlays, theme, i18n: i18nStart } = useAppDependencies();
+
+  if (!forceModal && typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
   }
 
   if (
+    !forceModal &&
     typeof text === 'object' &&
+    text !== null &&
     typeof text.message === 'string' &&
     text.message.length <= MAX_SIMPLE_MESSAGE_LENGTH
   ) {
     return text.message;
   }
 
-  const unformattedText = text.message ? text.message : text;
-  const formattedText = typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : text;
+  const unformattedText =
+    typeof text === 'object' && text !== null && text.message ? text.message : text;
+  const formattedText =
+    typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : unformattedText;
   const textLength = previewTextLength ?? 140;
   const previewText = `${formattedText.substring(0, textLength)}${
     formattedText.length > textLength ? ' ...' : ''
@@ -83,15 +87,19 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
             </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>,
-        { theme$: theme.theme$ }
+        { theme, i18n: i18nStart }
       )
     );
   };
 
   return (
     <>
-      <pre>{previewText}</pre>
-      <EuiButtonEmpty onClick={openModal}>
+      {!inline && <pre>{previewText}</pre>}
+      <EuiButtonEmpty
+        onClick={openModal}
+        css={inline ? { blockSize: 0 } : {}}
+        size={inline ? 's' : undefined}
+      >
         {i18n.translate('xpack.transform.toastText.openModalButtonText', {
           defaultMessage: 'View details',
         })}

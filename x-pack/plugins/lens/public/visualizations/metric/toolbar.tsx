@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover } from '../../shared_components';
 import { MetricVisualizationState } from './visualization';

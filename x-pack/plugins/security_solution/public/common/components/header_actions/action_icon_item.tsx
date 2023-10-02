@@ -7,7 +7,13 @@
 
 import type { MouseEvent } from 'react';
 import React from 'react';
-import { EuiContextMenuItem, EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiText,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 
@@ -20,7 +26,7 @@ interface ActionIconItemProps {
   isDisabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   children?: React.ReactNode;
-  buttonType?: 'text' | 'icon';
+  buttonType?: 'text' | 'icon' | 'emptyButton';
 }
 
 const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
@@ -66,6 +72,17 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
           {content}
         </EuiText>
       </EuiContextMenuItem>
+    )}
+    {buttonType === 'emptyButton' && (
+      <EuiButtonEmpty
+        onClick={onClick}
+        iconType="timeline"
+        flush="right"
+        size="xs"
+        data-test-subj={dataTestSubj}
+      >
+        {content}
+      </EuiButtonEmpty>
     )}
   </>
 );

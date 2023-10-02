@@ -6,46 +6,64 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UpsellingService } from './common/lib/upsellings';
+import type { RouteProps } from 'react-router-dom';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
+import type { DataQualityPanelConfig } from './overview/types';
+import type { AppLinksSwitcher } from './common/links';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
+import { ContractComponentsService } from './contract_components';
 
 export class PluginContract {
   public isSidebarEnabled$: BehaviorSubject<boolean>;
-  public getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
+  public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
+  public extraRoutes$: BehaviorSubject<RouteProps[]>;
+  public appLinksSwitcher: AppLinksSwitcher;
+  public dataQualityPanelConfig?: DataQualityPanelConfig;
 
   constructor() {
+    this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
+    this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
+    this.appLinksSwitcher = (appLinks) => appLinks;
   }
 
   public getStartServices(): ContractStartServices {
     return {
+      extraRoutes$: this.extraRoutes$.asObservable(),
       isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
-      getStartedComponent$: this.getStartedComponent$.asObservable(),
+      getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
+      dataQualityPanelConfig: this.dataQualityPanelConfig,
     };
   }
 
   public getSetupContract(): PluginSetup {
     return {
       resolver: lazyResolver,
-      upselling: this.upsellingService,
+      setAppLinksSwitcher: (appLinksSwitcher) => {
+        this.appLinksSwitcher = appLinksSwitcher;
+      },
+      setDataQualityPanelConfig: (dataQualityPanelConfig) => {
+        this.dataQualityPanelConfig = dataQualityPanelConfig;
+      },
     };
   }
 
   public getStartContract(): PluginStart {
     return {
       getNavLinks$: () => navLinks$,
+      setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setGetStartedPage: (getStartedComponent) => {
-        this.getStartedComponent$.next(getStartedComponent);
+      setComponents: (components) => {
+        this.componentsService.setComponents(components);
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
+      getUpselling: () => this.upsellingService,
     };
   }
 

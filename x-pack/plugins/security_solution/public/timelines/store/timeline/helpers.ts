@@ -140,7 +140,7 @@ export const addTimelineToStore = ({
       ...timeline,
       filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
-      initialized: timelineById[id].initialized,
+      initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&

@@ -12,18 +12,17 @@ import {
   EuiSelectable,
   EuiSelectableListItem,
 } from '@elastic/eui';
-import { act, waitFor } from '@testing-library/react';
-import { shallow } from 'enzyme';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { NavControlPopover } from './nav_control_popover';
 
 const mockSpaces = [
   {
@@ -70,7 +69,7 @@ describe('NavControlPopover', () => {
   it('renders without crashing', () => {
     const spacesManager = spacesManagerMock.create();
 
-    const wrapper = shallow(
+    const { baseElement } = render(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
@@ -80,7 +79,7 @@ describe('NavControlPopover', () => {
         navigateToUrl={jest.fn()}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(baseElement).toMatchSnapshot();
   });
 
   it('renders a SpaceAvatar with the active space', async () => {
@@ -105,7 +104,7 @@ describe('NavControlPopover', () => {
       />
     );
 
-    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+    wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
 
     // Wait for `getSpaces` promise to resolve
     await waitFor(() => {
@@ -118,7 +117,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(mockSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -167,7 +166,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(eightSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -200,7 +199,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(sevenSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -211,7 +210,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(mockSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);

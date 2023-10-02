@@ -15,7 +15,6 @@ type PropArguments = Pick<
   | 'value'
   | 'aria-label'
   | 'allowFullScreen'
-  | 'useDarkTheme'
   | 'transparentBackground'
   | 'placeholder'
 >;
@@ -58,12 +57,6 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       },
       defaultValue: false,
     },
-    useDarkTheme: {
-      control: {
-        type: 'boolean',
-      },
-      defaultValue: false,
-    },
     transparentBackground: {
       control: {
         type: 'boolean',
@@ -87,7 +80,6 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       value: this.getArgumentValue('value', params),
       'aria-label': this.getArgumentValue('aria-label', params),
       allowFullScreen: this.getArgumentValue('allowFullScreen', params),
-      useDarkTheme: this.getArgumentValue('useDarkTheme', params),
       transparentBackground: this.getArgumentValue('transparentBackground', params),
       placeholder: this.getArgumentValue('placeholder', params),
     };

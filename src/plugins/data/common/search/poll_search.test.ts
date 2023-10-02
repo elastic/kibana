@@ -83,7 +83,7 @@ describe('pollSearch', () => {
       abortSignal: abortController.signal,
     }).toPromise();
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     abortController.abort();
 
     await expect(poll).rejects.toThrow(AbortError);
@@ -99,7 +99,7 @@ describe('pollSearch', () => {
     const cancelFn = jest.fn();
     const subscription = pollSearch(searchFn, cancelFn).subscribe(() => {});
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     subscription.unsubscribe();
     await new Promise((resolve) => setTimeout(resolve, 1000));
 

@@ -7,7 +7,8 @@
  */
 
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListItem, FieldTypeKnown } from '../../types';
+import type { FieldTypeKnown } from '@kbn/discover-utils/types';
+import type { FieldListItem } from '../../types';
 
 /**
  * Returns a field type. Time series metric type will override the original field type.

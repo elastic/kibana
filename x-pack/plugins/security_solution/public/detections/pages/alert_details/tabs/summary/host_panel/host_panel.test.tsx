@@ -60,7 +60,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
     inspect: null,
     refetch: () => {},
     isModuleEnabled: true,
-    isLicenseValid: true,
+    isAuthorized: true,
     loading: false,
   };
   const HostPanelWithDefaultProps = (propOverrides: Partial<HostPanelProps>) => (
@@ -106,7 +106,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
     it('should not show risk if the license is not valid', () => {
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: false,
+        isAuthorized: false,
         data: null,
       });
       const { queryByTestId } = render(<HostPanelWithDefaultProps />);
@@ -119,7 +119,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
 
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: true,
+        isAuthorized: true,
         data: [
           {
             host: {

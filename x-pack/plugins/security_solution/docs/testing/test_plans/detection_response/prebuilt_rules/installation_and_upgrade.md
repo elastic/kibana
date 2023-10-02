@@ -61,7 +61,7 @@ Then the package gets installed in the background from EPR
 
 #### **Scenario: Package is installed via bundled Fleet package in Kibana**
 
-**Automation**: 1 integration test.
+**Automation**: 2 integration tests.
 
 ```Gherkin
 Given the package is not installed
@@ -173,6 +173,8 @@ TODO: Check why for the legacy API Dmitrii has added 2 integration tests for `ru
 - `should update outdated prebuilt rules when previous historical versions available`
 - `should update outdated prebuilt rules when previous historical versions unavailable`
 
+(NOTE: the second scenario tests that, if a new version of a rule is released, it can upgrade the current instance of that rule even if the historical versions of that rule are no longer in the package)
+
 Notes:
 
 - Legacy API:
@@ -220,7 +222,7 @@ Notes:
 
 ### Scenarios for the real package
 
-#### **Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new pckage**
+#### **Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**
 
 **Automation**: 1 integration test with real packages.
 
@@ -250,21 +252,6 @@ Then rules returned in this response should exist as alert saved objects
 
 ### Rule installation and upgrade notifications on the Rule Management page
 
-#### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules available to install
-When user opens the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see a number of rules available to install (X)
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
 #### **Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**
 
 **Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
@@ -289,6 +276,21 @@ Given all the latest prebuilt rules are installed in Kibana
 When user opens the Rule Management page
 Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
+And user should NOT see a CTA to upgrade prebuilt rules
+And user should NOT see a number of rules available to upgrade
+And user should NOT see the Rule Updates table
+```
+
+#### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
+
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules available to install
+When user opens the Rule Management page
+Then user should see a CTA to install prebuilt rules
+And user should see a number of rules available to install (X)
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
 And user should NOT see the Rule Updates table
@@ -323,7 +325,6 @@ Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
 And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
-And user should see the Rule Updates table
 ```
 
 #### **Scenario: User is notified when both rules to install and upgrade are available**
@@ -339,7 +340,6 @@ Then user should see a CTA to install prebuilt rules
 And user should see the number of rules available to install (Y)
 And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
-And user should see the Rule Updates table
 ```
 
 #### **Scenario: User is notified after a prebuilt rule gets deleted**
@@ -533,7 +533,7 @@ Then user should NOT see the Rule Updates tab until the package installation is 
 
 #### **Scenario: Error is handled when any operation on prebuilt rules fails**
 
-**Automation**: unit tests.
+**Automation**: e2e test with mock rules
 
 ```Gherkin
 When user is <operation> prebuilt rules

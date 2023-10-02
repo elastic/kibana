@@ -13,8 +13,11 @@ import {
 import * as t from 'io-ts';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { APMConfig } from '../..';
-import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
-import { registerRoutes } from './register_apm_server_routes';
+import { APMRouteCreateOptions } from '../typings';
+import {
+  APMRouteHandlerResources,
+  registerRoutes,
+} from './register_apm_server_routes';
 import { NEVER } from 'rxjs';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
@@ -54,7 +57,18 @@ const getRegisterRouteDependencies = () => {
       },
       logger,
       config: {} as APMConfig,
-      plugins: {},
+      plugins: {
+        apmDataAccess: {
+          setup: {
+            indices: {
+              errorIndices: 'apm-*',
+              metricsIndices: 'apm-*',
+              spanIndices: 'apm-*',
+              transactionIndices: 'apm-*',
+            },
+          },
+        },
+      },
     } as unknown as RegisterRouteDependencies,
   };
 };
@@ -208,9 +222,7 @@ describe('createApi', () => {
         } = initApi([
           {
             endpoint: 'GET /foo',
-            options: {
-              tags: [],
-            },
+            options: { tags: [] },
             handler: handlerMock,
           },
         ]);

@@ -25,9 +25,9 @@ describe('ReportingAPIClient', () => {
   });
 
   describe('getReportURL', () => {
-    it('should generate report URL', () => {
+    it('should generate the internal report download URL', () => {
       expect(apiClient.getReportURL('123')).toMatchInlineSnapshot(
-        `"/base/path/api/reporting/jobs/download/123"`
+        `"/base/path/internal/reporting/jobs/download/123?elasticInternalOrigin=true"`
       );
     });
   });
@@ -52,10 +52,7 @@ describe('ReportingAPIClient', () => {
     it('should send a delete request', async () => {
       await apiClient.deleteReport('123');
 
-      expect(httpClient.delete).toHaveBeenCalledWith(
-        expect.stringContaining('/delete/123'),
-        expect.any(Object)
-      );
+      expect(httpClient.delete).toHaveBeenCalledWith(expect.stringContaining('/delete/123'));
     });
   });
 
@@ -112,10 +109,7 @@ describe('ReportingAPIClient', () => {
     it('should send a get request', async () => {
       await apiClient.getInfo('123');
 
-      expect(httpClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('/info/123'),
-        expect.any(Object)
-      );
+      expect(httpClient.get).toHaveBeenCalledWith(expect.stringContaining('/info/123'));
     });
 
     it('should return a job instance', async () => {
@@ -174,7 +168,7 @@ describe('ReportingAPIClient', () => {
   describe('getReportingJobPath', () => {
     it('should generate a job path', () => {
       expect(
-        apiClient.getReportingJobPath('pdf', {
+        apiClient.getReportingPublicJobPath('pdf', {
           browserTimezone: 'UTC',
           objectType: 'something',
           title: 'some title',
@@ -293,10 +287,7 @@ describe('ReportingAPIClient', () => {
     it('should send a post request', async () => {
       await apiClient.verifyBrowser();
 
-      expect(httpClient.post).toHaveBeenCalledWith(
-        expect.stringContaining('/diagnose/browser'),
-        expect.any(Object)
-      );
+      expect(httpClient.post).toHaveBeenCalledWith(expect.stringContaining('/diagnose/browser'));
     });
   });
 
@@ -304,10 +295,7 @@ describe('ReportingAPIClient', () => {
     it('should send a post request', async () => {
       await apiClient.verifyScreenCapture();
 
-      expect(httpClient.post).toHaveBeenCalledWith(
-        expect.stringContaining('/diagnose/screenshot'),
-        expect.any(Object)
-      );
+      expect(httpClient.post).toHaveBeenCalledWith(expect.stringContaining('/diagnose/screenshot'));
     });
   });
 

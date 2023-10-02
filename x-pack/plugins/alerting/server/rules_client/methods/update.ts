@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import type { ShouldIncrementRevision } from './bulk_edit';
 import {
   PartialRule,
   RawRule,
@@ -34,6 +33,9 @@ import {
   createNewAPIKeySet,
   migrateLegacyActions,
 } from '../lib';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+
+type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -47,7 +49,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     notifyWhen?: RuleNotifyWhenType | null;
   };
   allowMissingConnectorSecrets?: boolean;
-  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
@@ -85,6 +87,21 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     );
     // Still attempt to load the object using SOC
     alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  }
+
+  const {
+    attributes: { enabled, schedule },
+  } = alertSavedObject;
+  try {
+    if (enabled && schedule.interval !== data.schedule.interval) {
+      await validateScheduleLimit({
+        context,
+        prevInterval: alertSavedObject.attributes.schedule?.interval,
+        updatedInterval: data.schedule.interval,
+      });
+    }
+  } catch (error) {
+    throw Boom.badRequest(`Error validating update data - ${error.message}`);
   }
 
   try {

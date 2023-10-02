@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '../../../../api';
+import { CaseSeverity } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 import { SeverityUserActionPayloadRt, SeverityUserActionRt } from './v1';
 

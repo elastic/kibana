@@ -15,9 +15,10 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  EventAnnotationGroupConfig,
+  type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   Datasource,
   DatasourceMap,
@@ -289,7 +290,8 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
-        undefined,
+        // initialize a new visualization always with the new color mapping
+        { type: 'colorMapping', value: { ...DEFAULT_COLOR_MAPPING_CONFIG } },
         annotationGroups,
         references
       ) ?? visualizationState.state

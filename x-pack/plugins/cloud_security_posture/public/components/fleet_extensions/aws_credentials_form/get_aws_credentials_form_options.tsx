@@ -10,6 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { AwsCredentialsType } from '../../../../common/types';
 
 const AssumeRoleDescription = (
   <div>
@@ -68,13 +69,6 @@ const AWS_FIELD_LABEL = {
     defaultMessage: 'Secret Access Key',
   }),
 };
-
-export type AwsCredentialsType =
-  | 'assume_role'
-  | 'direct_access_keys'
-  | 'temporary_keys'
-  | 'shared_credentials'
-  | 'cloud_formation';
 
 export type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 

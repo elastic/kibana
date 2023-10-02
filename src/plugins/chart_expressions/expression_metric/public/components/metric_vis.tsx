@@ -49,7 +49,7 @@ export const defaultColor = euiThemeVars.euiColorLightestShade;
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const formatId = serializedFieldFormat?.id || 'number';
-  if (formatId === 'duration') {
+  if (formatId === 'duration' && !serializedFieldFormat?.params?.formatOverride) {
     return {
       ...serializedFieldFormat,
       params: {
@@ -134,7 +134,10 @@ export const MetricVis = ({
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        renderComplete();
+        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
+        window.requestAnimationFrame(() => {
+          renderComplete();
+        });
       }
     },
     [renderComplete]
@@ -181,7 +184,7 @@ export const MetricVis = ({
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
-      title,
+      title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: (

@@ -37,8 +37,8 @@ describe('Create Follower index', () => {
     });
 
     test('should display a "loading remote clusters" indicator', () => {
-      expect(exists('remoteClustersLoading')).toBe(true);
-      expect(find('remoteClustersLoading').text()).toBe('Loading remote clusters…');
+      expect(exists('sectionLoading')).toBe(true);
+      expect(find('sectionLoading').text()).toBe('Loading remote clusters…');
     });
   });
 

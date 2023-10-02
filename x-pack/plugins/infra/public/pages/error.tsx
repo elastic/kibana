@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiTitle, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -41,31 +33,27 @@ export const Error: React.FC<Props> = ({ message }) => {
 
 export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
   return (
-    <EuiPage style={{ flex: '1 0 auto' }}>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.infra.errorPage.unexpectedErrorTitle"
-                  defaultMessage="Oops!"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiCallOut color="danger" title={message} iconType="error">
-            <p>
-              <FormattedMessage
-                id="xpack.infra.errorPage.tryAgainDescription "
-                defaultMessage="Please click the back button and try again."
-              />
-            </p>
-          </EuiCallOut>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageTemplate offset={0} restrictWidth={false} bottomBorder={false} grow={false}>
+      <EuiPageTemplate.Header>
+        <EuiTitle size="m">
+          <h1>
+            <FormattedMessage
+              id="xpack.infra.errorPage.unexpectedErrorTitle"
+              defaultMessage="Oops!"
+            />
+          </h1>
+        </EuiTitle>
+      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Section>
+        <EuiCallOut color="danger" title={message} iconType="error">
+          <p>
+            <FormattedMessage
+              id="xpack.infra.errorPage.tryAgainDescription "
+              defaultMessage="Please click the back button and try again."
+            />
+          </p>
+        </EuiCallOut>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

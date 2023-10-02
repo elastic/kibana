@@ -7,15 +7,17 @@
 
 import Boom from '@hapi/boom';
 
+import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
-import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
-import { CommentRequestRt, decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
+import type { AttachmentRequest } from '../../../common/types/api';
+import { AttachmentRequestRt } from '../../../common/types/api';
 
 /**
  * Delete all comments for a case.
@@ -119,7 +121,7 @@ export async function deleteComment(
     // we only want to store the fields related to the original request of the attachment, not fields like
     // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
     // what type of attachment this is. Depending on the type it could have various fields.
-    const attachmentRequestAttributes = decodeOrThrow(CommentRequestRt)(attachment.attributes);
+    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
 
     await userActionService.creator.createUserAction({
       type: UserActionTypes.comment,
@@ -143,12 +145,12 @@ export async function deleteComment(
 
 interface HandleAlertsArgs {
   alertsService: CasesClientArgs['services']['alertsService'];
-  attachments: CommentRequest[];
+  attachments: AttachmentRequest[];
   caseId: string;
 }
 
 const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
-  const alertAttachments = attachments.filter((attachment): attachment is CommentRequestAlertType =>
+  const alertAttachments = attachments.filter((attachment): attachment is AlertAttachmentPayload =>
     isCommentRequestTypeAlert(attachment)
   );
 

@@ -1,9 +1,17 @@
 {
   "ml.stop_data_frame_analytics": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
       "force": "__flag__",
-      "timeout": ""
+      "timeout": [
+        "20s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -11,6 +19,10 @@
     "patterns": [
       "_ml/data_frame/analytics/{id}/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/stop-dfanalytics.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/stop-dfanalytics.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

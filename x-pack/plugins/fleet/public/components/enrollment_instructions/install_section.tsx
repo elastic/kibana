@@ -19,6 +19,7 @@ interface Props {
   isK8s: K8sMode | undefined;
   cloudSecurityIntegration: CloudSecurityIntegration | undefined;
   enrollToken?: string;
+  fleetServerHost?: string;
   fullCopyButton?: boolean;
   isManaged?: boolean;
   onCopy?: () => void;
@@ -29,6 +30,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   isK8s,
   cloudSecurityIntegration,
   enrollToken,
+  fleetServerHost,
   fullCopyButton = false,
   isManaged = true,
   onCopy,
@@ -50,6 +52,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         hasK8sIntegrationMultiPage={isK8s === 'IS_KUBERNETES_MULTIPAGE'}
         isManaged={isManaged}
         enrollToken={enrollToken}
+        fleetServerHost={fleetServerHost}
       />
     </>
   );

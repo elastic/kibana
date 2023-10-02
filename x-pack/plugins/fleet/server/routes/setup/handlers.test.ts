@@ -9,6 +9,7 @@ import type { AwaitedProperties } from '@kbn/utility-types';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common/types';
+import { API_VERSIONS } from '../../../common/constants';
 import { RegistryError } from '../../errors';
 import {
   createAppContextStartContractMock,
@@ -62,6 +63,7 @@ describe('FleetSetupHandler', () => {
     request = httpServerMock.createKibanaRequest({
       method: 'post',
       path: '/api/fleet/setup',
+      headers: { 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
     // prevents `Logger not set.` and other appContext errors
     appContextService.start(createAppContextStartContractMock());
@@ -145,6 +147,7 @@ describe('FleetStatusHandler', () => {
     request = httpServerMock.createKibanaRequest({
       method: 'post',
       path: '/api/fleet/status',
+      headers: { 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
     // prevents `Logger not set.` and other appContext errors
     appContextService.start(createAppContextStartContractMock());

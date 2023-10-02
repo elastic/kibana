@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridRefProps, EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useRef } from 'react';
 import { GridOnScrollProps } from 'react-window';
-import { TopNFunctionSortField } from '../../../../common/functions';
+import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import {
@@ -17,6 +25,8 @@ import {
 } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
+import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';
+import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -73,36 +83,31 @@ export function DifferentialTopNFunctionsView() {
     ({ http }) => {
       return fetchTopNFunctions({
         http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
         startIndex: 0,
         endIndex: 100000,
         kuery,
       });
     },
-    [timeRange.inSeconds.start, timeRange.inSeconds.end, kuery, fetchTopNFunctions]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
   );
 
   const comparisonState = useTimeRangeAsync(
     ({ http }) => {
-      if (!comparisonTimeRange.inSeconds.start || !comparisonTimeRange.inSeconds.end) {
+      if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
         return undefined;
       }
       return fetchTopNFunctions({
         http,
-        timeFrom: comparisonTimeRange.inSeconds.start,
-        timeTo: comparisonTimeRange.inSeconds.end,
+        timeFrom: new Date(comparisonTimeRange.start).getTime(),
+        timeTo: new Date(comparisonTimeRange.end).getTime(),
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
       });
     },
-    [
-      comparisonTimeRange.inSeconds.start,
-      comparisonTimeRange.inSeconds.end,
-      comparisonKuery,
-      fetchTopNFunctions,
-    ]
+    [comparisonTimeRange.start, comparisonTimeRange.end, fetchTopNFunctions, comparisonKuery]
   );
 
   const routePath = useProfilingRoutePath() as
@@ -178,15 +183,30 @@ export function DifferentialTopNFunctionsView() {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <PrimaryAndComparisonSearchBar />
+          <EuiPanel hasShadow={false} color="subdued">
+            <PrimaryAndComparisonSearchBar />
+            <EuiHorizontalRule />
+            <NormalizationMenu
+              mode={normalizationMode}
+              options={normalizationOptions}
+              onChange={onChangeNormalizationMode}
+            />
+            <EuiSpacer />
+            <TopNFunctionsSummary
+              baselineTopNFunctions={state.data}
+              comparisonTopNFunctions={comparisonState.data}
+              baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+              comparisonScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+              isLoading={
+                state.status === AsyncStatus.Loading ||
+                comparisonState.status === AsyncStatus.Loading
+              }
+              baselineDuration={totalSeconds}
+              comparisonDuration={totalComparisonSeconds}
+            />
+          </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NormalizationMenu
-            mode={normalizationMode}
-            options={normalizationOptions}
-            onChange={onChangeNormalizationMode}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>
@@ -213,13 +233,11 @@ export function DifferentialTopNFunctionsView() {
                   <TopNFunctionsGrid
                     ref={comparisonGridRef}
                     topNFunctions={comparisonState.data}
-                    comparisonTopNFunctions={state.data}
-                    totalSeconds={
-                      comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
-                    }
-                    isDifferentialView={true}
                     baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                    comparisonTopNFunctions={state.data}
                     comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                    totalSeconds={totalSeconds}
+                    isDifferentialView={true}
                     onFrameClick={handleOnFrameClick}
                     onScroll={handleComparisonGridScroll}
                     showDiffColumn
@@ -228,6 +246,7 @@ export function DifferentialTopNFunctionsView() {
                     sortField={sortField}
                     sortDirection={sortDirection}
                     onChangeSort={handleSortChange}
+                    dataTestSubj="TopNFunctionsComparisonGrid"
                   />
                 </AsyncComponent>
               </EuiFlexItem>

@@ -13,11 +13,6 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type {
-  EndpointActionLogRequestParams,
-  EndpointActionLogRequestQuery,
-} from '../../../../common/endpoint/schema/actions';
-import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
@@ -39,6 +34,11 @@ import type {
 } from '../../../../common/endpoint/types';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type {
+  EndpointActionLogRequestParams,
+  EndpointActionLogRequestQuery,
+} from '../../../../common/api/endpoint';
+import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint';
 
 describe('Action Log API', () => {
   describe('schema', () => {

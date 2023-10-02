@@ -9,19 +9,19 @@ import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/ru
 import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
-import { matchPath, Redirect } from 'react-router-dom';
+import { matchPath } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { isObject } from 'lodash';
 import {
   ALERTS_PATH,
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
   EXCEPTIONS_PATH,
-  LANDING_PATH,
   RULES_PATH,
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
@@ -158,7 +158,10 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
-  dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
+  dsl:
+    isObject(response?.inspect) && response?.inspect.dsl
+      ? response.inspect.dsl
+      : prevResponse?.dsl || [],
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
@@ -198,15 +201,12 @@ export const getSubPluginRoutesByCapabilities = (
   capabilities: Capabilities,
   services: StartServices
 ): RouteProps[] => {
-  return [
-    ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-      if (isSubPluginAvailable(key, capabilities)) {
-        return [...acc, ...value.routes];
-      }
+  return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
+    if (isSubPluginAvailable(key, capabilities)) {
+      acc.push(...value.routes);
+    } else {
       const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;
-
-      return [
-        ...acc,
+      acc.push(
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
           component: () => {
@@ -216,14 +216,11 @@ export const getSubPluginRoutesByCapabilities = (
             }
             return <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />;
           },
-        })),
-      ];
-    }, []),
-    {
-      path: '',
-      component: () => <RedirectRoute capabilities={capabilities} />,
-    },
-  ];
+        }))
+      );
+    }
+    return acc;
+  }, []);
 };
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
@@ -232,19 +229,6 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   }
   return capabilities[SERVER_APP_ID].show === true;
 };
-
-export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {
-  const overviewAvailable = isSubPluginAvailable('overview', capabilities);
-  const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
-  if (overviewAvailable) {
-    return <Redirect to={LANDING_PATH} />;
-  }
-  if (casesAvailable) {
-    return <Redirect to={CASES_PATH} />;
-  }
-  return <Redirect to={LANDING_PATH} />;
-});
-RedirectRoute.displayName = 'RedirectRoute';
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',

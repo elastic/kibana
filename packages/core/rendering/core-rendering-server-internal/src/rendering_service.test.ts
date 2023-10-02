@@ -45,6 +45,7 @@ const INJECTED_METADATA = {
       dist: expect.any(Boolean),
       version: expect.any(String),
       buildDate: new Date(BUILD_DATE).toISOString(),
+      buildFlavor: expect.any(String),
     },
   },
 };

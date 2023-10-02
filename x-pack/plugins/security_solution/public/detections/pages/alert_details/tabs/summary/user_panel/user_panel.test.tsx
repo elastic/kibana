@@ -27,7 +27,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
     inspect: null,
     refetch: () => {},
     isModuleEnabled: true,
-    isLicenseValid: true,
+    isAuthorized: true,
     loading: false,
   };
   const UserPanelWithDefaultProps = (propOverrides: Partial<UserPanelProps>) => (
@@ -64,7 +64,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
     it('should not show risk if the license is not valid', () => {
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: false,
+        isAuthorized: false,
         data: null,
       });
       const { queryByTestId } = render(<UserPanelWithDefaultProps />);
@@ -77,7 +77,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
 
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: true,
+        isAuthorized: true,
         data: [
           {
             user: {

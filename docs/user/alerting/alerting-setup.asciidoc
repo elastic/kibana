@@ -109,5 +109,5 @@ The same behavior occurs when you change the API key in the header of your API c
 [[alerting-ccs-setup]]
 === {ccs-cap}
 
-If you want to use alerting rules with {ccs}, you must configure 
-{ref}/remote-clusters-privileges.html#clusters-privileges-ccs-kibana[privileges for {ccs-init} and {kib}].
+If you want to use alerting rules with {ccs}, you must configure privileges for
+{ccs-init} and {kib}. Refer to {ref}/remote-clusters.html[Remote clusters].

@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract, RuleType } from '@kbn/alerting-plugin/server';
+import {
+  GetViewInAppRelativeUrlFnOpts,
+  PluginSetupContract,
+  RuleType,
+} from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
@@ -183,8 +189,10 @@ export async function registerMetricThresholdRuleType(
         },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

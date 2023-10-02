@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../../api';
+import { ConnectorTypes } from '../../connector/v1';
 import { ConnectorUserActionPayloadWithoutConnectorIdRt } from './v1';
 
 describe('Connector', () => {

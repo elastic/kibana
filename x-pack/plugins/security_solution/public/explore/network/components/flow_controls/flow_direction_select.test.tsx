@@ -44,7 +44,7 @@ describe('Select Flow Direction', () => {
       );
 
       wrapper
-        .find(`[data-test-subj="${FlowDirection.biDirectional}"]`)
+        .find(`button[data-test-subj="${FlowDirection.biDirectional}"]`)
         .first()
         .simulate('click', event);
       wrapper.update();

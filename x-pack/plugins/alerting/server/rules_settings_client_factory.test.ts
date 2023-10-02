@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   RulesSettingsClientFactory,
   RulesSettingsClientFactoryOpts,
@@ -33,23 +32,6 @@ const rulesSettingsClientFactoryParams: jest.Mocked<RulesSettingsClientFactoryOp
   savedObjectsService,
 };
 
-const fakeRequest = {
-  app: {},
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-  getSavedObjectsClient: () => savedObjectsClient,
-} as unknown as Request;
-
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -60,7 +42,7 @@ test('creates a rules settings client with proper constructor arguments when sec
     securityPluginStart,
     ...rulesSettingsClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
@@ -82,7 +64,7 @@ test('creates a rules settings client with proper constructor arguments when sec
 test('creates a rules settings client with proper constructor arguments', async () => {
   const factory = new RulesSettingsClientFactory();
   factory.initialize(rulesSettingsClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
@@ -107,7 +89,7 @@ test('creates an unauthorized rules settings client', async () => {
     securityPluginStart,
     ...rulesSettingsClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
@@ -130,7 +112,7 @@ test('creates an unauthorized rules settings client', async () => {
 test('getUserName() returns null when security is disabled', async () => {
   const factory = new RulesSettingsClientFactory();
   factory.initialize(rulesSettingsClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
   const constructorCall =
@@ -146,7 +128,7 @@ test('getUserName() returns a name when security is enabled', async () => {
     securityPluginStart,
     ...rulesSettingsClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
 

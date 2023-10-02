@@ -10,3 +10,4 @@ export {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
 } from './src/random_sampler_wrapper';
+export * from './src/random_sampler_manager';

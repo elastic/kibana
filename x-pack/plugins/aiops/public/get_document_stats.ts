@@ -15,7 +15,7 @@ import type { Query } from '@kbn/es-query';
 import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
-import { GroupTableItem } from './components/spike_analysis_table/types';
+import { GroupTableItem } from './components/log_rate_analysis_results_table/types';
 
 export interface DocumentCountStats {
   interval?: number;

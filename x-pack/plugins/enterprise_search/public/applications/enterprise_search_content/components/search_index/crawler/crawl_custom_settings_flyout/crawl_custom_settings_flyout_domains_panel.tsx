@@ -24,12 +24,32 @@ import { i18n } from '@kbn/i18n';
 
 import { SimplifiedSelectable } from '../../../../../shared/simplified_selectable/simplified_selectable';
 
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
-  const { domainUrls, selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
+interface CrawlCustomSettingsFlyoutDomainsPanelProps {
+  domainUrls: string[];
+  selectedDomainUrls: string[];
+  onSelectDomainUrls: (selectedUrls: string[]) => void;
+}
+
+export const CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps: React.FC = () => {
+  const { selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
+  const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
   const { onSelectDomainUrls } = useActions(CrawlCustomSettingsFlyoutLogic);
 
+  return (
+    <CrawlCustomSettingsFlyoutDomainsPanel
+      domainUrls={domainUrls}
+      selectedDomainUrls={selectedDomainUrls}
+      onSelectDomainUrls={onSelectDomainUrls}
+    />
+  );
+};
+
+export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC<
+  CrawlCustomSettingsFlyoutDomainsPanelProps
+> = ({ domainUrls, selectedDomainUrls, onSelectDomainUrls }) => {
   return (
     <EuiPanel hasBorder>
       <EuiAccordion

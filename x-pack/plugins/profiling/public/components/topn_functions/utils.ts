@@ -5,17 +5,27 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { TopNFunctions } from '../../../common/functions';
-import { StackFrameMetadata } from '../../../common/profiling';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
+import {
+  CalculateImpactEstimates,
+  ImpactEstimates,
+} from '../../hooks/use_calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {
-  const color = percent < 0 ? 'success' : 'danger';
-  const icon = percent < 0 ? 'sortDown' : 'sortUp';
-  const isSmallPercent = Math.abs(percent) <= 0.01;
-  const label = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2) + '%';
+  if (percent === 0) {
+    return { color: 'text', label: `0%`, icon: undefined };
+  }
 
-  return { color, label, icon: isSmallPercent ? undefined : icon };
+  const color = percent < 0 ? 'success' : 'danger';
+  const icon = percent < 0 ? 'sortUp' : 'sortDown';
+  const isSmallPercent = Math.abs(percent) <= 0.01;
+  const value = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2);
+
+  if (isFinite(percent)) {
+    return { color, label: `${value}%`, icon };
+  }
+
+  return { color: 'text', label: undefined, icon: undefined };
 }
 
 export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
@@ -30,7 +40,7 @@ export interface IFunctionRow {
   totalCPU: number;
   selfCPUPerc: number;
   totalCPUPerc: number;
-  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  impactEstimates?: ImpactEstimates;
   diff?: {
     rank: number;
     samples: number;
@@ -38,6 +48,7 @@ export interface IFunctionRow {
     totalCPU: number;
     selfCPUPerc: number;
     totalCPUPerc: number;
+    impactEstimates?: ImpactEstimates;
   };
 }
 
@@ -47,12 +58,14 @@ export function getFunctionsRows({
   comparisonTopNFunctions,
   topNFunctions,
   totalSeconds,
+  calculateImpactEstimates,
 }: {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   comparisonTopNFunctions?: TopNFunctions;
   topNFunctions?: TopNFunctions;
   totalSeconds: number;
+  calculateImpactEstimates: CalculateImpactEstimates;
 }): IFunctionRow[] {
   if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
     return [];
@@ -62,13 +75,11 @@ export function getFunctionsRows({
     ? keyBy(comparisonTopNFunctions.TopN, 'Id')
     : {};
 
-  return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
+  return topNFunctions.TopN.filter((topN) => topN.CountExclusive >= 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
-    const totalSamples = topN.CountExclusive;
-
-    const topNCountExclusiveScaled = scaleValue({
-      value: totalSamples,
+    const scaledSelfCPU = scaleValue({
+      value: topN.CountExclusive,
       scaleFactor: baselineScaleFactor,
     });
 
@@ -80,25 +91,27 @@ export function getFunctionsRows({
         ? calculateImpactEstimates({
             countExclusive: topN.CountExclusive,
             countInclusive: topN.CountInclusive,
-            totalSamples,
+            totalSamples: topNFunctions.TotalCount,
             totalSeconds,
           })
         : undefined;
 
     function calculateDiff() {
       if (comparisonTopNFunctions && comparisonRow) {
-        const comparisonCountExclusiveScaled = scaleValue({
+        const comparisonScaledSelfCPU = scaleValue({
           value: comparisonRow.CountExclusive,
           scaleFactor: comparisonScaleFactor,
         });
 
+        const scaledDiffSamples = scaledSelfCPU - comparisonScaledSelfCPU;
+
         return {
           rank: topN.Rank - comparisonRow.Rank,
-          samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
+          samples: scaledDiffSamples,
           selfCPU: comparisonRow.CountExclusive,
+          totalCPU: comparisonRow.CountInclusive,
           selfCPUPerc:
             selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-          totalCPU: comparisonRow.CountInclusive,
           totalCPUPerc:
             totalCPUPerc -
             (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
@@ -109,13 +122,58 @@ export function getFunctionsRows({
     return {
       rank: topN.Rank,
       frame: topN.Frame,
-      samples: topNCountExclusiveScaled,
-      selfCPU: topN.CountExclusive,
+      samples: scaledSelfCPU,
       selfCPUPerc,
-      totalCPU: topN.CountInclusive,
       totalCPUPerc,
+      selfCPU: topN.CountExclusive,
+      totalCPU: topN.CountInclusive,
       impactEstimates,
       diff: calculateDiff(),
     };
   });
+}
+
+export function calculateBaseComparisonDiff({
+  baselineValue,
+  baselineScaleFactor,
+  comparisonValue,
+  comparisonScaleFactor,
+  formatValue,
+}: {
+  baselineValue: number;
+  baselineScaleFactor?: number;
+  comparisonValue: number;
+  comparisonScaleFactor?: number;
+  formatValue?: (value: number) => string;
+}) {
+  const scaledBaselineValue = scaleValue({
+    value: baselineValue,
+    scaleFactor: baselineScaleFactor,
+  });
+
+  const baseValue = formatValue
+    ? formatValue(scaledBaselineValue)
+    : scaledBaselineValue.toLocaleString();
+  if (comparisonValue === 0) {
+    return { baseValue };
+  }
+
+  const scaledComparisonValue = scaleValue({
+    value: comparisonValue,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledComparisonValue - scaledBaselineValue;
+  const percentDiffDelta = (diffSamples / (scaledComparisonValue - diffSamples)) * 100;
+  const { color, icon, label } = getColorLabel(percentDiffDelta);
+  return {
+    baseValue,
+    comparisonValue: formatValue
+      ? formatValue(scaledComparisonValue)
+      : scaledComparisonValue.toLocaleString(),
+    percentDiffDelta,
+    color,
+    icon,
+    label,
+  };
 }

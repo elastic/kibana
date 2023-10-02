@@ -10,7 +10,7 @@ import { migrationMocks } from '@kbn/core/server/mocks';
 import {
   ConfigKey,
   LocationStatus,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
 
 const context = migrationMocks.createContext();
@@ -53,7 +53,7 @@ const monitor850UI = {
     revision: 1,
     secrets:
       '{"password":"","check.request.body":{"type":"text","value":""},"check.request.headers":{},"check.response.body.negative":[],"check.response.body.positive":[],"check.response.headers":{},"ssl.key":"","ssl.key_passphrase":"","username":""}',
-  } as SyntheticsMonitorWithSecrets,
+  } as SyntheticsMonitorWithSecretsAttributes,
   references: [],
   coreMigrationVersion: '8.5.0',
 };
@@ -119,7 +119,7 @@ const monitor850Project = {
     revision: 1,
     secrets:
       '{"params":"{\\"url\\":\\"https://elastic.github.io/synthetics-demo/\\"}","source.inline.script":"","source.project.content":"UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAXAAAAam91cm5leXMvb25lLmpvdXJuZXkudHNVkL1uwzAMhHc/BeFJAQyrLdAlQYouXbp3KjqwMhMrlUVVohMYgd+9in+AdCHED6c7kloDpkSy1R+JYtINd9bb356Mw/hDuqGzToOXlsSapIWSPOkT99HTkDR7qpemllTYLnAUuMLCKkhCoYKOvRWOMMIhcgflKzlM2e/OudwVZ4xgIqHQ+/wd9qA8drSB/QtcC1h96j6RuvUA0kYWcdYftzATgIYv3jE2W3h8qBbWh5k8r8DlGG+Gm2YiY67jZpfrMvuUXIG6QsBjfgSM2KWsWYeBaTlVOuy9aQFDcNagWPZllW86eAPqTgyAF7QyudVHFlazY91HN+Wu+bc67orPErNP+V1+1QeOb2hapXDy+3ejzLL+D1BLBwgqc7lrFgEAAMYBAABQSwECLQMUAAgACAAAACEAKnO5axYBAADGAQAAFwAAAAAAAAAAACAApIEAAAAAam91cm5leXMvb25lLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBFAAAAWwEAAAAA","source.zip_url.username":"","source.zip_url.password":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
-  } as SyntheticsMonitorWithSecrets,
+  } as SyntheticsMonitorWithSecretsAttributes,
   references: [],
   coreMigrationVersion: '8.5.0',
 };

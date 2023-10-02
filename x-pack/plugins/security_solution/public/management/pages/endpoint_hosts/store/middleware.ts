@@ -353,7 +353,12 @@ async function endpointListMiddleware({
 }) {
   const { getState, dispatch } = store;
 
-  const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+  const {
+    page_index: pageIndex,
+    page_size: pageSize,
+    sort_field: sortField,
+    sort_direction: sortDirection,
+  } = uiQueryParams(getState());
   let endpointResponse: MetadataListResponse | undefined;
 
   try {
@@ -365,6 +370,8 @@ async function endpointListMiddleware({
         page: pageIndex,
         pageSize,
         kuery: decodedQuery.query as string,
+        sortField,
+        sortDirection,
       },
     });
 

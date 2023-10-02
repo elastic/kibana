@@ -30,8 +30,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
-import { SecurityLicenseService } from '../common/licensing';
 import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
@@ -62,6 +60,8 @@ import type { UserProfileServiceStart, UserProfileServiceStartInternal } from '.
 import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
 import type { UserSettingServiceStart } from './user_profile/user_setting_service';
 import { UserSettingService } from './user_profile/user_setting_service';
+import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
+import { SecurityLicenseService } from '../common/licensing';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -359,6 +359,7 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -408,6 +409,12 @@ export class SecurityPlugin
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
     this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
 
+    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
+    const customLogoutURL =
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
+        ? cloud?.projectsUrl
+        : undefined;
+
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
@@ -421,6 +428,7 @@ export class SecurityPlugin
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
+      customLogoutURL,
     });
 
     this.authorizationService.start({

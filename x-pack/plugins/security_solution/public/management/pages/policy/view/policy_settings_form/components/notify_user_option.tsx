@@ -28,17 +28,15 @@ import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
-const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
+export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.userNotification',
+  { defaultMessage: 'User notification' }
+);
+
+export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetail.notifyUser',
   {
     defaultMessage: 'Notify user',
-  }
-);
-
-const DO_NOT_NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetail.doNotNotifyUser',
-  {
-    defaultMessage: "Don't notify user",
   }
 );
 
@@ -49,14 +47,14 @@ const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
   }
 );
 
-const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
+export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
   {
     defaultMessage: 'Customize notification message',
   }
 );
 
-interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
+export interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
@@ -77,9 +75,6 @@ export const NotifyUserOption = React.memo(
     const selected = policy.windows[protection].mode;
     const userNotificationSelected = policy.windows.popup[protection].enabled;
     const userNotificationMessage = policy.windows.popup[protection].message;
-    const checkboxLabel = userNotificationSelected
-      ? NOTIFY_USER_CHECKBOX_LABEL
-      : DO_NOT_NOTIFY_USER_CHECKBOX_LABEL;
 
     const handleUserNotificationCheckbox = useCallback(
       (event) => {
@@ -161,11 +156,8 @@ export const NotifyUserOption = React.memo(
     return (
       <div data-test-subj={getTestId()}>
         <EuiSpacer size="m" />
-        <SettingCardHeader>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
-            defaultMessage="User notification"
-          />
+        <SettingCardHeader data-test-subj={getTestId('title')}>
+          {NOTIFY_USER_SECTION_TITLE}
         </SettingCardHeader>
 
         <SupportedVersionForProtectionNotice
@@ -182,10 +174,10 @@ export const NotifyUserOption = React.memo(
             onChange={handleUserNotificationCheckbox}
             checked={userNotificationSelected}
             disabled={!isEditMode || selected === ProtectionModes.off}
-            label={checkboxLabel}
+            label={NOTIFY_USER_CHECKBOX_LABEL}
           />
         ) : (
-          <>{checkboxLabel}</>
+          <>{NOTIFY_USER_CHECKBOX_LABEL}</>
         )}
 
         {userNotificationSelected &&
@@ -194,7 +186,7 @@ export const NotifyUserOption = React.memo(
               <EuiSpacer size="m" />
               <EuiFlexGroup gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">
+                  <EuiText size="s" data-test-subj={getTestId('customMessageTitle')}>
                     <h4>{CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL}</h4>
                   </EuiText>
                 </EuiFlexItem>

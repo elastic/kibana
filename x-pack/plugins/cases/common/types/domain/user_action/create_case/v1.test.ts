@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../../api';
+import { ConnectorTypes } from '../../connector/v1';
 import { UserActionTypes } from '../action/v1';
 import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './v1';
 

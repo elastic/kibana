@@ -83,6 +83,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   isBuildingBlock: false,
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  investigationFields: [],
   references: [''],
   falsePositives: [''],
   license: '',
@@ -131,4 +132,9 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
 export const defaultCustomQuery = {
   forNormalRules: stepDefineDefaultValue.queryBar,
   forThreatMatchRules: threatQueryBarDefaultValue,
+  forEsqlRules: {
+    query: { query: '', language: 'esql' },
+    filters: [],
+    saved_id: null,
+  },
 };

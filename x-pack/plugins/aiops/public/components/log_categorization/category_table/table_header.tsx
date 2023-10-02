@@ -33,7 +33,7 @@ export const TableHeader: FC<Props> = ({
           <EuiText size="s" data-test-subj="aiopsLogPatternsFoundCount">
             <FormattedMessage
               id="xpack.aiops.logCategorization.counts"
-              defaultMessage="{count} patterns found"
+              defaultMessage="{count} {count, plural, one {pattern} other {patterns}} found"
               values={{ count: categoriesCount }}
             />
             {selectedCategoriesCount > 0 ? (
@@ -51,6 +51,7 @@ export const TableHeader: FC<Props> = ({
           <>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverIncludeButton"
                 size="s"
                 onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
                 iconType="plusInCircle"
@@ -61,6 +62,7 @@ export const TableHeader: FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverExcludeButton"
                 size="s"
                 onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
                 iconType="minusInCircle"

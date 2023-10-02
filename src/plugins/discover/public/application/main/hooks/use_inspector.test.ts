@@ -13,7 +13,7 @@ import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {

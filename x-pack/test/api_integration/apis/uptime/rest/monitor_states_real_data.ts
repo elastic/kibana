@@ -11,7 +11,7 @@ import {
   MonitorSummariesResult,
   MonitorSummariesResultType,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 interface ExpectedMonitorStatesPage {
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
       );
 
-      expectSnapshot(body).toMatch();
+      expectSnapshot(body.summaries).toMatch();
     });
 
     it('can navigate forward and backward using pagination', async () => {

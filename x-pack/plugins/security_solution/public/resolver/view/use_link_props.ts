@@ -29,7 +29,7 @@ export function useLinkProps(
   onClick: EventHandlerCallback;
 } {
   const search = useSelector((state: State) =>
-    selectors.relativeHref(state.analyzer.analyzerById[id])(panelViewAndParameters)
+    selectors.relativeHref(state.analyzer[id])(panelViewAndParameters)
   );
 
   return useNavigateOrReplace({

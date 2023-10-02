@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosHeaders, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -147,7 +147,9 @@ export const createExternalService = (
         status: 0,
         statusText: '',
         headers: {},
-        config: {},
+        config: {
+          headers: new AxiosHeaders({}),
+        },
       };
 
       while (numberOfFetch < RE_TRY) {

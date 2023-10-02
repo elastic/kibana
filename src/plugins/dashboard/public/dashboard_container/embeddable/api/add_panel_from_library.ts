@@ -18,6 +18,9 @@ export function addFromLibrary(this: DashboardContainer) {
         this.setScrollToPanelId(id);
         this.setHighlightPanelId(id);
       },
+      onClose: () => {
+        this.clearOverlays();
+      },
     })
   );
 }

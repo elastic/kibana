@@ -23,6 +23,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -31,7 +32,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRangeInput } from './customize_panel_action';
 import { canInheritTimeRange } from './can_inherit_time_range';
 import { doesInheritTimeRange } from './does_inherit_time_range';
-import { IEmbeddable, Embeddable, CommonlyUsedRange, ViewMode } from '../../../lib';
+import {
+  IEmbeddable,
+  Embeddable,
+  CommonlyUsedRange,
+  ViewMode,
+  isFilterableEmbeddable,
+} from '../../../lib';
+import { FiltersDetails } from './filters_details';
 
 type PanelSettings = {
   title?: string;
@@ -46,10 +54,11 @@ interface CustomizePanelProps {
   dateFormat?: string;
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
+  onEdit: () => void;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat, timeRangeCompatible } = props;
+  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit } = props;
   const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -259,6 +268,17 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
     );
   };
 
+  const renderFilterDetails = () => {
+    if (!isFilterableEmbeddable(embeddable)) return null;
+
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <FiltersDetails onEdit={onEdit} embeddable={embeddable} editMode={editMode} />
+      </>
+    );
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -275,6 +295,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
         <EuiForm>
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
+          {renderFilterDetails()}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -291,7 +312,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             <EuiButton data-test-subj="saveCustomizePanelButton" onClick={save} fill>
               <FormattedMessage
                 id="embeddableApi.customizePanel.flyout.saveButtonTitle"
-                defaultMessage="Save"
+                defaultMessage="Apply"
               />
             </EuiButton>
           </EuiFlexItem>

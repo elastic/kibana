@@ -15,11 +15,11 @@ import type { NodesVersionCompatibility } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { ElasticsearchConnectionStatus } from '../common';
 import { ConfigSchema } from './config';
 import type { ElasticsearchServiceSetup } from './elasticsearch_service';
 import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
+import { ElasticsearchConnectionStatus } from '../common';
 
 jest.mock('tls');
 jest.mock('@kbn/core/server', () => ({

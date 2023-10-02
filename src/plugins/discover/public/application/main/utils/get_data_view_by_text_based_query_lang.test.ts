@@ -8,7 +8,7 @@
 
 import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('getDataViewByTextBasedQueryLang', () => {
@@ -20,13 +20,13 @@ describe('getDataViewByTextBasedQueryLang', () => {
   });
   const services = discoverServiceMock;
   it('returns the current dataview if is adhoc and query has not changed', async () => {
-    const query = { sql: 'Select * from data-view-ad-hoc-title' };
+    const query = { esql: 'from data-view-ad-hoc-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
     expect(dataView).toStrictEqual(dataViewAdHoc);
   });
 
   it('creates an adhoc dataview if the current dataview is persistent and query has not changed', async () => {
-    const query = { sql: 'Select * from the-data-view-title' };
+    const query = { esql: 'from the-data-view-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewMock, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBe('@timestamp');
@@ -40,7 +40,7 @@ describe('getDataViewByTextBasedQueryLang', () => {
       title: 'test-1',
       timeFieldName: undefined,
     });
-    const query = { sql: 'Select * from the-data-view-title' };
+    const query = { esql: 'from the-data-view-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBeUndefined();

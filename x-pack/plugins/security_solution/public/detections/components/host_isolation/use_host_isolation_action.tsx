@@ -27,7 +27,9 @@ export const useHostIsolationAction = ({
   detailsData,
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
-}: UseHostIsolationActionProps) => {
+}: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
+  const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
+
   const isEndpointAlert = useMemo(() => {
     return isAlertFromEndpointEvent({ data: detailsData || [] });
   }, [detailsData]);
@@ -49,14 +51,14 @@ export const useHostIsolationAction = ({
 
   const {
     loading: loadingHostIsolationStatus,
-    isIsolated: isolationStatus,
+    isIsolated: isHostIsolated,
     agentStatus,
     capabilities,
   } = useHostIsolationStatus({
     agentId,
   });
 
-  const isolationSupported = useMemo(() => {
+  const doesHostSupportIsolation = useMemo(() => {
     return isEndpointAlert
       ? isIsolationSupported({
           osName: hostOsFamily,
@@ -66,46 +68,45 @@ export const useHostIsolationAction = ({
       : false;
   }, [agentVersion, capabilities, hostOsFamily, isEndpointAlert]);
 
-  const isIsolationAllowed = useUserPrivileges().endpointPrivileges.canIsolateHost;
-
   const isolateHostHandler = useCallback(() => {
     closePopover();
-    if (isolationStatus === false) {
+    if (!isHostIsolated) {
       onAddIsolationStatusClick('isolateHost');
     } else {
       onAddIsolationStatusClick('unisolateHost');
     }
-  }, [closePopover, isolationStatus, onAddIsolationStatusClick]);
+  }, [closePopover, isHostIsolated, onAddIsolationStatusClick]);
 
-  const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
+  return useMemo(() => {
+    if (
+      !isEndpointAlert ||
+      !doesHostSupportIsolation ||
+      loadingHostIsolationStatus ||
+      isHostIsolationPanelOpen
+    ) {
+      return [];
+    }
 
-  const hostIsolationAction: AlertTableContextMenuItem[] = useMemo(
-    () =>
-      isIsolationAllowed &&
-      isEndpointAlert &&
-      isolationSupported &&
-      isHostIsolationPanelOpen === false &&
-      loadingHostIsolationStatus === false
-        ? [
-            {
-              key: 'isolate-host-action-item',
-              'data-test-subj': 'isolate-host-action-item',
-              disabled: agentStatus === HostStatus.UNENROLLED,
-              onClick: isolateHostHandler,
-              name: isolateHostTitle,
-            },
-          ]
-        : [],
-    [
-      agentStatus,
-      isEndpointAlert,
-      isHostIsolationPanelOpen,
-      isIsolationAllowed,
-      isolateHostHandler,
-      isolateHostTitle,
-      isolationSupported,
-      loadingHostIsolationStatus,
-    ]
-  );
-  return hostIsolationAction;
+    const menuItems = [
+      {
+        key: 'isolate-host-action-item',
+        'data-test-subj': 'isolate-host-action-item',
+        disabled: agentStatus === HostStatus.UNENROLLED,
+        onClick: isolateHostHandler,
+        name: isHostIsolated ? UNISOLATE_HOST : ISOLATE_HOST,
+      },
+    ];
+
+    return canIsolateHost || (isHostIsolated && canUnIsolateHost) ? menuItems : [];
+  }, [
+    isEndpointAlert,
+    doesHostSupportIsolation,
+    loadingHostIsolationStatus,
+    isHostIsolationPanelOpen,
+    agentStatus,
+    isolateHostHandler,
+    canIsolateHost,
+    isHostIsolated,
+    canUnIsolateHost,
+  ]);
 };

@@ -7,3 +7,4 @@
 
 export * from './csp_rule_template_metadata';
 export * from './csp_rule_template';
+export * from './csp_vulnerability_finding';

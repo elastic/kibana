@@ -7,9 +7,10 @@
 
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { SLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
@@ -98,6 +99,20 @@ export function BurnRateRuleEditor(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+      {selectedSlo?.groupBy && selectedSlo.groupBy !== ALL_VALUE && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiCallOut
+            color="warning"
+            size="s"
+            title={i18n.translate('xpack.observability.slo.rules.groupByMessage', {
+              defaultMessage:
+                'The SLO you selected has been created with a partition on "{groupByField}". This rule will monitor and generate an alert for every instance found in the partition field.',
+              values: { groupByField: selectedSlo.groupBy },
+            })}
+          />
+        </>
+      )}
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>Define multiple burn rate windows</h5>

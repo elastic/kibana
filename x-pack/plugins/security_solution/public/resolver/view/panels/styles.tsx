@@ -12,11 +12,9 @@ import styled from 'styled-components';
 /**
  * Used by the nodeDetail view to show attributes of the related events.
  */
-export const StyledDescriptionList = styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 10em;
-  }
-`;
+export const StyledDescriptionList = styled(EuiDescriptionList).attrs({
+  columnWidths: ['fit-content(10em)', 'auto'], // Sets a max-width of 10em on titles
+})``;
 
 /**
  * Used by the nodeDetail view for the label of the node.

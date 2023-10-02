@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { assertLogContains, isExecutionContextLog, ANY } from '../test_utils';
+import { readLogFile, assertLogContains, isExecutionContextLog, ANY } from '../test_utils';
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export default function ({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -65,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
       const alertId = createdAlert.id;
 
       await waitForStatus(alertId, new Set(['ok']), 90_000);
+      const logs = await readLogFile();
 
       await assertLogContains({
         description:
@@ -76,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
               `kibana:task%20manager:run%20alerting%3Atest.executionContext:`
             )
           ),
-        retry,
+        logs,
       });
 
       await assertLogContains({
@@ -86,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
           Boolean(
             record.http?.request?.id?.includes(`alert:execute%20test.executionContext:${alertId}`)
           ),
-        retry,
+        logs,
       });
 
       await assertLogContains({
@@ -105,16 +109,20 @@ export default function ({ getService }: FtrProviderContext) {
               description: 'execute [test.executionContext] with name [abc] in [default] namespace',
             },
           }),
-        retry,
+        logs,
       });
     });
 
     it('propagates context for Telemetry collection', async () => {
       await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ unencrypted: false })
         .expect(200);
+
+      const logs = await readLogFile();
 
       await assertLogContains({
         description:
@@ -126,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
               `kibana:usage_collection:collector.fetch:application_usage`
             )
           ),
-        retry,
+        logs,
       });
 
       await assertLogContains({
@@ -138,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: 'application_usage',
             description: 'Fetch method in the Collector "application_usage"',
           }),
-        retry,
+        logs,
       });
     });
   });

@@ -6,7 +6,8 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
-import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../../common/profiling';
+import { getCalleeFunction, getCalleeSource } from '@kbn/profiling-utils';
+import type { StackFrameMetadata } from '@kbn/profiling-utils';
 
 interface Props {
   frame: StackFrameMetadata;
@@ -35,7 +36,7 @@ export function StackFrameSummary({ frame, onFrameClick }: Props) {
       <EuiFlexItem>
         <div>
           {onFrameClick ? (
-            <EuiLink onClick={handleOnClick}>
+            <EuiLink data-test-subj="profilingStackFrameSummaryLink" onClick={handleOnClick}>
               <CalleeFunctionText calleeFunctionName={calleeFunctionName} />
             </EuiLink>
           ) : (

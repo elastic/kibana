@@ -22,7 +22,7 @@ describe('search applications field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
       fieldCaps: jest.fn(),
-      indices: { get: jest.fn() },
+      indices: { get: jest.fn(), getAlias: jest.fn() },
     },
     asInternalUser: {},
   };
@@ -56,6 +56,11 @@ describe('search applications field_capabilities', () => {
         'index-001': { aliases: { unit_test_search_application: {} } },
       };
 
+      const getAliasIndicesResponse = {
+        'index-001': { aliases: { unit_test_search_application: {} } },
+      };
+
+      mockClient.asCurrentUser.indices.getAlias.mockResolvedValueOnce(getAliasIndicesResponse);
       mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
 

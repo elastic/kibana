@@ -3,38 +3,38 @@
 exports[`SummaryClient fetchSummary with calendar aligned and timeslices SLO returns the summary 1`] = `
 Object {
   "errorBudget": Object {
-    "consumed": 0.198413,
+    "consumed": 0,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.801587,
+    "remaining": 1,
   },
-  "sliValue": 0.9,
-  "status": "DEGRADING",
+  "sliValue": -1,
+  "status": "NO_DATA",
 }
 `;
 
 exports[`SummaryClient fetchSummary with rolling and occurrences SLO returns the summary 1`] = `
 Object {
   "errorBudget": Object {
-    "consumed": 100,
+    "consumed": 0,
     "initial": 0.001,
     "isEstimated": false,
-    "remaining": -99,
+    "remaining": 1,
   },
-  "sliValue": 0.9,
-  "status": "VIOLATED",
+  "sliValue": -1,
+  "status": "NO_DATA",
 }
 `;
 
 exports[`SummaryClient fetchSummary with rolling and timeslices SLO returns the summary 1`] = `
 Object {
   "errorBudget": Object {
-    "consumed": 2,
+    "consumed": 0,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": -1,
+    "remaining": 1,
   },
-  "sliValue": 0.9,
-  "status": "VIOLATED",
+  "sliValue": -1,
+  "status": "NO_DATA",
 }
 `;

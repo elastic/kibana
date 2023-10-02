@@ -84,16 +84,11 @@ const withCore = makeDecorator({
           logs: { enabled: false },
           metrics: { enabled: false },
           uptime: { enabled: false },
+          observability: { enabled: false },
         },
         thresholdRule: { enabled: false },
       },
       compositeSlo: { enabled: false },
-      aiAssistant: {
-        enabled: false,
-        feedback: {
-          enabled: false,
-        },
-      },
     };
 
     return (

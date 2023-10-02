@@ -70,6 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('returns expected list of groups after update', async () => {

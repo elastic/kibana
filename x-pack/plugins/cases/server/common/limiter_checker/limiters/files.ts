@@ -6,8 +6,8 @@
  */
 
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import { CommentType } from '../../../../common/api';
-import type { CommentRequest } from '../../../../common/api';
+import { AttachmentType } from '../../../../common/types/domain';
+import type { AttachmentRequest } from '../../../../common/types/api';
 import { MAX_FILES_PER_CASE } from '../../../../common/constants';
 import { isFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
@@ -16,7 +16,7 @@ export class FileLimiter extends BaseLimiter {
   constructor(private readonly fileService: FileServiceStart) {
     super({
       limit: MAX_FILES_PER_CASE,
-      attachmentType: CommentType.externalReference,
+      attachmentType: AttachmentType.externalReference,
       field: 'externalReferenceAttachmentTypeId',
       attachmentNoun: 'files',
     });
@@ -33,7 +33,7 @@ export class FileLimiter extends BaseLimiter {
     return files.total;
   }
 
-  public countOfItemsInRequest(requests: CommentRequest[]): number {
+  public countOfItemsInRequest(requests: AttachmentRequest[]): number {
     let fileRequests = 0;
 
     for (const request of requests) {

@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
-import { ConnectorStatus, DisplayType, FieldType } from '../../../../../../common/types/connectors';
+import { ConnectorStatus, DisplayType, FieldType } from '@kbn/search-connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';

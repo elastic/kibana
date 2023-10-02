@@ -8,13 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -123,48 +117,41 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     );
   } else if (policies && policies.length === 0) {
     content = (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyList.emptyPromptTitle"
+              defaultMessage="Create your first snapshot policy"
+            />
+          </h1>
+        }
+        body={
+          <Fragment>
+            <p>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-                defaultMessage="Create your first snapshot policy"
+                id="xpack.snapshotRestore.policyList.emptyPromptDescription"
+                defaultMessage="A policy automates the creation and deletion of snapshots."
               />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                  defaultMessage="A policy automates the creation and deletion of snapshots."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={
-            <EuiButton
-              {...reactRouterNavigate(history, linkToAddPolicy())}
-              fill
-              iconType="plusInCircle"
-              data-test-subj="createPolicyButton"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.createPolicyButton"
-                defaultMessage="Create a policy"
-              />
-            </EuiButton>
-          }
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageContent>
+            </p>
+          </Fragment>
+        }
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(history, linkToAddPolicy())}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createPolicyButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.createPolicyButton"
+              defaultMessage="Create a policy"
+            />
+          </EuiButton>
+        }
+        data-test-subj="emptyPrompt"
+      />
     );
   } else {
     const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/policy';
+import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 import { getESQueryPolicyResponseByAgentID } from './service';
 
 describe('test policy handlers schema', () => {

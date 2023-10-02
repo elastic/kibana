@@ -6,14 +6,17 @@
  */
 
 import { omit } from 'lodash';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
 import type {
-  AttributesTypeExternalReferenceNoSO,
-  AttributesTypeExternalReferenceSO,
-  AttributesTypePersistableState,
-  CommentRequestPersistableStateType,
-} from '../../common/api';
-import { ExternalReferenceStorageType } from '../../common/api';
+  ExternalReferenceSOAttachmentAttributes,
+  ExternalReferenceNoSOAttachmentAttributes,
+  PersistableStateAttachmentAttributes,
+  PersistableStateAttachmentPayload,
+} from '../../common/types/domain';
+import {
+  AttachmentType,
+  ExternalReferenceStorageType,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common';
 import { ExternalReferenceAttachmentTypeRegistry } from './external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 import type {
@@ -46,7 +49,7 @@ export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentTyp
 });
 
 export const externalReferenceAttachmentSO = {
-  type: CommentType.externalReference as const,
+  type: AttachmentType.externalReference as const,
   externalReferenceId: 'my-id',
   externalReferenceStorage: {
     type: ExternalReferenceStorageType.savedObject as const,
@@ -58,7 +61,7 @@ export const externalReferenceAttachmentSO = {
 };
 
 export const externalReferenceAttachmentES = {
-  type: CommentType.externalReference as const,
+  type: AttachmentType.externalReference as const,
   externalReferenceId: 'my-id',
   externalReferenceStorage: {
     type: ExternalReferenceStorageType.elasticSearchDoc as const,
@@ -68,7 +71,7 @@ export const externalReferenceAttachmentES = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const externalReferenceAttachmentSOAttributes: AttributesTypeExternalReferenceSO = {
+export const externalReferenceAttachmentSOAttributes: ExternalReferenceSOAttachmentAttributes = {
   ...externalReferenceAttachmentSO,
   created_at: '2019-11-25T22:32:30.608Z',
   created_by: {
@@ -82,7 +85,7 @@ export const externalReferenceAttachmentSOAttributes: AttributesTypeExternalRefe
   pushed_by: null,
 };
 
-export const externalReferenceAttachmentESAttributes: AttributesTypeExternalReferenceNoSO = {
+export const externalReferenceAttachmentESAttributes: ExternalReferenceNoSOAttachmentAttributes = {
   ...externalReferenceAttachmentES,
   created_at: '2019-11-25T22:32:30.608Z',
   created_by: {
@@ -101,15 +104,15 @@ export const persistableStateAttachmentStateOnly: PersistableStateAttachmentStat
   persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
 
-export const persistableStateAttachment: CommentRequestPersistableStateType = {
+export const persistableStateAttachment: PersistableStateAttachmentPayload = {
   ...persistableStateAttachmentStateOnly,
-  type: CommentType.persistableState,
+  type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
 };
 
-export const persistableStateAttachmentAttributes: AttributesTypePersistableState = {
+export const persistableStateAttachmentAttributes: PersistableStateAttachmentAttributes = {
   ...persistableStateAttachment,
-  type: CommentType.persistableState,
+  type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
   created_at: '2019-11-25T22:32:30.608Z',
   created_by: {

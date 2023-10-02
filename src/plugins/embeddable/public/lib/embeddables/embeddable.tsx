@@ -94,7 +94,6 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
-
     this.getOutput$()
       .pipe(
         map(({ title }) => title || ''),

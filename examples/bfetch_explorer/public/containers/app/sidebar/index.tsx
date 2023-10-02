@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiSideNav } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { routes } from '../../../routes';
 
@@ -18,26 +18,24 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   const history = useHistory();
 
   return (
-    <EuiPageSideBar>
-      <EuiSideNav
-        items={[
-          {
-            name: 'bfetch explorer',
-            id: 'home',
-            items: routes.map(({ id, title, items }) => ({
-              id,
-              name: title,
-              isSelected: true,
-              items: items.map((route) => ({
-                id: route.id,
-                name: route.title,
-                onClick: () => history.push(`/${route.id}`),
-                'data-test-subj': route.id,
-              })),
+    <EuiSideNav
+      items={[
+        {
+          name: 'bfetch explorer',
+          id: 'home',
+          items: routes.map(({ id, title, items }) => ({
+            id,
+            name: title,
+            isSelected: true,
+            items: items.map((route) => ({
+              id: route.id,
+              name: route.title,
+              onClick: () => history.push(`/${route.id}`),
+              'data-test-subj': route.id,
             })),
-          },
-        ]}
-      />
-    </EuiPageSideBar>
+          })),
+        },
+      ]}
+    />
   );
 };

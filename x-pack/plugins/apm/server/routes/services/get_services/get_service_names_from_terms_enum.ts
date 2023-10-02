@@ -15,10 +15,14 @@ export async function getServiceNamesFromTermsEnum({
   apmEventClient,
   environment,
   maxNumberOfServices,
+  start,
+  end,
 }: {
   apmEventClient: APMEventClient;
   environment: Environment;
   maxNumberOfServices: number;
+  start: number;
+  end: number;
 }) {
   if (environment !== ENVIRONMENT_ALL.value) {
     return [];
@@ -36,6 +40,15 @@ export async function getServiceNamesFromTermsEnum({
       },
       size: maxNumberOfServices,
       field: SERVICE_NAME,
+      index_filter: {
+        range: {
+          ['@timestamp']: {
+            gte: start,
+            lte: end,
+            format: 'epoch_millis',
+          },
+        },
+      },
     }
   );
 

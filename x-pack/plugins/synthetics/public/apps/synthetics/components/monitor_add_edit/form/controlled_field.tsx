@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import {
-  UseFormReturn,
-  ControllerRenderProps,
-  ControllerFieldState,
-  useFormContext,
-} from 'react-hook-form';
+import { useDebounce } from 'react-use';
+import { ControllerRenderProps, ControllerFieldState, useFormContext } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';
 import { FieldMeta, FormConfig } from '../types';
@@ -25,43 +21,60 @@ type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {
   error: React.ReactNode;
   dependenciesValues: unknown[];
   dependenciesFieldMeta: Record<string, ControllerFieldState>;
+  isInvalid: boolean;
 };
-
-const setFieldValue =
-  (key: keyof FormConfig, setValue: UseFormReturn<FormConfig>['setValue']) => (value: any) => {
-    setValue(key, value);
-  };
 
 export const ControlledField = <TFieldKey extends keyof FormConfig>({
   component: FieldComponent,
   props,
   fieldKey,
-  shouldUseSetValue,
   field,
   formRowProps,
-  fieldState,
-  customHook,
   error,
   dependenciesValues,
   dependenciesFieldMeta,
+  isInvalid,
 }: Props<TFieldKey>) => {
-  const { setValue, reset, formState, setError, clearErrors } = useFormContext<FormConfig>();
-  const noop = () => {};
-  let hook: Function = noop;
-  let hookProps;
+  const { setValue, getFieldState, reset, formState, trigger } = useFormContext<FormConfig>();
+
   const { locations } = useSelector(selectServiceLocationsState);
   const { space } = useKibanaSpace();
   const isEdit = useIsEditFlow();
-  if (customHook) {
-    hookProps = customHook(field.value);
-    hook = hookProps.func;
-  }
-  const { [hookProps?.fieldKey as string]: hookResult } = hook(hookProps?.params) || {};
-  const onChange = shouldUseSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
+
+  const [onChangeArgs, setOnChangeArgs] = useState<Parameters<typeof field.onChange> | undefined>(
+    undefined
+  );
+
+  useDebounce(
+    async () => {
+      if (onChangeArgs !== undefined) {
+        await trigger?.(); // Manually invalidate whole form to make dependency validations reactive
+      }
+    },
+    500,
+    [onChangeArgs]
+  );
+
+  const handleChange = useCallback(
+    async (...event: any[]) => {
+      if (typeof event?.[0] === 'string' && !getFieldState(fieldKey).isTouched) {
+        // This is needed for composite fields like code editors
+        setValue(fieldKey, event[0], { shouldTouch: true });
+      }
+
+      field.onChange(...event);
+      setOnChangeArgs(event);
+    },
+    // Do not depend on `field`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setOnChangeArgs]
+  );
+
   const generatedProps = props
     ? props({
         field,
         setValue,
+        trigger,
         reset,
         locations: locations.map((location) => ({ ...location, key: location.id })),
         dependencies: dependenciesValues,
@@ -71,33 +84,14 @@ export const ControlledField = <TFieldKey extends keyof FormConfig>({
         formState,
       })
     : {};
-  const isInvalid = hookResult || Boolean(fieldState.error);
-  const hookErrorContent = hookProps?.error;
-  const hookError = hookResult ? hookProps?.error : undefined;
-
-  useEffect(() => {
-    if (!customHook) {
-      return;
-    }
-
-    if (hookResult && !fieldState.error) {
-      setError(fieldKey, { type: 'custom', message: hookErrorContent as string });
-    } else if (!hookResult && fieldState.error?.message === hookErrorContent) {
-      clearErrors(fieldKey);
-    }
-  }, [setError, fieldKey, clearErrors, fieldState, customHook, hookResult, hookErrorContent]);
 
   return (
-    <EuiFormRow
-      {...formRowProps}
-      isInvalid={isInvalid}
-      error={isInvalid ? hookError || fieldState.error?.message || error : undefined}
-    >
+    <EuiFormRow {...formRowProps} isInvalid={isInvalid} error={error}>
       <FieldComponent
         {...field}
         checked={field.value || false}
         defaultValue={field.value}
-        onChange={onChange}
+        onChange={handleChange}
         {...generatedProps}
         isInvalid={isInvalid}
         fullWidth

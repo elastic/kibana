@@ -210,27 +210,203 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      }
-    ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+      },
       {
         "parentPluginId": "stackAlerts",
-        "id": "def-common.STACK_ALERTS_FEATURE_ID",
-        "type": "string",
+        "id": "def-common.rowToDocument",
+        "type": "Function",
         "tags": [],
-        "label": "STACK_ALERTS_FEATURE_ID",
+        "label": "rowToDocument",
         "description": [],
         "signature": [
-          "\"stackAlerts\""
+          "(columns: EsqlResultColumn[], row: EsqlResultRow) => EsqlDocument"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.rowToDocument.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "EsqlResultColumn[]"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.rowToDocument.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "row",
+            "description": [],
+            "signature": [
+              "EsqlResultRow"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.toEsQueryHits",
+        "type": "Function",
+        "tags": [],
+        "label": "toEsQueryHits",
+        "description": [],
+        "signature": [
+          "(results: ",
+          {
+            "pluginId": "stackAlerts",
+            "scope": "common",
+            "docId": "kibStackAlertsPluginApi",
+            "section": "def-common.EsqlTable",
+            "text": "EsqlTable"
+          },
+          ") => { hits: EsqlHit[]; total: number; }"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.toEsQueryHits.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "stackAlerts",
+                "scope": "common",
+                "docId": "kibStackAlertsPluginApi",
+                "section": "def-common.EsqlTable",
+                "text": "EsqlTable"
+              }
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.transformDatatableToEsqlTable",
+        "type": "Function",
+        "tags": [],
+        "label": "transformDatatableToEsqlTable",
+        "description": [],
+        "signature": [
+          "(results: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ") => ",
+          {
+            "pluginId": "stackAlerts",
+            "scope": "common",
+            "docId": "kibStackAlertsPluginApi",
+            "section": "def-common.EsqlTable",
+            "text": "EsqlTable"
+          }
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.transformDatatableToEsqlTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              }
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
+    "interfaces": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.EsqlTable",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsqlTable",
+        "description": [],
+        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.EsqlTable.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "EsqlResultColumn[]"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.EsqlTable.values",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              "EsqlResultRow[]"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "stackAlerts",

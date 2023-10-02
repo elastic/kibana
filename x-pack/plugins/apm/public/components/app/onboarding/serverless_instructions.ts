@@ -48,7 +48,7 @@ export function serverlessInstructions(
   const displayApiKeyErrorCallout = error && Boolean(errorMessage);
   const commonOptions: AgentInstructions = {
     baseUrl,
-    apmServerUrl: config.managedServiceUrl,
+    apmServerUrl: `${config.managedServiceUrl}:443`,
     checkAgentStatus,
     agentStatus,
     agentStatusLoading,

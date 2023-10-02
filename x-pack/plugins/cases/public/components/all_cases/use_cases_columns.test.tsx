@@ -17,7 +17,7 @@ import { connectors } from '../configure_cases/__mock__';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 describe('useCasesColumns ', () => {

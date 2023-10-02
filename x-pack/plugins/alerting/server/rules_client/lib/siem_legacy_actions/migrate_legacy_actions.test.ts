@@ -40,13 +40,14 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
-  getSummarizedAlerts: jest.fn(),
   validate: {
     params: { validate: (params) => params },
   },
+  validLegacyConsumers: [],
 };
 
 const context = {
@@ -124,18 +125,17 @@ describe('migrateLegacyActions', () => {
     jest.clearAllMocks();
   });
 
-  it('should return empty migratedActions when error is thrown within method', async () => {
+  it('should throw an exception when error is thrown within method', async () => {
     (retrieveMigratedLegacyActions as jest.Mock).mockRejectedValueOnce(new Error('test failure'));
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId,
-      attributes,
-    });
+    await expect(
+      migrateLegacyActions(context, {
+        ruleId,
+        attributes,
+      })
+    ).rejects.toThrowError(
+      `Failed to migrate legacy actions for SIEM rule ${ruleId}: test failure`
+    );
 
-    expect(migratedActions).toEqual({
-      resultedActions: [],
-      hasLegacyActions: false,
-      resultedReferences: [],
-    });
     expect(context.logger.error).toHaveBeenCalledWith(
       `migrateLegacyActions(): Failed to migrate legacy actions for SIEM rule ${ruleId}: test failure`
     );
@@ -168,7 +168,11 @@ describe('migrateLegacyActions', () => {
     });
     await migrateLegacyActions(context, { ruleId, attributes });
 
-    expect(retrieveMigratedLegacyActions).toHaveBeenCalledWith(context, { ruleId });
+    expect(retrieveMigratedLegacyActions).toHaveBeenCalledWith(
+      context,
+      { ruleId },
+      expect.any(Function)
+    );
   });
 
   it('should not call validateActions and injectReferencesIntoActions if skipActionsValidation=true', async () => {
@@ -176,44 +180,6 @@ describe('migrateLegacyActions', () => {
 
     expect(validateActions).not.toHaveBeenCalled();
     expect(injectReferencesIntoActions).not.toHaveBeenCalled();
-  });
-
-  it('should call validateActions and injectReferencesIntoActions if attributes provided', async () => {
-    (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValueOnce({
-      legacyActions: legacyActionsMock,
-      legacyActionsReferences: legacyReferencesMock,
-    });
-
-    (injectReferencesIntoActions as jest.Mock).mockReturnValue('actions-with-references');
-    await migrateLegacyActions(context, { ruleId, attributes });
-
-    expect(validateActions).toHaveBeenCalledWith(context, ruleType, {
-      ...attributes,
-      actions: 'actions-with-references',
-    });
-
-    expect(injectReferencesIntoActions).toHaveBeenCalledWith(
-      'rule_id_1',
-      [
-        {
-          actionRef: 'action_0',
-          actionTypeId: '.email',
-          group: 'default',
-          params: {
-            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-            subject: 'Test Actions',
-            to: ['test@test.com'],
-          },
-          uuid: '11403909-ca9b-49ba-9d7a-7e5320e68d05',
-          frequency: {
-            notifyWhen: 'onThrottleInterval',
-            summary: true,
-            throttle: '1d',
-          },
-        },
-      ],
-      [{ id: 'cc85da20-d480-11ed-8e69-1df522116c28', name: 'action_0', type: 'action' }]
-    );
   });
 
   it('should set frequency props from rule level to existing actions', async () => {

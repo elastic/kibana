@@ -37,6 +37,8 @@ import { TransactionOverview } from '../../app/transaction_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
+import { ProfilingOverview } from '../../app/profiling_overview';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 
 function page({
   title,
@@ -47,12 +49,7 @@ function page({
   title: string;
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
-  searchBarOptions?: {
-    showUnifiedSearchBar?: boolean;
-    showTransactionTypeSelector?: boolean;
-    showTimeComparison?: boolean;
-    hidden?: boolean;
-  };
+  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }): {
   element: React.ReactElement<any, any>;
 } {
@@ -363,6 +360,20 @@ export const serviceDetailRoute = {
               t.literal(ALERT_STATUS_ALL),
             ]),
           }),
+        }),
+      },
+      '/services/{serviceName}/profiling': {
+        ...page({
+          tab: 'profiling',
+          title: i18n.translate('xpack.apm.views.profiling.title', {
+            defaultMessage: 'Universal Profiling',
+          }),
+          element: <ProfilingOverview />,
+          searchBarOptions: {
+            showTimeComparison: false,
+            showTransactionTypeSelector: false,
+            showQueryInput: false,
+          },
         }),
       },
       '/services/{serviceName}/': {

@@ -22,6 +22,7 @@ import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
 
+// eslint-disable-next-line react/display-name
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
     const { read } = useKibana().services.application.capabilities.osquery;

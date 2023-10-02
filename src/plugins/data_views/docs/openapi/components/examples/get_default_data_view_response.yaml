@@ -1,0 +1,5 @@
+summary: The get default data view API returns the default data view identifier.
+value:
+  {
+    "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+  }

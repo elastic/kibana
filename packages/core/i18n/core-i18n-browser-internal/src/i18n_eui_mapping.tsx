@@ -17,9 +17,12 @@ interface EuiValues {
 
 export const getEuiContextMapping = (): EuiTokensObject => {
   return {
-    'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
-      defaultMessage: 'Loading',
-    }),
+    'euiAccordionChildrenLoading.message': i18n.translate(
+      'core.euiAccordionChildrenLoading.message',
+      {
+        defaultMessage: 'Loading',
+      }
+    ),
     'euiAutoRefresh.autoRefreshLabel': i18n.translate('core.euiAutoRefresh.autoRefreshLabel', {
       defaultMessage: 'Auto refresh',
     }),
@@ -103,6 +106,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Page level controls',
       description: 'Screen reader announcement about heading controls',
     }),
+    'euiBreadcrumb.popoverAriaLabel': i18n.translate('core.euiBreadcrumb.popoverAriaLabel', {
+      defaultMessage: 'Clicking this button will toggle a popover dialog.',
+    }),
     'euiBreadcrumb.collapsedBadge.ariaLabel': i18n.translate(
       'core.euiBreadcrumb.collapsedBadge.ariaLabel',
       {
@@ -112,6 +118,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiBreadcrumbs.nav.ariaLabel': i18n.translate('core.euiBreadcrumbs.nav.ariaLabel', {
       defaultMessage: 'Breadcrumbs',
       description: 'Label on the breadcrumbs nav element',
+    }),
+    'euiCallOut.dismissAriaLabel': i18n.translate('core.euiCallOut.dismissAriaLabel', {
+      defaultMessage: 'Dismiss this callout',
     }),
     'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
       defaultMessage: 'Select',
@@ -157,6 +166,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description:
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
+    ),
+    'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
+      defaultMessage: 'Site menu',
+    }),
+    'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelClose',
+      { defaultMessage: 'Toggle navigation closed' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelOpen',
+      { defaultMessage: 'Toggle navigation open' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
@@ -405,6 +425,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
         values: { landmarkHeading },
       }),
+    'euiGlobalToastList.clearAllToastsButtonAriaLabel': i18n.translate(
+      'core.euiGlobalToastList.clearAllToastsButtonAriaLabel',
+      {
+        defaultMessage: 'Clear all toast notifications',
+      }
+    ),
+    'euiGlobalToastList.clearAllToastsButtonDisplayText': i18n.translate(
+      'core.euiGlobalToastList.clearAllToastsButtonDisplayText',
+      {
+        defaultMessage: 'Clear all',
+      }
+    ),
     'euiKeyboardShortcuts.title': i18n.translate('core.euiKeyboardShortcuts.title', {
       defaultMessage: 'Keyboard shortcuts',
     }),
@@ -1455,13 +1487,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
       {
-        defaultMessage: 'Press left or right to adjust panels size',
+        defaultMessage: 'Press the left or right arrow keys to adjust panels size',
       }
     ),
     'euiResizableButton.verticalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.verticalResizerAriaLabel',
       {
-        defaultMessage: 'Press up or down to adjust panels size',
+        defaultMessage: 'Press the up or down arrow keys to adjust panels size',
       }
     ),
     'euiResizablePanel.toggleButtonAriaLabel': i18n.translate(
@@ -1479,6 +1511,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiSaturation.ariaLabel': i18n.translate('core.euiSaturation.ariaLabel', {
       defaultMessage: 'HSV color mode saturation and value 2-axis slider',
+    }),
+    'euiSearchBox.ariaLabel': i18n.translate('core.euiSearchBox.ariaLabel', {
+      defaultMessage:
+        'This is a search bar. After typing your query, hit enter to filter the results lower in the page.',
+    }),
+    'euiSearchBox.incrementalAriaLabel': i18n.translate('core.euiSearchBox.incrementalAriaLabel', {
+      defaultMessage:
+        'This is a search bar. As you type, the results lower in the page will automatically filter.',
+    }),
+    'euiSearchBox.placeholder': i18n.translate('core.euiSearchBox.placeholder', {
+      defaultMessage: 'Search...',
     }),
     'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
       defaultMessage: 'Loading options',

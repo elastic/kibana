@@ -6,7 +6,7 @@
  */
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { UserWithProfileInfo } from '../../../common/api';
+import type { UserWithProfileInfo } from '../../../common/types/domain';
 
 export interface Assignee {
   uid: string;

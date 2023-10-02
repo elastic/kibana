@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { nextTick } from '@kbn/test-jest-helpers';
-
 // Note: this import must be before other relative imports for the mocks to work as intended.
-// eslint-disable-next-line import/order
 import {
   mockAuthorizationModeFactory,
   mockCheckPrivilegesDynamicallyWithRequestFactory,
@@ -22,14 +15,20 @@ import {
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { Subject } from 'rxjs';
+
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import { AuthorizationService } from './authorization_service';
 import { checkPrivilegesFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;

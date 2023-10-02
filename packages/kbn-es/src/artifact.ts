@@ -14,7 +14,6 @@ import { pipeline, Transform } from 'stream';
 import { setTimeout } from 'timers/promises';
 
 import fetch, { Headers } from 'node-fetch';
-import AbortController from 'abort-controller';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
 

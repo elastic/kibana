@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
+import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
@@ -100,4 +102,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
   getSyntheticsCertsRoute,
+  getActionConnectorsRoute,
+  getConnectorTypesRoute,
 ];

@@ -7,51 +7,42 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
+
 import {
-  EuiCollapsibleNavGroup,
-  EuiIcon,
-  EuiLink,
-  EuiSideNav,
-  EuiSideNavItemType,
-  EuiText,
+  EuiCollapsibleNavItem,
+  EuiCollapsibleNavItemProps,
+  EuiCollapsibleNavSubItemGroupTitle,
 } from '@elastic/eui';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import classnames from 'classnames';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
-import { navigationStyles as styles } from '../../styles';
 import { useNavigation as useServices } from '../../services';
-import { ChromeProjectNavigationNodeEnhanced } from '../types';
 import { isAbsoluteLink } from '../../utils';
 
-type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
-
 const navigationNodeToEuiItem = (
-  item: ChromeProjectNavigationNodeEnhanced,
+  item: ChromeProjectNavigationNode,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
-): EuiSideNavItemType<unknown> => {
+): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const dataTestSubj = `nav-item-${id}`;
-
-  const getRenderItem = (): RenderItem | undefined => {
-    if (!isExternal || item.renderItem) {
-      return item.renderItem;
-    }
-
-    return () => (
-      <div className="euiSideNavItemButton" data-test-subj={dataTestSubj}>
-        <EuiLink href={href} external>
-          {item.title}
-        </EuiLink>
-      </div>
-    );
-  };
-
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
+  const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
+    [`nav-item-deepLinkId-${item.deepLink?.id}`]: !!item.deepLink,
+    [`nav-item-id-${item.id}`]: item.id,
+    [`nav-item-isActive`]: isSelected,
+  });
 
   return {
     id,
-    name: item.title,
+    isGroupTitle: item.isGroupTitle,
+    title: item.title,
     isSelected,
+    accordionProps: {
+      ...item.accordionProps,
+      initialIsOpen: true, // FIXME open state is controlled on component mount
+    },
+    linkProps: { external: isExternal },
     onClick:
       href !== undefined
         ? (event: React.MouseEvent) => {
@@ -60,20 +51,18 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href,
-    renderItem: getRenderItem(),
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),
     ['data-test-subj']: dataTestSubj,
-    ...(item.icon && {
-      icon: <EuiIcon type={item.icon} size="s" />,
-    }),
+    icon: item.icon,
+    iconProps: { size: 's' },
   };
 };
 
 interface Props {
-  navNode: ChromeProjectNavigationNodeEnhanced;
-  items?: ChromeProjectNavigationNodeEnhanced[];
+  navNode: ChromeProjectNavigationNode;
+  items?: ChromeProjectNavigationNode[];
 }
 
 export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
@@ -85,8 +74,12 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
   // If the item has no link and no cildren, we don't want to render it
-  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNodeEnhanced) => {
+  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNode) => {
+    const isGroupTitle = Boolean(item.isGroupTitle);
     const hasLink = Boolean(item.deepLink) || Boolean(item.href);
+    if (isGroupTitle) {
+      return true;
+    }
     if (hasLink) {
       return true;
     }
@@ -108,6 +101,10 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   });
 
   const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
+  const groupHasChildren = filteredItems.some(itemHasLinkOrChildren);
+  // Group with a link and no children will be rendered as a link and not an EUI accordion
+  const groupIsLink = groupHasLink && !groupHasChildren;
+  const groupHref = navNode.deepLink?.url ?? navNode.href!;
 
   useEffect(() => {
     if (doCollapseFromActiveState) {
@@ -115,33 +112,43 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     }
   }, [isActive, doCollapseFromActiveState]);
 
-  if (!groupHasLink && !filteredItems.some(itemHasLinkOrChildren)) {
+  if (!groupHasLink && !groupHasChildren) {
     return null;
   }
 
+  const propsForGroupAsLink: Partial<EuiCollapsibleNavItemProps> = groupIsLink
+    ? {
+        linkProps: {
+          href: groupHref,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateToUrl(groupHref);
+          },
+        },
+      }
+    : {};
+
   return (
-    <EuiCollapsibleNavGroup
+    <EuiCollapsibleNavItem
       id={id}
       title={title}
-      iconType={icon}
-      iconSize={'m'}
-      isCollapsible={true}
-      initialIsOpen={isActive}
-      onToggle={(isOpen) => {
-        setIsCollapsed(!isOpen);
-        setDoCollapseFromActiveState(false);
+      icon={icon}
+      iconProps={{ size: 'm' }}
+      accordionProps={{
+        initialIsOpen: isActive,
+        forceState: isCollapsed ? 'closed' : 'open',
+        onToggle: (isOpen) => {
+          setIsCollapsed(!isOpen);
+          setDoCollapseFromActiveState(false);
+        },
+        ...navNode.accordionProps,
       }}
-      forceState={isCollapsed ? 'closed' : 'open'}
       data-test-subj={`nav-bucket-${id}`}
-    >
-      <EuiText color="default">
-        <EuiSideNav
-          items={filteredItems.map((item) =>
-            navigationNodeToEuiItem(item, { navigateToUrl, basePath })
-          )}
-          css={styles.euiSideNavItems}
-        />
-      </EuiText>
-    </EuiCollapsibleNavGroup>
+      {...propsForGroupAsLink}
+      items={filteredItems.map((item) =>
+        navigationNodeToEuiItem(item, { navigateToUrl, basePath })
+      )}
+    />
   );
 };

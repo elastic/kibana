@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { reduce } from 'lodash';
-import type { Shard } from '../../common/schemas/common/utils';
+import type { Shard } from '../../common/utils/converters';
 import type { SOShard } from '../common/types';
 
 export const convertECSMappingToArray = (ecsMapping: Record<string, object> | undefined) =>

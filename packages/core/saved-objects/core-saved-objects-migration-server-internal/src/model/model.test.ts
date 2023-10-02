@@ -9,6 +9,7 @@
 import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_INDEX_TYPES_MAP,
@@ -125,6 +126,7 @@ describe('migrations v2 model', () => {
     waitForMigrationCompletion: false,
     mustRelocateDocuments: false,
     indexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
   const postInitState = {
     ...baseState,

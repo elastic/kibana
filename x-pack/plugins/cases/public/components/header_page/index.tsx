@@ -87,7 +87,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   return (
     <Header border={border} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
-        <FlexItem>
+        <FlexItem css={{ overflow: 'hidden' }}>
           {showBackButton && (
             <LinkBack>
               <LinkIcon

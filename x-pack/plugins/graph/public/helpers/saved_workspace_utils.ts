@@ -59,7 +59,7 @@ function mapHits(hit: any, url: string): GraphWorkspaceSavedObject {
   source.id = hit.id;
   source.url = url;
   source.updatedAt = hit.updatedAt;
-  source.icon = 'fa-share-alt'; // looks like a graph
+  source.icon = 'cluster'; // maybe there's a better choice here?
   return source;
 }
 

@@ -18,7 +18,7 @@ import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
-import { API_URLS } from '../common/constants';
+import { SYNTHETICS_API_URLS } from '../common/constants';
 import { SyntheticsServerSetup } from './types';
 import { savedObjectsAdapter } from './saved_objects/saved_objects';
 
@@ -168,9 +168,9 @@ export class UptimeEsClient {
   async getInspectData(path: string) {
     const isInspectorEnabled = await this.getInspectEnabled();
     const showInspectData =
-      (isInspectorEnabled || this.isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
+      (isInspectorEnabled || this.isDev) && path !== SYNTHETICS_API_URLS.DYNAMIC_SETTINGS;
 
-    if (showInspectData) {
+    if (showInspectData && this.inspectableEsQueries.length > 0) {
       return { _inspect: this.inspectableEsQueries };
     }
     return {};

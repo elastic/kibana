@@ -22,10 +22,13 @@ import { IlmPhasesEmptyPrompt } from '../../../ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
 import { PatternRollup, SelectedIndex } from '../../../types';
+import { useDataQualityContext } from '../../data_quality_context';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -53,8 +56,8 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -68,6 +71,7 @@ export interface Props {
 const DataQualityDetailsComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -77,18 +81,20 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   patternIndexNames,
   patternRollups,
   patterns,
+  startDate,
   theme,
   baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const [selectedIndex, setSelectedIndex] = useState<SelectedIndex | null>(null);
 
   const onIndexSelected = useCallback(async ({ indexName, pattern }: SelectedIndex) => {
     setSelectedIndex({ indexName, pattern });
   }, []);
 
-  if (ilmPhases.length === 0) {
+  if (isILMAvailable && ilmPhases.length === 0) {
     return <IlmPhasesEmptyPrompt />;
   }
 
@@ -107,6 +113,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
       <IndicesDetails
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
+        endDate={endDate}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
@@ -120,6 +127,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         patternRollups={patternRollups}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
+        startDate={startDate}
         updatePatternIndexNames={updatePatternIndexNames}
         updatePatternRollup={updatePatternRollup}
       />

@@ -15,7 +15,6 @@ import {
 } from '../constants';
 import {
   ruleParamsSchema,
-  rRuleSchema,
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
@@ -36,8 +35,7 @@ export type RuleExecutionStatusWarningReason =
   typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
-export type RRule = TypeOf<typeof rRuleSchema>;
-export type SnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
+export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
 export type Action = TypeOf<typeof actionSchema>;

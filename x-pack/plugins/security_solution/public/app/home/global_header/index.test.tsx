@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
@@ -171,5 +171,19 @@ describe('global header', () => {
     );
 
     expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
+  });
+
+  it('shows AI Assistant header link', () => {
+    (useLocation as jest.Mock).mockReturnValue([
+      { pageName: SecurityPageName.overview, detailName: undefined },
+    ]);
+
+    const { findByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+      </TestProviders>
+    );
+
+    waitFor(() => expect(findByTestId('assistantHeaderLink')).toBeInTheDocument());
   });
 });

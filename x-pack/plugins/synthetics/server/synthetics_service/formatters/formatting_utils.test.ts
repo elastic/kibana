@@ -65,4 +65,81 @@ describe('replaceStringWithParams', () => {
 
     expect(result).toEqual('Basic https://elastic.co https://elastic.co/product');
   });
+
+  it('works with $ as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  $auth',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  $auth');
+  });
+
+  it('works with ${ as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  ${auth',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  ${auth');
+  });
+  it('works with { as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  {auth',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  {auth');
+  });
+  it('works with {} as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  {}',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  {}');
+  });
+  it('works with {$ as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  {$',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  {$');
+  });
+
+  it('works with ${} as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  ${} value',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  ${} value');
+  });
+
+  it('works with } ${abc} as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic } ${homePageUrl1} value',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic } https://elastic.co/product value');
+  });
+
+  it('works with ${abc} { as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl1} { value',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.co/product { value');
+  });
 });

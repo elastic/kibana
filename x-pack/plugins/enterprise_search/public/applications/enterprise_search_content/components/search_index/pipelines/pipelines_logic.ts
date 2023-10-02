@@ -11,10 +11,11 @@ import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
 
 import { HttpError } from '../../../../../../common/types/api';
-import { IngestPipelineParams } from '../../../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';

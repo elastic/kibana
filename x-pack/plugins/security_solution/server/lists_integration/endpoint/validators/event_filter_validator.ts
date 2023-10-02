@@ -13,25 +13,18 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 
 import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
-function validateField(field: string) {
-  if (!EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(field)) {
-    return `invalid field: ${field}`;
-  }
-}
-
 const EventFilterDataSchema = schema.object(
   {
     entries: schema.arrayOf(
       schema.object(
         {
-          field: schema.string({ validate: validateField }),
+          field: schema.string(),
         },
         { unknowns: 'ignore' }
       ),

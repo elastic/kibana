@@ -68,8 +68,8 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       () =>
         createRuleSo({
           ruleAttributes: updateMeta(context, rawRule as RawRule) as RuleAttributes,
-          savedObjectClient: context.unsecuredSavedObjectsClient,
-          savedObjectCreateOptions: {
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
+          savedObjectsCreateOptions: {
             ...options,
             references,
             id: ruleId,
@@ -101,7 +101,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       // Cleanup data, something went wrong scheduling the task
       try {
         await deleteRuleSo({
-          savedObjectClient: context.unsecuredSavedObjectsClient,
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
           id: createdAlert.id,
         });
       } catch (err) {
@@ -115,7 +115,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
     await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
       updateRuleSo({
-        savedObjectClient: context.unsecuredSavedObjectsClient,
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
         id: createdAlert.id,
         updateRuleAttributes: {
           scheduledTaskId,

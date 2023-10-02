@@ -18,7 +18,7 @@ export function MobileAddData() {
       aria-label={i18n.translate('xpack.exploratoryView.page_header.addMobileDataLink.label', {
         defaultMessage: 'Navigate to a tutorial about adding mobile APM data',
       })}
-      href={kibana.services?.application?.getUrlForApp('/home#/tutorial/apm')}
+      href={kibana.services?.application?.getUrlForApp('/apm/tutorial')}
       color="primary"
       iconType="indexOpen"
     >

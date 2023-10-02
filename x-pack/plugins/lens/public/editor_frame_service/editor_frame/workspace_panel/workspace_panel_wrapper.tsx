@@ -30,6 +30,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectVisualizationState,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -52,13 +53,10 @@ export interface WorkspacePanelWrapperProps {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  onUpdateStateCb?: (datasourceState: unknown, visualizationState: unknown) => void;
 }) {
   const dispatchLens = useLensDispatch();
-  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
-    (state) => state.lens
-  );
-  const { activeVisualization, onUpdateStateCb } = props;
+  const visualization = useLensSelector(selectVisualizationState);
+  const { activeVisualization } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -70,12 +68,8 @@ export function VisualizationToolbar(props: {
           newState,
         })
       );
-      if (activeDatasourceId && onUpdateStateCb) {
-        const dsState = datasourceStates[activeDatasourceId].state;
-        onUpdateStateCb?.(dsState, newState);
-      }
     },
-    [activeDatasourceId, datasourceStates, dispatchLens, activeVisualization, onUpdateStateCb]
+    [dispatchLens, activeVisualization]
   );
 
   const ToolbarComponent = props.activeVisualization?.ToolbarComponent;

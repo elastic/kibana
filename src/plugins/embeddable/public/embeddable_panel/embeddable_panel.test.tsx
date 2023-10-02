@@ -25,12 +25,16 @@ import {
   ContactCardEmbeddableReactFactory,
   HelloWorldContainer,
 } from '../lib/test_samples';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiNotificationBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../mocks';
 import { EmbeddablePanel } from './embeddable_panel';
 import { core, inspector } from '../kibana_services';
 import { CONTEXT_MENU_TRIGGER, ViewMode } from '..';
 import { UnwrappedEmbeddablePanelProps } from './types';
+import {
+  DESCRIPTIVE_CONTACT_CARD_EMBEDDABLE,
+  DescriptiveContactCardEmbeddableFactory,
+} from '../lib/test_samples/embeddables/contact_card/descriptive_contact_card_embeddable_factory';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
@@ -46,11 +50,15 @@ const embeddableReactFactory = new ContactCardEmbeddableReactFactory(
   (() => null) as any,
   {} as any
 );
+const descriptiveEmbeddableFactory = new DescriptiveContactCardEmbeddableFactory(
+  (() => null) as any
+);
 
 actionRegistry.set(editModeAction.id, new ActionInternal(editModeAction));
 triggerRegistry.set(trigger.id, trigger);
 setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFactory);
+setup.registerEmbeddableFactory(descriptiveEmbeddableFactory.type, descriptiveEmbeddableFactory);
 
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
@@ -69,7 +77,11 @@ const renderEmbeddableInPanel = async (
   return wrapper!;
 };
 
-const setupContainerAndEmbeddable = async (viewMode?: ViewMode, hidePanelTitles?: boolean) => {
+const setupContainerAndEmbeddable = async (
+  embeddableType: string,
+  viewMode: ViewMode = ViewMode.VIEW,
+  hidePanelTitles?: boolean
+) => {
   const container = new HelloWorldContainer(
     { id: '123', panels: {}, viewMode: viewMode ?? ViewMode.VIEW, hidePanelTitles },
     {
@@ -81,7 +93,7 @@ const setupContainerAndEmbeddable = async (viewMode?: ViewMode, hidePanelTitles?
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
+  >(embeddableType, {
     firstName: 'Jack',
     lastName: 'Orange',
   });
@@ -89,10 +101,17 @@ const setupContainerAndEmbeddable = async (viewMode?: ViewMode, hidePanelTitles?
   return { container, embeddable };
 };
 
-const renderInEditModeAndOpenContextMenu = async (
-  embeddableInputs: any,
-  getActions: UiActionsStart['getTriggerCompatibleActions'] = () => Promise.resolve([])
-) => {
+const renderInEditModeAndOpenContextMenu = async ({
+  embeddableInputs,
+  getActions = () => Promise.resolve([]),
+  showNotifications = true,
+  showBadges = true,
+}: {
+  embeddableInputs: any;
+  getActions?: UiActionsStart['getTriggerCompatibleActions'];
+  showNotifications?: boolean;
+  showBadges?: boolean;
+}) => {
   const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
     getEmbeddableFactory,
   } as any);
@@ -110,8 +129,8 @@ const renderInEditModeAndOpenContextMenu = async (
         <EmbeddablePanel
           embeddable={embeddable}
           getActions={getActions}
-          showNotifications={true}
-          showBadges={true}
+          showNotifications={showNotifications}
+          showBadges={showBadges}
         />
       </I18nProvider>
     );
@@ -243,7 +262,7 @@ describe('Error states', () => {
 });
 
 test('Render method is called on Embeddable', async () => {
-  const { embeddable } = await setupContainerAndEmbeddable();
+  const { embeddable } = await setupContainerAndEmbeddable(CONTACT_CARD_EMBEDDABLE);
   jest.spyOn(embeddable, 'render');
   await renderEmbeddableInPanel({ embeddable });
   expect(embeddable.render).toHaveBeenCalledTimes(1);
@@ -264,19 +283,19 @@ test('Actions which are disabled via disabledActions are hidden', async () => {
   };
   const getActions = () => Promise.resolve([action]);
 
-  const { component: component1 } = await renderInEditModeAndOpenContextMenu(
-    {
+  const { component: component1 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
     },
-    getActions
-  );
-  const { component: component2 } = await renderInEditModeAndOpenContextMenu(
-    {
+    getActions,
+  });
+  const { component: component2 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
       disabledActions: ['FOO'],
     },
-    getActions
-  );
+    getActions,
+  });
 
   const fooContextMenuActionItem1 = findTestSubject(component1, 'embeddablePanelAction-FOO');
   const fooContextMenuActionItem2 = findTestSubject(component2, 'embeddablePanelAction-FOO');
@@ -300,26 +319,79 @@ test('Badges which are disabled via disabledActions are hidden', async () => {
   };
   const getActions = () => Promise.resolve([action]);
 
-  const { component: component1 } = await renderInEditModeAndOpenContextMenu(
-    {
+  const { component: component1 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
     },
-    getActions
-  );
-  const { component: component2 } = await renderInEditModeAndOpenContextMenu(
-    {
+    getActions,
+  });
+  const { component: component2 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
       disabledActions: ['BAR'],
     },
-    getActions
-  );
+    getActions,
+  });
 
   expect(component1.find(EuiBadge).length).toBe(1);
   expect(component2.find(EuiBadge).length).toBe(0);
 });
 
+test('Badges are not shown when hideBadges is true', async () => {
+  const action = {
+    id: 'BAR',
+    type: 'BAR',
+    getIconType: () => undefined,
+    getDisplayName: () => 'bar',
+    isCompatible: async () => true,
+    execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
+  };
+  const getActions = () => Promise.resolve([action]);
+
+  const { component } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
+      firstName: 'Bob',
+    },
+    getActions,
+    showBadges: false,
+  });
+  expect(component.find(EuiBadge).length).toBe(0);
+  expect(component.find(EuiNotificationBadge).length).toBe(1);
+});
+
+test('Notifications are not shown when hideNotifications is true', async () => {
+  const action = {
+    id: 'BAR',
+    type: 'BAR',
+    getIconType: () => undefined,
+    getDisplayName: () => 'bar',
+    isCompatible: async () => true,
+    execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
+  };
+  const getActions = () => Promise.resolve([action]);
+
+  const { component } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
+      firstName: 'Bob',
+    },
+    getActions,
+    showNotifications: false,
+  });
+
+  expect(component.find(EuiBadge).length).toBe(1);
+  expect(component.find(EuiNotificationBadge).length).toBe(0);
+});
+
 test('Edit mode actions are hidden if parent is in view mode', async () => {
-  const { embeddable } = await setupContainerAndEmbeddable();
+  const { embeddable } = await setupContainerAndEmbeddable(CONTACT_CARD_EMBEDDABLE);
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
@@ -335,7 +407,7 @@ test('Edit mode actions are hidden if parent is in view mode', async () => {
 });
 
 test('Edit mode actions are shown in edit mode', async () => {
-  const { container, embeddable } = await setupContainerAndEmbeddable();
+  const { container, embeddable } = await setupContainerAndEmbeddable(CONTACT_CARD_EMBEDDABLE);
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
@@ -382,7 +454,11 @@ test('Edit mode actions are shown in edit mode', async () => {
 });
 
 test('Panel title customize link does not exist in view mode', async () => {
-  const { embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, false);
+  const { embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    false
+  );
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
@@ -394,7 +470,11 @@ test('Runs customize panel action on title click when in edit mode', async () =>
   // spy on core openFlyout to check that the flyout is opened correctly.
   core.overlays.openFlyout = jest.fn();
 
-  const { embeddable } = await setupContainerAndEmbeddable(ViewMode.EDIT, false);
+  const { embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.EDIT,
+    false
+  );
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
@@ -412,7 +492,16 @@ test('Runs customize panel action on title click when in edit mode', async () =>
 });
 
 test('Updates when hidePanelTitles is toggled', async () => {
-  const { container, embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, false);
+  const { container, embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    false
+  );
+  /**
+   * panel title will always show if a description is set so we explictily set the panel
+   * description so the embeddable description is not used
+   */
+  embeddable.updateInput({ description: '' });
   const component = await renderEmbeddableInPanel({ embeddable });
 
   await component.update();
@@ -439,7 +528,11 @@ test('Updates when hidePanelTitles is toggled', async () => {
 });
 
 test('Respects options from SelfStyledEmbeddable', async () => {
-  const { container, embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, false);
+  const { container, embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    false
+  );
 
   const selfStyledEmbeddable = embeddablePluginMock.mockSelfStyledEmbeddable(embeddable, {
     hideTitle: true,
@@ -454,8 +547,24 @@ test('Respects options from SelfStyledEmbeddable', async () => {
   expect(title.length).toBe(0);
 });
 
+test('Shows icon in panel title when the embeddable has a description', async () => {
+  const { embeddable } = await setupContainerAndEmbeddable(
+    DESCRIPTIVE_CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    false
+  );
+  const component = await renderEmbeddableInPanel({ embeddable });
+
+  const descriptionIcon = findTestSubject(component, 'embeddablePanelTitleDescriptionIcon');
+  expect(descriptionIcon.length).toBe(1);
+});
+
 test('Does not hide header when parent hide header option is false', async () => {
-  const { embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, false);
+  const { embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    false
+  );
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
@@ -464,7 +573,11 @@ test('Does not hide header when parent hide header option is false', async () =>
 });
 
 test('Hides title when parent hide header option is true', async () => {
-  const { embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, true);
+  const { embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    true
+  );
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
@@ -475,7 +588,11 @@ test('Hides title when parent hide header option is true', async () => {
 test('Should work in minimal way rendering only the inspector action', async () => {
   inspector.isAvailable = jest.fn(() => true);
 
-  const { embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, true);
+  const { embeddable } = await setupContainerAndEmbeddable(
+    CONTACT_CARD_EMBEDDABLE,
+    ViewMode.VIEW,
+    true
+  );
 
   const component = await renderEmbeddableInPanel({ embeddable });
 

@@ -1,6 +1,6 @@
 # aiops
 
-The plugin provides APIs and components for AIOps features, including the “Explain log rate spikes” UI, maintained by the ML team.
+The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 ---
 

@@ -50,6 +50,7 @@ const OverlayContainer = styled.div`
 `;
 
 const FullScreenOverlayStyles = css`
+  background-color:  ${({ theme }) => `${theme.eui.euiColorEmptyShade};`}
   position: fixed;
   top: 0;
   bottom: 2em;

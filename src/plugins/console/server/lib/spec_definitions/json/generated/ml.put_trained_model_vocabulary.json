@@ -1,11 +1,21 @@
 {
   "ml.put_trained_model_vocabulary": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_ml/trained_models/{model_id}/vocabulary"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-model-vocabulary.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-model-vocabulary.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

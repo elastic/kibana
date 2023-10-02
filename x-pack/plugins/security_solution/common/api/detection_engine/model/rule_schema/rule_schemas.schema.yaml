@@ -1,0 +1,849 @@
+openapi: 3.0.0
+info:
+  title: Security Rule Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: false
+  schemas:
+    SortOrder:
+      type: string
+      enum:
+        - asc
+        - desc
+    RuleExecutionStatus:
+      type: string
+      description: |-
+        Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.
+        - going to run - @deprecated Replaced by the 'running' status but left for backwards compatibility with rule execution events already written to Event Log in the prior versions of Kibana. Don't use when writing rule status changes.
+        - running - Rule execution started but not reached any intermediate or final status.
+        - partial failure - Rule can partially fail for various reasons either in the middle of an execution (in this case we update its status right away) or in the end of it. So currently this status can be both intermediate and final at the same time. A typical reason for a partial failure: not all the indices that the rule searches over actually exist.
+        - failed - Rule failed to execute due to unhandled exception or a reason defined in the business logic of its executor function.
+        - succeeded - Rule executed successfully without any issues. Note: this status is just an indication of a rule's "health". The rule might or might not generate any alerts despite of it.
+
+      enum:
+        - going to run
+        - running
+        - partial failure
+        - failed
+        - succeeded
+
+    RuleExecutionResult:
+      type: object
+      description: |-
+        Rule execution result is an aggregate that groups plain rule execution events by execution UUID.
+      properties:
+        execution_uuid:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        duration_ms:
+          type: integer
+        status:
+          type: string
+        message:
+          type: string
+        num_active_alerts:
+          type: integer
+        num_new_alerts:
+          type: integer
+        num_recovered_alerts:
+          type: integer
+        num_triggered_actions:
+          type: integer
+        num_succeeded_actions:
+          type: integer
+        num_errored_actions:
+          type: integer
+        total_search_duration_ms:
+          type: integer
+        es_search_duration_ms:
+          type: integer
+        schedule_delay_ms:
+          type: integer
+        timed_out:
+          type: boolean
+        indexing_duration_ms:
+          type: integer
+        search_duration_ms:
+          type: integer
+        gap_duration_s:
+          type: integer
+        security_status:
+          type: string
+        security_message:
+          type: string
+      required:
+        - execution_uuid
+        - timestamp
+        - duration_ms
+        - status
+        - message
+        - num_active_alerts
+        - num_new_alerts
+        - num_recovered_alerts
+        - num_triggered_actions
+        - num_succeeded_actions
+        - num_errored_actions
+        - total_search_duration_ms
+        - es_search_duration_ms
+        - schedule_delay_ms
+        - timed_out
+        - indexing_duration_ms
+        - search_duration_ms
+        - gap_duration_s
+        - security_status
+        - security_message
+
+    Action:
+      type: object
+      properties:
+        action_type_id:
+          type: string
+          description: The action type used for sending notifications.
+        group:
+          type: string
+          description: Optionally groups actions by use cases. Use `default` for alert notifications.
+        id:
+          type: string
+          description: The connector ID.
+        params:
+          type: object
+          description: Object containing the allowed connector fields, which varies according to the connector type.
+        uuid:
+          type: string
+        alerts_filter:
+          type: object
+          description: TODO implement the schema type
+        frequency:
+          type: object
+          description: TODO implement the schema type
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
+
+    AlertSuppression:
+      type: object
+      properties:
+        group_by:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 3
+        duration:
+          type: object
+          properties:
+            value:
+              type: integer
+              minimum: 1
+            unit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+          required:
+            - value
+            - unit
+        missing_fields_strategy:
+          type: string
+          enum:
+            - doNotSuppress
+            - suppress
+      required:
+        - group_by
+
+    BaseRule:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Rule name
+        description:
+          type: string
+          description: Rule description
+        risk_score:
+          type: integer
+          description: Risk score (0 to 100)
+          minimum: 0
+          maximum: 100
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+          description: Severity of the rule
+        rule_name_override:
+          type: string
+          description: Sets the source field for the alert's signal.rule.name value
+        timestamp_override:
+          type: string
+          description: Sets the time field used to query indices (optional)
+        timeline_id:
+          type: string
+          description: Timeline template ID
+        timeline_title:
+          type: string
+          description: Timeline template title
+        outcome:
+          type: string
+          enum:
+            - exactMatch
+            - aliasMatch
+            - conflict
+        alias_target_id:
+          type: string
+          description: TODO
+        alias_purpose:
+          type: string
+          enum:
+            - savedObjectConversion
+            - savedObjectImport
+          description: TODO
+        license:
+          type: string
+          description: The rule’s license.
+        note:
+          type: string
+          description: Notes to help investigate alerts produced by the rule.
+        building_block_type:
+          type: string
+          description: Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default.
+        output_index:
+          type: string
+          description: (deprecated) Has no effect.
+        namespace:
+          type: string
+          description: Has no effect.
+        meta:
+          type: object
+          description: Stores rule metadata.
+        throttle:
+          type: string
+          description: Defines the interval on which a rule's actions are executed.
+        version:
+          type: integer
+          minimum: 1
+          default: 1
+          description: The rule’s version number. Defaults to 1.
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+          description: String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
+        enabled:
+          type: boolean
+          default: true
+          description: Determines whether the rule is enabled. Defaults to true.
+        risk_score_mapping:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              operator:
+                type: string
+                enum:
+                  - equals
+              value:
+                type: string
+              risk_score:
+                type: integer
+                minimum: 0
+                maximum: 100
+            required:
+              - field
+              - value
+              - operator
+          description: Overrides generated alerts' risk_score with a value from the source event
+          default: []
+        severity_mapping:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              operator:
+                type: string
+                enum:
+                  - equals
+              severity:
+                type: string
+                enum:
+                  - low
+                  - medium
+                  - high
+                  - critical
+              value:
+                type: string
+            required:
+              - field
+              - operator
+              - severity
+              - value
+          description: Overrides generated alerts' severity with values from the source event
+          default: []
+        interval:
+          type: string
+          description: Frequency of rule execution, using a date math range. For example, "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
+          default: 5m
+        from:
+          type: string
+          description: Time from which data is analyzed each time the rule executes, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+          default: now-6m
+        to:
+          type: string
+          description: TODO
+          default: now
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+          default: []
+        exceptions_list:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: ID of the exception container
+                minLength: 1
+              list_id:
+                type: string
+                description: List ID of the exception container
+                minLength: 1
+              type:
+                type: string
+                description: The exception type
+                enum:
+                  - detection
+                  - rule_default
+                  - endpoint
+                  - endpoint_trusted_apps
+                  - endpoint_events
+                  - endpoint_host_isolation_exceptions
+                  - endpoint_blocklists
+              namespace_type:
+                type: string
+                description: Determines the exceptions validity in rule's Kibana space
+                enum:
+                  - agnostic
+                  - single
+            required:
+              - id
+              - list_id
+              - type
+              - namespace_type
+          default: []
+        author:
+          type: array
+          items:
+            type: string
+          default: []
+        false_positives:
+          type: array
+          items:
+            type: string
+          default: []
+        references:
+          type: array
+          items:
+            type: string
+          default: []
+        max_signals:
+          type: integer
+          minimum: 1
+          default: 100
+        threat:
+          type: array
+          items:
+            type: object
+            properties:
+              framework:
+                type: string
+                description: Relevant attack framework
+              tactic:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  reference:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - reference
+              technique:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    reference:
+                      type: string
+                    subtechnique:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                          reference:
+                            type: string
+                        required:
+                          - id
+                          - name
+                          - reference
+                  required:
+                    - id
+                    - name
+                    - reference
+            required:
+              - framework
+              - tactic
+      required:
+        - id
+        - name
+        - description
+        - risk_score
+        - severity
+
+    QueryRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [query]
+              description: Rule type
+            index:
+              type: array
+              items:
+                type: string
+            data_view_id:
+              type: string
+            filters:
+              type: array
+              items: {} # unknown
+            saved_id:
+              type: string
+            response_actions:
+              type: array
+              items:
+                type: object
+              description: TODO
+            alert_suppression:
+              $ref: '#/components/schemas/AlertSuppression'
+            query:
+              type: string
+              description: Query to execute
+              default: ''
+            language:
+              type: string
+              enum:
+                - kuery
+                - lucene
+              default: kuery
+              description: Query language to use.
+          required:
+            - type
+
+    SavedQueryRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [saved_query]
+              description: Rule type
+            index:
+              type: array
+              items:
+                type: string
+            data_view_id:
+              type: string
+            filters:
+              type: array
+              items: {} # unknown
+            saved_id:
+              type: string
+            response_actions:
+              type: array
+              items:
+                type: object
+              description: TODO
+            alert_suppression:
+              $ref: '#/components/schemas/AlertSuppression'
+            query:
+              type: string
+              description: Query to execute
+            language:
+              type: string
+              enum:
+                - kuery
+                - lucene
+              default: kuery
+              description: Query language to use.
+          required:
+            - type
+            - saved_id
+
+    ThresholdRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [threshold]
+              description: Rule type
+            query:
+              type: string
+            threshold:
+              type: object
+              properties:
+                field:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                  description: Field to aggregate on
+                value:
+                  type: integer
+                  minimum: 1
+                  description: Threshold value
+                cardinality:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                      value:
+                        type: integer
+                        minimum: 0
+            index:
+              type: array
+              items:
+                type: string
+            data_view_id:
+              type: string
+            filters:
+              type: array
+              items: {} # unknown
+            saved_id:
+              type: string
+            language:
+              type: string
+              enum:
+                - kuery
+                - lucene
+              default: kuery
+              description: Query language to use.
+          required:
+            - type
+            - query
+            - threshold
+    ThreatMatchRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [threat_match]
+              description: Rule type
+            query:
+              type: string
+            threat_query:
+              type: string
+              description: Query to execute
+            threat_mapping:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          minLength: 1
+                        type:
+                          type: string
+                          enum:
+                            - mapping
+                        value:
+                          type: string
+                          minLength: 1
+            threat_index:
+              type: array
+              items:
+                type: string
+            index:
+              type: array
+              items:
+                type: string
+            data_view_id:
+              type: string
+            filters:
+              type: array
+              items: {} # unknown
+            saved_id:
+              type: string
+            threat_filters:
+              type: array
+              items:
+                description: Query and filter context array used to filter documents from the Elasticsearch index containing the threat values
+            threat_indicator_path:
+              type: string
+              description: Defines the path to the threat indicator in the indicator documents (optional)
+            threat_language:
+              type: string
+              enum:
+                - kuery
+                - lucene
+              description: Query language to use.
+            concurrent_searches:
+              type: integer
+              minimum: 1
+            items_per_search:
+              type: integer
+              minimum: 1
+            language:
+              type: string
+              enum:
+                - kuery
+                - lucene
+              default: kuery
+              description: Query language to use.
+          required:
+            - type
+            - query
+            - threat_query
+            - threat_mapping
+            - threat_index
+    MlRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [machine_learning]
+              description: Rule type
+            anomaly_threshold:
+              type: integer
+              minimum: 0
+              description: Anomaly threshold
+            machine_learning_job_id:
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+                  minItems: 1
+              description: Machine learning job ID
+          required:
+            - type
+            - machine_learning_job_id
+            - anomaly_threshold
+    EqlRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [eql]
+              description: Rule type
+            language:
+              type: string
+              enum:
+                - eql
+            query:
+              type: string
+              description: EQL query to execute
+            index:
+              type: array
+              items:
+                type: string
+            data_view_id:
+              type: string
+            filters:
+              type: array
+              items: {} # unknown
+            event_category_field:
+              type: string
+              description: Contains the event classification
+            tiebreaker_field:
+              type: string
+              description: Sets a secondary field for sorting events
+            timestamp_field:
+              type: string
+              description: Contains the event timestamp used for sorting a sequence of events
+          required:
+            - type
+            - language
+            - query
+
+    NewTermsRule:
+      allOf:
+        - $ref: '#/components/schemas/BaseRule'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [new_terms]
+              description: Rule type
+            query:
+              type: string
+            new_terms_fields:
+              type: array
+              items:
+                type: string
+              minItems: 1
+              maxItems: 3
+            history_window_size:
+              type: string
+              minLength: 1
+            index:
+              type: array
+              items:
+                type: string
+            data_view_id:
+              type: string
+            filters:
+              type: array
+              items: {} # unknown
+            language:
+              type: string
+              enum:
+                - kuery
+                - lucene
+              default: kuery
+          required:
+            - type
+            - query
+            - new_terms_fields
+            - history_window_start
+
+    Rule:
+      oneOf:
+        - $ref: '#/components/schemas/QueryRule'
+        - $ref: '#/components/schemas/SavedQueryRule'
+        - $ref: '#/components/schemas/ThresholdRule'
+        - $ref: '#/components/schemas/ThreatMatchRule'
+        - $ref: '#/components/schemas/MlRule'
+        - $ref: '#/components/schemas/EqlRule'
+        - $ref: '#/components/schemas/NewTermsRule'
+
+    Throttle:
+      type: string
+      description: Defines the maximum interval in which a rule's actions are executed.
+      enum:
+        - rule
+        - 1h
+        - 1d
+        - 7d
+
+    Subtechnique:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Subtechnique ID
+        name:
+          type: string
+          description: Subtechnique name
+        reference:
+          type: string
+          description: Subtechnique reference
+      required:
+        - id
+        - name
+        - reference
+
+    Technique:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Technique ID
+        name:
+          type: string
+          description: Technique name
+        reference:
+          type: string
+          description: Technique reference
+        subtechnique:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subtechnique'
+          description: Array containing more specific information on the attack technique
+      required:
+        - id
+        - name
+        - reference
+
+    Threat:
+      type: object
+      properties:
+        framework:
+          type: string
+          description: Relevant attack framework
+        tactic:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Tactic ID
+            name:
+              type: string
+              description: Tactic name
+            reference:
+              type: string
+              description: Tactic reference
+          required:
+            - id
+            - name
+            - reference
+        technique:
+          type: array
+          items:
+            $ref: '#/components/schemas/Technique'
+          description: Array containing information on the attack techniques (optional)
+      required:
+        - framework
+        - tactic
+
+    RuleResponse:
+      type: object
+
+    RuleCreateProps:
+      type: object
+
+    RuleUpdateProps:
+      type: object
+
+    RulePatchProps:
+      type: object

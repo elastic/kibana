@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
+import { EuiAccordionProps } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -45,6 +47,18 @@ export type AppDeepLinkId =
   | ObservabilityLink;
 
 /** @public */
+export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+
+export type GetIsActiveFn = (params: {
+  /** The current path name including the basePath + hash value but **without** any query params */
+  pathNameSerialized: string;
+  /** The history Location */
+  location: Location;
+  /** Utiliy function to prepend a path with the basePath */
+  prepend: (path: string) => string;
+}) => boolean;
+
+/** @public */
 export interface ChromeProjectNavigationNode {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
@@ -56,6 +70,8 @@ export interface ChromeProjectNavigationNode {
   deepLink?: ChromeNavLink;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
+  /** Optional flag to indicate if the node must be treated as a group title */
+  isGroupTitle?: boolean;
   /** Optional children of the navigation node */
   children?: ChromeProjectNavigationNode[];
   /**
@@ -69,13 +85,15 @@ export interface ChromeProjectNavigationNode {
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
-  getIsActive?: (location: Location) => boolean;
+  getIsActive?: GetIsActiveFn;
 
   /**
    * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  accordionProps?: Partial<EuiAccordionProps>;
 }
 
 /** @public */
@@ -123,9 +141,16 @@ export interface NodeDefinition<
   title?: string;
   /** App id or deeplink id */
   link?: LinkId;
+  /** Cloud link id */
+  cloudLink?: CloudLinkId;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
-  /** Optional children of the navigation node */
+  /**
+   * Optional flag to indicate if the node must be treated as a group title.
+   * Can not be used with `children`
+   */
+  isGroupTitle?: boolean;
+  /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Use href for absolute links only. Internal links should use "link".
@@ -134,13 +159,15 @@ export interface NodeDefinition<
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
-  getIsActive?: (location: Location) => boolean;
+  getIsActive?: GetIsActiveFn;
 
   /**
    * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  accordionProps?: Partial<EuiAccordionProps>;
 }
 
 /**

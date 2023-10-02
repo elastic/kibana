@@ -7,19 +7,30 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { UpsellingSectionId } from '../lib/upsellings';
-import { useKibana } from '../lib/kibana';
+import type React from 'react';
+import type {
+  UpsellingSectionId,
+  UpsellingMessageId,
+} from '@kbn/security-solution-upselling/service';
+import { useUpsellingService } from '../components/upselling_provider';
 import type { SecurityPageName } from '../../../common';
 
 export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentType | null => {
-  const { upselling } = useKibana().services;
-  const upsellingSections = useObservable(upselling.sections$);
+  const upselling = useUpsellingService();
+  const upsellingSections = useObservable(upselling.sections$, upselling.getSectionsValue());
 
   return useMemo(() => upsellingSections?.get(id) ?? null, [id, upsellingSections]);
 };
 
+export const useUpsellingMessage = (id: UpsellingMessageId): string | null => {
+  const upselling = useUpsellingService();
+  const upsellingMessages = useObservable(upselling.messages$, upselling.getMessagesValue());
+
+  return useMemo(() => upsellingMessages?.get(id) ?? null, [id, upsellingMessages]);
+};
+
 export const useUpsellingPage = (pageName: SecurityPageName): React.ComponentType | null => {
-  const { upselling } = useKibana().services;
+  const upselling = useUpsellingService();
   const UpsellingPage = useMemo(() => upselling.getPageUpselling(pageName), [pageName, upselling]);
 
   return UpsellingPage ?? null;

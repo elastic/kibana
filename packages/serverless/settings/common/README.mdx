@@ -1,0 +1,14 @@
+---
+id: serverless/packages/settings/common
+slug: /serverless/packages/settings/common
+title: Serverless Common Advanced Settings
+description: A package of common settings for all Serverless projects.
+tags: ['serverless', 'package']
+date: 2023-08-24
+---
+
+This package contains a list of UI settings that are available in all Serverless projects in the Advanced settings app.
+This list is consumed by the `serverless` plugin, which merges it with any serverless project-specific settings that 
+have been set up, and sends it to the uiSettings service to set an allowlist for the settings.
+
+If you need to register a setting that should be available in all serverless projects, make sure to add its Id to this list.

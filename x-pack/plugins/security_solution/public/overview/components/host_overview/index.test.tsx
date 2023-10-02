@@ -21,7 +21,7 @@ const defaultProps = {
   inspect: null,
   refetch: () => {},
   isModuleEnabled: true,
-  isLicenseValid: true,
+  isAuthorized: true,
   loading: true,
 };
 
@@ -88,7 +88,7 @@ describe('Host Summary Component', () => {
       data: [
         {
           host: {
-            name: 'testHostmame',
+            name: 'testHostname',
             risk: {
               rule_risks: [],
               calculated_score_norm: riskScore,

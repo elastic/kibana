@@ -7,12 +7,13 @@
 
 import moment from 'moment-timezone';
 import { filter, omit, some } from 'lodash';
-import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
 import deepmerge from 'deepmerge';
 
 import type { IRouter } from '@kbn/core/server';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
+import type { UpdateAssetsStatusRequestParamsSchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import { combineMerge } from './utils';
@@ -20,6 +21,7 @@ import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from '../pack/utils';
 import type { PackSavedObject } from '../../common/types';
+import { updateAssetsStatusRequestParamsSchema } from '../../../common/api';
 
 export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -33,7 +35,10 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: schema.object({}, { unknowns: 'allow' }),
+            params: buildRouteValidation<
+              typeof updateAssetsStatusRequestParamsSchema,
+              UpdateAssetsStatusRequestParamsSchema
+            >(updateAssetsStatusRequestParamsSchema),
           },
         },
       },

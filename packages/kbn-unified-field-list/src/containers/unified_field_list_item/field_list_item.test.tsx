@@ -82,6 +82,7 @@ async function getComponent({
     isEmpty: false,
     groupIndex: 1,
     itemIndex: 0,
+    size: 'xs',
     workspaceSelectedFieldNames: [],
   };
   const comp = await mountWithIntl(<UnifiedFieldListItem {...props} />);

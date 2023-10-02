@@ -28,22 +28,16 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  GetSummarizedAlertsFnOpts,
   SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
+  GetViewInAppRelativeUrlFnOpts,
+  DataStreamAdapter,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type {
-  FindResult,
-  BulkEditOperation,
-  BulkOperationError,
-  BulkEditOptions,
-  BulkEditOptionsFilter,
-  BulkEditOptionsIds,
-} from './rules_client';
+export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
@@ -62,6 +56,7 @@ export {
   ECS_COMPONENT_TEMPLATE_NAME,
   ECS_CONTEXT,
   TOTAL_FIELDS_LIMIT,
+  VALID_ALERT_INDEX_PREFIXES,
   getComponentTemplate,
   type PublicFrameworkAlertsService,
   createOrUpdateIlmPolicy,
@@ -70,7 +65,9 @@ export {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  isValidAlertIndexName,
 } from './alerts_service';
+export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

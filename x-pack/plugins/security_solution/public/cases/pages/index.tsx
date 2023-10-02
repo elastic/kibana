@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -114,7 +115,13 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            metrics: [
+              CaseMetricsFeature.ALERTS_COUNT,
+              CaseMetricsFeature.ALERTS_USERS,
+              CaseMetricsFeature.ALERTS_HOSTS,
+              CaseMetricsFeature.CONNECTORS,
+              CaseMetricsFeature.LIFESPAN,
+            ],
             alerts: { isExperimental: false },
           },
           refreshRef,

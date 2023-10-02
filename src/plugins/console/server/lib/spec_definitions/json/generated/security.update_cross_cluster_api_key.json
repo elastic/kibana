@@ -6,6 +6,10 @@
     "patterns": [
       "_security/cross_cluster/api_key/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-update-cross-cluster-api-key.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-update-cross-cluster-api-key.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
   }
 }

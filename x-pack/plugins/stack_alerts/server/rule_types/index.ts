@@ -10,6 +10,8 @@ import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
 
+export * from './constants';
+
 export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams) {
   registerIndexThreshold(params);
   registerGeoContainment(params);

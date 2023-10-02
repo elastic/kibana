@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`maybeAddCloudLinks when cloud enabled and it fails to fetch the user, it sets the links 2`] = `
+Array [
+  Object {
+    "href": "profile-url",
+    "iconType": "user",
+    "label": "Profile",
+    "order": 100,
+    "setAsProfile": true,
+  },
+  Object {
+    "href": "billing-url",
+    "iconType": "visGauge",
+    "label": "Billing",
+    "order": 200,
+  },
+  Object {
+    "href": "organization-url",
+    "iconType": "gear",
+    "label": "Organization",
+    "order": 300,
+  },
+  Any<Object>,
+]
+`;
+
+exports[`maybeAddCloudLinks when cloud enabled and the user is an Elastic Cloud user, it sets the links 2`] = `
+Array [
+  Object {
+    "href": "profile-url",
+    "iconType": "user",
+    "label": "Profile",
+    "order": 100,
+    "setAsProfile": true,
+  },
+  Object {
+    "href": "billing-url",
+    "iconType": "visGauge",
+    "label": "Billing",
+    "order": 200,
+  },
+  Object {
+    "href": "organization-url",
+    "iconType": "gear",
+    "label": "Organization",
+    "order": 300,
+  },
+  Any<Object>,
+]
+`;

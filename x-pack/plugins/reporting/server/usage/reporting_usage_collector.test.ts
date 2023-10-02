@@ -12,15 +12,13 @@ import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { FeaturesAvailability } from '.';
 import {
   getReportingUsageCollector,
   registerReportingUsageCollector,
 } from './reporting_usage_collector';
-
-const exportTypesRegistry = getExportTypesRegistry();
+import { ExportTypesRegistry } from '../lib';
 
 const getLicenseMock =
   (licenseType = 'gold') =>
@@ -40,11 +38,15 @@ const getMockFetchClients = (resp: any) => {
 };
 
 const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+let exportTypesRegistry: ExportTypesRegistry;
 
 describe('license checks', () => {
   describe('with a basic license', () => {
     let usageStats: any;
     beforeAll(async () => {
+      const mockReporting = await createMockReportingCore(createMockConfigSchema());
+      exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('basic'),

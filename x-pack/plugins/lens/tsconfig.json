@@ -79,8 +79,17 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/unified-field-list",
+    "@kbn/event-annotation-common",
     "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-theme-browser-mocks"
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/event-annotation-components",
+    "@kbn/content-management-utils",
+    "@kbn/serverless",
+    "@kbn/ebt-tools",
+    "@kbn/chart-expressions-common",
+    "@kbn/search-response-warnings",
+    "@kbn/logging",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

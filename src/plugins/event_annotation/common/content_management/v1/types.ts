@@ -20,8 +20,8 @@ import {
 } from '@kbn/content-management-plugin/common';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { EventAnnotationGroupContentType } from '../types';
-import { EventAnnotationConfig } from '../../types';
 
 export interface Reference {
   type: string;
@@ -34,7 +34,8 @@ export interface EventAnnotationGroupSavedObjectAttributes {
   description: string;
   ignoreGlobalFilters: boolean;
   annotations: EventAnnotationConfig[];
-  dataViewSpec?: DataViewSpec;
+  // NULL is important here - undefined will not properly remove this property from the saved object
+  dataViewSpec: DataViewSpec | null;
 }
 
 export interface EventAnnotationGroupSavedObject {
@@ -78,8 +79,6 @@ export type EventAnnotationGroupGetOut = GetResult<
 // ----------- CREATE --------------
 
 export interface CreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  overwrite?: boolean;
   /** Array of referenced saved objects. */
   references?: Reference[];
 }

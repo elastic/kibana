@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { UptimeRouter } from '../types';
 import { uptimeRequests } from './lib/requests';
 import { createRouteWithAuth, legacyUptimeRestApiRoutes, uptimeRouteWrapper } from './routes';
 import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
@@ -28,7 +29,8 @@ export const initUptimeServer = (
   server: UptimeServerSetup,
   plugins: UptimeCorePluginsSetup,
   ruleDataClient: IRuleDataClient,
-  logger: Logger
+  logger: Logger,
+  router: UptimeRouter
 ) => {
   legacyUptimeRestApiRoutes.forEach((route) => {
     const { method, options, handler, validate, path } = uptimeRouteWrapper(
@@ -44,16 +46,16 @@ export const initUptimeServer = (
 
     switch (method) {
       case 'GET':
-        server.router.get(routeDefinition, handler);
+        router.get(routeDefinition, handler);
         break;
       case 'POST':
-        server.router.post(routeDefinition, handler);
+        router.post(routeDefinition, handler);
         break;
       case 'PUT':
-        server.router.put(routeDefinition, handler);
+        router.put(routeDefinition, handler);
         break;
       case 'DELETE':
-        server.router.delete(routeDefinition, handler);
+        router.delete(routeDefinition, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);

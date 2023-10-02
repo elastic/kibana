@@ -65,7 +65,7 @@ const VisLegendItemComponent = ({
     {
       id: 'filterIn',
       label: i18n.translate('visTypeVislib.vislib.legend.filterForValueButtonAriaLabel', {
-        defaultMessage: 'Filter for value {legendDataLabel}',
+        defaultMessage: 'Filter for {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
       iconType: 'plusInCircle',
@@ -74,7 +74,7 @@ const VisLegendItemComponent = ({
     {
       id: 'filterOut',
       label: i18n.translate('visTypeVislib.vislib.legend.filterOutValueButtonAriaLabel', {
-        defaultMessage: 'Filter out value {legendDataLabel}',
+        defaultMessage: 'Filter out {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
       iconType: 'minusInCircle',

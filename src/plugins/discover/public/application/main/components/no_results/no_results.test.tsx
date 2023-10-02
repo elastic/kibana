@@ -20,6 +20,7 @@ import {
 import { type Filter } from '@kbn/es-query';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {
@@ -35,9 +36,13 @@ jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
 }));
 
 async function mountAndFindSubjects(
-  props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'isTimeBased'>
+  props: Omit<
+    DiscoverNoResultsProps,
+    'onDisableFilters' | 'data' | 'isTimeBased' | 'stateContainer'
+  >
 ) {
   const services = createDiscoverServicesMock();
+  const isTimeBased = props.dataView.isTimeBased();
 
   let component: ReactWrapper;
 
@@ -45,7 +50,8 @@ async function mountAndFindSubjects(
     component = await mountWithIntl(
       <KibanaContextProvider services={services}>
         <DiscoverNoResults
-          isTimeBased={props.dataView.isTimeBased()}
+          stateContainer={getDiscoverStateMock({ isTimeBased })}
+          isTimeBased={isTimeBased}
           onDisableFilters={() => {}}
           {...props}
         />

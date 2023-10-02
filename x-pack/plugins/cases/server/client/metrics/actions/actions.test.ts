@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Case } from '../../../../common/api';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { Actions } from './actions';
+import type { Case } from '../../../../common/types/domain';
 
 const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();
@@ -47,7 +48,7 @@ describe('Actions', () => {
     attachmentService.executeCaseActionsAggregations.mockResolvedValue(undefined);
 
     const handler = new Actions(constructorOptions);
-    handler.setupFeature('actions.isolateHost');
+    handler.setupFeature(CaseMetricsFeature.ACTIONS_ISOLATE_HOST);
 
     expect(await handler.compute()).toEqual({
       actions: {
@@ -63,7 +64,7 @@ describe('Actions', () => {
     attachmentService.executeCaseActionsAggregations.mockResolvedValue({});
 
     const handler = new Actions(constructorOptions);
-    handler.setupFeature('actions.isolateHost');
+    handler.setupFeature(CaseMetricsFeature.ACTIONS_ISOLATE_HOST);
 
     expect(await handler.compute()).toEqual({
       actions: {
@@ -81,7 +82,7 @@ describe('Actions', () => {
     });
 
     const handler = new Actions(constructorOptions);
-    handler.setupFeature('actions.isolateHost');
+    handler.setupFeature(CaseMetricsFeature.ACTIONS_ISOLATE_HOST);
 
     expect(await handler.compute()).toEqual({
       actions: {
@@ -99,7 +100,7 @@ describe('Actions', () => {
     });
 
     const handler = new Actions(constructorOptions);
-    handler.setupFeature('actions.isolateHost');
+    handler.setupFeature(CaseMetricsFeature.ACTIONS_ISOLATE_HOST);
 
     expect(await handler.compute()).toEqual({
       actions: {
@@ -120,7 +121,7 @@ describe('Actions', () => {
     });
 
     const handler = new Actions(constructorOptions);
-    handler.setupFeature('actions.isolateHost');
+    handler.setupFeature(CaseMetricsFeature.ACTIONS_ISOLATE_HOST);
 
     expect(await handler.compute()).toEqual({
       actions: {

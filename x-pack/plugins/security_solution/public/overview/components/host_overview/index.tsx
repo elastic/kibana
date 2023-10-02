@@ -98,7 +98,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       }),
       [from, to]
     );
-    const { data: hostRisk, isLicenseValid } = useRiskScore({
+    const { data: hostRisk, isAuthorized } = useRiskScore({
       filterQuery,
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
@@ -297,7 +297,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {isLicenseValid && (
+        {isAuthorized && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

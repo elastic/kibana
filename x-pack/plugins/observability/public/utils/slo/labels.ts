@@ -112,13 +112,6 @@ export function toDurationLabel(durationStr: string): string {
           duration: duration.value,
         },
       });
-    case 'Y':
-      return i18n.translate('xpack.observability.slo.duration.year', {
-        defaultMessage: '{duration, plural, one {1 year} other {# years}}',
-        values: {
-          duration: duration.value,
-        },
-      });
   }
 }
 
@@ -145,10 +138,6 @@ export function toDurationAdverbLabel(durationStr: string): string {
     case 'M':
       return i18n.translate('xpack.observability.slo.duration.monthly', {
         defaultMessage: 'Monthly',
-      });
-    case 'Y':
-      return i18n.translate('xpack.observability.slo.duration.yearly', {
-        defaultMessage: 'Yearly',
       });
   }
 }

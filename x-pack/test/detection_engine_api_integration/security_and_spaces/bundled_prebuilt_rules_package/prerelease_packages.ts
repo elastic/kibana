@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
 import expect from 'expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  deleteAllPrebuiltRuleAssets,
-  deleteAllRules,
-  getPrebuiltRulesAndTimelinesStatus,
-  installPrebuiltRulesAndTimelines,
-} from '../../utils';
+import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
+import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
+import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
+import { installPrebuiltRules } from '../../utils/prebuilt_rules/install_prebuilt_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -36,26 +32,21 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should install latest stable version and ignore prerelease packages', async () => {
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
-      expect(statusBeforePackageInstallation.rules_installed).toBe(0);
-      expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
-      expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
+      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
+      expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
+      expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
+      expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
-      await installPrebuiltRulesAndTimelines(supertest);
-      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+      await installPrebuiltRules(es, supertest);
 
       // Verify that status is updated after package installation
-      const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
-      expect(statusAfterPackageInstallation.rules_installed).toBe(1); // 1 rule in package 99.0.0
-      expect(statusAfterPackageInstallation.rules_not_installed).toBe(0);
-      expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
+      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(1); // 1 rule in package 99.0.0
+      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
+      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
       // Get installed rules
-      const { body: rulesResponse } = await supertest
-        .get(DETECTION_ENGINE_RULES_URL_FIND)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const rulesResponse = await getInstalledRules(supertest);
 
       // Assert that installed rules are from package 99.0.0 and not from prerelease (beta) package
       expect(rulesResponse.data.length).toBe(1);

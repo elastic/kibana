@@ -30,6 +30,8 @@ export enum SYNTHETICS_API_URLS {
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
   SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,
+  GET_ACTIONS_CONNECTORS = `/internal/synthetics/get_actions_connectors`,
+  GET_CONNECTOR_TYPES = `/internal/synthetics/get_connector_types`,
   JOURNEY = `/internal/synthetics/journey/{checkGroup}`,
   SYNTHETICS_SUCCESSFUL_CHECK = `/internal/synthetics/synthetics/check/success`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/synthetics/journey/screenshot/block`,
@@ -45,4 +47,6 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
   SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
+
+  DYNAMIC_SETTINGS = `/internal/uptime/dynamic_settings`,
 }

@@ -94,6 +94,7 @@ export const ValuesInput = ({
           const inputNumber = Number(inputValue);
           setInputValue(String(Math.min(maxValue, Math.max(inputNumber, minValue))));
         }}
+        data-test-subj={'indexPattern-terms-values'}
       />
     </EuiFormRow>
   );

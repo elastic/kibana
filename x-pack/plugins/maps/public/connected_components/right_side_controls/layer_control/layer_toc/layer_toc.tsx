@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
-import { DropResult, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import React, { Component, ComponentProps } from 'react';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { TOCEntry } from './toc_entry';
 import { isLayerGroup } from '../../../../classes/layers/layer_group';
 import { ILayer } from '../../../../classes/layers/layer';
@@ -72,13 +72,17 @@ export class LayerTOC extends Component<Props> {
     return [...this._getForebearers(parentLayer), parentId];
   }
 
-  _onDragStart = ({ source }: DropResult) => {
+  _onDragStart: ComponentProps<typeof EuiDragDropContext>['onDragStart'] = ({ source }) => {
     const sourceIndex = this._reverseIndex(source.index);
     const sourceLayer = this.props.layerList[sourceIndex];
     this.setState({ ...CLEAR_DND_STATE, sourceLayer });
   };
 
-  _onDragUpdate = ({ combine, destination, source }: DropResult) => {
+  _onDragUpdate: ComponentProps<typeof EuiDragDropContext>['onDragUpdate'] = ({
+    combine,
+    destination,
+    source,
+  }) => {
     const sourceIndex = this._reverseIndex(source.index);
     const sourceLayer = this.props.layerList[sourceIndex];
 
@@ -128,7 +132,7 @@ export class LayerTOC extends Component<Props> {
     });
   };
 
-  _onDragEnd = () => {
+  _onDragEnd: ComponentProps<typeof EuiDragDropContext>['onDragEnd'] = () => {
     const { combineLayer, isOwnAncestor, sourceLayer, newRightSiblingLayer } = this.state;
     this.setState({ ...CLEAR_DND_STATE });
 

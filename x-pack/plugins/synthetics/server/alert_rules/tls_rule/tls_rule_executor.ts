@@ -25,7 +25,7 @@ import {
 import {
   CertResult,
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   Ping,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -40,7 +40,7 @@ export class TLSRuleExecutor {
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
-  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
 
   constructor(
     previousStartedAt: Date | null,
@@ -70,20 +70,15 @@ export class TLSRuleExecutor {
     const {
       allIds,
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = await processMonitors(
-      this.monitors,
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient
-    );
+    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
 
     return {
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       allIds,
       monitorLocationMap,
       projectMonitorsCount,

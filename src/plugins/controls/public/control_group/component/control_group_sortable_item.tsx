@@ -93,6 +93,7 @@ const SortableControlInner = forwardRef<
         data-test-subj={`control-frame`}
         data-render-complete="true"
         className={classNames('controlFrameWrapper', {
+          'controlFrameWrapper--grow': grow,
           'controlFrameWrapper-isDragging': isDragging,
           'controlFrameWrapper-isEditable': isEditable,
           'controlFrameWrapper--small': width === 'small',

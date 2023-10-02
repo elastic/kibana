@@ -1,11 +1,21 @@
 {
   "security.clear_api_key_cache": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_security/api_key/{ids}/_clear_cache"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-clear-api-key-cache.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-clear-api-key-cache.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

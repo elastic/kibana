@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Position } from 'css-box-model';
 import { range } from 'd3-array';
 import { interpolate } from 'd3-interpolate';
 import { useCallback } from 'react';
-import type { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
+import type { DraggableId, FluidDragActions, SensorAPI } from '@hello-pangea/dnd';
 
 import {
   EMPTY_PROVIDERS_GROUP_CLASS_NAME,
@@ -19,7 +20,7 @@ let _sensorApiSingleton: SensorAPI;
 
 /**
  * This hook is passed (in an array) to the `sensors` prop of the
- * `react-beautiful-dnd` `DragDropContext` component. Example:
+ * `@hello-pangea/dnd` `DragDropContext` component. Example:
  *
  * ```
        <DragDropContext onDragEnd={onDragEnd} sensors={[useAddToTimelineSensor]}>

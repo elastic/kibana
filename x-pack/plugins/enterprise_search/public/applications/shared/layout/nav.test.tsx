@@ -43,33 +43,6 @@ describe('useEnterpriseSearchContentNav', () => {
 
     expect(useEnterpriseSearchNav()).toEqual([
       {
-        href: '/app/enterprise_search/overview',
-        id: 'es_overview',
-        items: [
-          {
-            href: '/app/enterprise_search/elasticsearch',
-            id: 'elasticsearch',
-            name: 'Elasticsearch',
-          },
-          {
-            href: '/app/enterprise_search/esre',
-            id: 'esre',
-            name: 'ESRE',
-          },
-          {
-            href: '/app/enterprise_search/vector_search',
-            id: 'vectorSearch',
-            name: 'Vector Search',
-          },
-          {
-            href: '/app/enterprise_search/search_experiences',
-            id: 'searchExperiences',
-            name: 'Search Experiences',
-          },
-        ],
-        name: 'Overview',
-      },
-      {
         id: 'content',
         items: [
           {
@@ -101,6 +74,28 @@ describe('useEnterpriseSearchContentNav', () => {
           },
         ],
         name: 'Applications',
+      },
+      {
+        href: '/app/enterprise_search/overview',
+        id: 'es_getting_started',
+        items: [
+          {
+            href: '/app/enterprise_search/elasticsearch',
+            id: 'elasticsearch',
+            name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
+            href: '/app/enterprise_search/ai_search',
+            id: 'aiSearch',
+            name: 'AI Search',
+          },
+        ],
+        name: 'Getting started',
       },
       {
         id: 'enterpriseSearch',
@@ -212,33 +207,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {
     expect(useEnterpriseSearchApplicationNav()).toEqual([
       {
-        href: '/app/enterprise_search/overview',
-        id: 'es_overview',
-        items: [
-          {
-            href: '/app/enterprise_search/elasticsearch',
-            id: 'elasticsearch',
-            name: 'Elasticsearch',
-          },
-          {
-            href: '/app/enterprise_search/esre',
-            id: 'esre',
-            name: 'ESRE',
-          },
-          {
-            href: '/app/enterprise_search/vector_search',
-            id: 'vectorSearch',
-            name: 'Vector Search',
-          },
-          {
-            href: '/app/enterprise_search/search_experiences',
-            id: 'searchExperiences',
-            name: 'Search Experiences',
-          },
-        ],
-        name: 'Overview',
-      },
-      {
         id: 'content',
         items: [
           {
@@ -271,6 +239,28 @@ describe('useEnterpriseSearchApplicationNav', () => {
         name: 'Applications',
       },
       {
+        href: '/app/enterprise_search/overview',
+        id: 'es_getting_started',
+        items: [
+          {
+            href: '/app/enterprise_search/elasticsearch',
+            id: 'elasticsearch',
+            name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
+            href: '/app/enterprise_search/ai_search',
+            id: 'aiSearch',
+            name: 'AI Search',
+          },
+        ],
+        name: 'Getting started',
+      },
+      {
         id: 'enterpriseSearch',
         items: [
           {
@@ -293,9 +283,9 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchApplicationNav(engineName);
     expect(navItems?.map((ni) => ni.name)).toEqual([
-      'Overview',
       'Content',
       'Applications',
+      'Getting started',
       'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'applications');
@@ -317,10 +307,10 @@ describe('useEnterpriseSearchApplicationNav', () => {
         "id": "searchApplicationId",
         "items": Array [
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/preview",
-            "id": "enterpriseSearchApplicationPreview",
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/docs_explorer",
+            "id": "enterpriseSearchApplicationDocsExplorer",
             "items": undefined,
-            "name": "Search Preview",
+            "name": "Docs Explorer",
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
@@ -349,9 +339,9 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchApplicationNav(engineName, true);
     expect(navItems?.map((ni) => ni.name)).toEqual([
-      'Overview',
       'Content',
       'Applications',
+      'Getting started',
       'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'applications');
@@ -409,33 +399,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
 describe('useEnterpriseSearchAnalyticsNav', () => {
   const baseNavs = [
     {
-      href: '/app/enterprise_search/overview',
-      id: 'es_overview',
-      items: [
-        {
-          href: '/app/enterprise_search/elasticsearch',
-          id: 'elasticsearch',
-          name: 'Elasticsearch',
-        },
-        {
-          href: '/app/enterprise_search/esre',
-          id: 'esre',
-          name: 'ESRE',
-        },
-        {
-          href: '/app/enterprise_search/vector_search',
-          id: 'vectorSearch',
-          name: 'Vector Search',
-        },
-        {
-          href: '/app/enterprise_search/search_experiences',
-          id: 'searchExperiences',
-          name: 'Search Experiences',
-        },
-      ],
-      name: 'Overview',
-    },
-    {
       id: 'content',
       items: [
         {
@@ -461,6 +424,28 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
         },
       ],
       name: 'Applications',
+    },
+    {
+      href: '/app/enterprise_search/overview',
+      id: 'es_getting_started',
+      items: [
+        {
+          href: '/app/enterprise_search/elasticsearch',
+          id: 'elasticsearch',
+          name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/vector_search',
+          id: 'vectorSearch',
+          name: 'Vector Search',
+        },
+        {
+          href: '/app/enterprise_search/ai_search',
+          id: 'aiSearch',
+          name: 'AI Search',
+        },
+      ],
+      name: 'Getting started',
     },
     {
       id: 'enterpriseSearch',

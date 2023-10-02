@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { AttributesTypeUser, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  UserCommentAttachmentAttributes,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
@@ -50,15 +53,15 @@ export default ({ getService }: FtrProviderContext): void => {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
         auth: authSpace1,
       });
 
-      const userComment = updatedCase.comments![0] as AttributesTypeUser;
+      const userComment = updatedCase.comments![0] as UserCommentAttachmentAttributes;
       expect(userComment.comment).to.eql(newComment);
-      expect(userComment.type).to.eql(CommentType.user);
+      expect(userComment.type).to.eql(AttachmentType.user);
       expect(updatedCase.updated_by).to.eql(nullUser);
     });
 
@@ -79,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
         auth: getAuthWithSuperUser('space2'),

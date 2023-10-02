@@ -91,6 +91,13 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ESQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
+  {
+    defaultMessage: 'ES|QL',
+  }
+);
+
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {
@@ -134,13 +141,6 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
   }
 );
 
-export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview',
-  {
-    defaultMessage: 'Technical Preview',
-  }
-);
-
 export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution',
   {
@@ -159,5 +159,19 @@ export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translat
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionDoNotSuppressOnMissingFieldsDescription',
   {
     defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);
+
+export const BUILDING_BLOCK_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockLabel',
+  {
+    defaultMessage: 'Building block',
+  }
+);
+
+export const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockDescription',
+  {
+    defaultMessage: 'All generated alerts will be marked as "building block" alerts',
   }
 );

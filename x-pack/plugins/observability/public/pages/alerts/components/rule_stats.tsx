@@ -8,7 +8,10 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { RulesParams } from '../../../locators/rules';
 
 export interface RuleStatsState {
   total: number;
@@ -17,10 +20,10 @@ export interface RuleStatsState {
   error: number;
   snoozed: number;
 }
-type StatType = 'disabled' | 'snoozed' | 'error';
+type Status = 'disabled' | 'snoozed' | 'error';
 
 const Divider = euiStyled.div`
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-right: 1px solid ${euiThemeVars.euiColorLightShade};
   height: 100%;
 `;
 
@@ -40,33 +43,32 @@ const ConditionalWrap = ({
   children: JSX.Element;
 }): JSX.Element => (condition ? wrap(children) : children);
 
-const getStatCount = (stats: RuleStatsState, statType: StatType) => {
-  if (statType === 'snoozed') return stats.snoozed + stats.muted;
-  return stats[statType];
+const getStatCount = (stats: RuleStatsState, status: Status) => {
+  if (status === 'snoozed') return stats.snoozed + stats.muted;
+  return stats[status];
 };
 
 export const renderRuleStats = (
   ruleStats: RuleStatsState,
   manageRulesHref: string,
-  ruleStatsLoading: boolean
+  ruleStatsLoading: boolean,
+  rulesLocator?: LocatorPublic<RulesParams>
 ) => {
-  const createRuleStatsLink = (stats: RuleStatsState, statType: StatType) => {
-    const count = getStatCount(stats, statType);
-    let statsLink = `${manageRulesHref}?_a=(lastResponse:!(),status:!())`;
+  const handleNavigateToRules = async (stats: RuleStatsState, status: Status) => {
+    const count = getStatCount(stats, status);
     if (count > 0) {
-      switch (statType) {
+      switch (status) {
         case 'error':
-          statsLink = `${manageRulesHref}?_a=(lastResponse:!(error),status:!())`;
+          await rulesLocator?.navigate({ lastResponse: ['failed'] }, { replace: false });
           break;
         case 'snoozed':
         case 'disabled':
-          statsLink = `${manageRulesHref}?_a=(lastResponse:!(),status:!(${statType}))`;
+          await rulesLocator?.navigate({ status: [status] }, { replace: false });
           break;
         default:
           break;
       }
     }
-    return statsLink;
   };
 
   const disabledStatsComponent = (
@@ -75,7 +77,7 @@ export const renderRuleStats = (
       wrap={(wrappedChildren) => (
         <EuiButtonEmpty
           data-test-subj="o11yDisabledStatsComponentButton"
-          href={createRuleStatsLink(ruleStats, 'disabled')}
+          onClick={() => handleNavigateToRules(ruleStats, 'disabled')}
         >
           {wrappedChildren}
         </EuiButtonEmpty>
@@ -101,7 +103,7 @@ export const renderRuleStats = (
       wrap={(wrappedChildren) => (
         <EuiButtonEmpty
           data-test-subj="o11ySnoozedStatsComponentButton"
-          href={createRuleStatsLink(ruleStats, 'snoozed')}
+          onClick={() => handleNavigateToRules(ruleStats, 'snoozed')}
         >
           {wrappedChildren}
         </EuiButtonEmpty>
@@ -127,7 +129,7 @@ export const renderRuleStats = (
       wrap={(wrappedChildren) => (
         <EuiButtonEmpty
           data-test-subj="o11yErrorStatsComponentButton"
-          href={createRuleStatsLink(ruleStats, 'error')}
+          onClick={() => handleNavigateToRules(ruleStats, 'error')}
         >
           {wrappedChildren}
         </EuiButtonEmpty>

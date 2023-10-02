@@ -13,11 +13,11 @@ import times from 'lodash/times';
 import {
   LocationStatus,
   MonitorFields,
-  PrivateLocation,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { mockEncryptedSO } from '../utils/mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 
@@ -87,7 +87,7 @@ describe('SyntheticsMonitorClient', () => {
     };
   });
 
-  const privateLocations: PrivateLocation[] = times(1).map((n) => {
+  const privateLocations: PrivateLocationAttributes[] = times(1).map((n) => {
     return {
       id: `loc-${n}`,
       label: 'Test private location',
@@ -133,7 +133,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.addMonitors(
       [{ monitor, id }],
-      mockRequest,
       savedObjectsClientMock,
       privateLocations,
       'test-space'
@@ -223,7 +222,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.deleteMonitors(
       [monitor as unknown as SyntheticsMonitorWithId],
-      mockRequest,
       savedObjectsClientMock,
       'test-space'
     );

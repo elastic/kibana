@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -12,22 +13,29 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type {
+  AfterKeys,
+  IdentifierType,
+  RiskWeights,
+  RiskScore,
+} from '../../../common/risk_engine';
+import { RiskCategories } from '../../../common/risk_engine';
 import { withSecuritySpan } from '../../utils/with_security_span';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {
-  buildCategoryScoreAssignment,
+  buildCategoryCountDeclarations,
+  buildCategoryAssignment,
   buildCategoryScoreDeclarations,
   buildWeightingOfScoreByCategory,
   getGlobalWeightForIdentifierType,
 } from './risk_weights';
 import type {
   CalculateRiskScoreAggregations,
-  GetScoresParams,
-  GetScoresResponse,
-  RiskScore,
+  CalculateScoresParams,
+  CalculateScoresResponse,
   RiskScoreBucket,
 } from './types';
 
@@ -41,22 +49,25 @@ const bucketToResponse = ({
   identifierField: string;
 }): RiskScore => ({
   '@timestamp': now,
-  identifierField,
-  identifierValue: bucket.key[identifierField],
-  level: bucket.risk_details.value.level,
-  totalScore: bucket.risk_details.value.score,
-  totalScoreNormalized: bucket.risk_details.value.normalized_score,
-  alertsScore: bucket.risk_details.value.alerts_score,
-  otherScore: bucket.risk_details.value.other_score,
+  id_field: identifierField,
+  id_value: bucket.key[identifierField],
+  calculated_level: bucket.risk_details.value.level,
+  calculated_score: bucket.risk_details.value.score,
+  calculated_score_norm: bucket.risk_details.value.normalized_score,
+  category_1_score: bucket.risk_details.value.category_1_score,
+  category_1_count: bucket.risk_details.value.category_1_count,
   notes: bucket.risk_details.value.notes,
-  riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+  inputs: bucket.inputs.hits.hits.map((riskInput) => ({
     id: riskInput._id,
     index: riskInput._index,
-    riskScore: riskInput.sort?.[0] ?? undefined,
+    description: `Alert from Rule: ${riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'}`,
+    category: RiskCategories.category_1,
+    risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
+    timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
   })),
 });
 
-const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContainer => ({
+const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
@@ -80,13 +91,14 @@ const buildReduceScript = ({
     }
 
     ${buildCategoryScoreDeclarations()}
+    ${buildCategoryCountDeclarations()}
 
     double total_score = 0;
     double current_score = 0;
     for (int i = 0; i < num_inputs_to_score; i++) {
       current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
 
-      ${buildCategoryScoreAssignment()}
+      ${buildCategoryAssignment()}
       total_score += current_score;
     }
 
@@ -144,11 +156,12 @@ const buildIdentifierTypeAggregation = ({
       after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
     },
     aggs: {
-      riskiest_inputs: {
+      inputs: {
         top_hits: {
           size: 10,
           sort: { [ALERT_RISK_SCORE]: 'desc' },
           _source: false,
+          docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
         },
       },
       risk_details: {
@@ -191,16 +204,17 @@ export const calculateRiskScores = async ({
   logger,
   pageSize,
   range,
+  runtimeMappings,
   weights,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-} & GetScoresParams): Promise<GetScoresResponse> =>
+} & CalculateScoresParams): Promise<CalculateScoresResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
 
     const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
-    if (userFilter) {
+    if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
@@ -209,6 +223,7 @@ export const calculateRiskScores = async ({
       size: 0,
       _source: false,
       index,
+      runtime_mappings: runtimeMappings,
       query: {
         bool: {
           filter,
@@ -239,7 +254,10 @@ export const calculateRiskScores = async ({
       return {
         ...(debug ? { request, response } : {}),
         after_keys: {},
-        scores: [],
+        scores: {
+          host: [],
+          user: [],
+        },
       };
     }
 
@@ -251,27 +269,16 @@ export const calculateRiskScores = async ({
       user: response.aggregations.user?.after_key,
     };
 
-    const scores = userBuckets
-      .map((bucket) =>
-        bucketToResponse({
-          bucket,
-          identifierField: 'user.name',
-          now,
-        })
-      )
-      .concat(
-        hostBuckets.map((bucket) =>
-          bucketToResponse({
-            bucket,
-            identifierField: 'host.name',
-            now,
-          })
-        )
-      );
-
     return {
       ...(debug ? { request, response } : {}),
       after_keys: afterKeys,
-      scores,
+      scores: {
+        host: hostBuckets.map((bucket) =>
+          bucketToResponse({ bucket, identifierField: 'host.name', now })
+        ),
+        user: userBuckets.map((bucket) =>
+          bucketToResponse({ bucket, identifierField: 'user.name', now })
+        ),
+      },
     };
   });

@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ApplicationStart } from '@kbn/core/public';
+
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../common';
+import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import type { SavedSearchEmbeddable } from './saved_search_embeddable';
+import type { DiscoverAppLocator } from '../../common';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
@@ -24,14 +26,18 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;
   public readonly type = ACTION_VIEW_SAVED_SEARCH;
 
-  constructor(private readonly application: ApplicationStart) {}
+  constructor(
+    private readonly application: ApplicationStart,
+    private readonly locator: DiscoverAppLocator
+  ) {}
 
   async execute(context: ActionExecutionContext<ViewSearchContext>): Promise<void> {
-    const { embeddable } = context;
-    const savedSearchId = (embeddable as SavedSearchEmbeddable).getSavedSearch().id;
-    const path = getSavedSearchUrl(savedSearchId);
-    const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    await this.application.navigateToApp(app ? app : 'discover', { path });
+    const embeddable = context.embeddable as SavedSearchEmbeddable;
+    const locatorParams = getDiscoverLocatorParams({
+      input: embeddable.getInput(),
+      savedSearch: embeddable.getSavedSearch(),
+    });
+    await this.locator.navigate(locatorParams);
   }
 
   getDisplayName(context: ActionExecutionContext<ViewSearchContext>): string {

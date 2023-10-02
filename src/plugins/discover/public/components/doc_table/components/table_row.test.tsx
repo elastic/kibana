@@ -9,17 +9,14 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
-import { setDocViewsRegistry } from '../../../kibana_services';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { EsHitRecord } from '../../../types';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 jest.mock('../utils/row_formatter', () => {
   const originalModule = jest.requireActual('../utils/row_formatter');
@@ -81,12 +78,7 @@ describe('Doc table row component', () => {
     useNewFieldsApi: true,
     filterManager: mockFilterManager,
     addBasePath: (path: string) => path,
-    DocViewer,
   } as unknown as TableRowProps;
-
-  beforeEach(() => {
-    setDocViewsRegistry(new DocViewsRegistry());
-  });
 
   it('should render __document__ column', () => {
     const component = mountComponent({ ...defaultProps, columns: [] });

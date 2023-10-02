@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CommentRequestExternalReferenceSOType } from '../../common/api';
-import { CommentType, ExternalReferenceStorageType } from '../../common/api';
+import type { ExternalReferenceSOAttachmentPayload } from '../../common/types/domain';
+import { AttachmentType, ExternalReferenceStorageType } from '../../common/types/domain';
 import type { AttachmentRequestAttributes } from '../common/types/attachments';
 
 /**
@@ -14,9 +14,9 @@ import type { AttachmentRequestAttributes } from '../common/types/attachments';
  */
 export const isCommentRequestTypeExternalReferenceSO = (
   context: Partial<AttachmentRequestAttributes>
-): context is CommentRequestExternalReferenceSOType => {
+): context is ExternalReferenceSOAttachmentPayload => {
   return (
-    context.type === CommentType.externalReference &&
+    context.type === AttachmentType.externalReference &&
     context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
   );
 };

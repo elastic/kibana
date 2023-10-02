@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -41,6 +39,7 @@ const StyledCopyableField = styled.div<StyledCopyableField>`
  * When the panel is hovered, these fields will show a gray background
  * When you then hover over these fields they will show a blue background and a tooltip with a copy button will appear
  */
+// eslint-disable-next-line react/display-name
 export const CopyablePanelField = memo(
   ({ textToCopy, content }: { textToCopy: string; content: JSX.Element | string }) => {
     const { linkColor, copyableFieldBackground } = useColors();

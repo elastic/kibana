@@ -38,7 +38,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
-  const { getHttp, getUISettings, getSavedObjectsManagement } = platformService;
+  const { getContentManagement, getUISettings } = platformService;
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
@@ -61,7 +61,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddableFactories = getEmbeddableFactories();
 
   const availableSavedObjects = Array.from(embeddableFactories)
-    .filter((factory) => isByValueEnabled || availableEmbeddables.includes(factory.type))
+    .filter(
+      (factory) =>
+        factory.type !== 'links' && // Links panels only exist on Dashboards
+        (isByValueEnabled || availableEmbeddables.includes(factory.type))
+    )
     .map((factory) => factory.savedObjectMetaData)
     .filter<SavedObjectMetaData<{}>>(function (
       maybeSavedObjectMetaData
@@ -83,9 +87,8 @@ export const AddEmbeddableFlyout: FC<Props> = ({
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{
+            contentClient: getContentManagement().client,
             uiSettings: getUISettings(),
-            http: getHttp(),
-            savedObjectsManagement: getSavedObjectsManagement(),
           }}
         />
       </EuiFlyoutBody>

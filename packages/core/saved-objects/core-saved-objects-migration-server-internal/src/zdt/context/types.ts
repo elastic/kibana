@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -53,4 +56,6 @@ export interface MigratorContext {
   readonly discardCorruptObjects: boolean;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
+  /** Capabilities of the ES cluster we're using */
+  readonly esCapabilities: ElasticsearchCapabilities;
 }

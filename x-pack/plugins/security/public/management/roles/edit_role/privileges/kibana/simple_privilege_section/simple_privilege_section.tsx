@@ -17,6 +17,7 @@ import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
@@ -24,7 +25,6 @@ import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
 interface Props {
   role: Role;

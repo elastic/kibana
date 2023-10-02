@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -15,7 +16,6 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
-import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.

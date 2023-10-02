@@ -1,6 +1,0 @@
-.presFilterByType__panel {
-  min-width: $euiSizeXXL * 8;
-  @include euiBreakpoint('l', 'xl') {
-    width: $euiFormMaxWidth;
-  }
-}

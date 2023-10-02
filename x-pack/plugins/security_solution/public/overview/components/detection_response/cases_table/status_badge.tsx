@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseStatuses } from '@kbn/cases-components';
 import { EuiBadge } from '@elastic/eui';
 
 import * as i18n from '../translations';

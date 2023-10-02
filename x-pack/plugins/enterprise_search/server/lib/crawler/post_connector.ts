@@ -7,12 +7,10 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX } from '../..';
+import { createConnectorDocument, CONNECTORS_INDEX, ConnectorStatus } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-import { ConnectorStatus } from '../../../common/types/connectors';
-
-import { createConnectorDocument } from '../../utils/create_connector_document';
+import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 export const recreateConnectorDocument = async (
   client: IScopedClusterClient,
@@ -23,6 +21,7 @@ export const recreateConnectorDocument = async (
     isNative: false,
     // The search index has already been created so we don't need the language, which we can't retrieve anymore anyway
     language: '',
+    name: stripSearchPrefix(indexName),
     pipeline: null,
     serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   });

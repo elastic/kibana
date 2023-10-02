@@ -6,7 +6,7 @@
  */
 
 export { BASE_PATH } from './base_path';
-export { API_BASE_PATH } from './api_base_path';
+export { API_BASE_PATH, INTERNAL_API_BASE_PATH } from './api_base_path';
 export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
 export * from './index_statuses';
 
@@ -31,12 +31,6 @@ export {
   UIM_INDEX_UNFREEZE,
   UIM_INDEX_UNFREEZE_MANY,
   UIM_INDEX_SETTINGS_EDIT,
-  UIM_SHOW_DETAILS_CLICK,
-  UIM_DETAIL_PANEL_SUMMARY_TAB,
-  UIM_DETAIL_PANEL_SETTINGS_TAB,
-  UIM_DETAIL_PANEL_MAPPING_TAB,
-  UIM_DETAIL_PANEL_STATS_TAB,
-  UIM_DETAIL_PANEL_EDIT_SETTINGS_TAB,
   UIM_TEMPLATE_LIST_LOAD,
   UIM_TEMPLATE_DELETE,
   UIM_TEMPLATE_DELETE_MANY,
@@ -53,3 +47,5 @@ export {
 } from './ui_metric';
 
 export { MAJOR_VERSION } from './plugin';
+
+export { Section, IndexDetailsSection } from './home_sections';

@@ -35,6 +35,34 @@ function renderFlyout(output?: Output) {
 
   return { utils };
 }
+
+const logstashInputsLabels = [
+  'Client SSL certificate key',
+  'Client SSL certificate',
+  'Server SSL certificate authorities (optional)',
+];
+
+const kafkaInputsLabels = [
+  'Partitioning strategy',
+  'Number of events',
+  'Default topic',
+  'Key',
+  'Value',
+  'Broker timeout',
+  'Broker reachability timeout',
+  'ACK Reliability',
+  'Key (optional)',
+];
+
+const kafkaSectionsLabels = [
+  'Authentication',
+  'Partitioning',
+  'Topics',
+  'Headers',
+  'Compression',
+  'Broker settings',
+];
+
 describe('EditOutputFlyout', () => {
   it('should render the flyout if there is not output provided', async () => {
     renderFlyout();
@@ -52,10 +80,20 @@ describe('EditOutputFlyout', () => {
     expect(
       utils.queryByLabelText('Elasticsearch CA trusted fingerprint (optional)')
     ).not.toBeNull();
+
     // Does not show logstash SSL inputs
-    expect(utils.queryByLabelText('Client SSL certificate key')).toBeNull();
-    expect(utils.queryByLabelText('Client SSL certificate')).toBeNull();
-    expect(utils.queryByLabelText('Server SSL certificate authorities (optional)')).toBeNull();
+    logstashInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
+
+    // Does not show kafka inputs nor sections
+    kafkaInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
+
+    kafkaSectionsLabels.forEach((label) => {
+      expect(utils.queryByText(label)).toBeNull();
+    });
   });
 
   it('should render the flyout if the output provided is a logstash output', async () => {
@@ -68,9 +106,42 @@ describe('EditOutputFlyout', () => {
     });
 
     // Show logstash SSL inputs
-    expect(utils.queryByLabelText('Client SSL certificate key')).not.toBeNull();
-    expect(utils.queryByLabelText('Client SSL certificate')).not.toBeNull();
-    expect(utils.queryByLabelText('Server SSL certificate authorities (optional)')).not.toBeNull();
+    logstashInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+
+    // Does not show kafka inputs nor sections
+    kafkaInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
+
+    kafkaSectionsLabels.forEach((label) => {
+      expect(utils.queryByText(label)).toBeNull();
+    });
+  });
+
+  it('should render the flyout if the output provided is a kafka output', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    // Show kafka inputs
+    kafkaInputsLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+
+    kafkaSectionsLabels.forEach((label) => {
+      expect(utils.queryByText(label)).not.toBeNull();
+    });
+
+    // Does not show logstash inputs
+    ['Client SSL certificate key', 'Client SSL certificate'].forEach((label) => {
+      expect(utils.queryByLabelText(label)).toBeNull();
+    });
   });
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {

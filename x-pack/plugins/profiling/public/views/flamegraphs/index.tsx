@@ -50,7 +50,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   ];
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={true}>
+    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
       {children}
     </ProfilingAppPageTemplate>
   );

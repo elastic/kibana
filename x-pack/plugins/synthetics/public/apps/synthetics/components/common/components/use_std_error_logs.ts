@@ -9,16 +9,10 @@ import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/pu
 import { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-export const useStdErrorLogs = ({
-  monitorId,
-  checkGroup,
-}: {
-  monitorId?: string;
-  checkGroup?: string;
-}) => {
+export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: !monitorId && !checkGroup ? '' : SYNTHETICS_INDEX_PATTERN,
+      index: !checkGroup ? '' : SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 1000,
         query: {
@@ -29,15 +23,6 @@ export const useStdErrorLogs = ({
                   'synthetics.type': ['stderr', 'stdout'],
                 },
               },
-              ...(monitorId
-                ? [
-                    {
-                      term: {
-                        'monitor.id': monitorId,
-                      },
-                    },
-                  ]
-                : []),
               ...(checkGroup
                 ? [
                     {

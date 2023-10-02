@@ -10,6 +10,26 @@ import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import { canRedirectRequest } from './can_redirect_request';
+import { DeauthenticationResult } from './deauthentication_result';
+import { HTTPAuthorizationHeader } from './http_authentication';
+import type {
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+  BaseAuthenticationProvider,
+} from './providers';
+import {
+  AnonymousAuthenticationProvider,
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  OIDCAuthenticationProvider,
+  PKIAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
+} from './providers';
+import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -33,26 +53,6 @@ import {
   type SessionValue,
 } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
-import { AuthenticationResult } from './authentication_result';
-import { canRedirectRequest } from './can_redirect_request';
-import { DeauthenticationResult } from './deauthentication_result';
-import { HTTPAuthorizationHeader } from './http_authentication';
-import type {
-  AuthenticationProviderOptions,
-  AuthenticationProviderSpecificOptions,
-  BaseAuthenticationProvider,
-} from './providers';
-import {
-  AnonymousAuthenticationProvider,
-  BasicAuthenticationProvider,
-  HTTPAuthenticationProvider,
-  KerberosAuthenticationProvider,
-  OIDCAuthenticationProvider,
-  PKIAuthenticationProvider,
-  SAMLAuthenticationProvider,
-  TokenAuthenticationProvider,
-} from './providers';
-import { Tokens } from './tokens';
 
 /**
  * List of query string parameters used to pass various authentication related metadata that should
@@ -97,6 +97,7 @@ export interface AuthenticatorOptions {
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
+  customLogoutURL?: string;
 }
 
 /** @internal */
@@ -259,7 +260,7 @@ export class Authenticator {
               ...providerCommonOptions,
               name,
               logger: options.loggers.get(type, name),
-              urls: { loggedOut: (request) => this.getLoggedOutURL(request, type) },
+              urls: { loggedOut: (request: KibanaRequest) => this.getLoggedOutURL(request, type) },
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
@@ -275,7 +276,8 @@ export class Authenticator {
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
           urls: {
-            loggedOut: (request) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
+            loggedOut: (request: KibanaRequest) =>
+              this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
           },
         })
       );
@@ -647,7 +649,13 @@ export class Authenticator {
       throw new Error(`Provider name "${options.name}" is reserved.`);
     }
 
-    this.providers.set(options.name, new HTTPAuthenticationProvider(options, { supportedSchemes }));
+    this.providers.set(
+      options.name,
+      new HTTPAuthenticationProvider(options, {
+        supportedSchemes,
+        jwt: this.options.config.authc.http.jwt,
+      })
+    );
   }
 
   /**
@@ -1013,6 +1021,10 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
+    if (this.options.customLogoutURL) {
+      return this.options.customLogoutURL;
+    }
+
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();

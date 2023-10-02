@@ -7,7 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 
-type LoadableComponent = () => any;
+type LoadableComponent = () => Promise<{
+  default: React.ComponentType<any>;
+}>;
 
 interface DynamicOptions {
   fallback?: React.ReactNode;

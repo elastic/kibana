@@ -1,0 +1,36 @@
+title: Data view response properties
+type: object
+properties:
+  data_view:
+    type: object
+    properties:
+      allowNoIndex:
+        $ref: 'allownoindex.yaml'
+      fieldAttrs:
+        $ref: 'fieldattrs.yaml'
+      fieldFormats:
+        $ref: 'fieldformats.yaml'
+      fields:
+        type: object
+      id:
+        type: string
+        example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+      name:
+        type: string
+        description: The data view name.
+      namespaces:
+        $ref: 'namespaces.yaml'
+      runtimeFieldMap:
+        $ref: 'runtimefieldmap.yaml'
+      sourceFilters:
+        $ref: 'sourcefilters.yaml'
+      timeFieldName:
+        $ref: 'timefieldname.yaml'
+      title:
+        $ref: 'title.yaml'
+      typeMeta:
+        $ref: 'typemeta.yaml'
+      version:
+        type: string
+        example: WzQ2LDJd
+        

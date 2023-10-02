@@ -14,5 +14,8 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/expect",
+    "@kbn/dev-utils",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
   ]
 }

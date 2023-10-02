@@ -30,8 +30,8 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   }
 
   public setup(
-    { http, uiSettings, savedObjects, getStartServices }: CoreSetup,
-    { features, licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
+    { http, uiSettings, getStartServices }: CoreSetup,
+    { features, licensing, indexManagement, usageCollection, dataViews, data }: Dependencies
   ) {
     this.license.setup(
       {
@@ -103,6 +103,8 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     if (indexManagement && indexManagement.indexDataEnricher) {
       indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
+    dataViews.enableRollups();
+    data.search.enableRollups();
   }
 
   start() {}

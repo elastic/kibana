@@ -16,7 +16,7 @@ GH_APM_TEAM_LABEL="Team:APM"
 if (! is_pr); then
   echo "--- Add GH labels to buildkite metadata"
   ts-node .buildkite/scripts/steps/add_gh_labels_to_bk_metadata.ts BUILDKITE_MESSAGE true
-  GH_ON_MERGE_LABELS="$(buildkite-agent meta-data get gh_labels)"
+  GH_ON_MERGE_LABELS="$(buildkite-agent meta-data get gh_labels --default '')"
 fi
 
 # Enabling cypress dashboard recording when PR is labeled with `apm:cypress-record` and we are not using the flaky test runner OR on merge with Team:APM label applied

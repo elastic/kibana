@@ -37,6 +37,8 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
     return [
       <EuiTableRow key={stat.id}>
         <EuiTableRowCell>
+          {stat.label}
+
           <span className="insRequestDetailsStats__icon">
             {stat.description ? (
               <EuiIconTip
@@ -51,7 +53,6 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
               <EuiIcon type="empty" />
             )}
           </span>
-          {stat.label}
         </EuiTableRowCell>
         <EuiTableRowCell>{stat.value}</EuiTableRowCell>
       </EuiTableRow>,

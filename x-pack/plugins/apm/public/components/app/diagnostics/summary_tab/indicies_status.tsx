@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -21,7 +22,7 @@ export function FieldMappingStatus() {
   const { query } = useApmParams('/diagnostics/*');
   const { diagnosticsBundle, status } = useDiagnosticsContext();
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isOk = getIndicesTabStatus(diagnosticsBundle);
+  const isOk = getIsIndicesTabOk(diagnosticsBundle);
 
   return (
     <TabStatus
@@ -40,6 +41,10 @@ export function FieldMappingStatus() {
   );
 }
 
-export function getIndicesTabStatus(diagnosticsBundle?: DiagnosticsBundle) {
-  return diagnosticsBundle?.invalidIndices.length === 0;
+export function getIsIndicesTabOk(diagnosticsBundle?: DiagnosticsBundle) {
+  if (!diagnosticsBundle) {
+    return true;
+  }
+
+  return isEmpty(diagnosticsBundle.invalidIndices);
 }

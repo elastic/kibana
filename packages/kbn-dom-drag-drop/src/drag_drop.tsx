@@ -42,6 +42,10 @@ interface BaseProps {
    * The CSS class(es) for the root element.
    */
   className?: string;
+  /**
+   * CSS class to apply when the item is being dragged
+   */
+  dragClassName?: string;
 
   /**
    * The event handler that fires when an item
@@ -212,6 +216,7 @@ const removeSelection = () => {
 const DragInner = memo(function DragInner({
   dataTestSubj,
   className,
+  dragClassName,
   value,
   children,
   dndDispatch,
@@ -305,6 +310,18 @@ const DragInner = memo(function DragInner({
       // so we know we have DraggableProps if we reach this code.
       if (e && 'dataTransfer' in e) {
         e.dataTransfer.setData('text', value.humanData.label);
+
+        // Apply an optional class to the element being dragged so the ghost
+        // can be styled. We must add it to the actual element for a single
+        // frame before removing it so the ghost picks up the styling.
+        const current = e.currentTarget;
+
+        if (dragClassName && !current.classList.contains(dragClassName)) {
+          current.classList.add(dragClassName);
+          requestAnimationFrame(() => {
+            current.classList.remove(dragClassName);
+          });
+        }
       }
 
       // Chrome causes issues if you try to render from within a
@@ -628,21 +645,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   const mainTargetProps = getProps(dropTypes && dropTypes[0]);
 
-  const extraDropStyles = useMemo(() => {
-    const extraDrops = dropTypes && dropTypes.length && dropTypes.slice(1);
-    if (!extraDrops || !extraDrops.length) {
-      return;
-    }
-
-    const height = extraDrops.length * 40;
-    const minHeight = height - (mainTargetRef.current?.clientHeight || 40);
-    const clipPath = `polygon(100% 0px, 100% ${height - minHeight}px, 0 100%, 0 0)`;
-    return {
-      clipPath,
-      height,
-    };
-  }, [dropTypes]);
-
   return (
     <div
       data-test-subj={`${dataTestSubjPrefix}Container`}
@@ -658,32 +660,25 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         children={children}
       />
       {dropTypes && dropTypes.length > 1 && (
-        <>
-          <div
-            className="domDragDrop__diamondPath"
-            style={extraDropStyles}
-            onDragEnter={dragEnter}
-          />
-          <EuiFlexGroup
-            gutterSize="none"
-            direction="column"
-            data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
-            className={classNames('domDragDrop__extraDrops', {
-              'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
-            })}
-          >
-            {dropTypes.slice(1).map((dropType) => {
-              const dropChildren = getCustomDropTarget?.(dropType);
-              return dropChildren ? (
-                <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
-                  <SingleDropInner {...getProps(dropType, dropChildren)}>
-                    {dropChildren}
-                  </SingleDropInner>
-                </EuiFlexItem>
-              ) : null;
-            })}
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup
+          gutterSize="none"
+          direction="column"
+          data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
+          className={classNames('domDragDrop__extraDrops', {
+            'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
+          })}
+        >
+          {dropTypes.slice(1).map((dropType) => {
+            const dropChildren = getCustomDropTarget?.(dropType);
+            return dropChildren ? (
+              <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
+                <SingleDropInner {...getProps(dropType, dropChildren)}>
+                  {dropChildren}
+                </SingleDropInner>
+              </EuiFlexItem>
+            ) : null;
+          })}
+        </EuiFlexGroup>
       )}
     </div>
   );

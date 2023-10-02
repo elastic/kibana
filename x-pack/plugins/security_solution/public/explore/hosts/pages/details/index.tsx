@@ -66,8 +66,9 @@ import { LandingPageComponent } from '../../../../common/components/landing_page
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
-const ES_HOST_FIELD = 'host.hostname';
+const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
@@ -152,7 +153,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
@@ -252,7 +253,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <TabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: isPlatinumOrTrialLicense,
+                  isRiskyHostsEnabled: hasEntityAnalyticsCapability,
                   hostName: detailName,
                   isEnterprise: isEnterprisePlus,
                 })}

@@ -241,17 +241,17 @@ export function SloEditFormObjectiveSection() {
                 min: 0.001,
                 max: 99.999,
               }}
-              render={({ field: { ref, ...field }, fieldState }) => (
+              render={({ field: { ref, onChange, ...field }, fieldState }) => (
                 <EuiFieldNumber
                   {...field}
                   required
                   isInvalid={fieldState.invalid}
                   data-test-subj="sloFormObjectiveTargetInput"
-                  value={String(field.value)}
+                  value={field.value}
                   min={0.001}
                   max={99.999}
                   step={0.001}
-                  onChange={(event) => field.onChange(Number(event.target.value))}
+                  onChange={(event) => onChange(event.target.value)}
                 />
               )}
             />

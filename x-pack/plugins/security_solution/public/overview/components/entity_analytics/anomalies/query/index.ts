@@ -59,9 +59,8 @@ export const getAggregatedAnomaliesQuery = ({
       aggs: {
         entity: {
           top_hits: {
-            _source: {
-              includes: ['host.name', 'user.name'],
-            },
+            _source: false,
+            fields: ['host.name', 'user.name'],
             size: 1,
           },
         },

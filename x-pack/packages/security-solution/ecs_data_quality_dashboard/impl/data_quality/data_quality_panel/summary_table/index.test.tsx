@@ -48,6 +48,7 @@ const pattern = 'auditbeat-*';
 const items = getSummaryTableItems({
   ilmExplain: mockIlmExplain,
   indexNames: indexNames ?? [],
+  isILMAvailable: true,
   pattern,
   patternDocsCount: auditbeatWithAllResults?.docsCount ?? 0,
   results: auditbeatWithAllResults?.results,

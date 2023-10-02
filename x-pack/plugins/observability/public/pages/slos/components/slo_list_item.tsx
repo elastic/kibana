@@ -5,49 +5,46 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { rulesLocatorID, sloFeatureId } from '../../../../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { paths } from '../../../../common/locators/paths';
 import { sloKeys } from '../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
-import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
-import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
-import { SloSummary } from './slo_summary';
-import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
-import { SloBadges } from './badges/slo_badges';
-import {
-  transformSloResponseToCreateSloForm,
-  transformCreateSLOFormToCreateSLOInput,
-} from '../../slo_edit/helpers/process_slo_form_values';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../routes/paths';
-import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import type { RulesParams } from '../../../locators/rules';
+import { useKibana } from '../../../utils/kibana_react';
+import {
+  transformCreateSLOFormToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
+} from '../../slo_edit/helpers/process_slo_form_values';
+import { SloBadges } from './badges/slo_badges';
+import { SloSummary } from './slo_summary';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<SloRule>> | undefined;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
-  activeAlerts?: ActiveAlerts;
-  onConfirmDelete: (slo: SLOWithSummaryResponse) => void;
+  activeAlerts?: number;
 }
 
 export function SloListItem({
@@ -56,7 +53,6 @@ export function SloListItem({
   historicalSummary = [],
   historicalSummaryLoading,
   activeAlerts,
-  onConfirmDelete,
 }: SloListItemProps) {
   const {
     application: { navigateToUrl },
@@ -72,6 +68,7 @@ export function SloListItem({
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const { mutate: cloneSlo } = useCloneSlo();
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
@@ -81,8 +78,14 @@ export function SloListItem({
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
+  const sloDetailsUrl = basePath.prepend(
+    paths.observability.sloDetails(
+      slo.id,
+      slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+    )
+  );
   const handleViewDetails = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
+    navigateToUrl(sloDetailsUrl);
   };
 
   const handleEdit = () => {
@@ -100,15 +103,7 @@ export function SloListItem({
 
   const handleNavigateToRules = async () => {
     const locator = locators.get<RulesParams>(rulesLocatorID);
-
-    locator?.navigate(
-      {
-        params: { sloId: slo.id },
-      },
-      {
-        replace: false,
-      }
-    );
+    locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
   };
 
   const handleClone = () => {
@@ -127,7 +122,7 @@ export function SloListItem({
 
   const handleDeleteConfirm = () => {
     setDeleteConfirmationModalOpen(false);
-    onConfirmDelete(slo);
+    deleteSlo({ id: slo.id, name: slo.name });
   };
 
   const handleDeleteCancel = () => {
@@ -145,9 +140,9 @@ export function SloListItem({
                 <EuiFlexItem>
                   <EuiText size="s">
                     {slo.summary ? (
-                      <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                      <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
                         {slo.name}
-                      </EuiLink>
+                      </a>
                     ) : (
                       <span>{slo.name}</span>
                     )}
@@ -181,6 +176,7 @@ export function SloListItem({
             anchorPosition="downLeft"
             button={
               <EuiButtonIcon
+                data-test-subj="o11ySloListItemButton"
                 aria-label={i18n.translate('xpack.observability.slo.item.actions.button', {
                   defaultMessage: 'Actions',
                 })}

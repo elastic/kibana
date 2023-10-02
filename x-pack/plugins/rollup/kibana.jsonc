@@ -13,13 +13,14 @@
     "requiredPlugins": [
       "management",
       "licensing",
-      "features"
+      "features",
+      "dataViews",
+      "data"
     ],
     "optionalPlugins": [
       "home",
       "indexManagement",
-      "usageCollection",
-      "visTypeTimeseries"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils",

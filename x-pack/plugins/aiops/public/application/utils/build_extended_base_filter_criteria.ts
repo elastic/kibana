@@ -15,7 +15,7 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
-import type { GroupTableItem } from '../../components/spike_analysis_table/types';
+import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
 
 /*
  * Contains utility functions for building and processing queries.

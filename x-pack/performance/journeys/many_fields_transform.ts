@@ -7,20 +7,19 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
-  .step('Go to Transforms', async ({ page, kbnUrl }) => {
+  .step('Go to Transforms', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`app/management/data/transform`));
-    await waitForChrome(page);
-    await page.waitForSelector(subj('transformCreateFirstButton'));
+    await kibanaPage.waitForHeader();
+    await page.waitForSelector(subj('transformButtonCreate'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
   .step('Go to data view selection', async ({ page }) => {
-    const createButtons = page.locator(subj('transformCreateFirstButton'));
+    const createButtons = page.locator(subj('transformButtonCreate'));
     await createButtons.first().click();
     await page.waitForSelector(subj('savedObjectsFinderTable'));
   })

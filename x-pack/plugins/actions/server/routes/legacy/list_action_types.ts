@@ -12,6 +12,10 @@ import { BASE_ACTION_API_PATH } from '../../../common';
 import { ActionsRequestHandlerContext } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
+/**
+ * Return all available action types
+ * expect system action types
+ */
 export const listActionTypesRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,

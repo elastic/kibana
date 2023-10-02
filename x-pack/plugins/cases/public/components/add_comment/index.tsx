@@ -23,7 +23,7 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CommentType } from '../../../common/api';
+import { AttachmentType } from '../../../common/types/domain';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
@@ -54,6 +54,7 @@ export interface AddCommentRefObject {
   editor: EuiMarkdownEditorRef | null;
 }
 
+/* eslint-disable react/no-unused-prop-types */
 export interface AddCommentProps {
   id: string;
   caseId: string;
@@ -62,6 +63,7 @@ export interface AddCommentProps {
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
 }
+/* eslint-enable react/no-unused-prop-types */
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
@@ -119,7 +121,7 @@ export const AddComment = React.memo(
             {
               caseId,
               caseOwner: owner[0],
-              attachments: [{ ...data, type: CommentType.user }],
+              attachments: [{ ...data, type: AttachmentType.user }],
             },
             {
               onSuccess: (theCase) => {

@@ -54,10 +54,13 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
       () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),
       [services, oldValue, newServices]
     );
-    return createElement(context.Provider, {
+
+    const newProvider = createElement(context.Provider, {
       value: newValue,
       children,
     });
+
+    return newProvider;
   };
 
   return {

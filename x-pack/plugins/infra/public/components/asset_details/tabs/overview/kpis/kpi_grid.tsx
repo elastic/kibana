@@ -4,26 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Tile, type TileProps } from './tile';
-import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
+import { Kpi } from './kpi';
 
-export const KPIGrid = React.memo(({ nodeName, dataView, timeRange: dateRange }: TileProps) => {
+interface Props {
+  dataView?: DataView;
+  assetName: string;
+  dateRange: TimeRange;
+}
+
+export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
   return (
-    <>
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        style={{ flexGrow: 0 }}
-        data-test-subj="assetDetailsKPIGrid"
-      >
-        {KPI_CHARTS.map((chartProp, index) => (
-          <EuiFlexItem key={index}>
-            <Tile {...chartProp} nodeName={nodeName} dataView={dataView} timeRange={dateRange} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
+      {assetDetailsDashboards.host.hostKPICharts.map((chartProps, index) => (
+        <EuiFlexItem key={index}>
+          <Kpi
+            {...chartProps}
+            dateRange={dateRange}
+            assetName={assetName}
+            dataView={dataView}
+            height={KPI_CHART_HEIGHT}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
-});
+};

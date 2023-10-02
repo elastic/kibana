@@ -45,7 +45,8 @@
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "unifiedSearch",
@@ -55,7 +56,6 @@
       "embeddable",
       "fieldFormats",
       "charts",
-      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common/constants"

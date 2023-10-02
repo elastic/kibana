@@ -20,8 +20,9 @@ export const allowedExperimentalValues = Object.freeze({
   showIntegrationsSubcategories: true,
   agentFqdnMode: true,
   showExperimentalShipperOptions: false,
-  agentTamperProtectionEnabled: false,
-  secretsStorage: false,
+  agentTamperProtectionEnabled: true,
+  secretsStorage: true,
+  kafkaOutput: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -45,6 +46,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new FleetInvalidExperimentalValue(`[${value}] is not a supported experimental feature`);
     }
 
+    // @ts-expect-error ts upgrade v4.7.4
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 

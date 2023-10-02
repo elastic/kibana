@@ -13,5 +13,3 @@ export * from './monitor';
 export * from './ping';
 export * from './snapshot';
 export * from './network_events';
-export * from './monitor_management';
-export * from './monitor_management/synthetics_private_locations';

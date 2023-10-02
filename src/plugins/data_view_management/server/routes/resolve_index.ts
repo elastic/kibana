@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
@@ -32,11 +33,19 @@ export function registerResolveIndexRoute(router: IRouter): void {
     },
     async (context, req, res) => {
       const esClient = (await context.core).elasticsearch.client;
-      const body = await esClient.asCurrentUser.indices.resolveIndex({
-        name: req.params.query,
-        expand_wildcards: req.query.expand_wildcards || 'open',
-      });
-      return res.ok({ body });
+      try {
+        const body = await esClient.asCurrentUser.indices.resolveIndex({
+          name: req.params.query,
+          expand_wildcards: req.query.expand_wildcards || 'open',
+        });
+        return res.ok({ body });
+      } catch (e) {
+        if (e?.meta.statusCode === 404) {
+          return res.notFound({ body: { message: e.meta?.body?.error?.reason } });
+        } else {
+          throw getKbnServerError(e);
+        }
+      }
     }
   );
 }

@@ -14,10 +14,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -101,11 +101,11 @@ export class FlyoutService {
         };
 
         render(
-          <CoreContextProvider i18n={i18n} theme={theme}>
+          <KibanaRenderContextProvider i18n={i18n} theme={theme}>
             <EuiFlyout {...options} onClose={onCloseFlyout}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiFlyout>
-          </CoreContextProvider>,
+          </KibanaRenderContextProvider>,
           this.targetDomElement
         );
 

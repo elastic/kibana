@@ -8,7 +8,7 @@
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { InvalidTransformError } from '../../../errors';
 
-export function getElastichsearchQueryOrThrow(kuery: string) {
+export function getElastichsearchQueryOrThrow(kuery: string | undefined = '') {
   try {
     return toElasticsearchQuery(fromKueryExpression(kuery));
   } catch (err) {

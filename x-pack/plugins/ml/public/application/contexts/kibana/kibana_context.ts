@@ -26,12 +26,16 @@ import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   share: SharePluginStart;
@@ -51,6 +55,8 @@ interface StartPlugins {
   lens: LensPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

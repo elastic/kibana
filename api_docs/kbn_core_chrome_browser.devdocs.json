@@ -700,6 +700,9 @@
             "tags": [],
             "label": "href",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -710,6 +713,36 @@
             "type": "string",
             "tags": [],
             "label": "iconType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpMenuLink.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpMenuLink.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
             "description": [],
             "signature": [
               "string | undefined"
@@ -1557,6 +1590,22 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.isGroupTitle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGroupTitle",
+            "description": [
+              "Optional flag to indicate if the node must be treated as a group title"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeProjectNavigationNode.children",
             "type": "Array",
             "tags": [],
@@ -1620,32 +1669,12 @@
               "\nOptional function to get the active state. This function is called whenever the location changes."
             ],
             "signature": [
-              "((location: ",
-              "Location",
-              "<unknown>) => boolean) | undefined"
+              "GetIsActiveFn",
+              " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-common.ChromeProjectNavigationNode.getIsActive.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "location",
-                "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
-                "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1660,6 +1689,22 @@
             ],
             "signature": [
               "\"hidden\" | \"visible\" | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.accordionProps",
+            "type": "Object",
+            "tags": [],
+            "label": "accordionProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiAccordionProps",
+              "> | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -2877,6 +2922,29 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.cloudLink",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloudLink",
+            "description": [
+              "Cloud link id"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.CloudLinkId",
+                "text": "CloudLinkId"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.NodeDefinition.icon",
             "type": "string",
             "tags": [],
@@ -2893,12 +2961,28 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.isGroupTitle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGroupTitle",
+            "description": [
+              "\nOptional flag to indicate if the node must be treated as a group title.\nCan not be used with `children`"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.NodeDefinition.children",
             "type": "Object",
             "tags": [],
             "label": "children",
             "description": [
-              "Optional children of the navigation node"
+              "Optional children of the navigation node. Can not be used with `isGroupTitle`"
             ],
             "signature": [
               "NonEmptyArray<",
@@ -2941,32 +3025,12 @@
               "\nOptional function to get the active state. This function is called whenever the location changes."
             ],
             "signature": [
-              "((location: ",
-              "Location",
-              "<unknown>) => boolean) | undefined"
+              "GetIsActiveFn",
+              " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-common.NodeDefinition.getIsActive.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "location",
-                "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
-                "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -2981,6 +3045,22 @@
             ],
             "signature": [
               "\"hidden\" | \"visible\" | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.accordionProps",
+            "type": "Object",
+            "tags": [],
+            "label": "accordionProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiAccordionProps",
+              "> | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -3136,7 +3216,9 @@
         "signature": [
           "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
           "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"time\" | \"step\" | \"location\" | undefined; }"
+          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"location\" | \"time\" | \"step\" | undefined; popoverContent?: React.ReactNode; popoverProps?: Omit<",
+          "EuiPopoverProps",
+          ", \"button\" | \"closePopover\" | \"isOpen\"> | undefined; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
         "deprecated": false,
@@ -3215,7 +3297,9 @@
         "signature": [
           "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
           "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"time\" | \"step\" | \"location\" | undefined; }"
+          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"location\" | \"time\" | \"step\" | undefined; popoverContent?: React.ReactNode; popoverProps?: Omit<",
+          "EuiPopoverProps",
+          ", \"button\" | \"closePopover\" | \"isOpen\"> | undefined; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3233,6 +3317,21 @@
           "\"project\" | \"classic\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.CloudLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudLinkId",
+        "description": [],
+        "signature": [
+          "\"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployment\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-side-nav';
+import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '../../../../../common';
 
 export const CATEGORIES: SeparatorLinkCategory[] = [
@@ -16,6 +16,7 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [
+      SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
@@ -25,12 +26,8 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
     type: LinkCategoryType.separator,
     linkIds: [
       SecurityPageName.timelines,
-      SecurityPageName.threatIntelligenceIndicators,
+      SecurityPageName.threatIntelligence,
       SecurityPageName.exploreLanding,
     ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.rulesLanding],
   },
 ];

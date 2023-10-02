@@ -74,6 +74,21 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
+            <span className="mlJobMapLegend__ingestPipeline" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.legend.ingestPipelineLabel"
+                defaultMessage="ingest pipeline"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
             <span className="mlJobMapLegend__transform" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

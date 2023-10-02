@@ -53,7 +53,12 @@ export const ImportSummary: FC<Props> = ({
         iconType="check"
         data-test-subj="dataVisualizerFileImportSuccessCallout"
       >
-        <EuiDescriptionList type="column" listItems={items} className="import-summary-list" />
+        <EuiDescriptionList
+          type="column"
+          columnWidths={[15, 85]}
+          listItems={items}
+          className="import-summary-list"
+        />
       </EuiCallOut>
 
       {importFailures && importFailures.length > 0 && (

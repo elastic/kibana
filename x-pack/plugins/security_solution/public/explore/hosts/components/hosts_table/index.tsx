@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
+import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
   Criteria,
@@ -25,12 +26,12 @@ import type {
   HostItem,
   HostsSortField,
 } from '../../../../../common/search_strategy/security_solution/hosts';
-import { HostsFields } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -132,6 +133,8 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
+
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const dispatchSeverityUpdate = useCallback(
@@ -151,8 +154,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const hostsColumns = useMemo(
-    () => getHostsColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
-    [dispatchSeverityUpdate, isPlatinumOrTrialLicense]
+    () =>
+      getHostsColumns(
+        isPlatinumOrTrialLicense && hasEntityAnalyticsCapability,
+        dispatchSeverityUpdate
+      ),
+    [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
@@ -202,6 +209,8 @@ const getNodeField = (field: HostsFields): string => {
       return 'node.host.name';
     case HostsFields.lastSeen:
       return 'node.lastSeen';
+    default:
+      return '';
   }
 };
 

@@ -4,29 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  calculateTimeRangeBucketSize,
-  getAlertSummaryTimeRange,
-  useTimeBuckets,
-} from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { TimeRange } from '@kbn/es-query';
-import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
+import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
+import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import type { AlertsEsQuery } from '../../../../../../common/alerts/types';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-
-import {
-  ALERTS_PER_PAGE,
-  ALERTS_TABLE_ID,
-  DEFAULT_DATE_FORMAT,
-  DEFAULT_INTERVAL,
-  infraAlertFeatureIds,
-} from '../config';
-import { AlertsEsQuery, useAlertsQuery } from '../../../hooks/use_alerts_query';
+import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 import AlertsStatusFilter from './alerts_status_filter';
+import { ALERTS_PER_PAGE, ALERTS_TABLE_ID, infraAlertFeatureIds } from '../config';
 import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
 
 export const AlertsTabContent = () => {
@@ -120,18 +109,3 @@ const MemoAlertSummaryWidget = React.memo(
     );
   }
 );
-
-const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
-  const timeBuckets = useTimeBuckets();
-
-  const bucketSize = useMemo(
-    () => calculateTimeRangeBucketSize(unifiedSearchDateRange, timeBuckets),
-    [unifiedSearchDateRange, timeBuckets]
-  );
-
-  return getAlertSummaryTimeRange(
-    unifiedSearchDateRange,
-    bucketSize?.intervalString || DEFAULT_INTERVAL,
-    bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
-  );
-};

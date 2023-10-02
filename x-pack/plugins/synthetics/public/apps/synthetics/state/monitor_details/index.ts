@@ -108,7 +108,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     })
     .addCase(enableMonitorAlertAction.success, (state, action) => {
       if ('updated_at' in action.payload && state.syntheticsMonitor) {
-        state.syntheticsMonitor = action.payload.attributes as EncryptedSyntheticsSavedMonitor;
+        state.syntheticsMonitor = action.payload;
       }
     });
 });

@@ -58,7 +58,7 @@ function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: Ur
     encoderID: encoder.id,
   };
   if (icon) {
-    serializedTemplate.iconClass = icon.class;
+    serializedTemplate.iconClass = icon.id;
   }
   return serializedTemplate;
 }
@@ -77,7 +77,7 @@ function serializeField({
     lastValidHopSize,
     color,
     selected,
-    iconClass: icon.class,
+    iconClass: icon.id,
   };
 }
 

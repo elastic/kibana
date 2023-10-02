@@ -13,18 +13,23 @@ import { i18n } from '@kbn/i18n';
 import { useCreateCloudFormationUrl } from '../../hooks';
 import { CloudFormationGuide } from '../cloud_formation_guide';
 
+import type { CloudSecurityIntegration } from './types';
+
 interface Props {
   enrollmentAPIKey?: string;
-  cloudFormationTemplateUrl: string;
+  cloudSecurityIntegration: CloudSecurityIntegration;
+  fleetServerHost: string;
 }
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
-  cloudFormationTemplateUrl,
+  cloudSecurityIntegration,
+  fleetServerHost,
 }) => {
-  const { isLoading, cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
+  const { cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
-    cloudFormationTemplateUrl,
+    cloudFormationProps: cloudSecurityIntegration?.cloudFormationProps,
+    fleetServerHost,
   });
 
   if (error && isError) {
@@ -40,7 +45,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
     <EuiSkeletonText
       lines={3}
       size="m"
-      isLoading={isLoading}
+      isLoading={cloudSecurityIntegration?.isLoading}
       contentAriaLabel={i18n.translate(
         'xpack.fleet.agentEnrollment.cloudFormation.loadingAriaLabel',
         {
@@ -48,7 +53,9 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
         }
       )}
     >
-      <CloudFormationGuide />
+      <CloudFormationGuide
+        awsAccountType={cloudSecurityIntegration?.cloudFormationProps?.awsAccountType}
+      />
       <EuiSpacer size="m" />
       <EuiButton
         color="primary"

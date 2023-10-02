@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
 import {

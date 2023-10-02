@@ -12,6 +12,7 @@ import { useQueryAlerts } from '../../../../detections/containers/detection_engi
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 
 // Formatted item result
 export interface RuleAlertsItem {
@@ -35,11 +36,11 @@ export interface SeverityRuleAlertsAggsResponse {
           };
           hits: [
             {
-              _source: {
-                '@timestamp': string;
-                'kibana.alert.rule.name': string;
-                'kibana.alert.rule.uuid': string;
-                'kibana.alert.severity': Severity;
+              fields: {
+                '@timestamp': string[];
+                'kibana.alert.rule.name': string[];
+                'kibana.alert.rule.uuid': string[];
+                'kibana.alert.severity': Severity[];
               };
             }
           ];
@@ -48,6 +49,10 @@ export interface SeverityRuleAlertsAggsResponse {
     }>;
   };
 }
+export const KIBANA_RULE_NAME = 'kibana.alert.rule.name';
+export const KIBANA_RULE_ID = 'kibana.alert.rule.uuid';
+export const KIBANA_ALERT_SEVERITY = 'kibana.alert.severity';
+export const TIMESTAMP = '@timestamp';
 
 const getSeverityRuleAlertsQuery = ({
   from,
@@ -58,6 +63,8 @@ const getSeverityRuleAlertsQuery = ({
   to: string;
   filterQuery?: ESBoolQuery;
 }) => ({
+  _source: false,
+  fields: [KIBANA_RULE_NAME, KIBANA_RULE_ID, KIBANA_ALERT_SEVERITY, TIMESTAMP],
   size: 0,
   query: {
     bool: {
@@ -101,14 +108,13 @@ const getRuleAlertsItemsFromAggs = (
 ): RuleAlertsItem[] => {
   const buckets = aggregations?.alertsByRule.buckets ?? [];
   return buckets.map<RuleAlertsItem>((bucket) => {
-    const lastAlert = bucket.lastRuleAlert.hits.hits[0]._source;
-
+    const lastAlert = bucket.lastRuleAlert.hits.hits[0].fields;
     return {
-      id: lastAlert['kibana.alert.rule.uuid'],
+      id: firstNonNullValue(lastAlert[KIBANA_RULE_ID]) ?? '',
       alert_count: bucket.lastRuleAlert.hits.total.value,
-      name: lastAlert['kibana.alert.rule.name'],
-      last_alert_at: lastAlert['@timestamp'],
-      severity: lastAlert['kibana.alert.severity'],
+      name: firstNonNullValue(lastAlert[KIBANA_RULE_NAME]) ?? '',
+      last_alert_at: firstNonNullValue(lastAlert[TIMESTAMP]) ?? '',
+      severity: firstNonNullValue(lastAlert[KIBANA_ALERT_SEVERITY]) ?? 'low',
     };
   });
 };

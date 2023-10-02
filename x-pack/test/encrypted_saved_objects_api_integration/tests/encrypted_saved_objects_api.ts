@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from '@kbn/core/server';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SavedObject } from '@kbn/core/server';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -575,6 +576,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('migrations', () => {
       before(async () => {
+        // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
+        await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
         await esArchiver.load(
           'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
         );

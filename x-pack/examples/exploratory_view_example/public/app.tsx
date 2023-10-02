@@ -12,8 +12,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -63,27 +62,25 @@ export const App = (props: {
             </EuiTitle>
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto', height: '70vh' }}>
-            <p>
-              This app embeds an Observability Exploratory view as embeddable component. Make sure
-              you have data in heartbeat-* index within last 5 days for this demo to work.
-            </p>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButton aria-label="Open in exploratory view" href={hrefLink} target="_blank">
-                  Edit in exploratory view (new tab)
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <ExploratoryViewComponent
-              attributes={seriesList}
-              reportType="kpi-over-time"
-              title={'Monitor response duration'}
-              withActions={['save', 'explore']}
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
+        <EuiPageSection>
+          <p>
+            This app embeds an Observability Exploratory view as embeddable component. Make sure you
+            have data in heartbeat-* index within last 5 days for this demo to work.
+          </p>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton aria-label="Open in exploratory view" href={hrefLink} target="_blank">
+                Edit in exploratory view (new tab)
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <ExploratoryViewComponent
+            attributes={seriesList}
+            reportType="kpi-over-time"
+            title={'Monitor response duration'}
+            withActions={['save', 'explore']}
+          />
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );

@@ -116,7 +116,7 @@ export const TagFilterPanel: FC<Props> = ({
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downCenter"
-        panelClassName="euiFilterGroup__popoverPanel"
+        panelProps={{ css: { width: euiTheme.base * 18 } }}
         panelStyle={isInUse ? { transition: 'none' } : undefined}
       >
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
@@ -175,7 +175,11 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiFlexItem>
 
             <EuiFlexItem css={saveBtnWrapperCSS}>
-              <EuiButton onClick={closePopover}>Save</EuiButton>
+              <EuiButton onClick={closePopover}>
+                {i18n.translate('contentManagement.tableList.tagFilterPanel.doneButtonLabel', {
+                  defaultMessage: 'Done',
+                })}
+              </EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem>

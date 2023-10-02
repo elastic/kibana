@@ -11,13 +11,14 @@ import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { createEsIndexBodySchema, createIndex } from './lib/create_index';
+import { createIndex } from './lib/create_index';
+import { createEsIndexRequestBody } from '../../../../common/api/risk_score';
 
 export const createEsIndexRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.put(
     {
       path: RISK_SCORE_CREATE_INDEX,
-      validate: { body: createEsIndexBodySchema },
+      validate: { body: createEsIndexRequestBody },
       options: {
         tags: ['access:securitySolution'],
       },

@@ -12,9 +12,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { CodeEditorField, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { IndexPrivilegeForm } from './index_privilege_form';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
-import { IndexPrivilegeForm } from './index_privilege_form';
 
 test('it renders without crashing', () => {
   const wrapper = shallowWithIntl(

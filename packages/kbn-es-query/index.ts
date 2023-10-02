@@ -54,6 +54,8 @@ export {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+  getLanguageDisplayName,
 } from './src/es_query';
 
 export {
@@ -116,6 +118,7 @@ export {
   nodeTypes,
   toElasticsearchQuery,
   escapeKuery,
+  escapeQuotes,
 } from './src/kuery';
 
 export {

@@ -12,7 +12,6 @@ import {
   EuiPage,
   EuiLink,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
@@ -151,7 +150,7 @@ export class PipelineListing extends Component {
           </EuiScreenReaderOnly>
           <EuiPanel>{this.renderStats()}</EuiPanel>
           <EuiSpacer size="m" />
-          <EuiPageContent>
+          <EuiPanel>
             <EuiMonitoringSSPTable
               className={className || 'logstashNodesTable'}
               rows={data}
@@ -172,7 +171,7 @@ export class PipelineListing extends Component {
               onTableChange={onTableChange}
               {...props}
             />
-          </EuiPageContent>
+          </EuiPanel>
         </EuiPageBody>
       </EuiPage>
     );

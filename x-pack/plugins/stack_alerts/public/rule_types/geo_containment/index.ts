@@ -15,11 +15,11 @@ export function getRuleType(): RuleTypeModel<GeoContainmentAlertParams> {
   return {
     id: '.geo-containment',
     description: i18n.translate('xpack.stackAlerts.geoContainment.descriptionText', {
-      defaultMessage: 'Alert when an entity is contained within a geo boundary.',
+      defaultMessage: 'Alert when an entity is contained or no longer contained within a boundary.',
     }),
     iconClass: 'globe',
     documentationUrl: null,
-    ruleParamsExpression: lazy(() => import('./query_builder')),
+    ruleParamsExpression: lazy(() => import('./rule_form')),
     validate: validateExpression,
     requiresAppContext: false,
   };

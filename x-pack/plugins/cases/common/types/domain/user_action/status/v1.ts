@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseStatusRt } from '../../../../api';
+import { CaseStatusRt } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const StatusUserActionPayloadRt = rt.strict({ status: CaseStatusRt });

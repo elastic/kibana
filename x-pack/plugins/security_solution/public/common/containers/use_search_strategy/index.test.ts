@@ -9,7 +9,10 @@ import { useSearch, useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import type { FactoryQueryTypes, StrategyRequestType } from '../../../../common/search_strategy';
+import type {
+  FactoryQueryTypes,
+  StrategyRequestInputType,
+} from '../../../../common/search_strategy';
 import { Observable } from 'rxjs';
 
 jest.mock('@kbn/securitysolution-hook-utils');
@@ -83,7 +86,7 @@ const userSearchStrategyProps = {
 const request = {
   fake: 'request',
   search: 'parameters',
-} as unknown as StrategyRequestType<FactoryQueryTypes>;
+} as unknown as StrategyRequestInputType<FactoryQueryTypes>;
 
 describe('useSearchStrategy', () => {
   beforeEach(() => {
@@ -273,14 +276,18 @@ describe('useSearchStrategy', () => {
       expect(mockEndTracking).toBeCalledWith('success');
     });
 
-    it('should track invalid search result', () => {
-      mockResponse.mockReturnValueOnce({}); // mock invalid empty response
+    it('should handle search error', () => {
+      mockResponse.mockImplementation(() => {
+        throw new Error(
+          'simulated search response error, which could be 1) undefined response, 2) response without rawResponse, or 3) partial response'
+        );
+      });
 
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
       result.current({ request, abortSignal: new AbortController().signal });
 
       expect(mockStartTracking).toBeCalledTimes(1);
-      expect(mockEndTracking).toBeCalledWith('invalid');
+      expect(mockEndTracking).toBeCalledWith('error');
     });
 
     it('should track error search result', () => {
@@ -309,15 +316,6 @@ describe('useSearchStrategy', () => {
       expect(mockStartTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('aborted');
-    });
-
-    it('should show toast warning when the API returns partial invalid response', () => {
-      mockResponse.mockReturnValueOnce({}); // mock invalid empty response
-
-      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
-      result.current({ request, abortSignal: new AbortController().signal });
-
-      expect(mockAddToastWarning).toBeCalled();
     });
   });
 });

@@ -323,7 +323,12 @@ const storageExplorerGetServices = createApmServerRoute({
     tags: ['access:apm'],
   },
   params: t.type({
-    query: t.intersection([indexLifecyclePhaseRt, environmentRt, kueryRt]),
+    query: t.intersection([
+      indexLifecyclePhaseRt,
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
   }),
   handler: async (
     resources
@@ -333,7 +338,7 @@ const storageExplorerGetServices = createApmServerRoute({
     }>;
   }> => {
     const {
-      query: { environment, kuery, indexLifecyclePhase },
+      query: { environment, kuery, indexLifecyclePhase, start, end },
     } = resources.params;
 
     if (
@@ -352,6 +357,8 @@ const storageExplorerGetServices = createApmServerRoute({
       apmEventClient,
       environment,
       maxNumberOfServices: 500,
+      start,
+      end,
     });
 
     return {

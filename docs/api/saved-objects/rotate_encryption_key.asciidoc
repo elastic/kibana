@@ -7,6 +7,12 @@
 
 experimental[] Rotate the encryption key for encrypted saved objects.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 If a saved object cannot be decrypted using the primary encryption key, then {kib} will attempt to decrypt it using the specified <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>>. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
 
 [IMPORTANT]

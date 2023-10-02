@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common/constants/routes';
+import { API_VERSIONS, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
 describe('ingest service', () => {
@@ -24,6 +24,7 @@ describe('ingest service', () => {
         query: {
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         },
+        version: API_VERSIONS.public.v1,
       });
     });
     it('supports additional KQL to be defined on input for query params', async () => {
@@ -36,6 +37,7 @@ describe('ingest service', () => {
           perPage: 10,
           page: 1,
         },
+        version: API_VERSIONS.public.v1,
       });
     });
   });

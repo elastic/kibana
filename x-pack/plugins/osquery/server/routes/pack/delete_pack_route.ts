@@ -7,15 +7,18 @@
 
 import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
-import { schema } from '@kbn/config-schema';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { getInternalSavedObjectsClient } from '../utils';
+import type { DeletePacksRequestParamsSchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { deletePacksRequestParamsSchema } from '../../../common/api';
 
 export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -29,9 +32,10 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string(),
-            }),
+            params: buildRouteValidation<
+              typeof deletePacksRequestParamsSchema,
+              DeletePacksRequestParamsSchema
+            >(deletePacksRequestParamsSchema),
           },
         },
       },
@@ -39,6 +43,9 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const savedObjectsClient = coreContext.savedObjects.client;
+        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+          osqueryContext.getStartServices
+        );
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
         const currentPackSO = await savedObjectsClient.get<{ name: string }>(
@@ -65,7 +72,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         await Promise.all(
           currentPackagePolicies.map((packagePolicy) =>
             packagePolicyService?.update(
-              savedObjectsClient,
+              internalSavedObjectsClient,
               esClient,
               packagePolicy.id,
               produce(packagePolicy, (draft) => {

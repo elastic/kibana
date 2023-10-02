@@ -16,7 +16,9 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
+  isOpenTelemetryAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
@@ -57,6 +59,7 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const isRumAgent = isRumAgentName(agentName);
+  const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
   const isServerless = isServerlessAgent(serverlessType);
 
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
@@ -178,13 +181,15 @@ export function ServiceOverview() {
                   />
                 </EuiFlexItem>
               ) : (
-                <EuiFlexItem grow={3}>
-                  <TransactionBreakdownChart
-                    showAnnotations={false}
-                    environment={environment}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
+                !isOpenTelemetryAgent && (
+                  <EuiFlexItem grow={3}>
+                    <TransactionBreakdownChart
+                      showAnnotations={false}
+                      environment={environment}
+                      kuery={kuery}
+                    />
+                  </EuiFlexItem>
+                )
               )}
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>

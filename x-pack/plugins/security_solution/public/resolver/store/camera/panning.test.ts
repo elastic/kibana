@@ -8,7 +8,7 @@
 import type { Store, Reducer, AnyAction } from 'redux';
 import { createStore } from 'redux';
 import { cameraReducer } from './reducer';
-import type { AnalyzerState, Vector2 } from '../../types';
+import type { AnalyzerById, Vector2 } from '../../types';
 import { translation } from './selectors';
 import { EMPTY_RESOLVER } from '../helpers';
 import {
@@ -20,7 +20,7 @@ import {
 } from './action';
 
 describe('panning interaction', () => {
-  let store: Store<AnalyzerState, AnyAction>;
+  let store: Store<AnalyzerById, AnyAction>;
   let translationShouldBeCloseTo: (expectedTranslation: Vector2) => void;
   let time: number;
   const id = 'test-id';
@@ -28,17 +28,15 @@ describe('panning interaction', () => {
   beforeEach(() => {
     // The time isn't relevant as we don't use animations in this suite.
     time = 0;
-    const testReducer: Reducer<AnalyzerState, AnyAction> = (
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
       state = {
-        analyzerById: {
-          [id]: EMPTY_RESOLVER,
-        },
+        [id]: EMPTY_RESOLVER,
       },
       action
-    ): AnalyzerState => cameraReducer(state, action);
+    ): AnalyzerById => cameraReducer(state, action);
     store = createStore(testReducer, undefined);
     translationShouldBeCloseTo = (expectedTranslation) => {
-      const actualTranslation = translation(store.getState().analyzerById[id].camera)(time);
+      const actualTranslation = translation(store.getState()[id].camera)(time);
       expect(expectedTranslation[0]).toBeCloseTo(actualTranslation[0]);
       expect(expectedTranslation[1]).toBeCloseTo(actualTranslation[1]);
     };
@@ -85,9 +83,7 @@ describe('panning interaction', () => {
       /**
        * Check the position once the animation has advanced 100ms
        */
-      const actual: Vector2 = translation(store.getState().analyzerById[id].camera)(
-        aBitIntoTheFuture
-      );
+      const actual: Vector2 = translation(store.getState()[id].camera)(aBitIntoTheFuture);
       expect(actual).toMatchInlineSnapshot(`
         Array [
           0,

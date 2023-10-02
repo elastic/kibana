@@ -9,7 +9,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { ExportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ExportRulesRequestBody,
   ExportRulesRequestQuery,
@@ -28,92 +27,97 @@ export const exportRulesRoute = (
   config: ConfigType,
   logger: Logger
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
-      validate: {
-        query: buildRouteValidation<typeof ExportRulesRequestQuery, ExportRulesRequestQueryDecoded>(
-          ExportRulesRequestQuery
-        ),
-        body: buildRouteValidation(ExportRulesRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const rulesClient = (await context.alerting).getRulesClient();
-      const exceptionsClient = (await context.lists)?.getExceptionListClient();
-      const actionsClient = (await context.actions)?.getActionsClient();
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: buildRouteValidation(ExportRulesRequestQuery),
+            body: buildRouteValidation(ExportRulesRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        const rulesClient = (await context.alerting).getRulesClient();
+        const exceptionsClient = (await context.lists)?.getExceptionListClient();
+        const actionsClient = (await context.actions)?.getActionsClient();
 
-      const {
-        getExporter,
-        getClient,
-        client: savedObjectsClient,
-      } = (await context.core).savedObjects;
+        const {
+          getExporter,
+          getClient,
+          client: savedObjectsClient,
+        } = (await context.core).savedObjects;
 
-      const client = getClient({ includedHiddenTypes: ['action'] });
-      const actionsExporter = getExporter(client);
-      try {
-        const exportSizeLimit = config.maxRuleImportExportSize;
-        if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: `Can't export more than ${exportSizeLimit} rules`,
-          });
-        } else {
-          const nonPackagedRulesCount = await getNonPackagedRulesCount({
-            rulesClient,
-          });
-          if (nonPackagedRulesCount > exportSizeLimit) {
+        const client = getClient({ includedHiddenTypes: ['action'] });
+        const actionsExporter = getExporter(client);
+        try {
+          const exportSizeLimit = config.maxRuleImportExportSize;
+          if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
             return siemResponse.error({
               statusCode: 400,
               body: `Can't export more than ${exportSizeLimit} rules`,
             });
+          } else {
+            const nonPackagedRulesCount = await getNonPackagedRulesCount({
+              rulesClient,
+            });
+            if (nonPackagedRulesCount > exportSizeLimit) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `Can't export more than ${exportSizeLimit} rules`,
+              });
+            }
           }
+
+          const exportedRulesAndReferences =
+            request.body?.objects != null
+              ? await getExportByObjectIds(
+                  rulesClient,
+                  exceptionsClient,
+                  savedObjectsClient,
+                  request.body.objects,
+                  logger,
+                  actionsExporter,
+                  request,
+                  actionsClient
+                )
+              : await getExportAll(
+                  rulesClient,
+                  exceptionsClient,
+                  savedObjectsClient,
+                  logger,
+                  actionsExporter,
+                  request,
+                  actionsClient
+                );
+
+          const responseBody = request.query.exclude_export_details
+            ? exportedRulesAndReferences.rulesNdjson
+            : `${exportedRulesAndReferences.rulesNdjson}${exportedRulesAndReferences.exceptionLists}${exportedRulesAndReferences.actionConnectors}${exportedRulesAndReferences.exportDetails}`;
+
+          return response.ok({
+            headers: {
+              'Content-Disposition': `attachment; filename="${request.query.file_name}"`,
+              'Content-Type': 'application/ndjson',
+            },
+            body: responseBody,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-
-        const exportedRulesAndReferences =
-          request.body?.objects != null
-            ? await getExportByObjectIds(
-                rulesClient,
-                exceptionsClient,
-                savedObjectsClient,
-                request.body.objects,
-                logger,
-                actionsExporter,
-                request,
-                actionsClient
-              )
-            : await getExportAll(
-                rulesClient,
-                exceptionsClient,
-                savedObjectsClient,
-                logger,
-                actionsExporter,
-                request,
-                actionsClient
-              );
-
-        const responseBody = request.query.exclude_export_details
-          ? exportedRulesAndReferences.rulesNdjson
-          : `${exportedRulesAndReferences.rulesNdjson}${exportedRulesAndReferences.exceptionLists}${exportedRulesAndReferences.actionConnectors}${exportedRulesAndReferences.exportDetails}`;
-
-        return response.ok({
-          headers: {
-            'Content-Disposition': `attachment; filename="${request.query.file_name}"`,
-            'Content-Type': 'application/ndjson',
-          },
-          body: responseBody,
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

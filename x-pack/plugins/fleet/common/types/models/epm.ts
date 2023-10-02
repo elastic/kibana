@@ -383,7 +383,7 @@ export interface RegistryDataStreamRoutingRules {
   rules: Array<{
     target_dataset: string;
     if: string;
-    namespace: string;
+    namespace?: string;
   }>;
 }
 
@@ -633,6 +633,9 @@ export interface TemplateMapEntry {
       }
     | {
         settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
+      }
+    | {
+        lifecycle?: any;
       };
 }
 

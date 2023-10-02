@@ -31,6 +31,7 @@ export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & Das
 
 export interface DashboardPublicState {
   lastSavedInput: DashboardContainerInput;
+  hasRunClientsideMigrations?: boolean;
   animatePanelTransforms?: boolean;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
@@ -39,8 +40,10 @@ export interface DashboardPublicState {
   fullScreenMode?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
+  managed?: boolean;
   scrollToPanelId?: string;
   highlightPanelId?: string;
+  focusedPanelId?: string;
 }
 
 export interface DashboardRenderPerformanceStats {

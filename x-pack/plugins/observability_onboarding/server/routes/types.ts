@@ -7,6 +7,7 @@
 import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { ObservabilityOnboardingServerRouteRepository } from '.';
 import { ObservabilityOnboardingConfig } from '..';
+import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 import {
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStartDependencies,
@@ -32,6 +33,10 @@ export interface ObservabilityOnboardingRouteHandlerResources {
     start: () => Promise<CoreStart>;
   };
   config: ObservabilityOnboardingConfig;
+  kibanaVersion: string;
+  services: {
+    esLegacyConfigService: EsLegacyConfigService;
+  };
 }
 
 export interface ObservabilityOnboardingRouteCreateOptions {

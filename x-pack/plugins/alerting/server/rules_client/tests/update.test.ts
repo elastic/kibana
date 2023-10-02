@@ -9,7 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -50,6 +54,10 @@ jest.mock('uuid', () => {
   return { v4: () => `${uuid++}` };
 });
 
+jest.mock('../../application/rule/methods/get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
+
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -58,6 +66,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -71,14 +80,18 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -171,10 +184,12 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
     (migrateLegacyActions as jest.Mock).mockResolvedValue({
       hasLegacyActions: false,
@@ -720,6 +735,242 @@ describe('update()', () => {
     expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
   });
 
+  test('should update a rule with some system actions', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'another email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
+    actionsClient.isSystemAction.mockReset();
+    actionsClient.isSystemAction.mockReturnValueOnce(false);
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+          },
+          {
+            group: 'custom',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: 'system_action-id',
+            params: {},
+          },
+          {
+            group: 'custom',
+            id: 'system_action-id',
+            params: {},
+          },
+        ],
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      'alert',
+      {
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            uuid: '106',
+          },
+          {
+            group: 'default',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+            uuid: '107',
+          },
+          {
+            group: 'custom',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+            uuid: '108',
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
+        consumer: 'myApp',
+        enabled: true,
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true },
+        revision: 1,
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "system_action-id",
+            "params": Object {},
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "custom",
+            "id": "system_action-id",
+            "params": Object {},
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
+  });
+
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     const ruleParams = {
       bar: true,
@@ -753,6 +1004,7 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -761,6 +1013,7 @@ describe('update()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -832,7 +1085,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '106',
+            uuid: '109',
           },
         ],
         alertTypeId: 'myType',
@@ -1012,7 +1265,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "107",
+            "uuid": "110",
           },
         ],
         "alertTypeId": "myType",
@@ -1165,7 +1418,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "108",
+            "uuid": "111",
           },
         ],
         "alertTypeId": "myType",
@@ -1275,7 +1528,9 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
+      validLegacyConsumers: [],
     });
     await expect(
       rulesClient.update({
@@ -1656,10 +1911,12 @@ describe('update()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
         },
+        validLegacyConsumers: [],
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,
@@ -2189,7 +2446,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '144',
+            uuid: '147',
           },
         ],
         alertTypeId: 'myType',
@@ -2740,7 +2997,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '151',
+            uuid: '154',
           },
         ],
         alertTypeId: 'myType',
@@ -2944,7 +3201,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "152",
+            "uuid": "155",
           },
         ],
         "alertTypeId": "myType",

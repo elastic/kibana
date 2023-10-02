@@ -12,10 +12,10 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const esClient = getService('es');
+  const es = getService('es');
 
   async function getLastDocId(processorEvent: ProcessorEvent) {
-    const response = await esClient.search<{
+    const response = await es.search<{
       [key: string]: { id: string };
     }>({
       index: ['apm-*'],

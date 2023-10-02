@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tint, type EuiThemeComputed } from '@elastic/eui';
+import { transparentize, type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 export const SolutionSideNavItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
@@ -14,7 +14,7 @@ export const SolutionSideNavItemStyles = (euiTheme: EuiThemeComputed<{}>) => css
     font-weight: ${euiTheme.font.weight.regular};
   }
   &.solutionSideNavItem--isSelected {
-    background-color: ${tint(euiTheme.colors.lightShade, 0.5)};
+    background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
     & * {
       font-weight: ${euiTheme.font.weight.medium};
     }

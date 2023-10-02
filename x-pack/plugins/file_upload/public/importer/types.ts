@@ -6,17 +6,15 @@
  */
 
 import type {
-  ImportFailure,
-  IngestPipeline,
-  ImportDoc,
-  ImportResponse,
-  Mappings,
-  Settings,
-} from '../../common/types';
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { ImportFailure, IngestPipeline, ImportDoc, ImportResponse } from '../../common/types';
 
 export interface ImportConfig {
-  settings: Settings;
-  mappings: Mappings;
+  settings: IndicesIndexSettings;
+  mappings: MappingTypeMapping;
   pipeline: IngestPipeline;
 }
 
@@ -44,8 +42,8 @@ export interface IImporter {
   read(data: ArrayBuffer): { success: boolean };
   initializeImport(
     index: string,
-    settings: Settings,
-    mappings: Mappings,
+    settings: IndicesIndexSettings,
+    mappings: MappingTypeMapping,
     pipeline: IngestPipeline
   ): Promise<ImportResponse>;
   import(

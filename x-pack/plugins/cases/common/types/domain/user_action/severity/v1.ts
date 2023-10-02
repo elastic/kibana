@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseSeverityRt } from '../../../../api';
+import { CaseSeverityRt } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const SeverityUserActionPayloadRt = rt.strict({ severity: CaseSeverityRt });

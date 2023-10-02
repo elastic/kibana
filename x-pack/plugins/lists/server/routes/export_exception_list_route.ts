@@ -6,69 +6,76 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { exportExceptionListQuerySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { exportExceptionListRequestQuery } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         tags: ['access:lists-read'],
       },
       path: `${EXCEPTION_LIST_URL}/_export`,
-      validate: {
-        query: buildRouteValidation(exportExceptionListQuerySchema),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidation(exportExceptionListRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const {
-          id,
-          list_id: listId,
-          namespace_type: namespaceType,
-          include_expired_exceptions: includeExpiredExceptionsString,
-        } = request.query;
-        const exceptionListsClient = await getExceptionListClient(context);
+        try {
+          const {
+            id,
+            list_id: listId,
+            namespace_type: namespaceType,
+            include_expired_exceptions: includeExpiredExceptionsString,
+          } = request.query;
+          const exceptionListsClient = await getExceptionListClient(context);
 
-        // Defaults to including expired exceptions if query param is not present
-        const includeExpiredExceptions =
-          includeExpiredExceptionsString !== undefined
-            ? includeExpiredExceptionsString === 'true'
-            : true;
-        const exportContent = await exceptionListsClient.exportExceptionListAndItems({
-          id,
-          includeExpiredExceptions,
-          listId,
-          namespaceType,
-        });
+          // Defaults to including expired exceptions if query param is not present
+          const includeExpiredExceptions =
+            includeExpiredExceptionsString !== undefined
+              ? includeExpiredExceptionsString === 'true'
+              : true;
+          const exportContent = await exceptionListsClient.exportExceptionListAndItems({
+            id,
+            includeExpiredExceptions,
+            listId,
+            namespaceType,
+          });
 
-        if (exportContent == null) {
+          if (exportContent == null) {
+            return siemResponse.error({
+              body: `exception list with list_id: ${listId} or id: ${id} does not exist`,
+              statusCode: 400,
+            });
+          }
+
+          return response.ok({
+            body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,
+            headers: {
+              'Content-Disposition': `attachment; filename="${listId}"`,
+              'Content-Type': 'application/ndjson',
+            },
+          });
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: `exception list with list_id: ${listId} or id: ${id} does not exist`,
-            statusCode: 400,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        return response.ok({
-          body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,
-          headers: {
-            'Content-Disposition': `attachment; filename="${listId}"`,
-            'Content-Type': 'application/ndjson',
-          },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

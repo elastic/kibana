@@ -15,6 +15,7 @@ import {
   EnterpriseSearchApplicationUpsertResponse,
 } from '../../../common/types/search_applications';
 import { createApiKey } from '../../lib/search_applications/create_api_key';
+import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_indices';
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
@@ -24,6 +25,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isInvalidSearchApplicationNameException,
+  isMissingAliasException,
   isNotFoundException,
   isVersionConflictEngineException,
 } from '../../utils/identify_exceptions';
@@ -46,6 +48,19 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
         request.query
       )) as EnterpriseSearchApplicationsResponse;
 
+      await Promise.all(
+        engines.results.map(async (searchApp) => {
+          try {
+            searchApp.indices = await fetchAliasIndices(client, searchApp.name);
+          } catch (error) {
+            if (isMissingAliasException(error)) {
+              searchApp.indices = [];
+            } else {
+              throw error;
+            }
+          }
+        })
+      );
       return response.ok({ body: engines });
     })
   );
@@ -64,7 +79,18 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       const engine = (await client.asCurrentUser.searchApplication.get({
         name: request.params.engine_name,
       })) as EnterpriseSearchApplication;
-      const indicesStats = await fetchIndicesStats(client, engine.indices);
+
+      let indices: string[];
+      try {
+        indices = await fetchAliasIndices(client, engine.name);
+      } catch (error) {
+        if (isMissingAliasException(error)) {
+          indices = [];
+        } else {
+          throw error;
+        }
+      }
+      const indicesStats = await fetchIndicesStats(client, indices);
 
       return response.ok({ body: { ...engine, indices: indicesStats } });
     })
@@ -215,20 +241,15 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      try {
-        const { client } = (await context.core).elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
-        const engine = (await client.asCurrentUser.searchApplication.get({
+      let engine;
+      try {
+        engine = (await client.asCurrentUser.searchApplication.get({
           name: request.params.engine_name,
         })) as EnterpriseSearchApplication;
-
-        const data = await fetchSearchApplicationFieldCapabilities(client, engine);
-        return response.ok({
-          body: data,
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (e) {
-        if (isNotFoundException(e)) {
+      } catch (error) {
+        if (isNotFoundException(error)) {
           return createError({
             errorCode: ErrorCode.SEARCH_APPLICATION_NOT_FOUND,
             message: i18n.translate(
@@ -239,7 +260,28 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
             statusCode: 404,
           });
         }
-        throw e;
+        throw error;
+      }
+
+      try {
+        const data = await fetchSearchApplicationFieldCapabilities(client, engine);
+        return response.ok({
+          body: data,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isMissingAliasException(error)) {
+          return createError({
+            errorCode: ErrorCode.SEARCH_APPLICATION_ALIAS_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.fetchSearchApplicationFieldCapabilities.missingAliasError',
+              { defaultMessage: 'Search application alias is missing.' }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
       }
     })
   );

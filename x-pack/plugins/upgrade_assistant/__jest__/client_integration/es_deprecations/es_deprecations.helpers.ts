@@ -56,7 +56,7 @@ const createActions = (testBed: TestBed) => {
         // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
         find('searchBarContainer')
           .find('.euiPopover')
-          .find('.euiFilterButton')
+          .find('button.euiFilterButton')
           .at(index)
           .simulate('click');
       });
@@ -75,7 +75,7 @@ const createActions = (testBed: TestBed) => {
     clickCriticalFilterButton: async () => {
       await act(async () => {
         // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('searchBarContainer').find('.euiFilterButton').at(0).simulate('click');
+        find('searchBarContainer').find('button.euiFilterButton').at(0).simulate('click');
       });
 
       component.update();

@@ -204,3 +204,16 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
+
+// API versioning constants
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};
+
+export const PUBLIC_API_ACCESS = 'public';
+export const INTERNAL_API_ACCESS = 'internal';

@@ -76,10 +76,12 @@ export {
   EmbeddableRenderer,
   useEmbeddableFactory,
   isFilterableEmbeddable,
+  isExplicitInputWithAttributes,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
   PANEL_HOVER_TRIGGER,
   panelHoverTrigger,
+  runEmbeddableFactoryMigrations,
 } from './lib';
 
 export { EmbeddablePanel } from './embeddable_panel';
@@ -92,6 +94,7 @@ export {
   ACTION_EDIT_PANEL,
   RemovePanelAction,
   REMOVE_PANEL_ACTION,
+  tracksOverlays,
 } from './embeddable_panel/panel_actions';
 
 export type {

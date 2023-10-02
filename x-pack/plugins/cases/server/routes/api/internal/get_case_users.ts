@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_CASE_USERS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { userApiV1 } from '../../../../common/types/api';
 
 export const getCaseUsersRoute = createCasesRoute({
   method: 'get',
@@ -24,8 +25,12 @@ export const getCaseUsersRoute = createCasesRoute({
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
 
+      const res: userApiV1.GetCaseUsersResponse = await casesClient.userActions.getUsers({
+        caseId,
+      });
+
       return response.ok({
-        body: await casesClient.userActions.getUsers({ caseId }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

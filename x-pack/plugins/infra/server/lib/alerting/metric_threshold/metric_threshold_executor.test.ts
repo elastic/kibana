@@ -18,6 +18,7 @@ import {
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import {
   Aggregators,
   Comparator,
@@ -130,8 +131,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/155534
-describe.skip('The metric threshold alert type', () => {
+describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1401,7 +1401,7 @@ describe.skip('The metric threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertDetailsUrl: '',
         alertState: 'NO DATA',
         group: '*',
         groupByKeys: undefined,
@@ -1898,15 +1898,19 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   inventory: {
     compositeSize: 2000,
   },
-  logs: {
-    app_target: 'logs-ui',
+  featureFlags: {
+    metricsExplorerEnabled: true,
   },
+  enabled: true,
   sources,
 });
 
 const mockLibs: any = {
   sources: new InfraSources({
     config: createMockStaticConfiguration({}),
+    metricsClient: {
+      getMetricIndices: jest.fn().mockResolvedValue('metrics-*,metricbeat-*'),
+    } as unknown as MetricsDataClient,
   }),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {

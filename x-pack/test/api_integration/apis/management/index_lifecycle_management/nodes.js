@@ -17,8 +17,7 @@ export default function ({ getService }) {
   const { getNodesStats } = initElasticsearchHelpers(getService);
   const { loadNodes, getNodeDetails } = registerHelpers({ supertest });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/141134
-  describe.skip('nodes', function () {
+  describe('nodes', function () {
     // Cloud disallows setting custom node attributes, so we can't use `NODE_CUSTOM_ATTRIBUTE`
     // to retrieve the IDs we expect.
     this.tags(['skipCloud']);

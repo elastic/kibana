@@ -10,6 +10,8 @@ import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/sav
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
+export const INSTALLED_VERSION = '1.0.7';
+
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private readonly getService: FtrProviderContext['getService'];
@@ -22,12 +24,12 @@ export class PrivateLocationTestService {
   async installSyntheticsPackage() {
     await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
     const response = await this.supertest
-      .get('/api/fleet/epm/packages/synthetics/1.0.1')
+      .get(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
       .set('kbn-xsrf', 'true')
       .expect(200);
     if (response.body.item.status !== 'installed') {
       await this.supertest
-        .post('/api/fleet/epm/packages/synthetics/1.0.1')
+        .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -61,10 +63,11 @@ export class PrivateLocationTestService {
       agentPolicyId: id,
       id,
       geo: {
-        lat: '',
-        lon: '',
+        lat: 0,
+        lon: 0,
       },
       concurrentMonitors: 1,
+      isServiceManaged: false,
     }));
 
     await server.savedObjects.create({

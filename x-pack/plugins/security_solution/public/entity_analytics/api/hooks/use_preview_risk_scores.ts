@@ -9,9 +9,13 @@ import dateMath from '@kbn/datemath';
 import { fetchRiskScorePreview } from '../api';
 import type { RiskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 
-export const useRiskScorePreview = ({ range, filter }: RiskScorePreviewRequestSchema) => {
+export const useRiskScorePreview = ({
+  data_view_id: dataViewId,
+  range,
+  filter,
+}: RiskScorePreviewRequestSchema) => {
   return useQuery(['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter], async ({ signal }) => {
-    const params: RiskScorePreviewRequestSchema = {};
+    const params: RiskScorePreviewRequestSchema = { data_view_id: dataViewId };
 
     if (range) {
       const startTime = dateMath.parse(range.start)?.utc().toISOString();

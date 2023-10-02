@@ -208,14 +208,6 @@ describe('SearchBar', () => {
 });
 
 describe('filterAndConvertFields', () => {
-  it('prepends the fieldPrefix if passed and hides some fields ', async () => {
-    expect(filterAndConvertFields(fields, '.test-index', 'test-index')).toEqual({
-      'test-index.api_key': { esTypes: ['keyword'], name: 'test-index.api_key', type: 'string' },
-      'test-index.name': { esTypes: ['keyword'], name: 'test-index.name', type: 'string' },
-      'test-index.version': { esTypes: ['keyword'], name: 'test-index.version', type: 'string' },
-    });
-  });
-
   it('leaves the fields names unchanged and does not hide any fields if fieldPrefix is not passed', async () => {
     expect(filterAndConvertFields(fields, '.test-index')).toEqual({
       _id: { esTypes: ['_id'], name: '_id', type: 'string' },

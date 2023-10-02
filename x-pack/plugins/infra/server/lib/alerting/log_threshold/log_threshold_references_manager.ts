@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { logViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { RuleParams, ruleParamsRT } from '../../../../common/alerting/logs/log_threshold';

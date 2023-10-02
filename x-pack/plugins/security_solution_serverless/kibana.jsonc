@@ -14,15 +14,19 @@
     "requiredPlugins": [
       "kibanaReact",
       "management",
-      "ml",
       "security",
       "securitySolution",
       "serverless",
-      "taskManager"
+      "taskManager",
+      "cloud",
+      "fleet"
     ],
     "optionalPlugins": [
       "securitySolutionEss"
     ],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "usageCollection"
+    ]
   }
 }

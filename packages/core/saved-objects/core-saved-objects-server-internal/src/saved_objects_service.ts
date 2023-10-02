@@ -15,7 +15,10 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
@@ -54,12 +57,13 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
-import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
+import { getAllIndices } from './utils';
 
 /**
  * @internal
@@ -199,7 +203,6 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
-      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -223,7 +226,8 @@ export class SavedObjectsService
       elasticsearch.client.asInternalUser,
       docLinks,
       waitForMigrationCompletion,
-      node
+      node,
+      elasticsearch.getCapabilities()
     );
 
     this.migrator$.next(migrator);
@@ -322,6 +326,8 @@ export class SavedObjectsService
       clientProvider.setClientFactory(clientFactory);
     }
 
+    const allIndices = getAllIndices({ registry: this.typeRegistry });
+
     this.started = true;
 
     return {
@@ -357,7 +363,7 @@ export class SavedObjectsService
         });
         return [...indices];
       },
-      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
+      getAllIndices: () => [...allIndices],
     };
   }
 
@@ -368,7 +374,8 @@ export class SavedObjectsService
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
     waitForMigrationCompletion: boolean,
-    nodeInfo: NodeInfo
+    nodeInfo: NodeInfo,
+    esCapabilities: ElasticsearchCapabilities
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -381,6 +388,7 @@ export class SavedObjectsService
       docLinks,
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
+      esCapabilities,
     });
   }
 }

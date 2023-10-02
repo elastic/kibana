@@ -36,7 +36,6 @@ filters.ids = {
   __template: {
     values: ['ID'],
   },
-  type: '{type}',
   values: [''],
 };
 
@@ -175,7 +174,6 @@ filters.geo_shape = {
     indexed_shape: {
       id: '',
       index: '{index}',
-      type: '{type}',
       shape_field_name: 'shape',
     },
     relation: {
@@ -189,7 +187,7 @@ filters.has_child = {
     type: 'TYPE',
     filter: {},
   },
-  type: '{type}',
+  type: '',
   query: {},
   filter: {},
   _scope: '',
@@ -202,7 +200,7 @@ filters.has_parent = {
     parent_type: 'TYPE',
     filter: {},
   },
-  parent_type: '{type}',
+  parent_type: '',
   query: {},
   filter: {},
   _scope: '',

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const logRate: FormulaConfig = {
-  label: 'Log Rate',
+export const logRate: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.logRate', {
+    defaultMessage: 'Log Rate',
+  }),
   value: 'differences(cumulative_sum(count()))',
   format: {
     id: 'number',

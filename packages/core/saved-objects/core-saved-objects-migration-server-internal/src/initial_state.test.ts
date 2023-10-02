@@ -17,6 +17,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { createInitialState, type CreateInitialStateParams } from './initial_state';
 import * as getOutdatedDocumentsQueryModule from './get_outdated_documents_query';
 import { getOutdatedDocumentsQuery } from './get_outdated_documents_query';
@@ -64,6 +65,7 @@ describe('createInitialState', () => {
       typeRegistry,
       docLinks,
       logger,
+      esCapabilities: elasticsearchServiceMock.createCapabilities(),
     };
   });
 
@@ -82,6 +84,9 @@ describe('createInitialState', () => {
         "currentAlias": ".kibana_task_manager",
         "discardCorruptObjects": false,
         "discardUnknownObjects": false,
+        "esCapabilities": Object {
+          "serverless": false,
+        },
         "excludeFromUpgradeFilterHooks": Object {},
         "excludeOnUpgradeQuery": Object {
           "bool": Object {

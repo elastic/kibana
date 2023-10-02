@@ -28,6 +28,7 @@ export const registerTranslationsRoute = (router: IRouter, locale: string) => {
         }),
       },
       options: {
+        access: 'public',
         authRequired: false,
       },
     },

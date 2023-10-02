@@ -160,7 +160,7 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downCenter"
-      panelClassName="euiFilterGroup__popoverPanel"
+      panelProps={{ css: { width: euiTheme.base * 18 } }}
     >
       <>
         <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>

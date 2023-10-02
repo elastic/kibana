@@ -8,10 +8,8 @@
 export const mockMlInferenceValues: any = {
   addInferencePipelineModal: {
     configuration: {
-      destinationField: '',
       modelID: '',
       pipelineName: '',
-      sourceField: '',
     },
     indexName: '',
     step: 0,

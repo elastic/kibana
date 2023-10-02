@@ -23,10 +23,13 @@ const LazyAddPanelFlyout = React.lazy(async () => {
 export const openAddPanelFlyout = ({
   container,
   onAddPanel,
+  onClose,
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
+  onClose?: () => void;
 }): OverlayRef => {
+  // send the overlay ref to the root embeddable if it is capable of tracking overlays
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
@@ -37,7 +40,12 @@ export const openAddPanelFlyout = ({
     {
       'data-test-subj': 'dashboardAddPanel',
       ownFocus: true,
+      onClose: (overlayRef) => {
+        if (onClose) onClose();
+        overlayRef.close();
+      },
     }
   );
+
   return flyoutSession;
 };

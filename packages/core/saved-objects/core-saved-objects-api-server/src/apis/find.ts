@@ -56,9 +56,25 @@ export interface SavedObjectsFindOptions {
   /** sort order, ascending or descending */
   sortOrder?: SortOrder;
   /**
-   * An array of fields to include in the results
+   * An array of attributes to fetch and include in the results. If unspecified, all attributes will be fetched.
+   *
+   * The main purpose of this option is to avoid fetching unnecessary heavy fields (e.g blobs) when searching for
+   * savedObjects, for performance purposes.
+   *
+   * Defaults to `undefined` (fetching all fields).
+   *
    * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
+   * ```ts
+   * SavedObjects.find({type: 'dashboard', fields: ['name', 'description']})
+   * ```
+   *
+   * @remarks When this option is specified, the savedObjects returned from the API will not
+   *          go through the migration process (as we can't migrate partial documents).
+   *          For this reason, all fields provided to this option should already be present
+   *          in the prior model version of the document's SO type.
+   *          Otherwise, it may lead to inconsistencies during hybrid version cohabitation
+   *          (e.g during an upgrade in serverless) where newly introduced / backfilled fields
+   *          may not necessarily appear in the documents returned from the API when the option is used.
    */
   fields?: string[];
   /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */

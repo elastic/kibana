@@ -12,9 +12,14 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEditMonitorLocator } from './use_edit_monitor_locator';
-import { ConfigKey, DataStream } from '../../../../common/runtime_types';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
 
+enum DataStream {
+  HTTP = 'http',
+  TCP = 'tcp',
+  ICMP = 'icmp',
+  BROWSER = 'browser',
+}
 /**
  * Exports Synthetics-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -37,7 +42,12 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
     )?.vars;
 
-    const configId: string = vars?.[ConfigKey.CONFIG_ID]?.value as DataStream;
+    let configId: string = '';
+    try {
+      configId = JSON.parse(vars?.processors.value)[0].add_fields.fields.config_id;
+    } catch (e) {
+      // ignore
+    }
 
     const url = useEditMonitorLocator({ configId, locators });
 

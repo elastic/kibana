@@ -8,7 +8,7 @@
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-export const fetchStats = async (
+export const fetchStats = (
   client: IScopedClusterClient,
   indexPattern: string
 ): Promise<IndicesStatsResponse> =>

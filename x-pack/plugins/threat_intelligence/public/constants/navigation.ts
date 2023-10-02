@@ -21,7 +21,7 @@ export const threatIntelligencePages: Record<TIPage, TIPageProperties> = {
     oldNavigationName: INDICATORS,
     newNavigationName: INTELLIGENCE,
     path: `${THREAT_INTELLIGENCE_BASE_PATH}/indicators`,
-    id: 'threat_intelligence-indicators',
+    id: 'threat_intelligence',
     description: DESCRIPTION,
     globalSearchKeywords: [INTELLIGENCE],
     keywords: [INTELLIGENCE],

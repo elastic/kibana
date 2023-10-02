@@ -15,12 +15,12 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
-  DashboardCollectorData,
 } from './dashboard_telemetry';
 import { injectReferences } from '../../common';
 import { DashboardAttributesAndReferences } from '../../common/types';
@@ -31,11 +31,6 @@ import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_m
 // dashboards will only occur once per day
 const TELEMETRY_TASK_TYPE = 'dashboard_telemetry';
 export const TASK_ID = `Dashboard-${TELEMETRY_TASK_TYPE}`;
-
-export interface DashboardTelemetryTaskState {
-  runs: number;
-  telemetry: DashboardCollectorData;
-}
 
 export function initializeDashboardTelemetryTask(
   logger: Logger,
@@ -60,6 +55,7 @@ function registerDashboardTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Dashboard telemetry collection task',
       timeout: '2m',
+      stateSchemaByVersion,
       createTaskRunner: dashboardTaskRunner(logger, core, embeddable),
     },
   });
@@ -70,7 +66,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
     return await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      state: emptyState,
       params: {},
     });
   } catch (e) {
@@ -80,7 +76,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable: EmbeddableSetup) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
 
     const getEsClient = async () => {
       const [coreStart] = await core.getStartServices();
@@ -172,11 +168,12 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             );
           }
 
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            telemetry: dashboardData,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              telemetry: dashboardData,
-            },
+            state: updatedState,
             runAt: getNextMidnight(),
           };
         } catch (e) {

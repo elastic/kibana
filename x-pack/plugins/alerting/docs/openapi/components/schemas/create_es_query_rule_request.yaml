@@ -20,10 +20,7 @@ properties:
   notify_when:
     $ref: 'notify_when.yaml'
   params:
-    type: object
-    description: The parameters for an Elasticsearch query rule.
-    # TO-DO: Add the parameter details for this rule.
-    additionalProperties: true
+    $ref: 'params_es_query_rule.yaml'
   rule_type_id:
     type: string
     description: The ID of the rule type that you want to call when the rule is scheduled to run.

@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "cases",
-      "description": "Case APIs enable you to open and track issues."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "cases",
+      "description": "Case APIs enable you to open and track issues."
     }
   ],
   "paths": {
@@ -258,6 +266,7 @@
                   "properties": {
                     "cases": {
                       "type": "array",
+                      "maxItems": 10000,
                       "items": {
                         "$ref": "#/components/schemas/case_response_properties"
                       }
@@ -337,6 +346,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -946,6 +956,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -1086,6 +1097,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "string"
                   }
@@ -1711,6 +1723,7 @@
                     },
                     "userActions": {
                       "type": "array",
+                      "maxItems": 10000,
                       "items": {
                         "$ref": "#/components/schemas/user_actions_find_response_properties"
                       }
@@ -3977,7 +3990,12 @@
           "type": "string",
           "enum": [
             "createdAt",
-            "updatedAt"
+            "updatedAt",
+            "closedAt",
+            "title",
+            "category",
+            "status",
+            "severity"
           ],
           "default": "createdAt"
         },
@@ -4144,6 +4162,7 @@
       "assignees": {
         "type": "array",
         "description": "An array containing users that are assigned to the case.",
+        "maxItems": 10,
         "nullable": true,
         "items": {
           "type": "object",
@@ -5056,6 +5075,7 @@
             "title": "Case response properties for comments",
             "description": "An array of comment objects for the case.",
             "type": "array",
+            "maxItems": 10000,
             "items": {
               "discriminator": {
                 "propertyName": "type"
@@ -5286,31 +5306,8 @@
         "type": "string",
         "description": "The fields to perform the `simple_query_string` parsed query against.",
         "enum": [
-          "closed_by.username",
-          "closed_by.full_name",
-          "closed_by.email",
-          "closed_by.profile_uid",
-          "created_by.username",
-          "created_by.full_name",
-          "created_by.email",
-          "created_by.profile_uid",
           "description",
-          "connector.name",
-          "connector.type",
-          "external_service.pushed_by.username",
-          "external_service.pushed_by.full_name",
-          "external_service.pushed_by.email",
-          "external_service.pushed_by.profile_uid",
-          "external_service.connector_name",
-          "external_service.external_id",
-          "external_service.external_title",
-          "external_service.external_url",
-          "title",
-          "title.keyword",
-          "updated_by.username",
-          "updated_by.full_name",
-          "updated_by.email",
-          "updated_by.profile_uid"
+          "title"
         ]
       },
       "closure_types": {
@@ -5474,7 +5471,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
         ],
         "x-technical-preview": true,
@@ -5491,7 +5489,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
         ],
         "x-technical-preview": true
@@ -7151,13 +7150,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }

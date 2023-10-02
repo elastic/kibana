@@ -42,6 +42,7 @@ export const NAME = 'some name';
 // TODO: Once this mock is available within packages, use it instead, https://github.com/elastic/kibana/issues/100715
 // import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 export const getListResponseMock = (): ListSchema => ({
+  '@timestamp': DATE_NOW,
   _version: undefined,
   created_at: DATE_NOW,
   created_by: USER,

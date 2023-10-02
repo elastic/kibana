@@ -6,6 +6,7 @@
  */
 jest.mock('axios', () => ({
   create: jest.fn(),
+  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
 }));
 
 import axios from 'axios';
@@ -90,6 +91,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -180,6 +182,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -269,6 +272,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },

@@ -1086,6 +1086,23 @@
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-common.ApplicationStart.currentLocation$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentLocation$",
+            "description": [
+              "\nAn observable that emits the current path#hash and each subsequent update using the global history instance"
+            ],
+            "signature": [
+              "Observable",
+              "<string>"
+            ],
+            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1777,7 +1794,15 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; } & ",
+          " | undefined; searchable?: boolean | undefined; category?: ",
+          {
+            "pluginId": "@kbn/core-application-common",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationCommonPluginApi",
+            "section": "def-common.AppCategory",
+            "text": "AppCategory"
+          },
+          " | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2014,7 +2039,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; navLinkStatus?: ",
+          " | undefined; navLinkStatus?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2022,7 +2047,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; searchable?: boolean | undefined; tooltip?: string | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",

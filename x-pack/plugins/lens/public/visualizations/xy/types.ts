@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import type { PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
   LegendConfig,
   AxisExtentConfig,
@@ -21,10 +21,7 @@ import type {
   FillStyle,
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
-import {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-} from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,
@@ -106,6 +103,7 @@ export interface XYDataLayerConfig {
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
+  colorMapping?: ColorMapping.Config;
 }
 
 export interface XYReferenceLineLayerConfig {

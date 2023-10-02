@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -189,7 +189,7 @@ export const percentileRanksOperation: OperationDefinition<
       });
     const onChange = useCallback(
       (value) => {
-        if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
+        if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }
         paramEditorUpdater({
@@ -209,7 +209,7 @@ export const percentileRanksOperation: OperationDefinition<
           },
         } as PercentileRanksIndexPatternColumn);
       },
-      [paramEditorUpdater, currentColumn, indexPattern]
+      [isInline, currentColumn, paramEditorUpdater, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -220,7 +220,7 @@ export const percentileRanksOperation: OperationDefinition<
       },
       { allowFalsyValue: true }
     );
-    const inputValueIsValid = isValidNumber(inputValue);
+    const inputValueIsValid = isValidNumber(inputValue, isInline);
 
     const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
       (e) => {
@@ -250,7 +250,7 @@ export const percentileRanksOperation: OperationDefinition<
           compressed
           value={inputValue ?? ''}
           onChange={handleInputChange}
-          step="any"
+          step={isInline ? 1 : 'any'}
           aria-label={percentileRanksLabel}
         />
       </FormRow>

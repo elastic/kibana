@@ -17,14 +17,13 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
-import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import {
   MetricsExplorerChartOptions,
@@ -65,8 +64,13 @@ export const MetricsExplorerChart = ({
   timeRange,
   onTimeChange,
 }: Props) => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
-  const isDarkMode = useIsDarkMode();
+  const {
+    services: {
+      application: { capabilities: uiCapabilities },
+    },
+  } = useKibanaContextForPlugin();
+
+  const chartTheme = useTimelineChartTheme();
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const handleTimeChange: BrushEndListener = ({ x }) => {
@@ -160,7 +164,7 @@ export const MetricsExplorerChart = ({
               domain={domain}
             />
             <Tooltip {...tooltipProps} />
-            <Settings onBrushEnd={handleTimeChange} theme={getChartTheme(isDarkMode)} />
+            <Settings onBrushEnd={handleTimeChange} baseTheme={chartTheme.baseTheme} />
           </Chart>
         ) : options.metrics.length > 0 ? (
           <MetricsExplorerEmptyChart />

@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiPageBody, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -17,9 +17,10 @@ export interface PageProps {
   nextStepPath: string;
 }
 
+const RESULTS_PER_PAGE = 20;
+
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
-  const RESULTS_PER_PAGE = 20;
-  const { uiSettings, http, savedObjectsManagement } = useMlKibana().services;
+  const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
   const onObjectSelection = (id: string, type: string) => {
@@ -39,7 +40,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             defaultMessage="Select data view or saved search"
           />
         </MlPageHeader>
-        <EuiPageContent hasShadow={false} hasBorder={true}>
+        <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
@@ -67,17 +68,15 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
             services={{
+              contentClient: contentManagement.client,
               uiSettings,
-              http,
-              savedObjectsManagement,
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );

@@ -21,19 +21,19 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
-import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import {
   StateSetter,
   Visualization,
-  DragDropOperation,
   isOperation,
   LayerAction,
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
   AddLayerFunction,
   RegisterLibraryAnnotationGroupFunction,
+  DragDropOperation,
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -47,7 +47,6 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
-import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 
@@ -65,6 +64,11 @@ export function LayerPanel(
     addLayer: AddLayerFunction;
     registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
     updateVisualization: StateSetter<unknown>;
+    onDropToDimension: (payload: {
+      source: DragDropIdentifier;
+      target: DragDropOperation;
+      dropType: DropType;
+    }) => void;
     updateDatasource: (
       datasourceId: string | undefined,
       newState: unknown,
@@ -91,6 +95,7 @@ export function LayerPanel(
     indexPatternService?: IndexPatternServiceAPI;
     getUserMessages?: UserMessagesGetter;
     displayLayerSettings: boolean;
+    setIsInlineFlyoutFooterVisible?: (status: boolean) => void;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -118,6 +123,7 @@ export function LayerPanel(
     visualizationState,
     onChangeIndexPattern,
     core,
+    onDropToDimension,
   } = props;
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
@@ -129,6 +135,12 @@ export function LayerPanel(
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
   }, [activeVisualization.id]);
+
+  useEffect(() => {
+    // is undefined when the dimension panel is closed
+    const activeDimensionId = activeDimension.activeId;
+    props?.setIsInlineFlyoutFooterVisible?.(!Boolean(activeDimensionId));
+  }, [activeDimension.activeId, activeVisualization.id, props]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
@@ -191,8 +203,8 @@ export function LayerPanel(
     registerNewRef: registerNewButtonRef,
   } = useFocusUpdate(allAccessors);
 
-  const onDrop = useMemo(() => {
-    return (source: DragDropIdentifier, target: DragDropIdentifier, dropType?: DropType) => {
+  const onDrop = useCallback(
+    (source: DragDropIdentifier, target: DragDropIdentifier, dropType?: DropType) => {
       if (!dropType) {
         return;
       }
@@ -206,65 +218,10 @@ export function LayerPanel(
         setNextFocusedButtonId(target.columnId);
       }
 
-      let hasDropSucceeded = true;
-      if (layerDatasource) {
-        hasDropSucceeded = Boolean(
-          layerDatasource?.onDrop({
-            state: layerDatasourceState,
-            setState: (newState: unknown) => {
-              // we don't sync linked dimension here because that would trigger an onDrop routine within an onDrop routine
-              updateDatasource(datasourceId, newState, true);
-            },
-            source,
-            target: {
-              ...(target as unknown as DragDropOperation),
-              filterOperations:
-                dimensionGroups.find(({ groupId: gId }) => gId === target.groupId)
-                  ?.filterOperations || Boolean,
-            },
-            targetLayerDimensionGroups: dimensionGroups,
-            dropType,
-            indexPatterns: framePublicAPI.dataViews.indexPatterns,
-          })
-        );
-      }
-      if (hasDropSucceeded) {
-        activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
-
-        updateVisualization(
-          (activeVisualization.onDrop || onDropForVisualization)?.(
-            {
-              prevState: props.visualizationState,
-              frame: framePublicAPI,
-              target,
-              source,
-              dropType,
-              group: dimensionGroups.find(({ groupId: gId }) => gId === target.groupId),
-            },
-            activeVisualization
-          )
-        );
-
-        if (isOperation(source) && shouldRemoveSource(source, dropType)) {
-          props.onRemoveDimension({
-            columnId: source.columnId,
-            layerId: source.layerId,
-          });
-        }
-      }
-    };
-  }, [
-    layerDatasource,
-    setNextFocusedButtonId,
-    layerDatasourceState,
-    dimensionGroups,
-    framePublicAPI,
-    updateDatasource,
-    datasourceId,
-    activeVisualization,
-    updateVisualization,
-    props,
-  ]);
+      onDropToDimension({ source, target, dropType });
+    },
+    [setNextFocusedButtonId, onDropToDimension]
+  );
 
   const isDimensionPanelOpen = Boolean(activeId);
 
@@ -567,6 +524,7 @@ export function LayerPanel(
                               groupId: group.groupId,
                               filterOperations: group.filterOperations,
                               prioritizedOperation: group.prioritizedOperation,
+                              isMetricDimension: group?.isMetricDimension,
                               indexPatternId: layerDatasource
                                 ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
                                 : activeVisualization.getUsedDataView?.(
@@ -717,6 +675,7 @@ export function LayerPanel(
             setPanelSettingsOpen(false);
             return true;
           }}
+          isInlineEditing={Boolean(props?.setIsInlineFlyoutFooterVisible)}
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
@@ -785,6 +744,7 @@ export function LayerPanel(
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
+        isInlineEditing={Boolean(props?.setIsInlineFlyoutFooterVisible)}
         handleClose={() => {
           if (layerDatasource) {
             if (layerDatasource.updateStateOnCloseDimension) {
