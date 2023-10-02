@@ -38,13 +38,6 @@ export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const INFORMATION_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.informationAriaLabel',
-  {
-    defaultMessage: 'Information',
-  }
-);
-
 export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent',
   {
@@ -99,17 +92,17 @@ export const ENRICHED_DATA = i18n.translate(
   }
 );
 
-export const CURRENT_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskClassification', {
-    defaultMessage: 'Current {riskEntity} risk classification',
+export const CURRENT_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskLevel', {
+    defaultMessage: 'Current {riskEntity} risk level',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
   });
 
-export const ORIGINAL_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskClassification', {
-    defaultMessage: 'Original {riskEntity} risk classification',
+export const ORIGINAL_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskLevel', {
+    defaultMessage: 'Original {riskEntity} risk level',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
