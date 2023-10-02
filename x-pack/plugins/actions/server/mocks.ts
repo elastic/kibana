@@ -48,6 +48,7 @@ const createStartMock = () => {
       .mockReturnValue(actionsAuthorizationMock.create()),
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
+    isSystemActionConnector: jest.fn(),
   };
   return mock;
 };
