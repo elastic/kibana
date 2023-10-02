@@ -112,7 +112,7 @@ Array [
       [Function],
       [Function],
     ],
-    "display": <DataTableColumnHeader
+    "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
       dataView={
@@ -395,7 +395,7 @@ Array [
     "cellActions": Array [
       [Function],
     ],
-    "display": <DataTableColumnHeader
+    "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
       dataView={
@@ -685,7 +685,7 @@ Array [
       [Function],
       [Function],
     ],
-    "display": <DataTableColumnHeader
+    "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
       columnTypes={
@@ -1001,7 +1001,7 @@ Array [
     "cellActions": Array [
       [Function],
     ],
-    "display": <DataTableColumnHeader
+    "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
       columnTypes={
