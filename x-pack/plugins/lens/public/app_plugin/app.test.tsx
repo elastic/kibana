@@ -930,6 +930,38 @@ describe('Lens App', () => {
         instance.update();
         expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
       });
+
+      it('enables Save Query UI when user has app-level permissions', async () => {
+        const services = makeDefaultServicesForApp();
+        services.application = {
+          ...services.application,
+          capabilities: {
+            ...services.application.capabilities,
+            visualize: { saveQuery: true },
+          },
+        };
+        const { instance } = await mountWith({ services });
+        await act(async () => {
+          const topNavMenu = instance.find(services.navigation.ui.AggregateQueryTopNavMenu);
+          expect(topNavMenu.props().saveQueryMenuVisibility).toBe('allowed_by_app_privilege');
+        });
+      });
+
+      it('checks global save query permission when user does not have app-level permissions', async () => {
+        const services = makeDefaultServicesForApp();
+        services.application = {
+          ...services.application,
+          capabilities: {
+            ...services.application.capabilities,
+            visualize: { saveQuery: false },
+          },
+        };
+        const { instance } = await mountWith({ services });
+        await act(async () => {
+          const topNavMenu = instance.find(services.navigation.ui.AggregateQueryTopNavMenu);
+          expect(topNavMenu.props().saveQueryMenuVisibility).toBe('globally_managed');
+        });
+      });
     });
   });
 
@@ -1187,7 +1219,7 @@ describe('Lens App', () => {
       };
       await mountWith({ services });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({ showSaveQuery: false }),
+        expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
         {}
       );
     });
@@ -1196,7 +1228,7 @@ describe('Lens App', () => {
       const { instance, services } = await mountWith({});
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          showSaveQuery: true,
+          saveQueryMenuVisibility: 'allowed_by_app_privilege',
           savedQuery: undefined,
           onSaved: expect.any(Function),
           onSavedQueryUpdated: expect.any(Function),

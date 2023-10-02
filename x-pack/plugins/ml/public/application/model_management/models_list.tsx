@@ -63,7 +63,7 @@ import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../contexts/ml';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -105,7 +105,7 @@ export const ModelsList: FC<Props> = ({
     },
   } = useMlKibana();
 
-  const [isNLPEnabled] = usePermissionCheck(['isNLPEnabled']);
+  const { isNLPEnabled } = useEnabledFeatures();
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 

@@ -16,7 +16,7 @@ export function registerSearchLinks(
   appUpdater: BehaviorSubject<AppUpdater>,
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
-  isServerless: boolean
+  showMLNavMenu: boolean
 ) {
   appUpdater.next(() => ({
     keywords: [
@@ -24,6 +24,6 @@ export function registerSearchLinks(
         defaultMessage: 'ML',
       }),
     ],
-    deepLinks: getDeepLinks(isFullLicense, mlCapabilities, isServerless),
+    deepLinks: getDeepLinks(isFullLicense, mlCapabilities, showMLNavMenu),
   }));
 }

@@ -37,8 +37,8 @@ import {
   useNotifications,
   useNavigateToPath,
   useMlKibana,
-  useIsServerless,
 } from '../../../../contexts/kibana';
+import { useEnabledFeatures } from '../../../../contexts/ml';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -55,9 +55,9 @@ interface Props {
   refreshJobsCallback: () => void;
 }
 
-function getListItemsFactory(isServerless: boolean) {
+function getListItemsFactory(showLicenseInfo: boolean) {
   return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
-    if (isServerless) {
+    if (showLicenseInfo === false) {
       delete details.license_level;
     }
 
@@ -94,8 +94,8 @@ export const Controls: FC<Props> = React.memo(
     const canCreateDataFrameAnalytics: boolean = usePermissionCheck('canCreateDataFrameAnalytics');
     const canDeleteDataFrameAnalytics: boolean = usePermissionCheck('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
-    const isServerless = useIsServerless();
-    const getListItems = useMemo(() => getListItemsFactory(isServerless), [isServerless]);
+    const { showLicenseInfo } = useEnabledFeatures();
+    const getListItems = useMemo(() => getListItemsFactory(showLicenseInfo), [showLicenseInfo]);
 
     const {
       closeDeleteJobCheckModal,
