@@ -7,36 +7,56 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { GatedFormDataApiLogicActions, UpdateGatedFormDataApiLogic } from './gated_form_api_logic';
+
 interface WorkplaceSearchGateValues {
-  additionalFeedback?: string;
+  additionalFeedback: string | null;
   feature: string;
-  featuresOther?: string;
-  isFormSubmitted: boolean;
-  participateInUXLabs?: string;
+  featuresOther: string | null;
+  participateInUXLabs: boolean | null;
 }
 interface WorkplaceSearchGateActions {
+  formSubmitRequest: () => void;
   setAdditionalFeedback(additionalFeedback: string): { additionalFeedback: string };
   setFeature(feature: string): { feature: string };
   setFeaturesOther(featuresOther: string): { featuresOther: string };
-  setFormSubmitted(): void;
-  setParticipateInUXLabs(participateInUXLabs: string): { participateInUXLabs: boolean };
+  setParticipateInUXLabs(participateInUXLabs: boolean): {
+    participateInUXLabs: boolean;
+  };
+  submitGatedFormDataRequest: GatedFormDataApiLogicActions['makeRequest'];
 }
 export const WorkplaceSearchGateLogic = kea<
   MakeLogicType<WorkplaceSearchGateValues, WorkplaceSearchGateActions>
 >({
   actions: {
+    formSubmitRequest: true,
     setAdditionalFeedback: (additionalFeedback) => ({ additionalFeedback }),
     setFeature: (feature) => ({ feature }),
     setFeaturesOther: (featuresOther) => ({ featuresOther }),
-    setFormSubmitted: () => null,
     setParticipateInUXLabs: (participateInUXLabs) => ({ participateInUXLabs }),
   },
+  connect: {
+    actions: [UpdateGatedFormDataApiLogic, ['makeRequest as submitGatedFormDataRequest']],
+  },
+  listeners: ({ actions, values }) => ({
+    formSubmitRequest: () => {
+      if (values.feature) {
+        actions.submitGatedFormDataRequest({
+          additionalFeedback: values?.additionalFeedback ? values?.additionalFeedback : null,
+          feature: values.feature,
+          featuresOther: values?.featuresOther ? values?.featuresOther : null,
+          participateInUXLabs: values?.participateInUXLabs,
+        });
+      }
+    },
+  }),
   path: ['enterprise_search', 'workplace_search', 'gate_form'],
-  reducers: {
+
+  reducers: ({}) => ({
     additionalFeedback: [
-      '',
+      null,
       {
-        setAdditionalFeedback: (_, { additionalFeedback }) => additionalFeedback,
+        setAdditionalFeedback: (_, { additionalFeedback }) => additionalFeedback ?? undefined,
       },
     ],
     feature: [
@@ -46,22 +66,16 @@ export const WorkplaceSearchGateLogic = kea<
       },
     ],
     featuresOther: [
-      '',
+      null,
       {
         setFeaturesOther: (_, { featuresOther }) => featuresOther,
       },
     ],
-    isFormSubmitted: [
-      false,
-      {
-        setFormSubmitted: () => true,
-      },
-    ],
     participateInUXLabs: [
-      '',
+      null,
       {
         setParticipateInUXLabs: (_, { participateInUXLabs }) => participateInUXLabs,
       },
     ],
-  },
+  }),
 });

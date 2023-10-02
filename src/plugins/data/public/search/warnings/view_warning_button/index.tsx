@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { handleWarnings } from './handle_warnings';
+import React from 'react';
+import type { Props } from './view_warning_button';
+
+const Fallback = () => <div />;
+
+const LazyViewWarningButton = React.lazy(() => import('./view_warning_button'));
+export const ViewWarningButton = (props: Props) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyViewWarningButton {...props} />
+  </React.Suspense>
+);
