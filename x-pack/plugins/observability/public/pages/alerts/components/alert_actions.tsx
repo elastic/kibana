@@ -211,7 +211,7 @@ export function AlertActions({
         </EuiContextMenuItem>
       ),
     ],
-    ...(userCasesPermissions.update && isActiveAlert
+    ...(isActiveAlert
       ? [
           <EuiContextMenuItem
             data-test-subj="untrackAlert"
