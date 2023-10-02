@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SyntheticsMonitorWithSecretsAttributes } from '../../common/runtime_types';
 import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType } from '../../common/types/saved_objects';
-import { ConfigKey, LegacyConfigKey, secretKeys } from '../../common/constants/monitor_management';
+import { LegacyConfigKey, secretKeys } from '../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
 
 const legacyConfigKeys = Object.values(LegacyConfigKey);
