@@ -64,7 +64,7 @@ export const sampleMetricFormulaAttribute = {
                 filter: {
                   language: 'kuery',
                   query:
-                    '(summary.final_attempt: true or ( not summary.final_attempt: * and summary:*)) AND (summary.down > 0)',
+                    '(summary.final_attempt: true or (not summary.final_attempt: * and summary:*)) AND (summary.down > 0)',
                 },
                 isBucketed: false,
                 label: 'Part of Availability',
