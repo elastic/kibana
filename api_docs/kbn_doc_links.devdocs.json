@@ -974,6 +974,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.esql",
+            "type": "Object",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "{ readonly statsBy: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.telemetry",
             "type": "Object",
             "tags": [],

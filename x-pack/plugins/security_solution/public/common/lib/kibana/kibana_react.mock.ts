@@ -47,12 +47,11 @@ import { mockApm } from '../apm/service.mock';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { of } from 'rxjs';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { contractStartServicesMock } from '../../../mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -125,6 +124,7 @@ export const createStartServicesMock = (
 
   return {
     ...core,
+    ...contractStartServicesMock,
     apm,
     cases,
     unifiedSearch,
@@ -217,8 +217,6 @@ export const createStartServicesMock = (
       ...cloud,
       isCloudEnabled: false,
     },
-    isSidebarEnabled$: of(true),
-    upselling: new UpsellingService(),
     customDataService,
     uiActions: uiActionsPluginMock.createStartContract(),
     savedSearch: savedSearchPluginMock.createStartContract(),
