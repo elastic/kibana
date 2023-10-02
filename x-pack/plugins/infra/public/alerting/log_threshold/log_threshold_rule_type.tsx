@@ -72,5 +72,6 @@ export function createLogThresholdRuleType(
     defaultRecoveryMessage: logThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
     format: createRuleFormatter(logsLocator),
+    priority: 30,
   };
 }

@@ -29,11 +29,13 @@ let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
 beforeEach(async () => {
   container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 
