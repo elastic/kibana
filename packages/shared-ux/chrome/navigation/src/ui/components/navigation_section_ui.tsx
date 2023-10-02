@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
-import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
+import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink } from '../../utils';
 import { PanelContext, usePanel } from './panel';
@@ -24,13 +24,11 @@ const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNode,
   {
     navigateToUrl,
-    basePath,
     openPanel,
     closePanel,
     isSideNavCollapsed,
   }: {
     navigateToUrl: NavigateToUrlFn;
-    basePath: BasePathService;
     openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
     isSideNavCollapsed: boolean;
@@ -84,7 +82,6 @@ const navigationNodeToEuiItem = (
       : item.children?.map((_item) =>
           navigationNodeToEuiItem(_item, {
             navigateToUrl,
-            basePath,
             openPanel,
             closePanel,
             isSideNavCollapsed,
@@ -103,7 +100,7 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const { id, title, icon, isActive } = navNode;
-  const { navigateToUrl, basePath, isSideNavCollapsed } = useServices();
+  const { navigateToUrl, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(!isActive);
   // We want to auto expand the group automatically if the node is active (URL match)
@@ -186,7 +183,6 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
       items={filteredItems.map((item) =>
         navigationNodeToEuiItem(item, {
           navigateToUrl,
-          basePath,
           isSideNavCollapsed,
           openPanel,
           closePanel,
