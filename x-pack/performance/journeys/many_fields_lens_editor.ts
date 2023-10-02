@@ -29,6 +29,5 @@ export const journey = new Journey({
 
     await page.waitForSelector(subj('lnsChartSwitchPopover'));
     await kibanaPage.waitForCharts({ count: 1, timeout: 60000 });
-    
     await kibanaPage.waitForChartsSuggestions(6);
   });

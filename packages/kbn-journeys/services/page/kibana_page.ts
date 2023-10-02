@@ -105,15 +105,10 @@ export class KibanaPage {
   }
 
   async waitForChartsSuggestions(count: number) {
-    await this.page.waitForFunction(
-      function renderCompleted(args: { count: number }) {
-        const renderingItems = Array.from(
-          document.querySelectorAll('button[data-test-subj="lnsSuggestion"]')
-        );
-        return renderingItems.length === args.count;
-      },
-      { count }
-    );
+    await this.retry.waitFor(`rendering of ${count} suggestions is completed`, async () => {
+      const renderingItems = await this.page.$$('button[data-test-subj="lnsSuggestion"]');
+      return renderingItems.length === count;
+    });
   }
 
   async clearInput(locator: string) {
