@@ -1253,15 +1253,15 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx"
           },
           {
             "plugin": "aiops",
@@ -1358,18 +1358,6 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
             "plugin": "infra",
@@ -3220,14 +3208,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/copy_to_dashboard_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/copy_to_dashboard_action.tsx"
           },
           {
             "plugin": "dashboard",

@@ -38,6 +38,7 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,
   textExpansionError: null,
+  elserModelId: '.elser_model_2',
 };
 
 jest.useFakeTimers();

@@ -7340,6 +7340,20 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePackageState.size",
+            "type": "Object",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "{ width?: number | undefined; height?: number | undefined; } | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePackageState.searchSessionId",
             "type": "string",
             "tags": [],

@@ -232,12 +232,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   return (
     <>
       <EuiTitle size="xs">
-        <h4>
+        <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
             defaultMessage="User"
           />
-        </h4>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ExpandablePanel
@@ -253,12 +253,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         data-test-subj={USER_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
-          <h5>
+          <h4>
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.entities.userDetailsInfoTitle"
               defaultMessage="User information"
             />
-          </h5>
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <AnomalyTableProvider
@@ -292,12 +292,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTitle"
                     defaultMessage="Related hosts"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

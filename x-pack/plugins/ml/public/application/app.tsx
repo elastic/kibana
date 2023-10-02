@@ -91,6 +91,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) =>
       embeddable: deps.embeddable,
       maps: deps.maps,
       triggersActionsUi: deps.triggersActionsUi,
+      dataViewEditor: deps.dataViewEditor,
       dataVisualizer: deps.dataVisualizer,
       usageCollection: deps.usageCollection,
       fieldFormats: deps.fieldFormats,

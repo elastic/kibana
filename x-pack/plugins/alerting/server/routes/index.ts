@@ -40,7 +40,7 @@ import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rule
 import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
-import { bulkDeleteRulesRoute } from './bulk_delete_rules';
+import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
 import { bulkDisableRulesRoute } from './bulk_disable_rules';
 import { cloneRuleRoute } from './clone_rule';

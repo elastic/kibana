@@ -92,7 +92,7 @@ export const ModelDeployed = ({
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
                 disabled={isStartButtonDisabled}
                 iconType="playFilled"
-                onClick={() => startTextExpansionModel(undefined)}
+                onClick={() => startTextExpansionModel()}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',

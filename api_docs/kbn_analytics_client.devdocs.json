@@ -663,6 +663,14 @@
                 "path": "packages/core/root/core-root-server-internal/src/server.ts"
               },
               {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.ts"
               },
