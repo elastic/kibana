@@ -12,6 +12,7 @@ import {
   getSizeInBytes,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
+  getTotalPatternSameFamily,
 } from '../helpers';
 import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../types';
 
@@ -62,6 +63,18 @@ export const getTotalIncompatible = (
   // only return the total when at least one `PatternRollup` has results:
   return anyRollupsHaveResults
     ? allRollups.reduce((acc, { results }) => acc + (getTotalPatternIncompatible(results) ?? 0), 0)
+    : undefined;
+};
+
+export const getTotalSameFamily = (
+  patternRollups: Record<string, PatternRollup>
+): number | undefined => {
+  const allRollups = Object.values(patternRollups);
+  const anyRollupsHaveResults = allRollups.some(({ results }) => results != null);
+
+  // only return the total when at least one `PatternRollup` has results:
+  return anyRollupsHaveResults
+    ? allRollups.reduce((acc, { results }) => acc + (getTotalPatternSameFamily(results) ?? 0), 0)
     : undefined;
 };
 
@@ -137,6 +150,7 @@ export const updateResultOnCheckCompleted = ({
         : [];
 
     const incompatible = partitionedFieldMetadata?.incompatible.length;
+    const sameFamily = partitionedFieldMetadata?.sameFamily.length;
 
     return {
       ...patternRollups,
@@ -152,6 +166,7 @@ export const updateResultOnCheckCompleted = ({
             indexName,
             markdownComments,
             pattern,
+            sameFamily,
           },
         },
       },

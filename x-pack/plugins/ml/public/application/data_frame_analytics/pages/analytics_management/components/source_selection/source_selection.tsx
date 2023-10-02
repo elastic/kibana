@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import {
@@ -38,8 +39,8 @@ export const SourceSelection: FC = () => {
   const onSearchSelected = async (
     id: string,
     type: string,
-    fullName: string,
-    savedObject: SavedObjectCommon
+    fullName?: string,
+    savedObject?: SavedObjectCommon
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
@@ -47,7 +48,7 @@ export const SourceSelection: FC = () => {
     // the selection before redirecting and show an error callout instead.
     let dataViewName = '';
 
-    if (type === 'index-pattern') {
+    if (type === 'index-pattern' && savedObject) {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
       try {
@@ -71,7 +72,7 @@ export const SourceSelection: FC = () => {
       }
     }
 
-    if (isCcsIndexPattern(dataViewName)) {
+    if (isCcsIndexPattern(dataViewName) && savedObject) {
       setIsCcsCallOut(true);
       if (type === 'search') {
         setCcsCallOutBodyText(
@@ -157,7 +158,9 @@ export const SourceSelection: FC = () => {
               contentClient: contentManagement.client,
               uiSettings,
             }}
-          />
+          >
+            <CreateDataViewButton onDataViewCreated={onSearchSelected} allowAdHocDataView={true} />
+          </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>
     </div>
