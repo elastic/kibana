@@ -117,6 +117,11 @@ export interface ModelVersionTestKit {
    * The SO repository using the SO type definitions at the `after` versions.
    */
   repositoryAfter: ISavedObjectsRepository;
+  /**
+   * Cleanup function that will delete the test index.
+   * Should be called before calling `testbed.prepareTestKit` again.
+   */
+  tearsDown: () => Promise<void>;
 }
 
 /**

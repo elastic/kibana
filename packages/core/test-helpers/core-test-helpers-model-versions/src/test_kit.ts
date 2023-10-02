@@ -121,10 +121,15 @@ export const prepareModelVersionTestKit = async ({
 
   await runMigrations(secondMigrator);
 
+  const tearsDown = async () => {
+    await esClient.indices.delete({ index: `${kibanaIndex}_*`, allow_no_indices: true });
+  };
+
   return {
     esClient,
     repositoryBefore,
     repositoryAfter,
+    tearsDown,
   };
 };
 

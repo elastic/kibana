@@ -38,6 +38,12 @@ import type { ModelVersionTestBed } from './types';
  *     })
  *   });
  *
+ *   afterEach(async () => {
+ *     if(testkit) {
+ *       await testkit.tearsDown();
+ *     }
+ *   });
+ *
  *   it('can be used to test model version cohabitation', async () => {
  *     // last registered version is `1`
  *     const repositoryV1 = testkit.repositoryBefore;
