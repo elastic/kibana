@@ -10,6 +10,7 @@ import { useSendMessages } from '../../use_send_messages';
 import { ConversationSelector } from '.';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { alertConvo, welcomeConvo } from '../../../mock/conversation';
 // import { useConversation } from '../../use_conversation';
 
 jest.mock('../../use_send_messages');
@@ -32,9 +33,13 @@ describe('Conversation selector', () => {
     });
   });
   it('has a test', () => {
-    const { debug, getByTestId } = render(<ConversationSelector {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
+    const { debug, getByTestId } = render(
+      <TestProviders
+        providerContext={{ getInitialConversations: () => [alertConvo, welcomeConvo] }}
+      >
+        <ConversationSelector {...defaultProps} />
+      </TestProviders>
+    );
     expect(getByTestId('conversation-selector')).toBeInTheDocument();
     debug();
   });
