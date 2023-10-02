@@ -26,7 +26,7 @@ import {
 } from '../../screens/alerts';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');

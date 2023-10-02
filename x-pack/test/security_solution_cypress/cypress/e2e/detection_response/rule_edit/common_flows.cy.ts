@@ -5,69 +5,28 @@
  * 2.0.
  */
 
-import { getExistingRule, getEditedRule } from '../../../objects/rule';
+import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { getExistingRule, getEditedRule, getMitre2, getMitre1 } from '../../../objects/rule';
 
 import {
   ACTIONS_NOTIFY_WHEN_BUTTON,
   ACTIONS_SUMMARY_BUTTON,
 } from '../../../screens/common/rule_actions';
 import {
-  CUSTOM_QUERY_INPUT,
-  DEFINE_INDEX_INPUT,
-  DEFAULT_RISK_SCORE_INPUT,
-  RULE_DESCRIPTION_INPUT,
-  RULE_NAME_INPUT,
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
-  SEVERITY_DROPDOWN,
-  TAGS_CLEAR_BUTTON,
-  TAGS_FIELD,
 } from '../../../screens/create_new_rule';
-import {
-  ABOUT_DETAILS,
-  ABOUT_INVESTIGATION_NOTES,
-  ABOUT_RULE_DESCRIPTION,
-  CUSTOM_QUERY_DETAILS,
-  DEFINITION_DETAILS,
-  INDEX_PATTERNS_DETAILS,
-  INVESTIGATION_NOTES_TOGGLE,
-  RISK_SCORE_DETAILS,
-  RULE_NAME_HEADER,
-  RULE_TYPE_DETAILS,
-  RUNS_EVERY_DETAILS,
-  SCHEDULE_DETAILS,
-  SEVERITY_DETAILS,
-  TAGS_DETAILS,
-  TIMELINE_TEMPLATE_DETAILS,
-} from '../../../screens/rule_details';
-
 import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
-  fillAboutRule,
   goToAboutStepTab,
   goToActionsStepTab,
   goToScheduleStepTab,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
 import { login } from '../../../tasks/login';
-import {
-  expandAdvancedSettings,
-  fillCustomInvestigationFields,
-  fillDescription,
-  fillFalsePositiveExamples,
-  fillNote,
-  fillReferenceUrls,
-  fillRiskScore,
-  fillRuleName,
-  fillRuleTags,
-  fillSeverity,
-  fillThreat,
-  fillThreatSubtechnique,
-  fillThreatTechnique,
-  fillScheduleRule,
-} from '../../../tasks/rule_creation';
+import { expandAdvancedSettings, fillScheduleRule } from '../../../tasks/rule_creation';
 import {
   confirmRuleDetailsAbout,
   confirmRuleDetailsDefinition,
@@ -89,9 +48,27 @@ import {
   editRuleIndices,
   editRuleQuery,
 } from '../../../tasks/rule_edit';
+import { CreateRulePropsRewrites } from '../../../objects/types';
 
 describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
-  const editedRule = getEditedRule();
+  const ruleEdits: CreateRulePropsRewrites<QueryRuleCreateProps> = {
+    index: ['auditbeat*'],
+    query: '*:*',
+    name: 'Edited Rule Name',
+    risk_score: 75,
+    note: 'Updated investigation guide',
+    author: ['New author'],
+    investigation_fields: {
+      field_names: ['agent.name'],
+    },
+    severity: 'medium',
+    description: 'Edited Rule description',
+    tags: [...(getExistingRule().tags || []), 'edited'],
+    references: ['http://example.com/', 'https://example.com/'],
+    false_positives: ['False1', 'False2'],
+    threat: [getMitre1(), getMitre2()],
+  };
+  const editedRule = getExistingRule(ruleEdits);
 
   beforeEach(() => {
     deleteConnectors();
@@ -109,27 +86,27 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     confirmEditDefineStepDetails(existingRule);
 
     cy.log('Update define step fields');
-    editRuleIndices(editedRule.index);
-    editRuleQuery(editedRule.query);
+    editRuleIndices(ruleEdits.index);
+    editRuleQuery(ruleEdits.query);
 
     cy.log('Checking about step populates');
     goToAboutStepTab();
     confirmEditAboutStepDetails(existingRule);
 
     cy.log('Update about step fields');
-    editRuleName(editedRule.name);
-    editRuleDescription(editedRule.description);
-    editSeverity(editedRule.severity);
-    editRiskScore(editedRule.risk_score);
-    editRuleTags(editedRule.tags);
+    editRuleName(ruleEdits.name);
+    editRuleDescription(ruleEdits.description);
+    editSeverity(ruleEdits.severity);
+    editRiskScore(ruleEdits.risk_score);
+    editRuleTags(ruleEdits.tags);
     expandAdvancedSettings();
-    editReferenceUrls(editedRule.references);
-    editFalsePositiveExamples(editedRule.false_positives);
-    editMitre(editedRule.threats);
-    editCustomInvestigationFields(editedRule.investigation_fields);
-    editNote(editedRule.note);
+    editReferenceUrls(ruleEdits.references);
+    editFalsePositiveExamples(ruleEdits.false_positives);
+    editMitre(ruleEdits.threats);
+    editCustomInvestigationFields(ruleEdits.investigation_fields);
+    editNote(ruleEdits.note);
 
-    cy.log('Checking about step populates');
+    cy.log('Checking schedule step populates');
     goToScheduleStepTab();
     const interval = existingRule.interval;
     const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);

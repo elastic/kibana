@@ -35,7 +35,7 @@ export const getIndexPatterns = (): string[] => [
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
-const getMitre1 = (): Threat => ({
+export const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
     name: getMockThreatData().tactic.name,
@@ -64,7 +64,7 @@ const getMitre1 = (): Threat => ({
   ],
 });
 
-const getMitre2 = (): Threat => ({
+export const getMitre2 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
     name: getMockThreatData().tactic.name,
@@ -495,9 +495,21 @@ export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', '
 
 export const getEditedRule = (): QueryRuleCreateProps =>
   getExistingRule({
+    index: ['auditbeat*'],
+    query: '*:*',
+    name: 'Edited Rule Name',
+    risk_score: 75,
+    note: 'Updated investigation guide',
+    author: ['New author'],
+    investigation_fields: {
+      field_names: ['agent.name'],
+    },
     severity: 'medium',
     description: 'Edited Rule description',
     tags: [...(getExistingRule().tags || []), 'edited'],
+    references: ['http://example.com/', 'https://example.com/'],
+    false_positives: ['False1', 'False2'],
+    threat: [getMitre1(), getMitre2()],
   });
 
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
