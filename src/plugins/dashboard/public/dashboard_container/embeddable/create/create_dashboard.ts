@@ -135,8 +135,9 @@ export const initializeDashboard = async ({
   controlGroup?: ControlGroupContainer;
 }) => {
   const {
-    dashboardSessionStorage,
+    dashboardBackup,
     embeddable: { getEmbeddableFactory },
+    dashboardCapabilities: { showWriteControls },
     data: {
       query: queryService,
       search: { session },
@@ -170,23 +171,42 @@ export const initializeDashboard = async ({
   }
 
   // --------------------------------------------------------------------------------------
-  // Gather input from session storage if integration is used.
+  // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
   })();
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
+  const initialViewMode = (() => {
+    if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
+    if (
+      loadDashboardReturn.newDashboardCreated ||
+      dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
+    ) {
+      return ViewMode.EDIT;
+    }
+
+    return dashboardBackup.getViewMode();
+  })();
+
   const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
+
+    ...(initialViewMode ? { viewMode: initialViewMode } : {}),
     ...overrideInput,
   });
+
+  // Back up any view mode passed in explicitly.
+  if (overrideInput?.viewMode) {
+    dashboardBackup.storeViewMode(overrideInput?.viewMode);
+  }
 
   initialInput.executionContext = {
     type: 'dashboard',

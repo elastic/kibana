@@ -42,6 +42,9 @@ export {
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
   profilingUseLegacyFlamegraphAPI,
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
 } from './ui_settings_keys';
 
 export {
