@@ -65,6 +65,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -89,10 +91,12 @@ describe('find()', () => {
       isExportable: true,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     },
   ]);
   beforeEach(() => {
@@ -148,6 +152,7 @@ describe('find()', () => {
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
           isExportable: true,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -155,6 +160,7 @@ describe('find()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -464,10 +470,12 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -482,10 +490,12 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -498,6 +508,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -506,6 +517,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,
@@ -672,10 +684,12 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -690,10 +704,12 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -706,6 +722,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -714,6 +731,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,

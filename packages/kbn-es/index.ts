@@ -12,6 +12,9 @@ export {
   SYSTEM_INDICES_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+  SERVERLESS_NODES,
   getDockerFileMountPath,
+  verifyDockerInstalled,
+  maybeCreateDockerNetwork,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';

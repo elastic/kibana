@@ -121,6 +121,14 @@ const mockRelatedUsersResponse = {
   relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.low }],
   loading: false,
 };
+
+const renderHostDetails = () =>
+  render(
+    <TestProviders>
+      <HostDetails {...defaultProps} />
+    </TestProviders>
+  );
+
 describe('<HostDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,21 +139,13 @@ describe('<HostDetails />', () => {
   });
 
   it('should render host details correctly', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <HostDetails {...defaultProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = renderHostDetails();
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID))).toBeInTheDocument();
   });
 
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostDetails();
       expect(mockUseHostDetails).toBeCalledWith({
         id: 'entities-hosts-details-uuid',
         startDate: from,
@@ -164,32 +164,20 @@ describe('<HostDetails />', () => {
       });
       mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: true });
 
-      const { getByText } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByText } = renderHostDetails();
       expect(getByText('Host risk score')).toBeInTheDocument();
     });
 
     it('should not render host risk score when unauthorized', () => {
       mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
-      const { queryByText } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryByText } = renderHostDetails();
       expect(queryByText('Host risk score')).not.toBeInTheDocument();
     });
   });
 
   describe('Related users', () => {
     it('should render the related user table with correct dates and indices', () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostDetails();
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
         from: timestamp,
         hostName: 'test host',
@@ -206,11 +194,7 @@ describe('<HostDetails />', () => {
       });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
-      const { queryAllByRole } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryAllByRole } = renderHostDetails();
       expect(queryAllByRole('columnheader').length).toBe(3);
       expect(queryAllByRole('row')[1].textContent).toContain('test user');
       expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
@@ -224,20 +208,12 @@ describe('<HostDetails />', () => {
       });
       mockUseHasSecurityCapability.mockReturnValue(false);
 
-      const { queryAllByRole } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryAllByRole } = renderHostDetails();
       expect(queryAllByRole('columnheader').length).toBe(2);
     });
 
     it('should not render host risk score column when license is not valid', () => {
-      const { queryAllByRole } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryAllByRole } = renderHostDetails();
       expect(queryAllByRole('columnheader').length).toBe(2);
     });
 
@@ -248,11 +224,7 @@ describe('<HostDetails />', () => {
         loading: false,
       });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostDetails();
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
         'No users identified'
       );

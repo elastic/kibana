@@ -36,6 +36,7 @@ export class CreateSLO {
     }
 
     try {
+      await this.transformManager.preview(sloTransformId);
       await this.transformManager.start(sloTransformId);
     } catch (err) {
       await Promise.all([
@@ -50,6 +51,7 @@ export class CreateSLO {
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
       id: `slo-${slo.id}`,
       document: createTempSummaryDocument(slo),
+      refresh: true,
     });
 
     return this.toResponse(slo);

@@ -62,6 +62,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -313,6 +315,7 @@ describe('get()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -321,6 +324,7 @@ describe('get()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -439,6 +443,7 @@ describe('get()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -447,6 +452,7 @@ describe('get()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({

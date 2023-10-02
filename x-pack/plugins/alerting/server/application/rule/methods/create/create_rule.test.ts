@@ -84,6 +84,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -1545,6 +1547,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1553,6 +1556,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1732,6 +1736,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1740,6 +1745,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -2558,7 +2564,9 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
+      validLegacyConsumers: [],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -3025,6 +3033,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3033,6 +3042,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const createdAttributes = {
       ...data,
@@ -3097,6 +3107,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3105,6 +3116,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({ schedule: { interval: '1s' } });
@@ -3134,6 +3146,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3142,6 +3155,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3226,6 +3240,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3234,6 +3249,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3275,6 +3291,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3283,6 +3300,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3337,6 +3355,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3345,6 +3364,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3417,6 +3437,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3425,6 +3446,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3616,6 +3638,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3629,6 +3652,7 @@ describe('create()', () => {
         mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
         shouldWrite: true,
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3673,6 +3697,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3681,6 +3706,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({

@@ -35,6 +35,10 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
   SecurityPageName.sessions,
 ]);
 
+const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
+  HIDDEN_BREADCRUMBS.has(id) ||
+  id.startsWith('management:'); /* management sub-pages set their breadcrumbs themselves */
+
 export const subscribeNavigationTree = (services: Services): void => {
   const { serverless, getProjectNavLinks$ } = services;
 
@@ -59,13 +63,12 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
       const navLinkId = getNavLinkIdFromProjectPageName(id);
 
       if (chrome.navLinks.has(navLinkId)) {
-        const breadcrumbHidden = HIDDEN_BREADCRUMBS.has(id);
         const link: ChromeProjectNavigationNode = {
           id: navLinkId,
           title,
           path: [...path, navLinkId],
           deepLink: chrome.navLinks.get(navLinkId),
-          ...(breadcrumbHidden && { breadcrumbStatus: 'hidden' }),
+          ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
         };
         // check default navigation for children
         const defaultChildrenNav = getDefaultChildrenNav(id, link);

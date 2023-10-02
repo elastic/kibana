@@ -21,7 +21,13 @@ import {
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
 } from './types';
-import { postActionsConnectorExecuteRoute } from './routes';
+import {
+  deleteKnowledgeBaseRoute,
+  getKnowledgeBaseStatusRoute,
+  postActionsConnectorExecuteRoute,
+  postEvaluateRoute,
+  postKnowledgeBaseRoute,
+} from './routes';
 
 export class ElasticAssistantPlugin
   implements
@@ -39,13 +45,15 @@ export class ElasticAssistantPlugin
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ElasticAssistantPluginStart, unknown>
+    core: CoreSetup<ElasticAssistantPluginStart, unknown>,
+    logger: Logger
   ): IContextProvider<ElasticAssistantRequestHandlerContext, 'elasticAssistant'> => {
     return async function elasticAssistantRouteHandlerContext(context, request) {
       const [_, pluginsStart] = await core.getStartServices();
 
       return {
         actions: pluginsStart.actions,
+        logger,
       };
     };
   };
@@ -59,10 +67,20 @@ export class ElasticAssistantPlugin
       'elasticAssistant'
     >(
       'elasticAssistant',
-      this.createRouteHandlerContext(core as CoreSetup<ElasticAssistantPluginStart, unknown>)
+      this.createRouteHandlerContext(
+        core as CoreSetup<ElasticAssistantPluginStart, unknown>,
+        this.logger
+      )
     );
 
+    // Knowledge Base
+    deleteKnowledgeBaseRoute(router);
+    getKnowledgeBaseStatusRoute(router);
+    postKnowledgeBaseRoute(router);
+    // Actions Connector Execute (LLM Wrapper)
     postActionsConnectorExecuteRoute(router);
+    // Evaluate
+    postEvaluateRoute(router);
     return {
       actions: plugins.actions,
     };

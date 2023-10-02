@@ -86,7 +86,7 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
       )}
       <EuiSpacer size="s" />
       <EuiTitle size="s">
-        <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+        <h2 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
           {isAlert && !isEmpty(ruleName) ? (
             ruleName
           ) : (
@@ -95,7 +95,7 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
               defaultMessage="Event details"
             />
           )}
-        </h4>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize={isAlert ? 'm' : 'none'}>

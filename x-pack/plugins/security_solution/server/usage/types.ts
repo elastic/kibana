@@ -29,6 +29,10 @@ export type CollectorDependencies = {
   core: CoreSetup;
   logger: Logger;
   eventLogIndex: string;
+  riskEngineIndexPatterns: {
+    all: string;
+    latest: string;
+  };
 } & Pick<SetupPlugins, 'ml' | 'usageCollection'>;
 
 export interface AlertBucket {

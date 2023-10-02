@@ -27,6 +27,8 @@ import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingRulesConfig } from './config';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { GetAlertIndicesAlias } from './lib';
+import { AlertsService } from './alerts_service/alerts_service';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -45,6 +47,8 @@ export interface RulesClientFactoryOpts {
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   connectorAdapterRegistry: ConnectorAdapterRegistry;
+  getAlertIndicesAlias: GetAlertIndicesAlias;
+  alertsService: AlertsService | null;
 }
 
 export class RulesClientFactory {
@@ -66,6 +70,8 @@ export class RulesClientFactory {
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
+  private getAlertIndicesAlias!: GetAlertIndicesAlias;
+  private alertsService!: AlertsService | null;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -89,6 +95,8 @@ export class RulesClientFactory {
     this.minimumScheduleInterval = options.minimumScheduleInterval;
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
+    this.getAlertIndicesAlias = options.getAlertIndicesAlias;
+    this.alertsService = options.alertsService;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -118,6 +126,8 @@ export class RulesClientFactory {
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       connectorAdapterRegistry: this.connectorAdapterRegistry,
+      getAlertIndicesAlias: this.getAlertIndicesAlias,
+      alertsService: this.alertsService,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

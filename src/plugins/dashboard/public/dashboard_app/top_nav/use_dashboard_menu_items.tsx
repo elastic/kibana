@@ -38,6 +38,7 @@ export const useDashboardMenuItems = ({
    */
   const {
     share,
+    dashboardBackup,
     settings: { uiSettings },
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
@@ -56,6 +57,7 @@ export const useDashboardMenuItems = ({
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const managed = dashboard.select((state) => state.componentState.managed);
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -126,18 +128,24 @@ export const useDashboardMenuItems = ({
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
       dashboard.clearOverlays();
-      if (hasUnsavedChanges) {
-        confirmDiscardUnsavedChanges(() => {
-          batch(() => {
-            dashboard.resetToLastSavedState();
-            if (switchToViewMode) dashboard.dispatch.setViewMode(ViewMode.VIEW);
-          });
-        }, viewMode);
-      } else {
-        if (switchToViewMode) dashboard.dispatch.setViewMode(ViewMode.VIEW);
+      const switchModes = switchToViewMode
+        ? () => {
+            dashboard.dispatch.setViewMode(ViewMode.VIEW);
+            dashboardBackup.storeViewMode(ViewMode.VIEW);
+          }
+        : undefined;
+      if (!hasUnsavedChanges) {
+        switchModes?.();
+        return;
       }
+      confirmDiscardUnsavedChanges(() => {
+        batch(() => {
+          dashboard.resetToLastSavedState();
+          switchModes?.();
+        });
+      }, viewMode);
     },
-    [dashboard, hasUnsavedChanges, viewMode]
+    [dashboard, dashboardBackup, hasUnsavedChanges, viewMode]
   );
 
   /**
@@ -169,6 +177,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
+          dashboardBackup.storeViewMode(ViewMode.EDIT);
           dashboard.dispatch.setViewMode(ViewMode.EDIT);
           dashboard.clearOverlays();
         },
@@ -230,18 +239,19 @@ export const useDashboardMenuItems = ({
       } as TopNavMenuData,
     };
   }, [
-    disableTopNav,
+    quickSaveDashboard,
     isSaveInProgress,
     hasRunMigrations,
     hasUnsavedChanges,
+    dashboardBackup,
+    saveDashboardAs,
+    setIsLabsShown,
+    disableTopNav,
+    resetChanges,
+    isLabsShown,
     lastSavedId,
     showShare,
     dashboard,
-    setIsLabsShown,
-    isLabsShown,
-    quickSaveDashboard,
-    saveDashboardAs,
-    resetChanges,
     clone,
   ]);
 
@@ -265,7 +275,7 @@ export const useDashboardMenuItems = ({
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
     const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
-    const editMenuItem = showWriteControls ? [menuItems.edit] : [];
+    const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
@@ -274,7 +284,7 @@ export const useDashboardMenuItems = ({
       resetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [menuItems, share, showWriteControls, resetChangesMenuItem, isLabsEnabled]);
+  }, [isLabsEnabled, menuItems, share, showWriteControls, managed, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];

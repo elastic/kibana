@@ -201,6 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
         schedule: '@every 5m',
         timeout: '3ms',
         max_redirects: 3,
+        max_attempts: 2,
         proxy_url: 'http://proxy.com',
         tags: ['tag1', 'tag2'],
         username: 'test-username',

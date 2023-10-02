@@ -92,6 +92,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -184,10 +186,12 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
     (migrateLegacyActions as jest.Mock).mockResolvedValue({
       hasLegacyActions: false,
@@ -1002,6 +1006,7 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1010,6 +1015,7 @@ describe('update()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1524,7 +1530,9 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
+      validLegacyConsumers: [],
     });
     await expect(
       rulesClient.update({
@@ -1905,10 +1913,12 @@ describe('update()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
         },
+        validLegacyConsumers: [],
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,

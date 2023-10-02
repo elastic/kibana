@@ -60,10 +60,12 @@ const ruleType: UntypedNormalizedRuleType = {
     name: 'Recovered',
   },
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   validate: {
     params: schema.any(),
   },
+  validLegacyConsumers: [],
 };
 let fakeTimer: sinon.SinonFakeTimers;
 

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
-import { HOSTS_URL, ALERTS_URL } from '../../urls/navigation';
+import { hostsUrl, ALERTS_URL } from '../../urls/navigation';
 
 import { createRule } from '../../tasks/api_calls/rules';
 
@@ -40,7 +41,7 @@ describe(
     });
 
     it('adds field to alert table', () => {
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createRule(getNewRule());
       refreshPage();
       waitForAlertsToPopulate();
@@ -50,7 +51,7 @@ describe(
     });
 
     it('adds field to timeline', () => {
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

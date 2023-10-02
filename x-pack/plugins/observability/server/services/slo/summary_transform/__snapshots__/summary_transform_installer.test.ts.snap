@@ -7,7 +7,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 7 days rolling time window",
       "dest": Object {
@@ -173,6 +173,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -235,7 +236,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 30 days rolling time window",
       "dest": Object {
@@ -401,6 +402,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -463,7 +465,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 90 days rolling time window",
       "dest": Object {
@@ -629,6 +631,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -691,7 +694,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a weekly calendar aligned time window",
       "dest": Object {
@@ -870,6 +873,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -932,7 +936,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a monthly calendar aligned time window",
       "dest": Object {
@@ -1126,6 +1130,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",

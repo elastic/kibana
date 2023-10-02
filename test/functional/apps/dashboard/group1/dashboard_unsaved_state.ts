@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let unsavedPanelCount = 0;
   const testQuery = 'Test Query';
 
-  describe('dashboard unsaved state', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167661
+  describe.skip('dashboard unsaved state', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -32,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -71,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.navigateToApp('dashboards');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         await PageObjects.dashboard.waitForRenderComplete();
         await validateQueryAndFilter();
@@ -138,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.navigateToApp('dashboards');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);

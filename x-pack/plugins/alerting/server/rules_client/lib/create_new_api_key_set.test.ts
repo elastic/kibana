@@ -54,6 +54,8 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const username = 'test';

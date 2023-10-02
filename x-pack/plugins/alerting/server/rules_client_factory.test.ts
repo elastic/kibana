@@ -47,6 +47,8 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   internalSavedObjectsRepository,
@@ -114,6 +116,8 @@ test('creates a rules client with proper constructor arguments when security is 
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    getAlertIndicesAlias: expect.any(Function),
+    alertsService: null,
     connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
   });
 });
@@ -157,6 +161,8 @@ test('creates a rules client with proper constructor arguments', async () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    getAlertIndicesAlias: expect.any(Function),
+    alertsService: null,
     connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
   });
 });

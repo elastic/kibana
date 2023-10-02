@@ -486,7 +486,7 @@ describe('Task Runner', () => {
 
         expect(clusterClient.bulk).toHaveBeenCalledWith({
           index: '.alerts-test.alerts-default',
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: !useDataStreamForAlerts,
           body: [
             {

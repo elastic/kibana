@@ -8,14 +8,18 @@
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { categorizationFieldValidationSchema } from '../../common/api/log_categorization/schema';
 import { AIOPS_API_ENDPOINT } from '../../common/api';
 import type { AiopsLicense } from '../types';
 import { wrapError } from './error_wrapper';
+import { trackAIOpsRouteUsage } from '../lib/track_route_usage';
+import { AIOPS_TELEMETRY_ID } from '../../common/constants';
 
 export const defineLogCategorizationRoutes = (
   router: IRouter<DataRequestHandlerContext>,
-  license: AiopsLicense
+  license: AiopsLicense,
+  usageCounter?: UsageCounter
 ) => {
   router.versioned
     .post({
@@ -32,6 +36,13 @@ export const defineLogCategorizationRoutes = (
         },
       },
       async (context, request, response) => {
+        const { headers } = request;
+        trackAIOpsRouteUsage(
+          `POST ${AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION}`,
+          headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
+          usageCounter
+        );
+
         if (!license.isActivePlatinumLicense) {
           return response.forbidden();
         }

@@ -33,6 +33,8 @@ import {
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { GetAlertIndicesAlias } from '../lib';
+import { AlertsService } from '../alerts_service';
 
 export type {
   BulkEditOperation,
@@ -76,6 +78,8 @@ export interface RulesClientContext {
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
+  readonly getAlertIndicesAlias: GetAlertIndicesAlias;
+  readonly alertsService: AlertsService | null;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
@@ -123,6 +127,7 @@ export interface IndexType {
   [key: string]: unknown;
 }
 
+// TODO: remove once all mute endpoints have been migrated to RuleMuteAlertOptions
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;

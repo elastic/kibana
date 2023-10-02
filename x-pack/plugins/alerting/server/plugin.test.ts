@@ -47,6 +47,7 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recov
   isExportable: true,
   actionGroups: [],
   defaultActionGroupId: 'default',
+  category: 'test',
   producer: 'test',
   async executor() {
     return { state: {} };
