@@ -11,10 +11,9 @@ import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { getTagsByName } from '../../common/containers/tags/api';
 import React from 'react';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { coreMock } from '@kbn/core/public/mocks';
 import { TestProviders } from '../../common/mock';
 
+jest.mock('@kbn/security-solution-navigation/src/context');
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
@@ -30,9 +29,7 @@ const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
     wrapper: ({ children }) => (
       <TestProviders>
-        <NavigationProvider core={coreMock.createStart()}>
-          <DashboardContextProvider>{children}</DashboardContextProvider>
-        </NavigationProvider>
+        <DashboardContextProvider>{children}</DashboardContextProvider>
       </TestProviders>
     ),
   });
