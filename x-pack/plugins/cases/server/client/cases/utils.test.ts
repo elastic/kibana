@@ -255,8 +255,11 @@ describe('utils', () => {
 
       expect(res).toEqual({
         incident: {
-          externalId: null,
           description: 'This is a brand new case of a bad meanie defacing data',
+          externalId: null,
+          id: 'mock-id-1',
+          severity: 'low',
+          status: 'open',
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
         },
