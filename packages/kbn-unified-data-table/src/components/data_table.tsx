@@ -583,6 +583,9 @@ export const UnifiedDataTable = ({
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
+    metadata: {
+      scopeId: 'timeline-1',
+    },
   });
 
   const euiGridColumns = useMemo(

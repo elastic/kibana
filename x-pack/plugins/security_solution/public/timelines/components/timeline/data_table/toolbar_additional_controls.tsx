@@ -12,7 +12,6 @@ import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../common/constants'
 import { isActiveTimeline } from '../../../../helpers';
 import { timelineActions } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
-import { defaultHeaders } from '../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -22,7 +21,6 @@ import {
   useTimelineFullScreen,
 } from '../../../../common/containers/use_full_screen';
 import { useFieldBrowserOptions } from '../../fields_browser';
-import { getColumnHeader } from '../body/column_headers/helpers';
 import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
 import { FixedWidthLastUpdatedContainer } from './last_updated';
 import * as i18n from './translations';
