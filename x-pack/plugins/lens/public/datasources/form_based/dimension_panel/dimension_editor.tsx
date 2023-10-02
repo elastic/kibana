@@ -155,8 +155,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
           title: i18n.translate('xpack.lens.uiInfo.otherBucketChangeTitle', {
             defaultMessage: 'Group remaining values as "Other" disabled',
           }),
-          text: i18n.translate('xpack.lens.uiInfo.otherBucketChangeToAlphabetical', {
-            defaultMessage: 'Enable it from the "Advanced" options.',
+          text: i18n.translate('xpack.lens.uiInfo.otherBucketDisabled', {
+            defaultMessage:
+              'Top values is >=1000, which can slow performance. Enable it again in “Advanced” options.',
           }),
         });
       }
