@@ -77,4 +77,49 @@ describe('8.11.0 Cloud Security Posture Package Policy migration', () => {
       attributes: migratedDoc.attributes,
     });
   });
+
+  it('if gcp.account_type exist and already has a value, do not set it to single-account', () => {
+    const policyDocWithAccountType = (): any => {
+      return {
+        id: 'mock-saved-csp-object-id',
+        attributes: {
+          name: 'cloud_security_posture_test',
+          package: {
+            name: 'cloud_security_posture',
+            title: '',
+            version: '',
+          },
+          id: 'ID_1234',
+          policy_id: '',
+          enabled: true,
+          namespace: '',
+          revision: 0,
+          updated_at: '',
+          updated_by: '',
+          created_at: '',
+          created_by: '',
+          inputs: [
+            {
+              type: 'cloudbeat/cis_gcp',
+              enabled: true,
+              streams: [
+                {
+                  vars: {
+                    'gcp.account_type': { value: 'single-account-MAYBE', type: 'text' },
+                  },
+                },
+              ],
+              config: {},
+            },
+          ],
+        },
+        type: ' nested',
+      };
+    };
+    const initialDoc = policyDocWithAccountType();
+    const migratedDoc = policyDocWithAccountType();
+    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
+      attributes: migratedDoc.attributes,
+    });
+  });
 });
