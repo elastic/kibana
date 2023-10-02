@@ -32,8 +32,8 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
   const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(
     watch('indicator.type')
   );
-  const indicatorType = watch('indicator.type');
 
+  const indicatorType = watch('indicator.type');
   useEffect(() => {
     if (indicatorType !== indicatorTypeState && !isEditMode) {
       setIndicatorTypeState(indicatorType);
