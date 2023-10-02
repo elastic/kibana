@@ -103,16 +103,6 @@ export const validateRequiredCustomFields = ({
     }
   }
 
-  const notRegisteredCustomFields = differenceWith(
-    requestCustomFields ?? [],
-    customFieldsConfiguration,
-    (requestedVal, requiredVal) => requestedVal.key === requiredVal.key
-  ).map((e) => e.key);
-
-  if (notRegisteredCustomFields.length) {
-    throw Boom.badRequest(`Unknown custom fields: ${notRegisteredCustomFields}`);
-  }
-
   const requiredCustomFields = customFieldsConfiguration.filter(
     (customField) => customField.required
   );
