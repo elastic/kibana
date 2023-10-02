@@ -26,7 +26,7 @@ describe('SeverityFilter', () => {
     expect(superSelect).toHaveTextContent('Low');
     fireEvent.click(superSelect);
     const options = getAllByRole('option');
-    const allSeverities = Object.keys(severities);
+    const allSeverities = Object.keys(severities) as CaseSeverity[];
     expect(options).toHaveLength(allSeverities.length);
     options.forEach((option, index) => {
       expect(option).toHaveTextContent(severities[allSeverities[index]].label);
