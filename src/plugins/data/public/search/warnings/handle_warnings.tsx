@@ -6,20 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import React from 'react';
 import { EuiTextAlign } from '@elastic/eui';
+import { estypes } from '@elastic/elasticsearch';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
-import { OpenIncompleteResultsModalButton } from '../../incomplete_results_modal';
+import type { IInspectorInfo } from '../../../common/search/search_source';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
 } from '../types';
 import { extractWarnings } from './extract_warnings';
+import { ViewWarningButton } from './view_warning_button';
 
 /**
  * @internal
@@ -30,17 +32,19 @@ export function handleWarnings({
   response,
   theme,
   callback,
-  sessionId = '',
   requestId,
+  inspector,
+  inspectorService,
 }: {
   request: SearchRequest;
   response: estypes.SearchResponse;
   theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
-  sessionId?: string;
   requestId?: string;
+  inspector?: IInspectorInfo;
+  inspectorService: InspectorStartContract;
 }) {
-  const warnings = extractWarnings(response);
+  const warnings = extractWarnings(response, inspectorService, inspector);
   if (warnings.length === 0) {
     return;
   }
@@ -63,14 +67,7 @@ export function handleWarnings({
     title: incompleteWarning.message,
     text: toMountPoint(
       <EuiTextAlign textAlign="right">
-        <OpenIncompleteResultsModalButton
-          theme={theme}
-          getRequestMeta={() => ({
-            request,
-            response,
-          })}
-          warning={incompleteWarning}
-        />
+        <ViewWarningButton onClick={incompleteWarning.openInInspector} />
       </EuiTextAlign>,
       { theme$: theme.theme$ }
     ),

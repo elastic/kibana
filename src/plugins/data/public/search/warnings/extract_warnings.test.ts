@@ -7,7 +7,10 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { extractWarnings } from './extract_warnings';
+
+const mockInspectorService = {} as InspectorStartContract;
 
 describe('extract search response warnings', () => {
   describe('single cluster', () => {
@@ -37,7 +40,7 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
@@ -51,6 +54,7 @@ describe('extract search response warnings', () => {
               failures: response._shards.failures,
             },
           },
+          openInInspector: expect.any(Function),
         },
       ]);
     });
@@ -62,7 +66,7 @@ describe('extract search response warnings', () => {
         _shards: {} as estypes.ShardStatistics,
         hits: { hits: [] },
       };
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
@@ -76,18 +80,22 @@ describe('extract search response warnings', () => {
               failures: response._shards.failures,
             },
           },
+          openInInspector: expect.any(Function),
         },
       ]);
     });
 
     it('should not include warnings when there are none', () => {
-      const warnings = extractWarnings({
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          total: 9000,
-        },
-      } as estypes.SearchResponse);
+      const warnings = extractWarnings(
+        {
+          timed_out: false,
+          _shards: {
+            failed: 0,
+            total: 9000,
+          },
+        } as estypes.SearchResponse,
+        mockInspectorService
+      );
 
       expect(warnings).toEqual([]);
     });
@@ -177,11 +185,12 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
           clusters: response._clusters.details,
+          openInInspector: expect.any(Function),
         },
       ]);
     });
@@ -230,58 +239,62 @@ describe('extract search response warnings', () => {
         },
         hits: { hits: [] },
       };
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
           clusters: response._clusters.details,
+          openInInspector: expect.any(Function),
         },
       ]);
     });
 
     it('should not include warnings when there are none', () => {
-      const warnings = extractWarnings({
-        took: 10,
-        timed_out: false,
-        _shards: {
-          total: 4,
-          successful: 4,
-          skipped: 0,
-          failed: 0,
-        },
-        _clusters: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          details: {
-            '(local)': {
-              status: 'successful',
-              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
-              took: 0,
-              timed_out: false,
-              _shards: {
-                total: 2,
-                successful: 2,
-                skipped: 0,
-                failed: 0,
+      const warnings = extractWarnings(
+        {
+          took: 10,
+          timed_out: false,
+          _shards: {
+            total: 4,
+            successful: 4,
+            skipped: 0,
+            failed: 0,
+          },
+          _clusters: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            details: {
+              '(local)': {
+                status: 'successful',
+                indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+                took: 0,
+                timed_out: false,
+                _shards: {
+                  total: 2,
+                  successful: 2,
+                  skipped: 0,
+                  failed: 0,
+                },
               },
-            },
-            remote1: {
-              status: 'successful',
-              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
-              took: 1,
-              timed_out: false,
-              _shards: {
-                total: 2,
-                successful: 2,
-                skipped: 0,
-                failed: 0,
+              remote1: {
+                status: 'successful',
+                indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+                took: 1,
+                timed_out: false,
+                _shards: {
+                  total: 2,
+                  successful: 2,
+                  skipped: 0,
+                  failed: 0,
+                },
               },
             },
           },
-        },
-        hits: { hits: [] },
-      } as estypes.SearchResponse);
+          hits: { hits: [] },
+        } as estypes.SearchResponse,
+        mockInspectorService
+      );
 
       expect(warnings).toEqual([]);
     });
