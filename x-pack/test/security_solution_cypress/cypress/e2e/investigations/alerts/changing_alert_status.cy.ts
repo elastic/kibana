@@ -39,7 +39,8 @@ import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+// Iusse tracked in: https://github.com/elastic/kibana/issues/167809
+describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
     cleanKibana();
