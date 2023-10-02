@@ -118,7 +118,7 @@ const getAlertConfig = (monitor: ProjectMonitor) => {
     : defaultFields[ConfigKey.ALERT_CONFIG];
 };
 
-const ONL_ONE_ATTEMPT = 1;
+const ONLY_ONE_ATTEMPT = 1;
 
 const getMaxAttempts = (monitor: ProjectMonitor) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
@@ -126,7 +126,7 @@ const getMaxAttempts = (monitor: ProjectMonitor) => {
   if (retestOnFailure) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
   } else if (monitor.retestOnFailure === false) {
-    return ONL_ONE_ATTEMPT;
+    return ONLY_ONE_ATTEMPT;
   }
   return defaultFields[ConfigKey.MAX_ATTEMPTS];
 };
