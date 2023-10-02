@@ -9,6 +9,7 @@ import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-al
 import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
 import type {
   EqlRuleCreateProps,
+  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -387,6 +388,27 @@ export const getEqlRule = (
   name: 'New EQL Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test', 'newRule'],
+  references: ['http://example.com/', 'https://example.com/'],
+  false_positives: ['False1', 'False2'],
+  threat: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  interval: '100m',
+  from: 'now-50000h',
+  max_signals: 100,
+  ...rewrites,
+});
+
+export const getEsqlRule = (
+  rewrites?: CreateRulePropsRewrites<EsqlRuleCreateProps>
+): EsqlRuleCreateProps => ({
+  type: 'esql',
+  language: 'esql',
+  query: 'from auditbeat-* [metadata _id, _version, _index] | keep agent.*,_id | eval test_id=_id',
+  name: 'ES|QL Rule',
+  description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
   tags: ['test', 'newRule'],
