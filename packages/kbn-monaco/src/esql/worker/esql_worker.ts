@@ -11,7 +11,7 @@ import { monaco } from '../../monaco_imports';
 // import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
-import { ANTLREErrorListener } from '../../common/error_listener';
+import { ESQLErrorListener } from '../lib/monaco/esql_error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;
@@ -33,7 +33,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
     const inputStream = this.getModelCharStream(modelUri);
 
     if (inputStream) {
-      const errorListener = new ANTLREErrorListener();
+      const errorListener = new ESQLErrorListener();
       const parser = getParser(inputStream, errorListener);
 
       parser[ROOT_STATEMENT]();

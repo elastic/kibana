@@ -18,7 +18,7 @@ export interface ESQLCustomAutocompleteCallbacks {
 }
 
 /** @internal **/
-type CallbackFn<T = string> = (ctx: {
+type CallbackFn<T = string> = (ctx?: {
   word: string;
   variables: UserDefinedVariables;
 }) => T[] | Promise<T[]>;
@@ -32,5 +32,5 @@ export interface UserDefinedVariables {
 /** @internal **/
 export type AutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
-  'label' | 'insertText' | 'kind' | 'detail' | 'documentation' | 'sortText'
+  'label' | 'insertText' | 'kind' | 'detail' | 'documentation' | 'sortText' | 'insertTextRules'
 >;

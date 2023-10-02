@@ -7,12 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { monaco } from '../../../../monaco_imports';
 import { buildDocumentation, buildFunctionDocumentation } from './utils';
 
 import type { AutocompleteCommandDefinition } from '../types';
-import { mathCommandFullDefinitions } from '../../definitions/functions';
-import { printArguments } from '../../definitions/helpers';
-import { FunctionDefinition } from '../../definitions/types';
+import { evalFunctionsDefinitions } from '../../ast/definitions/functions';
+import { getFunctionSignatures } from '../../ast/definitions/helpers';
+import { FunctionDefinition } from '../../ast/definitions/types';
+import { statsAggregationFunctionDefinitions } from '../../ast/definitions/aggs';
 
 export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
   {
@@ -32,168 +34,45 @@ export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
   },
 ];
 
-function getMathCommandDefinition({ name, description, signatures }: FunctionDefinition) {
+function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
+  const fullSignatures = getFunctionSignatures(fn);
   return {
-    label: name,
-    insertText: name,
+    label: fullSignatures[0].declaration,
+    insertText: `${fn.name}($0)`,
+    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 1,
-    detail: description,
+    detail: fn.description,
     documentation: {
-      value: buildFunctionDocumentation(
-        signatures.map(({ params, returnType, infiniteParams, examples }) => ({
-          declaration: `${name}(${params.map(printArguments).join(', ')}${
-            infiniteParams ? ` ,[... ${params.map(printArguments)}]` : ''
-          }): ${returnType}`,
-          examples,
-        }))
-      ),
+      value: buildFunctionDocumentation(fullSignatures),
     },
     sortText: 'C',
   };
 }
 
-export const mathCommandDefinition: AutocompleteCommandDefinition[] =
-  mathCommandFullDefinitions.map(getMathCommandDefinition);
+export const mathCommandDefinition: AutocompleteCommandDefinition[] = evalFunctionsDefinitions.map(
+  getAutocompleteFunctionDefinition
+);
 
-export const getCompatibleMathCommandDefinition = (
+const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
+
+export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] =
+  statsAggregationFunctionDefinitions.map(getAutocompleteFunctionDefinition);
+
+export const getCompatibleFunctionDefinition = (
+  command: string,
   returnTypes?: string[]
 ): AutocompleteCommandDefinition[] => {
+  const fnSupportedByCommand = allFunctions.filter(({ supportedCommands }) =>
+    supportedCommands.includes(command)
+  );
   if (!returnTypes) {
-    return mathCommandDefinition;
+    return fnSupportedByCommand.map(getAutocompleteFunctionDefinition);
   }
-  return mathCommandFullDefinitions
+  return fnSupportedByCommand
     .filter((mathDefinition) =>
-      mathDefinition.signatures.some((signature) => returnTypes.includes(signature.returnType))
+      mathDefinition.signatures.some(
+        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+      )
     )
-    .map(getMathCommandDefinition);
+    .map(getAutocompleteFunctionDefinition);
 };
-
-export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
-  {
-    label: 'avg',
-    insertText: 'avg',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.avgDoc', {
-      defaultMessage: 'Returns the average of the values in a field',
-    }),
-    documentation: {
-      value: buildDocumentation('avg(grouped[T]): aggregated[T]', [
-        'from index | stats average = avg(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'max',
-    insertText: 'max',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.maxDoc', {
-      defaultMessage: 'Returns the maximum value in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('max(grouped[T]): aggregated[T]', [
-        'from index | stats max = max(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'min',
-    insertText: 'min',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.minDoc', {
-      defaultMessage: 'Returns the minimum value in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('min(grouped[T]): aggregated[T]', [
-        'from index | stats min = min(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'sum',
-    insertText: 'sum',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.sumDoc', {
-      defaultMessage: 'Returns the sum of the values in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('sum(grouped[T]): aggregated[T]', [
-        'from index | stats sum = sum(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'count',
-    insertText: 'count',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.countDoc', {
-      defaultMessage: 'Returns the count of the values in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = count(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'count_distinct',
-    insertText: 'count_distinct',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.countDistinctDoc', {
-      defaultMessage: 'Returns the count of distinct values in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = count_distinct(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'median',
-    insertText: 'median',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.medianDoc', {
-      defaultMessage: 'Returns the 50% percentile.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = median(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'median_absolute_deviation',
-    insertText: 'median_absolute_deviation',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.medianDeviationDoc', {
-      defaultMessage:
-        'Returns the median of each data point’s deviation from the median of the entire sample.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = median_absolute_deviation(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'percentile',
-    insertText: 'percentile',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.percentiletDoc', {
-      defaultMessage: 'Returns the n percentile of a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('percentile(grouped[T]): aggregated[T]', [
-        'from index | stats pct = percentile(field, 90)',
-      ]),
-    },
-    sortText: 'C',
-  },
-];

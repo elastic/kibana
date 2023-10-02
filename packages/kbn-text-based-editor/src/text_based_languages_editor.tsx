@@ -145,7 +145,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
   const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
   const [editorLanguageProvider, setLanguageProvider] = useState<
-    | { validate: Function; getSuggestions: () => monaco.languages.CompletionItemProvider }
+    | {
+        validate: Function;
+        getSuggestions: () => monaco.languages.CompletionItemProvider;
+        getSignatureHelp?: () => monaco.languages.SignatureHelpProvider;
+      }
     | undefined
   >(undefined);
 
@@ -263,8 +267,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       } else if (code && editorLanguageProvider) {
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
         const { warnings: parserWarnings, errors: parserErrors } = editorLanguageProvider.validate(
-          editorModel.current,
-          new monaco.Position(0, 1)
+          editorModel.current
         );
         const markers = [];
 
@@ -692,6 +695,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       options={codeEditorOptions}
                       width="100%"
                       suggestionProvider={editorLanguageProvider?.getSuggestions()}
+                      signatureProvider={editorLanguageProvider?.getSignatureHelp?.()}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;

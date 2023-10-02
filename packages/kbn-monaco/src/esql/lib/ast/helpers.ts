@@ -7,14 +7,17 @@
  */
 
 import { monaco } from '../../../monaco_imports';
-import { builtinFunctions } from '../definitions/builtin';
-import { mathCommandFullDefinitions } from '../definitions/functions';
-import { FunctionDefinition } from '../definitions/types';
-import { ESQLSingleAstItem } from './types';
+import { statsAggregationFunctionDefinitions } from './definitions/aggs';
+import { builtinFunctions } from './definitions/builtin';
+import { commandDefinitions } from './definitions/commands';
+import { evalFunctionsDefinitions } from './definitions/functions';
+import { CommandDefinition, FunctionDefinition } from './definitions/types';
+import { ESQLLiteral, ESQLSingleAstItem } from './types';
 
 type SignatureType = FunctionDefinition['signatures'][number];
 type SignatureArgType = SignatureType['params'][number];
 
+// from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
   const lines = expression.split(/\n/);
   let remainingChars = offset;
@@ -30,6 +33,7 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   throw new Error('Algorithm failure');
 }
 
+// From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
   const lines = expression.split(/\n/);
   return lines
@@ -41,21 +45,68 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
     );
 }
 
-const fnLookups = builtinFunctions.concat(mathCommandFullDefinitions).reduce((memo, def) => {
-  memo.set(def.name, def);
-  return memo;
-}, new Map<string, FunctionDefinition>());
+let fnLookups: Map<string, FunctionDefinition> | undefined;
+let commandLookups: Map<string, CommandDefinition> | undefined;
 
-export function isSupportedFunction(name: string, parentCommand?: string) {
-  if (!parentCommand) {
-    return false;
+function buildFunctionLookup() {
+  if (!fnLookups) {
+    fnLookups = builtinFunctions
+      .concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
+      .reduce((memo, def) => {
+        memo.set(def.name, def);
+        return memo;
+      }, new Map<string, FunctionDefinition>());
   }
-  const fn = fnLookups.get(name);
-  return Boolean(fn?.supportedCommands.includes(parentCommand));
+  return fnLookups;
+}
+
+type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
+
+export function isSupportedFunction(
+  name: string,
+  parentCommand?: string
+): { supported: boolean; reason: ReasonTypes | undefined } {
+  if (!parentCommand) {
+    return {
+      supported: false,
+      reason: 'missingCommand',
+    };
+  }
+  const fn = buildFunctionLookup().get(name);
+  const isSupported = Boolean(fn?.supportedCommands.includes(parentCommand));
+  return {
+    supported: isSupported,
+    reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
+  };
 }
 
 export function getFunctionDefinition(name: string) {
-  return fnLookups.get(name);
+  return buildFunctionLookup().get(name.toLowerCase());
+}
+
+function buildCommandLookup() {
+  if (!commandLookups) {
+    commandLookups = commandDefinitions.reduce((memo, def) => {
+      memo.set(def.name, def);
+      if (def.alias) {
+        memo.set(def.alias, def);
+      }
+      return memo;
+    }, new Map<string, CommandDefinition>());
+  }
+  return commandLookups;
+}
+
+export function getCommandDefinition(name: string): CommandDefinition {
+  return buildCommandLookup().get(name.toLowerCase())!;
+}
+
+function compareLiteralType(argTypes: string[], type: ESQLLiteral['literalType']) {
+  if (type !== 'string') {
+    return argTypes.includes(type);
+  }
+  const hasLiteralTypes = argTypes.some((t) => /literal$/.test(t));
+  return hasLiteralTypes;
 }
 
 export function isEqualType(
@@ -68,15 +119,15 @@ export function isEqualType(
     return true;
   }
   if (item.type === 'literal') {
-    return argTypes.includes(item.literalType);
+    return compareLiteralType(argTypes, item.literalType);
   }
   if (item.type === 'list') {
     const listType = `${item.values[0].literalType}[]`;
     return argTypes.includes(listType);
   }
   if (item.type === 'function') {
-    if (isSupportedFunction(item.name, parentCommand)) {
-      const fnDef = fnLookups.get(item.name)!;
+    if (isSupportedFunction(item.name, parentCommand).supported) {
+      const fnDef = buildFunctionLookup().get(item.name)!;
       return fnDef.signatures.some((signature) => argTypes.includes(signature.returnType));
     }
   }

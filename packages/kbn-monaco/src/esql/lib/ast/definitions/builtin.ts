@@ -132,14 +132,38 @@ export const builtinFunctions: FunctionDefinition[] = [
   },
   {
     name: '=',
-    description: '',
-    supportedCommands: ['eval', 'stats'],
+    description: i18n.translate('monaco.esql.autocomplete.assignDoc', {
+      defaultMessage: 'Assign (=)',
+    }),
+    supportedCommands: ['eval', 'stats', 'row', 'dissect'],
     signatures: [
       {
         params: [
           { name: 'left', type: 'any' },
           { name: 'right', type: 'any' },
         ],
+        returnType: 'void',
+      },
+    ],
+  },
+  {
+    name: 'functions',
+    description: '',
+    supportedCommands: ['show'],
+    signatures: [
+      {
+        params: [],
+        returnType: 'void',
+      },
+    ],
+  },
+  {
+    name: 'info',
+    description: '',
+    supportedCommands: ['show'],
+    signatures: [
+      {
+        params: [],
         returnType: 'void',
       },
     ],

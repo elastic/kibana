@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
+import { CommonTokenStream, type CodePointCharStream, type ANTLRErrorListener } from 'antlr4ts';
 
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';
 import type { esql_parserListener as ESQLParserListener } from '../antlr/esql_parser_listener';
 
-import type { ANTLREErrorListener } from '../../common/error_listener';
-
 export const ROOT_STATEMENT = 'singleStatement';
 
 export const getParser = (
   inputStream: CodePointCharStream,
-  errorListener: ANTLREErrorListener,
+  errorListener: ANTLRErrorListener<any>,
   parseListener?: ESQLParserListener
 ) => {
   const lexer = getLexer(inputStream, errorListener);
@@ -35,7 +33,10 @@ export const getParser = (
   return parser;
 };
 
-export const getLexer = (inputStream: CodePointCharStream, errorListener: ANTLREErrorListener) => {
+export const getLexer = (
+  inputStream: CodePointCharStream,
+  errorListener: ANTLRErrorListener<any>
+) => {
   const lexer = new ESQLLexer(inputStream);
 
   lexer.removeErrorListeners();

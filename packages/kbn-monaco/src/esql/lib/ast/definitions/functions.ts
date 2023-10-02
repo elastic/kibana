@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionDefinition } from './types';
 
-export const mathCommandFullDefinitions: FunctionDefinition[] = [
+export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
     name: 'round',
     description: i18n.translate('monaco.esql.autocomplete.roundDoc', {
@@ -300,15 +300,15 @@ export const mathCommandFullDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'field', type: 'date' },
           {
             name: 'date_part',
-            type: 'string',
+            type: 'chrono_literal',
           },
+          { name: 'field', type: 'date' },
         ],
         returnType: 'number',
         examples: [
-          `ROW date = DATE_PARSE("2022-05-06", "yyyy-MM-dd") | EVAL year = DATE_EXTRACT(date, "year")`,
+          `ROW date = DATE_PARSE("2022-05-06", "yyyy-MM-dd") | EVAL year = DATE_EXTRACT("year", date)`,
         ],
       },
     ],

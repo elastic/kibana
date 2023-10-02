@@ -79,7 +79,13 @@ describe('ast_listener', () => {
           text: 'showinfo',
           location: { min: 0, max: 4 },
           args: [
-            { type: 'function', name: 'info', text: 'showinfo', location: { min: 5, max: 9 } },
+            {
+              type: 'function',
+              args: [],
+              name: 'info',
+              text: 'showinfo',
+              location: { min: 5, max: 9 },
+            },
           ],
         },
       ]);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLSingleAstItem } from '../ast/types';
+import { ESQLSingleAstItem } from '../types';
 
 export interface FunctionDefinition {
   name: string;
@@ -17,10 +17,36 @@ export interface FunctionDefinition {
       name: string;
       type: string | string[];
       optional?: boolean;
+      noNestingFunctions?: boolean;
     }>;
     infiniteParams?: boolean;
     returnType: string;
     examples?: string[];
   }>;
   warning?: (...args: ESQLSingleAstItem[]) => string | undefined;
+}
+
+export interface CommandBaseDefinition {
+  name: string;
+  alias?: string;
+  description: string;
+  signature: {
+    multipleParams: boolean;
+    params: Array<{ name: string; type: string; optional?: boolean }>;
+  };
+}
+
+export interface CommandOptionsDefinition extends CommandBaseDefinition {
+  wrapped?: string[];
+  optional: boolean;
+}
+
+export interface CommandDefinition extends CommandBaseDefinition {
+  options: CommandOptionsDefinition[];
+  examples: string[];
+}
+
+export interface Literals {
+  name: string;
+  description: string;
 }

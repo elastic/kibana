@@ -28,10 +28,14 @@ export const ESQLLang: CustomLangModuleType = {
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
 
+    // syntax errors are manually handled
     new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
   languageConfiguration: {
-    brackets: [['(', ')']],
+    brackets: [
+      ['(', ')'],
+      ['[', ']'],
+    ],
     autoClosingPairs: [
       { open: '(', close: ')' },
       { open: `'`, close: `'` },

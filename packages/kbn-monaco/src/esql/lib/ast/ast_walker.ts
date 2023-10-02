@@ -24,6 +24,7 @@ import {
   DecimalValueContext,
   DereferenceContext,
   esql_parser,
+  FieldContext,
   FieldsContext,
   FromCommandContext,
   FunctionExpressionContext,
@@ -43,6 +44,7 @@ import {
   QualifiedIntegerLiteralContext,
   RegexBooleanExpressionContext,
   SourceIdentifierContext,
+  StatsCommandContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
@@ -75,13 +77,16 @@ const symbolsLookup: Record<number, string> = Object.entries(esql_parser)
     return memo;
   }, {} as Record<number, string>);
 
-export function getPosition(token: Token | undefined) {
+export function getPosition(token: Token | undefined, lastToken?: Token | undefined) {
   if (!token || token.startIndex < 0) {
-    return;
+    return { min: 0, max: 0 };
   }
+  const endFirstToken =
+    token.stopIndex > -1 ? Math.max(token.stopIndex + 1, token.startIndex) : undefined;
+  const endLastToken = lastToken?.stopIndex;
   return {
     min: token.startIndex,
-    max: token.stopIndex > -1 ? Math.max(token.stopIndex + 1, token.startIndex) : undefined,
+    max: endLastToken ?? endFirstToken ?? Infinity,
   };
 }
 
@@ -128,7 +133,7 @@ export function getLastArgIfType<T extends ESQLSingleAstItem['type']>(
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const args: ESQLSource[] =
     ctx.children
-      ?.filter((child) => child instanceof SourceIdentifierContext)
+      ?.filter((child) => child instanceof SourceIdentifierContext && child.text)
       .map((_, i) => {
         return createSource(ctx.sourceIdentifier(i));
       }) ?? [];
@@ -153,9 +158,8 @@ function visitLogicalIns(ctx: LogicalInContext) {
   const values = [visitValueExpression(left), list.map((ve) => visitValueExpression(ve))];
   for (const arg of values) {
     if (arg) {
-      if ((Array.isArray(arg) && arg.every(nonNullable)) || !Array.isArray(arg)) {
-        fn.args.push(arg);
-      }
+      const filteredArg = !Array.isArray(arg) ? arg : arg.filter(nonNullable);
+      fn.args.push(filteredArg);
     }
   }
   return fn;
@@ -303,15 +307,16 @@ function visitPrimaryExpression(
 }
 
 export function collectLogicalExpression(ctx: BooleanExpressionContext) {
-  const logicalNots = ctx.getRuleContexts(LogicalNotContext);
-  const logicalAndsOrs = ctx.getRuleContexts(LogicalBinaryContext);
-  const logicalIns = ctx.getRuleContexts(LogicalInContext);
-  const ret: ESQLFunction[] = [];
-  return ret.concat(
-    logicalNots.map(visitLogicalNot),
-    logicalAndsOrs.map(visitLogicalAndsOrs),
-    logicalIns.map(visitLogicalIns)
-  );
+  if (ctx instanceof LogicalNotContext) {
+    return [visitLogicalNot(ctx)];
+  }
+  if (ctx instanceof LogicalBinaryContext) {
+    return [visitLogicalAndsOrs(ctx)];
+  }
+  if (ctx instanceof LogicalInContext) {
+    return [visitLogicalIns(ctx)];
+  }
+  return [];
 }
 
 function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
@@ -367,6 +372,18 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   );
 }
 
+export function visitField(ctx: FieldContext) {
+  if (ctx.qualifiedName() && ctx.ASSIGN()) {
+    const fn = createFunction(ctx.ASSIGN()!.text, ctx);
+    fn.args.push(
+      createColumn(ctx.qualifiedName()!),
+      collectBooleanExpression(ctx.booleanExpression())
+    );
+    return [fn];
+  }
+  return collectBooleanExpression(ctx.booleanExpression());
+}
+
 export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQLAstItem[] {
   const ast: ESQLAstItem[] = [];
   if (!ctx) {
@@ -374,21 +391,23 @@ export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQL
   }
   try {
     for (const field of ctx.field()) {
-      if (field.qualifiedName() && field.ASSIGN()) {
-        const fn = createFunction(field.ASSIGN()!.text, field);
-        fn.args.push(
-          createColumn(field.qualifiedName()!),
-          collectBooleanExpression(field.booleanExpression())
-        );
-        ast.push(fn);
-      } else {
-        ast.push(collectBooleanExpression(field.booleanExpression()));
-      }
+      ast.push(...visitField(field));
     }
   } catch (e) {
     // do nothing
   }
   return ast;
+}
+
+export function visitByOption(ctx: StatsCommandContext) {
+  if (!ctx.BY()) {
+    return [];
+  }
+  const option = createOption(ctx.BY()!.text, ctx);
+  for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
+    option.args.push(createColumn(qnCtx));
+  }
+  return [option];
 }
 
 export function createError(exception: RecognitionException) {
@@ -412,7 +431,7 @@ export function createError(exception: RecognitionException) {
       ? `SyntaxError: expected {${getExpectedSymbols(exception.expectedTokens).join(
           ', '
         )}} but found "${token.text}"`
-      : 'Unknown parsing error',
+      : '',
     location: getPosition(token),
   };
 }
@@ -423,7 +442,7 @@ export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand
     name,
     text: ctx.text,
     args: [],
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -432,7 +451,7 @@ function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList {
     type: 'list',
     values,
     text: ctx.text,
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -443,7 +462,7 @@ function createNumericLiteral(ctx: DecimalValueContext | IntegerValueContext): E
     literalType: 'number',
     text,
     value: Number(text),
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -453,7 +472,7 @@ function createFakeMultiplyLiteral(ctx: ArithmeticUnaryContext): ESQLLiteral {
     literalType: 'number',
     text: ctx.text,
     value: ctx.PLUS() ? 1 : -1,
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -463,7 +482,7 @@ export function createLiteral(type: ESQLLiteral['literalType'], node: TerminalNo
     type: 'literal' as const,
     literalType: type,
     text,
-    value: Number(text),
+    value: type === 'number' ? Number(text) : text,
     location: getPosition(node.symbol),
   };
 }
@@ -474,7 +493,7 @@ export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInt
     quantity: Number(ctx.integerValue().text),
     unit: ctx.UNQUOTED_IDENTIFIER().text,
     text: ctx.text,
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -487,7 +506,7 @@ export function createFunction(
     type: 'function',
     name,
     text: ctx.text,
-    location: customPosition ?? getPosition(ctx.start),
+    location: customPosition ?? getPosition(ctx.start, ctx.stop),
     args: [],
   };
 }
@@ -498,7 +517,7 @@ export function createSource(ctx: ParserRuleContext): ESQLSource {
     type: 'source',
     name: text,
     text,
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -508,7 +527,7 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
     type: 'column',
     name: text,
     text,
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
   };
 }
 
@@ -517,7 +536,7 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
     type: 'option',
     name,
     text: ctx.text,
-    location: getPosition(ctx.start),
+    location: getPosition(ctx.start, ctx.stop),
     args: [],
   };
 }

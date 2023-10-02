@@ -7,15 +7,15 @@
  */
 
 import { CharStreams } from 'antlr4ts';
-import { ANTLREErrorListener } from '../../../common/error_listener';
 import { monaco } from '../../../monaco_imports';
 import { getParser } from '../antlr_facade';
 import { AstListener } from '../ast/ast_factory';
-import { suggest } from '../ast/autocomplete';
+import { getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
 import { offsetToRowColumn } from '../ast/helpers';
 import { ESQLMessage } from '../ast/types';
-import { validateAst } from '../ast/validation';
+import { validateAst } from '../ast/validation/validation';
 import { ESQLCustomAutocompleteCallbacks } from '../autocomplete/types';
+import { ESQLErrorListener } from './esql_error_listener';
 
 const ROOT_STATEMENT = 'singleStatement';
 
@@ -63,31 +63,43 @@ function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: 
 }
 
 export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) {
-  const getAst = (model: monaco.editor.ITextModel, position: monaco.Position) => {
-    const text = model?.getValue();
-
+  const getAst = (text: string | undefined) => {
     if (!text) {
       return { ast: [], errors: [] };
     }
     const inputStream = CharStreams.fromString(text.toLowerCase());
-    const errorListener = new ANTLREErrorListener();
+    const errorListener = new ESQLErrorListener();
     const parseListener = createParserListener();
     const parser = getParser(inputStream, errorListener, parseListener);
 
     parser[ROOT_STATEMENT]();
 
-    const ast = parseListener.getAstAndErrors();
+    const ast = parseListener.getAst();
     return ast;
   };
   return {
+    // used for debugging purposes only
     getAst,
-    validate: (model: monaco.editor.ITextModel, position: monaco.Position) => {
-      const { ast, errors: syntaxErrors } = getAst(model, position);
+    validate: (model: monaco.editor.ITextModel) => {
+      const { ast } = getAst(model.getValue());
       const { errors, warnings } = validateAst(ast);
       const code = model?.getValue();
-      const monacoErrors = wrapAsMonacoMessage('error', code, syntaxErrors.concat(errors));
+      const monacoErrors = wrapAsMonacoMessage('error', code, errors);
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };
+    },
+    getSignatureHelp: (): monaco.languages.SignatureHelpProvider => {
+      return {
+        signatureHelpTriggerCharacters: [' ', '('],
+        provideSignatureHelp(
+          model: monaco.editor.ITextModel,
+          position: monaco.Position,
+          _token: monaco.CancellationToken,
+          context: monaco.languages.SignatureHelpContext
+        ) {
+          return getSignatureHelp(model, position, context, getAst);
+        },
+      };
     },
     getSuggestions: (): monaco.languages.CompletionItemProvider => {
       return {
@@ -97,7 +109,13 @@ export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) 
           position: monaco.Position,
           context: monaco.languages.CompletionContext
         ): Promise<monaco.languages.CompletionList> {
-          return suggest(model, position, context, callbacks);
+          const suggestionEntries = await suggest(model, position, context, getAst, callbacks);
+          return {
+            suggestions: suggestionEntries.map((suggestion) => ({
+              ...suggestion,
+              range: undefined as unknown as monaco.IRange,
+            })),
+          };
         },
       };
     },

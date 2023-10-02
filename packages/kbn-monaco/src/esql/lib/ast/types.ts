@@ -21,14 +21,14 @@ export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export interface ESQLLocation {
   min: number;
-  max: number | undefined;
+  max: number;
 }
 
 export interface ESQLCommand {
   type: 'command';
   name: string;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
   args: ESQLAstItem[];
 }
 
@@ -36,7 +36,7 @@ export interface ESQLCommandOption {
   type: 'option';
   name: string;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
   args: ESQLAstItem[];
 }
 
@@ -44,7 +44,7 @@ export interface ESQLFunction {
   type: 'function';
   name: string;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
   args: ESQLAstItem[];
 }
 
@@ -53,28 +53,28 @@ export interface ESQLTimeInterval {
   unit: string;
   quantity: number;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
 }
 
 export interface ESQLSource {
   type: 'source';
   name: string;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
 }
 
 export interface ESQLColumn {
   type: 'column';
   name: string;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
 }
 
 export interface ESQLList {
   type: 'list';
   values: ESQLLiteral[];
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
 }
 
 export interface ESQLLiteral {
@@ -83,11 +83,11 @@ export interface ESQLLiteral {
   name?: string;
   value: string | number;
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
 }
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
-  location?: ESQLLocation;
+  location: ESQLLocation;
 }
