@@ -16,6 +16,7 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import type { KnowledgeBaseEntry } from '../../../common/types';
 import type { RecalledEntry } from '../../service/kb_service';
 
 const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
@@ -233,7 +234,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/functions/kb_status',
+  endpoint: 'GET /internal/observability_ai_assistant/kb/status',
   options: {
     tags: ['access:ai_assistant'],
   },
@@ -256,7 +257,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
 });
 
 const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/setup_kb',
+  endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
   options: {
     tags: ['access:ai_assistant'],
     timeout: {
@@ -276,11 +277,99 @@ const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    entries: KnowledgeBaseEntry[];
+  }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return await client.getKnowledgeBaseEntries();
+  },
+});
+
+const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+  params: t.type({
+    body: t.type({
+      id: t.string,
+      text: nonEmptyStringRt,
+      confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
+      is_correction: toBooleanRt,
+      public: toBooleanRt,
+      labels: t.record(t.string, t.string),
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const {
+      confidence,
+      id,
+      is_correction: isCorrection,
+      text,
+      public: isPublic,
+      labels,
+    } = resources.params.body;
+
+    return client.summarize({
+      entry: {
+        confidence,
+        id,
+        is_correction: isCorrection,
+        text,
+        public: isPublic,
+        labels,
+      },
+    });
+  },
+});
+
+const deleteKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
+  endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+  params: t.type({
+    path: t.type({
+      entryId: t.string,
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.deleteKnowledgeBaseEntry(resources.params.path.entryId);
+  },
+});
+
 export const functionRoutes = {
   ...functionElasticsearchRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
+  ...functionAlertsRoute,
   ...setupKnowledgeBaseRoute,
   ...getKnowledgeBaseStatus,
-  ...functionAlertsRoute,
+  ...getKnowledgeBaseEntries,
+  ...saveKnowledgeBaseEntry,
+  ...deleteKnowledgeBaseEntry,
 };

@@ -13,6 +13,7 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
@@ -26,6 +27,7 @@ import { ConnectorSelectorBase } from '../connector_selector/connector_selector_
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 
 export function ChatActionsMenu({
   connectors,
@@ -51,6 +53,10 @@ export function ChatActionsMenu({
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  const router = useObservabilityAIAssistantRouter();
+
+  const kbLink = router.link('/knowledge-base');
 
   return (
     <EuiPopover
@@ -170,28 +176,26 @@ export function ChatActionsMenu({
             content: (
               <EuiPanel>
                 <EuiText size="s">
-                  <p>
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.description.paragraph',
+                    {
+                      defaultMessage:
+                        'Using a knowledge base is optional but improves the experience of using the Assistant significantly.',
+                    }
+                  )}{' '}
+                  <EuiLink
+                    data-test-subj="observabilityAiAssistantChatActionsMenuLearnMoreLink"
+                    external
+                    target="_blank"
+                    href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html"
+                  >
                     {i18n.translate(
-                      'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.description.paragraph',
+                      'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.elser.learnMore',
                       {
-                        defaultMessage:
-                          'Using a knowledge base is optional but improves the experience of using the Assistant significantly.',
+                        defaultMessage: 'Learn more',
                       }
-                    )}{' '}
-                    <EuiLink
-                      data-test-subj="observabilityAiAssistantChatActionsMenuLearnMoreLink"
-                      external
-                      target="_blank"
-                      href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html"
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.elser.learnMore',
-                        {
-                          defaultMessage: 'Learn more',
-                        }
-                      )}
-                    </EuiLink>
-                  </p>
+                    )}
+                  </EuiLink>
                 </EuiText>
 
                 <EuiSpacer size="l" />
@@ -238,6 +242,22 @@ export function ChatActionsMenu({
                         'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement',
                         {
                           defaultMessage: 'Go to Machine Learning',
+                        }
+                      )}
+                    </EuiButton>
+
+                    <EuiHorizontalRule />
+
+                    <EuiButton
+                      data-test-subj="observabilityAiAssistantChatActionsMenuManageKnowledgeBaseContentsButton"
+                      fill
+                      href={kbLink}
+                      size="s"
+                    >
+                      {i18n.translate(
+                        'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement',
+                        {
+                          defaultMessage: 'Manage contents',
                         }
                       )}
                     </EuiButton>

@@ -8,6 +8,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { id } from '@kbn/files-plugin/common/default_image_file_kind';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IncomingMessage } from 'http';
@@ -370,6 +371,21 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       contexts,
+    });
+  };
+
+  getKnowledgeBaseEntries = async (): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+    return this.dependencies.knowledgeBaseService.getEntries({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+    });
+  };
+
+  deleteKnowledgeBaseEntry = async (id: string): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.deleteEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      id,
     });
   };
 

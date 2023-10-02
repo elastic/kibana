@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ExperimentalFeatureBanner } from './experimental_feature_banner';
-import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 
 export function InitialSetupPanel({
   connectors,

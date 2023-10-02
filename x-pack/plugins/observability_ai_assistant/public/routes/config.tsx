@@ -11,6 +11,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { ObservabilityAIAssistantPageTemplate } from '../components/page_template';
 import { ConversationView } from './conversations/conversation_view';
+import { KnowledgeBaseView } from './knowledge_base/knowledge_base_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -40,6 +41,29 @@ const observabilityAIAssistantRoutes = {
       },
       '/conversations': {
         element: <Redirect to="/conversations/new" />,
+      },
+    },
+  },
+  '/knowledge-base': {
+    element: (
+      <ObservabilityAIAssistantPageTemplate>
+        <Outlet />
+      </ObservabilityAIAssistantPageTemplate>
+    ),
+    children: {
+      '/knowledge-base': {
+        element: <KnowledgeBaseView />,
+      },
+      '/knowledge-base/new': {
+        element: <KnowledgeBaseView />,
+      },
+      '/knowledge-base/{kbEntryId}': {
+        params: t.type({
+          path: t.type({
+            kbEntryId: t.string,
+          }),
+        }),
+        element: <KnowledgeBaseView />,
       },
     },
   },

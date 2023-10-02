@@ -9,6 +9,18 @@ import { useMemo, useState } from 'react';
 import { AbortableAsyncState, useAbortableAsync } from './use_abortable_async';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import type { KnowledgeBaseEntry } from '../../common/types';
+
+interface Foo {
+  id: string;
+  text: string;
+  confidence: 'low' | 'medium' | 'high';
+  is_correction: boolean;
+  public: boolean;
+  labels: {
+    [x: string]: string;
+  };
+}
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<{
@@ -20,6 +32,9 @@ export interface UseKnowledgeBaseResult {
   isInstalling: boolean;
   installError?: Error;
   install: () => Promise<void>;
+  getEntries: () => Promise<{ entries: KnowledgeBaseEntry[] }>;
+  saveEntry: ({ body }: { body: Foo }) => Promise<void>;
+  deleteEntry: (entryId: string) => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -29,7 +44,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const service = useObservabilityAIAssistant();
 
   const status = useAbortableAsync(({ signal }) => {
-    return service.callApi('GET /internal/observability_ai_assistant/functions/kb_status', {
+    return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
       signal,
     });
   }, []);
@@ -45,7 +60,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     const install = (): Promise<void> => {
       setIsInstalling(true);
       return service
-        .callApi('POST /internal/observability_ai_assistant/functions/setup_kb', {
+        .callApi('POST /internal/observability_ai_assistant/kb/setup', {
           signal: null,
         })
         .then(() => {
@@ -79,9 +94,34 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
         });
     };
 
+    const getEntries = (): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+      return service.callApi('GET /internal/observability_ai_assistant/kb/entries', {
+        signal: null,
+      });
+    };
+
+    const saveEntry = (params: { body: Foo }): Promise<void> => {
+      return service.callApi('POST /internal/observability_ai_assistant/kb/entries/save', {
+        signal: null,
+        params,
+      });
+    };
+
+    const deleteEntry = (entryId: string): Promise<void> => {
+      return service.callApi('DELETE /internal/observability_ai_assistant/kb/entries/{entryId}', {
+        signal: null,
+        params: {
+          path: { entryId },
+        },
+      });
+    };
+
     return {
       status,
       install,
+      getEntries,
+      saveEntry,
+      deleteEntry,
       isInstalling,
       installError,
     };

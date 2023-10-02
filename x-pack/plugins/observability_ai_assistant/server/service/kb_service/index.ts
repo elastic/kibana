@@ -239,6 +239,63 @@ export class KnowledgeBaseService {
     }
   };
 
+  getEntries = async ({
+    user,
+    namespace,
+  }: {
+    user: { name: string };
+    namespace: string;
+  }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+    try {
+      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+        index: this.dependencies.resources.aliases.kb,
+        query: {
+          bool: {
+            filter: [
+              ...getAccessQuery({
+                user,
+                namespace,
+              }),
+            ],
+          },
+        },
+        size: 10000,
+        _source: {
+          includes: ['text', 'is_correction', 'labels', 'confidence', 'public', '@timestamp'],
+        },
+      });
+
+      return {
+        entries: response.hits.hits.map((hit) => ({
+          ...hit._source!,
+          score: hit._score,
+          id: hit._id,
+        })),
+      };
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+      throw error;
+    }
+  };
+
+  deleteEntry = async ({ id }: { id: string }): Promise<void> => {
+    try {
+      await this.dependencies.esClient.delete({
+        index: this.dependencies.resources.aliases.kb,
+        id,
+      });
+
+      return Promise.resolve();
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+      throw error;
+    }
+  };
+
   summarize = async ({
     entry: { id, ...document },
     user,
