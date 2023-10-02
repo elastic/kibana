@@ -39,6 +39,7 @@ import {
   SERVERLESS_JWKS_PATH,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
+import { getLocalhostRealIp } from './get_localhost_real_ip';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -50,6 +51,9 @@ jest.mock('@elastic/elasticsearch', () => {
 
 jest.mock('./wait_until_cluster_ready', () => ({
   waitUntilClusterReady: jest.fn(),
+}));
+jest.mock('./get_localhost_real_ip', () => ({
+  getLocalhostRealIp: jest.fn(),
 }));
 
 const log = new ToolingLog();
@@ -155,6 +159,20 @@ describe('resolvePort()', () => {
     `);
   });
 
+  test('should return default port when no options and real localhost ip', () => {
+    (getLocalhostRealIp as jest.MockedFunction<() => string>).mockReturnValue('192.168.1.15');
+    const port = resolvePort({});
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+        "-p",
+        "192.168.1.15:9200:9200",
+      ]
+    `);
+  });
+
   test('should return custom port when passed in options', () => {
     const port = resolvePort({ port: 9220 });
 
@@ -162,6 +180,22 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "--env",
+        "http.port=9220",
+      ]
+    `);
+  });
+
+  test('should return custom port when passed in options and real localhost ip', () => {
+    (getLocalhostRealIp as jest.MockedFunction<() => string>).mockReturnValue('192.168.1.15');
+    const port = resolvePort({ port: 9220 });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+        "-p",
+        "192.168.1.15:9220:9220",
         "--env",
         "http.port=9220",
       ]

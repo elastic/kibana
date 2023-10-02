@@ -314,12 +314,12 @@ export function resolvePort(options: ServerlessOptions | DockerOptions) {
   const value = ['-p', `127.0.0.1:${port}:${port}`];
   const realLocalhostIp = getLocalhostRealIp();
 
-  if (options.port) {
-    value.push('--env', `http.port=${options.port}`);
-  }
-
   if (realLocalhostIp) {
     value.push('-p', `${realLocalhostIp}:${port}:${port}`);
+  }
+
+  if (options.port) {
+    value.push('--env', `http.port=${options.port}`);
   }
 
   return value;

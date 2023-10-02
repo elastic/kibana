@@ -117,7 +117,7 @@ export const createRuntimeServices = async ({
 
   if (asSuperuser) {
     await waitForKibana(
-      new KbnClient({ log, url: kibanaUrl, certificateAuthorities: [CA_CERTIFICATE] })
+      createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl })
     );
     const tmpEsClient = createEsClient({
       url: elasticsearchUrl,
