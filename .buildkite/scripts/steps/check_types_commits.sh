@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+# This script detects the files changed in a given set of commits, finds the related tsconfig.json files, and scope the TypeScript type check to those.
+# In CI, this script can be used for selective type-checking on projects that might be affected for a given PR.
+# (The accuracy for finding related projects is not a 100%)
+
 argv=( "$@" )
 diffArgs=("--name-only")
 uniq_dirs=()
