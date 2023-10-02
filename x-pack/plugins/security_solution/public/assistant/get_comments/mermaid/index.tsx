@@ -5,7 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { MermaidParser } from './parser';
-import { Mermaid } from './mermaid';
+export type { MermaidProps } from './mermaid';
 
-export { MermaidParser as parser, Mermaid as renderer };
+const LazyMermaid = React.lazy(() => import('./mermaid'));
+
+const MermaidRenderer = (props) => (
+  <React.Suspense fallback={null}>
+    <LazyMermaid {...props} />
+  </React.Suspense>
+);
+
+MermaidRenderer.displayName = 'MermaidRenderer';
+
+export { MermaidParser as parser, MermaidRenderer as renderer };

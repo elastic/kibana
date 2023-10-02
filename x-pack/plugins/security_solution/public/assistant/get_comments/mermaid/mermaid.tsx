@@ -27,3 +27,7 @@ const MermaidComponent: React.FC<MermaidProps> = ({ chart, config }) => {
 MermaidComponent.displayName = 'Mermaid';
 
 export const Mermaid = React.memo(MermaidComponent);
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default Mermaid;
