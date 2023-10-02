@@ -51,7 +51,7 @@ async function bulkUntrackAlertsWithOCC(
         ruleTypeId: string;
         consumer: string;
       }) =>
-        await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+        await withSpan({ name: 'authorization.ensureAuthorized', type: 'alerts' }, () =>
           context.authorization.ensureAuthorized({
             ruleTypeId,
             consumer,

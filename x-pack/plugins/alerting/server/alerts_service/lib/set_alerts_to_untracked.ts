@@ -117,7 +117,7 @@ export async function setAlertsToUntracked({
     } of ruleTypeIdBuckets) {
       const consumers = consumerBuckets.map((b) => b.key);
       for (const consumer of consumers) {
-        if (consumer === 'siem') throw new Error('Untracking SIEM alerts is not permitted');
+        if (consumer === 'siem') throw new Error('Untracking Security alerts is not permitted');
         await ensureAuthorized({ ruleTypeId, consumer });
       }
     }
