@@ -7,13 +7,12 @@
 
 import { EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { memo } from 'react';
+import type { AppFeatureKeyType } from '@kbn/security-solution-features/keys';
+import { getProductTypeByPLI } from '../../hooks/use_product_type_by_pli';
 
-import type { AppFeatureKeyType } from '@kbn/security-solution-features';
-import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
-
-const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: AppFeatureKeyType }> =
-  React.memo(({ requiredPLI }) => {
+const EndpointExceptionsDetailsUpselling: React.FC<{ requiredPLI: AppFeatureKeyType }> = memo(
+  ({ requiredPLI }) => {
     const productTypeRequired = getProductTypeByPLI(requiredPLI);
 
     return (
@@ -23,7 +22,7 @@ const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: AppFeature
         title={
           <h2>
             <FormattedMessage
-              id="xpack.securitySolutionServerless.osquery.paywall.title"
+              id="xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.title"
               defaultMessage="Do more with Security!"
             />
           </h2>
@@ -31,17 +30,18 @@ const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: AppFeature
         body={
           <p>
             <FormattedMessage
-              id="xpack.securitySolutionServerless.osquery.paywall.body"
-              defaultMessage="Upgrade your license to {productTypeRequired} to use Osquery Response Actions."
+              id="xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.body"
+              defaultMessage="Upgrade your license to {productTypeRequired} to use Endpoint Security Exception List."
               values={{ productTypeRequired }}
             />
           </p>
         }
       />
     );
-  });
+  }
+);
 
-OsqueryResponseActionsUpsellingSection.displayName = 'OsqueryResponseActionsUpsellingSection';
+EndpointExceptionsDetailsUpselling.displayName = 'EndpointExceptionsDetailsUpselling';
 
 // eslint-disable-next-line import/no-default-export
-export { OsqueryResponseActionsUpsellingSection as default };
+export { EndpointExceptionsDetailsUpselling as default };
