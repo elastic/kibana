@@ -27,6 +27,7 @@ export enum appIds {
   CONNECTORS = 'triggersActionsConnectors',
   RULES = 'triggersActions',
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
+  SERVERLESS_SETTINGS = 'settings',
 }
 
 // Create new type that is a union of all the appId values
@@ -152,6 +153,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage: 'Allow programmatic access to your project data and capabilities.',
     }),
     icon: <EuiIcon size="l" type="lockOpen" />,
+  },
+
+  [appIds.SERVERLESS_SETTINGS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
+      defaultMessage: 'Control project behavior, such as date display and default sorting.',
+    }),
+    icon: <EuiIcon size="l" type="gear" />,
   },
 };
 

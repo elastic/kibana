@@ -15,5 +15,6 @@ export const transformCreateBody = (
     title: createBody.title,
     duration: createBody.duration,
     rRule: createBody.r_rule,
+    categoryIds: createBody.category_ids,
   };
 };

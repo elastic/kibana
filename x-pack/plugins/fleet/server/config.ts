@@ -120,6 +120,7 @@ export const config: PluginConfigDescriptor = {
         elasticsearch: schema.object({
           hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
           ca_sha256: schema.maybe(schema.string()),
+          ca_trusted_fingerprint: schema.maybe(schema.string()),
         }),
         fleet_server: schema.maybe(
           schema.object({
@@ -188,6 +189,7 @@ export const config: PluginConfigDescriptor = {
               min: 0,
             })
           ),
+          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
           registry: schema.object(
             {
               kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),

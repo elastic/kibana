@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
       );
 
-      expectSnapshot(body).toMatch();
+      expectSnapshot(body.summaries).toMatch();
     });
 
     it('can navigate forward and backward using pagination', async () => {
