@@ -17,7 +17,7 @@ export function registerCasesPersistableState(cases: CasesSetup | undefined, log
       });
     } catch (error) {
       logger.warn(
-        `AIPOs failed to register cases persistable state for ${CASES_ATTACHMENT_CHANGE_POINT_CHART}`
+        `AIOPs failed to register cases persistable state for ${CASES_ATTACHMENT_CHANGE_POINT_CHART}`
       );
     }
   }
