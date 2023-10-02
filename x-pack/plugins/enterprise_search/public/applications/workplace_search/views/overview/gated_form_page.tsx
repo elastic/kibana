@@ -20,7 +20,7 @@ import {
 } from '../../../shared/layout';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
-import { WorkplaceSearchGate } from './workplace_search_gate';
+import { WorkplaceSearchGate } from './gated_form';
 
 export const WorkplaceSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading }) => {
   return (
