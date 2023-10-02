@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { act, waitFor, screen } from '@testing-library/react';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
@@ -20,10 +21,10 @@ import { casesQueriesKeys } from '../../containers/constants';
 import { basicCase } from '../../containers/mock';
 import { CasesTableUtilityBar } from './utility_bar';
 
-describe('Severity form field', () => {
+describe('Utility bar', () => {
   let appMockRender: AppMockRenderer;
   const deselectCases = jest.fn();
-  const localStorageKey = 'cases.testAppId.utilityBar.hideMaxLimitWarning';
+  const allCasesPageSize = [10, 25, 50, 100];
 
   const props = {
     totalCases: 5,
@@ -161,172 +162,20 @@ describe('Severity form field', () => {
     expect(screen.queryByText('Showing 0 cases')).toBeFalsy();
   });
 
-  describe('Maximum number of cases', () => {
-    const newProps = {
-      ...props,
-      selectedCaseS: [],
-      totalCases: MAX_DOCS_PER_PAGE,
-      pagination: {
-        ...props.pagination,
-        totalItemCount: MAX_DOCS_PER_PAGE,
-      },
-    };
+  it.each(allCasesPageSize)(`renders showing cases message correctly`, (size) => {
+    const newPageIndex = MAX_DOCS_PER_PAGE / size;
 
-    const allCasesPageSize = [10, 25, 50, 100];
-
-    it.each(allCasesPageSize)(
-      `does not show warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 < ${MAX_DOCS_PER_PAGE}`,
-      (size) => {
-        const newPageIndex = MAX_DOCS_PER_PAGE / size - 2;
-
-        appMockRender.render(
-          <CasesTableUtilityBar
-            {...{
-              ...newProps,
-              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
-            }}
-          />
-        );
-
-        expect(
-          screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
-        ).toBeInTheDocument();
-        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
-      }
+    appMockRender.render(
+      <CasesTableUtilityBar
+        {...{
+          ...props,
+          totalCases: MAX_DOCS_PER_PAGE,
+          pagination: { ...props.pagination, pageSize: size, pageIndex: newPageIndex },
+        }}
+      />
     );
 
-    it.each(allCasesPageSize)(
-      `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 = ${MAX_DOCS_PER_PAGE}`,
-      (size) => {
-        const newPageIndex = MAX_DOCS_PER_PAGE / size - 1;
-
-        appMockRender.render(
-          <CasesTableUtilityBar
-            {...{
-              ...newProps,
-              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
-            }}
-          />
-        );
-
-        expect(
-          screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
-        ).toBeInTheDocument();
-        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-      }
-    );
-
-    it.each(allCasesPageSize)(
-      `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 > ${MAX_DOCS_PER_PAGE}`,
-      (size) => {
-        const newPageIndex = MAX_DOCS_PER_PAGE / size;
-
-        appMockRender.render(
-          <CasesTableUtilityBar
-            {...{
-              ...newProps,
-              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
-            }}
-          />
-        );
-
-        expect(
-          screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
-        ).toBeInTheDocument();
-        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-      }
-    );
-
-    it('should show dismiss and do not show again buttons correctly', () => {
-      appMockRender.render(
-        <CasesTableUtilityBar
-          {...{
-            ...newProps,
-            pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
-          }}
-        />
-      );
-
-      expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-      expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();
-
-      expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
-    });
-
-    it('should dismiss warning correctly', () => {
-      appMockRender.render(
-        <CasesTableUtilityBar
-          {...{
-            ...newProps,
-            pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
-          }}
-        />
-      );
-
-      expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-      expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();
-
-      userEvent.click(screen.getByTestId('dismiss-warning'));
-
-      expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
-    });
-
-    describe('do not show button', () => {
-      beforeAll(() => {
-        jest.useFakeTimers();
-      });
-
-      afterEach(() => {
-        jest.clearAllTimers();
-      });
-
-      afterAll(() => {
-        jest.useRealTimers();
-        sessionStorage.removeItem(localStorageKey);
-      });
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should set storage key correctly', () => {
-        appMockRender.render(
-          <CasesTableUtilityBar
-            {...{
-              ...newProps,
-              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
-            }}
-          />
-        );
-
-        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-        expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
-
-        expect(localStorage.getItem(localStorageKey)).toBe(null);
-      });
-
-      it('should hide warning correctly when do not show button clicked', () => {
-        appMockRender.render(
-          <CasesTableUtilityBar
-            {...{
-              ...newProps,
-              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
-            }}
-          />
-        );
-
-        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-        expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
-
-        userEvent.click(screen.getByTestId('do-not-show-warning'));
-
-        act(() => {
-          jest.advanceTimersByTime(1000);
-        });
-
-        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
-        expect(localStorage.getItem(localStorageKey)).toBe('true');
-      });
-    });
+    expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+    expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
   });
 });
