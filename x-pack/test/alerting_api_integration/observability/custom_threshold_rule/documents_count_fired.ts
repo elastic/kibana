@@ -163,6 +163,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
 
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.group');
+
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
