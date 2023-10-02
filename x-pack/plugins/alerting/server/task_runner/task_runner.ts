@@ -306,7 +306,7 @@ export class TaskRunner<
       snoozeSchedule,
     } = rule;
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, adHocOptions },
       state: {
         alertInstances: alertRawInstances = {},
         alertRecoveredInstances: alertRecoveredRawInstances = {},
@@ -487,6 +487,7 @@ export class TaskRunner<
               state: ruleTypeState as RuleState,
               startedAt: this.taskInstance.startedAt!,
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+              adHocOptions,
               spaceId,
               namespace,
               rule: {
@@ -635,7 +636,7 @@ export class TaskRunner<
     }
 
     const {
-      params: { alertId: ruleId, spaceId, consumer },
+      params: { alertId: ruleId, spaceId, consumer, adHocOptions },
     } = this.taskInstance;
 
     if (apm.currentTransaction) {
@@ -680,6 +681,7 @@ export class TaskRunner<
       spaceId,
       context: this.context,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      isAdHocRuleRun: !!adHocOptions,
     });
   }
 
@@ -802,11 +804,12 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, adHocOptions },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+    const isAdHocRuleRun = !!adHocOptions;
 
     this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
 
@@ -820,7 +823,7 @@ export class TaskRunner<
     }
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    let schedule: Result<IntervalSchedule, Error>;
+    let schedule: Result<IntervalSchedule | undefined, Error>;
     try {
       const preparedResult = await this.prepareToRun();
 
@@ -843,14 +846,14 @@ export class TaskRunner<
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
       const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
-      schedule = asOk(attributes.rule.schedule);
+      schedule = isAdHocRuleRun ? asOk(undefined) : asOk(attributes.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
     }
 
     let nextRun: string | null = null;
-    if (isOk(schedule)) {
+    if (isOk(schedule) && schedule.value?.interval) {
       nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
     } else if (taskSchedule) {
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });

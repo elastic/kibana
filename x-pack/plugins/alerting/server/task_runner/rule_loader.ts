@@ -48,6 +48,7 @@ interface ValidateRuleParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
   ruleTypeRegistry: RuleTypeRegistry;
   ruleData: RuleDataResult<RuleData<Params>>;
+  isAdHocRuleRun?: boolean;
 }
 
 export function validateRule<Params extends RuleTypeParams>(
@@ -64,11 +65,12 @@ export function validateRule<Params extends RuleTypeParams>(
     ruleTypeRegistry,
     paramValidator,
     alertingEventLogger,
+    isAdHocRuleRun,
   } = params;
 
   const { enabled, apiKey } = indirectParams;
 
-  if (!enabled) {
+  if (!enabled && !isAdHocRuleRun) {
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
       new Error(`Rule failed to execute because rule ran after it was disabled.`)

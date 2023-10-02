@@ -229,6 +229,8 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
+export const DETECTION_ENGINE_RULES_AD_HOC_RUN =
+  `${DETECTION_ENGINE_RULES_URL}/_ad_hoc_run` as const;
 export const DETECTION_ENGINE_RULES_BULK_DELETE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
 export const DETECTION_ENGINE_RULES_BULK_CREATE =

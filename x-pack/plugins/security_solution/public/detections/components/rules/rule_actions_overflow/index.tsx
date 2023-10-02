@@ -50,6 +50,7 @@ interface RuleActionsOverflowComponentProps {
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   confirmDeletion: () => Promise<boolean>;
+  showAdHocRunModal?: () => void;
 }
 
 /**
@@ -61,6 +62,7 @@ const RuleActionsOverflowComponent = ({
   canDuplicateRuleWithActions,
   showBulkDuplicateExceptionsConfirmation,
   confirmDeletion,
+  showAdHocRunModal,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
@@ -165,6 +167,18 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.DELETE_RULE}
             </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key={i18nActions.AD_HOC_RUN}
+              icon="refresh"
+              disabled={!userHasPermissions}
+              data-test-subj="rules-details-ad-hoc-run"
+              onClick={async () => {
+                closePopover();
+                showAdHocRunModal?.();
+              }}
+            >
+              {i18nActions.AD_HOC_RUN}
+            </EuiContextMenuItem>,
           ]
         : [],
     [
@@ -180,6 +194,7 @@ const RuleActionsOverflowComponent = ({
       userHasPermissions,
       downloadExportedRules,
       confirmDeletion,
+      showAdHocRunModal,
     ]
   );
 

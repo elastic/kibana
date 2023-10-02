@@ -124,18 +124,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             executionId,
             params,
             previousStartedAt,
-            startedAt,
             services,
             spaceId,
             state,
             rule,
+            adHocOptions,
           } = options;
+          let { startedAt } = options;
           let runState = state;
           let inputIndex: string[] = [];
           let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
-            params;
+          let { from, to, maxSignals } = params;
+          const { timestampOverride, timestampOverrideFallbackDisabled } = params;
           const {
             alertWithPersistence,
             alertWithSuppression,
@@ -145,7 +146,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleMonitoringService,
             ruleResultService,
           } = services;
-          const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const esClient = scopedClusterClient.asCurrentUser;
 
@@ -170,9 +170,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             alertId: rule.id,
           };
 
-          const {
+          const { actions } = completeRule.ruleConfig;
+          let {
             schedule: { interval },
           } = completeRule.ruleConfig;
+
+          if (adHocOptions) {
+            from = adHocOptions.from;
+            to = adHocOptions.to;
+            interval = '1s';
+            startedAt = new Date(adHocOptions.to);
+            maxSignals = adHocOptions.maxSignals;
+          }
+          ruleExecutionLogger.debug(`[AD-HOC] adHocOptions: ${JSON.stringify(adHocOptions)}`);
+          const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const refresh = isPreview ? false : true;
 

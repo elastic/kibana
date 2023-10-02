@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
@@ -257,6 +257,15 @@ export interface FilterOptions {
   excludeRuleTypes?: Type[];
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
+}
+
+export interface AdHocRunProps {
+  id: string;
+  from: string;
+  to: string;
+  maxSignals: number;
+  actions?: RuleAction[];
+  signal?: AbortSignal;
 }
 
 export interface FetchRulesResponse {

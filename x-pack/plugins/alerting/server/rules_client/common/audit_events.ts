@@ -33,6 +33,7 @@ export enum RuleAuditAction {
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
   RUN_SOON = 'rule_run_soon',
+  AD_HOC_RUN = 'ad_hoc_rule_run',
 }
 
 type VerbsTuple = [string, string, string];
@@ -71,6 +72,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
   rule_run_soon: ['run', 'running', 'ran'],
+  ad_hoc_rule_run: ['run', 'running', 'ran'],
   rule_get_execution_kpi: [
     'access execution KPI for',
     'accessing execution KPI for',
@@ -107,6 +109,7 @@ const eventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_run_soon: 'access',
   rule_get_execution_kpi: 'access',
   rule_get_global_execution_kpi: 'access',
+  ad_hoc_rule_run: 'access',
 };
 
 export interface RuleAuditEventParams {

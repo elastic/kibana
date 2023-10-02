@@ -175,8 +175,9 @@ export class ExecutionHandler<
   public async run(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
+    const { adHocOptions } = this.taskInstance.params;
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
-      actions: this.rule.actions,
+      actions: adHocOptions?.actions ? adHocOptions.actions : this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
     const executables = await this.generateExecutables(alerts, throttledSummaryActions);
@@ -565,7 +566,10 @@ export class ExecutionHandler<
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
 
-    for (const action of this.rule.actions) {
+    const { adHocOptions } = this.taskInstance.params;
+    const actions = adHocOptions?.actions ? adHocOptions.actions : this.rule.actions;
+
+    for (const action of actions) {
       const alertsArray = Object.entries(alerts);
       let summarizedAlerts = null;
 

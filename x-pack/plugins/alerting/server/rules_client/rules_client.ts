@@ -6,7 +6,7 @@
  */
 
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
-import { SanitizedRule, RuleTypeParams } from '../types';
+import { RuleAction, SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions } from './types';
 import { clone, CloneArguments } from './methods/clone';
@@ -61,6 +61,7 @@ import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
 import { getTags, GetTagsParams } from './methods/get_tags';
+import { adHocRun } from './methods/ad_hoc_run';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 
 export type ConstructorOptions = Omit<
@@ -168,6 +169,14 @@ export class RulesClient {
   public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
+
+  public adHocRun = (options: {
+    id: string;
+    from: string;
+    to: string;
+    maxSignals: number;
+    actions?: RuleAction[];
+  }) => adHocRun(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 

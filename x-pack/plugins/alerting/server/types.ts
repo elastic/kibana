@@ -135,6 +135,11 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
+  adHocOptions?: {
+    from: string;
+    to: string;
+    maxSignals: number;
+  };
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
