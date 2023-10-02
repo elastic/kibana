@@ -414,9 +414,20 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows.map(
-      (maintenanceWindow) => maintenanceWindow.id
-    );
+    const maintenanceWindowIds = activeMaintenanceWindows
+      .filter(({ categoryIds }) => {
+        // If category IDs array doesn't exist: allow all
+        if (!Array.isArray(categoryIds)) {
+          return true;
+        }
+        // If category IDs array exist: check category
+        if ((categoryIds as string[]).includes(ruleType.category)) {
+          return true;
+        }
+        return false;
+      })
+      .map(({ id }) => id);
+
     if (maintenanceWindowIds.length) {
       this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
     }
