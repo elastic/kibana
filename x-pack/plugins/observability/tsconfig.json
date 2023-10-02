@@ -88,6 +88,7 @@
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
     "@kbn/deeplinks-observability",
+    "@kbn/core-application-common",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme"
   ],
