@@ -20,7 +20,14 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
@@ -75,13 +82,13 @@ export function AlertActions({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
+  const ruleId = alert.fields[ALERT_RULE_UUID] ?? null;
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? prepend(paths.observability.ruleDetails(ruleId))
       : null;
 
-  const alertId = alert.fields['kibana.alert.uuid'] ?? null;
+  const alertId = alert.fields[ALERT_UUID] ?? null;
   const linkToAlert =
     pageId !== ALERT_DETAILS_PAGE_ID && alertId
       ? prepend(paths.observability.alertDetails(alertId))
@@ -99,6 +106,11 @@ export function AlertActions({
         ]
       : [];
   }, [ecsData, getRuleIdFromEvent, data]);
+
+  const isActiveAlert = useMemo(
+    () => alert.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
+    [alert.fields]
+  );
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -199,7 +211,7 @@ export function AlertActions({
         </EuiContextMenuItem>
       ),
     ],
-    ...(userCasesPermissions.update
+    ...(userCasesPermissions.update && isActiveAlert
       ? [
           <EuiContextMenuItem
             data-test-subj="untrackAlert"
