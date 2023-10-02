@@ -70,7 +70,7 @@ describe('Policy Windows Event Collection Card', () => {
             'Operating system' +
             'Windows 8 / 8 event collections enabled' +
             'Events' +
-            'Credential Access' +
+            'API' +
             'DLL and Driver Load' +
             'DNS' +
             'File' +
@@ -98,7 +98,7 @@ describe('Policy Windows Event Collection Card', () => {
             'Windows ' +
             '6 / 8 event collections enabled' +
             'Events' +
-            'Credential Access' +
+            'API' +
             'DLL and Driver Load' +
             'Network' +
             'Process' +
