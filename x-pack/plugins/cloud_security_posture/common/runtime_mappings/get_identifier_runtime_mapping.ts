@@ -20,9 +20,6 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
           !doc["rule.benchmark.posture_type"].empty;
         def orchestratorIdAvailable = doc.containsKey("orchestrator.cluster.id") &&
           !doc["orchestrator.cluster.id"].empty;
-        def packagePolicyIdExists = doc.containsKey("cloud_security_posture.package_policy.id") &&
-          !doc["cloud_security_posture.package_policy.id"].empty;
-
         if (!postureTypeAvailable) {
           def identifier = orchestratorIdAvailable ?
             doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
@@ -43,10 +40,6 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
             emit(identifier);
           }
         }
-        if (packagePolicyIdExists) {
-          emit(doc["cloud_security_posture.package_policy.id"].value);
-        }
-      
       `,
     },
   },

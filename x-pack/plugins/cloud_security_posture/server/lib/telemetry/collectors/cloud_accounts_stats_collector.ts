@@ -7,6 +7,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
 import { getSafeCloudAccountIdRuntimeMapping } from '../../../../common/runtime_mappings/get_cloud_account_id_mapping';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
@@ -26,7 +27,7 @@ import {
 
 export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
-  runtime_mappings: getIdentifierRuntimeMapping(),
+  runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getPackagePolicyIdRuntimeMapping() },
   query: {
     match_all: {},
   },
@@ -291,10 +292,10 @@ const getKspmStats = (account: AccountEntity) => ({
   },
 });
 
-const kspmCloudProviders: Record<CloudProviderKey, string> = {
+const kspmCloudProviders: Record<CloudProviderKey, string | null> = {
   cis_eks: 'aws',
   cis_gke: 'gcp',
-  cis_k8s: 'self_managed',
+  cis_k8s: null,
   cis_ake: 'azure',
 };
 const cspmBenchmarkIds = ['cis_aws', 'cis_azure', 'cis_gcp'];
