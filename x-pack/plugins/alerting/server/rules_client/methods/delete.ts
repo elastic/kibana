@@ -6,13 +6,14 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { Rule } from '../../../common';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { migrateLegacyActions } from '../lib';
+import { untrackRuleAlerts, migrateLegacyActions } from '../lib';
 
 export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
   return await retryIfConflicts(
@@ -47,6 +48,13 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     taskIdToRemove = alert.attributes.scheduledTaskId;
     attributes = alert.attributes;
   }
+
+  await untrackRuleAlerts(
+    context,
+    id,
+    // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
+    attributes as unknown as Rule<never>
+  );
 
   try {
     await context.authorization.ensureAuthorized({
