@@ -61,7 +61,6 @@ export function AlertActions({
     http: {
       basePath: { prepend },
     },
-    application,
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
@@ -71,7 +70,6 @@ export function AlertActions({
     [observabilityRuleTypeRegistry]
   );
 
-  const ruleSavePermissions = application?.capabilities.rulesSettings.save;
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const alert = parseObservabilityAlert(dataFieldEs);
 
@@ -201,7 +199,7 @@ export function AlertActions({
         </EuiContextMenuItem>
       ),
     ],
-    ...(ruleSavePermissions
+    ...(userCasesPermissions.update
       ? [
           <EuiContextMenuItem
             data-test-subj="untrackAlert"

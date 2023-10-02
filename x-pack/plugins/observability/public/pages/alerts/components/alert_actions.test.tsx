@@ -45,6 +45,12 @@ jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
   useGetUserCasesPermissions: jest.fn(() => ({ create: true, read: true })),
 }));
 
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react', () => ({
+  useKibana: jest.fn(() => ({
+    services: { notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } } },
+  })),
+}));
+
 const config = {
   unsafe: {
     alertDetails: {
