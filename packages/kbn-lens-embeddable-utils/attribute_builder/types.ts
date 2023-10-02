@@ -11,6 +11,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   FormBasedPersistedState,
   MetricVisualizationState,
+  PieVisualizationState,
+  HeatmapVisualizationState,
   PersistedIndexPatternLayer,
   TypedLensByValueInput,
   XYState,
@@ -20,7 +22,11 @@ import type {
 export type LensAttributes = TypedLensByValueInput['attributes'];
 
 // Attributes
-export type LensVisualizationState = XYState | MetricVisualizationState;
+export type LensVisualizationState =
+  | XYState
+  | MetricVisualizationState
+  | PieVisualizationState
+  | HeatmapVisualizationState;
 
 export interface VisualizationAttributesBuilder {
   build(): LensAttributes;
@@ -45,7 +51,11 @@ export interface StaticChartColumn extends BaseChartColumn<StaticValueConfig> {
 }
 
 // Layer
-export type LensLayerConfig = XYLayerConfig | MetricVisualizationState;
+export type LensLayerConfig =
+  | XYLayerConfig
+  | MetricVisualizationState
+  | PieVisualizationState
+  | HeatmapVisualizationState;
 
 export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   getName(): string | undefined;

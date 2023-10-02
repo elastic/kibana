@@ -8,9 +8,8 @@
 
 import type {
   FormBasedPersistedState,
-  XYArgs,
-  XYLayerConfig,
-  XYState,
+  PieLayerState,
+  PieVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -20,24 +19,18 @@ import { DEFAULT_LAYER_ID } from '../utils';
 const ACCESSOR = 'formula_accessor';
 
 // This needs be more specialized by `preferredSeriesType`
-export interface XYVisualOptions {
-  lineInterpolation?: XYArgs['curveType'];
-  missingValues?: XYArgs['fittingFunction'];
-  endValues?: XYArgs['endValue'];
-  showDottedLine?: boolean;
-  legend?: XYArgs['legend'];
-}
+export interface PieVisualOptions {}
 
-export class XYChart implements Chart<XYState> {
-  private _layers: Array<ChartLayer<XYLayerConfig>> | null = null;
+export class PieChart implements Chart<PieVisualizationState> {
+  private _layers: Array<ChartLayer<PieLayerState>> | null = null;
   constructor(
-    private chartConfig: ChartConfig<Array<ChartLayer<XYLayerConfig>>> & {
-      visualOptions?: XYVisualOptions;
+    private chartConfig: ChartConfig<Array<ChartLayer<PieLayerState>>> & {
+      visualOptions?: PieVisualOptions;
     }
   ) {}
 
   getVisualizationType(): string {
-    return 'lnsXY';
+    return 'lnsPie';
   }
 
   private get layers() {
@@ -66,9 +59,9 @@ export class XYChart implements Chart<XYState> {
     }, {});
   }
 
-  getVisualizationState(): XYState {
+  getVisualizationState(): PieVisualizationState {
     const state = {
-      ...getXYVisualizationState({
+      ...getPieVisualizationState({
         layers: [
           ...this.chartConfig.layers.map((layerItem, index) => {
             const layerId = `${DEFAULT_LAYER_ID}_${index}`;
@@ -77,15 +70,7 @@ export class XYChart implements Chart<XYState> {
           }),
         ],
       }),
-      fittingFunction: this.chartConfig.visualOptions?.missingValues ?? 'None',
-      endValue: this.chartConfig.visualOptions?.endValues,
-      curveType: this.chartConfig.visualOptions?.lineInterpolation,
-      emphasizeFitting: !this.chartConfig.visualOptions?.showDottedLine,
     };
-
-    if (this.chartConfig.visualOptions?.legend) {
-      state.legend = this.chartConfig.visualOptions?.legend;
-    }
 
     return state;
   }
@@ -109,38 +94,11 @@ export class XYChart implements Chart<XYState> {
   }
 }
 
-export const getXYVisualizationState = (
-  custom: Omit<Partial<XYState>, 'layers'> & { layers: XYState['layers'] }
-): XYState => ({
-  legend: {
-    isVisible: false,
-    position: 'right',
-    showSingleSeries: false,
-  },
-  valueLabels: 'show',
-  yLeftScale: 'linear',
-  axisTitlesVisibilitySettings: {
-    x: false,
-    yLeft: false,
-    yRight: true,
-  },
-  tickLabelsVisibilitySettings: {
-    x: true,
-    yLeft: true,
-    yRight: true,
-  },
-  labelsOrientation: {
-    x: 0,
-    yLeft: 0,
-    yRight: 0,
-  },
-  gridlinesVisibilitySettings: {
-    x: true,
-    yLeft: true,
-    yRight: true,
-  },
-  preferredSeriesType: 'line',
-  valuesInLegend: false,
-  hideEndzones: true,
+export const getPieVisualizationState = (
+  custom: Omit<Partial<PieVisualizationState>, 'layers'> & {
+    layers: PieVisualizationState['layers'];
+  }
+): PieVisualizationState => ({
+  shape: 'pie',
   ...custom,
 });

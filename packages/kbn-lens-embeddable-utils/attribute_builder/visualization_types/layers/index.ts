@@ -7,6 +7,8 @@
  */
 
 export { MetricLayer, type MetricLayerOptions, type MetricLayerConfig } from './metric_layer';
+export { PieLayer, type PieLayerOptions, type PieLayerConfig } from './pie_layer';
+export { HeatmapLayer, type HeatmapLayerOptions, type HeatmapLayerConfig } from './heatmap_layer';
 export { XYDataLayer, type XYLayerOptions, type XYLayerConfig } from './xy_data_layer';
 export {
   XYReferenceLinesLayer,

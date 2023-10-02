@@ -7,7 +7,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type {LegendConfigResult, LensPublicStart} from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
@@ -34,19 +34,25 @@ function Lens({
   indexPattern,
   layers,
   breakdown,
+  breakdown_x,
   seriesType,
   start,
   end,
   lens,
+  legend,
+  chartType,
   dataViews,
   timeField,
 }: {
   indexPattern: string;
   layers: any;
-  breakdown?: { field: string };
+  breakdown?: string;
+  breakdown_x?: string;
   seriesType?: string;
   start: string;
   end: string;
+  legend?: LegendConfigResult;
+  chartType?: string;
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   timeField: string;
@@ -60,8 +66,11 @@ function Lens({
       layers,
       seriesType,
       breakdown,
+      breakdown_x,
+      legend,
+      chartType,
     });
-  }, [lens, dataViews, indexPattern, timeField, start, end, layers, seriesType, breakdown]);
+  }, [lens, dataViews, indexPattern, timeField, start, end, layers, seriesType, breakdown, legend, chartType]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
@@ -191,8 +200,7 @@ export function registerLensFunction({
           timeField: {
             type: 'string',
             default: '@timefield',
-            description:
-              'time field to use for XY chart. Use @timefield if its available on the index.',
+            description: 'This should always be set!. time field to use on the x axis if XY chart is used. For other chart types this defines the primary timefield of the dataset.',
           },
           breakdown: {
             type: 'object',
@@ -202,7 +210,25 @@ export function registerLensFunction({
                 type: 'string',
               },
             },
+            description: 'this is required setting for pie and heatmap chart and optional for other charts. For heatmap chart it defines breakdown on the Y axis.',
             required: ['field'],
+          },
+          breakdown_x: {
+            type: 'string',
+            description: 'this is required setting for heatmap chart. It defines the field to breakdown on X axis.'
+          },
+          legend: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              visibility: {
+                type: 'boolean',
+              },
+              position: {
+                type: 'string',
+                enum: ['left', 'right', 'bottom', 'top'],
+              },
+            },
           },
           indexPattern: {
             type: 'string',
@@ -229,6 +255,11 @@ export function registerLensFunction({
             type: 'string',
             description: 'The end of the time range, in Elasticsearch datemath',
           },
+          chartType: {
+            type: 'string',
+            description: 'chart type to render, if not set XY chart is assumed',
+            enum: ['XY', 'heatmap', 'pie', 'metric'],
+          },
         },
         required: ['layers', 'indexPattern', 'start', 'end', 'timeField'],
       } as const,
@@ -238,20 +269,22 @@ export function registerLensFunction({
         content: {},
       };
     },
-    ({ arguments: { layers, indexPattern, breakdown, seriesType, start, end, timeField } }) => {
+    ({ arguments: { layers, indexPattern, breakdown, breakdown_x, legend, chartType, seriesType, start, end, timeField } }) => {
       if (!timeField) return;
 
       return (
         <Lens
           indexPattern={indexPattern}
           layers={layers}
-          seriesType={seriesType}
-          breakdown={breakdown}
+          breakdown={breakdown ? breakdown.field : undefined}
+          breakdown_x={breakdown_x}
+          timeField={timeField}
           start={start}
           end={end}
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
-          timeField={timeField}
+          legend={legend}
+          chartType={chartType}
         />
       );
     }

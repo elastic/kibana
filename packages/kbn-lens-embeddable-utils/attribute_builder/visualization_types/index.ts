@@ -8,5 +8,6 @@
 
 export { XYChart, type XYVisualOptions } from './xy_chart';
 export { MetricChart } from './metric_chart';
-
+export { PieChart } from './pie_chart';
+export { HeatmapChart } from './heatmap_chart';
 export * from './layers';

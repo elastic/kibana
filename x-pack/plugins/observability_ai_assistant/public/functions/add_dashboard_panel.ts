@@ -40,9 +40,18 @@ export function registerAddPanelToDashboardFunction({
       } as const,
     },
     async ({ arguments: { config }}) => {
-      getLensConfig(pluginsStart.lens, pluginsStart.dataViews, JSON.parse(config)).then((parsedConfig) => {
+      const parsedConfig = JSON.parse(config);
+      parsedConfig.breakdown = parsedConfig.breakdown ? parsedConfig.breakdown.field : undefined;
+      getLensConfig(pluginsStart.lens, pluginsStart.dataViews, parsedConfig).then((lensConfig) => {
         // @ts-ignore
-        window._dashboardAPI.addNewEmbeddable('lens', parsedConfig);
+        window._dashboardAPI.addNewEmbeddable('lens', {
+          ...lensConfig,
+          id: undefined,
+          attributes: {
+            type: 'lens',
+            ...lensConfig.attributes,
+          }
+        });
       });
 
       return {
