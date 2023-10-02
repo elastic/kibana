@@ -187,6 +187,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...this.contract.getStartServices(),
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+        setHeaderActionMenu: params.setHeaderActionMenu,
         storage: this.storage,
         sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,

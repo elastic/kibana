@@ -151,6 +151,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -289,6 +298,15 @@ describe('getMonitorStatus', () => {
                 Object {
                   "exists": Object {
                     "field": "summary",
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
                   },
                 },
                 Object {
@@ -470,6 +488,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -641,6 +668,15 @@ describe('getMonitorStatus', () => {
                   },
                 },
                 Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
+                  },
+                },
+                Object {
                   "range": Object {
                     "summary.down": Object {
                       "gt": "0",
@@ -784,6 +820,15 @@ describe('getMonitorStatus', () => {
                 Object {
                   "exists": Object {
                     "field": "summary",
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
+                      },
+                    },
                   },
                 },
                 Object {

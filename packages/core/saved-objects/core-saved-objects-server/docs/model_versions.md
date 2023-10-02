@@ -893,9 +893,11 @@ to the `fields` option **were already present in the prior model version**. Othe
 during upgrades, where newly introduced or backfilled fields may not necessarily appear in the documents returned
 from the `search` API when the option is used.
 
-### Using `update` with dynamically backfilled fields
+### Using `bulkUpdate` with dynamically backfilled fields
 
-The savedObjects `update` API is effectively a partial update (using Elasticsearch's `_update` under the hood),
+(Note: this same limitation used to exist for the `update` method but has been [fixed](https://github.com/elastic/kibana/issues/165434). So while they're similar this limitation is only relevant for the `bulkUpdate` method)
+
+The savedObjects `bulkUpdate` API is effectively a partial update (using Elasticsearch's `_update` under the hood),
 allowing API consumers to only specify the subset of fields they want to update to new values, without having to
 provide the full list of attributes (the unchanged ones). We're also not changing the `version` of the document
 during updates, even when the instance performing the operation doesn't know about the current model version
@@ -935,8 +937,14 @@ const newDocAttributes = {
 Which could occur either while being still in the cohabitation period, or in case of rollback:
 
 ```ts
-savedObjectClient.update('type', 'id', {
-  index: 11,
+savedObjectClient.bulkUpdate({
+  objects: [{
+    type: 'type', 
+    id: 'id', 
+    attributes: {
+      index: 11
+    }
+  }]
 });
 ```
 
@@ -949,7 +957,7 @@ We will then be in a situation where our data is **inconsistent**, as the value 
 }
 ```
 
-The long term solution for that is implementing [backward-compatible updates](https://github.com/elastic/kibana/issues/152807), however
+The long term solution for that is implementing [backward-compatible updates](https://github.com/elastic/kibana/issues/165434), however
 this won't be done for the MVP, so the workaround for now is to avoid situations where this edge case can occur.
 
 It can be avoided by either:

@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type {
   TimelineEqlRequestOptionsInput,
@@ -251,7 +251,7 @@ export const useTimelineEventsHandler = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 endTracking('success');
                 setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {

@@ -119,6 +119,10 @@ export interface SearchResponseIncompleteWarning {
    * clusters: cluster details.
    */
   clusters: Record<string, ClusterDetails>;
+  /**
+   * openInInspector: callback to open warning in inspector
+   */
+  openInInspector: () => void;
 }
 
 /**

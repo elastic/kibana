@@ -47,10 +47,14 @@
       "files",
       "controls",
       "dataViewEditor",
+      "savedObjectsManagement",
+      "expressions",
       "stackConnectors",
       "discover",
       "notifications",
       "charts",
+      "savedObjects",
+      "savedSearch"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -75,8 +79,7 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch",
-      "cloudChat"
+      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"
