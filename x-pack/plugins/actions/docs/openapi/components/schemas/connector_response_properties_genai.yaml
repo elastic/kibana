@@ -1,4 +1,4 @@
-title: Connector response properties for a generative AI connector
+title: Connector response properties for an OpenAI connector
 type: object
 required:
   - config

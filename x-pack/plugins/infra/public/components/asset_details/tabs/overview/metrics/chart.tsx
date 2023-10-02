@@ -39,7 +39,7 @@ export const Chart = ({
   assetName,
   ...props
 }: ChartProps) => {
-  const { setDateRange } = useDateRangeProviderContext();
+  const { setDateRange, refreshTs } = useDateRangeProviderContext();
 
   const dataView = useMemo(() => {
     return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
@@ -93,6 +93,7 @@ export const Chart = ({
       filters={filters}
       title={title}
       overrides={overrides}
+      lastReloadRequestTime={refreshTs}
       visualizationType="lnsXY"
       onBrushEnd={handleBrushEnd}
       onFilter={handleFilter}
