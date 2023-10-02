@@ -28,6 +28,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    // DATE_VIEW should match the index template:
+    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
     let actionId: string;
@@ -37,9 +40,9 @@ export default function ({ getService }: FtrProviderContext) {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await createDataView({
         supertest,
-        name: 'metrics-fake_hosts',
+        name: DATE_VIEW,
         id: DATA_VIEW_ID,
-        title: 'metrics-fake_hosts',
+        title: DATE_VIEW,
       });
     });
 
