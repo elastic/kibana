@@ -23,7 +23,7 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
   </EuiLink>
 );
 
-export const GoogleCloudShellGuide = (props: { commandText: string }) => {
+export const GoogleCloudShellGuide = (props: { commandText: string; hasProjectId?: boolean }) => {
   return (
     <>
       <EuiSpacer size="xs" />
@@ -48,10 +48,17 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
           <ol>
             <li>
               <>
-                <FormattedMessage
-                  id="xpack.fleet.googleCloudShell.guide.steps.copy"
-                  defaultMessage="Replace <PROJECT_ID> in the following command with your project ID and copy the command"
-                />
+                {props?.hasProjectId ? (
+                  <FormattedMessage
+                    id="xpack.fleet.googleCloudShell.guide.steps.copyWithProjectId"
+                    defaultMessage="Copy the command below"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.googleCloudShell.guide.steps.copyWithoutProjectId"
+                    defaultMessage="Replace <PROJECT_ID> in the following command with your project ID and copy the command"
+                  />
+                )}
                 <EuiSpacer size="m" />
                 <EuiCodeBlock language="bash" isCopyable contentEditable="true">
                   {props.commandText}

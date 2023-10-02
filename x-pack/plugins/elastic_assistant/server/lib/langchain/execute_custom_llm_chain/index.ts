@@ -5,35 +5,26 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { BaseMessage } from 'langchain/schema';
 import { ChainTool, Tool } from 'langchain/tools';
 
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { RequestBody, ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 
 export const callAgentExecutor = async ({
   actions,
   connectorId,
   esClient,
   langChainMessages,
+  llmType,
   logger,
   request,
-}: {
-  actions: ActionsPluginStart;
-  connectorId: string;
-  esClient: ElasticsearchClient;
-  langChainMessages: BaseMessage[];
-  logger: Logger;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
-}): Promise<ResponseBody> => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
+}: AgentExecutorParams): AgentExecutorResponse => {
+  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
