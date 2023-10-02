@@ -311,7 +311,7 @@ export function ObservabilityLogExplorerPageObject({
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       await searchField.clearValueWithKeyboard();
-      return searchField.type(name);
+      return searchField.type(name, { charByChar: true });
     },
 
     async clearSearchField() {
