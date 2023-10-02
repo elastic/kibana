@@ -18,36 +18,49 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-
+import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
+import { MountPoint } from '@kbn/core/public';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
   getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
   dashboardManagedBadge,
-} from '../_dashboard_app_strings';
-import { UI_SETTINGS } from '../../../common';
-import { useDashboardAPI } from '../dashboard_app';
-import { DashboardEmbedSettings } from '../types';
-import { pluginServices } from '../../services/plugin_services';
-import { useDashboardMenuItems } from './use_dashboard_menu_items';
-import { DashboardRedirect } from '../../dashboard_container/types';
-import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
-import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
-import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
-
+} from '../dashboard_app/_dashboard_app_strings';
+import { UI_SETTINGS } from '../../common';
+import { useDashboardAPI } from '../dashboard_app/dashboard_app';
+import { pluginServices } from '../services/plugin_services';
+import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
+import { DashboardEmbedSettings } from '../dashboard_app/types';
+import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
+import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
+import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
-export interface DashboardTopNavProps {
+import { DashboardRedirect } from '../dashboard_container/types';
+
+export interface InternalDashboardTopNavProps {
+  customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
+  forceHideUnifiedSearch?: boolean;
   redirectTo: DashboardRedirect;
+  setCustomHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
+  showBorderBottom?: boolean;
+  showResetChange?: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
-export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavProps) {
+export function InternalDashboardTopNav({
+  customLeadingBreadCrumbs = [],
+  embedSettings,
+  forceHideUnifiedSearch,
+  redirectTo,
+  setCustomHeaderActionMenu,
+  showBorderBottom = true,
+  showResetChange = true,
+}: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
-
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -168,19 +181,33 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
       serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
     } else {
-      // non-serverless regular breadcrumbs
-      setBreadcrumbs([
-        {
-          text: getDashboardBreadcrumb(),
-          'data-test-subj': 'dashboardListingBreadcrumb',
-          onClick: () => {
-            redirectTo({ destination: 'listing' });
+      /**
+       * non-serverless regular breadcrumbs
+       * Dashboard embedded in other plugins (e.g. SecuritySolution)
+       * will have custom leading breadcrumbs for back to their app.
+       **/
+      setBreadcrumbs(
+        customLeadingBreadCrumbs.concat([
+          {
+            text: getDashboardBreadcrumb(),
+            'data-test-subj': 'dashboardListingBreadcrumb',
+            onClick: () => {
+              redirectTo({ destination: 'listing' });
+            },
           },
-        },
-        ...dashboardTitleBreadcrumbs,
-      ]);
+          ...dashboardTitleBreadcrumbs,
+        ])
+      );
     }
-  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode, serverless]);
+  }, [
+    setBreadcrumbs,
+    redirectTo,
+    dashboardTitle,
+    dashboard,
+    viewMode,
+    serverless,
+    customLeadingBreadCrumbs,
+  ]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
@@ -205,12 +232,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     };
   }, [onAppLeave, getStateTransfer, hasUnsavedChanges, viewMode]);
 
-  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    redirectTo,
-    isLabsShown,
-    setIsLabsShown,
-  });
-
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || isChromeVisible) && !fullScreenMode;
@@ -218,14 +239,17 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = shouldShowNavBarComponent(
-      Boolean(embedSettings?.forceShowQueryInput || viewMode === ViewMode.PRINT)
-    );
-    const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
+    const showQueryInput = Boolean(forceHideUnifiedSearch)
+      ? false
+      : shouldShowNavBarComponent(
+          Boolean(embedSettings?.forceShowQueryInput || viewMode === ViewMode.PRINT)
+        );
+    const showDatePicker = Boolean(forceHideUnifiedSearch)
+      ? false
+      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
-
     return {
       showTopNavMenu,
       showSearchBar,
@@ -233,7 +257,21 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       showQueryInput,
       showDatePicker,
     };
-  }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
+  }, [
+    embedSettings,
+    filterManager,
+    forceHideUnifiedSearch,
+    fullScreenMode,
+    isChromeVisible,
+    viewMode,
+  ]);
+
+  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
+    redirectTo,
+    isLabsShown,
+    setIsLabsShown,
+    showResetChange,
+  });
 
   UseUnmount(() => {
     dashboard.clearOverlays();
@@ -301,7 +339,11 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
-        setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}
+        setMenuMountPoint={
+          embedSettings || fullScreenMode
+            ? setCustomHeaderActionMenu ?? undefined
+            : setHeaderActionMenu
+        }
         className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}
         config={
           visibilityProps.showTopNavMenu
@@ -327,7 +369,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       {viewMode === ViewMode.EDIT ? (
         <DashboardEditingToolbar isDisabled={!!focusedPanelId} />
       ) : null}
-      <EuiHorizontalRule margin="none" />
+      {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
   );
 }
