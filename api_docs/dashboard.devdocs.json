@@ -160,6 +160,107 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.getEmbeddableParams",
+        "type": "Function",
+        "tags": [],
+        "label": "getEmbeddableParams",
+        "description": [],
+        "signature": [
+          "(source: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<EmbeddableQueryInput, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", any>, options: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.DashboardDrilldownOptions",
+            "text": "DashboardDrilldownOptions"
+          },
+          ") => Partial<",
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.DashboardAppLocatorParams",
+            "text": "DashboardAppLocatorParams"
+          },
+          ">"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.getEmbeddableParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<EmbeddableQueryInput, ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", any>"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.getEmbeddableParams.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.DashboardDrilldownOptions",
+                "text": "DashboardDrilldownOptions"
+              }
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -455,6 +556,21 @@
           "\"dashboard\""
         ],
         "path": "src/plugins/dashboard/public/dashboard_container/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.DASHBOARD_GRID_COLUMN_COUNT",
+        "type": "number",
+        "tags": [],
+        "label": "DASHBOARD_GRID_COLUMN_COUNT",
+        "description": [],
+        "signature": [
+          "48"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
