@@ -18,6 +18,8 @@ interface Props {
 
 export const DefaultContent: FC<Props> = ({ activeNode }) => {
   const totalChildren = activeNode.children?.length ?? 0;
+  const firstGroupTitle = activeNode.children?.[0]?.title;
+  const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
@@ -33,12 +35,13 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
 
       <EuiFlexItem style={{ width: '100%' }}>
         <>
-          <EuiSpacer size="l" />
+          {firstGroupHasTitle && <EuiSpacer size="l" />}
+
           {activeNode.children && (
             <>
               {activeNode.children.map((child, i) => (
                 <Fragment key={child.id}>
-                  <PanelGroup navNode={child} />
+                  <PanelGroup navNode={child} isFirstInList={i === 0} />
                   {i < totalChildren - 1 && <EuiSpacer size="l" />}
                 </Fragment>
               ))}

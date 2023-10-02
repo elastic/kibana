@@ -362,7 +362,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           },
           {
             id: 'group:openpanel1',
-            title: 'Open panel (default content)',
+            title: 'Open panel (default 1)',
             openPanel: true,
             children: [
               {
@@ -387,6 +387,52 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
               {
                 id: 'group2',
                 title: 'Group 2',
+                children: [
+                  {
+                    id: 'group2:settings.logs',
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    id: 'group2:settings.signals',
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group2:settings.tracing',
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'group:openpanel1b',
+            title: 'Open panel (default 2)',
+            openPanel: true,
+            children: [
+              // Groups with no title
+              {
+                id: 'group1',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                    withBadge: true, // Default to "Beta" badge
+                  },
+                ],
+              },
+              {
+                id: 'group2',
                 children: [
                   {
                     id: 'group2:settings.logs',
