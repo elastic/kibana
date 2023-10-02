@@ -8,8 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
@@ -76,14 +75,7 @@ export const useAlertExceptionActions = ({
     onAddExceptionTypeClick,
   });
 
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
-    useListsConfig();
-  const canReadEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
-
-  const canWriteEndpointExceptions = useMemo(
-    () => !listsConfigLoading && !needsListsConfiguration && canReadEndpointExceptions,
-    [canReadEndpointExceptions, listsConfigLoading, needsListsConfiguration]
-  );
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   // Endpoint exceptions are available for:
   // Serverless Endpoint Essentials/Complete PLI and
   // on ESS Security Kibana sub-feature Endpoint Exceptions (enabled when Security feature is enabled)

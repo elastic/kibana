@@ -3,12 +3,12 @@ description: >-
   The create case API request body varies depending on the type of connector.
 type: object
 required:
-      - connector
-      - description
-      - owner
-      - settings
-      - tags
-      - title
+  - connector
+  - description
+  - owner
+  - settings
+  - tags
+  - title
 properties:
   assignees:
     $ref: 'assignees.yaml'
@@ -46,3 +46,5 @@ properties:
     description: A title for the case.
     type: string
     maxLength: 160
+  customFields:
+    $ref: 'custom_fields_property.yaml'

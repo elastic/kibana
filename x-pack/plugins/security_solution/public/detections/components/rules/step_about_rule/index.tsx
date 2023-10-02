@@ -249,6 +249,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 browserFields: indexPattern.fields,
                 isDisabled: isLoading || indexPatternLoading,
                 fullWidth: true,
+                dataTestSubj: 'detectionEngineStepAboutRuleInvestigationFields',
               }}
             />
             <EuiSpacer size="l" />

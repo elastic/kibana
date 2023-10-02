@@ -266,7 +266,9 @@ describe('SQL search strategy', () => {
       );
 
       const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
-      await esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise();
+      esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps);
+      // await next tick. esSearch.search will not resolve until `is_running: false`
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(mockSqlClearCursor).not.toHaveBeenCalled();
     });
