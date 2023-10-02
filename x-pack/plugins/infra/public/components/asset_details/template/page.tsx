@@ -26,7 +26,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
   const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
   const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
   const { asset, assetType } = useAssetDetailsRenderPropsContext();
-  const { headerHeight } = useKibanaHeader();
+  const { actionMenuHeight } = useKibanaHeader();
   const trackOnlyOnce = React.useRef(false);
 
   const { activeTabId } = useTabSwitcherContext();
@@ -62,7 +62,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
     <EuiFlexGroup
       direction="column"
       css={css`
-        height: calc(100vh - ${headerHeight}px);
+        height: calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px);
       `}
     >
       <InfraLoadingPanel
@@ -79,7 +79,9 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       contentBorder={false}
       offset={0}
       restrictWidth={false}
-      style={{ minBlockSize: `calc(100vh - ${headerHeight}px)` }}
+      style={{
+        minBlockSize: `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
+      }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={assetType}
     >
