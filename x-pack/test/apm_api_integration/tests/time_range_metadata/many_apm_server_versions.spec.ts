@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           await synthtrace.clean();
           await Promise.all([
-            generateTraceEvents({
+            generateTraceDataForService({
               serviceName: 'synth-java-legacy',
               start: startLegacy,
               end,
@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               synthtrace,
             }),
 
-            generateTraceEvents({
+            generateTraceDataForService({
               serviceName: 'synth-java',
               start,
               end,
@@ -123,7 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('does not have latency data for synth-java-legacy service', async () => {
-          const res = await getLatencyChartData({
+          const res = await getLatencyChartForService({
             serviceName: 'synth-java-legacy',
             start,
             end,
@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has latency data for synth-java service', async () => {
-          const res = await getLatencyChartData({
+          const res = await getLatencyChartForService({
             serviceName: 'synth-java',
             start,
             end,
@@ -162,7 +162,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 }
 
-function getLatencyChartData({
+// This will retrieve latency data expecting the `transaction.duration.summary` field to be present
+function getLatencyChartForService({
   serviceName,
   start,
   end,
@@ -193,7 +194,7 @@ function getLatencyChartData({
   });
 }
 
-function generateTraceEvents({
+function generateTraceDataForService({
   serviceName,
   start,
   end,
