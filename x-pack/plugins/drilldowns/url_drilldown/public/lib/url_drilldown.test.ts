@@ -107,6 +107,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -124,6 +125,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -143,6 +145,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -163,6 +166,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -191,6 +195,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -213,6 +218,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.invalid}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -235,6 +241,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -503,6 +510,7 @@ describe('encoding', () => {
         template: 'https://elastic.co?foo=head%26shoulders',
       },
       openInNewTab: false,
+      encodeUrl: true,
     };
     const url = await urlDrilldown.getHref(config, context);
 
