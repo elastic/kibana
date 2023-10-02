@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   QueryAlerts,
   AlertSearchResponse,
@@ -13,7 +14,13 @@ import type {
   Privilege,
   CasesFromAlertsResponse,
 } from '../types';
-import { alertsMock, mockSignalIndex, mockUserPrivilege, mockCaseIdsFromAlertId } from '../mock';
+import {
+  alertsMock,
+  mockSignalIndex,
+  mockUserPrivilege,
+  mockCaseIdsFromAlertId,
+  mockUserProfiles,
+} from '../mock';
 
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,
@@ -36,3 +43,6 @@ export const getCaseIdsFromAlertId = async ({
 }: {
   alertId: string;
 }): Promise<CasesFromAlertsResponse> => Promise.resolve(mockCaseIdsFromAlertId);
+
+export const fetchUserProfiles = async (): Promise<UserProfileWithAvatar[]> =>
+  Promise.resolve(mockUserProfiles);
