@@ -7,9 +7,7 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { Status } from '../../../../../common/types/api';
-
-import { GatedFormDataApiLogicResponse, UpdateGatedFormDataApiLogic } from './gated_form_api_logic';
+import { UpdateGatedFormDataApiLogic } from './gated_form_api_logic';
 import { WorkplaceSearchGateLogic } from './gated_form_logic';
 
 const DEFAULT_VALUES = {

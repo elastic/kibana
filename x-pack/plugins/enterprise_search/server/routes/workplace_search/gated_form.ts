@@ -28,7 +28,7 @@ export function registerGatedFormRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/ent/v2/internal/ws_gate'
+      path: '/api/ent/v2/internal/ws_gate',
     })
   );
 }

@@ -37,7 +37,6 @@ export const WorkplaceSearchGateLogic = kea<
   },
   connect: {
     actions: [UpdateGatedFormDataApiLogic, ['makeRequest as submitGatedFormDataRequest']],
-    values: [UpdateGatedFormDataApiLogic, ['status', 'data']],
   },
   listeners: ({ actions, values }) => ({
     formSubmitRequest: () => {

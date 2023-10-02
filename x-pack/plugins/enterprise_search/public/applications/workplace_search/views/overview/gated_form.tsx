@@ -533,14 +533,7 @@ export const WorkplaceSearchGate: React.FC = () => {
     useActions(WorkplaceSearchGateLogic);
 
   const { feature, participateInUXLabs } = useValues(WorkplaceSearchGateLogic);
-  console.log(participateInUXLabs);
-  console.log(
-    participateInUXLabs != null
-      ? participateInUXLabs
-        ? participateInUXLabsChoice.yes.choice
-        : participateInUXLabsChoice.no.choice
-      : undefined
-  );
+
   return (
     <EuiPanel hasShadow={false}>
       <EuiForm component="form" fullWidth>

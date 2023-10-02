@@ -9,8 +9,6 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 
 import { registerGatedFormRoute } from './gated_form';
 
-import { registerOverviewRoute } from './overview';
-
 describe('Overview route with kibana_uis_enabled ', () => {
   describe('POST /internal/workplace_search/ws_gate', () => {
     let mockRouter: MockRouter;
