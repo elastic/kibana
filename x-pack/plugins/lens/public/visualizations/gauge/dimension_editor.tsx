@@ -159,6 +159,9 @@ export function GaugeDimensionEditor(
                   siblingRef={props.panelRef}
                   isOpen={isPaletteOpen}
                   handleClose={togglePalette}
+                  title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                    defaultMessage: 'Color',
+                  })}
                 >
                   <CustomizablePalette
                     palettes={props.paletteService}

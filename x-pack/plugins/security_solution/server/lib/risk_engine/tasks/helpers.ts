@@ -13,6 +13,7 @@ import {
   type CoreStart,
 } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { parseIntervalAsSecond } from '@kbn/task-manager-plugin/server/lib/intervals';
 
 import type { Range } from '../../../../common/risk_engine';
 
@@ -71,4 +72,16 @@ export const buildScopedInternalSavedObjectsClientUnsafe = ({
   return coreStart.savedObjects.getScopedClient(fakeScopedRequest, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
   });
+};
+
+export const isExecutionDurationExceededInterval = (
+  interval: string | undefined,
+  taskDurationInSeconds: number
+): boolean => {
+  let executionDurationExceededInterval = false;
+  if (interval) {
+    executionDurationExceededInterval = taskDurationInSeconds > parseIntervalAsSecond(interval);
+  }
+
+  return executionDurationExceededInterval;
 };

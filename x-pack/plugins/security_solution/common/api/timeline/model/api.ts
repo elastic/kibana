@@ -336,6 +336,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
+  savedSearchId: unionWithNullType(runtimeTypes.string),
 });
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
@@ -666,6 +667,7 @@ export interface TimelineResult {
   updated?: Maybe<number>;
   updatedBy?: Maybe<string>;
   version: string;
+  savedSearchId?: Maybe<string>;
 }
 
 export interface ResponseTimeline {

@@ -15,7 +15,7 @@ import { RiskScoreHeaderTitle } from './risk_score_header_title';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 import type { inputsModel } from '../../../../common/store';
 import * as overviewI18n from '../../../../overview/components/entity_analytics/common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const RiskScoresNoDataDetectedComponent = ({
   entityType,
@@ -24,7 +24,7 @@ const RiskScoresNoDataDetectedComponent = ({
   entityType: RiskScoreEntity;
   refetch: inputsModel.Refetch;
 }) => {
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
   const translations = useMemo(
     () => ({
@@ -51,7 +51,7 @@ const RiskScoresNoDataDetectedComponent = ({
         body={translations.body}
         actions={
           <>
-            {!isNewRiskScoreModuleAvailable && (
+            {!isNewRiskScoreModuleInstalled && (
               <EuiToolTip content={i18n.RESTART_TOOLTIP}>
                 <RiskScoreRestartButton refetch={refetch} riskScoreEntity={entityType} />
               </EuiToolTip>

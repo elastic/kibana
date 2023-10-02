@@ -59,6 +59,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
     organization: {
       name: 'ACME Donuts',
       defaultOrgName: 'My Organization',
+      kibanaUIsEnabled: false,
     },
     account: {
       id: 'some-id-string',

@@ -106,5 +106,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-http-browser",
     "@kbn/data-view-editor-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/alerts-as-data-utils",
   ],
 }
