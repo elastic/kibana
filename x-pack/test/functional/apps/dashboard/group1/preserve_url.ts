@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
 
-  // Failing: See https://github.com/elastic/kibana/issues/166900
-  describe.skip('preserve url', function () {
+  describe('preserve url', function () {
     const anotherSpace = 'another-space';
 
     before(async () => {
