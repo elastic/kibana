@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
@@ -33,7 +34,8 @@ export async function setAlertsToUntracked({
   logger: Logger;
   esClient: ElasticsearchClient;
 } & SetAlertsToUntrackedOpts): Promise<UntrackedAlertsResult> {
-  if (!ruleIds && !alertUuids) throw new Error('Must provide either ruleIds or alertUuids');
+  if (isEmpty(ruleIds) && isEmpty(alertUuids))
+    throw new Error('Must provide either ruleIds or alertUuids');
 
   const shouldMatchRules: Array<{ term: Record<string, { value: string }> }> = ruleIds.map(
     (ruleId) => ({
