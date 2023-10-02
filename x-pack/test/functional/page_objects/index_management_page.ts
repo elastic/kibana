@@ -34,6 +34,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
+    async clickDataStreamAt(indexOfRow: number): Promise<void> {
+      const dataStreamLinks = await testSubjects.findAll('nameLink');
+      await dataStreamLinks[indexOfRow].click();
+    },
+
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const deleteButons = await testSubjects.findAll('deletePolicyButton');
       await deleteButons[indexOfRow].click();

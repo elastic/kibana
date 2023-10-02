@@ -1250,6 +1250,19 @@
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.embeddingOrigin",
+            "type": "string",
+            "tags": [],
+            "label": "embeddingOrigin",
+            "description": [
+              "Identifier to indicate the plugin utilizing the component"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
