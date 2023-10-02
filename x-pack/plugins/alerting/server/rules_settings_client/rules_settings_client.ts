@@ -18,6 +18,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_SAVED_OBJECT_ID,
   DEFAULT_QUERY_DELAY_SETTINGS,
+  DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS,
 } from '../../common';
 import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 
@@ -25,6 +26,7 @@ export interface RulesSettingsClientConstructorOptions {
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
+  readonly isServerless: boolean;
 }
 
 export class RulesSettingsClient {
@@ -33,11 +35,13 @@ export class RulesSettingsClient {
   private readonly getUserName: () => Promise<string | null>;
   private readonly _flapping: RulesSettingsFlappingClient;
   private readonly _queryDelay: RulesSettingsQueryDelayClient;
+  private readonly isServerless: boolean;
 
   constructor(options: RulesSettingsClientConstructorOptions) {
     this.logger = options.logger;
     this.savedObjectsClient = options.savedObjectsClient;
     this.getUserName = options.getUserName;
+    this.isServerless = options.isServerless;
 
     this._flapping = new RulesSettingsFlappingClient({
       logger: this.logger,
@@ -80,7 +84,9 @@ export class RulesSettingsClient {
 
   public async create(): Promise<SavedObject<RulesSettings>> {
     const modificationMetadata = await this.getModificationMetadata();
-
+    const defaultQueryDelaySettings = this.isServerless
+      ? DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS
+      : DEFAULT_QUERY_DELAY_SETTINGS;
     try {
       return await this.savedObjectsClient.create<RulesSettings>(
         RULES_SETTINGS_SAVED_OBJECT_TYPE,
@@ -90,7 +96,7 @@ export class RulesSettingsClient {
             ...modificationMetadata,
           },
           queryDelay: {
-            ...DEFAULT_QUERY_DELAY_SETTINGS,
+            ...defaultQueryDelaySettings,
             ...modificationMetadata,
           },
         },

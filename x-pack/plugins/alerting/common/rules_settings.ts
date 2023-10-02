@@ -63,6 +63,7 @@ export const RULES_SETTINGS_SAVED_OBJECT_ID = 'rules-settings';
 export const DEFAULT_LOOK_BACK_WINDOW = 20;
 export const DEFAULT_STATUS_CHANGE_THRESHOLD = 4;
 export const DEFAULT_QUERY_DELAY = 15;
+export const DEFAULT_SERVERLESS_QUERY_DELAY = 0;
 
 export const DEFAULT_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
   enabled: true,
@@ -77,4 +78,7 @@ export const DISABLE_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
 
 export const DEFAULT_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
   delay: DEFAULT_QUERY_DELAY,
+};
+export const DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
+  delay: DEFAULT_SERVERLESS_QUERY_DELAY,
 };

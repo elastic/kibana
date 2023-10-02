@@ -29,6 +29,7 @@ const rulesSettingsClientParams: jest.Mocked<RulesSettingsClientConstructorOptio
   logger: loggingSystemMock.create().get(),
   getUserName: jest.fn(),
   savedObjectsClient,
+  isServerless: false,
 };
 
 const getMockRulesSettings = (): RulesSettings => {
@@ -100,6 +101,48 @@ describe('RulesSettingsClient', () => {
         }),
         queryDelay: expect.objectContaining({
           delay: 15,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      {
+        id: RULES_SETTINGS_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
+    expect(result.attributes).toEqual(mockAttributes);
+  });
+
+  test('can create a new rules settings saved object with default serverless query delay', async () => {
+    const client = new RulesSettingsClient({ ...rulesSettingsClientParams, isServerless: true });
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    const result = await client.create();
+
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      {
+        flapping: expect.objectContaining({
+          enabled: mockAttributes.flapping.enabled,
+          lookBackWindow: mockAttributes.flapping.lookBackWindow,
+          statusChangeThreshold: mockAttributes.flapping.statusChangeThreshold,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 0,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
