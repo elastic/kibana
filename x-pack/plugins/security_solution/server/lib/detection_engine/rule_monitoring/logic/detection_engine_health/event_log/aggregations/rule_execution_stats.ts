@@ -15,10 +15,11 @@ import type {
   NumberOfLoggedMessages,
   RuleExecutionStats,
   TopMessages,
+  RuleExecutionStatus,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   RuleExecutionEventType,
-  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
   LogLevel,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 
@@ -72,8 +73,8 @@ export const getRuleExecutionStatsAggregation = (
             {
               terms: {
                 [f.RULE_EXECUTION_STATUS]: [
-                  RuleExecutionStatus.running,
-                  RuleExecutionStatus['going to run'],
+                  RuleExecutionStatusEnum.running,
+                  RuleExecutionStatusEnum['going to run'],
                 ],
               },
             },
@@ -223,9 +224,9 @@ const normalizeNumberOfExecutions = (
   return {
     total: Number(totalExecutions.value || 0),
     by_outcome: {
-      succeeded: getStatusCount(RuleExecutionStatus.succeeded),
-      warning: getStatusCount(RuleExecutionStatus['partial failure']),
-      failed: getStatusCount(RuleExecutionStatus.failed),
+      succeeded: getStatusCount(RuleExecutionStatusEnum.succeeded),
+      warning: getStatusCount(RuleExecutionStatusEnum['partial failure']),
+      failed: getStatusCount(RuleExecutionStatusEnum.failed),
     },
   };
 };
