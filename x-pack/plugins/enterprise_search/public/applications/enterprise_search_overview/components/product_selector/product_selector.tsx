@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { WelcomeBanner } from '@kbn/search-api-panels';
 
@@ -148,7 +147,6 @@ export const ProductSelector: React.FC = () => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <Chat />
         </EuiPageTemplate.Section>
       </EnterpriseSearchOverviewPageTemplate>
     </>
