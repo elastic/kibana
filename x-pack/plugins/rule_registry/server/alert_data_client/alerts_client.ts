@@ -643,18 +643,27 @@ export class AlertsClient {
         operation: ReadOperations.Get,
         aggs: {
           active_alerts_bucket: {
-            date_histogram: {
-              field: ALERT_TIME_RANGE,
-              fixed_interval: fixedInterval,
-              hard_bounds: {
-                min: gte,
-                max: lte,
+            filter: {
+              term: {
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
               },
-              extended_bounds: {
-                min: gte,
-                max: lte,
+            },
+            aggs: {
+              container: {
+                date_histogram: {
+                  field: ALERT_TIME_RANGE,
+                  fixed_interval: fixedInterval,
+                  hard_bounds: {
+                    min: gte,
+                    max: lte,
+                  },
+                  extended_bounds: {
+                    min: gte,
+                    max: lte,
+                  },
+                  min_doc_count: 0,
+                },
               },
-              min_doc_count: 0,
             },
           },
           recovered_alerts: {
@@ -718,8 +727,10 @@ export class AlertsClient {
         recoveredAlertCount,
         activeAlerts:
           (
-            responseAlertSum.aggregations
-              ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
+            (
+              responseAlertSum.aggregations
+                ?.active_alerts_bucket as estypes.AggregationsFilterAggregate
+            )?.container as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
         recoveredAlerts:
           (
