@@ -13,10 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler, FormattedHit } from '../types';
 import { formatFieldValue } from './format_value';
 
-const formattedHitCache = new WeakMap<
-  SearchHit,
-  { formattedHit: FormattedHit; maxEntries: number }
->();
+const formattedHitCache = new WeakMap<SearchHit, FormattedHit>();
 
 /**
  * Returns a formatted document in form of key/value pairs of the fields name and a formatted value.
@@ -36,8 +33,8 @@ export function formatHit(
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
-  if (cached && cached.maxEntries === maxEntries) {
-    return cached.formattedHit;
+  if (cached) {
+    return cached;
   }
 
   const highlights = hit.raw.highlight ?? {};
@@ -84,6 +81,6 @@ export function formatHit(
             null,
           ] as const,
         ];
-  formattedHitCache.set(hit.raw, { formattedHit: formatted, maxEntries });
+  formattedHitCache.set(hit.raw, formatted);
   return formatted;
 }
