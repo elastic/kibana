@@ -204,7 +204,10 @@ export class MapsPlugin implements Plugin {
 
     contentManagement.register({
       id: CONTENT_ID,
-      storage: new MapsStorage(),
+      storage: new MapsStorage({
+        throwOnResultValidationError: this._initializerContext.env.mode.dev,
+        logger: this._logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

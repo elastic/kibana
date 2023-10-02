@@ -10,22 +10,15 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+
+import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
-import { useAppContext } from '../../app_context';
 import { ComponentTemplateList } from '../../components/component_templates';
 import { IndexList } from './index_list';
 import { EnrichPoliciesList } from './enrich_policies_list';
 import { IndexDetailsPage } from './index_list/details_page';
 import { DataStreamList } from './data_stream_list';
 import { TemplateList } from './template_list';
-
-export enum Section {
-  Indices = 'indices',
-  DataStreams = 'data_streams',
-  IndexTemplates = 'templates',
-  ComponentTemplates = 'component_templates',
-  EnrichPolicies = 'enrich_policies',
-}
 
 export const homeSections = [
   Section.Indices,
@@ -45,9 +38,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const {
-    config: { enableIndexDetailsPage },
-  } = useAppContext();
   const tabs = [
     {
       id: Section.Indices,
@@ -153,18 +143,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       </Routes>
     </>
   );
-  if (enableIndexDetailsPage) {
-    return (
-      <>
-        <Routes>
-          <Route
-            path={`/${Section.Indices}/:indexName/:indexDetailsSection?`}
-            component={IndexDetailsPage}
-          />
-          <Route render={() => indexManagementTabs} />
-        </Routes>
-      </>
-    );
-  }
-  return indexManagementTabs;
+  return (
+    <Routes>
+      <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
+      <Route render={() => indexManagementTabs} />
+    </Routes>
+  );
 };

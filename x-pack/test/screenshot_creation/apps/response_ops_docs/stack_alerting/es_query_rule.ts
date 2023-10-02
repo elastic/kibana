@@ -11,7 +11,7 @@ import { esQueryRuleName } from '.';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const commonScreenshots = getService('commonScreenshots');
-  const find = getService('find');
+  const comboBox = getService('comboBox');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
@@ -56,10 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('queryFormType_esQuery');
       const indexSelector = await testSubjects.find('selectIndexExpression');
       await indexSelector.click();
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.type('kibana_sample_data_logs ');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await testSubjects.click('closePopover');

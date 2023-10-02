@@ -11,7 +11,12 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 
-import { RequestDetailsRequest, RequestDetailsResponse, RequestDetailsStats } from './details';
+import {
+  ClustersView,
+  RequestDetailsRequest,
+  RequestDetailsResponse,
+  RequestDetailsStats,
+} from './details';
 import { RequestDetailsProps } from './types';
 
 interface RequestDetailsState {
@@ -32,6 +37,13 @@ const DETAILS: DetailViewData[] = [
       defaultMessage: 'Statistics',
     }),
     component: RequestDetailsStats,
+  },
+  {
+    name: 'clusters',
+    label: i18n.translate('inspector.requests.clustersTabLabel', {
+      defaultMessage: 'Clusters',
+    }),
+    component: ClustersView,
   },
   {
     name: 'Request',

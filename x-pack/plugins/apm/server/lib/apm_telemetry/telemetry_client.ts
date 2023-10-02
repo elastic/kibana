@@ -15,6 +15,22 @@ interface RequiredSearchParams {
   body: { size: number; track_total_hits: boolean | number; timeout: string };
 }
 
+export interface IndicesStatsResponse {
+  _all?: {
+    total?: { store?: { size_in_bytes?: number }; docs?: { count?: number } };
+    primaries?: {
+      docs?: { count?: number };
+      store?: {
+        size_in_bytes?: number;
+        total_data_set_size_in_bytes?: number;
+      };
+    };
+  };
+  _shards?: {
+    total?: number;
+  };
+}
+
 export interface TelemetryClient {
   search<TSearchRequest extends ESSearchRequest & RequiredSearchParams>(
     params: TSearchRequest
@@ -24,14 +40,7 @@ export interface TelemetryClient {
     params: estypes.IndicesStatsRequest
     // promise returned by client has an abort property
     // so we cannot use its ReturnType
-  ): Promise<{
-    _all?: {
-      total?: { store?: { size_in_bytes?: number }; docs?: { count?: number } };
-    };
-    _shards?: {
-      total?: number;
-    };
-  }>;
+  ): Promise<IndicesStatsResponse>;
 
   transportRequest: (params: {
     path: string;

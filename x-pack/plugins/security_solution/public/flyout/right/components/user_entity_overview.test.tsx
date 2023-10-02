@@ -15,6 +15,7 @@ import {
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../mocks/mock_context';
@@ -120,6 +121,36 @@ describe('<UserEntityOverview />', () => {
 
       expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent('—');
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
+    });
+
+    it('should render loading if user details returns loading as true', () => {
+      mockUseUserDetails.mockReturnValue([true, { userDetails: null }]);
+      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <RightPanelContext.Provider value={panelContextValue}>
+            <UserEntityOverview userName={userName} />
+          </RightPanelContext.Provider>
+        </TestProviders>
+      );
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render loading if risk score returns loading as true', () => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
+      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true, loading: true });
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <RightPanelContext.Provider value={panelContextValue}>
+            <UserEntityOverview userName={userName} />
+          </RightPanelContext.Provider>
+        </TestProviders>
+      );
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should navigate to left panel entities tab when clicking on title', () => {
