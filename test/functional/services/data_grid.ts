@@ -93,6 +93,39 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
+  private getCellActionButton(rowIndex: number = 0, columnIndex: number = 0, selector: string) {
+    let actionButton;
+    await this.retry.try(async () => {
+      const cell = await this.getCellElement(rowIndex, columnIndex);
+      await cell.click();
+      actionButton = await cell.findByTestSubject(selector);
+      if (!actionButton) {
+        throw new Error(`Unable to find cell action button ${selector}`);
+      }
+    });
+    return actionButton;
+  }
+
+  /**
+   * Clicks grid cell 'expand' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellExpandButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'euiDataGridCellExpandButton');
+    await actionButton.click();
+  }
+
+  /**
+   * Clicks grid cell 'filter for' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellFilterForButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterForButton');
+    await actionButton.click();
+  }
+
   /**
    * The same as getCellElement, but useful when multiple data grids are on the page.
    */
