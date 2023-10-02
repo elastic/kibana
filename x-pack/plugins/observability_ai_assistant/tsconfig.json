@@ -47,7 +47,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/licensing-plugin",
     "@kbn/share-plugin",
-    "@kbn/files-plugin"
   ],
   "exclude": ["target/**/*"]
 }
