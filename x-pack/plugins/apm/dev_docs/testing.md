@@ -1,5 +1,15 @@
 # Testing
 
+We've got three ways of testing our code:
+
+- Unit testing with Jest
+- API testing
+- End-to-end testing (with Cypress)
+
+API tests are usually preferred. They're stable and reasonably quick, and give a good approximation of real-world usage.
+E2E testing is suitable for common and vital user journeys. They are however less stable than API tests.
+Unit testing is a good approach if you have a very specific piece of code with lots of possibilities that you want to test.
+
 ## Unit Tests (Jest)
 
 ```
