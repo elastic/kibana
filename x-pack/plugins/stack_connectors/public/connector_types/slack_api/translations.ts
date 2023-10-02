@@ -16,7 +16,7 @@ export const MESSAGE_REQUIRED = i18n.translate(
 export const CHANNEL_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack_api.error.requiredSlackChannel',
   {
-    defaultMessage: 'Channel id is required.',
+    defaultMessage: 'Channel ID is required.',
   }
 );
 export const TOKEN_LABEL = i18n.translate(
@@ -43,7 +43,7 @@ export const ACTION_TYPE_TITLE = i18n.translate(
 export const ALLOWED_CHANNELS = i18n.translate(
   'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
   {
-    defaultMessage: 'Channel Ids',
+    defaultMessage: 'Channel IDs',
   }
 );
 export const SUCCESS_FETCH_CHANNELS = i18n.translate(
@@ -64,7 +64,7 @@ export const ERROR_VALID_CHANNELS = i18n.translate(
 export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
   i18n.translate('xpack.stackConnectors.components.slack_api.errorInvalidChannelsText', {
     defaultMessage:
-      'Cannot valid channel id "{channels}", please check the validity of your token and/or the channel id',
+      'Cannot valid channel ID "{channels}", please check the validity of your token and/or the channel ID',
     values: {
       channels: invalidChannels.join(', '),
     },

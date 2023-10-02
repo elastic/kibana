@@ -47,12 +47,12 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   );
   const [validChannelId, setValidChannelId] = useState('');
   const { toasts } = useKibana().notifications;
+  const allowedChannelsConfig =
+    (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
+      ?.allowedChannels ?? [];
   const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption[]>(
     (channelIds ?? []).map((c) => {
-      const allowedChannels = (
-        actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>
-      )?.config?.allowedChannels;
-      const allowedChannelSelected = allowedChannels?.find((ac) => ac.id === c);
+      const allowedChannelSelected = allowedChannelsConfig?.find((ac) => ac.id === c);
       return {
         value: c,
         label: allowedChannelSelected
@@ -72,7 +72,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     subActionParams: {
       channelId: validChannelId,
     },
-    disabled: validChannelId.length === 0,
+    disabled: validChannelId.length === 0 && allowedChannelsConfig.length === 0,
   });
 
   useEffect(() => {
@@ -176,13 +176,13 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     ).map((ac) => ({
       label: `${ac.id} - ${ac.name}`,
       value: ac.id,
+      'data-test-subj': ac.id,
     }));
   }, [actionConnector]);
 
   const onChangeComboBox = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
       const newSelectedChannels = newOptions.map<string>((option) => option.value!.toString());
-
       setSelectedChannels(newOptions);
       editAction(
         'subActionParams',
@@ -196,7 +196,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     if (tempChannelId === '') {
       editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
     }
-    setValidChannelId(tempChannelId);
+    setValidChannelId(tempChannelId.trim());
   }, [editAction, index, tempChannelId, text]);
 
   const onChangeTextField = useCallback(
@@ -254,7 +254,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
                 defaultMessage: 'Channel',
               })
             : i18n.translate('xpack.stackConnectors.slack.params.channelIdComboBoxLabel', {
-                defaultMessage: 'Channel Id',
+                defaultMessage: 'Channel ID',
               })
         }
         fullWidth

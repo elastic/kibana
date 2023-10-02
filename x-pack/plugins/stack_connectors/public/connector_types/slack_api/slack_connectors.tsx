@@ -66,12 +66,6 @@ const getConfigFormSchemaAfterSecrets = ({
     id: 'allowedChannels',
     isRequired: true,
     label: i18n.ALLOWED_CHANNELS,
-    helpText: (
-      <FormattedMessage
-        id="xpack.stackConnectors.components.slack_api.allowedChannelsText"
-        defaultMessage="By default, the connector can access all channels within the scope of the Slack app."
-      />
-    ),
     type: 'COMBO_BOX',
     euiFieldProps: {
       noSuggestions: true,
@@ -153,18 +147,21 @@ export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> =
   }, [authToken]);
 
   useEffect(() => {
-    setFieldValue('config.allowedChannels', validChannels);
+    const configAllowedChannels = formData?.config?.allowedChannels || [];
+    if (!isEqual(configAllowedChannels, validChannels)) {
+      setFieldValue('config.allowedChannels', validChannels);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validChannels]);
 
   const isInitialyzed = useRef(false);
   useEffect(() => {
+    const configAllowedChannels = formData?.config?.allowedChannels || [];
     if (
       !isInitialyzed.current &&
-      formData.config &&
-      formData.config.allowedChannels &&
-      formData.config.allowedChannels.length > 0 &&
-      !isEqual(formData.config.allowedChannels, validChannels)
+      configAllowedChannels.length > 0 &&
+      !isEqual(configAllowedChannels, validChannels)
     ) {
       isInitialyzed.current = true;
       resetChannelsToValidate(formData.config.allowedChannels);
