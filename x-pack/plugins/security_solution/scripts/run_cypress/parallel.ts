@@ -412,7 +412,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
@@ -446,7 +446,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
-          (result) => result?.status === 'finished' && result.totalFailed > 0
+          (result) =>
+            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (result as CypressCommandLine.CypressRunResult)?.totalFailed
         );
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');

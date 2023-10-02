@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
@@ -44,14 +44,15 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(({ selectedTabId, setSele
     ));
 
   return (
-    <EuiFlyoutHeader hasBorder>
-      <EuiTabs
-        size="l"
-        expand
-        css={css`
-          margin-bottom: -25px;
-        `}
-      >
+    <EuiFlyoutHeader
+      hasBorder
+      css={css`
+        background-color: ${useEuiBackgroundColor('subdued')};
+        padding-bottom: 0 !important;
+        border-block-end: none !important;
+      `}
+    >
+      <EuiTabs size="l" expand>
         {renderTabs}
       </EuiTabs>
     </EuiFlyoutHeader>

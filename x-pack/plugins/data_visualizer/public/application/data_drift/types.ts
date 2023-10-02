@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Filter, Query } from '@kbn/es-query';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { Histogram } from '@kbn/ml-chi2test';
+
 import { DATA_COMPARISON_TYPE } from './constants';
 
 export interface DataComparisonQueryState {
@@ -51,12 +54,6 @@ export const getDefaultDataComparisonState = (
   },
   ...overrides,
 });
-
-export interface Histogram {
-  doc_count: number;
-  key: string | number;
-  percentage?: number;
-}
 
 export interface ComparisonHistogram extends Histogram {
   g: string;
