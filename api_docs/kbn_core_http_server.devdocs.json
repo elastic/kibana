@@ -5208,6 +5208,14 @@
                 "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.test.ts"
               },
               {
+                "plugin": "cloudChat",
+                "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.test.ts"
+              },
+              {
+                "plugin": "cloudChat",
+                "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/get_route.test.ts"
               },
