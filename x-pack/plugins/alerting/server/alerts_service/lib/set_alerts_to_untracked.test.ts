@@ -18,6 +18,19 @@ describe('setAlertsToUntracked()', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    clusterClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [],
+      },
+    });
   });
   test('should call updateByQuery on provided ruleIds', async () => {
     await setAlertsToUntracked({
