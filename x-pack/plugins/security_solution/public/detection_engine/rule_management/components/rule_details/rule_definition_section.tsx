@@ -421,7 +421,7 @@ const prepareDefinitionSectionListItems = (
     }
   }
 
-  if ('filters' in rule && 'data_view_id' in rule && rule.filters?.length) {
+  if ('filters' in rule && rule.filters?.length) {
     definitionSectionListItems.push({
       title: descriptionStepI18n.FILTERS_LABEL,
       description: (
@@ -522,9 +522,7 @@ const prepareDefinitionSectionListItems = (
 
   if ('threat_filters' in rule && rule.threat_filters && rule.threat_filters.length > 0) {
     definitionSectionListItems.push({
-      title: savedQuery
-        ? descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL
-        : descriptionStepI18n.FILTERS_LABEL,
+      title: i18n.THREAT_FILTERS_FIELD_LABEL,
       description: (
         <Filters
           filters={rule.threat_filters as Filter[]}
@@ -570,7 +568,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.type === 'new_terms' || 'history_window_start' in rule) {
+  if ('history_window_start' in rule) {
     definitionSectionListItems.push({
       title: i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL,
       description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,

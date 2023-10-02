@@ -276,7 +276,7 @@ export const THREAT_MAPPING_FIELD_LABEL = i18n.translate(
 export const THREAT_FILTERS_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFiltersFieldLabel',
   {
-    defaultMessage: 'Filters',
+    defaultMessage: 'Indicator filters',
   }
 );
 
