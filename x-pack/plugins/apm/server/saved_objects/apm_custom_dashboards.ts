@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../common/service_dashboards';
+import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../common/custom_dashboards';
 
 export const apmCustomDashboards: SavedObjectsType = {
   name: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
@@ -18,7 +18,8 @@ export const apmCustomDashboards: SavedObjectsType = {
     properties: {
       dashboardSavedObjectId: { type: 'keyword' },
       kuery: { type: 'text' },
-      useServiceFilters: { type: 'boolean' },
+      serviceEnvironmentFilterEnabled: { type: 'boolean' },
+      serviceNameFilterEnabled: { type: 'boolean' },
     },
   },
   management: {
@@ -36,7 +37,8 @@ export const apmCustomDashboards: SavedObjectsType = {
         create: schema.object({
           dashboardSavedObjectId: schema.string(),
           kuery: schema.maybe(schema.string()),
-          useServiceFilters: schema.boolean(),
+          serviceEnvironmentFilterEnabled: schema.boolean(),
+          serviceNameFilterEnabled: schema.boolean(),
         }),
       },
     },

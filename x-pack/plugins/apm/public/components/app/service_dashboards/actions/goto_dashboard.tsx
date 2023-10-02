@@ -9,12 +9,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ApmPluginStartDeps } from '../../../../plugin';
-import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
+import { SavedApmCustomDashboard } from '../../../../../common/custom_dashboards';
 
 export function GotoDashboard({
   currentDashboard,
 }: {
-  currentDashboard: SavedServiceDashboard;
+  currentDashboard: SavedApmCustomDashboard;
 }) {
   const {
     services: {

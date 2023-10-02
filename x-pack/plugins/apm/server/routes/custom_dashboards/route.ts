@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
-import { SavedServiceDashboard } from '../../../common/service_dashboards';
+import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 import { deleteServiceDashboard } from './remove_service_dashboard';
 import { getLinkedCustomDashboards } from './get_linked_custom_dashboards';
 import { getServicesWithDashboards } from './get_services_with_dashboards';
@@ -16,31 +16,32 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { rangeRt } from '../default_api_types';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/service-dashboard',
+  endpoint: 'POST /internal/apm/custom-dashboard',
   params: t.type({
     query: t.union([
       t.partial({
-        serviceDashboardId: t.string,
+        customDashboardId: t.string,
       }),
       t.undefined,
     ]),
     body: t.type({
       dashboardSavedObjectId: t.string,
       kuery: t.union([t.string, t.undefined]),
-      useServiceFilters: t.boolean,
+      serviceNameFilterEnabled: t.boolean,
+      serviceEnvironmentFilterEnabled: t.boolean,
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources): Promise<SavedServiceDashboard> => {
+  handler: async (resources): Promise<SavedApmCustomDashboard> => {
     const { context, params } = resources;
-    const { serviceDashboardId } = params.query;
+    const { customDashboardId } = params.query;
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
 
     return saveServiceDashbord({
       savedObjectsClient,
-      serviceDashboardId,
+      customDashboardId,
       serviceDashboard: params.body,
     });
   },
@@ -59,7 +60,7 @@ const serviceDashboardsRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{ serviceDashboards: SavedServiceDashboard[] }> => {
+  ): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
     const { context, params } = resources;
     const { start, end } = params.query;
 
@@ -88,20 +89,20 @@ const serviceDashboardsRoute = createApmServerRoute({
 });
 
 const serviceDashboardDeleteRoute = createApmServerRoute({
-  endpoint: 'DELETE /internal/apm/service-dashboard',
+  endpoint: 'DELETE /internal/apm/custom-dashboard',
   params: t.type({
     query: t.type({
-      serviceDashboardId: t.string,
+      customDashboardId: t.string,
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
-    const { serviceDashboardId } = params.query;
+    const { customDashboardId } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
     await deleteServiceDashboard({
       savedObjectsClient,
-      serviceDashboardId,
+      customDashboardId,
     });
   },
 });

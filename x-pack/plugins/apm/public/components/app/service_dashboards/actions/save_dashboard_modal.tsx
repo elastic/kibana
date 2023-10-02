@@ -51,8 +51,10 @@ export function SaveDashboardModal({
 
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
-  const [useServiceFilters, setUseServiceFilters] = useState(
-    currentDashboard?.useServiceFilters ?? true
+  const [serviceFiltersEnabled, setserviceFiltersEnabled] = useState(
+    (currentDashboard?.serviceEnvironmentFilterEnabled &&
+      currentDashboard?.serviceNameFilterEnabled) ??
+      true
   );
 
   if (currentDashboard) {
@@ -70,7 +72,7 @@ export function SaveDashboardModal({
     path: { serviceName },
   } = useApmParams('/services/{serviceName}/dashboards');
 
-  const reloadServiceDashboards = useCallback(() => {
+  const reloadCustomDashboards = useCallback(() => {
     onRefresh();
   }, [onRefresh]);
 
@@ -90,12 +92,13 @@ export function SaveDashboardModal({
       const [newDashboard] = selectedDashboard;
       try {
         if (newDashboard.value) {
-          await callApmApi('POST /internal/apm/service-dashboard', {
+          await callApmApi('POST /internal/apm/custom-dashboard', {
             params: {
-              query: { serviceDashboardId: currentDashboard?.id },
+              query: { customDashboardId: currentDashboard?.id },
               body: {
                 dashboardSavedObjectId: newDashboard.value,
-                useServiceFilters,
+                serviceEnvironmentFilterEnabled: serviceFiltersEnabled,
+                serviceNameFilterEnabled: serviceFiltersEnabled,
                 kuery: `${SERVICE_NAME}: ${serviceName}`,
               },
             },
@@ -107,7 +110,7 @@ export function SaveDashboardModal({
               ? getEditSuccessToastLabels(newDashboard.label)
               : getLinkSuccessToastLabels(newDashboard.label)
           );
-          reloadServiceDashboards();
+          reloadCustomDashboards();
         }
       } catch (error) {
         console.error(error);
@@ -127,9 +130,9 @@ export function SaveDashboardModal({
     [
       selectedDashboard,
       notifications.toasts,
-      useServiceFilters,
+      serviceFiltersEnabled,
       onClose,
-      reloadServiceDashboards,
+      reloadCustomDashboards,
       isEditMode,
       serviceName,
       currentDashboard,
@@ -199,8 +202,8 @@ export function SaveDashboardModal({
                 </EuiToolTip>
               </p>
             }
-            onChange={() => setUseServiceFilters(!useServiceFilters)}
-            checked={useServiceFilters}
+            onChange={() => setserviceFiltersEnabled(!serviceFiltersEnabled)}
+            checked={serviceFiltersEnabled}
           />
         </EuiFlexGroup>
       </EuiModalBody>

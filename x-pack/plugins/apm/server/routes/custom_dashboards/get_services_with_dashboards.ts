@@ -17,7 +17,7 @@ import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { SavedServiceDashboard } from '../../../common/service_dashboards';
+import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 
 function getSearchRequest(
   filters: estypes.QueryDslQueryContainer[]
@@ -46,11 +46,11 @@ export async function getServicesWithDashboards({
   end,
 }: {
   apmEventClient: APMEventClient;
-  allLinkedCustomDashboards: SavedServiceDashboard[];
+  allLinkedCustomDashboards: SavedApmCustomDashboard[];
   serviceName: string;
   start: number;
   end: number;
-}): Promise<SavedServiceDashboard[]> {
+}): Promise<SavedApmCustomDashboard[]> {
   const allKueryPerDashboard = allLinkedCustomDashboards.map(({ kuery }) => ({
     kuery,
   }));

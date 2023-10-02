@@ -8,28 +8,28 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-  SavedServiceDashboard,
-  ServiceDashboard,
-} from '../../../common/service_dashboards';
+  SavedApmCustomDashboard,
+  ApmCustomDashboard,
+} from '../../../common/custom_dashboards';
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
-  serviceDashboardId?: string;
-  serviceDashboard: ServiceDashboard;
+  customDashboardId?: string;
+  serviceDashboard: ApmCustomDashboard;
 }
 export async function saveServiceDashbord({
   savedObjectsClient,
-  serviceDashboardId,
+  customDashboardId,
   serviceDashboard,
-}: Options): Promise<SavedServiceDashboard> {
+}: Options): Promise<SavedApmCustomDashboard> {
   const {
     id,
     attributes,
     updated_at: updatedAt,
-  } = await (serviceDashboardId
+  } = await (customDashboardId
     ? savedObjectsClient.update(
         APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        serviceDashboardId,
+        customDashboardId,
         serviceDashboard
       )
     : savedObjectsClient.create(
@@ -38,7 +38,7 @@ export async function saveServiceDashbord({
       ));
   return {
     id,
-    ...(attributes as ServiceDashboard),
+    ...(attributes as ApmCustomDashboard),
     updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
   };
 }

@@ -26,7 +26,7 @@ import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { SavedServiceDashboard } from '../../../../common/service_dashboards';
+import { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
@@ -36,7 +36,7 @@ import { getFilters } from '../metrics/static_dashboard';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
-export interface MergedServiceDashboard extends SavedServiceDashboard {
+export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
 }
 
@@ -78,7 +78,7 @@ export function ServiceDashboards() {
     const filteredServiceDashbords = (data?.serviceDashboards ?? []).reduce(
       (
         result: MergedServiceDashboard[],
-        serviceDashboard: SavedServiceDashboard
+        serviceDashboard: SavedApmCustomDashboard
       ) => {
         const matchedDashboard = allAvailableDashboards.find(
           ({ id }) => id === serviceDashboard.dashboardSavedObjectId
@@ -119,7 +119,9 @@ export function ServiceDashboards() {
 
     dashboard.updateInput({
       filters:
-        dataView && currentDashboard?.useServiceFilters
+        dataView &&
+        currentDashboard?.serviceEnvironmentFilterEnabled &&
+        currentDashboard?.serviceNameFilterEnabled
           ? getFilters(serviceName, environment, dataView)
           : [],
       timeRange: { from: rangeFrom, to: rangeTo },

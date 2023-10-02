@@ -7,13 +7,14 @@
 
 export const APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'apm-custom-dashboards';
 
-export interface ServiceDashboard {
+export interface ApmCustomDashboard {
   dashboardSavedObjectId: string;
-  useServiceFilters: boolean;
+  serviceNameFilterEnabled: boolean;
+  serviceEnvironmentFilterEnabled: boolean;
   kuery?: string;
 }
 
-export interface SavedServiceDashboard extends ServiceDashboard {
+export interface SavedApmCustomDashboard extends ApmCustomDashboard {
   id: string;
   updatedAt: number;
 }

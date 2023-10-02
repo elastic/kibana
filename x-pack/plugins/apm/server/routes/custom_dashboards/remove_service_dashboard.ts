@@ -6,18 +6,18 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../common/service_dashboards';
+import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../common/custom_dashboards';
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
-  serviceDashboardId: string;
+  customDashboardId: string;
 }
 export async function deleteServiceDashboard({
   savedObjectsClient,
-  serviceDashboardId,
+  customDashboardId,
 }: Options) {
   return savedObjectsClient.delete(
     APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-    serviceDashboardId
+    customDashboardId
   );
 }

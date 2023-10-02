@@ -28,26 +28,27 @@ export async function getServiceDashboardApi(
 export async function getLinkServiceDashboardApi({
   dashboardSavedObjectId,
   apmApiClient,
-  serviceDashboardId,
+  customDashboardId,
   kuery,
-  useServiceFilters,
+  serviceFiltersEnabled,
 }: {
   apmApiClient: ApmApiClient;
   dashboardSavedObjectId: string;
-  serviceDashboardId?: string;
+  customDashboardId?: string;
   kuery: string;
-  useServiceFilters: boolean;
+  serviceFiltersEnabled: boolean;
 }) {
   const response = await apmApiClient.writeUser({
-    endpoint: 'POST /internal/apm/service-dashboard',
+    endpoint: 'POST /internal/apm/custom-dashboard',
     params: {
       query: {
-        serviceDashboardId,
+        customDashboardId,
       },
       body: {
         dashboardSavedObjectId,
         kuery,
-        useServiceFilters,
+        serviceEnvironmentFilterEnabled: serviceFiltersEnabled,
+        serviceNameFilterEnabled: serviceFiltersEnabled,
       },
     },
   });
@@ -64,8 +65,8 @@ export async function deleteAllServiceDashboard(
     const promises = response.body.serviceDashboards.map((item) => {
       if (item.id) {
         return apmApiClient.writeUser({
-          endpoint: 'DELETE /internal/apm/service-dashboard',
-          params: { query: { serviceDashboardId: item.id } },
+          endpoint: 'DELETE /internal/apm/custom-dashboard',
+          params: { query: { customDashboardId: item.id } },
         });
       }
     });

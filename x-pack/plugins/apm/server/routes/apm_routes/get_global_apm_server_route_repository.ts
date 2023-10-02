@@ -46,7 +46,7 @@ import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
 import { assistantRouteRepository } from '../assistant_functions/route';
 import { profilingRouteRepository } from '../profiling/route';
-import { serviceDashboardsRouteRepository } from '../service_dashboards/route';
+import { serviceDashboardsRouteRepository } from '../custom_dashboards/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {

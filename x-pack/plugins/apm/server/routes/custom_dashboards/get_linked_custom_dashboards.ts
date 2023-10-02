@@ -8,9 +8,9 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-  SavedServiceDashboard,
-  ServiceDashboard,
-} from '../../../common/service_dashboards';
+  SavedApmCustomDashboard,
+  ApmCustomDashboard,
+} from '../../../common/custom_dashboards';
 
 interface Props {
   savedObjectsClient: SavedObjectsClientContract;
@@ -18,8 +18,8 @@ interface Props {
 
 export async function getLinkedCustomDashboards({
   savedObjectsClient,
-}: Props): Promise<SavedServiceDashboard[]> {
-  const result = await savedObjectsClient.find<ServiceDashboard>({
+}: Props): Promise<SavedApmCustomDashboard[]> {
+  const result = await savedObjectsClient.find<ApmCustomDashboard>({
     type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
     page: 1,
     perPage: 1000,

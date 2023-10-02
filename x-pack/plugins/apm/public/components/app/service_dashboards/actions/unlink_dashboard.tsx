@@ -26,8 +26,8 @@ export function UnlinkDashboard({
   const onConfirm = useCallback(
     async function () {
       try {
-        await callApmApi('DELETE /internal/apm/service-dashboard', {
-          params: { query: { serviceDashboardId: currentDashboard.id } },
+        await callApmApi('DELETE /internal/apm/custom-dashboard', {
+          params: { query: { customDashboardId: currentDashboard.id } },
           signal: null,
         });
 
