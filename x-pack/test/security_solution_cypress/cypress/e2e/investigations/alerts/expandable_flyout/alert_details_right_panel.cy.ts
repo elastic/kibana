@@ -67,7 +67,7 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert details expandable flyout right panel', () => {
   const rule = getNewRule();
 
   beforeEach(() => {
@@ -78,7 +78,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     waitForAlertsToPopulate();
   });
 
-  it('should display header and footer basics', () => {
+  it('should display header and footer basics', { tags: ['@ess', '@serverless'] }, () => {
     expandFirstAlertExpandableFlyout();
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
@@ -134,7 +134,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
   // TODO this will change when add to existing case is improved
   //  https://github.com/elastic/security-team/issues/6298
-  it('should add to existing case', () => {
+  it('should add to existing case', { tags: ['@ess', '@serverless'] }, () => {
     navigateToCasesPage();
     createNewCaseFromCases();
 
@@ -149,7 +149,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
   // TODO this will change when add to new case is improved
   //  https://github.com/elastic/security-team/issues/6298
-  it('should add to new case', () => {
+  it('should add to new case', { tags: ['@ess', '@serverless'] }, () => {
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
 
@@ -162,7 +162,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
   });
 
-  it('should mark as acknowledged', () => {
+  it('should mark as acknowledged', { tags: ['@ess', '@brokenInServerless'] }, () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 2);
 
     expandFirstAlertExpandableFlyout();
@@ -175,7 +175,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     cy.get(ALERT_CHECKBOX).should('have.length', 1);
   });
 
-  it('should mark as closed', () => {
+  it('should mark as closed', { tags: ['@ess', '@brokenInServerless'] }, () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 2);
 
     expandFirstAlertExpandableFlyout();
@@ -187,47 +187,51 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   });
 
   // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown
-  it('should test other action within take action dropdown', () => {
-    expandFirstAlertExpandableFlyout();
+  it(
+    'should test other action within take action dropdown',
+    { tags: ['@ess', '@brokenInServerless'] },
+    () => {
+      expandFirstAlertExpandableFlyout();
 
-    cy.log('should add endpoint exception');
+      cy.log('should add endpoint exception');
 
-    // TODO figure out why this option is disabled in Cypress but not running the app locally
-    //  https://github.com/elastic/security-team/issues/6300
-    openTakeActionButton();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.disabled');
+      // TODO figure out why this option is disabled in Cypress but not running the app locally
+      //  https://github.com/elastic/security-team/issues/6300
+      openTakeActionButton();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.disabled');
 
-    cy.log('should add rule exception');
+      cy.log('should add rule exception');
 
-    // TODO this isn't fully testing the add rule exception yet
-    //  https://github.com/elastic/security-team/issues/6301
-    selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION);
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER).should('be.visible');
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON)
-      .should('be.visible')
-      .click();
+      // TODO this isn't fully testing the add rule exception yet
+      //  https://github.com/elastic/security-team/issues/6301
+      selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION);
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON)
+        .should('be.visible')
+        .click();
 
-    // cy.log('should isolate host');
+      // cy.log('should isolate host');
 
-    // TODO figure out why isolate host isn't showing up in the dropdown
-    //  https://github.com/elastic/security-team/issues/6302
-    // openTakeActionButton();
-    // cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.visible');
+      // TODO figure out why isolate host isn't showing up in the dropdown
+      //  https://github.com/elastic/security-team/issues/6302
+      // openTakeActionButton();
+      // cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.visible');
 
-    cy.log('should respond');
+      cy.log('should respond');
 
-    // TODO this will change when respond is improved
-    //  https://github.com/elastic/security-team/issues/6303
-    openTakeActionButton();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.disabled');
+      // TODO this will change when respond is improved
+      //  https://github.com/elastic/security-team/issues/6303
+      openTakeActionButton();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.disabled');
 
-    cy.log('should investigate in timeline');
+      cy.log('should investigate in timeline');
 
-    selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
-      .first()
-      .within(() =>
-        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY).should('be.visible')
-      );
-  });
+      selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
+        .first()
+        .within(() =>
+          cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY).should('be.visible')
+        );
+    }
+  );
 });
