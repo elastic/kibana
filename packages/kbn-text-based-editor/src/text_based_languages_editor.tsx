@@ -67,7 +67,7 @@ import './overwrite.scss';
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
   onTextLangQueryChange: (query: AggregateQuery) => void;
-  onTextLangQuerySubmit: () => void;
+  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   detectTimestamp?: boolean;
@@ -78,6 +78,8 @@ export interface TextBasedLanguagesEditorProps {
   dataTestSubj?: string;
   hideMinimizeButton?: boolean;
   hideRunQueryText?: boolean;
+  editorIsInline?: boolean;
+  disableSubmitAction?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -125,6 +127,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isDarkMode,
   hideMinimizeButton,
   hideRunQueryText,
+  editorIsInline,
+  disableSubmitAction,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -166,7 +170,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(errors?.length),
     Boolean(warning),
     isCodeEditorExpandedFocused,
-    Boolean(documentationSections)
+    Boolean(documentationSections),
+    Boolean(editorIsInline)
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -215,6 +220,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     [editorHeight]
   );
+
+  const onQuerySubmit = useCallback(() => {
+    const currentValue = editor1.current?.getValue();
+    onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery);
+  }, [language, onTextLangQuerySubmit]);
 
   const restoreInitialMode = () => {
     setIsCodeEditorExpandedFocused(false);
@@ -712,7 +722,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           // eslint-disable-next-line no-bitwise
                           monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                           function () {
-                            onTextLangQuerySubmit();
+                            onQuerySubmit();
                           }
                         );
                         if (!isCodeEditorExpanded) {
@@ -729,8 +739,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         errors={editorErrors}
                         warning={editorWarning}
                         onErrorClick={onErrorClick}
-                        refreshErrors={onTextLangQuerySubmit}
+                        refreshErrors={onQuerySubmit}
                         detectTimestamp={detectTimestamp}
+                        editorIsInline={editorIsInline}
+                        disableSubmitAction={disableSubmitAction}
                       />
                     )}
                   </div>
@@ -815,9 +827,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           errors={editorErrors}
           warning={editorWarning}
           onErrorClick={onErrorClick}
-          refreshErrors={onTextLangQuerySubmit}
+          refreshErrors={onQuerySubmit}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
+          editorIsInline={editorIsInline}
+          disableSubmitAction={disableSubmitAction}
         />
       )}
       {isCodeEditorExpanded && (

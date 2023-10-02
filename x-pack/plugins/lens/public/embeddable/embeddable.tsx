@@ -855,6 +855,7 @@ export class Embeddable
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
           displayFlyoutHeader={true}
+          canEditTextBasedQuery={this.isTextBasedLanguage()}
         />
       );
     }

@@ -19,6 +19,8 @@ import {
   EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -156,6 +158,8 @@ interface EditorFooterProps {
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
   hideRunQueryText?: boolean;
+  disableSubmitAction?: boolean;
+  editorIsInline?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -167,7 +171,10 @@ export const EditorFooter = memo(function EditorFooter({
   onErrorClick,
   refreshErrors,
   hideRunQueryText,
+  disableSubmitAction,
+  editorIsInline,
 }: EditorFooterProps) {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiFlexGroup
@@ -258,6 +265,47 @@ export const EditorFooter = memo(function EditorFooter({
               >{`${COMMAND_KEY} + Enter`}</EuiCode>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+      {Boolean(editorIsInline) && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="text"
+            size="s"
+            fill
+            onClick={refreshErrors}
+            isDisabled={Boolean(disableSubmitAction)}
+          >
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false}>
+                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                  defaultMessage: 'Run query',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="xs"
+                  css={css`
+                    border: 1px solid
+                      ${Boolean(disableSubmitAction)
+                        ? euiTheme.colors.disabled
+                        : euiTheme.colors.emptyShade};
+                    padding: 0 ${euiTheme.size.xs};
+                    font-size: ${euiTheme.size.s};
+                    margin-left: ${euiTheme.size.xs};
+                    border-radius: ${euiTheme.size.xs};
+                  `}
+                >
+                  {COMMAND_KEY}⏎
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiButton>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

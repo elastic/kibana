@@ -25,10 +25,8 @@ import {
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
+import type { EditConfigPanelProps } from './types';
 import { SavedObjectIndexStore, type Document } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
 
@@ -98,6 +96,7 @@ export async function getEditLensConfiguration(
     updateByRefInput,
     navigateToLensEditor,
     displayFlyoutHeader,
+    canEditTextBasedQuery,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -184,6 +183,7 @@ export async function getEditLensConfiguration(
       updateByRefInput,
       navigateToLensEditor,
       displayFlyoutHeader,
+      canEditTextBasedQuery,
     };
 
     return getWrapper(

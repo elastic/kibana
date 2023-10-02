@@ -6,85 +6,19 @@
  */
 
 import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiLink,
-  EuiIcon,
-  EuiToolTip,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiCallOut,
-} from '@elastic/eui';
 import { isEqual } from 'lodash';
-import type { Observable } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { EuiTitle, EuiAccordion, useEuiTheme } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { LensPluginStartDependencies } from '../../../plugin';
-import {
-  useLensSelector,
-  selectFramePublicAPI,
-  useLensDispatch,
-  updateIndexPatterns,
-} from '../../../state_management';
-import { replaceIndexpattern } from '../../../state_management/lens_slice';
-import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
-
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import type { LensEmbeddableOutput } from '../../../embeddable';
-import type { LensInspector } from '../../../lens_inspector_service';
-import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { extractReferencesFromState } from '../../../utils';
-import type { Document } from '../../../persistence';
-import { createIndexPatternService } from '../../../data_views_service/service';
-
-export interface EditConfigPanelProps {
-  coreStart: CoreStart;
-  startDependencies: LensPluginStartDependencies;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
-  /** The attributes of the Lens embeddable */
-  attributes: TypedLensByValueInput['attributes'];
-  /** Callback for updating the visualization and datasources state */
-  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
-  /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
-  datasourceId: 'formBased' | 'textBased';
-  /** Embeddable output observable, useful for dashboard flyout  */
-  output$?: Observable<LensEmbeddableOutput>;
-  /** Contains the active data, necessary for some panel configuration such as coloring */
-  lensAdapters?: LensInspector['adapters'];
-  /** Optional callback called when updating the by reference embeddable */
-  updateByRefInput?: (soId: string) => void;
-  /** Callback for closing the edit flyout */
-  closeFlyout?: () => void;
-  /** Boolean used for adding a flyout wrapper */
-  wrapInFlyout?: boolean;
-  /** Optional parameter for panel identification
-   * If not given, Lens generates a new one
-   */
-  panelId?: string;
-  /** Optional parameter for saved object id
-   * Should be given if the lens embeddable is a by reference one
-   * (saved in the library)
-   */
-  savedObjectId?: string;
-  /** Callback for saving the embeddable as a SO */
-  saveByRef?: (attrs: Document) => void;
-  /** Optional callback for navigation from the header of the flyout */
-  navigateToLensEditor?: () => void;
-  /** If set to true it displays a header on the flyout */
-  displayFlyoutHeader?: boolean;
-}
+import { LayerConfiguration } from './layer_configuration_section';
+import type { EditConfigPanelProps } from './types';
+import { FlyoutWrapper } from './flyout_wrapper';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -102,15 +36,15 @@ export function LensEditConfigurationFlyout({
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
+  canEditTextBasedQuery,
 }: EditConfigPanelProps) {
+  const { euiTheme } = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
-  const { euiTheme } = useEuiTheme();
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
-  const dispatch = useLensDispatch();
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
@@ -218,22 +152,6 @@ export function LensEditConfigurationFlyout({
     datasourceMap,
   ]);
 
-  const indexPatternService = useMemo(
-    () =>
-      createIndexPatternService({
-        dataViews: startDependencies.dataViews,
-        uiActions: startDependencies.uiActions,
-        core: coreStart,
-        updateIndexPatterns: (newIndexPatternsState, options) => {
-          dispatch(updateIndexPatterns(newIndexPatternsState));
-        },
-        replaceIndexPattern: (newIndexPattern, oldId, options) => {
-          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
-        },
-      }),
-    [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
-  );
-
   const framePublicAPI = useLensSelector((state) => {
     const newState = {
       ...state,
@@ -245,154 +163,99 @@ export function LensEditConfigurationFlyout({
     return selectFramePublicAPI(newState, datasourceMap);
   });
   if (isLoading) return null;
+  // Example is the Discover editing where we dont want to render the text based editor on the panel
+  if (!canEditTextBasedQuery) {
+    return (
+      <FlyoutWrapper
+        attributesChanged={attributesChanged}
+        isInlineFooterVisible={isInlineFooterVisible}
+        displayFlyoutHeader={displayFlyoutHeader}
+        onCancel={onCancel}
+        navigateToLensEditor={navigateToLensEditor}
+        onApply={onApply}
+        datasourceId={datasourceId}
+      >
+        <LayerConfiguration
+          attributes={attributes}
+          coreStart={coreStart}
+          startDependencies={startDependencies}
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+          datasourceId={datasourceId}
+          framePublicAPI={framePublicAPI}
+          setIsInlineFlyoutFooterVisible={setIsInlineFlyoutFooterVisible}
+        />
+      </FlyoutWrapper>
+    );
+  }
 
-  const layerPanelsProps = {
-    framePublicAPI,
-    datasourceMap,
-    visualizationMap,
-    core: coreStart,
-    dataViews: startDependencies.dataViews,
-    uiActions: startDependencies.uiActions,
-    hideLayerHeader: datasourceId === 'textBased',
-    indexPatternService,
-    setIsInlineFlyoutFooterVisible,
-  };
   return (
     <>
-      <EuiFlyoutBody
-        className="lnsEditFlyoutBody"
-        css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
-          pointer-events: none;
-          .euiFlyoutBody__overflow {
-            padding-left: inherit;
-            margin-left: inherit;
-            > * {
-              pointer-events: auto;
-            }
-          }
-          .euiFlyoutBody__overflowContent {
-            padding: 0;
-          }
-        `}
+      <FlyoutWrapper
+        attributesChanged={attributesChanged}
+        isInlineFooterVisible={isInlineFooterVisible}
+        displayFlyoutHeader={displayFlyoutHeader}
+        onCancel={onCancel}
+        navigateToLensEditor={navigateToLensEditor}
+        onApply={onApply}
+        datasourceId={datasourceId}
+        noPadding
       >
-        <EuiFlexGroup gutterSize="s" direction="column">
-          {displayFlyoutHeader && (
-            <EuiFlexItem
-              data-test-subj="editFlyoutHeader"
-              css={css`
-                padding: ${euiThemeVars.euiSizeL};
-                border-block-end: 1px solid ${euiThemeVars.euiBorderColor};
-              `}
-            >
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2 id="Edit visualization">
-                          {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                            defaultMessage: 'Edit visualization',
-                          })}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.lens.config.experimentalLabel', {
-                          defaultMessage: 'Technical preview',
-                        })}
-                      >
-                        <EuiIcon type="beaker" size="m" />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {navigateToLensEditor && (
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      onClick={navigateToLensEditor}
-                      data-test-subj="navigateToLensEditorLink"
-                    >
-                      {i18n.translate('xpack.lens.config.editLinkLabel', {
-                        defaultMessage: 'Edit in Lens',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+        <>
+          {isOfAggregateQueryType(attributes.state.query) && (
+            <TextBasedLangEditor
+              query={attributes.state.query}
+              onTextLangQueryChange={(q) => {
+                // setQueryTextBased(q);
+                // prevQuery.current = q;
+              }}
+              expandCodeEditor={(status: boolean) => {}}
+              isCodeEditorExpanded
+              // detectTimestamp={Boolean(dataView?.timeFieldName)}
+              // errors={errors}
+              hideMinimizeButton
+              editorIsInline
+              hideRunQueryText
+              // editorIsInline={true}
+              // disableSubmitAction={isEqual(queryTextBased, prevQuery.current)}
+              onTextLangQuerySubmit={(q) => {
+                if (q) {
+                  // runQuery(q);
+                }
+              }}
+              isDisabled={false}
+            />
           )}
-          <EuiFlexItem
+          <EuiAccordion
+            id="layer-configuration"
+            buttonContent={
+              <EuiTitle size="xxs">
+                <h5>
+                  {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
+                    defaultMessage: 'Layer configuration',
+                  })}
+                </h5>
+              </EuiTitle>
+            }
+            initialIsOpen={true}
             css={css`
               padding: ${euiTheme.size.s};
+              border-bottom: ${euiTheme.border.thin};
             `}
           >
-            {datasourceId === 'textBased' && (
-              <EuiCallOut
-                size="s"
-                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                  defaultMessage: 'ES|QL currently offers limited configuration options',
-                })}
-                iconType="iInCircle"
-              />
-            )}
-            <EuiSpacer size="m" />
-            <VisualizationToolbar
-              activeVisualization={activeVisualization}
+            <LayerConfiguration
+              attributes={attributes}
+              coreStart={coreStart}
+              startDependencies={startDependencies}
+              visualizationMap={visualizationMap}
+              datasourceMap={datasourceMap}
+              datasourceId={datasourceId}
               framePublicAPI={framePublicAPI}
+              setIsInlineFlyoutFooterVisible={setIsInlineFlyoutFooterVisible}
             />
-            <EuiSpacer size="m" />
-            <ConfigPanelWrapper
-              {...layerPanelsProps}
-              css={css`
-                padding: ${euiTheme.size.s};
-              `}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
-      {isInlineFooterVisible && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onCancel}
-                flush="left"
-                aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
-                  defaultMessage: 'Cancel applied changes',
-                })}
-                data-test-subj="cancelFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.lens.config.cancelFlyoutLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onApply}
-                fill
-                aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
-                  defaultMessage: 'Apply changes',
-                })}
-                iconType="check"
-                isDisabled={!attributesChanged}
-                data-test-subj="applyFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.lens.config.applyFlyoutLabel"
-                  defaultMessage="Apply and close"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      )}
+          </EuiAccordion>
+        </>
+      </FlyoutWrapper>
     </>
   );
 }
