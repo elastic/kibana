@@ -215,11 +215,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            extension
-          </span>
+          extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -232,11 +228,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            bytesDisplayName
-          </span>
+          bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -249,11 +241,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            _index
-          </span>
+          _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -266,11 +254,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            _score
-          </span>
+          _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -390,11 +374,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            extension
-          </span>
+          extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -409,11 +389,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            bytesDisplayName
-          </span>
+          bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -428,11 +404,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            _index
-          </span>
+          _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -445,11 +417,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            _score
-          </span>
+          _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -494,11 +462,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            extension
-          </span>
+          extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -513,11 +477,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            and 3 more fields
-          </span>
+          and 3 more fields
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -643,11 +603,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            object.value
-          </span>
+          object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -693,11 +649,7 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            object.value
-          </span>
+          object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
