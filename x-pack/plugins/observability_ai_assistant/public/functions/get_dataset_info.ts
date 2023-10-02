@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type {Serializable} from '@kbn/utility-types';
-import {FunctionVisibility, RegisterFunctionDefinition} from '../../common/types';
-import type {ObservabilityAIAssistantService} from '../types';
+import type { Serializable } from '@kbn/utility-types';
+import { FunctionVisibility, RegisterFunctionDefinition } from '../../common/types';
+import type { ObservabilityAIAssistantService } from '../types';
 
 export function registerGetDatasetInfoFunction({
   service,
