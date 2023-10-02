@@ -31,6 +31,7 @@ import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
+import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
 
 interface StartAppComponent {
@@ -77,13 +78,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
                               <UpsellingProvider upsellingService={upselling}>
-                                <PageRouter
-                                  history={history}
-                                  onAppLeave={onAppLeave}
-                                  setHeaderActionMenu={setHeaderActionMenu}
-                                >
-                                  {children}
-                                </PageRouter>
+                                <DiscoverInTimelineContextProvider>
+                                  <PageRouter
+                                    history={history}
+                                    onAppLeave={onAppLeave}
+                                    setHeaderActionMenu={setHeaderActionMenu}
+                                  >
+                                    {children}
+                                  </PageRouter>
+                                </DiscoverInTimelineContextProvider>
                               </UpsellingProvider>
                             </CellActionsProvider>
                           </ReactQueryClientProvider>

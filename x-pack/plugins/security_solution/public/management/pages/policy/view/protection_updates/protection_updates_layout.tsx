@@ -37,6 +37,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
+import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
@@ -45,14 +46,14 @@ interface ProtectionUpdatesLayoutProps {
 const AUTOMATIC_UPDATES_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdates',
   {
-    defaultMessage: 'Use automatic updates',
+    defaultMessage: 'Automatic updates enabled',
   }
 );
 
 const AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdatesOff',
   {
-    defaultMessage: "Don't use automatic updates",
+    defaultMessage: 'Automatic updates disabled.',
   }
 );
 
@@ -390,23 +391,22 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             <EuiFlexItem grow={1}>
               <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-title'}>
                 <h5>
-                  {i18n.translate(
-                    'xpack.securitySolution.endpoint.protectionUpdates.manifestName',
-                    {
-                      defaultMessage: 'Manifest name',
-                    }
-                  )}
+                  {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.title', {
+                    defaultMessage: 'Manage protection updates',
+                  })}
                 </h5>
               </EuiTitle>
-              <EuiText size="m" data-test-subj="protection-updates-manifest-name">
-                {'artifactsec'}
-              </EuiText>
             </EuiFlexItem>
             <EuiShowFor sizes={['l', 'xl', 'm']}>
               {canWritePolicyManagement ? (
                 <EuiSwitch
                   disabled={isUpdating || createNoteInProgress || getNoteInProgress}
-                  label={'Update manifest automatically'}
+                  label={i18n.translate(
+                    'xpack.securitySolution.endpoint.protectionUpdates.enableAutomaticUpdates',
+                    {
+                      defaultMessage: 'Enable automatic updates',
+                    }
+                  )}
                   labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
                   checked={automaticUpdatesEnabled}
                   onChange={toggleAutomaticUpdates}
@@ -423,6 +423,8 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           <EuiHorizontalRule margin="m" />
           <EuiSpacer size="m" />
           <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
+            <ProtectionUpdatesWarningPanel />
+            <EuiSpacer size="m" />
             {renderManifestOutdatedCallOut()}
             {renderContent()}
           </div>

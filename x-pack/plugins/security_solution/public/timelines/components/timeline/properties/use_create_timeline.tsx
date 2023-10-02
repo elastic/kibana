@@ -22,6 +22,7 @@ import { sourcererActions, sourcererSelectors } from '../../../../common/store/s
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
 import type { TimeRange } from '../../../../common/store/inputs/model';
+import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 
 interface Props {
   timelineId?: string;
@@ -38,6 +39,8 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
+
+  const { resetDiscoverAppState } = useDiscoverInTimelineContext();
 
   const createTimeline = useCallback(
     ({ id, show, timeRange: timeRangeParam }) => {
@@ -110,8 +113,9 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       if (typeof closeGearMenu === 'function') {
         closeGearMenu();
       }
+      resetDiscoverAppState();
     },
-    [createTimeline, timelineId, timelineType, closeGearMenu]
+    [createTimeline, timelineId, timelineType, closeGearMenu, resetDiscoverAppState]
   );
 
   return handleCreateNewTimeline;
