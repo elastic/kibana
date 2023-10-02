@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -53,6 +54,7 @@ export const registerSyntheticsTLSCheckRule = (
 
   return createLifecycleRuleType({
     id: SYNTHETICS_ALERT_RULE_TYPES.TLS,
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
     name: TLS_CERTIFICATE.name,
     validate: {
