@@ -27,6 +27,7 @@ export enum appIds {
   CONNECTORS = 'triggersActionsConnectors',
   RULES = 'triggersActions',
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
+  SERVERLESS_SETTINGS = 'settings',
 }
 
 // Create new type that is a union of all the appId values
@@ -81,7 +82,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
       defaultMessage:
-        'View, export, and import machine learning analytics and anomaly detection items.',
+        'Identify, analyze, and process your data using advanced analysis techniques.',
     }),
     icon: <EuiIcon size="l" type="indexMapping" />,
   },
@@ -154,6 +155,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage: 'Allow applications to access Elastic on your behalf.',
     }),
     icon: <EuiIcon size="l" type="lockOpen" />,
+  },
+
+  [appIds.SERVERLESS_SETTINGS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
+      defaultMessage: 'Control project behavior, such as date display and default sorting.',
+    }),
+    icon: <EuiIcon size="l" type="gear" />,
   },
 };
 
