@@ -91,6 +91,13 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ESQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
+  {
+    defaultMessage: 'ES|QL',
+  }
+);
+
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {
@@ -131,13 +138,6 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
   {
     defaultMessage:
       'Alert suppression is configured but will not be applied due to insufficient licensing',
-  }
-);
-
-export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview',
-  {
-    defaultMessage: 'Technical Preview',
   }
 );
 
