@@ -30,7 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { WorkplaceSearchGateLogic } from './workplace_search_gate_logic';
+import { WorkplaceSearchGateLogic } from './gated_form_logic';
 
 const getFeature = (id: string) => {
   switch (id) {
@@ -66,7 +66,7 @@ const featuresList = {
           "Did you know you can easily analyze your users' searching and clicking behavior with Behavioral Analytics? Instrument your website or application for tracking relevant user actions.",
       }
     ),
-    id: 'analytics',
+    id: 'Analytics',
     learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/analytics-overview.html',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.analytics.featureName', {
       defaultMessage: 'Use Behavioral Analytics',
@@ -90,7 +90,7 @@ const featuresList = {
           'Did you know you have access to powerful content extraction via Elastic connectors! Use our powerful and highly adaptable extraction capabilities to extract contents from your files. ',
       }
     ),
-    id: 'contentExtraction',
+    id: 'Content Extraction',
     learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/connectors.html ',
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.connectorExtraction.featureName',
@@ -116,7 +116,7 @@ const featuresList = {
           'Did you know Elastic connectors are now available? You can keep content on your data sources in sync with your search-optimized indices! ',
       }
     ),
-    id: 'contentSources',
+    id: 'Content sources',
     learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/connectors.html ',
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.connectorSources.featureName',
@@ -138,7 +138,7 @@ const featuresList = {
           'Did you know you can restrict access to documents in your Elasticsearch indices according to user and group permissions? Return only authorized search results for users with Elastic’s document level security. ',
       }
     ),
-    id: 'documentLevelPermissions',
+    id: 'Document Level Permissions',
     learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/dls.html',
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.docLevelPermissions.featureName',
@@ -169,7 +169,7 @@ const featuresList = {
           'Did you know you can restrict access to documents in your Elasticsearch indices according to user and group permissions? Return only authorized search results for users with Elastic’s document level security. ',
       }
     ),
-    id: 'searchApplication',
+    id: 'Search Application',
     learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/search-applications.html',
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.featureName',
@@ -196,12 +196,17 @@ const featuresList = {
           'Did you know you can improve your search experience by searching with synonyms? Use our Synonyms API to easily create and manage synonym sets.',
       }
     ),
-    id: 'synonyms',
+    id: 'Synonyms',
     learnMore: 'https://www.elastic.co/guide/en/elasticsearch/reference/8.10/synonyms-apis.html',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.synonyms.featureName', {
       defaultMessage: 'Search with Synonyms API',
     }),
   },
+};
+
+const participateInUXLabsChoice = {
+  no: { choice: 'no', value: false },
+  yes: { choice: 'yes', value: true },
 };
 
 const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }) => {
@@ -524,16 +529,18 @@ export const WorkplaceSearchGate: React.FC = () => {
     },
   ];
 
-  const {
-    // setFormSubmitted,
-    setFormSubmitted,
-    setAdditionalFeedback,
-    setParticipateInUXLabs,
-    setFeature,
-  } = useActions(WorkplaceSearchGateLogic);
+  const { formSubmitRequest, setAdditionalFeedback, setParticipateInUXLabs, setFeature } =
+    useActions(WorkplaceSearchGateLogic);
 
   const { feature, participateInUXLabs } = useValues(WorkplaceSearchGateLogic);
-
+  console.log(participateInUXLabs);
+  console.log(
+    participateInUXLabs != null
+      ? participateInUXLabs
+        ? participateInUXLabsChoice.yes.choice
+        : participateInUXLabsChoice.no.choice
+      : undefined
+  );
   return (
     <EuiPanel hasShadow={false}>
       <EuiForm component="form" fullWidth>
@@ -649,7 +656,7 @@ export const WorkplaceSearchGate: React.FC = () => {
                     defaultMessage: 'Yes',
                   }
                 ),
-                value: 'yes',
+                value: participateInUXLabsChoice.yes.choice,
               },
               {
                 text: i18n.translate(
@@ -658,11 +665,28 @@ export const WorkplaceSearchGate: React.FC = () => {
                     defaultMessage: 'No',
                   }
                 ),
-                value: 'no',
+                value: participateInUXLabsChoice.no.choice,
               },
             ]}
-            onChange={(e) => setParticipateInUXLabs(e.target.value)}
-            value={participateInUXLabs}
+            onChange={(e) =>
+              setParticipateInUXLabs(
+                e.target.value === participateInUXLabsChoice.yes.choice
+                  ? participateInUXLabsChoice.yes.value
+                  : participateInUXLabsChoice.no.value
+              )
+            }
+            // value={
+            //   participateInUXLabs
+            //     ? participateInUXLabsChoice.yes.choice
+            //     : participateInUXLabsChoice.no.choice
+            // }
+            value={
+              participateInUXLabs != null
+                ? participateInUXLabs
+                  ? participateInUXLabsChoice.yes.choice
+                  : participateInUXLabsChoice.no.choice
+                : undefined
+            }
           />
         </EuiFormRow>
 
@@ -673,7 +697,7 @@ export const WorkplaceSearchGate: React.FC = () => {
               isDisabled={!feature ?? false}
               type="submit"
               fill
-              onClick={() => setFormSubmitted()}
+              onClick={() => formSubmitRequest()}
             >
               {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
                 defaultMessage: 'Submit',
