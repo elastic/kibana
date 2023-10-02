@@ -186,7 +186,7 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
-        // @ts-ignore
+        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'play',
         type: 'button',
         isPrimary: true,
@@ -389,7 +389,7 @@ export function useModelActions({
           defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        // @ts-ignore
+        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
         type: 'button',
         isPrimary: true,

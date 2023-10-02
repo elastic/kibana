@@ -10,18 +10,17 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  type EuiHealthProps,
   EuiInMemoryTable,
+  EuiLink,
   type EuiSearchBarProps,
   EuiSpacer,
   EuiTitle,
-  SearchFilterConfig,
   EuiToolTip,
-  EuiCallOut,
-  EuiLink,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -33,21 +32,20 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import {
-  BUILT_IN_MODEL_TYPE,
   BUILT_IN_MODEL_TAG,
+  BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
-} from '@kbn/ml-trained-models-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import {
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
+  ELSER_ID_V1,
   MODEL_STATE,
   type ModelState,
-  ELSER_ID_V1,
 } from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { css } from '@emotion/react';
 import { useStorage } from '@kbn/ml-local-storage';
+import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
@@ -108,57 +106,6 @@ interface Props {
   pageState?: ListingPageUrlState;
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
-
-export const getModelStateColor = (
-  state: ModelState
-): { color: EuiHealthProps['color']; name: string } | null => {
-  switch (state) {
-    case MODEL_STATE.DOWNLOADED:
-      return {
-        color: 'subdued',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadedName', {
-          defaultMessage: 'Ready to deploy',
-        }),
-      };
-    case MODEL_STATE.DOWNLOADING:
-      return {
-        color: 'warning',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
-          defaultMessage: 'Downloading...',
-        }),
-      };
-    case MODEL_STATE.STARTED:
-      return {
-        color: 'success',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startedName', {
-          defaultMessage: 'Deployed',
-        }),
-      };
-    case MODEL_STATE.STARTING:
-      return {
-        color: 'success',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startingName', {
-          defaultMessage: 'Starting deployment...',
-        }),
-      };
-    case MODEL_STATE.STOPPING:
-      return {
-        color: 'accent',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.stoppingName', {
-          defaultMessage: 'Stopping deployment...',
-        }),
-      };
-    case MODEL_STATE.NOT_DOWNLOADED:
-      return {
-        color: '#d4dae5',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.notDownloadedName', {
-          defaultMessage: 'Not downloaded',
-        }),
-      };
-    default:
-      return null;
-  }
-};
 
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,

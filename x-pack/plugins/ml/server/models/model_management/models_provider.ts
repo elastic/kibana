@@ -471,7 +471,7 @@ export class ModelsProvider {
     }
 
     // check if there is no recommended, so we mark default as recommended
-    for (const [, arr] of modelDefinitionMap.entries()) {
+    for (const arr of modelDefinitionMap.values()) {
       const defaultModel = arr.find((a) => a.default);
       const recommendedModel = arr.find((a) => a.recommended);
       if (defaultModel && !recommendedModel) {
