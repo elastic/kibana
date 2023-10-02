@@ -48,6 +48,7 @@ export const optionalModelIdSchema = schema.object({
 export const getInferenceQuerySchema = schema.object({
   size: schema.maybe(schema.string()),
   with_pipelines: schema.maybe(schema.string()),
+  with_indices: schema.maybe(schema.oneOf([schema.string(), schema.boolean()])),
   include: schema.maybe(schema.string()),
 });
 
@@ -86,4 +87,8 @@ export const createIngestPipelineSchema = schema.object({
       description: schema.maybe(schema.string()),
     })
   ),
+});
+
+export const modelDownloadsQuery = schema.object({
+  version: schema.maybe(schema.oneOf([schema.literal('1'), schema.literal('2')])),
 });

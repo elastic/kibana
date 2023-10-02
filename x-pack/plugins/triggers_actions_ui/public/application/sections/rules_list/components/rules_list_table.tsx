@@ -413,14 +413,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-lastExecutionDateTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
               {
                 defaultMessage: 'Start time of the last run.',
               }
             )}
           >
             <span>
-              Last run{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitle',
+                { defaultMessage: 'Last run' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -569,14 +572,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-durationTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitleTooltip',
               {
                 defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
               }
             )}
           >
             <span>
-              Duration{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+                { defaultMessage: 'Duration' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -639,14 +645,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-successRatioTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitleTooltip',
               {
                 defaultMessage: 'How often this rule runs successfully.',
               }
             )}
           >
             <span>
-              Success ratio{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+                { defaultMessage: 'Success ratio' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>

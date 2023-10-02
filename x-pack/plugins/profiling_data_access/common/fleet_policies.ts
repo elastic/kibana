@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { getApmPolicy } from './get_apm_policy';
 import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
@@ -21,9 +22,11 @@ async function getPackagePolicy({
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
   packageName: string;
-}) {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return packagePolicies.items.find((pkg) => pkg.name === packageName);
+}): Promise<PackagePolicy | undefined> {
+  const packagePolicies = await packagePolicyClient.list(soClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:${packageName}`,
+  });
+  return packagePolicies.items[0];
 }
 
 export async function getCollectorPolicy({
