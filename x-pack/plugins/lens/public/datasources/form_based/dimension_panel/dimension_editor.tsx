@@ -153,11 +153,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
       if (isLayerChangingDueToOtherBucketChange(state.layers[layerId], newLayer)) {
         props.notifications.toasts.add({
           title: i18n.translate('xpack.lens.uiInfo.otherBucketChangeTitle', {
-            defaultMessage: 'Group remaining values as "Other" disabled',
+            defaultMessage: '“Group remaining values as Other” disabled',
           }),
           text: i18n.translate('xpack.lens.uiInfo.otherBucketDisabled', {
             defaultMessage:
-              'Top values is >=1000, which can slow performance. Enable it again in “Advanced” options.',
+              'Values >= 1000 may slow performance. Re-enable the setting in “Advanced” options.',
           }),
         });
       }
