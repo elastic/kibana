@@ -77,7 +77,7 @@ describe('useUpdateRuleSettings', () => {
       });
     });
     await waitFor(() =>
-      expect(mockAddSuccess).toBeCalledWith('Rules settings updated successfully')
+      expect(mockAddSuccess).toBeCalledWith('Rules settings updated successfully.')
     );
   });
 
