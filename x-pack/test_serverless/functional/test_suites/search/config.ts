@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [require.resolve('.')],
   junit: {
     reportName: 'Serverless Search Functional Tests',
   },
