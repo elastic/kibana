@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'riskScoringRoutesEnabled',
           'riskScoringPersistence',
+          'esqlRulesDisabled',
         ])}`,
         `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
           { product_line: 'security', product_tier: 'complete' },
