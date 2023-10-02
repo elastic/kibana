@@ -66,6 +66,21 @@ const USE_TEXT_EXTRACTION_SERVICE_TOOLTIP = i18n.translate(
   }
 );
 
+const ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL = i18n.translate(
+  'searchConnectors.nativeConnectors.enableDLS.label',
+  {
+    defaultMessage: 'Enable document level security',
+  }
+);
+
+const ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP = i18n.translate(
+  'searchConnectors.nativeConnectors.enableDLS.tooltip',
+  {
+    defaultMessage:
+      'Document level security ensures identities and permissions set in Google Drive are maintained in Elasticsearch. This enables you to restrict and personalize read-access users and groups have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+  }
+);
+
 const DATABASE_LABEL = i18n.translate('searchConnectors.nativeConnectors.databaseLabel', {
   defaultMessage: 'Database',
 });
@@ -582,14 +597,20 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.DROPDOWN,
-        label: 'GitHub data source',
+        label: i18n.translate('searchConnectors.nativeConnectors.github.label', {
+          defaultMessage: 'GitHub data source',
+        }),
         options: [
           {
-            label: 'GitHub Cloud',
+            label: i18n.translate('searchConnectors.nativeConnectors.github.options.cloudLabel', {
+              defaultMessage: 'GitHub Cloud',
+            }),
             value: 'github_cloud',
           },
           {
-            label: 'GitHub Server',
+            label: i18n.translate('searchConnectors.nativeConnectors.github.options.cloudServer', {
+              defaultMessage: 'GitHub Server',
+            }),
             value: 'github_server',
           },
         ],
@@ -611,7 +632,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: 'GitHub URL',
+        label: i18n.translate('searchConnectors.nativeConnectors.github.url.label', {
+          defaultMessage: 'GitHub URL',
+        }),
         options: [],
         order: 2,
         required: true,
@@ -626,7 +649,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'GitHub Token',
+        label: i18n.translate('searchConnectors.nativeConnectors.github.token.label', {
+          defaultMessage: 'GitHub Token',
+        }),
         options: [],
         order: 3,
         required: true,
@@ -641,12 +666,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'List of repositories',
+        label: i18n.translate('searchConnectors.nativeConnectors.github.listOfRepos.label', {
+          defaultMessage: 'List of repositories',
+        }),
         options: [],
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: 'This configurable field is ignored when Advanced Sync Rules are used.',
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.github.listOfRepos.tooltip', {
+          defaultMessage: 'This configurable field is ignored when Advanced Sync Rules are used.',
+        }),
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
@@ -656,7 +685,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Enable SSL',
+        label: ENABLE_SSL_LABEL,
         options: [],
         order: 5,
         required: true,
@@ -676,7 +705,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: 'SSL certificate',
+        label: SSL_CERTIFICATE_LABEL,
         options: [],
         order: 6,
         required: true,
@@ -691,7 +720,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum retries per request',
+        label: RETRIES_PER_REQUEST_LABEL,
         options: [],
         order: 7,
         required: false,
@@ -707,13 +736,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Use text extraction service',
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 8,
         required: true,
         sensitive: false,
-        tooltip:
-          'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
@@ -732,13 +760,17 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'Google Drive service account JSON',
+        label: i18n.translate('searchConnectors.nativeConnectors.gdrive.label', {
+          defaultMessage: 'Google Drive service account JSON',
+        }),
         options: [],
         order: 1,
         required: true,
         sensitive: true,
-        tooltip:
-          'This connectors authenticates as a service account to synchronize content from Google Drive.',
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.gdrive.tooltip', {
+          defaultMessage:
+            'This connectors authenticates as a service account to synchronize content from Google Drive.',
+        }),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -748,13 +780,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Enable document level security',
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
         order: 2,
         required: true,
         sensitive: false,
-        tooltip:
-          'Document level security ensures identities and permissions set in Google Drive are maintained in Elasticsearch. This enables you to restrict and personalize read-access users and groups have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
@@ -769,13 +800,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: 'Google Workspace admin email',
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmail.label',
+          { defaultMessage: 'Google Workspace admin email' }
+        ),
         options: [],
         order: 3,
         required: true,
         sensitive: false,
-        tooltip:
-          'In order to use Document Level Security you need to enable Google Workspace domain-wide delegation of authority for your service account. A service account with delegated authority can impersonate admin user with sufficient permissions to fetch all users and their corresponding permissions.',
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmail.tooltip',
+          {
+            defaultMessage:
+              'In order to use Document Level Security you need to enable Google Workspace domain-wide delegation of authority for your service account. A service account with delegated authority can impersonate admin user with sufficient permissions to fetch all users and their corresponding permissions.',
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [
@@ -790,13 +829,17 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 25,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum concurrent HTTP requests',
+        label: i18n.translate('searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.label', {
+          defaultMessage: 'Maximum concurrent HTTP requests',
+        }),
         options: [],
         order: 4,
         required: false,
         sensitive: false,
-        tooltip:
-          'This setting determines the maximum number of concurrent HTTP requests sent to the Google API to fetch data. Increasing this value can improve data retrieval speed, but it may also place higher demands on system resources and network bandwidth.',
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.tooltip', {
+          defaultMessage:
+            'This setting determines the maximum number of concurrent HTTP requests sent to the Google API to fetch data. Increasing this value can improve data retrieval speed, but it may also place higher demands on system resources and network bandwidth.',
+        }),
         type: FieldType.INTEGER,
         ui_restrictions: ['advanced'],
         validations: [
@@ -811,13 +854,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Use text extraction service',
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 5,
         required: true,
         sensitive: false,
-        tooltip:
-          'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
@@ -1719,7 +1761,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Azure application Client ID',
+        label: i18n.translate('searchConnectors.nativeConnectors.oneDrive.azureClientId.label', {
+          defaultMessage: 'Azure application Client ID',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -1734,7 +1778,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Azure application Client Secret',
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oneDrive.azureClientSecret.label',
+          { defaultMessage: 'Azure application Client Secret' }
+        ),
         options: [],
         order: 2,
         required: true,
@@ -1749,7 +1796,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Azure application Tenant ID',
+        label: i18n.translate('searchConnectors.nativeConnectors.oneDrive.tenantId.label', {
+          defaultMessage: 'Azure application Tenant ID',
+        }),
         options: [],
         order: 3,
         required: true,
@@ -1764,7 +1813,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 3,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum retries per request',
+        label: RETRIES_PER_REQUEST_LABEL,
         options: [],
         order: 4,
         required: false,
@@ -1779,7 +1828,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 15,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum concurrent downloads',
+        label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
         order: 5,
         required: false,
@@ -1794,13 +1843,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Enable document level security',
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
         order: 6,
         required: true,
         sensitive: false,
-        tooltip:
-          'Document level security ensures identities and permissions set in OneDrive are maintained in Elasticsearch. This enables you to restrict and personalize read-access users and groups have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
@@ -1810,13 +1858,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Use text extraction service',
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 7,
         required: true,
         sensitive: false,
-        tooltip:
-          'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
         validations: [],
