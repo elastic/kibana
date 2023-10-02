@@ -24,12 +24,15 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
         <>{children}</>
       ) : (
         <>
+          {/* Main navigation content */}
           <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
             {children}
           </EuiCollapsibleNavBeta.Body>
           {footerChildren && (
             <EuiCollapsibleNavBeta.Footer>{footerChildren}</EuiCollapsibleNavBeta.Footer>
           )}
+
+          {/* Right side panel navigation */}
           <NavigationPanel />
         </>
       )}
