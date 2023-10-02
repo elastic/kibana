@@ -21,7 +21,7 @@ import type { CloudSecurityIntegration } from './types';
 interface Props {
   enrollmentAPIKey?: string;
   cloudSecurityIntegration: CloudSecurityIntegration;
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
 }
 export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
