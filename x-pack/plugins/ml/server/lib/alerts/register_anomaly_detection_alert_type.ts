@@ -47,7 +47,7 @@ export type AnomalyDetectionAlertPayload = {
   job_id: string;
   anomaly_score?: number;
   is_interim?: boolean;
-  anomaly_timestamp?: string;
+  anomaly_timestamp?: number;
   top_records?: any;
   top_influencers?: any;
 } & {
