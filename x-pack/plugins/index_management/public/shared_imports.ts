@@ -40,6 +40,7 @@ export {
   VALIDATION_TYPES,
   useForm,
   useFormData,
+  useFormIsModified,
   Form,
   getUseField,
   UseField,
@@ -60,6 +61,7 @@ export {
   TextField,
   SelectField,
   ToggleField,
+  NumericField,
   JsonEditorField,
   ComboBoxField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
