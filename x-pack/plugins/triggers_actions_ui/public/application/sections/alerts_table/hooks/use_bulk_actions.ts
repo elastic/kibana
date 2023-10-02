@@ -202,10 +202,13 @@ export const useBulkUntrackActions = ({
         if (!alerts) return;
         const alertUuids = alerts.map((alert) => alert._id);
         const indices = alerts.map((alert) => alert._index ?? '');
-        setIsBulkActionsLoading(true);
-        await untrackAlerts({ indices, alertUuids });
-        setIsBulkActionsLoading(false);
-        onSuccess();
+        try {
+          setIsBulkActionsLoading(true);
+          await untrackAlerts({ indices, alertUuids });
+          onSuccess();
+        } finally {
+          setIsBulkActionsLoading(false);
+        }
       },
     },
   ];

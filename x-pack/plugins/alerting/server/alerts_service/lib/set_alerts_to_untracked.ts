@@ -96,12 +96,16 @@ export async function setAlertsToUntracked({
           },
         },
       });
+      if (total === 0 && response.total === 0)
+        throw new Error('No active alerts matched the query');
       if (response.total) total = response.total;
       if (response.total === response.updated) break;
       logger.warn(
         `Attempt ${retryCount + 1}: Failed to untrack ${
           (response.total ?? 0) - (response.updated ?? 0)
-        } of ${response.total}; indices ${indices}, ruleIds ${ruleIds}`
+        } of ${response.total}; indices ${indices}, ${ruleIds ? 'ruleIds' : 'alertUuids'} ${
+          ruleIds ? ruleIds : alertUuids
+        }`
       );
     }
 
@@ -121,8 +125,12 @@ export async function setAlertsToUntracked({
     });
     return searchResponse.hits.hits.map((hit) => hit._source) as UntrackedAlertsResult;
   } catch (err) {
-    logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
-    return [];
+    logger.error(
+      `Error marking ${ruleIds ? 'ruleIds' : 'alertUuids'} ${
+        ruleIds ? ruleIds : alertUuids
+      } as untracked - ${err.message}`
+    );
+    throw err;
   }
 }
 
