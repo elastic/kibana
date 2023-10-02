@@ -16,9 +16,12 @@ import { visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 
-describe.skip('Detection ES|QL rules, creation', { tags: ['@serverless'] }, () => {
+describe('Detection ES|QL rules, creation', { tags: ['@serverless'] }, () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
   });
 
