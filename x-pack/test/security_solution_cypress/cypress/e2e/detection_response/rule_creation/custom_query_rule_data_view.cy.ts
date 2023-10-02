@@ -63,7 +63,8 @@ import {
 } from '../../../tasks/create_new_rule';
 
 import { login } from '../../../tasks/login';
-import { openRuleManagementPageViaBreadcrumbs, visit } from '../../../tasks/navigation';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';

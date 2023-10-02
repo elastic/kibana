@@ -111,7 +111,7 @@ import {
 } from '../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 

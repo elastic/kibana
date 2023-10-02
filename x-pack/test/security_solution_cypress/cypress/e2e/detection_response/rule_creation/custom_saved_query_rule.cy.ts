@@ -45,7 +45,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
