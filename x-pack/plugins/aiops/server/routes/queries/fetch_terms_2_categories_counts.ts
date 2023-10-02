@@ -107,7 +107,6 @@ export async function fetchTerms2CategoriesCounts(
       });
     });
   });
-  // console.log('searches', searches);
 
   let mSearchresponse;
 
@@ -133,11 +132,13 @@ export async function fetchTerms2CategoriesCounts(
     };
   }
 
+  const mSearchResponses = mSearchresponse.responses;
+
   return {
     fields: uniq(significantCategories.map((c) => c.fieldName)),
     df: results
       .map((result, i) => {
-        const resp = mSearchresponse.responses[i];
+        const resp = mSearchResponses[i];
         if (isMsearchResponseItem(resp)) {
           result.doc_count = (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
         }
