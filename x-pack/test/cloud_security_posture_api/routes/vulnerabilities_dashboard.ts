@@ -88,8 +88,9 @@ const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilitie
 const BENCHMARK_SCORES_INDEX = 'logs-cloud_security_posture.scores-default';
 
 type CnvmDashboardDataWithoutTimestamp = Omit<CnvmDashboardData, 'vulnTrends'> & {
-  vulnTrends: Array<Omit<VulnStatsTrend, '@timestamp'>>;
+  vulnTrends: Array<Omit<VulnStatsTrend, '@timestamp' | 'event'>>;
 };
+
 const removeRealtimeCalculatedFields = (
   responseBody: CnvmDashboardData
 ): CnvmDashboardDataWithoutTimestamp => {
