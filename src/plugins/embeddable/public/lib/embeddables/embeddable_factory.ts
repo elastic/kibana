@@ -24,6 +24,17 @@ export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
+export interface ExplicitInputWithAttributes {
+  newInput: Partial<EmbeddableInput>;
+  attributes?: unknown;
+}
+
+export const isExplicitInputWithAttributes = (
+  value: ExplicitInputWithAttributes | Partial<EmbeddableInput>
+): value is ExplicitInputWithAttributes => {
+  return Boolean((value as ExplicitInputWithAttributes).newInput);
+};
+
 /**
  * EmbeddableFactories create and initialize an embeddable instance
  */
@@ -106,8 +117,14 @@ export interface EmbeddableFactory<
    * input passed down from the parent container.
    *
    * Can be used to edit an embeddable by re-requesting explicit input. Initial input can be provided to allow the editor to show the current state.
+   *
+   * If saved object information is needed for creation use-cases, getExplicitInput can also return an unknown typed attributes object which will be passed
+   * into the container's addNewEmbeddable function.
    */
-  getExplicitInput(initialInput?: Partial<TEmbeddableInput>): Promise<Partial<TEmbeddableInput>>;
+  getExplicitInput(
+    initialInput?: Partial<TEmbeddableInput>,
+    parent?: IContainer
+  ): Promise<Partial<TEmbeddableInput> | ExplicitInputWithAttributes>;
 
   /**
    * Creates a new embeddable instance based off the saved object id.
