@@ -14,5 +14,3 @@ cd x-pack/test/security_solution_cypress
 set +e
 
 CYPRESS_ELASTICSEARCH_URL=$TEST_ENV_ES_URL CYPRESS_BASE_URL=$TEST_ENV_KB_URL CYPRESS_ELASTICSEARCH_USERNAME=$TEST_ENV_USERNAME CYPRESS_ELASTICSEARCH_PASSWORD=$TEST_ENV_PWD CYPRESS_KIBANA_URL=$CYPRESS_BASE_URL yarn cypress:run:qa:serverless; status=$?; yarn junit:merge || :; exit $status
-
-.buildkite/scripts/lifecycle/post_command.sh
