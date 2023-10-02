@@ -76,6 +76,11 @@ export function ProfilingHeaderActionMenu() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiHeaderLink>
+      <EuiHeaderLink href={router.link('/settings')} color="text">
+        {i18n.translate('xpack.profiling.headerActionMenu.settings', {
+          defaultMessage: 'Settings',
+        })}
+      </EuiHeaderLink>
       <ObservabilityAIAssistantActionMenuItem />
     </EuiHeaderLinks>
   );
