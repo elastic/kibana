@@ -74,6 +74,12 @@ const ObservabilityMetricsAlertOptional = rt.partial({
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'kibana.alert.group': rt.array(
+    rt.partial({
+      field: schemaString,
+      value: schemaString,
+    })
+  ),
 });
 
 // prettier-ignore

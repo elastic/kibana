@@ -24,7 +24,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
-import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   PreviewResponse,
   RulePreviewLogs,
@@ -287,11 +287,11 @@ export const previewRulesRoute = async (
               })) as { state: TState });
 
               const errors = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+                .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
                 .map((item) => item.message ?? 'Unknown Error');
 
               const warnings = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
+                .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
                 .map((item) => item.message ?? 'Unknown Warning');
 
               logs.push({

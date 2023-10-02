@@ -76,6 +76,12 @@ const ObservabilityApmAlertOptional = rt.partial({
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'kibana.alert.group': rt.array(
+    rt.partial({
+      field: schemaString,
+      value: schemaString,
+    })
+  ),
   'processor.event': schemaString,
   'service.environment': schemaString,
   'service.language.name': schemaString,
