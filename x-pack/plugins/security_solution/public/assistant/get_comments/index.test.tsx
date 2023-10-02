@@ -6,7 +6,9 @@
  */
 
 import { getComments } from '.';
+import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
+const user: ConversationRole = 'user';
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {
     const currentConversation = {
@@ -14,7 +16,7 @@ describe('getComments', () => {
       id: '1',
       messages: [
         {
-          role: 'user',
+          role: user,
           content: 'Hello {name}',
           timestamp: '2022-01-01',
           isError: false,
@@ -33,7 +35,7 @@ describe('getComments', () => {
       id: '1',
       messages: [
         {
-          role: 'user',
+          role: user,
           content: 'Hello {name}',
           timestamp: '2022-01-01',
           isError: true,
