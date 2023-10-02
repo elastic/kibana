@@ -7,6 +7,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
@@ -106,6 +107,7 @@ export async function registerMetricInventoryThresholdRuleType(
     defaultActionGroupId: FIRED_ACTIONS_ID,
     doesSetRecoveryContext: true,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',
     isExportable: true,
