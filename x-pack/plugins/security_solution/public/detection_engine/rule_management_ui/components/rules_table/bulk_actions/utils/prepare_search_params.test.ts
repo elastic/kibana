@@ -64,6 +64,16 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
+      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        excludeRuleTypes: ['esql'],
+      },
+    ],
+    [
       BulkActionsDryRunErrCode.IMMUTABLE,
       {
         filter: '',

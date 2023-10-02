@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# This script will collect typescript projects and run typecheck on projects between the given 2 parameters
+# Could be used for selective typechecking on projects that might be affected for a given PR.
+# (The accuracy for finding related projects is not a 100%)
 
 if [[ "${CI-}" == "true" ]]; then
   .buildkite/scripts/bootstrap.sh
@@ -106,10 +109,12 @@ done
 
 echo "Looking for related tsconfig.json files..."
 
-for dir in "${uniq_dirs[@]}"
-do
-  find_tsconfig $dir
-done
+if [ ${#uniq_dirs[@]} -gt 0 ]; then
+  for dir in "${uniq_dirs[@]}"
+  do
+    find_tsconfig $dir
+  done
+fi
 
 if [ ${#uniq_tsconfigs[@]} -eq 0 ]; then
   if [[ "$sha1" == "--cached" ]]; then
@@ -122,7 +127,17 @@ fi
 
 echo "Running scripts/type_check for each found tsconfig.json file..."
 
+finalExitCode=0
+
 for tsconfig in "${uniq_tsconfigs[@]}"
 do
+  set +e
   node scripts/type_check --project $tsconfig
+  exitCode=$?
+  set -e
+  if [ "$exitCode" -gt "$finalExitCode" ]; then
+    finalExitCode=$exitCode
+  fi
 done
+
+exit $finalExitCode

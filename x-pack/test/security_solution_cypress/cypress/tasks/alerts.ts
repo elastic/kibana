@@ -113,6 +113,7 @@ export const openAddEndpointExceptionFromAlertActionButton = () => {
 };
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
+  cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
@@ -121,13 +122,14 @@ export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
-  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.be.visible');
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };
 
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
   const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible');
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
     cy.get(TIMELINE_CONTEXT_MENU_BTN)
       .first()
@@ -191,6 +193,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
+  cy.scrollTo('top');
   recurse(
     () => {
       cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
@@ -264,7 +267,7 @@ export const goToOpenedAlerts = () => {
 export const openFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(OPEN_ALERT_BTN).should('be.visible');
-  cy.get(OPEN_ALERT_BTN).click({ force: true });
+  cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const openAlerts = () => {
@@ -303,6 +306,7 @@ export const goToAcknowledgedAlerts = () => {
 
 export const markAcknowledgedFirstAlert = () => {
   expandFirstAlertActions();
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
