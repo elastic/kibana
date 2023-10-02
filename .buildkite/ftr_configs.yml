@@ -100,6 +100,7 @@ enabled:
   - test/functional/apps/dashboard_elements/controls/options_list/config.ts
   - test/functional/apps/dashboard_elements/image_embeddable/config.ts
   - test/functional/apps/dashboard_elements/input_control_vis/config.ts
+  - test/functional/apps/dashboard_elements/links/config.ts
   - test/functional/apps/dashboard_elements/markdown/config.ts
   - test/functional/apps/dashboard/group1/config.ts
   - test/functional/apps/dashboard/group2/config.ts
@@ -310,6 +311,7 @@ enabled:
   - x-pack/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts
+  - x-pack/test/functional/apps/saved_query_management/config.ts
   - x-pack/test/functional/apps/security/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
@@ -401,16 +403,22 @@ enabled:
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts

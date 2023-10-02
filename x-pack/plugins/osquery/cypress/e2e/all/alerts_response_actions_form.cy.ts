@@ -28,6 +28,7 @@ import {
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
+// Issue: https://github.com/elastic/security-team/issues/7731
 describe.skip(
   'Alert Event Details - Response Actions Form',
   { tags: ['@ess', '@serverless'] },
