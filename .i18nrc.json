@@ -84,6 +84,7 @@
     ],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
+    "links": "src/plugins/links",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
     "randomSampling": "x-pack/packages/kbn-random-sampling",

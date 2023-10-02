@@ -1351,4 +1351,81 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.check_debug_registers',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.check_debug_registers',
+      {
+        defaultMessage:
+          'Check debug registers inline to detect the use of hardware breakpoints. Malware may use hardware breakpoints to forge benign-looking call stacks. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.fileaccess',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'A value of false overrides other config settings that would enable kernel fileaccess events. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.image_load',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
+      {
+        defaultMessage:
+          'A value of false overrides other config settings that would enable kernel image load events. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.image_load.capture',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.collect',
+      {
+        defaultMessage:
+          'Collect and send image load events to Elasticsearch. Take caution, this can be a very high data volume. Adding an event filter to drop unwanted events is strongly recommended. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
 ];

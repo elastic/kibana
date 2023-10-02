@@ -72,7 +72,17 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', login);
+Cypress.Commands.add('login', (role) => {
+  // TODO Temporary approach to login until login with role is supported in serverless
+  // Cypress.Commands.add('login', login);
+  const isServerless = Cypress.env().IS_SERVERLESS;
+
+  if (isServerless) {
+    return login.with('system_indices_superuser', 'changeme');
+  }
+
+  return login(role);
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
