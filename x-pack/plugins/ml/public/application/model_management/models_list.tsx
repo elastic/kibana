@@ -43,11 +43,12 @@ import {
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
   MODEL_STATE,
-  ModelState,
-} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+  type ModelState,
+  ELSER_ID_V1,
+} from '@kbn/ml-trained-models-utils';
 import { css } from '@emotion/react';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_ELSER_CALLOUT_VISIBLE } from '../../../common/types/storage';
+import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -173,7 +174,10 @@ export const ModelsList: FC<Props> = ({
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
 
   const { isNLPEnabled } = useEnabledFeatures();
-  const [isCalloutVisible, setIsCalloutVisible] = useStorage(ML_ELSER_CALLOUT_VISIBLE, true);
+  const [isElserCalloutDismissed, setIsElserCalloutDismissed] = useStorage(
+    ML_ELSER_CALLOUT_DISMISSED,
+    false
+  );
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -725,6 +729,9 @@ export const ModelsList: FC<Props> = ({
       : {}),
   };
 
+  const isElserCalloutVisible =
+    !isElserCalloutDismissed && items.findIndex((i) => i.model_id === ELSER_ID_V1) >= 0;
+
   if (!isInitialized) return null;
 
   return (
@@ -761,7 +768,7 @@ export const ModelsList: FC<Props> = ({
           sorting={sorting}
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
           childrenBetween={
-            isCalloutVisible ? (
+            isElserCalloutVisible ? (
               <>
                 <EuiCallOut
                   size="s"
@@ -771,7 +778,7 @@ export const ModelsList: FC<Props> = ({
                       defaultMessage="New ELSER model now available"
                     />
                   }
-                  onDismiss={setIsCalloutVisible.bind(null, false)}
+                  onDismiss={setIsElserCalloutDismissed.bind(null, true)}
                 >
                   <FormattedMessage
                     id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
