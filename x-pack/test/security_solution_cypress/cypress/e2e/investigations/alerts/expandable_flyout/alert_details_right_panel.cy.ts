@@ -162,6 +162,7 @@ describe('Alert details expandable flyout right panel', () => {
     cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
   });
 
+  // Issue reported int: https://github.com/elastic/kibana/issues/167809
   it('should mark as acknowledged', { tags: ['@ess', '@brokenInServerless'] }, () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 2);
 
@@ -175,6 +176,7 @@ describe('Alert details expandable flyout right panel', () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 1);
   });
 
+  // Issue reported int: https://github.com/elastic/kibana/issues/167809
   it('should mark as closed', { tags: ['@ess', '@brokenInServerless'] }, () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 2);
 
@@ -187,6 +189,7 @@ describe('Alert details expandable flyout right panel', () => {
   });
 
   // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown
+  // Issue reported int: https://github.com/elastic/kibana/issues/167809
   it(
     'should test other action within take action dropdown',
     { tags: ['@ess', '@brokenInServerless'] },
