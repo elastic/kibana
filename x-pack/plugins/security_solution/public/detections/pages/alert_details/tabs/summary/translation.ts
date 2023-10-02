@@ -189,10 +189,10 @@ export const HOST_RISK_SCORE = i18n.translate(
   }
 );
 
-export const HOST_RISK_CLASSIFICATION = i18n.translate(
-  'xpack.securitySolution.alerts.alertDetails.summary.host.riskClassification',
+export const HOST_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.host.riskLevel',
   {
-    defaultMessage: 'Host risk classification',
+    defaultMessage: 'Host risk level',
   }
 );
 
@@ -210,10 +210,10 @@ export const USER_RISK_SCORE = i18n.translate(
   }
 );
 
-export const USER_RISK_CLASSIFICATION = i18n.translate(
-  'xpack.securitySolution.alerts.alertDetails.summary.user.riskClassification',
+export const USER_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.user.riskLevel',
   {
-    defaultMessage: 'User risk classification',
+    defaultMessage: 'User risk level',
   }
 );
 
