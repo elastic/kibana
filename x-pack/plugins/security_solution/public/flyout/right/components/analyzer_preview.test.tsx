@@ -34,7 +34,7 @@ const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.'
 
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('shows analyzer preview correctly when documentId and index are present', () => {
