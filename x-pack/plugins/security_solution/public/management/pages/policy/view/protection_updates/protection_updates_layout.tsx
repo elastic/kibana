@@ -262,7 +262,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               values={{
                 learnMore: (
                   <EuiLink
-                    href={docLinks.links.securitySolution.endpointArtifacts}
+                    href={docLinks.links.securitySolution.artifactControl}
                     target="_blank"
                     external
                   >
