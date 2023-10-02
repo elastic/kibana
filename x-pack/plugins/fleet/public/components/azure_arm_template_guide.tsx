@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { AgentPolicy } from '../../common';
 import { useFleetServerHostsForPolicy } from '../hooks';
 
 import { useAgentPolicyWithPackagePolicies } from './agent_enrollment_flyout/hooks';
-
 import type { CloudSecurityIntegrationAzureAccountType } from './agent_enrollment_flyout/types';
 
 const azureResourceManagerLink =
@@ -21,13 +21,13 @@ const azureResourceManagerLink =
 export const AzureArmTemplateGuide = ({
   azureAccountType,
   agentPolicy,
-  enrollmentToken,
+  enrollmentToken = '',
 }: {
   azureAccountType?: CloudSecurityIntegrationAzureAccountType;
   agentPolicy?: AgentPolicy;
-  enrollmentToken: string;
+  enrollmentToken?: string;
 }) => {
-  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicy.id);
+  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicy?.id);
   const { fleetServerHosts } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
   const fleetServerHost = fleetServerHosts[0];
 
