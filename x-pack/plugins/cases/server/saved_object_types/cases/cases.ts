@@ -13,16 +13,18 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
-import type { CasePersistedAttributes } from '../common/types/case';
-import { handleExport } from './import_export/export';
-import { caseMigrations } from './migrations';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import type { CasePersistedAttributes } from '../../common/types/case';
+import { handleExport } from '../import_export/export';
+import { caseMigrations } from '../migrations';
+import { modelVersion1 } from './model_versions';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
+  switchToModelVersionAt: '8.10.0',
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
@@ -191,9 +193,48 @@ export const createCaseSavedObjectType = (
       category: {
         type: 'keyword',
       },
+      customFields: {
+        type: 'nested',
+        properties: {
+          key: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+          value: {
+            type: 'keyword',
+            fields: {
+              number: {
+                type: 'long',
+                ignore_malformed: true,
+              },
+              boolean: {
+                type: 'boolean',
+                // @ts-expect-error: es types are not correct. ignore_malformed is supported.
+                ignore_malformed: true,
+              },
+              string: {
+                type: 'text',
+              },
+              date: {
+                type: 'date',
+                ignore_malformed: true,
+              },
+              ip: {
+                type: 'ip',
+                ignore_malformed: true,
+              },
+            },
+          },
+        },
+      },
     },
   },
   migrations: caseMigrations,
+  modelVersions: {
+    1: modelVersion1,
+  },
   management: {
     importableAndExportable: true,
     defaultSearchField: 'title',

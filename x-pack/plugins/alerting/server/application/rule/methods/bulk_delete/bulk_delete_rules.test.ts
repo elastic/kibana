@@ -156,6 +156,7 @@ describe('bulkDelete', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: schema.any(),
