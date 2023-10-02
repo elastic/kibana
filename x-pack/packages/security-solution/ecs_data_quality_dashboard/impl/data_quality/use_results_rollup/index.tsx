@@ -13,6 +13,7 @@ import {
   getTotalIncompatible,
   getTotalIndices,
   getTotalIndicesChecked,
+  getTotalSameFamily,
   getTotalSizeInBytes,
   onPatternRollupUpdated,
   updateResultOnCheckCompleted,
@@ -39,6 +40,7 @@ interface UseResultsRollup {
   totalIncompatible: number | undefined;
   totalIndices: number | undefined;
   totalIndicesChecked: number | undefined;
+  totalSameFamily: number | undefined;
   totalSizeInBytes: number | undefined;
   updatePatternIndexNames: ({
     indexNames,
@@ -67,6 +69,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     () => getTotalIndicesChecked(patternRollups),
     [patternRollups]
   );
+  const totalSameFamily = useMemo(() => getTotalSameFamily(patternRollups), [patternRollups]);
   const totalSizeInBytes = useMemo(() => getTotalSizeInBytes(patternRollups), [patternRollups]);
 
   const updatePatternIndexNames = useCallback(
@@ -175,6 +178,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     totalIncompatible,
     totalIndices,
     totalIndicesChecked,
+    totalSameFamily,
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
