@@ -12,12 +12,15 @@ import {
   loadRuleAlerts,
   submitQuery,
   takeOsqueryActionWithParams,
+  enableRule,
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe(
   'Alert Event Details - dynamic params',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: ['@ess', '@serverless'],
+  },
   () => {
     let ruleId: string;
     let ruleName: string;
@@ -26,7 +29,12 @@ describe(
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
-        loadRuleAlerts(data.name);
+        enableRule(data.id, 'disable');
+        cy.wait(2000);
+        enableRule(data.id, 'enable').then(() => {
+          cy.wait(2000);
+          loadRuleAlerts(data.name);
+        });
       });
     });
 
@@ -99,7 +107,6 @@ describe(
       });
 
       it('should substitute params in osquery ran from timelines alerts', () => {
-        loadRuleAlerts(ruleName);
         cy.getBySel('send-alert-to-timeline-button').first().click();
         cy.getBySel('query-events-table').within(() => {
           cy.getBySel('expand-event').first().click();

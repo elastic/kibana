@@ -7,6 +7,8 @@
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
+import { request } from './common';
+import { API_VERSIONS } from '../../common/constants';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -174,3 +176,13 @@ export const takeOsqueryActionWithParams = () => {
 export const clickRuleName = (ruleName: string) => {
   cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
 };
+
+export const enableRule = (ruleId: string, action: string) =>
+  request({
+    method: 'POST',
+    body: { action, ids: [ruleId] },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    url: '/api/detection_engine/rules/_bulk_action',
+  });
