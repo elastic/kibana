@@ -84,6 +84,12 @@ const ObservabilityApmAlertOptional = rt.partial({
         value: schemaStringOrNumber,
         values: schemaStringOrNumberArray,
       }),
+      group: rt.array(
+        rt.partial({
+          field: schemaString,
+          value: schemaString,
+        })
+      ),
     }),
   }),
   processor: rt.partial({
