@@ -86,7 +86,7 @@ export const useDiscoverInTimelineActions = (
       columns: [],
       interval: 'auto',
       filters: [],
-      hideChart: true,
+      hideChart: false,
       grid: {},
     };
   }, [dataViewService, dataViewId]);
