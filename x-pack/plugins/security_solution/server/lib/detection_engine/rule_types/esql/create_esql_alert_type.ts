@@ -22,7 +22,6 @@ export const createEsqlAlertType = (
   return {
     id: ESQL_RULE_TYPE_ID,
     name: 'ES|QL Rule',
-    category: DEFAULT_APP_CATEGORIES.security.id,
     validate: {
       params: {
         validate: (object: unknown) => {
