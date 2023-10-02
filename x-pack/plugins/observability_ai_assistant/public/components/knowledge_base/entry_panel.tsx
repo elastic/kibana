@@ -122,9 +122,10 @@ export function EntryPanel({
     <>
       {confirmDeleteElement}
       <EuiPanel borderRadius="none" style={{ position: 'relative' }}>
-        {loading ? (
+        {!loading && entry ? (
           <>
             <EuiButtonIcon
+              aria-label="Close"
               data-test-subj="observabilityAiAssistantKnowledgeBaseViewButton"
               iconType="cross"
               onClick={() => {
