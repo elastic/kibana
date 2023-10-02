@@ -8,7 +8,6 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import moment from 'moment';
 import {
   InstallPrebuiltRulesAndTimelinesResponse,
@@ -116,9 +115,7 @@ export const createPrepackagedRules = async (
     throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
   }
 
-  const { result: timelinesResult, error: timelinesError } = await performTimelinesInstallation(
-    context
-  );
+  const { result: timelinesResult } = await performTimelinesInstallation(context);
 
   await upgradePrebuiltRules(rulesClient, rulesToUpdate);
 
@@ -129,17 +126,5 @@ export const createPrepackagedRules = async (
     timelines_updated: timelinesResult?.timelines_updated ?? 0,
   };
 
-  const [validated, genericErrors] = validate(
-    prebuiltRulesOutput,
-    InstallPrebuiltRulesAndTimelinesResponse
-  );
-
-  if (genericErrors != null && timelinesError != null) {
-    throw new PrepackagedRulesError(
-      [genericErrors, timelinesError].filter((msg) => msg != null).join(', '),
-      500
-    );
-  }
-
-  return validated;
+  return InstallPrebuiltRulesAndTimelinesResponse.parse(prebuiltRulesOutput);
 };
