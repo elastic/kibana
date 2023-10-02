@@ -36,7 +36,7 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
-import { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
@@ -179,7 +179,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
 
           await ruleExecutionLogger.logStatusChange({
-            newStatus: RuleExecutionStatus.running,
+            newStatus: RuleExecutionStatusEnum.running,
           });
 
           let result = createResultObject(state);
@@ -240,7 +240,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   : `Check for indices to search failed ${exc}`;
 
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatus.failed,
+                newStatus: RuleExecutionStatusEnum.failed,
                 message: errorMessage,
               });
 
@@ -299,7 +299,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           } catch (exc) {
             await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatus['partial failure'],
+              newStatus: RuleExecutionStatusEnum['partial failure'],
               message: `Check privileges failed to execute ${exc}`,
             });
             wroteWarningStatus = true;
@@ -321,7 +321,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
 
             await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatus.failed,
+              newStatus: RuleExecutionStatusEnum.failed,
               message: `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`,
               metrics: { executionGap: remainingGap },
             });
@@ -459,7 +459,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             if (result.warningMessages.length) {
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatus['partial failure'],
+                newStatus: RuleExecutionStatusEnum['partial failure'],
                 message: truncateList(result.warningMessages).join(),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
@@ -485,7 +485,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
                 await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatus.succeeded,
+                  newStatus: RuleExecutionStatusEnum.succeeded,
                   message: 'Rule execution completed successfully',
                   metrics: {
                     searchDurations: result.searchAfterTimes,
@@ -495,7 +495,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 });
               } else if (wroteWarningStatus && !hasError && !result.warning) {
                 await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatus['partial failure'],
+                  newStatus: RuleExecutionStatusEnum['partial failure'],
                   message: warningMessage,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
@@ -506,7 +506,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
             } else {
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatus.failed,
+                newStatus: RuleExecutionStatusEnum.failed,
                 message: `Bulk Indexing of alerts failed: ${truncateList(result.errors).join()}`,
                 metrics: {
                   searchDurations: result.searchAfterTimes,
@@ -519,7 +519,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const errorMessage = error.message ?? '(no error message given)';
 
             await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatus.failed,
+              newStatus: RuleExecutionStatusEnum.failed,
               message: `An error occurred during rule execution: message: "${errorMessage}"`,
               metrics: {
                 searchDurations: result.searchAfterTimes,
