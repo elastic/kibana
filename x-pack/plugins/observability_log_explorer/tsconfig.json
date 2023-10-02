@@ -23,7 +23,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/config-schema",
     "@kbn/kibana-utils-plugin",
-    "@kbn/core-application-browser",
     "@kbn/discover-plugin",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
