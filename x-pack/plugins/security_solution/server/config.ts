@@ -11,6 +11,8 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { SetupOptions } from '../common/setup_options';
+import { parseSetupOptionsConfig } from '../common/setup_options';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -121,12 +123,23 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+  /**
+   * Used to setup options for the Security application.
+   * @example
+   * xpack.securitySolution.setupOptions: {
+   *  "esqlEnabled": false,
+   * }
+   */
+  setupOptions: schema.recordOf(schema.string(), schema.any(), {
+    defaultValue: {},
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export type ConfigType = ConfigSchema & {
   experimentalFeatures: ExperimentalFeatures;
+  readonly setupOptions: SetupOptions;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
@@ -146,8 +159,20 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
+  const { invalid: invalidSetupOptions, options: setupOptions } = parseSetupOptionsConfig(
+    pluginConfig.setupOptions
+  );
+
+  if (invalidSetupOptions.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.setupOptions" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+${invalidSetupOptions.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
+
   return {
     ...pluginConfig,
     experimentalFeatures,
+    setupOptions,
   };
 };
