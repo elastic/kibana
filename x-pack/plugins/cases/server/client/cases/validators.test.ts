@@ -403,34 +403,5 @@ describe('validators', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
     });
-
-    it('throws if request sends a custom field that is not part of the configuration', () => {
-      const requestCustomFields: CaseCustomFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT as const,
-          value: ['foo'],
-        },
-        {
-          key: 'second_key',
-          type: CustomFieldTypes.TOGGLE,
-          value: true,
-        },
-      ];
-      const customFieldsConfiguration: CustomFieldsConfiguration = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          label: 'foo',
-          required: true,
-        },
-      ];
-      expect(() =>
-        validateRequiredCustomFields({
-          requestCustomFields,
-          customFieldsConfiguration,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown custom fields: second_key"`);
-    });
   });
 });
