@@ -323,6 +323,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly artifactControl: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
