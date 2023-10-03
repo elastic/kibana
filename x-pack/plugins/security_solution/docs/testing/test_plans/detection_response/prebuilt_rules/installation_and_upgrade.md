@@ -44,6 +44,76 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
 - Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
 - Kibana should not crash with Out Of Memory exception during package installation.
 - For test purposes, it should be possible to use detection rules package versions lower than the latest.
+- In the prebuilt rule preview a tab without that doesn't have any sections should not be displayed and a section without any properties also should not be displayed
+
+
+```Gherkin
+Prebuilt rule properties examples:
+| rule_type         | property                          | section             | tab                 |
+│ All rule types    │ Author                            │ About               │ Overview            │
+│ All rule types    │ Building block                    │ About               │ Overview            │
+│ All rule types    │ Severity                          │ About               │ Overview            │
+│ All rule types    │ Severity override                 │ About               │ Overview            │
+│ All rule types    │ Risk score                        │ About               │ Overview            │
+│ All rule types    │ Risk score override               │ About               │ Overview            │
+│ All rule types    │ Reference URLs                    │ About               │ Overview            │
+│ All rule types    │ False positive examples           │ About               │ Overview            │
+│ All rule types    │ Custom highlighted fields         │ About               │ Overview            │
+│ All rule types    │ License                           │ About               │ Overview            │
+│ All rule types    │ Rule name override                │ About               │ Overview            │
+│ All rule types    │ MITRE ATT&CK™                     │ About               │ Overview            │
+│ All rule types    │ Timestamp override                │ About               │ Overview            │
+│ All rule types    │ Tags                              │ About               │ Overview            │
+│ All rule types    │ Type                              │ Definition          │ Overview            │
+│ All rule types    │ Related integrations              │ Definition          │ Overview            │
+│ All rule types    │ Required fields                   │ Definition          │ Overview            │
+│ All rule types    │ Timeline template                 │ Definition          │ Overview            │
+│ All rule types    │ Runs every                        │ Schedule            │ Overview            │
+│ All rule types    │ Additional look-back time         │ Schedule            │ Overview            │
+│ All rule types    │ Setup guide                       │ Setup guide         │ Overview            │
+│ All rule types    │ Investigation guide               │ Investigation guide │ Investigation guide │
+│ Custom Query      │ Index patterns                    │ Definition          │ Overview            │
+│ Custom Query      │ Data view ID                      │ Definition          │ Overview            │
+│ Custom Query      │ Data view index pattern           │ Definition          │ Overview            │
+│ Custom Query      │ Custom query                      │ Definition          │ Overview            │
+│ Custom Query      │ Filters                           │ Definition          │ Overview            │
+│ Custom Query      │ Saved query name                  │ Definition          │ Overview            │
+│ Custom Query      │ Saved query filters               │ Definition          │ Overview            │
+│ Custom Query      │ Saved query                       │ Definition          │ Overview            │
+│ Custom Query      │ Suppress alerts by                │ Definition          │ Overview            │
+│ Custom Query      │ Suppress alerts for               │ Definition          │ Overview            │
+│ Custom Query      │ If a suppression field is missing │ Definition          │ Overview            │
+│ Machine Learning  │ Anomaly score threshold           │ Definition          │ Overview            │
+│ Machine Learning  │ Machine Learning job              │ Definition          │ Overview            │
+│ Threshold         │ Threshold                         │ Definition          │ Overview            │
+│ Threshold         │ Index patterns                    │ Definition          │ Overview            │
+│ Threshold         │ Data view ID                      │ Definition          │ Overview            │
+│ Threshold         │ Data view index pattern           │ Definition          │ Overview            │
+│ Threshold         │ Custom query                      │ Definition          │ Overview            │
+│ Threshold         │ Filters                           │ Definition          │ Overview            │
+│ Event Correlation │ EQL query                         │ Definition          │ Overview            │
+│ Event Correlation │ Filters                           │ Definition          │ Overview            │
+│ Event Correlation │ Index patterns                    │ Definition          │ Overview            │
+│ Event Correlation │ Data view ID                      │ Definition          │ Overview            │
+│ Event Correlation │ Data view index pattern           │ Definition          │ Overview            │
+│ Indicator Match   │ Indicator index patterns          │ Definition          │ Overview            │
+│ Indicator Match   │ Indicator mapping                 │ Definition          │ Overview            │
+│ Indicator Match   │ Indicator filters                 │ Definition          │ Overview            │
+│ Indicator Match   │ Indicator index query             │ Definition          │ Overview            │
+│ Indicator Match   │ Index patterns                    │ Definition          │ Overview            │
+│ Indicator Match   │ Data view ID                      │ Definition          │ Overview            │
+│ Indicator Match   │ Data view index pattern           │ Definition          │ Overview            │
+│ Indicator Match   │ Custom query                      │ Definition          │ Overview            │
+│ Indicator Match   │ Filters                           │ Definition          │ Overview            │
+│ New Terms         │ Fields                            │ Definition          │ Overview            │
+│ New Terms         │ History Window Size               │ Definition          │ Overview            │
+│ New Terms         │ Index patterns                    │ Definition          │ Overview            │
+│ New Terms         │ Data view ID                      │ Definition          │ Overview            │
+│ New Terms         │ Data view index pattern           │ Definition          │ Overview            │
+│ New Terms         │ Custom query                      │ Definition          │ Overview            │
+│ New Terms         │ Filters                           │ Definition          │ Overview            │
+│ ES|QL             │ ES|QL query                       │ Definition          │ Overview            │
+```
 
 ## Scenarios
 
@@ -366,7 +436,7 @@ Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules available to install
 When user opens the Add Rules page
 Then prebuilt rules available for installation should be displayed in the table
-When user installs one individual rule
+When user installs one individual rule without previewing it
 Then success message should be displayed after installation
 And the installed rule should be removed from the table
 When user navigates back to the Rule Management page
@@ -429,6 +499,39 @@ Then user should see a message indicating that all available rules have been ins
 And user should see a CTA that leads to the Rule Management page
 ```
 
+#### **Scenario: User can preview a rule before installing**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are at least 2 rules available to install
+When user opens the Add Rules page
+Then the user should be able to open a preview for a rule
+When the preview is open the user should be able to close it
+Then the user should be able to open a preview for another rule
+When the preview is open the user should be able to install a rule using a CTA in the rule preview
+Then success message should be displayed after installation
+And the installed rule should be removed from the table
+When user navigates back to the Rule Management page
+Then user should see a CTA to install prebuilt rules
+And user should see the number of rules available to install as 1
+```
+
+#### **Scenario: User can see correct rule information in preview before installing**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules available to install
+When user opens the Add Rules page
+Then the user should be able to open a preview for a rule
+When the rule preview is open 
+Then for every property defined in a rule the user should see property information in the correct tab and section of the preview (see Prebuilt rule properties examples)
+And selecting another rule in the table should update the preview content
+```
+
 ### Rule installation workflow: filtering, sorting, pagination
 
 TODO: add scenarios
@@ -467,7 +570,7 @@ And for Y of the installed rules there are new versions available
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
-When user upgrades one individual rule
+When user upgrades one individual rule without previewing it
 Then success message should be displayed after upgrade
 And the upgraded rule should be removed from the table
 And user should see the number of rules available to upgrade decreased by 1
@@ -517,6 +620,41 @@ And user should NOT see the Rule Updates table
 
 TODO: add scenarios
 
+#### **Scenario: User can preview a rule before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given at least 2 prebuilt rules are installed in Kibana
+And for at least 2 of the installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then all rules available for upgrade should be displayed in the table
+And user should be able to open a preview for a rule
+When the preview is open the user should be able to close it
+Then the user should be able to open a preview for another rule
+When the preview is open the user should be able to upgrade a rule using an action in the rule preview
+Then success message should be displayed after upgrade
+And the upgraded rule should be removed from the table
+And user should see the number of rules available to upgrade as 1
+```
+
+#### **Scenario: User can see correct rule information in preview before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of the installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then Y rules available for upgrade should be displayed in the table
+And the user should be able to open a preview for a rule
+When the rule preview is open 
+Then for every property defined in a rule the user should see property information in the correct tab and section of the preview (see Prebuilt rule properties examples)
+And selecting another rule in the table should update the preview content
+```
+
 ### Rule upgrade workflow: misc cases
 
 #### **Scenario: User doesn't see the Rule Updates tab until the package installation is completed**
@@ -528,197 +666,6 @@ Given prebuilt rules package is not installed
 When user opens the Rule Management page
 Then user should NOT see the Rule Updates tab until the package installation is completed and there are rules available for upgrade
 ```
-
-### Previewing a rule before installation or upgrade
-Assumptions: 
-  - if a section in the Overview tab doesn't contain any properties, it should not be displayed
-
-```Gherkin
-Shared properties examples:
-  | section    | shared_property           |
-  | About      | Author                    |
-  | About      | Building block            |
-  | About      | Severity                  |
-  | About      | Severity override         |
-  | About      | Risk score                |
-  | About      | Risk score override       |
-  | About      | Reference URLs            |
-  | About      | False positive examples   |
-  | About      | Custom highlighted fields |
-  | About      | License                   |
-  | About      | Rule name override        |
-  | About      | MITRE ATT&CK™             |
-  | About      | Timestamp override        |
-  | About      | Tags                      |
-  | Definition | Related integrations      |
-  | Definition | Required fields           |
-  | Definition | Timeline template         |
-  | Schedule   | Runs every                |
-  | Schedule   | Additional look-back time |
-
-Custom query properties examples:
-  | custom_query_property |
-  | Custom query          |
-  | Filters               |
-
-Saved query properties examples:
-  | saved_query_property |
-  | Saved query name     |
-  | Saved query filters  |
-  | Saved query          |
-```
-
-#### **Scenario: Custom Query rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-Given a Custom Query rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "Custom query"
-And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
-And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
-And if the rule has a custom query then for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
-And if the rule has a saved query then for each <saved_query_property> defined in the rule a corresponding value should be displayed under the Definition section
-And if the rule has alert suppression settings then for each <alert_suppression_property> defined in the rule a corresponding value should be displayed under the Definition section
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-
-Alert suppression examples:
-  | alert_suppression_property        |
-  | Suppress alerts by                |
-  | Suppress alerts for               |
-  | If a suppression field is missing |
-```
-
-#### **Scenario: Machine Learning rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-Given a Machine Learning rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "Machine Learning"
-And all the <machine_learning_property> properties should be displayed along with their values under the Definition section
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-
-Machine Learning properties examples:
-  | machine_learning_property |
-  | Anomaly score threshold   |
-  | Machine Learning job      |
-```
-
-#### **Scenario: Threshold rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-Given a Threshold rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "Threshold"
-And the Threshold field should be displayed under the Definition section along with its value
-And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
-And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
-And for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-```
-
-#### **Scenario: EQL rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-Given a EQL rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "Event Correlation"
-And the "EQL query" field should be displayed under the Definition section along with its value
-And if EQL filters are defined in the rule then the "Filters" label should be displayed under the Definition section along with its value
-And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
-And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-```
-
-#### **Scenario: Indicator Match rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-Given an Indicator Match rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "Indicator Match"
-And for each <indicator_match_property> defined in the rule a corresponding value should be displayed under the Definition section
-And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
-And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
-And for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-
-Examples:
-  | indicator_match_property |
-  | Indicator index patterns |
-  | Indicator mapping        |
-  | Indicator filters        |
-  | Indicator index query    |
-```
-
-#### **Scenario: New Terms rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-Given a New Terms rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "New Terms"
-And for each <new_terms_property> defined in the rule a corresponding value should be displayed under the Definition section
-And if the rule has index patterns then the "Index patterns" label should be displayed under the Definition section along with a list of index patters
-And if the rule has a data view then "Data view ID" and "Data view index pattern" labels should be displayed under the Definition section along with their values
-And for each <custom_query_property> defined in the rule a corresponding value should be displayed under the Definition section
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-
-Examples:
-  | new_terms_property  |
-  | Fields              |
-  | History Window Size |
-```
-
-#### **Scenario: ES|QL rule - Overview tab**
-**Automation**: 1 e2e test
-```Gherkin
-"Rule type" should be "ES|QL"
-Might have setup guide
-Includes all shared About section properties.
-Includes all shared Schedule section properties.
-
-Given an ES|QL rule
-When the user opens the rule preview
-Then the "Rule type" property under the Definition section should be "ES|QL"
-And "ES|QL query" field should be displayed under the Definition section along with its value
-And all the <shared_property> properties defined in the rule should be displayed along with their values under their respective <section>
-And if the rule has a setup guide then it should be displayed under the Setup Guide section
-```
-
-#### **Scenario: All rule types - Investigation guide**
-**Automation**: 1 e2e test
-```Gherkin
-  Given a rule of any type
-  When the user opens the rule preview
-  Then the "Investigation guide" tab should be displayed if the rule has an investigation guide
-  But the "Investigation guide" tab should not be displayed if the rule doesn't have an investigation guide
-```
-
-#### **Scenario: All rule types - Installing a rule**
-**Automation**: 1 e2e test
-```Gherkin
-  Given a not installed prebuilt rule
-  When the user opens the rule preview
-  Then the "Install" button should be displayed and enabled
-  And clicking the "Install" button should install the rule
-  And a newly installed rule should be displayed on the Rule Management page
-```
-
-#### **Scenario: All rule types - Upgrading a rule**
-**Automation**: 1 e2e test
-```Gherkin
-  Given an installed prebuilt rule that has a new version available
-  When the user opens the rule preview for this rule
-  Then the new version of the rule should be displayed
-  And the "Upgrade" button should be displayed and enabled
-  And clicking the "Upgrade" button should install the upgraded version of the rule
-```
-
-
 
 ### Error handling
 
