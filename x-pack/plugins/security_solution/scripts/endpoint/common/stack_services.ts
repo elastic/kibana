@@ -125,8 +125,6 @@ export const createRuntimeServices = async ({
     });
 
     await waitForKibana(tmpKbnClient);
-
-    // const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
     const isServerlessEs = await isServerlessKibanaFlavor(tmpKbnClient);
 
     if (isServerlessEs) {

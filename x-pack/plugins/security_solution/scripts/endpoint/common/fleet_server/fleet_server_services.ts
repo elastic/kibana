@@ -9,6 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import execa from 'execa';
 import chalk from 'chalk';
+import assert from 'assert';
 import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
@@ -207,8 +208,10 @@ const getOrCreateFleetServerAgentPolicyId = async (
 interface StartFleetServerWithDockerOptions {
   kbnClient: KbnClient;
   logger: ToolingLog;
-  policyId: string;
-  serviceToken: string;
+  /** The agent policy id. Required for non-serverless env. */
+  policyId?: string;
+  /** The service token for fleet server. Required for non-serverless env. */
+  serviceToken?: string;
   version?: string;
   port?: number;
 }
@@ -216,8 +219,8 @@ interface StartFleetServerWithDockerOptions {
 const startFleetServerWithDocker = async ({
   kbnClient,
   logger: log,
-  policyId,
-  serviceToken,
+  policyId = '',
+  serviceToken = '',
   version,
   port = 8220,
 }: StartFleetServerWithDockerOptions): Promise<StartedServer> => {
@@ -247,6 +250,9 @@ const startFleetServerWithDocker = async ({
 
       agentVersion = 'latest';
       await maybeCreateDockerNetwork(log);
+    } else {
+      assert.ok(!!policyId, '`policyId` is required');
+      assert.ok(!!serviceToken, '`serviceToken` is required');
     }
 
     try {
