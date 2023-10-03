@@ -56,6 +56,16 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
+    case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
+            defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
+            values={{ rulesCount }}
+          />
+        </li>
+      );
     default:
       return (
         <li key={message}>

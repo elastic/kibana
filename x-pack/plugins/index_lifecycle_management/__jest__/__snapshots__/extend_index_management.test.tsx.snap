@@ -119,7 +119,10 @@ Array [
       Index lifecycle error
     </p>
     <div
-      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
     >
       illegal_argument_exception: setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
     </div>

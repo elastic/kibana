@@ -10,18 +10,25 @@ import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FLYOUT_LOADING_TEST_ID } from '../test_ids';
 
+interface FlyoutLoadingProps {
+  /**
+  Data test subject string for testing
+  */
+  ['data-test-subj']?: string;
+}
+
 /**
  * Use this when you need to show a loading state in the flyout
  */
-export const FlyoutLoading: React.VFC = () => (
+export const FlyoutLoading: React.FC<FlyoutLoadingProps> = ({
+  'data-test-subj': dataTestSubj = FLYOUT_LOADING_TEST_ID,
+}) => (
   <EuiFlexItem
     css={css`
       align-items: center;
       justify-content: center;
     `}
   >
-    <EuiLoadingSpinner size="xxl" data-test-subj={FLYOUT_LOADING_TEST_ID} />
+    <EuiLoadingSpinner size="xxl" data-test-subj={dataTestSubj} />
   </EuiFlexItem>
 );
-
-FlyoutLoading.displayName = 'FlyoutLoading';
