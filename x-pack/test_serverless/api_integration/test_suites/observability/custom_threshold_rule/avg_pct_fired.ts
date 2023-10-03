@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        conflicts: 'proceed',
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
