@@ -30,8 +30,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--serverless=security',
         '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'riskScoringRoutesEnabled',
-          'riskScoringPersistence',
           'esqlRulesDisabled',
         ])}`,
         `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
