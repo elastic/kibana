@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [activeNode, setActiveNode] = useState<PanelNavNode | null>(null);
 
   const toggle = useCallback(() => {

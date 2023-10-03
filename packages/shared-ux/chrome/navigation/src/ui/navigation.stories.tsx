@@ -643,59 +643,85 @@ export const WithUIComponents = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <Navigation>
-          <Navigation.RecentlyAccessed />
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <Navigation>
+            <Navigation.RecentlyAccessed />
 
-          <Navigation.Group
-            id="example_projet"
-            title="Example project"
-            icon="logoObservability"
-            defaultIsCollapsed={false}
-          >
-            <Navigation.Item<any> id="item1" link="item1" />
-            <Navigation.Item id="item2" title="Alerts">
-              {(navNode) => {
-                return (
-                  <div className="euiSideNavItemButton">
-                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
-                  </div>
-                );
-              }}
-            </Navigation.Item>
-            <Navigation.Item id="item3" title="Title in ReactNode">
-              <div className="euiSideNavItemButton">
-                <EuiLink>Title in ReactNode</EuiLink>
-              </div>
-            </Navigation.Item>
-            <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
-
-            <Navigation.Group id="group:settings" title="Settings">
-              <Navigation.Item id="logs" title="Logs" />
-              <Navigation.Item id="signals" title="Signals" />
-              <Navigation.Item id="tracing" title="Tracing" />
-            </Navigation.Group>
-          </Navigation.Group>
-
-          <Navigation.Group preset="analytics" defaultIsCollapsed={false} />
-          <Navigation.Group preset="ml" />
-
-          <Navigation.Footer>
-            <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
             <Navigation.Group
-              id="project_settings_project_nav"
-              title="Project settings"
-              breadcrumbStatus="hidden"
-              icon="gear"
+              id="example_projet"
+              title="Example project"
+              icon="logoObservability"
+              defaultIsCollapsed={false}
             >
-              <Navigation.Item link="management" title="Management" />
-              <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
-              <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
-              <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              <Navigation.Item<any> id="item1" link="item1" />
+              <Navigation.Item id="item2" title="Alerts">
+                {(navNode) => {
+                  return (
+                    <div className="euiSideNavItemButton">
+                      <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    </div>
+                  );
+                }}
+              </Navigation.Item>
+              <Navigation.Item id="item3" title="Title in ReactNode">
+                <div className="euiSideNavItemButton">
+                  <EuiLink>Title in ReactNode</EuiLink>
+                </div>
+              </Navigation.Item>
+              <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
+
+              <Navigation.Group id="group:settings" title="Open panel" openPanel>
+                <Navigation.Group id="group1">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" appendHorizontalRule title="Group 2">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group title="MANAGEMENT" id="group3" isCollapsible>
+                  <Navigation.Group title="Group A" id="group3-a">
+                    <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                    <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                    <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                  </Navigation.Group>
+                  <Navigation.Group title="Group B" id="group3-b">
+                    <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                    <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                    <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                  </Navigation.Group>
+                  <Navigation.Group title="Group C" id="group3-c">
+                    <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                    <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                    <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                  </Navigation.Group>
+                </Navigation.Group>
+              </Navigation.Group>
             </Navigation.Group>
-          </Navigation.Footer>
-        </Navigation>
-      </NavigationProvider>
+
+            <Navigation.Group preset="analytics" defaultIsCollapsed={false} />
+            <Navigation.Group preset="ml" />
+
+            <Navigation.Footer>
+              <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+              <Navigation.Group
+                id="project_settings_project_nav"
+                title="Project settings"
+                breadcrumbStatus="hidden"
+                icon="gear"
+              >
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation.Footer>
+          </Navigation>
+        </NavigationProvider>
+      )}
     </NavigationWrapper>
   );
 };
