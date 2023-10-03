@@ -18,7 +18,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Analyze events view for alerts', { tags: ['@ess', '@serverless', '@serverless'] }, () => {
+describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());
