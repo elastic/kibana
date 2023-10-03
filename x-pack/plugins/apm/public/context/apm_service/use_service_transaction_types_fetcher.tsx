@@ -6,6 +6,8 @@
  */
 
 import { useFetcher } from '../../hooks/use_fetcher';
+import { RollupInterval } from '../../../common/rollup';
+import { ApmTransactionDocumentType } from '../../../common/document_type';
 
 const INITIAL_DATA = { transactionTypes: [] };
 
@@ -13,26 +15,30 @@ export function useServiceTransactionTypesFetcher({
   serviceName,
   start,
   end,
+  documentType,
+  rollupInterval,
 }: {
   serviceName?: string;
   start?: string;
   end?: string;
+  documentType?: ApmTransactionDocumentType;
+  rollupInterval?: RollupInterval;
 }) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end) {
+      if (serviceName && start && end && documentType && rollupInterval) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transaction_types',
           {
             params: {
               path: { serviceName },
-              query: { start, end },
+              query: { start, end, documentType, rollupInterval },
             },
           }
         );
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, documentType, rollupInterval]
   );
 
   return { transactionTypes: data.transactionTypes, status };
