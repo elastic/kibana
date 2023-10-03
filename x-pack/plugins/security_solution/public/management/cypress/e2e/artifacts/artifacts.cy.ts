@@ -74,7 +74,6 @@ describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'
 
   beforeEach(() => {
     login();
-    loadPage(APP_ENDPOINTS_PATH);
   });
 
   after(() => {
@@ -96,6 +95,8 @@ describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'
   for (const testData of getArtifactsListTestsData()) {
     describe(`${testData.title}`, () => {
       it(`should update Endpoint Policy on Endpoint when adding ${testData.artifactName}`, () => {
+        loadPage(APP_ENDPOINTS_PATH);
+
         cy.get(`[data-endpoint-id="${createdHost.agentId}"]`).within(() => {
           cy.getByTestSubj('policyListRevNo')
             .invoke('text')
