@@ -21,6 +21,7 @@ import type {
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
+import { SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -296,7 +297,13 @@ export const defineLogRateAnalysisRoute = (
               // This will store the combined count of detected significant log patterns and keywords
               let fieldValuePairsCount = 0;
 
-              const significantCategories: SignificantTerm[] = [];
+              const significantCategories: SignificantTerm[] = request.body.overrides
+                ?.significantTerms
+                ? request.body.overrides?.significantTerms.filter(
+                    (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+                  )
+                : [];
+
               // Get significant categories of text fields
               if (textFieldCandidates.length > 0) {
                 significantCategories.push(
@@ -317,7 +324,9 @@ export const defineLogRateAnalysisRoute = (
               }
 
               const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
-                ? request.body.overrides?.significantTerms
+                ? request.body.overrides?.significantTerms.filter(
+                    (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+                  )
                 : [];
 
               const fieldsToSample = new Set<string>();
