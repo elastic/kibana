@@ -17,12 +17,13 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { DashboardAppLocatorParams, getEmbeddableParams } from '@kbn/dashboard-plugin/public';
 
 import { LINKS_VERTICAL_LAYOUT, LinksLayoutType, Link } from '../../../common/content_management';
-import { coreServices } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { useLinks } from '../../embeddable/links_embeddable';
-import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
+import { fetchDashboard } from './dashboard_link_tools';
+import { dashboardServices } from '../../services/kibana_services';
 
 export const DashboardLinkComponent = ({
   link,
@@ -99,13 +100,15 @@ export const DashboardLinkComponent = ({
       ...link.options,
     } as DashboardDrilldownOptions;
 
-    const locator = await getDashboardLocator({
-      link: { ...link, options: linkOptions },
-      linksEmbeddable,
-    });
+    const params: DashboardAppLocatorParams = {
+      dashboardId: link.destination,
+      ...getEmbeddableParams(linksEmbeddable, linkOptions),
+    };
+
+    const locator = dashboardServices.locator;
     if (!locator) return;
 
-    const href = getDashboardHref(locator);
+    const href = locator.getRedirectUrl(params);
     return {
       href,
       onClick: async (event: React.MouseEvent) => {
@@ -123,11 +126,7 @@ export const DashboardLinkComponent = ({
         if (linkOptions.openInNewTab) {
           window.open(href, '_blank');
         } else {
-          const { app, path, state } = locator;
-          await coreServices.application.navigateToApp(app, {
-            path,
-            state,
-          });
+          locator.navigate(params);
         }
       },
     };
