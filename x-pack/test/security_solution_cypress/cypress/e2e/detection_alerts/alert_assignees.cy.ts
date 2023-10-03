@@ -23,8 +23,7 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { ALERTS_TABLE_ROW_LOADER } from '../../screens/alerts';
 import { waitForAssigneesToPopulate } from '../../tasks/alert_assignees';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Alert assigning', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');
