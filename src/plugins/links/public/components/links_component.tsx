@@ -62,6 +62,10 @@ export const LinksComponent = () => {
       }`}
       paddingSize="xs"
       data-test-subj="links--component"
+      data-shared-item
+      data-render-complete
+      data-title={linksEmbeddable.getTitle()}
+      data-description={linksEmbeddable.getDescription()}
     >
       <EuiListGroup
         maxWidth={false}

@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
-        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         expect(await testSubjects.exists('dashboardLink--link004--error')).to.be(true);
         expect(await testSubjects.isEnabled('dashboardLink--link004--error')).to.be(false);
       });
@@ -101,11 +101,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * but should not override the date range.
          */
         await dashboard.loadSavedDashboard('links 002');
-        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await testSubjects.clickWhenNotDisabled('dashboardLink--link001');
+        await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '0930f310-5bc2-11ee-9a85-7b86504227bc'
         );
+        await dashboard.waitForRenderComplete();
         // Should pass the filters
         expect(await filterBar.getFilterCount()).to.equal(2);
         const filterLabels = await filterBar.getFiltersLabel();
@@ -133,11 +135,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * but should not pass its filters.
          */
         await dashboard.loadSavedDashboard('links 001');
-        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await testSubjects.clickWhenNotDisabled('dashboardLink--link002');
+        await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '24751520-5bc2-11ee-9a85-7b86504227bc'
         );
+
+        await dashboard.waitForRenderComplete();
         // Should pass the date range
         const time = await timePicker.getTimeConfig();
         expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
@@ -164,8 +169,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * to dashboard links003.
          */
         await dashboard.loadSavedDashboard('links 001');
-        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await testSubjects.clickWhenNotDisabled('dashboardLink--link003');
+        await header.waitUntilLoadingHasFinished();
 
         // Should have opened another tab
         const windowHandlers = await browser.getAllWindowHandles();
@@ -175,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '27398c50-5bc2-11ee-9a85-7b86504227bc'
         );
 
+        await dashboard.waitForRenderComplete();
         // Should not pass any filters
         expect((await filterBar.getFiltersLabel()).length).to.equal(0);
 
