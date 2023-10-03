@@ -36,6 +36,8 @@ import {
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { GetAlertIndicesAlias } from '../lib';
+import { AlertsService } from '../alerts_service';
 
 export type {
   BulkEditOperation,
@@ -79,6 +81,8 @@ export interface RulesClientContext {
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
+  readonly getAlertIndicesAlias: GetAlertIndicesAlias;
+  readonly alertsService: AlertsService | null;
   readonly isSystemAction: (actionId: string) => boolean;
 }
 
