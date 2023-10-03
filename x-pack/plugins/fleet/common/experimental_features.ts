@@ -11,7 +11,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-export const allowedExperimentalValues = Object.freeze<Record<string, boolean | undefined>>({
+export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,
@@ -39,7 +39,7 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @throws FleetInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
-  const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
+  const enabledFeatures: Mutable<ExperimentalFeatures> = {};
 
   for (const value of configValue) {
     if (!isValidExperimentalValue(value)) {
