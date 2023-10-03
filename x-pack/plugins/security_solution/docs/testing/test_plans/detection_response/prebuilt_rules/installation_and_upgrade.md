@@ -44,7 +44,7 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
 - Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
 - Kibana should not crash with Out Of Memory exception during package installation.
 - For test purposes, it should be possible to use detection rules package versions lower than the latest.
-- In the prebuilt rule preview a tab without that doesn't have any sections should not be displayed and a section without any properties also should not be displayed
+- In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed
 
 
 ```Gherkin
