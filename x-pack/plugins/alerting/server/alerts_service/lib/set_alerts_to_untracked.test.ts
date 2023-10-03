@@ -178,4 +178,160 @@ describe('setAlertsToUntracked()', () => {
       'Attempt 1: Failed to untrack 2 of 10; indices test-index, ruleIds test-rule'
     );
   });
+
+  describe('ensureAuthorized', () => {
+    test('should fail on siem consumer', async () => {
+      clusterClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          hits: [],
+        },
+        aggregations: {
+          ruleTypeIds: {
+            buckets: [
+              {
+                key: 'some rule type',
+                consumers: {
+                  buckets: [
+                    {
+                      key: 'not siem',
+                    },
+                    {
+                      key: 'definitely not siem',
+                    },
+                    {
+                      key: 'hey guess what still not siem',
+                    },
+                    {
+                      key: 'siem',
+                    },
+                    {
+                      key: 'uh oh was that siem',
+                    },
+                    {
+                      key: 'not good',
+                    },
+                    {
+                      key: 'this is gonna fail',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+      await expect(
+        setAlertsToUntracked({
+          logger,
+          esClient: clusterClient,
+          indices: ['test-index'],
+          ruleIds: ['test-rule'],
+          ensureAuthorized: () => Promise.resolve(),
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Untracking Security alerts is not permitted"`);
+    });
+
+    test('should fail on unauthorized consumer', async () => {
+      clusterClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          hits: [],
+        },
+        aggregations: {
+          ruleTypeIds: {
+            buckets: [
+              {
+                key: 'some rule',
+                consumers: {
+                  buckets: [
+                    {
+                      key: 'authorized',
+                    },
+                    {
+                      key: 'unauthorized',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+      await expect(
+        setAlertsToUntracked({
+          logger,
+          esClient: clusterClient,
+          indices: ['test-index'],
+          ruleIds: ['test-rule'],
+          ensureAuthorized: async ({ consumer }) => {
+            if (consumer === 'unauthorized') throw new Error('Unauthorized consumer');
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized consumer"`);
+    });
+  });
+
+  test('should succeed when all consumers are authorized', async () => {
+    clusterClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [],
+      },
+      aggregations: {
+        ruleTypeIds: {
+          buckets: [
+            {
+              key: 'some rule',
+              consumers: {
+                buckets: [
+                  {
+                    key: 'authorized',
+                  },
+                  {
+                    key: 'still authorized',
+                  },
+                  {
+                    key: 'even this one is authorized',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+    await expect(
+      setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        ruleIds: ['test-rule'],
+        ensureAuthorized: async ({ consumer }) => {
+          if (consumer === 'unauthorized') throw new Error('Unauthorized consumer');
+        },
+      })
+    ).resolves;
+  });
 });
