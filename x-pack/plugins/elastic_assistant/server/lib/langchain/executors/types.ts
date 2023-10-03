@@ -20,6 +20,7 @@ export interface AgentExecutorParams {
   llmType?: string;
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  elserId?: string;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;

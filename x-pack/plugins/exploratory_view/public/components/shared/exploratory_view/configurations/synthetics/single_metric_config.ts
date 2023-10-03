@@ -70,7 +70,10 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           },
           titlePosition: 'bottom',
         },
-        columnFilter: { language: 'kuery', query: 'summary.up: *' },
+        columnFilter: {
+          language: 'kuery',
+          query: 'summary.final_attempt: true or (not summary.final_attempt: * and summary:*)',
+        },
       },
       {
         id: 'monitor_duration',
@@ -143,7 +146,10 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         },
         field: RECORDS_FIELD,
         format: 'number',
-        columnFilter: { language: 'kuery', query: 'summary.down > 0' },
+        columnFilter: {
+          language: 'kuery',
+          query: 'summary.status: down and summary.final_attempt: true',
+        },
       },
     ],
     labels: FieldLabels,

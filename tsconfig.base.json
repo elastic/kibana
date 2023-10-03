@@ -542,6 +542,8 @@
       "@kbn/core-test-helpers-http-setup-browser/*": ["packages/core/test-helpers/core-test-helpers-http-setup-browser/*"],
       "@kbn/core-test-helpers-kbn-server": ["packages/core/test-helpers/core-test-helpers-kbn-server"],
       "@kbn/core-test-helpers-kbn-server/*": ["packages/core/test-helpers/core-test-helpers-kbn-server/*"],
+      "@kbn/core-test-helpers-model-versions": ["packages/core/test-helpers/core-test-helpers-model-versions"],
+      "@kbn/core-test-helpers-model-versions/*": ["packages/core/test-helpers/core-test-helpers-model-versions/*"],
       "@kbn/core-test-helpers-so-type-serializer": ["packages/core/test-helpers/core-test-helpers-so-type-serializer"],
       "@kbn/core-test-helpers-so-type-serializer/*": ["packages/core/test-helpers/core-test-helpers-so-type-serializer/*"],
       "@kbn/core-test-helpers-test-utils": ["packages/core/test-helpers/core-test-helpers-test-utils"],

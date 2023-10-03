@@ -305,6 +305,10 @@ export interface UnifiedDataTableProps {
    * Optional gridStyle override.
    */
   gridStyleOverride?: EuiDataGridStyle;
+  /**
+   * Optional row line height override. Default is 1.6em.
+   */
+  rowLineHeightOverride?: string;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -361,6 +365,7 @@ export const UnifiedDataTable = ({
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
+  rowLineHeightOverride,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -752,6 +757,7 @@ export const UnifiedDataTable = ({
     storage,
     configRowHeight,
     consumer,
+    rowLineHeight: rowLineHeightOverride,
   });
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
