@@ -53,7 +53,7 @@ import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { placePanel } from '../component/panel_placement';
 import { pluginServices } from '../../services/plugin_services';
 import { initializeDashboard } from './create/create_dashboard';
-import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
+import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
@@ -107,7 +107,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
-
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
@@ -183,6 +182,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.getState = reduxTools.getState;
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
+  }
+
+  public getAppContext() {
+    const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
+      this.getDashboardSavedObjectId()
+    );
+    return {
+      ...embeddableAppContext,
+      currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
+    };
   }
 
   public getDashboardSavedObjectId() {

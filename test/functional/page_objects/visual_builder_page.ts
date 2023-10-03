@@ -663,6 +663,7 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
     await this.comboBox.setElement(fieldEl, field);
