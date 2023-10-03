@@ -4347,7 +4347,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; last_seen: string | null; pipeline?: ",
+          "; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -4379,7 +4379,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          " | null; last_incremental_sync_scheduled_at: string | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
+          " | null; last_incremental_sync_scheduled_at: string | null; last_seen: string | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

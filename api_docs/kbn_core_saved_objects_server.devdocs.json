@@ -10473,7 +10473,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/cases.ts"
+                "path": "x-pack/plugins/cases/server/saved_object_types/cases/cases.ts"
               },
               {
                 "plugin": "cases",
