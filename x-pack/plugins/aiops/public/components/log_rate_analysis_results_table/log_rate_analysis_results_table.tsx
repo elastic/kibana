@@ -91,7 +91,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const dataViewId = dataView.id;
 
   const {
+    pinnedGroup,
     pinnedSignificantTerm,
+    selectedGroup,
     selectedSignificantTerm,
     setPinnedSignificantTerm,
     setSelectedSignificantTerm,
@@ -404,7 +406,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       (selectedSignificantTerm === null ||
         !pageOfItems.some((item) => isEqual(item, selectedSignificantTerm))) &&
       pinnedSignificantTerm === null &&
-      pageOfItems.length > 0
+      pageOfItems.length > 0 &&
+      selectedGroup === null &&
+      pinnedGroup === null
     ) {
       setSelectedSignificantTerm(pageOfItems[0]);
     }
@@ -413,15 +417,19 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     // on the current page, set the status of pinned rows back to `null`.
     if (
       pinnedSignificantTerm !== null &&
-      !pageOfItems.some((item) => isEqual(item, pinnedSignificantTerm))
+      !pageOfItems.some((item) => isEqual(item, pinnedSignificantTerm)) &&
+      selectedGroup === null &&
+      pinnedGroup === null
     ) {
       setPinnedSignificantTerm(null);
     }
   }, [
+    selectedGroup,
     selectedSignificantTerm,
     setSelectedSignificantTerm,
     setPinnedSignificantTerm,
     pageOfItems,
+    pinnedGroup,
     pinnedSignificantTerm,
   ]);
 
