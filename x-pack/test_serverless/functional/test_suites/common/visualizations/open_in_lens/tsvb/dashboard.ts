@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, timePicker, dashboard, canvas } = getPageObjects([
+  const { lens, timePicker, dashboard, canvas } = getPageObjects([
     'visualize',
     'lens',
     'timePicker',
@@ -47,8 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
       await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
@@ -86,8 +86,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
       await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
