@@ -108,6 +108,7 @@ const testMonitor = {
   },
   urls: '${devUrl}',
   max_redirects: '0',
+  max_attempts: 2,
   'url.port': null,
   proxy_url: '',
   'response.include_body': 'on_error',
