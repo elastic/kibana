@@ -125,12 +125,6 @@ export const FieldsSelectorTable = ({
     },
   };
 
-  const tableHeaderValues = {
-    totalFields: (
-      <strong data-test-subj="csp:dataTable:fieldsModal:fieldsCount">{totalFields}</strong>
-    ),
-  };
-
   const tableHeader = (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -138,7 +132,13 @@ export const FieldsSelectorTable = ({
           <FormattedMessage
             id="xpack.csp.dataTable.fieldsModalFieldsShowing"
             defaultMessage="Showing {totalFields} fields"
-            values={tableHeaderValues}
+            values={{
+              totalFields: (
+                <strong data-test-subj="csp:dataTable:fieldsModal:fieldsCount">
+                  {totalFields}
+                </strong>
+              ),
+            }}
           />
         </EuiText>
       </EuiFlexItem>
