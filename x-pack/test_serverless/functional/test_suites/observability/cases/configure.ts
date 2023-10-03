@@ -49,7 +49,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Connectors', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/167869
+    describe.skip('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
         expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
       });
