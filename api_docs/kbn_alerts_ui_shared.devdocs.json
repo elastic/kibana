@@ -108,9 +108,9 @@
         "label": "MaintenanceWindowCallout",
         "description": [],
         "signature": [
-          "({\n  kibanaServices,\n}: { kibanaServices: ",
+          "({\n  kibanaServices,\n  categories,\n}: { kibanaServices: ",
           "KibanaServices",
-          "; }) => JSX.Element | null"
+          "; categories?: string[] | undefined; }) => JSX.Element | null"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
         "deprecated": false,
@@ -121,7 +121,7 @@
             "id": "def-common.MaintenanceWindowCallout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  kibanaServices,\n}",
+            "label": "{\n  kibanaServices,\n  categories,\n}",
             "description": [],
             "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
             "deprecated": false,
@@ -136,6 +136,20 @@
                 "description": [],
                 "signature": [
                   "KibanaServices"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.MaintenanceWindowCallout.$1.categories",
+                "type": "Array",
+                "tags": [],
+                "label": "categories",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
                 ],
                 "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
                 "deprecated": false,
