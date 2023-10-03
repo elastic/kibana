@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { chunk, cloneDeep, flatten } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
+
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  MappingRuntimeFields,
+  QueryDslBoolQuery,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+
+import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
-import { chunk, cloneDeep, flatten } from 'lodash';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
-import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
+import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+
 import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
-import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
+
+import { useDataDriftStateManagerContext } from './use_state_manager';
+
 import {
   REFERENCE_LABEL,
   COMPARISON_LABEL,
@@ -34,7 +42,6 @@ import {
 } from './constants';
 
 import {
-  Histogram,
   NumericDriftData,
   CategoricalDriftData,
   Range,
@@ -46,7 +53,6 @@ import {
   TimeRange,
   ComparisonHistogram,
 } from './types';
-import { computeChi2PValue } from './data_drift_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {
   switch (kibanaType) {

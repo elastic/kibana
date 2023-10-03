@@ -52,6 +52,8 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const username = 'test';

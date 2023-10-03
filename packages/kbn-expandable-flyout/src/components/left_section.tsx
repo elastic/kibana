@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { LEFT_SECTION } from './test_ids';
 
@@ -26,12 +26,12 @@ interface LeftSectionProps {
  */
 export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: LeftSectionProps) => {
   const style = useMemo<React.CSSProperties>(
-    () => ({ height: '100%', width: `${width * 100}%`, overflowY: 'scroll' }),
+    () => ({ height: '100%', width: `${width * 100}%` }),
     [width]
   );
   return (
     <EuiFlexItem grow data-test-subj={LEFT_SECTION} style={style}>
-      <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
+      {component}
     </EuiFlexItem>
   );
 };
