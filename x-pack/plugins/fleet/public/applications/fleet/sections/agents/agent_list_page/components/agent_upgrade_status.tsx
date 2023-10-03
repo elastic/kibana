@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
-import type { AgentStatus, AgentUpgradeDetails } from '../../../../../../../common/types';
+import type { AgentUpgradeDetails } from '../../../../../../../common/types';
 
 function getUpgradeStartDelay(scheduledAt?: string) {
   return Math.round((Date.parse(scheduledAt || '') - Date.now()) / 36e5);
@@ -186,9 +186,9 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
 }
 
 export const AgentUpgradeStatus: React.FC<{
-  agentStatus?: AgentStatus;
+  agentUpgradeStartedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
-}> = ({ agentStatus, agentUpgradeDetails }) => {
+}> = ({ agentUpgradeStartedAt, agentUpgradeDetails }) => {
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
 
   if (agentUpgradeDetails && status) {
@@ -202,14 +202,15 @@ export const AgentUpgradeStatus: React.FC<{
     );
   }
 
-  if (agentStatus === 'updating') {
+  // TODO: check logic
+  if (agentUpgradeStartedAt) {
     return (
       <EuiIconTip
         type="iInCircle"
         content={
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDetailsNotAvailable"
-            defaultMessage="Agent upgrade details are available from version 8.11." // TODO check message
+            defaultMessage="Agent upgrade details are available from version 8.11." // TODO: check message
           />
         }
         color="subdued"

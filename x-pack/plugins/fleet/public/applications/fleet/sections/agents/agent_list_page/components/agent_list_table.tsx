@@ -293,7 +293,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AgentUpgradeStatus
-                  agentStatus={agent.status}
+                  agentUpgradeStartedAt={agent.upgrade_started_at}
                   agentUpgradeDetails={agent.upgrade_details}
                 />
               </EuiFlexItem>
