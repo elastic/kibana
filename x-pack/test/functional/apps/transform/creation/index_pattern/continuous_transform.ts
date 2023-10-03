@@ -6,6 +6,7 @@
  */
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {

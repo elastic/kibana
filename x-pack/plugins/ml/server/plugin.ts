@@ -25,12 +25,16 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesSetup } from '@kbn/cases-plugin/server';
-import type { MlFeatures, PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
-import type { ConfigSchema } from './config_schema';
 import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
-import { PLUGIN_ID } from '../common/constants/app';
+import {
+  type MlFeatures,
+  PLUGIN_ID,
+  type ConfigSchema,
+  initEnabledFeatures,
+} from '../common/constants/app';
 import { initMlServerLog } from './lib/log';
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
@@ -102,7 +106,7 @@ export class MlServerPlugin
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
-    this.initEnabledFeatures(ctx.config.get());
+    initEnabledFeatures(this.enabledFeatures, ctx.config.get());
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -240,11 +244,11 @@ export class MlServerPlugin
 
     // Register Trained Model Management routes
     if (this.enabledFeatures.dfa || this.enabledFeatures.nlp) {
-      modelManagementRoutes(routeInit);
       trainedModelsRoutes(routeInit, plugins.cloud);
     }
 
     // Register Miscellaneous routes
+    modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
     indicesRoutes(routeInit);
@@ -309,10 +313,10 @@ export class MlServerPlugin
 
       if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
         if (this.cases) {
-          registerCasesPersistableState(this.cases, this.enabledFeatures);
+          registerCasesPersistableState(this.cases, this.enabledFeatures, this.log);
         }
         if (this.home) {
-          registerSampleDataSetLinks(this.home, this.enabledFeatures);
+          registerSampleDataSetLinks(this.home, this.enabledFeatures, this.log);
         }
       }
       // check whether the job saved objects exist
@@ -331,17 +335,5 @@ export class MlServerPlugin
 
   public stop() {
     this.mlLicense.unsubscribe();
-  }
-
-  private initEnabledFeatures(config: ConfigSchema) {
-    if (config.ad?.enabled !== undefined) {
-      this.enabledFeatures.ad = config.ad.enabled;
-    }
-    if (config.dfa?.enabled !== undefined) {
-      this.enabledFeatures.dfa = config.dfa.enabled;
-    }
-    if (config.nlp?.enabled !== undefined) {
-      this.enabledFeatures.nlp = config.nlp.enabled;
-    }
   }
 }

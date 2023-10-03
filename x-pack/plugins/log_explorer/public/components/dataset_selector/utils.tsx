@@ -13,6 +13,8 @@ import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   noDatasetsDescriptionLabel,
   noDatasetsLabel,
+  noDataViewsDescriptionLabel,
+  noDataViewsLabel,
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
 } from './constants';
@@ -111,6 +113,22 @@ export const createUncategorizedStatusItem = (
         key="uncategorizedStatusItem"
         description={noDatasetsDescriptionLabel}
         title={noDatasetsLabel}
+        {...props}
+      />
+    ),
+  };
+};
+
+export const createDataViewsStatusItem = (
+  props: Omit<ListStatusProps, 'description' | 'title'>
+) => {
+  return {
+    disabled: true,
+    name: (
+      <ListStatus
+        key="dataViewsStatusItem"
+        description={noDataViewsDescriptionLabel}
+        title={noDataViewsLabel}
         {...props}
       />
     ),

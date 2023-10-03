@@ -49,6 +49,12 @@ export const prepareSearchParams = ({
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],
         };
         break;
+      case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],
+        };
+        break;
     }
   });
 

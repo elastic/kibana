@@ -46,7 +46,7 @@ import {
 } from '../../../screens/create_new_rule';
 
 /** Returns the continue button on the step of about */
-const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 export const goToAboutStepTab = () => {
   cy.get(ABOUT_EDIT_TAB).click({ force: true });
