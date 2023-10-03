@@ -170,12 +170,6 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
     }
   }, [hasInitialized]);
 
-  // return isAdmin && !kibanaUIsEnabled ? (
-  //   <WorkplaceSearchConfiguredRoutes isblockingRoutes />
-  // ) : (
-  //   <WorkplaceSearchConfiguredRoutes isblockingRoutes={false} />
-  // );
-
   return <WorkplaceSearchConfiguredRoutes isAdmin={isAdmin} kibanaUIsEnabled={kibanaUIsEnabled} />;
 };
 
