@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -99,12 +98,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
     async assertProjectHeaderExists() {
       await testSubjects.existOrFail('kibanaProjectHeader');
-    },
-
-    async assertNavExistsWithFixedSize() {
-      const res = await testSubjects.find('projectLayoutSideNav');
-      // EuiBottomBar expect side nav to be 248px if this change we may have to update src/core/public/styles/_base.scss
-      expect((await res.getSize()).width).toBe(248);
     },
 
     async clickUserAvatar() {

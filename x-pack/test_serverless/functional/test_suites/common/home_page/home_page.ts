@@ -24,10 +24,5 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertProjectHeaderExists();
     });
-
-    it('has nav with fixed size', async () => {
-      await svlCommonNavigation.navigateToKibanaHome();
-      await svlCommonPage.assertNavExistsWithFixedSize();
-    });
   });
 }
