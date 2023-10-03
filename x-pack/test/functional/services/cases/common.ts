@@ -53,9 +53,12 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const assertRadioGroupValue = await testSubjects.find(testSubject);
       const input = await assertRadioGroupValue.findByCssSelector(':checked');
       const selectedOptionId = await input.getAttribute('id');
-      expect(selectedOptionId).to.eql(
-        expectedValue,
-        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`
+
+      await retry.waitFor(
+        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`,
+        async () => {
+          return selectedOptionId === expectedValue;
+        }
       );
     },
 
