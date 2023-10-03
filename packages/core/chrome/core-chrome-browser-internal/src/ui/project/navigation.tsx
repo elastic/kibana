@@ -33,7 +33,11 @@ export const ProjectNavigation: React.FC<{
     <EuiCollapsibleNavBeta
       initialIsCollapsed={isCollapsed}
       onCollapseToggle={onCollapseToggle}
-      css={isCollapsed ? { display: 'none;' } : {}}
+      css={
+        isCollapsed
+          ? { display: 'none;' }
+          : { overflow: 'visible', clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)' }
+      }
     >
       {children}
     </EuiCollapsibleNavBeta>
