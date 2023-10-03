@@ -7,7 +7,6 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common/constants';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   Alerts,
