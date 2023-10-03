@@ -21,7 +21,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
       <>
         <p>
           {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.text', {
-            defaultMessage: 'Share your onboarding experience to help us improve it.',
+            defaultMessage: 'Share with us your onboarding experience and help us improve it.',
           })}
         </p>
 
