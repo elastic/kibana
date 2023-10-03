@@ -64,23 +64,28 @@ async function bulkUntrackAlertsWithOCC(
     // Clear alert instances from their corresponding tasks so that they can remain untracked
     const taskIds = [...new Set(result.map((doc) => doc[ALERT_RULE_UUID]))];
     await context.taskManager.bulkUpdateState(taskIds, (state, id) => {
-      const uuidsToClear = result
-        .filter((doc) => doc[ALERT_RULE_UUID] === id)
-        .map((doc) => doc[ALERT_UUID]);
-      const alertTypeState = {
-        ...state.alertTypeState,
-        trackedAlerts: omitBy(state.alertTypeState.trackedAlerts, ({ alertUuid }) =>
-          uuidsToClear.includes(alertUuid)
-        ),
-      };
-      const alertInstances = omitBy(state.alertInstances, ({ meta: { uuid } }) =>
-        uuidsToClear.includes(uuid)
-      );
-      return {
-        ...state,
-        alertTypeState,
-        alertInstances,
-      };
+      try {
+        const uuidsToClear = result
+          .filter((doc) => doc[ALERT_RULE_UUID] === id)
+          .map((doc) => doc[ALERT_UUID]);
+        const alertTypeState = {
+          ...state.alertTypeState,
+          trackedAlerts: omitBy(state.alertTypeState.trackedAlerts, ({ alertUuid }) =>
+            uuidsToClear.includes(alertUuid)
+          ),
+        };
+        const alertInstances = omitBy(state.alertInstances, ({ meta: { uuid } }) =>
+          uuidsToClear.includes(uuid)
+        );
+        return {
+          ...state,
+          alertTypeState,
+          alertInstances,
+        };
+      } catch (e) {
+        context.logger.error(`Failed to untrack alerts in task ID ${id}`);
+        return state;
+      }
     });
 
     context.auditLogger?.log(
