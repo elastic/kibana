@@ -109,6 +109,7 @@ const assertFilterControlsWithFilterObject = (
 };
 
 // Failing: See https://github.com/elastic/kibana/issues/167914
+// Failing: See https://github.com/elastic/kibana/issues/167915
 describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
