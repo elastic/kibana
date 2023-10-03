@@ -287,6 +287,12 @@ export interface UnifiedDataTableProps {
    * Optional gridStyle override.
    */
   gridStyleOverride?: EuiDataGridStyle;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -341,6 +347,7 @@ export const UnifiedDataTable = ({
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
+  cellActionsMetadata,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -589,9 +596,7 @@ export const UnifiedDataTable = ({
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
-    metadata: {
-      scopeId: 'timeline-1',
-    },
+    metadata: cellActionsMetadata,
   });
 
   const euiGridColumns = useMemo(

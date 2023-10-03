@@ -21,7 +21,7 @@ export const RowCheckBox = ({
 }: ActionProps) => {
   const handleSelectEvent = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (onRowSelected && !disabled) {
+      if (!disabled) {
         onRowSelected({
           eventIds: [eventId],
           isSelected: event.currentTarget.checked,

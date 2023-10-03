@@ -21,7 +21,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'message',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH * 2,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,

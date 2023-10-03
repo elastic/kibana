@@ -75,6 +75,7 @@ import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
 import CustomGridBodyControls from './render_custom_body';
 import RowDetails from './row_details';
 import { DRAG_DROP_FIELD } from './translations';
+import { CoreStart } from '@kbn/core/public';
 
 const DROP_PROPS = {
   value: {
@@ -190,7 +191,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       data: dataPluginContract,
       uiActions,
       charts,
-      core,
+      docLinks,
     },
   } = useKibana();
 
@@ -198,22 +199,24 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     () => ({
       fieldFormats,
       dataViews,
-      storage,
       dataViewFieldEditor,
       data: dataPluginContract,
       uiActions,
       charts,
-      core,
+      core: {
+        uiSettings,
+        docLinks,
+      } as CoreStart,
     }),
     [
       charts,
-      core,
       dataPluginContract,
       dataViewFieldEditor,
       dataViews,
       fieldFormats,
       storage,
       uiActions,
+      docLinks,
     ]
   );
 
@@ -395,14 +398,15 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
               eventId={discoverGridRows[cveProps.rowIndex].id}
               eventIdToNoteIds={eventIdToNoteIds}
               loadingEventIds={loadingEventIds}
-              onRowSelected={x.onRowSelected}
+              onRowSelected={x.onRowSelected ? x.onRowSelected : () => { } }
               showCheckboxes={x.showCheckboxes ?? false}
               showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
               timelineId={timelineId}
               toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
               refetch={refetch}
               setEventsLoading={setEventsLoading}
-              isUnifiedDataTable={true}
+              isUnifiedDataTable={true} 
+              onEventDetailsPanelOpened={() => { }}            
             />
           );
         },
@@ -711,6 +715,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [columns, dispatch, onRemoveColumn, timelineId]
   );
 
+  const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
+
   if (!dataView) {
     return null;
   }
@@ -810,6 +816,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
                   onFetchMoreRecords={handleChangePageClick}
                   configRowHeight={3}
                   showMultiFields={true}
+                  cellActionsMetadata={cellActionsMetadata}
                 />
               </DropOverlayWrapper>
             </DragDrop>
