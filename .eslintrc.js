@@ -922,6 +922,7 @@ module.exports = {
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
+        '@kbn/i18n/strings_should_be_translated': 'warn',
       },
     },
     {
