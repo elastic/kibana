@@ -307,7 +307,7 @@ export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusRes
 
 /**
  * Checks to ensure Kibana is up and running
- * @param kbnUrl
+ * @param kbnClient
  */
 export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
