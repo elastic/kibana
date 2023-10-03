@@ -43,7 +43,7 @@ import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../..
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Detection response view', () => {
+describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());
@@ -54,7 +54,7 @@ describe('Detection response view', () => {
     visit(DETECTION_AND_RESPONSE_URL);
   });
 
-  context('KQL search bar', { tags: ['@ess', '@serverless'] }, () => {
+  context('KQL search bar', () => {
     it(`filters out hosts with KQL search bar query`, () => {
       kqlSearch(`host.name : fakeHostName{enter}`);
 
@@ -88,7 +88,7 @@ describe('Detection response view', () => {
     });
   });
 
-  context('Open in timeline', { tags: ['@ess', '@serverless'] }, () => {
+  context('Open in timeline', () => {
     afterEach(() => {
       createNewTimeline();
     });
@@ -156,7 +156,7 @@ describe('Detection response view', () => {
     });
   });
 
-  context('Redirection to AlertPage', { tags: ['@ess', '@serverless'] }, () => {
+  context('Redirection to AlertPage', () => {
     it('should redirect to alert page with host and status as the filters', () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()
