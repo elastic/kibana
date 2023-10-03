@@ -218,6 +218,9 @@ export const CloudSecurityDataTable = ({
     height: `calc(100vh - ${filters.length > 0 ? 454 : 414}px)`,
   };
 
+  const rowHeightState =
+    uiSettings.get(ROW_HEIGHT_OPTION) === -1 ? 0 : uiSettings.get(ROW_HEIGHT_OPTION);
+
   const loadingStyle = {
     opacity: isLoading ? 1 : 0,
   };
@@ -251,15 +254,15 @@ export const CloudSecurityDataTable = ({
           services={services}
           useNewFieldsApi
           onUpdateRowsPerPage={onChangeItemsPerPage}
-          configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+          rowHeightState={rowHeightState}
           showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
           showTimeCol={false}
           settings={settings}
           onFetchMoreRecords={loadMore}
           externalCustomRenderers={externalCustomRenderers}
-          rowHeightState={uiSettings.get(ROW_HEIGHT_OPTION)}
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}
+          rowLineHeightOverride="24px"
         />
       </div>
     </CellActionsProvider>
