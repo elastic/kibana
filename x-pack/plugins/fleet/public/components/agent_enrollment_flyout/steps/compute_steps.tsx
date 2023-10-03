@@ -293,6 +293,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           apiKeyData,
           enrollToken,
           cloudSecurityIntegration,
+          agentPolicy,
         })
       );
     } else {

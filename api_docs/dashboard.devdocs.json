@@ -163,6 +163,41 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.DashboardTopNav",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardTopNav",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "DashboardTopNavProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardTopNav.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "DashboardTopNavProps"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.getEmbeddableParams",
         "type": "Function",
         "tags": [],
@@ -482,6 +517,46 @@
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardCreationOptions.getEmbeddableAppContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getEmbeddableAppContext",
+            "description": [],
+            "signature": [
+              "((dashboardId?: string | undefined) => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableAppContext",
+                "text": "EmbeddableAppContext"
+              },
+              ") | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardCreationOptions.getEmbeddableAppContext.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dashboardId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
