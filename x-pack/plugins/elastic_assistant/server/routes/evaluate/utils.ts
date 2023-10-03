@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 
 /**

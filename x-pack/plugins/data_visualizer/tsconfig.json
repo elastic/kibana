@@ -16,7 +16,6 @@
     "@kbn/aiops-components",
     "@kbn/aiops-utils",
     "@kbn/charts-plugin",
-    "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
     "@kbn/core-execution-context-common",
     "@kbn/core",

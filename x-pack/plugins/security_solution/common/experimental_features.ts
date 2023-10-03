@@ -97,18 +97,23 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
    */
-  riskScoringPersistence: false,
+  riskScoringPersistence: true,
 
   /**
    * Enables experimental Entity Analytics HTTP endpoints
    */
-  riskScoringRoutesEnabled: false,
+  riskScoringRoutesEnabled: true,
   /*
    *
    * Enables Discover embedded within timeline
    *
    * */
   discoverInTimeline: false,
+
+  /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page

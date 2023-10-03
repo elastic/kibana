@@ -17,10 +17,14 @@ import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { AppFeatureKeyType } from '@kbn/security-solution-features';
-import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
+import {
+  EndpointPolicyProtectionsLazy,
+  RuleDetailsEndpointExceptionsLazy,
+} from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import {
+  EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
@@ -86,7 +90,7 @@ export const registerUpsellings = (
   upselling.setMessages(upsellingMessagesToRegister);
 };
 
-// Upsellings for entire pages, linked to a SecurityPageName
+// Upselling for entire pages, linked to a SecurityPageName
 export const upsellingPages: UpsellingPages = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
@@ -105,9 +109,16 @@ export const upsellingPages: UpsellingPages = [
       <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
     ),
   },
+  {
+    pageName: SecurityPageName.exceptions,
+    pli: AppFeatureKey.endpointExceptions,
+    component: () => (
+      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={AppFeatureKey.endpointExceptions} />
+    ),
+  },
 ];
 
-// Upsellings for sections, linked by arbitrary ids
+// Upselling for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
@@ -124,9 +135,14 @@ export const upsellingSections: UpsellingSections = [
     pli: AppFeatureKey.endpointPolicyProtections,
     component: EndpointPolicyProtectionsLazy,
   },
+  {
+    id: 'ruleDetailsEndpointExceptions',
+    pli: AppFeatureKey.endpointExceptions,
+    component: RuleDetailsEndpointExceptionsLazy,
+  },
 ];
 
-// Upsellings for sections, linked by arbitrary ids
+// Upselling for sections, linked by arbitrary ids
 export const upsellingMessages: UpsellingMessages = [
   {
     id: 'investigation_guide',

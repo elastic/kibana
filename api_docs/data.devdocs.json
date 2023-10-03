@@ -2807,7 +2807,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { uiActions, fieldFormats, dataViews, screenshotMode }: ",
+              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: ",
               "DataStartDependencies",
               ") => ",
               {
@@ -2848,7 +2848,7 @@
                 "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiActions, fieldFormats, dataViews, screenshotMode }",
+                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode }",
                 "description": [],
                 "signature": [
                   "DataStartDependencies"
@@ -4917,158 +4917,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.isCompleteResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isCompleteResponse",
-        "description": [],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isCompleteResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if response is completed successfully"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.isErrorResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isErrorResponse",
-        "description": [
-          "\nFrom https://github.com/elastic/elasticsearch/issues/55572: \"When is_running is false, the query has stopped, which\nmay happen due to ... the search failed, in which case is_partial is set to true to indicate that any results that\nmay be included in the search response come only from a subset of the shards that the query should have hit.\""
-        ],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isErrorResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if response had an error while executing in ES"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.isPartialResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isPartialResponse",
-        "description": [],
-        "signature": [
-          "(response?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> | undefined) => boolean"
-        ],
-        "path": "src/plugins/data/common/search/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isPartialResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "true if request is still running an/d response contains partial results"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.isQuery",
         "type": "Function",
         "tags": [],
@@ -5109,6 +4957,56 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.isRunningResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isRunningResponse",
+        "description": [],
+        "signature": [
+          "(response?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any> | undefined) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.isRunningResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if request is still running"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.isTimeRange",
         "type": "Function",
         "tags": [],
@@ -5139,41 +5037,6 @@
               "unknown"
             ],
             "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.OpenIncompleteResultsModalButton",
-        "type": "Function",
-        "tags": [],
-        "label": "OpenIncompleteResultsModalButton",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "OpenIncompleteResultsModalButtonProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/data/public/incomplete_results_modal/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.OpenIncompleteResultsModalButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "OpenIncompleteResultsModalButtonProps"
-            ],
-            "path": "src/plugins/data/public/incomplete_results_modal/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -69,7 +69,6 @@ packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/cloud @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
-x-pack/plugins/cloud_integrations/cloud_chat_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
 x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
@@ -275,6 +274,7 @@ packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-kbn-server @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-model-versions @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-test-utils @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
@@ -1212,9 +1212,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 
 ## Explore owner connectors
-/x-pack/plugins/stack_connectors/public/connector_types/gen_ai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/server/connector_types/gen_ai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/common/gen_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/common/openai @elastic/security-threat-hunting-explore
 
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
@@ -1231,7 +1231,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
-
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_details @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 
@@ -1240,6 +1240,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/public/common/components/ml_popover @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/popover_items @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detection_engine/fleet_integrations @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/public/detection_engine/endpoint_exceptions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_details_ui @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
@@ -1274,6 +1275,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/risk_engine @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engine
@@ -1294,6 +1296,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_alerts @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_actions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_creation @elastic/security-detection-engine
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_edit @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/value_lists @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/exceptions @elastic/security-detection-engine
@@ -1335,6 +1338,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
 /x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
+/x-pack/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
