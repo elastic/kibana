@@ -6,16 +6,14 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { useInterpret } from '@xstate/react';
 import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { isDevMode } from '@kbn/xstate-utils';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { createOriginInterpreterStateMachine } from '../../state_machines';
 import { ObservabilityLogExplorerAppMountParameters } from '../../types';
+import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 export interface ObservablityLogExplorerMainRouteProps {
   appParams: ObservabilityLogExplorerAppMountParameters;
   core: CoreStart;
@@ -33,15 +31,6 @@ export const ObservablityLogExplorerMainRoute = ({
 
   const [state$] = useState(() => new BehaviorSubject({}));
 
-  useInterpret(
-    () =>
-      createOriginInterpreterStateMachine({
-        history,
-        toasts: core.notifications.toasts,
-      }),
-    { devTools: isDevMode() }
-  );
-
   return (
     <>
       <LogExplorerTopNavMenu
@@ -50,6 +39,7 @@ export const ObservablityLogExplorerMainRoute = ({
         state$={state$}
         theme$={theme$}
       />
+      <LazyOriginInterpreter history={history} toasts={core.notifications.toasts} />
       <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
         <logExplorer.LogExplorer scopedHistory={history} state$={state$} />
       </ObservabilityLogExplorerPageTemplate>
