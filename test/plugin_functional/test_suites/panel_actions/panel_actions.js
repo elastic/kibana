@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('Panel Actions', () => {
+  describe.only('Panel Actions', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
@@ -44,5 +44,10 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.existOrFail('samplePanelActionTitle');
       await testSubjects.existOrFail('samplePanelActionBody');
     });
+
+    // after(async () => {
+    //   await testSubjects.click('euiFlyoutCloseButton');
+    //   await testSubjects.missingOrFail('samplePanelActionFlyout');
+    // });
   });
 }
