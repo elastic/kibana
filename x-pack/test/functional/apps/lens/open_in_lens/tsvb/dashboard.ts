@@ -92,6 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisualization();
+
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');

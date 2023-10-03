@@ -113,11 +113,6 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       await dashboard.getKubernetesSummarySection();
       return await testSubjects.find('dashboard-summary-section-compliance-score');
     },
-
-    getKubernetesComplianceScore2: async () => {
-      // await dashboard.getKubernetesSummarySection();
-      return await testSubjects.find('dashboard-summary-section-compliance-score');
-    },
   };
 
   const navigateToComplianceDashboardPage = async () => {
