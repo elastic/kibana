@@ -11,7 +11,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
-import { fetchConnectorExecuteAction } from '../api';
+import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
 interface SendMessagesProps {
   http: HttpSetup;
@@ -21,7 +21,11 @@ interface SendMessagesProps {
 
 interface UseSendMessages {
   isLoading: boolean;
-  sendMessages: ({ apiConfig, http, messages }: SendMessagesProps) => Promise<string>;
+  sendMessages: ({
+    apiConfig,
+    http,
+    messages,
+  }: SendMessagesProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
 export const useSendMessages = (): UseSendMessages => {
