@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsMultiBucketBase,
+} from '@elastic/elasticsearch/lib/api/types';
 import { CspStatusCode } from '../../../../common/types';
 
 export type CloudSecurityUsageCollectorType =
@@ -193,7 +195,14 @@ export interface AccountEntity {
   doc_count: number; // latest findings doc count
   passed_findings_count: AggregationsMultiBucketBase;
   failed_findings_count: AggregationsMultiBucketBase;
-  package_policy_id: { top: PackagePolicyId[] };
+  package_policy_id: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: Array<{
+      key: string; // package_policy_id
+      doc_count: number;
+    }>;
+  };
   cloud_provider: { top: CloudProvider[] };
   latest_doc_updated_timestamp: { top: LatestDocTimestamp[] };
   benchmark_id: { top: BenchmarkId[] };

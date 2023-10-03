@@ -51,17 +51,6 @@ export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
             },
           },
         },
-        package_policy_id: {
-          top_metrics: {
-            metrics: {
-              field: 'cloud_security_posture.package_policy.id',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
         latest_doc_updated_timestamp: {
           top_metrics: {
             metrics: {
@@ -146,7 +135,6 @@ export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
             },
           },
         },
-
         // KSPM QUERY FIELDS
         kubernetes_version: {
           top_metrics: {
@@ -196,6 +184,15 @@ export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
             field: 'agent.id',
           },
         },
+        package_policy_id: {
+          terms: {
+            field: 'package_policy_identifier',
+            order: {
+              _count: 'desc',
+            },
+            size: 100,
+          },
+        },
       },
     },
   },
@@ -231,17 +228,6 @@ export const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => (
             },
           },
         },
-        package_policy_id: {
-          top_metrics: {
-            metrics: {
-              field: 'cloud_security_posture.package_policy.id',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
         cloud_provider: {
           top_metrics: {
             metrics: {
@@ -251,6 +237,15 @@ export const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => (
             sort: {
               '@timestamp': 'desc',
             },
+          },
+        },
+        package_policy_id: {
+          terms: {
+            field: 'package_policy_identifier',
+            order: {
+              _count: 'desc',
+            },
+            size: 100,
           },
         },
       },
@@ -265,8 +260,7 @@ const cloudBaseStats = (account: AccountEntity) => ({
   latest_doc_count: account.doc_count,
   latest_doc_updated_timestamp: account.latest_doc_updated_timestamp.top[0].metrics['@timestamp'],
   cloud_provider: account.cloud_provider.top[0].metrics['cloud.provider'],
-  package_policy_id:
-    account.package_policy_id.top[0].metrics['cloud_security_posture.package_policy.id'],
+  package_policy_id: account.package_policy_id?.buckets[0]?.key ?? null,
 });
 
 const getPostureManagementStats = (account: AccountEntity) => ({
