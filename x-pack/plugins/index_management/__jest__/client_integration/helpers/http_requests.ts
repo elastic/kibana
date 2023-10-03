@@ -90,6 +90,18 @@ const registerHttpRequestMockHelpers = (
   const setDeleteDataStreamResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_data_streams`, response, error);
 
+  const setEditDataRetentionResponse = (
+    dataStreamId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'PUT',
+      `${API_BASE_PATH}/data_streams/${encodeURIComponent(dataStreamId)}/data_retention`,
+      response,
+      error
+    );
+
   const setDeleteTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_index_templates`, response, error);
 
@@ -196,6 +208,7 @@ const registerHttpRequestMockHelpers = (
     setLoadDataStreamResponse,
     setDeleteDataStreamResponse,
     setDeleteTemplateResponse,
+    setEditDataRetentionResponse,
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setLoadIndexSettingsResponse,

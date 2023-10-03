@@ -1,4 +1,4 @@
-title: Update generative AI connector request
+title: Update OpenAI connector request
 type: object
 required:
   - config
@@ -10,4 +10,4 @@ properties:
     type: string
     description: The display name for the connector.
   secrets:
-    $ref: 'secrets_properties_genai.yaml' 
+    $ref: 'secrets_properties_genai.yaml'
