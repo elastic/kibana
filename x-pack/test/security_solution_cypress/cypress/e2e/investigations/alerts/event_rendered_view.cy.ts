@@ -60,7 +60,7 @@ describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
     cy.get(XY_CHART).should('be.visible');
     cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
-    cy.get(XY_CHART).should('not.be.visible');
+    cy.get(XY_CHART).should('not.exist');
   });
 
   /*
