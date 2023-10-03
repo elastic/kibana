@@ -8,8 +8,8 @@
 import { omit } from 'lodash';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { ASSETS_ENDPOINT } from '../constants';
-import { FtrProviderContext } from '../../types';
+import { ASSETS_ENDPOINT } from './constants';
+import { FtrProviderContext } from '../types';
 
 const SERVICES_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/services`;
 
@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         .query({
           from,
           to,
-          parent: 'my-host-1',
+          parent: 'host:my-host-1',
         })
         .expect(200);
 

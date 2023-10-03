@@ -9,9 +9,9 @@ import { sortBy } from 'lodash';
 
 import { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
-import { ASSETS_ENDPOINT } from '../constants';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from './helpers';
+import { ASSETS_ENDPOINT } from './constants';
 
 const DIFF_ENDPOINT = `${ASSETS_ENDPOINT}/diff`;
 

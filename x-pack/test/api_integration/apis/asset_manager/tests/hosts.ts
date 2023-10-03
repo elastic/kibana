@@ -7,8 +7,8 @@
 
 import { timerange, infra } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { ASSETS_ENDPOINT } from '../constants';
-import { FtrProviderContext } from '../../types';
+import { ASSETS_ENDPOINT } from './constants';
+import { FtrProviderContext } from '../types';
 
 const HOSTS_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/hosts`;
 

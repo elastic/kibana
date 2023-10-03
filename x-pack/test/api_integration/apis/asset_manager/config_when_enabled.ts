@@ -38,7 +38,7 @@ export default async function createTestConfig({
 
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: [require.resolve('./tests/with_signals_source')],
+    testFiles: [require.resolve('./tests')],
     services: {
       ...services,
       assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
@@ -87,7 +87,6 @@ export default async function createTestConfig({
       serverArgs: [
         ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.assetManager.alphaEnabled=true',
-        `--xpack.assetManager.lockedSource=signals`,
       ],
     },
   };
