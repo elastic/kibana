@@ -162,6 +162,21 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertTableIsPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.not.eql(0, `Expected trained model row count to be '>0' (got '0')`);
+    }
+
+    public async assertTableIsNotPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.eql(
+        0,
+        `Expected trained model row count to be '0' (got '${rows.length}')`
+      );
+    }
+
     public async assertModelCollapsedActionsButtonExists(modelId: string, expectedValue: boolean) {
       const actionsExists = await this.doesModelCollapsedActionsButtonExist(modelId);
       expect(actionsExists).to.eql(
