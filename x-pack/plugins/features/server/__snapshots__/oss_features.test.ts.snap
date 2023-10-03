@@ -177,6 +177,10 @@ Array [
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
+  Object {
+    "id": "savedQueryManagement",
+    "subFeatures": undefined,
+  },
 ]
 `;
 
@@ -467,6 +471,10 @@ Array [
   },
   Object {
     "id": "savedObjectsManagement",
+    "subFeatures": undefined,
+  },
+  Object {
+    "id": "savedQueryManagement",
     "subFeatures": undefined,
   },
 ]
@@ -971,6 +979,29 @@ Array [
       ],
     },
     "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the savedQueryManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [],
+      "savedObject": Object {
+        "all": Array [
+          "query",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "saveQuery",
+      ],
+    },
+    "privilegeId": "all",
   },
 ]
 `;
@@ -1559,6 +1590,29 @@ Array [
       ],
     },
     "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the savedQueryManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [],
+      "savedObject": Object {
+        "all": Array [
+          "query",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "saveQuery",
+      ],
+    },
+    "privilegeId": "all",
   },
 ]
 `;

@@ -50,7 +50,7 @@ export function ShowShareModal({
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
-    dashboardSessionStorage,
+    dashboardBackup,
     data: {
       query: {
         timefilter: {
@@ -121,7 +121,7 @@ export function ShowShareModal({
   };
 
   let unsavedStateForLocator: DashboardAppLocatorParams = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
+  const unsavedDashboardState = dashboardBackup.getState(savedObjectId);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {

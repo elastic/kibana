@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { estypes } from '@elastic/elasticsearch';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SurrDocType } from '../services/context';
 
@@ -19,7 +19,7 @@ export function getEsQuerySearchAfter(
   type: SurrDocType,
   rows: DataTableRecord[],
   anchor: DataTableRecord
-): EsQuerySearchAfter {
+): estypes.SortResults {
   if (rows.length) {
     // already surrounding docs -> first or last record  is used
     const afterTimeRecIdx = type === SurrDocType.SUCCESSORS && rows.length ? rows.length - 1 : 0;
