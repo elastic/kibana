@@ -75,7 +75,6 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Run a set of queries in a pack').click();
     });
-    cy.contains('Save changes').click();
     cy.getBySel('response-actions-error')
       .within(() => {
         cy.contains('Pack is a required field');
