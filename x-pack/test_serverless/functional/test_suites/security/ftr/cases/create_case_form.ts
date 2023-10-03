@@ -15,7 +15,8 @@ import { navigateToCasesApp } from '../../../../../shared/lib/cases';
 const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
-  describe('Create Case', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/166842
+  describe.skip('Create Case', function () {
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
