@@ -20,7 +20,7 @@ export const bulkUntrackAlertRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_untrack`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack`,
       validate: {
         body: bulkUntrackBodySchemaV1,
       },

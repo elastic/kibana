@@ -90,7 +90,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/_bulk_untrack`)
+            .post(`${getUrlPrefix(scenario.space.id)}/internal/alerting/alerts/_bulk_untrack`)
             .set('kbn-xsrf', 'foo')
             .auth(scenario.user.username, scenario.user.password)
             .send({

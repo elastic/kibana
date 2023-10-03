@@ -24,7 +24,7 @@ export const useBulkUntrackAlerts = () => {
           ...(indices?.length ? { indices } : {}),
           ...(alertUuids ? { alert_uuids: alertUuids } : {}),
         });
-        return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_untrack`, { body });
+        return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack`, { body });
       } catch (e) {
         throw new Error(`Unable to parse bulk untrack params: ${e}`);
       }
