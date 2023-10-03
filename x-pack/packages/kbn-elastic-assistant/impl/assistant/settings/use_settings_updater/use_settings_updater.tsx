@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { Prompt, QuickPrompt } from '../../../..';
 import { UseAssistantContext, useAssistantContext } from '../../../assistant_context';
-import { KnowledgeBaseConfig } from '../../types';
+import type { KnowledgeBaseConfig } from '../../types';
 
 interface UseSettingsUpdater {
   conversationSettings: UseAssistantContext['conversations'];

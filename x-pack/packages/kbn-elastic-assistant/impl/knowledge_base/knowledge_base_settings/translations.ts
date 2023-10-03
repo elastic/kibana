@@ -39,7 +39,7 @@ export const KNOWLEDGE_BASE_LABEL = i18n.translate(
 export const KNOWLEDGE_BASE_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseDescription',
   {
-    defaultMessage: 'Index where Knowledge Base docs are stored.',
+    defaultMessage: 'Index where Knowledge Base docs are stored',
   }
 );
 
@@ -47,7 +47,7 @@ export const KNOWLEDGE_BASE_DESCRIPTION_INSTALLED = (kbIndexPattern: string) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseInstalledDescription',
     {
-      defaultMessage: 'Initialized to `{kbIndexPattern}`.',
+      defaultMessage: 'Initialized to `{kbIndexPattern}`',
       values: { kbIndexPattern },
     }
   );
@@ -83,7 +83,7 @@ export const KNOWLEDGE_BASE_ELSER_MACHINE_LEARNING = i18n.translate(
 export const KNOWLEDGE_BASE_ELSER_SEE_DOCS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.elserSeeDocsDescription',
   {
-    defaultMessage: 'See docs.',
+    defaultMessage: 'See docs',
   }
 );
 
@@ -97,13 +97,13 @@ export const ESQL_LABEL = i18n.translate(
 export const ESQL_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.esqlDescription',
   {
-    defaultMessage: 'Knowledge Base docs for generating ES|QL queries.',
+    defaultMessage: 'Knowledge Base docs for generating ES|QL queries',
   }
 );
 
 export const ESQL_DESCRIPTION_INSTALLED = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.esqlInstalledDescription',
   {
-    defaultMessage: 'ES|QL Knowledge Base docs loaded.',
+    defaultMessage: 'ES|QL Knowledge Base docs loaded',
   }
 );
