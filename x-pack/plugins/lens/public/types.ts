@@ -285,7 +285,7 @@ export interface UserMessage {
   uniqueId?: string;
   severity: 'error' | 'warning' | 'info';
   shortMessage: string;
-  longMessage: React.ReactNode | string;
+  longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }

@@ -2979,19 +2979,11 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/incomplete_results_modal/open_incomplete_results_modal_button.tsx"
+            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/incomplete_results_modal/open_incomplete_results_modal_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/fetch/handle_warnings.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/fetch/handle_warnings.tsx"
+            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
           },
           {
             "plugin": "data",
@@ -3700,14 +3692,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/global_header/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/global_header/index.tsx"
           },
           {
             "plugin": "synthetics",
