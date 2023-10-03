@@ -6,4 +6,4 @@
  */
 
 export { Overview } from './overview';
-export { WorkplaceSearchGate } from './workplace_search_gate';
+export { WorkplaceSearchGate } from './gated_form';

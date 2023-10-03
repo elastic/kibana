@@ -19,7 +19,7 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -32,12 +32,13 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 
 import {
-  tableDefaults,
   dataTableActions,
   dataTableSelectors,
   FILTER_OPEN,
+  tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -100,10 +101,10 @@ import {
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import {
-  explainLackOfPermission,
   canEditRuleWithActions,
-  isBoolean,
+  explainLackOfPermission,
   hasUserCRUDPermission,
+  isBoolean,
 } from '../../../../common/utils/privileges';
 
 import {
@@ -148,8 +149,6 @@ const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
   ExceptionListTypeEnum.RULE_DEFAULT,
 ];
-
-const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -780,9 +779,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route
                   path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
                 >
-                  <ExceptionsViewer
+                  <EndpointExceptionsViewer
                     rule={rule}
-                    listTypes={RULE_ENDPOINT_EXCEPTION_LIST_TYPE}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"

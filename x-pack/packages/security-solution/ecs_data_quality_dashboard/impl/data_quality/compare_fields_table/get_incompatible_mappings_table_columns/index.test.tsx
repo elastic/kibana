@@ -105,8 +105,8 @@ describe('getIncompatibleMappingsTableColumns', () => {
         );
       });
 
-      test('it renders the expected type as a warning', () => {
-        expect(screen.getByTestId('codeWarning')).toHaveTextContent(indexFieldType);
+      test('it renders the expected type with a "success" style', () => {
+        expect(screen.getByTestId('codeSuccess')).toHaveTextContent(indexFieldType);
       });
 
       test('it renders the same family badge', () => {
