@@ -36,7 +36,7 @@ import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/co
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
+import { kqlSearch } from '../../../tasks/security_header';
 import { createNewTimeline } from '../../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../../urls/navigation';
 
@@ -54,15 +54,13 @@ describe('Detection response view', () => {
     visit(DETECTION_AND_RESPONSE_URL);
   });
 
-  context('KQL search bar', { tags: ['@ess', '@brokenInServerless'] }, () => {
+  context('KQL search bar', { tags: ['@ess', '@serverless'] }, () => {
     it(`filters out hosts with KQL search bar query`, () => {
       kqlSearch(`host.name : fakeHostName{enter}`);
 
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
-
-      clearSearchBar();
     });
 
     it(`finds the host when filtering with KQL search bar query`, () => {
@@ -71,8 +69,6 @@ describe('Detection response view', () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
       cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
-
-      clearSearchBar();
     });
 
     it(`filters out the users with KQL search bar query`, () => {
@@ -81,8 +77,6 @@ describe('Detection response view', () => {
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
-
-      clearSearchBar();
     });
 
     it(`finds the user when filtering with KQL search bar query`, () => {
@@ -91,8 +85,6 @@ describe('Detection response view', () => {
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
       cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
-
-      clearSearchBar();
     });
   });
 
