@@ -29,10 +29,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...svlSharedConfig.get('kbnTestServer.serverArgs'),
         '--serverless=security',
         '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'riskScoringRoutesEnabled',
-          'riskScoringPersistence',
-        ])}`,
         `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
