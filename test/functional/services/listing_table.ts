@@ -23,7 +23,6 @@ export class ListingTableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
