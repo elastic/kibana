@@ -32,7 +32,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
               href={LOGS_ONBOARDING_FEEDBACK_LINK}
               size="s"
               target="_blank"
-              color="warning"
+              color="primary"
             >
               {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.buttonText', {
                 defaultMessage: 'Take a quick survey',
