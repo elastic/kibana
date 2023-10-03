@@ -30,6 +30,13 @@ export function hasKibanaPrivilege(
   return fleetAuthz.packagePrivileges?.endpoint?.actions[privilege].executePackageAction ?? false;
 }
 
+export function hasEndpointExceptionsPrivilege(
+  fleetAuthz: FleetAuthz,
+  privilege: 'showEndpointExceptions' | 'crudEndpointExceptions'
+): boolean {
+  return fleetAuthz.endpointExceptionsPrivileges?.actions[privilege] ?? false;
+}
+
 /**
  * Used by both the server and the UI to generate the Authorization for access to Endpoint related
  * functionality
@@ -84,6 +91,15 @@ export const calculateEndpointAuthz = (
 
   const canWriteExecuteOperations = hasKibanaPrivilege(fleetAuthz, 'writeExecuteOperations');
 
+  const canReadEndpointExceptions = hasEndpointExceptionsPrivilege(
+    fleetAuthz,
+    'showEndpointExceptions'
+  );
+  const canWriteEndpointExceptions = hasEndpointExceptionsPrivilege(
+    fleetAuthz,
+    'crudEndpointExceptions'
+  );
+
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
     canReadSecuritySolution,
@@ -123,6 +139,8 @@ export const calculateEndpointAuthz = (
     canReadBlocklist,
     canWriteEventFilters,
     canReadEventFilters,
+    canReadEndpointExceptions,
+    canWriteEndpointExceptions,
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -172,5 +190,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadBlocklist: false,
     canWriteEventFilters: false,
     canReadEventFilters: false,
+    canReadEndpointExceptions: false,
+    canWriteEndpointExceptions: false,
   };
 };

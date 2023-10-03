@@ -37,14 +37,6 @@
             "section": "def-public.DataPublicPluginStart",
             "text": "DataPublicPluginStart"
           },
-          "; theme: ",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
           "; }; adapter: ",
           {
             "pluginId": "inspector",
@@ -93,14 +85,6 @@
                     "docId": "kibDataPluginApi",
                     "section": "def-public.DataPublicPluginStart",
                     "text": "DataPublicPluginStart"
-                  },
-                  "; theme: ",
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
                   },
                   "; }"
                 ],
