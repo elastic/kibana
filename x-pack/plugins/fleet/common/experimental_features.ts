@@ -11,7 +11,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-export const allowedExperimentalValues = Object.freeze({
+export const allowedExperimentalValues = Object.freeze<Record<string, boolean | undefined>>({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,
@@ -46,8 +46,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new FleetInvalidExperimentalValue(`[${value}] is not a supported experimental feature`);
     }
 
-    // @ts-expect-error ts upgrade v4.7.4
-    enabledFeatures[value as keyof ExperimentalFeatures] = true;
+    enabledFeatures[value] = true;
   }
 
   return {
@@ -57,7 +56,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
 };
 
 export const isValidExperimentalValue = (value: string) => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
+  return allowedKeys.includes(value);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];
