@@ -11,7 +11,6 @@ import type { Plugin, PluggableList } from 'unified';
 import type { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
 import type rehype2react from 'rehype-react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
-
 export interface CursorPosition {
   start: number;
   end: number;
