@@ -21,7 +21,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
       <>
         <p>
           {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.text', {
-            defaultMessage: 'Share your onboarding experience to help us improve it.',
+            defaultMessage: 'Share with us your onboarding experience and help us improve it.',
           })}
         </p>
 
@@ -32,8 +32,8 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
               href={LOGS_ONBOARDING_FEEDBACK_LINK}
               size="s"
               target="_blank"
-              color="warning"
               iconType="editorComment"
+              color="primary"
             >
               {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.buttonText', {
                 defaultMessage: 'Take a quick survey',
