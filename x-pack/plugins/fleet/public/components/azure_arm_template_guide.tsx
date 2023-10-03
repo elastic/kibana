@@ -56,7 +56,7 @@ export const AzureArmTemplateGuide = ({
       </p>
       <EuiText size="s" color="subdued">
         <ol>
-          {azureAccountType === 'organization-account-azure' ? (
+          {azureAccountType === 'organization-account' ? (
             <li>
               <FormattedMessage
                 id="xpack.fleet.azureArmTemplate.guide.steps.organizationLogin"
