@@ -114,12 +114,18 @@ export interface XYReferenceLineLayerConfig {
 }
 
 export interface XYByValueAnnotationLayerConfig {
-  title?: string;
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
   ignoreGlobalFilters: boolean;
+  // populated only when the annotation has been forked from the
+  // version saved in the library (persisted as XYPersistedLinkedByValueAnnotationLayerConfig)
+  cachedMetadata?: {
+    title: string;
+    description: string;
+    tags: string[];
+  };
 }
 
 export type XYPersistedByValueAnnotationLayerConfig = Omit<

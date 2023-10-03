@@ -30,6 +30,7 @@ import type {
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import {
   getAnnotationLayerTitle,
+  getGroupMetadataFromAnnotationLayer,
   isByReferenceAnnotationsLayer,
 } from '../../visualization_helpers';
 
@@ -329,6 +330,8 @@ export const getSaveLayerAction = ({
     ),
     execute: async (domElement) => {
       if (domElement) {
+        const metadata = getGroupMetadataFromAnnotationLayer(layer);
+
         render(
           <KibanaThemeProvider theme$={kibanaTheme.theme$}>
             <I18nProvider>
@@ -348,9 +351,7 @@ export const getSaveLayerAction = ({
                     goToAnnotationLibrary,
                   });
                 }}
-                title={neverSaved ? '' : getAnnotationLayerTitle(layer)}
-                description={neverSaved ? '' : layer.__lastSaved.description}
-                tags={neverSaved ? [] : layer.__lastSaved.tags}
+                {...metadata}
                 showCopyOnSave={!neverSaved}
               />
             </I18nProvider>

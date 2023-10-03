@@ -460,7 +460,11 @@ describe('xy_visualization', () => {
           annotations: [], // different from the persisted group
         },
         {
-          title: 'Local title',
+          cachedMetadata: {
+            title: 'Local title',
+            description: '',
+            tags: [],
+          },
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           persistanceType: 'linked',
@@ -502,7 +506,7 @@ describe('xy_visualization', () => {
         {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
-          title: 'Local title',
+          cachedMetadata: persistedAnnotationLayers[1].cachedMetadata,
           annotationGroupId: annotationGroupId2,
           ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[1].annotations,
@@ -3720,7 +3724,12 @@ describe('xy_visualization', () => {
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'linked',
-          title: 'My saved object title', // stores "cached" or "local" title
+          // stores "cached" or "local" metadata
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[0].annotations,
           ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
         },
@@ -3729,7 +3738,11 @@ describe('xy_visualization', () => {
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'linked',
-          title: 'My saved object title',
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[1].annotations,
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },
