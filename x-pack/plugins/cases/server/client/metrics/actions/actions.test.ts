@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '../../../../common/api';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

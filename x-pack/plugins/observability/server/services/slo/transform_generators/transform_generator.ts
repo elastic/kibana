@@ -17,6 +17,8 @@ export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
+    const mustIncludeAllInstanceId = slo.groupBy === ALL_VALUE || slo.groupBy === '';
+
     return {
       'slo.id': {
         type: 'keyword',
@@ -30,12 +32,20 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      'slo.instanceId': {
+      'slo.groupBy': {
         type: 'keyword',
         script: {
-          source: `emit('${ALL_VALUE}')`,
+          source: `emit('${!!slo.groupBy ? slo.groupBy : ALL_VALUE}')`,
         },
       },
+      ...(mustIncludeAllInstanceId && {
+        'slo.instanceId': {
+          type: 'keyword',
+          script: {
+            source: `emit('${ALL_VALUE}')`,
+          },
+        },
+      }),
       'slo.name': {
         type: 'keyword',
         script: {
@@ -109,10 +119,14 @@ export abstract class TransformGenerator {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
+    const instanceIdField =
+      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE ? slo.groupBy : 'slo.instanceId';
+
     return {
       'slo.id': { terms: { field: 'slo.id' } },
       'slo.revision': { terms: { field: 'slo.revision' } },
-      'slo.instanceId': { terms: { field: 'slo.instanceId' } },
+      'slo.groupBy': { terms: { field: 'slo.groupBy' } },
+      'slo.instanceId': { terms: { field: instanceIdField } },
       'slo.name': { terms: { field: 'slo.name' } },
       'slo.description': { terms: { field: 'slo.description' } },
       'slo.tags': { terms: { field: 'slo.tags' } },

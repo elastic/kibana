@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, type FC } from 'react';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
@@ -54,6 +54,9 @@ const BRUSH_MARGIN = 4;
 const BRUSH_HANDLE_SIZE = 4;
 const BRUSH_HANDLE_ROUNDED_CORNER = 2;
 
+/**
+ * Props for the DualBrush React Component
+ */
 interface DualBrushProps {
   /**
    * Min and max numeric timestamps for the two brushes
@@ -88,40 +91,12 @@ interface DualBrushProps {
 /**
  * DualBrush React Component
  * Dual brush component that overlays the document count chart
- * @type {FC<DualBrushProps>}
- * @param props - `DualBrushProps` component props
- * @returns {React.ReactElement} The DualBrush component.
+ *
+ * @param props DualBrushProps component props
+ * @returns The DualBrush component.
  */
-export function DualBrush({
-  /**
-   * Min and max numeric timestamps for the two brushes
-   */
-  windowParameters,
-  /**
-   * Min timestamp for x domain
-   */
-  min,
-  /**
-   * Max timestamp for x domain
-   */
-  max,
-  /**
-   * Callback function whenever the brush changes
-   */
-  onChange,
-  /**
-   * Margin left
-   */
-  marginLeft,
-  /**
-   * Nearest timestamps to snap to the brushes to
-   */
-  snapTimestamps,
-  /**
-   * Width
-   */
-  width,
-}: DualBrushProps) {
+export const DualBrush: FC<DualBrushProps> = (props) => {
+  const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
 
@@ -383,4 +358,4 @@ export function DualBrush({
       )}
     </>
   );
-}
+};

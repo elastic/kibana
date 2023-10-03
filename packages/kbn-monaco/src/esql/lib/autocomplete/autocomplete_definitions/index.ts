@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { aggregationFunctionsDefinitions, roundCommandDefinition } from './functions_commands';
+export {
+  aggregationFunctionsDefinitions,
+  mathCommandDefinition,
+  whereCommandDefinition,
+} from './functions_commands';
 export { sourceCommandsDefinitions } from './source_commands';
 export { processingCommandsDefinitions, pipeDefinition } from './processing_commands';
 
@@ -17,6 +21,7 @@ export {
 export {
   mathOperatorsCommandsDefinitions,
   assignOperatorDefinition,
+  asOperatorDefinition,
   byOperatorDefinition,
   openBracketDefinition,
   closeBracketDefinition,

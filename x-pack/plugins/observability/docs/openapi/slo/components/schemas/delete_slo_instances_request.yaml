@@ -1,0 +1,26 @@
+title: Delete SLO instances request
+description: >
+  The delete SLO instances request takes a list of SLO id and instance id, then delete the rollup and summary data.
+  This API can be used to remove the staled data of an instance SLO that no longer get updated.
+type: object
+required:
+  - list
+properties:
+  list:
+    description: An array of slo id and instance id
+    type: array
+    items:
+      type: object
+      required:
+        - sloId
+        - instanceId
+      properties:
+        sloId:
+          description: The SLO unique identifier
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        instanceId:
+          description: The SLO instance identifier
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          

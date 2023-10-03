@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
@@ -92,6 +93,8 @@ describe('FindSLO', () => {
             updatedAt: slo.updatedAt.toISOString(),
             enabled: slo.enabled,
             revision: slo.revision,
+            groupBy: slo.groupBy,
+            instanceId: ALL_VALUE,
           },
         ],
       });
@@ -135,6 +138,19 @@ describe('FindSLO', () => {
       `);
     });
   });
+
+  describe('validation', () => {
+    it("throws an error when 'perPage > 5000'", async () => {
+      const slo = createSLO();
+      mockSummarySearchClient.search.mockResolvedValueOnce(summarySearchResult(slo));
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
+      await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
+        'perPage limit to 5000'
+      );
+    });
+  });
 });
 
 function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
@@ -145,6 +161,7 @@ function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
     results: [
       {
         id: slo.id,
+        instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,

@@ -190,6 +190,26 @@ export class SavedObjectsPageObject extends FtrService {
     await option.click();
   }
 
+  async clickShareToSpaceByTitle(title: string) {
+    const table = keyBy(await this.getElementsInTable(), 'title');
+    // should we check if table size > 0 and log error if not?
+    if (table[title].menuElement) {
+      this.log.debug(`we found a context menu element for (${title}) so click it`);
+      await table[title].menuElement?.click();
+      // Wait for context menu to render
+      const menuPanel = await this.find.byCssSelector('.euiContextMenuPanel');
+      await (
+        await menuPanel.findByTestSubject('savedObjectsTableAction-share_saved_objects_to_space')
+      ).click();
+    } else {
+      this.log.debug(
+        `we didn't find a menu element so should be a "share to space" element for (${title}) to click`
+      );
+      // or the action elements are on the row without the menu
+      await table[title].copySaveObjectsElement?.click();
+    }
+  }
+
   async clickCopyToSpaceByTitle(title: string) {
     const table = keyBy(await this.getElementsInTable(), 'title');
     // should we check if table size > 0 and log error if not?

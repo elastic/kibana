@@ -10,6 +10,8 @@ import React, { memo } from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
 import { UserPrivilegesProvider } from '../../../../../../../common/components/user_privileges/user_privileges_context';
 import type { SecuritySolutionQueryClient } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
@@ -21,11 +23,12 @@ import { useKibana } from '../../../../../../../common/lib/kibana';
 export type RenderContextProvidersProps = PropsWithChildren<{
   store: Store;
   depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+  upsellingService: UpsellingService;
   queryClient?: SecuritySolutionQueryClient;
 }>;
 
 export const RenderContextProviders = memo<RenderContextProvidersProps>(
-  ({ store, depsStart, queryClient, children }) => {
+  ({ store, depsStart, queryClient, upsellingService, children }) => {
     const services = useKibana().services;
     const {
       application: { capabilities },
@@ -36,7 +39,11 @@ export const RenderContextProviders = memo<RenderContextProvidersProps>(
           <SecuritySolutionStartDependenciesContext.Provider value={depsStart}>
             <UserPrivilegesProvider kibanaCapabilities={capabilities}>
               <NavigationProvider core={services}>
-                <CurrentLicense>{children}</CurrentLicense>
+                <CurrentLicense>
+                  <UpsellingProvider upsellingService={upsellingService}>
+                    {children}
+                  </UpsellingProvider>
+                </CurrentLicense>
               </NavigationProvider>
             </UserPrivilegesProvider>
           </SecuritySolutionStartDependenciesContext.Provider>

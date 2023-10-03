@@ -32,7 +32,7 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Cases with invalid indicators', () => {
+describe('Cases with invalid indicators', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
     login();
@@ -58,7 +58,7 @@ describe('Cases with invalid indicators', () => {
   });
 });
 
-describe('Cases interactions', () => {
+describe('Cases interactions', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();

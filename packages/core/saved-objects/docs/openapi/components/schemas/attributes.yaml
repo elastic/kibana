@@ -1,0 +1,4 @@
+type: object
+description: >
+  The data that you want to create.
+  WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.

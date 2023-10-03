@@ -8,18 +8,14 @@
 
 import React, { FC } from 'react';
 
-import { EuiErrorBoundary } from '@elastic/eui';
-import type { I18nStart } from '@kbn/core-i18n-browser';
 import {
-  KibanaThemeProvider,
-  type KibanaThemeProviderProps,
-} from '@kbn/react-kibana-context-theme';
+  KibanaRootContextProvider,
+  type KibanaRootContextProviderProps,
+} from '@kbn/react-kibana-context-root';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 /** Props for the KibanaContextProvider */
-export interface KibanaRenderContextProviderProps extends KibanaThemeProviderProps {
-  /** The `I18nStart` API from `CoreStart`. */
-  i18n: I18nStart;
-}
+export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderProps, 'globalStyles'>;
 
 /**
  * The `KibanaRenderContextProvider` provides the necessary context for an out-of-current
@@ -27,14 +23,11 @@ export interface KibanaRenderContextProviderProps extends KibanaThemeProviderPro
  */
 export const KibanaRenderContextProvider: FC<KibanaRenderContextProviderProps> = ({
   children,
-  i18n,
   ...props
 }) => {
   return (
-    <i18n.Context>
-      <KibanaThemeProvider {...props}>
-        <EuiErrorBoundary>{children}</EuiErrorBoundary>
-      </KibanaThemeProvider>
-    </i18n.Context>
+    <KibanaRootContextProvider globalStyles={false} {...props}>
+      <EuiErrorBoundary>{children}</EuiErrorBoundary>
+    </KibanaRootContextProvider>
   );
 };

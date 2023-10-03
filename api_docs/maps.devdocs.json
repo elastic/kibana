@@ -3097,54 +3097,6 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.createField",
-            "type": "Function",
-            "tags": [],
-            "label": "createField",
-            "description": [],
-            "signature": [
-              "({ fieldName }: { fieldName: string; }) => ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.IField",
-                "text": "IField"
-              }
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.IVectorSource.createField.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ fieldName }",
-                "description": [],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-public.IVectorSource.createField.$1.fieldName",
-                    "type": "string",
-                    "tags": [],
-                    "label": "fieldName",
-                    "description": [],
-                    "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
             "id": "def-public.IVectorSource.hasTooltipProperties",
             "type": "Function",
             "tags": [],

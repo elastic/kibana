@@ -44,6 +44,56 @@ paths:
                 $ref: '#/components/schemas/RiskScoresPreviewResponse'
         '400':
           description: Invalid request
+  /engine/status:
+    get:
+      summary: Get the status of the Risk Engine
+      description: Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineStatusResponse'
+                
+  /engine/init:
+    post:
+      summary: Initialize the Risk Engine
+      description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineInitResponse'
+  /engine/enable:
+    post:
+      summary: Enable the Risk Engine
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineEnableResponse'
+  /engine/disable:
+    post:
+      summary: Disable the Risk Engine
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineDisableResponse'
+
 
 components:
   schemas:
@@ -153,7 +203,49 @@ components:
           description: A list of risk scores
           items:
             $ref: '#/components/schemas/RiskScore'
+    RiskEngineStatusResponse:
+      type: object
+      properties:
+        legacy_risk_engine_status:
+          $ref: '#/components/schemas/RiskEngineStatus'
+        risk_engine_status:
+          $ref: '#/components/schemas/RiskEngineStatus'
+        is_max_amount_of_risk_engines_reached:
+          description: Indicates whether the maximum amount of risk engines has been reached
+          type: boolean
+    RiskEngineInitResponse:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            risk_engine_enabled:
+              type: boolean
+            risk_engine_resources_installed:
+              type: boolean
+            risk_engine_configuration_created:
+              type: boolean
+            legacy_risk_engine_disabled:
+              type: boolean
+            errors: 
+              type: array
+              items:
+                type: string
 
+
+        
+    RiskEngineEnableResponse:
+      type: object
+      properties:
+        success: 
+          type: boolean
+    RiskEngineDisableResponse:
+      type: object
+      properties:
+        success: 
+          type: boolean
+        
+         
     AfterKeys:
       type: object
       properties:
@@ -326,3 +418,22 @@ components:
         - type: 'global_identifier'
           host: 0.5
           user: 0.1
+    RiskEngineStatus:
+      type: string
+      enum:
+        - 'NOT_INSTALLED'
+        - 'DISABLED'
+        - 'ENABLED'
+    RiskEngineInitStep:
+      type: object
+      required:
+        - type
+        - success
+      properties:
+        type:
+          type: string
+        success: 
+          type: boolean
+        error:
+          type: string
+          

@@ -8,7 +8,7 @@
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ProfilingESField } from '../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-utils';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
@@ -58,6 +58,17 @@ describe('TopN data from Elasticsearch', () => {
         }) as Promise<any>
     ),
     getEsClient: jest.fn(() => context.elasticsearch.client.asCurrentUser),
+    profilingFlamegraph: jest.fn(
+      (request) =>
+        context.elasticsearch.client.asCurrentUser.transport.request({
+          method: 'POST',
+          path: encodeURI('_profiling/flamegraph'),
+          body: {
+            query: request.query,
+            sample_size: request.sampleSize,
+          },
+        }) as Promise<any>
+    ),
   };
   const logger = loggerMock.create();
 

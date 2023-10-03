@@ -27,7 +27,7 @@ describe('ReportingAPIClient', () => {
   describe('getReportURL', () => {
     it('should generate the internal report download URL', () => {
       expect(apiClient.getReportURL('123')).toMatchInlineSnapshot(
-        `"/base/path/internal/reporting/jobs/download/123"`
+        `"/base/path/internal/reporting/jobs/download/123?elasticInternalOrigin=true"`
       );
     });
   });

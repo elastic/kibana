@@ -40,9 +40,13 @@ jest.mock('../../common/convert_to_lens/lib/buckets', () => ({
   convertBucketToColumns: jest.fn(() => mockConvertBucketToColumns()),
 }));
 
-jest.mock('../../common/convert_to_lens/lib/utils', () => ({
-  getCustomBucketsFromSiblingAggs: jest.fn(() => mockGetCutomBucketsFromSiblingAggs()),
-}));
+jest.mock('../../common/convert_to_lens/lib/utils', () => {
+  const utils = jest.requireActual('../../common/convert_to_lens/lib/utils');
+  return {
+    ...utils,
+    getCustomBucketsFromSiblingAggs: jest.fn(() => mockGetCutomBucketsFromSiblingAggs()),
+  };
+});
 
 jest.mock('../vis_schemas', () => ({
   getVisSchemas: jest.fn(() => mockGetVisSchemas()),

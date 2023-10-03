@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import { ActionInternal } from './actions/action_internal';
@@ -19,6 +19,7 @@ export interface VisualizeFieldContext {
   fieldName: string;
   dataViewSpec: DataViewSpec;
   contextualFields?: string[];
+  textBasedColumns?: DatatableColumn[];
   originatingApp?: string;
   query?: AggregateQuery;
 }
@@ -26,7 +27,7 @@ export interface VisualizeFieldContext {
 export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
-  originatingApp?: string;
+  originatingApp: string;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

@@ -23,8 +23,13 @@ import type {
   CasePatchRequest,
   CaseResolveResponse,
   CaseUserActionStatsResponse,
+  SingleCaseMetricsResponse,
 } from '../../common/types/api';
-import { CaseResolveResponseRt, CaseUserActionStatsResponseRt } from '../../common/types/api';
+import {
+  CaseResolveResponseRt,
+  CaseUserActionStatsResponseRt,
+  SingleCaseMetricsResponseRt,
+} from '../../common/types/api';
 import type {
   Case,
   Cases,
@@ -34,8 +39,7 @@ import type {
   UserActions,
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import type { SingleCaseMetricsResponse } from '../../common/api';
-import { throwErrors, SingleCaseMetricsResponseRt } from '../../common/api';
+import { throwErrors } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 

@@ -20,81 +20,88 @@ import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from 
 import { validateExceptionListSize } from './validate';
 
 export const createEndpointListItemRoute = (router: ListsPluginRouter): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: ENDPOINT_LIST_ITEM_URL,
-      validate: {
-        body: buildRouteValidation<
-          typeof createEndpointListItemRequest,
-          CreateEndpointListItemRequestDecoded
-        >(createEndpointListItemRequest),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: buildRouteValidation<
+              typeof createEndpointListItemRequest,
+              CreateEndpointListItemRequestDecoded
+            >(createEndpointListItemRequest),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const {
-          name,
-          tags,
-          meta,
-          comments,
-          description,
-          entries,
-          item_id: itemId,
-          os_types: osTypes,
-          type,
-        } = request.body;
-        const exceptionLists = await getExceptionListClient(context);
-        const exceptionListItem = await exceptionLists.getEndpointListItem({
-          id: undefined,
-          itemId,
-        });
-        if (exceptionListItem != null) {
-          return siemResponse.error({
-            body: `exception list item id: "${itemId}" already exists`,
-            statusCode: 409,
-          });
-        } else {
-          const createdList = await exceptionLists.createEndpointListItem({
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const {
+            name,
+            tags,
+            meta,
             comments,
             description,
             entries,
-            itemId,
-            meta,
-            name,
-            osTypes,
-            tags,
+            item_id: itemId,
+            os_types: osTypes,
             type,
+          } = request.body;
+          const exceptionLists = await getExceptionListClient(context);
+          const exceptionListItem = await exceptionLists.getEndpointListItem({
+            id: undefined,
+            itemId,
           });
-          const [validated, errors] = validate(createdList, createEndpointListItemResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          if (exceptionListItem != null) {
+            return siemResponse.error({
+              body: `exception list item id: "${itemId}" already exists`,
+              statusCode: 409,
+            });
           } else {
-            const listSizeError = await validateExceptionListSize(
-              exceptionLists,
-              ENDPOINT_LIST_ID,
-              'agnostic'
-            );
-            if (listSizeError != null) {
-              await exceptionLists.deleteExceptionListItemById({
-                id: createdList.id,
-                namespaceType: 'agnostic',
-              });
-              return siemResponse.error(listSizeError);
+            const createdList = await exceptionLists.createEndpointListItem({
+              comments,
+              description,
+              entries,
+              itemId,
+              meta,
+              name,
+              osTypes,
+              tags,
+              type,
+            });
+            const [validated, errors] = validate(createdList, createEndpointListItemResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              const listSizeError = await validateExceptionListSize(
+                exceptionLists,
+                ENDPOINT_LIST_ID,
+                'agnostic'
+              );
+              if (listSizeError != null) {
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType: 'agnostic',
+                });
+                return siemResponse.error(listSizeError);
+              }
+              return response.ok({ body: validated ?? {} });
             }
-            return response.ok({ body: validated ?? {} });
           }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

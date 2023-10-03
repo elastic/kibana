@@ -20,15 +20,19 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...services,
         ...options.services,
       },
+      esTestCluster: {
+        ...svlSharedConfig.get('esTestCluster'),
+        serverArgs: [
+          ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          ...(options.esServerArgs ?? []),
+        ],
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
-          `--xpack.alerting.enableFrameworkAlerts=true`,
-          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--xpack.observability.unsafe.thresholdRule.enabled=true',
-          '--server.publicBaseUrl=https://localhost:5601',
+          ...(options.kbnServerArgs || []),
         ],
       },
       testFiles: options.testFiles,

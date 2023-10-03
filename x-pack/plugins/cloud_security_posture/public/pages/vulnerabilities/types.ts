@@ -5,119 +5,7 @@
  * 2.0.
  */
 
-import { VulnSeverity } from '../../../common/types';
-
-export interface VulnerabilityRecord {
-  '@timestamp': string;
-  resource?: {
-    id: string;
-    name: string;
-  };
-  event: {
-    type: string[];
-    category: string[];
-    created: string;
-    id: string;
-    kind: string;
-    sequence: number;
-    outcome: string;
-  };
-  vulnerability: Vulnerability;
-  ecs: {
-    version: string;
-  };
-  host: {
-    os: {
-      name: string;
-      kernel: string;
-      codename: string;
-      type: string;
-      platform: string;
-      version: string;
-      family: string;
-    };
-    id: string;
-    name: string;
-    containerized: boolean;
-    ip: string[];
-    mac: string[];
-    hostname: string;
-    architecture: string;
-  };
-  agent: {
-    ephemeral_id: string;
-    id: string;
-    name: string;
-    type: string;
-    version: string;
-  };
-  cloud: {
-    image?: {
-      id: string;
-    };
-    provider?: string;
-    instance?: {
-      id: string;
-    };
-    machine?: {
-      type: string;
-    };
-    region: string;
-    availability_zone?: string;
-    service?: {
-      name: string;
-    };
-    account?: {
-      id: string;
-    };
-  };
-  cloudbeat: {
-    version: string;
-    commit_sha: string;
-    commit_time: string;
-  };
-}
-
-export interface Vulnerability {
-  published_date: string;
-  score: {
-    version: string;
-    base: number;
-  };
-  cwe: string[];
-  id: string;
-  title: string;
-  reference: string;
-  severity: VulnSeverity;
-  cvss: {
-    nvd: VectorScoreBase;
-    redhat?: VectorScoreBase;
-    ghsa?: VectorScoreBase;
-  };
-  data_source: {
-    ID: string;
-    Name: string;
-    URL: string;
-  };
-  enumeration: string;
-  description: string;
-  classification: string;
-  scanner: {
-    vendor: string;
-  };
-  package: {
-    version: string;
-    name: string;
-    fixed_version?: string;
-  };
-}
-
-export interface VectorScoreBase {
-  V3Score?: number;
-  V3Vector?: string;
-  V2Score?: number;
-  V2Vector?: string;
-}
+import { VectorScoreBase, CspVulnerabilityFinding } from '../../../common/schemas';
 
 export type Vendor = 'NVD' | 'Red Hat' | 'GHSA';
 
@@ -130,4 +18,30 @@ export interface Vector {
   version: string;
   vector: string;
   score: number | undefined;
+}
+
+export interface VulnerabilitiesQueryData {
+  page: CspVulnerabilityFinding[];
+  total: number;
+}
+
+export interface VulnerabilitiesByResourceQueryData {
+  page: Array<{
+    resource: {
+      id: string;
+      name: string;
+    };
+    cloud: {
+      region: string;
+    };
+    vulnerabilities_count: number;
+    severity_map: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    };
+  }>;
+  total: number;
+  total_vulnerabilities: number;
 }

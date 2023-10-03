@@ -12,6 +12,7 @@ export interface NavigationLink<T extends string = string> {
   categories?: LinkCategories<T>;
   description?: string;
   disabled?: boolean;
+  externalUrl?: string;
   id: T;
   landingIcon?: IconType;
   landingImage?: string;
@@ -27,23 +28,28 @@ export interface NavigationLink<T extends string = string> {
 }
 
 export interface LinkCategory<T extends string = string> {
-  linkIds: readonly T[];
+  linkIds?: readonly T[];
   label?: string;
   type?: LinkCategoryType;
+  iconType?: IconType;
+  categories?: Array<TitleLinkCategory<T>>; // nested categories are only supported by accordion type
 }
 
 export interface TitleLinkCategory<T extends string = string> extends LinkCategory<T> {
   type?: LinkCategoryType.title;
+  linkIds: readonly T[];
   label: string;
 }
 
 export interface AccordionLinkCategory<T extends string = string> extends LinkCategory<T> {
   type: LinkCategoryType.accordion;
   label: string;
+  categories?: Array<TitleLinkCategory<T>>;
 }
 
 export interface SeparatorLinkCategory<T extends string = string> extends LinkCategory<T> {
   type: LinkCategoryType.separator;
+  linkIds: readonly T[];
 }
 
 export type LinkCategories<T extends string = string> = Readonly<Array<LinkCategory<T>>>;

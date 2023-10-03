@@ -24,6 +24,7 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "observabilityAIAssistant",
       "ruleRegistry",
       "security",
       "share",
@@ -40,7 +41,8 @@
       "kibanaUtils",
       "observability",
       "spaces",
-      "indexLifecycleManagement"
+      "indexLifecycleManagement",
+      "unifiedDocViewer"
     ]
   }
 }

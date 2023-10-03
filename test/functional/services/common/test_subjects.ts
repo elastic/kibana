@@ -285,9 +285,9 @@ export class TestSubjects extends FtrService {
     return await element.isEnabled();
   }
 
-  public async isDisplayed(selector: string): Promise<boolean> {
+  public async isDisplayed(selector: string, timeout?: number): Promise<boolean> {
     this.log.debug(`TestSubjects.isDisplayed(${selector})`);
-    const element = await this.find(selector);
+    const element = await this.find(selector, timeout);
     return await element.isDisplayed();
   }
 

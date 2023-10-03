@@ -9,9 +9,9 @@
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -20,6 +20,7 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
+import { MIN_POPOVER_WIDTH } from '../../constants';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -28,9 +29,7 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
-  const resizeRef = useRef(null);
   const optionsList = useOptionsList();
-  const dimensions = useResizeObserver(resizeRef.current);
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
@@ -124,26 +123,24 @@ export const OptionsListControl = ({
   }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
-    <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
-      <EuiFilterButton
-        badgeColor="success"
-        iconType="arrowDown"
-        isLoading={debouncedLoading}
-        className={classNames('optionsList--filterBtn', {
-          'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
-          'optionsList--filterBtnPlaceholder': !hasSelections,
-        })}
-        data-test-subj={`optionsList-control-${id}`}
-        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
-        isSelected={isPopoverOpen}
-        numActiveFilters={validSelectionsCount}
-        hasActiveFilters={Boolean(validSelectionsCount)}
-      >
-        {hasSelections || existsSelected
-          ? selectionDisplayNode
-          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
-      </EuiFilterButton>
-    </div>
+    <EuiFilterButton
+      badgeColor="success"
+      iconType="arrowDown"
+      isLoading={debouncedLoading}
+      className={classNames('optionsList--filterBtn', {
+        'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
+        'optionsList--filterBtnPlaceholder': !hasSelections,
+      })}
+      data-test-subj={`optionsList-control-${id}`}
+      onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
+      isSelected={isPopoverOpen}
+      numActiveFilters={validSelectionsCount}
+      hasActiveFilters={Boolean(validSelectionsCount)}
+    >
+      {hasSelections || existsSelected
+        ? selectionDisplayNode
+        : placeholder ?? OptionsListStrings.control.getPlaceholder()}
+    </EuiFilterButton>
   );
 
   return error ? (
@@ -154,26 +151,26 @@ export const OptionsListControl = ({
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
     >
-      <EuiPopover
+      <EuiInputPopover
         ownFocus
-        button={button}
+        input={button}
+        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
-        anchorPosition="downCenter"
+        panelMinWidth={MIN_POPOVER_WIDTH}
+        className="optionsList__inputButtonOverride"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        className="optionsList__popoverOverride"
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-        anchorClassName="optionsList__anchorOverride"
-        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        panelClassName="optionsList__popoverOverride"
+        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
       >
         <OptionsListPopover
-          width={dimensions.width}
           isLoading={debouncedLoading}
           updateSearchString={updateSearchString}
           loadMoreSuggestions={loadMoreSuggestions}
         />
-      </EuiPopover>
+      </EuiInputPopover>
     </EuiFilterGroup>
   );
 };

@@ -1,11 +1,21 @@
 {
   "ml.validate": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_ml/anomaly_detectors/_validate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html"
+    "documentation": "https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
   }
 }

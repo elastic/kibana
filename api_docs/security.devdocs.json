@@ -999,42 +999,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-public.UpdateUserProfileHook",
-        "type": "Type",
-        "tags": [],
-        "label": "UpdateUserProfileHook",
-        "description": [],
-        "signature": [
-          "(props?: Props | undefined) => { update: (data: ",
-          "UserProfileData",
-          ") => void; showSuccessNotification: (props: { isRefreshRequired: boolean; }) => void; isLoading: boolean; userProfileData?: ",
-          "UserProfileData",
-          " | null | undefined; }"
-        ],
-        "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-public.UpdateUserProfileHook.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "Props | undefined"
-            ],
-            "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1163,9 +1127,21 @@
           ],
           "signature": [
             "{ update: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(data: D) => Promise<void>; suggest: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(path: string, params: ",
             {
               "pluginId": "security",
@@ -1183,7 +1159,13 @@
               "text": "UserProfile"
             },
             "<D>[]>; bulkGet: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(params: ",
             {
               "pluginId": "security",
@@ -1201,7 +1183,13 @@
               "text": "UserProfile"
             },
             "<D>[]>; getCurrent: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(params?: ",
             {
               "pluginId": "security",
@@ -1221,32 +1209,14 @@
             "<D>>; readonly userProfile$: ",
             "Observable",
             "<",
-            "UserProfileData",
-            " | null>; }"
-          ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "security",
-          "id": "def-public.SecurityPluginStart.hooks",
-          "type": "Object",
-          "tags": [],
-          "label": "hooks",
-          "description": [
-            "\nA set of hooks to work with Kibana user profiles"
-          ],
-          "signature": [
-            "{ useUpdateUserProfile: ",
             {
-              "pluginId": "security",
-              "scope": "public",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-public.UpdateUserProfileHook",
-              "text": "UpdateUserProfileHook"
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
             },
-            "; }"
+            " | null>; }"
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
           "deprecated": false,
@@ -2195,13 +2165,7 @@
                 "text": "CreateAPIKeyParams"
               },
               ") => Promise<",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.CreateAPIKeyResult",
-                "text": "CreateAPIKeyResult"
-              },
+              "SecurityCreateApiKeyResponse",
               " | null>; validate: (apiKeyPrams: ",
               {
                 "pluginId": "security",
@@ -2210,7 +2174,7 @@
                 "section": "def-server.ValidateAPIKeyParams",
                 "text": "ValidateAPIKeyParams"
               },
-              ") => Promise<boolean>; areAPIKeysEnabled: () => Promise<boolean>; invalidate: (request: ",
+              ") => Promise<boolean>; areAPIKeysEnabled: () => Promise<boolean>; areCrossClusterAPIKeysEnabled: () => Promise<boolean>; invalidate: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -2242,15 +2206,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, createParams: ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.CreateAPIKeyParams",
-                "text": "CreateAPIKeyParams"
-              },
-              ") => Promise<",
+              "<unknown, unknown, unknown, any>, createParams: Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>) => Promise<",
               {
                 "pluginId": "security",
                 "scope": "server",
@@ -2380,77 +2336,6 @@
               "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
             ],
             "path": "x-pack/plugins/security/server/authorization/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.CreateAPIKeyResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "CreateAPIKeyResult",
-        "description": [
-          "\nThe return value when creating an API key in Elasticsearch. The API key returned by this API\ncan then be used by sending a request with a Authorization header with a value having the\nprefix ApiKey `{token}` where token is id and api_key joined by a colon `{id}:{api_key}` and\nthen encoded to base64."
-        ],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyResult.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nUnique id for this API key"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyResult.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [
-              "\nName for this API key"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyResult.expiration",
-            "type": "number",
-            "tags": [],
-            "label": "expiration",
-            "description": [
-              "\nOptional expiration in milliseconds for this API key"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyResult.api_key",
-            "type": "string",
-            "tags": [],
-            "label": "api_key",
-            "description": [
-              "\nGenerated API key"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3169,12 +3054,74 @@
         "tags": [],
         "label": "CreateAPIKeyParams",
         "description": [
-          "\nRepresents the params for creating an API key"
+          "\nRequest body of Kibana Create API key endpoint."
         ],
         "signature": [
-          "Omit<BaseCreateAPIKeyParams, \"role_descriptors\" | \"kibana_role_descriptors\"> & ((Pick<Required<BaseCreateAPIKeyParams>, \"role_descriptors\"> & { kibana_role_descriptors?: undefined; }) | (Pick<Required<BaseCreateAPIKeyParams>, \"kibana_role_descriptors\"> & { role_descriptors?: undefined; }))"
+          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{} & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
         ],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/plugins/security/server/routes/api_keys/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAPIKeyResult",
+        "description": [
+          "\nResponse of Kibana Create API key endpoint."
+        ],
+        "signature": [
+          "SecurityCreateApiKeyResponse"
+        ],
+        "path": "x-pack/plugins/security/server/routes/api_keys/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateCrossClusterAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateCrossClusterAPIKeyParams",
+        "description": [],
+        "signature": [
+          "{ readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly type: \"cross_cluster\"; readonly name: string; readonly access: Readonly<{ search?: Readonly<{} & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }"
+        ],
+        "path": "x-pack/plugins/security/server/routes/api_keys/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateRestAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateRestAPIKeyParams",
+        "description": [],
+        "signature": [
+          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly role_descriptors: Record<string, Readonly<{} & {}>>; }"
+        ],
+        "path": "x-pack/plugins/security/server/routes/api_keys/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "description": [],
+        "signature": [
+          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }"
+        ],
+        "path": "x-pack/plugins/security/server/routes/api_keys/create.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3571,125 +3518,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "security",
-        "id": "def-common.ApiKey",
-        "type": "Interface",
-        "tags": [],
-        "label": "ApiKey",
-        "description": [],
-        "path": "x-pack/plugins/security/common/model/api_key.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.username",
-            "type": "string",
-            "tags": [],
-            "label": "username",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.realm",
-            "type": "string",
-            "tags": [],
-            "label": "realm",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.creation",
-            "type": "number",
-            "tags": [],
-            "label": "creation",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.expiration",
-            "type": "number",
-            "tags": [],
-            "label": "expiration",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.invalidated",
-            "type": "boolean",
-            "tags": [],
-            "label": "invalidated",
-            "description": [],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.metadata",
-            "type": "Object",
-            "tags": [],
-            "label": "metadata",
-            "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.ApiKey.role_descriptors",
-            "type": "Object",
-            "tags": [],
-            "label": "role_descriptors",
-            "description": [],
-            "signature": [
-              "Record<string, any> | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "security",
         "id": "def-common.AuthenticatedUser",
@@ -4981,70 +4809,6 @@
       },
       {
         "parentPluginId": "security",
-        "id": "def-common.UserProfileAvatarData",
-        "type": "Interface",
-        "tags": [],
-        "label": "UserProfileAvatarData",
-        "description": [
-          "\nAvatar stored in user profile."
-        ],
-        "path": "x-pack/plugins/security/common/model/user_profile.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileAvatarData.initials",
-            "type": "string",
-            "tags": [],
-            "label": "initials",
-            "description": [
-              "\nOptional initials (two letters) of the user to use as avatar if avatar picture isn't specified."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileAvatarData.color",
-            "type": "string",
-            "tags": [],
-            "label": "color",
-            "description": [
-              "\nBackground color of the avatar when initials are used."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileAvatarData.imageUrl",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "imageUrl",
-            "description": [
-              "\nBase64 data URL for the user avatar image."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
         "id": "def-common.UserProfileUserInfo",
         "type": "Interface",
         "tags": [],
@@ -5299,6 +5063,25 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-common.ApiKey",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKey",
+        "description": [
+          "\nInterface representing an API key the way it is returned by Elasticsearch GET endpoint."
+        ],
+        "signature": [
+          "RestApiKey",
+          " | ",
+          "CrossClusterApiKey"
+        ],
+        "path": "x-pack/plugins/security/common/model/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "security",
         "id": "def-common.LoginLayout",

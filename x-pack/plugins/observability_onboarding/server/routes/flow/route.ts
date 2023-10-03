@@ -148,16 +148,13 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     const esClient =
       coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-    const dataset = savedObservabilityOnboardingState.state
-      ?.datasetName as string;
-    const namespace = savedObservabilityOnboardingState.state
-      ?.namespace as string;
+    const type = savedObservabilityOnboardingState.type;
 
     if (progress['ea-status']?.status === 'complete') {
       try {
         const hasLogs = await getHasLogs({
-          dataset,
-          namespace,
+          type,
+          state: savedObservabilityOnboardingState.state,
           esClient,
         });
         if (hasLogs) {

@@ -51,6 +51,7 @@ export function initRoutes(
       validate: {
         body: schema.object({
           task: schema.object({
+            enabled: schema.boolean({ defaultValue: true }),
             taskType: schema.string(),
             schedule: schema.maybe(
               schema.object({

@@ -84,13 +84,13 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
         helpText={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.kafkaHostsInputDescription"
-            defaultMessage="Specify the URLs that your agents will use to connect to Kafka. For more information, see the {guideLink}."
+            defaultMessage="Specify the URLs that your agents will use to connect to Kafka. {guideLink}."
             values={{
               guideLink: (
-                <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
+                <EuiLink href={docLinks.links.fleet.kafkaSettings} target="_blank" external>
                   <FormattedMessage
-                    id="xpack.fleet.settings.fleetUserGuideLink"
-                    defaultMessage="Fleet and Elastic Agent Guide"
+                    id="xpack.fleet.settings.kafkaUserGuideLink"
+                    defaultMessage="Learn more"
                   />
                 </EuiLink>
               ),
@@ -105,6 +105,7 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
       <EuiSpacer size="m" />
 
       <OutputFormKafkaAuthentication inputs={inputs} />
+
       <EuiSpacer size="m" />
 
       <OutputFormKafkaPartitioning inputs={inputs} />

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { PrivilegeFormCalculator } from './privilege_form_calculator';
 import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
-import { PrivilegeFormCalculator } from './privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {

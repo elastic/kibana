@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from './rules';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -31,7 +32,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 }));
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-  appMountParameters: {} as AppMountParameters,
+  appMountParameters: {
+    setHeaderActionMenu: () => {},
+  } as unknown as AppMountParameters,
   config: {
     unsafe: {
       slo: { enabled: false },
@@ -46,12 +49,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
     },
     compositeSlo: {
       enabled: false,
-    },
-    aiAssistant: {
-      enabled: false,
-      feedback: {
-        enabled: false,
-      },
     },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
@@ -108,7 +105,11 @@ describe('RulesPage with all capabilities', () => {
       ruleTypeIndex,
     });
 
-    return render(<RulesPage />);
+    return render(
+      <IntlProvider locale="en">
+        <RulesPage />
+      </IntlProvider>
+    );
   }
 
   it('should render a page template', async () => {

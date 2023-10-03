@@ -43,6 +43,7 @@ export type {
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
   NotifyWhenSelectOptions,
+  RuleCreationValidConsumer,
 } from './types';
 
 export type {
@@ -89,6 +90,7 @@ export {
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
@@ -115,6 +117,7 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,

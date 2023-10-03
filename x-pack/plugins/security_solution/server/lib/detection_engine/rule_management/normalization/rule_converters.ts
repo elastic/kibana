@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { validate, validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 
@@ -24,18 +24,19 @@ import type {
   RequiredFieldArray,
   SetupGuide,
   RuleCreateProps,
-  RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlPatchParams,
+  EsqlPatchParams,
   MachineLearningPatchParams,
   NewTermsPatchParams,
   QueryPatchParams,
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
+  RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import {
@@ -59,6 +60,8 @@ import type {
   BaseRuleParams,
   EqlRuleParams,
   EqlSpecificRuleParams,
+  EsqlRuleParams,
+  EsqlSpecificRuleParams,
   ThreatRuleParams,
   ThreatSpecificRuleParams,
   QueryRuleParams,
@@ -76,6 +79,11 @@ import type {
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
+import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+
+const DEFAULT_FROM = 'now-6m' as const;
+const DEFAULT_TO = 'now' as const;
+const DEFAULT_INTERVAL = '5m' as const;
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -100,6 +108,13 @@ export const typeSpecificSnakeToCamel = (
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
+      };
+    }
+    case 'esql': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
       };
     }
     case 'threat_match': {
@@ -198,6 +213,17 @@ const patchEqlParams = (
     timestampField: params.timestamp_field ?? existingRule.timestampField,
     eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+  };
+};
+
+const patchEsqlParams = (
+  params: EsqlPatchParams,
+  existingRule: EsqlRuleParams
+): EsqlSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    query: params.query ?? existingRule.query,
   };
 };
 
@@ -336,6 +362,13 @@ export const patchTypeSpecificSnakeToCamel = (
       }
       return patchEqlParams(validated, existingRule);
     }
+    case 'esql': {
+      const [validated, error] = validateNonExact(params, EsqlPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchEsqlParams(validated, existingRule);
+    }
     case 'threat_match': {
       const [validated, error] = validateNonExact(params, ThreatMatchPatchParams);
       if (validated == null) {
@@ -409,6 +442,7 @@ export const convertPatchAPIToInternalSchema = (
       description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
       falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
+      investigationFields: nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
       license: nextParams.license ?? existingParams.license,
@@ -470,7 +504,8 @@ export const convertCreateAPIToInternalSchema = (
       description: input.description,
       ruleId: newRuleId,
       falsePositives: input.false_positives ?? [],
-      from: input.from ?? 'now-6m',
+      investigationFields: input.investigation_fields,
+      from: input.from ?? DEFAULT_FROM,
       immutable,
       license: input.license,
       outputIndex: input.output_index ?? '',
@@ -486,7 +521,7 @@ export const convertCreateAPIToInternalSchema = (
       threat: input.threat ?? [],
       timestampOverride: input.timestamp_override,
       timestampOverrideFallbackDisabled: input.timestamp_override_fallback_disabled,
-      to: input.to ?? 'now',
+      to: input.to ?? DEFAULT_TO,
       references: input.references ?? [],
       namespace: input.namespace,
       note: input.note,
@@ -517,6 +552,13 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
+      };
+    }
+    case 'esql': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
       };
     }
     case 'threat_match': {
@@ -619,6 +661,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
+    investigation_fields: params.investigationFields,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,
@@ -676,4 +719,49 @@ export const internalRuleToAPIResponse = (
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };
+};
+
+export const convertPrebuiltRuleAssetToRuleResponse = (
+  prebuiltRuleAsset: PrebuiltRuleAsset
+): RuleResponse => {
+  const prebuiltRuleAssetDefaults = {
+    enabled: false,
+    risk_score_mapping: [],
+    severity_mapping: [],
+    interval: DEFAULT_INTERVAL,
+    to: DEFAULT_TO,
+    from: DEFAULT_FROM,
+    exceptions_list: [],
+    false_positives: [],
+    max_signals: DEFAULT_MAX_SIGNALS,
+    actions: [],
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
+    references: [],
+    threat: [],
+    tags: [],
+    author: [],
+  };
+
+  const ruleResponseSpecificFields = {
+    id: uuidv4(),
+    updated_at: new Date(0).toISOString(),
+    updated_by: '',
+    created_at: new Date(0).toISOString(),
+    created_by: '',
+    immutable: true,
+    revision: 1,
+  };
+
+  const [rule, error] = validate(
+    { ...prebuiltRuleAssetDefaults, ...prebuiltRuleAsset, ...ruleResponseSpecificFields },
+    RuleResponse
+  );
+
+  if (!rule) {
+    throw new Error(error);
+  }
+
+  return rule;
 };

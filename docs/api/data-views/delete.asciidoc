@@ -8,6 +8,11 @@ experimental[] Delete data views.
 
 WARNING: Once you delete a data view, _it cannot be recovered_.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-delete-request]]
 ==== Request

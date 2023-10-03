@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 export interface GenericIcon {
   label: string;

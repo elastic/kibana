@@ -8,6 +8,7 @@ import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
+import '@frsource/cypress-plugin-visual-regression-diff';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
@@ -80,19 +81,25 @@ Cypress.Commands.add('visitKibana', (url: string) => {
   });
 });
 
+// This command expects from and to both values to be present on the URL where
+// this command is being executed. If from and to values are not present,
+// the date picker renders singleValueInput where this command won't work.
 Cypress.Commands.add(
   'selectAbsoluteTimeRange',
   (start: string, end: string) => {
     const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
     cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
-    cy.getByTestSubj('superDatePickerAbsoluteDateInput')
-      .eq(0)
+    cy.contains('Start date')
+      .nextAll()
+      .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .clear({ force: true })
       .type(moment(start).format(format), { force: true });
+
     cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
-    cy.getByTestSubj('superDatePickerAbsoluteDateInput')
-      .eq(1)
+    cy.contains('End date')
+      .nextAll()
+      .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .clear({ force: true })
       .type(moment(end).format(format), { force: true });
   }
@@ -144,6 +151,12 @@ Cypress.Commands.add('dismissServiceGroupsTour', () => {
       editGroup: false,
     })
   );
+});
+
+Cypress.Commands.add('withHidden', (selector, callback) => {
+  cy.get(selector).invoke('attr', 'style', 'display: none');
+  callback();
+  cy.get(selector).invoke('attr', 'style', '');
 });
 
 // A11y configuration

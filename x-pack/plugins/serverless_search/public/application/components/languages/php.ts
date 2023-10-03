@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
-import { LanguageDefinition, Languages } from './types';
 
 export const phpDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.phpAdvancedConfig,
+  apiReference: docLinks.phpApiReference,
   basicConfig: docLinks.phpBasicConfig,
   buildSearchQuery: `$params = [
   'index' => 'books',
@@ -27,6 +27,12 @@ print_r($response->asArray());`,
   ->setApiKey('${apiKey}')
   ->build();`,
   docLink: docLinks.phpClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-php',
+    label: i18n.translate('xpack.serverlessSearch.languages.php.githubLink', {
+      defaultMessage: 'elasticsearch-serverless-php',
+    }),
+  },
   iconType: 'php.svg',
   id: Languages.PHP,
   ingestData: `$params = [

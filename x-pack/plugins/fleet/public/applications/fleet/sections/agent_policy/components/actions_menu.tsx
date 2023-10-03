@@ -18,10 +18,11 @@ import {
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
-import { ExperimentalFeaturesService } from '../../../../../services/experimental_features';
+import { policyHasFleetServer, ExperimentalFeaturesService } from '../../../services';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
+import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;
@@ -54,6 +55,10 @@ export const AgentPolicyActionMenu = memo<{
         ),
       [agentPolicy]
     );
+
+    const hasManagedPackagePolicy =
+      'package_policies' in agentPolicy &&
+      agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -129,6 +134,35 @@ export const AgentPolicyActionMenu = memo<{
                     defaultMessage="Duplicate policy"
                   />
                 </EuiContextMenuItem>,
+                <AgentPolicyDeleteProvider
+                  hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
+                  key="deletePolicy"
+                >
+                  {(deleteAgentPolicyPrompt) => (
+                    <EuiContextMenuItem
+                      data-test-subj="agentPolicyActionMenuDeleteButton"
+                      disabled={hasManagedPackagePolicy}
+                      toolTipContent={
+                        hasManagedPackagePolicy ? (
+                          <FormattedMessage
+                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
+                            defaultMessage="Agent policy with managed package policies cannot be deleted."
+                            data-test-subj="agentPolicyActionMenuDeleteButtonDisabledTooltip"
+                          />
+                        ) : undefined
+                      }
+                      icon="trash"
+                      onClick={() => {
+                        deleteAgentPolicyPrompt(agentPolicy.id);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyActionMenu.deletePolicyActionText"
+                        defaultMessage="Delete policy"
+                      />
+                    </EuiContextMenuItem>
+                  )}
+                </AgentPolicyDeleteProvider>,
               ];
 
           if (agentTamperProtectionEnabled && !agentPolicy?.is_managed) {

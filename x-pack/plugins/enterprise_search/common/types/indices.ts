@@ -12,7 +12,8 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { Connector } from './connectors';
+import { Connector } from '@kbn/search-connectors';
+
 import { Crawler } from './crawler';
 
 export interface AlwaysShowPattern {

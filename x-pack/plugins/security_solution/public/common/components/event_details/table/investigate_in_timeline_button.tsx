@@ -7,6 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 
@@ -31,11 +32,21 @@ export interface InvestigateInTimelineButtonProps {
   timeRange?: TimeRange;
   keepDataView?: boolean;
   isDisabled?: boolean;
+  iconType?: IconType;
 }
 
 export const InvestigateInTimelineButton: React.FunctionComponent<
   InvestigateInTimelineButtonProps
-> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
+> = ({
+  asEmptyButton,
+  children,
+  dataProviders,
+  filters,
+  timeRange,
+  keepDataView,
+  iconType,
+  ...rest
+}) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(
@@ -113,6 +124,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
       onClick={configureAndOpenTimeline}
       flush="right"
       size="xs"
+      iconType={iconType}
     >
       {children}
     </EuiButtonEmpty>

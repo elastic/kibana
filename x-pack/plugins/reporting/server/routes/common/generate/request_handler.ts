@@ -16,7 +16,12 @@ import type { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../../lib';
 import { Report } from '../../../lib/store';
-import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../../types';
+import type {
+  BaseParams,
+  ReportingJobResponse,
+  ReportingRequestHandlerContext,
+  ReportingUser,
+} from '../../../types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -203,7 +208,7 @@ export class RequestHandler {
       // return task manager's task information and the download URL
       counters.usageCounter();
 
-      return this.res.ok({
+      return this.res.ok<ReportingJobResponse>({
         headers: { 'content-type': 'application/json' },
         body: {
           path: `${publicDownloadPath}/${report._id}`,

@@ -10,10 +10,10 @@ import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
-import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -41,7 +41,7 @@ import type {
   TextBasedField,
 } from './types';
 import { FieldSelect } from './field_select';
-import type { Datasource, IndexPatternMap } from '../../types';
+import type { Datasource } from '../../types';
 import { LayerPanel } from './layerpanel';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
@@ -105,30 +105,19 @@ export function getTextBasedDatasource({
   const getSuggestionsForVisualizeField = (
     state: TextBasedPrivateState,
     indexPatternId: string,
-    fieldName: string,
-    indexPatterns: IndexPatternMap
+    fieldName: string
   ) => {
     const context = state.initialContext;
     // on text based mode we offer suggestions for the query and not for a specific field
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
-      const indexPattern = indexPatterns[indexPatternId];
-
-      const contextualFields = context.contextualFields;
-      const newColumns = contextualFields?.map((c) => {
-        let field = indexPattern?.getFieldByName(c);
-        if (!field) {
-          field = indexPattern?.fields.find((f) => f.name.includes(c));
-        }
-        const newId = generateId();
-        const type = field?.type ?? 'number';
+      const textBasedQueryColumns = context.textBasedColumns ?? [];
+      const newColumns = textBasedQueryColumns.map((c) => {
         return {
-          columnId: newId,
-          fieldName: c,
-          meta: {
-            type: type as DatatableColumnType,
-          },
+          columnId: c.id,
+          fieldName: c.name,
+          meta: c.meta,
         };
       });
 
@@ -136,14 +125,7 @@ export function getTextBasedDatasource({
       const query = context.query;
       const updatedState = {
         ...state,
-        fieldList:
-          newColumns?.map((c) => {
-            return {
-              id: c.columnId,
-              name: c.fieldName,
-              meta: c.meta,
-            };
-          }) ?? [],
+        fieldList: textBasedQueryColumns,
         layers: {
           ...state.layers,
           [newLayerId]: {
@@ -389,6 +371,12 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
+      const context = state?.initialContext;
+      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
+        const language = getAggregateQueryMode(context.query);
+        // it will eventually log render_lens_esql_chart
+        return [`${language}_chart`];
+      }
       return [];
     },
 
@@ -616,7 +604,12 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
-    isEqual: () => true,
+    isEqual: (
+      persistableState1: TextBasedPersistedState,
+      references1: SavedObjectReference[],
+      persistableState2: TextBasedPersistedState,
+      references2: SavedObjectReference[]
+    ) => isEqual(persistableState1, persistableState2),
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {

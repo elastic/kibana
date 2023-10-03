@@ -6,17 +6,22 @@
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { dataLoaders } from '@kbn/security-solution-plugin/public/management/cypress/support/data_loaders';
 import { LoadUserAndRoleCyTaskOptions } from '../cypress';
-import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
+import {
+  LoadedRoleAndUser,
+  SecurityRoleAndUserLoader,
+  YamlRoleDefinitions,
+} from '../../../../../shared/lib';
 
-export const setupDataLoaderTasks = (
+interface AdditionalDefinitions {
+  roleDefinitions?: YamlRoleDefinitions;
+  additionalRoleName?: string;
+}
+export const setupUserDataLoader = (
   on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions
+  config: Cypress.PluginConfigOptions,
+  { roleDefinitions, additionalRoleName }: AdditionalDefinitions
 ) => {
-  // Reuse data loaders from endpoint management cypress setup
-  dataLoaders(on, config);
-
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
@@ -29,7 +34,7 @@ export const setupDataLoaderTasks = (
 
   const roleAndUserLoaderPromise: Promise<SecurityRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
-      return new SecurityRoleAndUserLoader(kbnClient, log);
+      return new SecurityRoleAndUserLoader(kbnClient, log, roleDefinitions);
     }
   );
 
@@ -39,7 +44,7 @@ export const setupDataLoaderTasks = (
      * @param name
      */
     loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
-      return (await roleAndUserLoaderPromise).load(name);
+      return (await roleAndUserLoaderPromise).load(name, additionalRoleName);
     },
   });
 };

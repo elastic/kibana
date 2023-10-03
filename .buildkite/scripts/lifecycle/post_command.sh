@@ -31,8 +31,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload '.es/**/*.hprof'
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
 
-  echo "--- Run Failed Test Reporter"
-  node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
+  if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+    echo "--- Run Failed Test Reporter"
+    node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
+  fi
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'

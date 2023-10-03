@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { registerRoutesMock } from './plugin.test.mocks';
-
 import { coreMock } from '@kbn/core/server/mocks';
 import { SavedObjectsServerPlugin } from './plugin';
 import { uiSettings } from './ui_settings';
@@ -21,17 +19,11 @@ describe('SavedObjectsPlugin', () => {
     plugin = new SavedObjectsServerPlugin();
   });
 
-  afterEach(() => {
-    registerRoutesMock.mockReset();
-  });
-
   describe('#setup', () => {
-    it('calls `registerRoutes` and `registerSettings` with the correct parameters', () => {
+    it('calls `registerSettings` with the correct parameters', () => {
       plugin.setup(coreSetup);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(uiSettings);
-      expect(coreSetup.http.createRouter).toHaveBeenCalledTimes(1);
-      expect(registerRoutesMock).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../../../domain/models';
 
 export function createTempSummaryDocument(slo: SLO) {
@@ -25,7 +26,8 @@ export function createTempSummaryDocument(slo: SLO) {
         duration: slo.timeWindow.duration.format(),
         type: slo.timeWindow.type,
       },
-      instanceId: '*',
+      groupBy: !!slo.groupBy ? slo.groupBy : ALL_VALUE,
+      instanceId: ALL_VALUE,
       name: slo.name,
       description: slo.description,
       id: slo.id,

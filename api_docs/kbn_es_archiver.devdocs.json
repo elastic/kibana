@@ -439,7 +439,7 @@
             "tags": [],
             "label": "emptyKibanaIndex",
             "description": [
-              "\nDelete any Kibana indices, and initialize the Kibana index as Kibana would do\non startup."
+              "\nCleanup saved object indices, preserving the space:default saved object."
             ],
             "signature": [
               "() => Promise<Record<string, ",

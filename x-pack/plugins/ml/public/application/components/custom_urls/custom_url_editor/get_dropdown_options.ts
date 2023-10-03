@@ -16,11 +16,15 @@ import { getQueryEntityFieldNames, getSupportedFieldNames } from './utils';
 export function getDropDownOptions(
   isFirstRender: boolean,
   job: Job | DataFrameAnalyticsConfig,
-  dataView?: DataView
+  dataView?: DataView,
+  isPartialDFAJob?: boolean
 ) {
   if (isAnomalyDetectionJob(job) && isFirstRender) {
     return getQueryEntityFieldNames(job);
-  } else if ((isDataFrameAnalyticsConfigs(job) || !isFirstRender) && dataView !== undefined) {
+  } else if (
+    (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob || !isFirstRender) &&
+    dataView !== undefined
+  ) {
     return getSupportedFieldNames(job, dataView);
   }
   return [];

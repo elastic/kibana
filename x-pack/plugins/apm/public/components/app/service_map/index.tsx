@@ -40,7 +40,7 @@ import { DisabledPrompt } from './disabled_prompt';
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <SearchBar showUnifiedSearchBar={false} />
+      <SearchBar showTimeComparison />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"
@@ -213,7 +213,7 @@ export function ServiceMap({
       <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
-          data-test-subj="ServiceMap"
+          data-test-subj="serviceMap"
           style={{ height: heightWithPadding }}
           ref={ref}
         >

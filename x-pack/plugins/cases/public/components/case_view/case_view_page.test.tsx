@@ -41,7 +41,7 @@ import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_fi
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
 import { createQueryWithMarkup } from '../../common/test_utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { CaseMetricsFeature } from '../../../common/api/metrics/case';
+import { CaseMetricsFeature } from '../../../common/types/api';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');

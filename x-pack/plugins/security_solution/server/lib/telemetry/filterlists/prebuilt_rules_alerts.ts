@@ -205,6 +205,52 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     name: true,
   },
   source: true,
+  threat: {
+    enrichments: {
+      indicator: {
+        confidence: true,
+        description: true,
+        email: {
+          address: true,
+        },
+        first_seen: true,
+        ip: true,
+        last_seen: true,
+        marking: {
+          tlp: true,
+          tlp_version: true,
+        },
+        modified_at: true,
+        name: true,
+        port: true,
+        provider: true,
+        reference: true,
+        scanner_stats: true,
+        sightings: true,
+        type: true,
+        matched: {
+          atomic: true,
+          field: true,
+          id: true,
+          index: true,
+          occurred: true,
+          type: true,
+        },
+      },
+    },
+    feed: {
+      description: true,
+      name: true,
+      reference: true,
+    },
+    framework: true,
+    group: {
+      alias: true,
+      id: true,
+      name: true,
+      reference: true,
+    },
+  },
   tls: {
     server: {
       hash: true,

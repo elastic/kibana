@@ -20,9 +20,11 @@ import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
+import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -45,6 +47,7 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
+          showFrozenDataTierChoice={showNodeInfo}
           appDependencies={{
             ...pick(services, [
               'application',
@@ -60,6 +63,10 @@ export const ChangePointDetectionPage: FC = () => {
               'unifiedSearch',
               'theme',
               'lens',
+              'presentationUtil',
+              'embeddable',
+              'cases',
+              'i18n',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

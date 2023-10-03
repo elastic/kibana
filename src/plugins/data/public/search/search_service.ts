@@ -23,6 +23,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -63,9 +64,9 @@ import { NowProviderInternalContract } from '../now_provider';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
+import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import { handleWarnings } from './fetch/handle_warnings';
+import { handleWarnings } from './warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -85,7 +86,9 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsContract;
+  inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
+  scriptedFieldsEnabled: boolean;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -173,6 +176,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(
+      getEsql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
       getEql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
@@ -216,7 +224,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     { http, theme, uiSettings, chrome, application }: CoreStart,
-    { fieldFormats, indexPatterns, screenshotMode }: SearchServiceStartDependencies
+    {
+      fieldFormats,
+      indexPatterns,
+      inspector,
+      screenshotMode,
+      scriptedFieldsEnabled,
+    }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
@@ -232,19 +246,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request, response, options) => {
-        if (!options.disableShardFailureWarning) {
+        if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 
           handleWarnings({
             request: request.body,
             response: rawResponse,
             theme,
-            sessionId: options.sessionId,
             requestId: request.id,
+            inspector: options.inspector,
+            inspectorService: inspector,
           });
         }
         return response;
       },
+      scriptedFieldsEnabled,
     };
 
     const config = this.initializerContext.config.get();
@@ -287,6 +303,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             theme,
             callback,
             requestId: request.id,
+            inspector: {
+              adapter,
+              title: request.name,
+              id: request.id,
+            },
+            inspectorService: inspector,
           });
         });
       },

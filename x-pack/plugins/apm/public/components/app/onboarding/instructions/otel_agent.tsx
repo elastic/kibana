@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  copyToClipboard,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonIcon,
   EuiLink,
   EuiMarkdownFormat,
   EuiSpacer,
@@ -144,9 +146,25 @@ function ConfigurationValueColumn({
   }
 
   return (
-    <EuiText size="s" color="accent">
-      {value}
-    </EuiText>
+    <>
+      <EuiText size="s" color="accent">
+        {value}
+      </EuiText>
+      {value && (
+        <EuiButtonIcon
+          data-test-subj="apmConfigurationValueColumnButton"
+          aria-label={i18n.translate(
+            'xpack.apm.onboarding.otel.column.value.copyIconText',
+            {
+              defaultMessage: 'Copy to clipboard',
+            }
+          )}
+          color="text"
+          iconType="copy"
+          onClick={() => copyToClipboard(value)}
+        />
+      )}
+    </>
   );
 }
 

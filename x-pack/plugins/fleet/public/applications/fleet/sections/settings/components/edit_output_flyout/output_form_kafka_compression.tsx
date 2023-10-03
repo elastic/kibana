@@ -21,12 +21,12 @@ export const OutputFormKafkaCompression: React.FunctionComponent<{
 
   const kafkaCompressionTypeOptions = useMemo(
     () =>
-      (Object.keys(kafkaCompressionType) as Array<keyof typeof kafkaCompressionType>).map(
-        (key) => ({
+      (Object.keys(kafkaCompressionType) as Array<keyof typeof kafkaCompressionType>)
+        .filter((c) => c !== 'None')
+        .map((key) => ({
           text: kafkaCompressionType[key],
           label: kafkaCompressionType[key],
-        })
-      ),
+        })),
     []
   );
 

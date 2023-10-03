@@ -11,7 +11,11 @@ import { DynamicAutocompleteItem, isDynamicAutocompleteItem } from '../autocompl
 import {
   buildFieldsDefinitions,
   buildSourcesDefinitions,
+  buildPoliciesDefinitions,
+  buildNoPoliciesAvailableDefinition,
+  buildMatchingFieldsDefinition,
 } from '../autocomplete/autocomplete_definitions/dynamic_commands';
+import { pipeDefinition } from '../autocomplete/autocomplete_definitions';
 
 import type {
   AutocompleteCommandDefinition,
@@ -19,11 +23,6 @@ import type {
   UserDefinedVariables,
 } from '../autocomplete/types';
 import type { ESQLWorker } from '../../worker/esql_worker';
-
-const emptyCompletionList: monaco.languages.CompletionList = {
-  incomplete: false,
-  suggestions: [],
-};
 
 export class ESQLCompletionAdapter implements monaco.languages.CompletionItemProvider {
   constructor(
@@ -40,16 +39,20 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
       userDefinedVariables: UserDefinedVariables;
     }
   ): Promise<AutocompleteCommandDefinition[]> {
-    let result: AutocompleteCommandDefinition[] = [];
-
-    for (const suggestion of suggestions) {
-      if (isDynamicAutocompleteItem(suggestion)) {
+    const allSuggestions: AutocompleteCommandDefinition[][] = await Promise.all(
+      suggestions.map(async (suggestion) => {
+        if (!isDynamicAutocompleteItem(suggestion)) {
+          return [suggestion];
+        }
         let dynamicItems: AutocompleteCommandDefinition[] = [];
 
         if (suggestion === DynamicAutocompleteItem.SourceIdentifier) {
           dynamicItems = buildSourcesDefinitions(
             (await this.callbacks?.getSourceIdentifiers?.(ctx)) ?? []
           );
+          if (!ctx.word && ctx.userDefinedVariables.sourceIdentifiers.length) {
+            dynamicItems = [pipeDefinition];
+          }
         }
 
         if (suggestion === DynamicAutocompleteItem.FieldIdentifier) {
@@ -57,13 +60,34 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
             (await this.callbacks?.getFieldsIdentifiers?.(ctx)) ?? []
           );
         }
-        result = [...result, ...dynamicItems];
-      } else {
-        result = [...result, suggestion];
-      }
-    }
 
-    return result;
+        if (suggestion === DynamicAutocompleteItem.PolicyIdentifier) {
+          const results = await this.callbacks?.getPoliciesIdentifiers?.(ctx);
+          dynamicItems = results?.length
+            ? buildPoliciesDefinitions(results)
+            : buildNoPoliciesAvailableDefinition();
+        }
+
+        if (suggestion === DynamicAutocompleteItem.PolicyFieldIdentifier) {
+          dynamicItems = buildFieldsDefinitions(
+            (await this.callbacks?.getPolicyFieldsIdentifiers?.(ctx)) || []
+          );
+        }
+
+        if (suggestion === DynamicAutocompleteItem.PolicyMatchingFieldIdentifier) {
+          const [fields = [], matchingField] = await Promise.all([
+            this.callbacks?.getFieldsIdentifiers?.(ctx),
+            this.callbacks?.getPolicyMatchingFieldIdentifiers?.(ctx),
+          ]);
+          dynamicItems = matchingField?.length
+            ? buildMatchingFieldsDefinition(matchingField[0], fields)
+            : buildFieldsDefinitions(fields);
+        }
+        return dynamicItems;
+      })
+    );
+
+    return allSuggestions.flat();
   }
 
   async provideCompletionItems(
@@ -72,21 +96,23 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
   ): Promise<monaco.languages.CompletionList> {
     const lines = model.getLineCount();
 
-    if (
+    const currentLineChars = model.getValueInRange({
+      startLineNumber: 0,
+      startColumn: 0,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+    const wordInfo = model.getWordUntilPosition(position);
+    const worker = await this.worker(model.uri);
+    const providedSuggestions =
       lines !== position.lineNumber ||
       model.getLineContent(position.lineNumber).trimEnd().length >= position.column
-    ) {
-      return emptyCompletionList;
-    }
-
-    const worker = await this.worker(model.uri);
-    const wordInfo = model.getWordUntilPosition(position);
-
-    const providedSuggestions = await worker.provideAutocompleteSuggestions(model.uri.toString(), {
-      word: wordInfo.word,
-      line: position.lineNumber,
-      index: position.column,
-    });
+        ? await worker.provideAutocompleteSuggestionsFromString(currentLineChars)
+        : await worker.provideAutocompleteSuggestions(model.uri.toString(), {
+            word: wordInfo.word,
+            line: position.lineNumber,
+            index: position.column,
+          });
 
     const withDynamicItems = providedSuggestions
       ? await this.injectDynamicAutocompleteItems(providedSuggestions.suggestions, {
@@ -96,7 +122,6 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
       : [];
 
     return {
-      incomplete: true,
       suggestions: withDynamicItems.map((i) => ({
         ...i,
         range: {

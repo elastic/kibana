@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { Redirect } from 'react-router-dom';
 import {
   LANDING_PATH,
   OVERVIEW_PATH,
@@ -15,7 +14,6 @@ import {
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
   ENTITY_ANALYTICS_PATH,
-  COVERAGE_OVERVIEW_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
@@ -25,9 +23,7 @@ import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 import { LandingPage } from './pages/landing';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -69,22 +65,6 @@ const DataQualityRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const CoverageOverviewRoutes = () => {
-  const isDetectionsCoverageOverviewEnabled = useIsExperimentalFeatureEnabled(
-    'detectionsCoverageOverview'
-  );
-
-  return isDetectionsCoverageOverviewEnabled ? (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
-        <CoverageOverviewPage />
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
-  ) : (
-    <Redirect to={SecurityPageName.landing} />
-  );
-};
-
 export const routes: SecuritySubPluginRoutes = [
   {
     path: OVERVIEW_PATH,
@@ -105,9 +85,5 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: DATA_QUALITY_PATH,
     component: DataQualityRoutes,
-  },
-  {
-    path: COVERAGE_OVERVIEW_PATH,
-    component: CoverageOverviewRoutes,
   },
 ];

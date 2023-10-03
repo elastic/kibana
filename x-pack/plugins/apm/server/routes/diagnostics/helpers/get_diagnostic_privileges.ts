@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getApmIndexPatterns } from '../bundle/get_indices';
 
 export async function getDiagnosticsPrivileges({
@@ -14,7 +14,7 @@ export async function getDiagnosticsPrivileges({
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
 }) {
   const indexPatterns = getApmIndexPatterns([
     apmIndices.error,

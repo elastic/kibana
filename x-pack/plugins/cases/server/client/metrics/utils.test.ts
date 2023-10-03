@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CasesMetricsFeatureField } from '../../../common/api/metrics/case';
-import { CaseMetricsFeature } from '../../../common/api/metrics/case';
+import type { CasesMetricsFeatureField } from '../../../common/types/api';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import { createMockClient, createMockClientArgs } from './test_utils/client';
 import { buildHandlers } from './utils';
 

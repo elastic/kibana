@@ -12,10 +12,10 @@ import type {
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 
+import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';
-import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {
   get(respectLicenseLevel?: boolean): RawKibanaPrivileges;

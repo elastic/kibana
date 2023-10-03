@@ -17,7 +17,12 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import type { ProductTier } from '../common/product';
+
+import type { ServerlessSecurityConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -28,10 +33,10 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
   securitySolutionEss: SecuritySolutionEssPluginSetup;
+  serverless: ServerlessPluginSetup;
   features: PluginSetupContract;
-  ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
-  cloudSetup: CloudSetup;
+  cloud: CloudSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
@@ -39,6 +44,7 @@ export interface SecuritySolutionServerlessPluginStartDeps {
   securitySolution: SecuritySolutionPluginStart;
   features: PluginStartContract;
   taskManager: TaskManagerStartContract;
+  fleet: FleetStartContract;
 }
 
 export interface UsageRecord {
@@ -61,17 +67,30 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
+  metadata?: UsageSourceMetadata;
+}
+
+export interface UsageSourceMetadata {
+  tier?: Tier;
+}
+
+export type Tier = ProductTier | 'none';
+
+export interface SecurityUsageReportingTaskSetupContractOptions {
+  lookBackLimitMinutes?: number;
 }
 
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
+  config: ServerlessSecurityConfig;
   taskManager: TaskManagerSetupContract;
   cloudSetup: CloudSetup;
   taskType: string;
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
+  options?: SecurityUsageReportingTaskSetupContractOptions;
 }
 
 export interface SecurityUsageReportingTaskStartContract {
@@ -90,6 +109,7 @@ export interface MeteringCallbackInput {
   taskId: string;
   lastSuccessfulReport: Date;
   abortController: AbortController;
+  config: ServerlessSecurityConfig;
 }
 
 export interface MetringTaskProperties {

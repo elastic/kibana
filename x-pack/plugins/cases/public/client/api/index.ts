@@ -11,8 +11,8 @@ import type {
   GetRelatedCasesByAlertResponse,
   CasesFindRequest,
   CasesStatusRequest,
+  CasesMetricsRequest,
 } from '../../../common/types/api';
-import type { CasesMetricsRequest } from '../../../common/api';
 import { getCasesFromAlertsUrl } from '../../../common/api';
 import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
 import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '../../../common/ui';

@@ -9,6 +9,8 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -23,8 +25,6 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
-import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).

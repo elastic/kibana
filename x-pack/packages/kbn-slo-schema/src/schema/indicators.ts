@@ -46,13 +46,17 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
 const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    filter: t.string,
-    good: t.string,
-    total: t.string,
-    timestampField: t.string,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      good: t.string,
+      total: t.string,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
 });
 
 const metricCustomValidAggregations = t.keyof({
@@ -76,13 +80,17 @@ const metricCustomMetricDef = t.type({
 const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
 const metricCustomIndicatorSchema = t.type({
   type: metricCustomIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    filter: t.string,
-    good: metricCustomMetricDef,
-    total: metricCustomMetricDef,
-    timestampField: t.string,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      good: metricCustomMetricDef,
+      total: metricCustomMetricDef,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
 });
 
 const rangeHistogramMetricType = t.literal('range');
@@ -117,13 +125,17 @@ const histogramMetricDef = t.union([
 const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');
 const histogramIndicatorSchema = t.type({
   type: histogramIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    timestampField: t.string,
-    filter: t.string,
-    good: histogramMetricDef,
-    total: histogramMetricDef,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      timestampField: t.string,
+      good: histogramMetricDef,
+      total: histogramMetricDef,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
 });
 
 const indicatorDataSchema = t.type({

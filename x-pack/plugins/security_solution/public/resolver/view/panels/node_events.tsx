@@ -23,11 +23,9 @@ import type { State } from '../../../common/store/types';
 
 export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer.analyzerById[id])(nodeID))
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
-  const nodeStats = useSelector((state: State) =>
-    selectors.nodeStats(state.analyzer.analyzerById[id])(nodeID)
-  );
+  const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 
   if (processEvent === undefined || nodeStats === undefined) {
     return (

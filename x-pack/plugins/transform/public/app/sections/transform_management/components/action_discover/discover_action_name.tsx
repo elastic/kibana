@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
@@ -32,7 +33,7 @@ export const isDiscoverActionDisabled = (
   const item = items[0];
 
   // Disable discover action if it's a batch transform and was never started
-  const stoppedTransform = item.stats.state === TRANSFORM_STATE.STOPPED;
+  const stoppedTransform = item.stats?.state === TRANSFORM_STATE.STOPPED;
   const transformProgress = getTransformProgress(item);
   const isBatchTransform = typeof item.config.sync === 'undefined';
   const transformNeverStarted =
@@ -51,7 +52,7 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ dataViewExists
   const item = items[0];
 
   // Disable discover action if it's a batch transform and was never started
-  const stoppedTransform = item.stats.state === TRANSFORM_STATE.STOPPED;
+  const stoppedTransform = item.stats?.state === TRANSFORM_STATE.STOPPED;
   const transformProgress = getTransformProgress(item);
   const isBatchTransform = typeof item.config.sync === 'undefined';
   const transformNeverStarted =

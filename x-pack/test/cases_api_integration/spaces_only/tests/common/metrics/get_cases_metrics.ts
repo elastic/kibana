@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';

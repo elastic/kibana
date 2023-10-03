@@ -6,38 +6,29 @@
  */
 
 import React from 'react';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 export const AccessDeniedPage = () => (
-  <>
-    <EuiPageContent
-      verticalPosition="center"
-      horizontalPosition="center"
-      color="danger"
-      data-test-subj="mlPageAccessDenied"
-    >
-      <EuiEmptyPrompt
-        iconType="warning"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.ml.management.jobsList.noPermissionToAccessLabel"
-              defaultMessage="Access denied"
-            />
-          </h2>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
-              defaultMessage="You don’t have permission to manage Machine Learning jobs. Access to the plugin requires the Machine Learning feature to be visible in this space."
-            />
-          </p>
-        }
-      />
-    </EuiPageContent>
-  </>
+  <EuiPageTemplate.EmptyPrompt
+    data-test-subj="mlPageAccessDenied"
+    color={'danger'}
+    iconType="warning"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.ml.management.jobsList.noPermissionToAccessLabel"
+          defaultMessage="Access denied"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
+          defaultMessage="You don’t have permission to manage Machine Learning jobs. Access to the plugin requires the Machine Learning feature to be visible in this space."
+        />
+      </p>
+    }
+  />
 );

@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           entries.forEach((entry) => {
             entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
-                expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
+                expect(column.message[0].highlights).to.eql(['message of document 0']);
               }
             });
           });

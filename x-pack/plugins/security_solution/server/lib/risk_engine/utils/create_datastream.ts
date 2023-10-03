@@ -55,7 +55,6 @@ const updateTotalFieldLimitSetting = async ({
         }),
       { logger }
     );
-    return;
   } catch (err) {
     logger.error(
       `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
@@ -99,8 +98,6 @@ const updateUnderlyingMapping = async ({
       () => esClient.indices.putMapping({ index, body: simulatedMapping }),
       { logger }
     );
-
-    return;
   } catch (err) {
     logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
     throw err;

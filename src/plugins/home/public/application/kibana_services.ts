@@ -22,7 +22,6 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CloudChatProviderPluginStart } from '@kbn/cloud-chat-provider-plugin/public';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -54,7 +53,6 @@ export interface HomeKibanaServices {
   welcomeService: WelcomeService;
   guidedOnboardingService?: GuidedOnboardingApi;
   cloud?: CloudSetup;
-  cloudChat?: CloudChatProviderPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;

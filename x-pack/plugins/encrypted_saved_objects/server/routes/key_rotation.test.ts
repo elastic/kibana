@@ -10,9 +10,9 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import type { EncryptionKeyRotationService } from '../crypto';
 import { routeDefinitionParamsMock } from './index.mock';
 import { defineKeyRotationRoutes } from './key_rotation';
+import type { EncryptionKeyRotationService } from '../crypto';
 
 describe('Key rotation routes', () => {
   let router: jest.Mocked<IRouter>;

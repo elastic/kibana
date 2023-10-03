@@ -17,15 +17,16 @@ import { Loading } from '../../../../../shared/loading';
 import { rerender } from '../../../../../test_helpers';
 
 import { CrawlCustomSettingsFlyout } from './crawl_custom_settings_flyout';
-import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
-import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
-import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
+import { CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps } from './crawl_custom_settings_flyout_crawl_depth_panel';
+import { CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps } from './crawl_custom_settings_flyout_domains_panel';
+import { CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
   isDataLoading: false,
   isFormSubmitting: false,
   isFlyoutVisible: true,
+  isSingleCrawlType: true,
   selectedDomainUrls: ['https://www.elastic.co'],
 };
 
@@ -72,9 +73,9 @@ describe('CrawlCustomSettingsFlyout', () => {
   it('lets the user customize their crawl', () => {
     expect(wrapper.find(Loading)).toHaveLength(0);
     for (const component of [
-      CrawlCustomSettingsFlyoutCrawlDepthPanel,
-      CrawlCustomSettingsFlyoutDomainsPanel,
-      CrawlCustomSettingsFlyoutSeedUrlsPanel,
+      CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps,
+      CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps,
+      CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps,
     ]) {
       expect(wrapper.find(component)).toHaveLength(1);
     }
@@ -90,9 +91,9 @@ describe('CrawlCustomSettingsFlyout', () => {
 
     expect(wrapper.find(Loading)).toHaveLength(1);
     for (const component of [
-      CrawlCustomSettingsFlyoutCrawlDepthPanel,
-      CrawlCustomSettingsFlyoutDomainsPanel,
-      CrawlCustomSettingsFlyoutSeedUrlsPanel,
+      CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps,
+      CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps,
+      CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps,
     ]) {
       expect(wrapper.find(component)).toHaveLength(0);
     }

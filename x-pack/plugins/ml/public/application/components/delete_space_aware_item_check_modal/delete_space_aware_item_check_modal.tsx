@@ -18,7 +18,6 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiButton,
-  EuiLoadingSpinner,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
@@ -273,11 +272,11 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
       );
       setButtonContent(buttonText);
       setModalContent(modalText);
+      setIsLoading(false);
     });
     if (typeof setDidUntag === 'function') {
       setDidUntag(false);
     }
-    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasManagedJob]);
 
@@ -324,68 +323,72 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
 
   return (
     <EuiModal onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
-      {isLoading === true && (
-        <>
-          <EuiModalBody>
-            <EuiFlexGroup justifyContent="spaceAround">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="xl" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalBody>
-        </>
-      )}
-      {isLoading === false && (
-        <>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
-                defaultMessage="Checking space permissions"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
+              defaultMessage="Checking space permissions"
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>{modalContent}</EuiModalBody>
+        {isLoading === false ? (
+          <>
+            <EuiModalBody>{modalContent}</EuiModalBody>
 
-          <EuiModalFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                {!hasUntagged &&
-                  itemCheckRespSummary?.canTakeAnyAction &&
-                  itemCheckRespSummary?.canRemoveFromSpace &&
-                  itemCheckRespSummary?.canDelete && (
-                    <EuiButtonEmpty
-                      isLoading={isUntagging}
-                      color="primary"
-                      size="s"
-                      onClick={onUntagClick}
-                    >
-                      {mlSavedObjectType === 'trained-model'
-                        ? shouldUnTagModelLabel
-                        : shouldUnTagJobLabel}
-                    </EuiButtonEmpty>
-                  )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  onClick={
+            <EuiModalFooter>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  {!hasUntagged &&
                     itemCheckRespSummary?.canTakeAnyAction &&
                     itemCheckRespSummary?.canRemoveFromSpace &&
-                    !itemCheckRespSummary?.canDelete
-                      ? onUntagClick
-                      : onClick
-                  }
-                  fill
-                >
-                  {buttonContent}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalFooter>
-        </>
-      )}
+                    itemCheckRespSummary?.canDelete && (
+                      <EuiButtonEmpty
+                        isLoading={isUntagging}
+                        color="primary"
+                        size="s"
+                        onClick={onUntagClick}
+                      >
+                        {mlSavedObjectType === 'trained-model'
+                          ? shouldUnTagModelLabel
+                          : shouldUnTagJobLabel}
+                      </EuiButtonEmpty>
+                    )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    onClick={
+                      itemCheckRespSummary?.canTakeAnyAction &&
+                      itemCheckRespSummary?.canRemoveFromSpace &&
+                      !itemCheckRespSummary?.canDelete
+                        ? onUntagClick
+                        : onClick
+                    }
+                    fill
+                  >
+                    {buttonContent}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiModalFooter>
+          </>
+        ) : (
+          <EuiModalBody>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.ml.deleteSpaceAwareItemCheckModal.modalDesc"
+                defaultMessage="Checking to see whether the {jobCount, plural, one {job} other {jobs}} can be deleted."
+                values={{
+                  jobCount: ids.length,
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </EuiModalBody>
+        )}
+      </>
     </EuiModal>
   );
 };

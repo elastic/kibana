@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { getSecurityGetStartedComponent } from './get_started';
+import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -19,6 +20,7 @@ import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { configureNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
+import { projectAppLinksSwitcher } from './navigation/links/app_links';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -39,7 +41,10 @@ export class SecuritySolutionServerlessPlugin
     _core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
+    const { securitySolution } = setupDeps;
+    securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+    securitySolution.setDataQualityPanelConfig({ isILMAvailable: false });
+
     return {};
   }
 
@@ -52,7 +57,12 @@ export class SecuritySolutionServerlessPlugin
 
     const services = createServices(core, startDeps);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
+
+    securitySolution.setComponents({
+      getStarted: getSecurityGetStartedComponent(services, productTypes),
+      dashboardsLandingCallout: getDashboardsLandingCallout(services),
+    });
 
     configureNavigation(services, this.config);
     setRoutes(services);

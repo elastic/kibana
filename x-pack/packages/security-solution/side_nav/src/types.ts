@@ -20,12 +20,14 @@ export interface SolutionSideNavItem<T extends string = string> {
   label: string;
   href: string;
   onClick?: React.MouseEventHandler;
+  openInNewTab?: boolean;
   description?: string;
   items?: Array<SolutionSideNavItem<T>>;
   categories?: LinkCategories<T>;
   iconType?: IconType;
   appendSeparator?: boolean;
   position?: SolutionSideNavItemPosition;
+  disabled?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;

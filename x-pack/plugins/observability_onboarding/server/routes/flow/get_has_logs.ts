@@ -6,19 +6,34 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  LogFilesState,
+  ObservabilityOnboardingType,
+  SystemLogsState,
+} from '../../saved_objects/observability_onboarding_status';
 
 export async function getHasLogs({
-  dataset,
-  namespace,
+  type,
+  state,
   esClient,
 }: {
-  dataset: string;
-  namespace: string;
+  type: ObservabilityOnboardingType;
+  state?: LogFilesState | SystemLogsState;
   esClient: ElasticsearchClient;
 }) {
+  if (!state) {
+    return false;
+  }
+
   try {
+    const { namespace } = state;
+    const index =
+      type === 'logFiles'
+        ? `logs-${(state as LogFilesState).datasetName}-${namespace}`
+        : `logs-system.syslog-${namespace}`;
+
     const { hits } = await esClient.search({
-      index: `logs-${dataset}-${namespace}`,
+      index,
       terminate_after: 1,
     });
     const total = hits.total as { value: number };

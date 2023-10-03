@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { DataType, IndexPattern, IndexPatternField } from '../../types';
+import type {
+  DataType,
+  IndexPattern,
+  IndexPatternField,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import type { FormBasedLayer } from './types';
 import type {
   BaseIndexPatternColumn,
@@ -24,6 +29,28 @@ export function normalizeOperationDataType(type: DataType) {
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
+}
+
+export function shouldShowTimeSeriesOption(
+  layer: FormBasedLayer,
+  indexPattern: IndexPattern,
+  groupId: string,
+  dimensionGroups: VisualizationDimensionGroupConfig[]
+) {
+  return Boolean(
+    dimensionGroups.find(({ groupId: id }) => groupId === id)?.isBreakdownDimension &&
+      containsColumnWithTimeSeriesMetric(layer, indexPattern)
+  );
+}
+
+function containsColumnWithTimeSeriesMetric(
+  layer: FormBasedLayer,
+  indexPattern: IndexPattern
+): boolean {
+  return Object.values(layer.columns).some(
+    (column) =>
+      hasField(column) && indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric
+  );
 }
 
 export function getFieldType(field: IndexPatternField) {

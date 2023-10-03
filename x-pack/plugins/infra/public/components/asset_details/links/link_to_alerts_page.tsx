@@ -14,18 +14,18 @@ import { ALERTS_PATH } from '../../../common/alerts/constants';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToAlertsPageProps {
-  nodeName: string;
-  queryField: string;
+  assetName: string;
   dateRange: TimeRange;
+  queryField: string;
 }
 
-export const LinkToAlertsPage = ({ nodeName, queryField, dateRange }: LinkToAlertsPageProps) => {
+export const LinkToAlertsPage = ({ assetName, queryField, dateRange }: LinkToAlertsPageProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const linkToAlertsPage = http.basePath.prepend(
     `${ALERTS_PATH}?_a=${encode({
-      kuery: `${queryField}:"${nodeName}"`,
+      kuery: `${queryField}:"${assetName}"`,
       rangeFrom: dateRange.from,
       rangeTo: dateRange.to,
       status: 'all',
@@ -35,7 +35,7 @@ export const LinkToAlertsPage = ({ nodeName, queryField, dateRange }: LinkToAler
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
-        data-test-subj="assetDetails-flyout-alerts-link"
+        data-test-subj="infraAssetDetailsAlertsShowAllButton"
         size="xs"
         iconSide="right"
         iconType="sortRight"

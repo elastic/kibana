@@ -49,14 +49,7 @@ const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
 };
 
 export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
-  const {
-    hideHeader,
-    showShadow,
-    embeddable,
-    hideInspector,
-    containerContext,
-    onPanelStatusChange,
-  } = panelProps;
+  const { hideHeader, showShadow, embeddable, hideInspector, onPanelStatusChange } = panelProps;
   const [node, setNode] = useState<ReactNode | undefined>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
@@ -71,25 +64,26 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
     const commonlyUsedRanges = core.uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
     const dateFormat = core.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
     const stateTransfer = embeddableStart.getStateTransfer();
+    const editPanel = new EditPanelAction(
+      embeddableStart.getEmbeddableFactory,
+      core.application,
+      stateTransfer
+    );
 
     const actions: PanelUniversalActions = {
       customizePanel: new CustomizePanelAction(
         core.overlays,
         core.theme,
+        editPanel,
         commonlyUsedRanges,
         dateFormat
       ),
       removePanel: new RemovePanelAction(),
-      editPanel: new EditPanelAction(
-        embeddableStart.getEmbeddableFactory,
-        core.application,
-        stateTransfer,
-        containerContext?.getCurrentPath
-      ),
+      editPanel,
     };
     if (!hideInspector) actions.inspectPanel = new InspectPanelAction(inspector);
     return actions;
-  }, [containerContext?.getCurrentPath, hideInspector]);
+  }, [hideInspector]);
 
   /**
    * Track panel status changes

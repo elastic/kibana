@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { asHttpRequestExecutionSource } from '../lib';
-import { actionsClientMock } from '../actions_client.mock';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { ActionTypeExecutorResult } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 

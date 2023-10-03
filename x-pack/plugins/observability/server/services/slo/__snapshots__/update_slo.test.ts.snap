@@ -18,6 +18,7 @@ Array [
       "slo": Object {
         "budgetingMethod": "occurrences",
         "description": "irrelevant",
+        "groupBy": "*",
         "id": "unique-id",
         "indicator": Object {
           "type": "sli.apm.transactionErrorRate",
@@ -44,6 +45,7 @@ Array [
     },
     "id": "slo-unique-id",
     "index": ".slo-observability.summary-v2.temp",
+    "refresh": true,
   },
 ]
 `;

@@ -19,9 +19,14 @@ export function defineSAMLRoutes({
   getAuthenticationService,
   basePath,
   logger,
+  buildFlavor,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/saml/callback', '/api/security/v1/saml']) {
+  // For a serverless build, do not register deprecated versioned routes
+  for (const path of [
+    '/api/security/saml/callback',
+    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/saml'] : []),
+  ]) {
     router.post(
       {
         path,

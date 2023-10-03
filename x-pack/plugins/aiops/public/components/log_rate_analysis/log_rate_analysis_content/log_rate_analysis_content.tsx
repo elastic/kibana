@@ -15,10 +15,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
-
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
 
 import { useData } from '../../../hooks/use_data';
 
@@ -48,8 +50,6 @@ export function getDocumentCountStatsSplitLabel(
 export interface LogRateAnalysisContentProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The type of analysis, whether it's a spike or dip */
-  analysisType?: LogRateAnalysisType;
   setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
   initialAnalysisStart?: number | WindowParameters;
@@ -64,11 +64,12 @@ export interface LogRateAnalysisContentProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   dataView,
-  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   setGlobalState,
   initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
@@ -77,12 +78,16 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  embeddingOrigin,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
   >(incomingInitialAnalysisStart);
   const [isBrushCleared, setIsBrushCleared] = useState(true);
+  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
+    LOG_RATE_ANALYSIS_TYPE.SPIKE
+  );
 
   useEffect(() => {
     setIsBrushCleared(windowParameters === undefined);
@@ -111,13 +116,18 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
+  function brushSelectionUpdate(
+    windowParametersUpdate: WindowParameters,
+    force: boolean,
+    logRateAnalysisTypeUpdate: LogRateAnalysisType
+  ) {
     if (!isBrushCleared || force) {
-      setWindowParameters(d);
+      setWindowParameters(windowParametersUpdate);
     }
     if (force) {
       setIsBrushCleared(false);
     }
+    setLogRateAnalysisType(logRateAnalysisTypeUpdate);
   }
 
   function clearSelection() {
@@ -153,7 +163,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
         <LogRateAnalysisResults
           dataView={dataView}
-          analysisType={analysisType}
+          analysisType={logRateAnalysisType}
           earliest={earliest}
           isBrushCleared={isBrushCleared}
           latest={latest}
@@ -165,6 +175,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           onAnalysisCompleted={onAnalysisCompleted}
+          embeddingOrigin={embeddingOrigin}
         />
       )}
       {windowParameters === undefined && (

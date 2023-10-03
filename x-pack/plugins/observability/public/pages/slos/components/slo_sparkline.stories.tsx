@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentStory } from '@storybook/react';
-
 import { HistoricalSummaryResponse } from '@kbn/slo-schema';
+import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import {
-  HEALTHY_ROLLING_SLO,
+  DEGRADING_FAST_ROLLING_SLO,
   HEALTHY_RANDOM_ROLLING_SLO,
+  HEALTHY_ROLLING_SLO,
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
-  DEGRADING_FAST_ROLLING_SLO,
   NO_DATA_TO_HEALTHY_ROLLING_SLO,
 } from '../../../data/slo/historical_summary_data';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloSparkline as Component, Props } from './slo_sparkline';
+import { Props, SloSparkline as Component } from './slo_sparkline';
 
 export default {
   component: Component,
@@ -33,7 +32,9 @@ AreaWithHealthyFlatData.args = {
   chart: 'area',
   state: 'success',
   id: 'history',
-  data: toBudgetBurnDown(historicalSummaryData[HEALTHY_ROLLING_SLO]),
+  data: toBudgetBurnDown(
+    historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!.data
+  ),
 };
 
 export const AreaWithHealthyRandomData = Template.bind({});
@@ -41,7 +42,9 @@ AreaWithHealthyRandomData.args = {
   chart: 'area',
   state: 'success',
   id: 'history',
-  data: toBudgetBurnDown(historicalSummaryData[HEALTHY_RANDOM_ROLLING_SLO]),
+  data: toBudgetBurnDown(
+    historicalSummaryData.find((datum) => datum.sloId === HEALTHY_RANDOM_ROLLING_SLO)!.data
+  ),
 };
 
 export const AreaWithHealthyStepDownData = Template.bind({});
@@ -49,7 +52,9 @@ AreaWithHealthyStepDownData.args = {
   chart: 'area',
   state: 'success',
   id: 'history',
-  data: toBudgetBurnDown(historicalSummaryData[HEALTHY_STEP_DOWN_ROLLING_SLO]),
+  data: toBudgetBurnDown(
+    historicalSummaryData.find((datum) => datum.sloId === HEALTHY_STEP_DOWN_ROLLING_SLO)!.data
+  ),
 };
 
 export const AreaWithDegradingLinearData = Template.bind({});
@@ -57,7 +62,9 @@ AreaWithDegradingLinearData.args = {
   chart: 'area',
   state: 'error',
   id: 'history',
-  data: toBudgetBurnDown(historicalSummaryData[DEGRADING_FAST_ROLLING_SLO]),
+  data: toBudgetBurnDown(
+    historicalSummaryData.find((datum) => datum.sloId === DEGRADING_FAST_ROLLING_SLO)!.data
+  ),
 };
 
 export const AreaWithNoDataToDegradingLinearData = Template.bind({});
@@ -65,7 +72,9 @@ AreaWithNoDataToDegradingLinearData.args = {
   chart: 'area',
   state: 'error',
   id: 'history',
-  data: toBudgetBurnDown(historicalSummaryData[NO_DATA_TO_HEALTHY_ROLLING_SLO]),
+  data: toBudgetBurnDown(
+    historicalSummaryData.find((datum) => datum.sloId === NO_DATA_TO_HEALTHY_ROLLING_SLO)!.data
+  ),
 };
 
 export const LineWithHealthyFlatData = Template.bind({});
@@ -73,7 +82,9 @@ LineWithHealthyFlatData.args = {
   chart: 'line',
   state: 'success',
   id: 'history',
-  data: toSliHistory(historicalSummaryData[HEALTHY_ROLLING_SLO]),
+  data: toSliHistory(
+    historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!.data
+  ),
 };
 
 export const LineWithHealthyRandomData = Template.bind({});
@@ -81,7 +92,9 @@ LineWithHealthyRandomData.args = {
   chart: 'line',
   state: 'success',
   id: 'history',
-  data: toSliHistory(historicalSummaryData[HEALTHY_RANDOM_ROLLING_SLO]),
+  data: toSliHistory(
+    historicalSummaryData.find((datum) => datum.sloId === HEALTHY_RANDOM_ROLLING_SLO)!.data
+  ),
 };
 
 export const LineWithHealthyStepDownData = Template.bind({});
@@ -89,7 +102,9 @@ LineWithHealthyStepDownData.args = {
   chart: 'line',
   state: 'success',
   id: 'history',
-  data: toSliHistory(historicalSummaryData[HEALTHY_STEP_DOWN_ROLLING_SLO]),
+  data: toSliHistory(
+    historicalSummaryData.find((datum) => datum.sloId === HEALTHY_STEP_DOWN_ROLLING_SLO)!.data
+  ),
 };
 
 export const LineWithDegradingLinearData = Template.bind({});
@@ -97,7 +112,9 @@ LineWithDegradingLinearData.args = {
   chart: 'line',
   state: 'error',
   id: 'history',
-  data: toSliHistory(historicalSummaryData[DEGRADING_FAST_ROLLING_SLO]),
+  data: toSliHistory(
+    historicalSummaryData.find((datum) => datum.sloId === DEGRADING_FAST_ROLLING_SLO)!.data
+  ),
 };
 
 export const LineWithNoDataToDegradingLinearData = Template.bind({});
@@ -105,7 +122,9 @@ LineWithNoDataToDegradingLinearData.args = {
   chart: 'line',
   state: 'error',
   id: 'history',
-  data: toSliHistory(historicalSummaryData[NO_DATA_TO_HEALTHY_ROLLING_SLO]),
+  data: toSliHistory(
+    historicalSummaryData.find((datum) => datum.sloId === NO_DATA_TO_HEALTHY_ROLLING_SLO)!.data
+  ),
 };
 
 function toBudgetBurnDown(data: HistoricalSummaryResponse[]) {

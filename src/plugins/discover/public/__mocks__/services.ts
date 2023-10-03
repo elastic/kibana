@@ -221,6 +221,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),
       getUrl: jest.fn(() => Promise.resolve('')),
+      getRedirectUrl: jest.fn(() => ''),
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },

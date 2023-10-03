@@ -19,11 +19,11 @@ import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import semver from 'semver/preload';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';
 import { API_URLS } from '../../../common/constants';
-import { UptimeServerSetup } from './adapters';
 
 export type { UMServerLibs } from '../uptime_server';
 
@@ -52,6 +52,7 @@ export class UptimeEsClient {
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
   savedObjectsClient: SavedObjectsClientContract;
   isLegacyAlert?: boolean;
+  stackVersion?: string;
 
   constructor(
     savedObjectsClient: SavedObjectsClientContract,
@@ -61,17 +62,17 @@ export class UptimeEsClient {
       uiSettings?: CoreRequestHandlerContext['uiSettings'];
       request?: KibanaRequest;
       heartbeatIndices?: string;
-      isLegacyAlert?: boolean;
+      stackVersion?: string;
     }
   ) {
     const {
-      isLegacyAlert,
+      stackVersion,
       isDev = false,
       uiSettings,
       request,
       heartbeatIndices = '',
     } = options ?? {};
-    this.isLegacyAlert = isLegacyAlert;
+    this.stackVersion = stackVersion;
     this.uiSettings = uiSettings;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
@@ -184,7 +185,7 @@ export class UptimeEsClient {
     const showInspectData =
       (isInspectorEnabled || this.isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
 
-    if (showInspectData) {
+    if (showInspectData && this.inspectableEsQueries.length > 0) {
       return { _inspect: this.inspectableEsQueries };
     }
     return {};
@@ -225,16 +226,24 @@ export class UptimeEsClient {
       indices = settings?.heartbeatIndices || '';
       syntheticsIndexRemoved = settings.syntheticsIndexRemoved ?? false;
     }
-    if (
-      this.isLegacyAlert &&
-      !indices.includes('synthetics-') &&
-      (syntheticsIndexRemoved || !settingsChangedByUser)
-    ) {
+    if (indices.includes('synthetics-')) {
+      return indices;
+    }
+    const appendSyntheticsIndex = shouldAppendSyntheticsIndex(this.stackVersion);
+
+    if (appendSyntheticsIndex && (syntheticsIndexRemoved || !settingsChangedByUser)) {
       indices = indices + ',synthetics-*';
     }
     return indices;
   }
 }
+
+export const shouldAppendSyntheticsIndex = (stackVersion?: string) => {
+  if (!stackVersion) {
+    return false;
+  }
+  return semver.lt(stackVersion, '8.10.0');
+};
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
   return params;
@@ -277,7 +286,3 @@ export function debugESCall({
   }
   console.log(`\n`);
 }
-
-export const isTestUser = (server: UptimeServerSetup) => {
-  return server.config.service?.username === 'localKibanaIntegrationTestsUser';
-};

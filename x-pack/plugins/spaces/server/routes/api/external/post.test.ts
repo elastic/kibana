@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
+import { initPostSpacesApi } from './post';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,7 +28,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initPostSpacesApi } from './post';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -62,7 +62,7 @@ describe('Spaces Public API', () => {
     });
 
     initPostSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

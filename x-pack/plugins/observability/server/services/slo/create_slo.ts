@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v1 as uuidv1 } from 'uuid';
 import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
@@ -36,6 +36,7 @@ export class CreateSLO {
     }
 
     try {
+      await this.transformManager.preview(sloTransformId);
       await this.transformManager.start(sloTransformId);
     } catch (err) {
       await Promise.all([
@@ -50,6 +51,7 @@ export class CreateSLO {
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
       id: `slo-${slo.id}`,
       document: createTempSummaryDocument(slo),
+      refresh: true,
     });
 
     return this.toResponse(slo);
@@ -69,6 +71,7 @@ export class CreateSLO {
       tags: params.tags ?? [],
       createdAt: now,
       updatedAt: now,
+      groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
     };
   }
 

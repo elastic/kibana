@@ -133,6 +133,9 @@ export interface TimelineModel {
   isSelectAllChecked: boolean;
   isLoading: boolean;
   selectAll: boolean;
+  /* discover saved search Id */
+  savedSearchId: string | null;
+  isDiscoverSavedSearchLoaded?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -186,12 +189,15 @@ export type SubsetTimelineModel = Readonly<
     | 'status'
     | 'filters'
     | 'filterManager'
+    | 'savedSearchId'
+    | 'isDiscoverSavedSearchLoaded'
   >
 >;
 
 export interface TimelineUrl {
   activeTab?: TimelineTabs;
-  id: string;
+  id?: string;
   isOpen: boolean;
   graphEventId?: string;
+  savedSearchId?: string;
 }

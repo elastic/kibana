@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getApmIndexPatterns } from './get_indices';
 
 export async function getNonDataStreamIndices({
@@ -14,7 +14,7 @@ export async function getNonDataStreamIndices({
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
 }) {
   const apmIndexPatterns = getApmIndexPatterns([
     apmIndices.error,

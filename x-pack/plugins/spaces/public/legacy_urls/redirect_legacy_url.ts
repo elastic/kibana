@@ -10,10 +10,10 @@ import { first } from 'rxjs/operators';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import type { RedirectLegacyUrlParams } from './types';
 import { DEFAULT_OBJECT_NOUN } from '../constants';
 import type { PluginsStart } from '../plugin';
 import type { SpacesApiUi } from '../ui_api';
-import type { RedirectLegacyUrlParams } from './types';
 
 export function createRedirectLegacyUrl(
   getStartServices: StartServicesAccessor<PluginsStart>

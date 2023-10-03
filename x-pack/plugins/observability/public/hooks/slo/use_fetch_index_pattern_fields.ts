@@ -18,6 +18,8 @@ export interface UseFetchIndexPatternFieldsResponse {
 export interface Field {
   name: string;
   type: string;
+  aggregatable: boolean;
+  searchable: boolean;
 }
 
 export function useFetchIndexPatternFields(
@@ -32,7 +34,7 @@ export function useFetchIndexPatternFields(
         return [];
       }
       try {
-        return await dataViews.getFieldsForWildcard({ pattern: indexPattern });
+        return await dataViews.getFieldsForWildcard({ pattern: indexPattern, allowNoIndex: true });
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }

@@ -14,19 +14,20 @@ import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts, useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
 } from '../../data/slo/historical_summary_data';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -63,6 +64,10 @@ const mockDelete = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="errorRateChart">mocked component</div>,
+      },
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createStartContract(),
       http: {
@@ -109,7 +114,7 @@ describe('SLO Details Page', () => {
       isLoading: false,
       data: historicalSummaryData,
     });
-    useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
+    useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
     useCloneSloMock.mockReturnValue({ mutate: mockClone });
     useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
     useLocationMock.mockReturnValue({ search: '' });
@@ -158,7 +163,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: true,
-      data: {},
+      data: [],
     });
 
     render(<SloDetailsPage />);
@@ -182,6 +187,7 @@ describe('SLO Details Page', () => {
     expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
+    expect(screen.queryByTestId('errorRateChart')).toBeTruthy();
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 
@@ -237,7 +243,17 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
-    const { id, createdAt, enabled, revision, summary, settings, updatedAt, ...newSlo } = slo;
+    const {
+      id,
+      createdAt,
+      enabled,
+      revision,
+      summary,
+      settings,
+      updatedAt,
+      instanceId,
+      ...newSlo
+    } = slo;
 
     expect(mockClone).toBeCalledWith({
       originalSloId: slo.id,
@@ -289,7 +305,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
+      data: new ActiveAlerts({ [`${slo.id}|${ALL_VALUE}`]: 2 }),
     });
 
     render(<SloDetailsPage />);

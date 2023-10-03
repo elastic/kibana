@@ -13,13 +13,14 @@ import {
   EuiFilterSelectItem,
   EuiPopover,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
-import { RiskScore } from './common';
-import { ENTITY_RISK_CLASSIFICATION } from '../translations';
+import { RiskScoreLevel } from './common';
+import { ENTITY_RISK_LEVEL } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface SeverityItems {
@@ -33,6 +34,7 @@ export const SeverityFilterGroup: React.FC<{
   onSelect: (newSelection: RiskSeverity[]) => void;
   riskEntity: RiskScoreEntity;
 }> = ({ severityCount, selectedSeverities, onSelect, riskEntity }) => {
+  const { euiTheme } = useEuiTheme();
   const { telemetry } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -90,7 +92,7 @@ export const SeverityFilterGroup: React.FC<{
         numActiveFilters={totalActiveItem}
         onClick={onButtonClick}
       >
-        {ENTITY_RISK_CLASSIFICATION(riskEntity)}
+        {ENTITY_RISK_LEVEL(riskEntity)}
       </EuiFilterButton>
     ),
     [isPopoverOpen, items, onButtonClick, totalActiveItem, riskEntity]
@@ -105,7 +107,10 @@ export const SeverityFilterGroup: React.FC<{
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <div className="euiFilterSelect__items">
+        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+            instead of EuiFilterSelectItem (which is pending deprecation).
+            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
           {items.map((item, index) => (
             <EuiFilterSelectItem
               data-test-subj={`risk-filter-item-${item.risk}`}
@@ -113,7 +118,7 @@ export const SeverityFilterGroup: React.FC<{
               key={index + item.risk}
               onClick={() => updateSeverityFilter(item.risk)}
             >
-              <RiskScore severity={item.risk} />
+              <RiskScoreLevel severity={item.risk} />
             </EuiFilterSelectItem>
           ))}
         </div>

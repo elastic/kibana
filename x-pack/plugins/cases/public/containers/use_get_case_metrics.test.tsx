@@ -13,7 +13,7 @@ import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
-import { CaseMetricsFeature } from '../../common/api/metrics/case';
+import { CaseMetricsFeature } from '../../common/types/api';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

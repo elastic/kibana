@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { dateType, summarySchema } from './common';
+import { allOrAnyString, dateType, summarySchema } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
@@ -32,9 +32,7 @@ const settingsSchema = t.type({
 });
 
 const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
-
 const tagsSchema = t.array(t.string);
-
 const sloIdSchema = t.string;
 
 const sloSchema = t.type({
@@ -51,6 +49,7 @@ const sloSchema = t.type({
   tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
+  groupBy: allOrAnyString,
 });
 
 const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);

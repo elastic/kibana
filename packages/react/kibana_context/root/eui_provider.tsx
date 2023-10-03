@@ -48,7 +48,8 @@ utilitiesCache.compat = true;
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
 /**
- * Prepares and returns a configured `EuiProvider` for use in Kibana roots.
+ * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
+ * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.
  */
 export const KibanaEuiProvider: FC<KibanaEuiProviderProps> = ({
   theme: { theme$ },

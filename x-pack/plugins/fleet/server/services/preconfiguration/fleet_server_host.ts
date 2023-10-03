@@ -27,7 +27,12 @@ import { isDifferent } from './utils';
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
-  if (cloudSetup && cloudSetup.isCloudEnabled && cloudSetup.cloudHost) {
+  if (
+    cloudSetup &&
+    !cloudSetup.isServerlessEnabled &&
+    cloudSetup.isCloudEnabled &&
+    cloudSetup.cloudHost
+  ) {
     // Fleet Server url are formed like this `https://<deploymentId>.fleet.<host>
     return [
       `https://${cloudSetup.deploymentId}.fleet.${cloudSetup.cloudHost}${

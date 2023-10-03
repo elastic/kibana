@@ -13,7 +13,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../../../../utils/kibana_react';
-import { paths } from '../../../../../routes/paths';
+import { paths } from '../../../../../../common/locators/paths';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
@@ -146,6 +146,24 @@ const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
         defaultMessage: 'Create rule',
       }),
       href: http.basePath.prepend(paths.observability.rules),
+    },
+    {
+      id: 'universal_profiling',
+      title: i18n.translate('xpack.observability.emptySection.apps.universalProfiling.title', {
+        defaultMessage: 'Universal Profiling',
+      }),
+      icon: 'logoObservability',
+      description: i18n.translate(
+        'xpack.observability.emptySection.apps.universalProfiling.description',
+        {
+          defaultMessage:
+            'Understand what lines of code are consuming compute resources across your entire infrastructure, with minimal overhead and zero instrumentation',
+        }
+      ),
+      linkTitle: i18n.translate('xpack.observability.emptySection.apps.universalProfiling.link', {
+        defaultMessage: 'Install Profiling Host Agent',
+      }),
+      href: http.basePath.prepend('/app/profiling/add-data-instructions'),
     },
   ];
 };

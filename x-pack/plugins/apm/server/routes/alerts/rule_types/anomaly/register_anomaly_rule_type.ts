@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KibanaRequest } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertUrl, ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  getAlertUrl,
+  observabilityPaths,
+  ProcessorEvent,
+} from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -57,8 +63,8 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 export function registerAnomalyRuleType({
   alerting,
   alertsLocator,
+  getApmIndices,
   basePath,
-  config$,
   logger,
   ml,
   ruleDataClient,
@@ -87,6 +93,7 @@ export function registerAnomalyRuleType({
           apmActionVariables.viewInAppUrl,
         ],
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -101,6 +108,8 @@ export function registerAnomalyRuleType({
           savedObjectsClient,
           scopedClusterClient,
         } = services;
+
+        const apmIndices = await getApmIndices(savedObjectsClient);
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -250,7 +259,7 @@ export function registerAnomalyRuleType({
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
-            config$,
+            apmIndices,
             scopedClusterClient,
             savedObjectsClient,
             serviceName,
@@ -329,6 +338,8 @@ export function registerAnomalyRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

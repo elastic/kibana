@@ -34,6 +34,7 @@ import {
 import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
+  createFiltersFromMultiValueClickAction,
   createMultiValueClickActionDefinition,
   createValueClickActionDefinition,
   createSelectRangeActionDefinition,
@@ -120,7 +121,7 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, screenshotMode }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: DataStartDependencies
   ): DataPublicPluginStart {
     const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
@@ -137,7 +138,9 @@ export class DataPublicPlugin
     const search = this.searchService.start(core, {
       fieldFormats,
       indexPatterns: dataViews,
+      inspector,
       screenshotMode,
+      scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });
     setSearchService(search);
 
@@ -158,7 +161,7 @@ export class DataPublicPlugin
     uiActions.addTriggerAction(
       'MULTI_VALUE_CLICK_TRIGGER',
       createMultiValueClickActionDefinition(() => ({
-        filterManager: query.filterManager,
+        query,
       }))
     );
 
@@ -167,6 +170,7 @@ export class DataPublicPlugin
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
+        createFiltersFromMultiValueClickAction,
       },
       datatableUtilities,
       fieldFormats,

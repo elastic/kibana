@@ -21,6 +21,7 @@ import {
   AlertsTableConfigurationRegistryContract,
 } from '../../../types';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -70,6 +71,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     } as unknown as HTMLElement,
     theme$: themeServiceMock.createTheme$(),
     licensing: licensingPluginMock,
+    expressions: expressionsPluginMock.createStartContract(),
   } as TriggersAndActionsUiServices;
 };
 

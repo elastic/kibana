@@ -9,45 +9,89 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+  SingleDatasetLocatorParams,
+  SINGLE_DATASET_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
 } from '../../shared/get_elastic_agent_setup_command';
 import {
+  EuiStepStatus,
   InstallElasticAgentSteps,
   ProgressStepId,
-  EuiStepStatus,
 } from '../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../shared/step_panel';
-import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { TroubleshootingLink } from '../../shared/troubleshooting_link';
+import { WindowsInstallStep } from '../../shared/windows_install_step';
+import { ApiKeyBanner } from '../custom_logs/api_key_banner';
+import {
+  SystemIntegrationBanner,
+  SystemIntegrationBannerState,
+} from './system_integration_banner';
 
 export function InstallElasticAgent() {
+  const {
+    services: { share },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
+  const singleDatasetLocator =
+    share.url.locators.get<SingleDatasetLocatorParams>(
+      SINGLE_DATASET_LOCATOR_ID
+    );
+  const allDataSetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
+    ALL_DATASETS_LOCATOR_ID
+  );
+
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
+  const [systemIntegrationStatus, setSystemIntegrationStatus] =
+    useState<SystemIntegrationBannerState>('pending');
 
-  const datasetName = 'elastic-agent';
-  const namespace = 'default';
+  const onIntegrationStatusChange = useCallback(
+    (status: SystemIntegrationBannerState) => {
+      setSystemIntegrationStatus(status);
+    },
+    []
+  );
+
+  const datasetName = 'system-logs';
 
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
-  function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+
+  async function onContinue() {
+    if (systemIntegrationStatus === 'rejected') {
+      await allDataSetsLocator!.navigate({});
+      return;
+    }
+
+    await singleDatasetLocator!.navigate({
+      integration: 'system',
+      dataset: 'system.syslog',
+    });
   }
 
   function onAutoDownloadConfig() {
@@ -83,10 +127,7 @@ export function InstallElasticAgent() {
           params: {
             body: {
               name: datasetName,
-              state: {
-                datasetName,
-                namespace,
-              },
+              type: 'systemLogs',
             },
           },
         });
@@ -94,26 +135,6 @@ export function InstallElasticAgent() {
     },
     [monitoringRole?.hasPrivileges]
   );
-
-  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
-    const { onboardingId } = getState();
-    if (onboardingId) {
-      return callApi(
-        'PUT /internal/observability_onboarding/flow/{onboardingId}',
-        {
-          params: {
-            path: { onboardingId },
-            body: {
-              state: {
-                datasetName,
-                namespace,
-              },
-            },
-          },
-        }
-      );
-    }
-  }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
@@ -132,7 +153,7 @@ export function InstallElasticAgent() {
     [
       apiKeyEncoded,
       onboardingId,
-      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+      installShipperSetupStatus === FETCH_STATUS.SUCCESS,
     ]
   );
 
@@ -177,7 +198,11 @@ export function InstallElasticAgent() {
           : stepStatus === 'complete'
           ? CHECK_LOGS_LABELS.completed
           : CHECK_LOGS_LABELS.incomplete;
-      return { title, status: stepStatus };
+      return {
+        title,
+        status: stepStatus,
+        'data-test-subj': 'obltOnboardingCheckLogsStep',
+      };
     }
     return {
       title: CHECK_LOGS_LABELS.incomplete,
@@ -196,7 +221,11 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
+            <EuiButton
+              data-test-subj="observabilityOnboardingInstallElasticAgentBackButton"
+              color="text"
+              onClick={onBack}
+            >
               {i18n.translate(
                 'xpack.observability_onboarding.systemLogs.back',
                 { defaultMessage: 'Back' }
@@ -209,6 +238,8 @@ export function InstallElasticAgent() {
                   fill
                   iconType="magnifyWithPlus"
                   onClick={onContinue}
+                  data-test-subj="obltOnboardingExploreLogs"
+                  disabled={systemIntegrationStatus === 'pending'}
                 >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.exploreLogs',
@@ -228,11 +259,13 @@ export function InstallElasticAgent() {
               'xpack.observability_onboarding.systemLogs.installElasticAgent.description',
               {
                 defaultMessage:
-                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipper is an Agent developed by Elastic.',
+                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
               }
             )}
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <SystemIntegrationBanner onStatusChange={onIntegrationStatusChange} />
         <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
@@ -254,9 +287,31 @@ export function InstallElasticAgent() {
         <EuiSpacer size="m" />
         <InstallElasticAgentSteps
           installAgentPlatformOptions={[
-            { label: 'Linux', id: 'linux-tar', isDisabled: false },
-            { label: 'MacOS', id: 'macos', isDisabled: false },
-            { label: 'Windows', id: 'windows', isDisabled: true },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux',
+                { defaultMessage: 'Linux' }
+              ),
+              id: 'linux-tar',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS',
+                { defaultMessage: 'MacOS' }
+              ),
+              id: 'macos',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows',
+                { defaultMessage: 'Windows' }
+              ),
+              id: 'windows',
+              disableSteps: true,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/welcome-to-elastic/current/getting-started-observability.html" />
+              ),
+            },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
           selectedPlatform={elasticAgentPlatform}
@@ -296,6 +351,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }

@@ -23,7 +23,8 @@
       "taskManager",
       "guidedOnboarding",
       "files",
-      "uiActions"
+      "uiActions",
+      "dashboard"
     ],
     "optionalPlugins": [
       "features",
@@ -38,7 +39,6 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "cloudChat",
       "esUiShared",
       "logsShared",
       "kibanaUtils",

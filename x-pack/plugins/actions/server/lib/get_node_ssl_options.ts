@@ -11,14 +11,25 @@ import { SSLSettings } from '../types';
 
 export function getNodeSSLOptions(
   logger: Logger,
-  verificationMode?: string
+  verificationMode?: string,
+  sslOverrides?: SSLSettings
 ): {
   rejectUnauthorized?: boolean;
   checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
+  cert?: Buffer;
+  key?: Buffer;
+  pfx?: Buffer;
+  passphrase?: string;
+  ca?: Buffer;
 } {
   const agentOptions: {
     rejectUnauthorized?: boolean;
     checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
+    cert?: Buffer;
+    key?: Buffer;
+    pfx?: Buffer;
+    passphrase?: string;
+    ca?: Buffer;
   } = {};
   if (!!verificationMode) {
     switch (verificationMode) {
@@ -40,6 +51,15 @@ export function getNodeSSLOptions(
     }
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
+  }
+  if (sslOverrides) {
+    Object.assign(agentOptions, {
+      cert: sslOverrides.cert,
+      key: sslOverrides.key,
+      pfx: sslOverrides.pfx,
+      passphrase: sslOverrides.passphrase,
+      ca: sslOverrides.ca,
+    });
   }
   return agentOptions;
 }

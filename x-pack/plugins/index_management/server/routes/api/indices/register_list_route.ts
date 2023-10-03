@@ -13,13 +13,14 @@ export function registerListRoute({
   router,
   indexDataEnricher,
   lib: { handleEsError },
+  config,
 }: RouteDependencies) {
   router.get(
     { path: addBasePath('/indices'), validate: false },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, indexDataEnricher);
+        const indices = await fetchIndices({ client, indexDataEnricher, config });
         return response.ok({ body: indices });
       } catch (error) {
         return handleEsError({ error, response });

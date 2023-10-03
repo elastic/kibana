@@ -24,15 +24,19 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../common/constants';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { AiopsApiLogRateAnalysis } from '../../../common/api';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
@@ -69,8 +73,15 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsLogRateAnalysisGroupingOff';
 const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 
+/**
+ * Interface for log rate analysis results data.
+ */
 export interface LogRateAnalysisResultsData {
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType: LogRateAnalysisType;
+  /** Statistically significant field/value items. */
   significantTerms: SignificantTerm[];
+  /** Statistically significant groups of field/value items. */
   significantTermsGroups: SignificantTermGroup[];
 }
 
@@ -103,6 +114,8 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -119,11 +132,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  embeddingOrigin,
 }) => {
   const { http } = useAiopsAppContext();
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
+  const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
@@ -187,7 +202,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       overrides,
       sampleProbability,
     },
-    { reducer: streamReducer, initialState }
+    { reducer: streamReducer, initialState },
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
   const { significantTerms } = data;
@@ -210,6 +226,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         setOverrides(undefined);
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
+            analysisType,
             significantTerms: data.significantTerms,
             significantTermsGroups: data.significantTermsGroups,
           });
@@ -236,6 +253,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       clearAllRowState();
     }
 
+    setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
 
     // We trigger hooks updates above so we cannot directly call `start()` here
@@ -252,6 +270,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }, [shouldStart]);
 
   useEffect(() => {
+    setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -336,6 +355,40 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
+      {showLogRateAnalysisResultsTable && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            title={
+              <span data-test-subj="aiopsAnalysisTypeCalloutTitle">
+                {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                  ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
+                      defaultMessage: 'Analysis type: Log rate spike',
+                    })
+                  : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
+                      defaultMessage: 'Analysis type: Log rate dip',
+                    })}
+              </span>
+            }
+            color="primary"
+            iconType="pin"
+            size="s"
+          >
+            <EuiText size="s">
+              {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContent', {
+                    defaultMessage:
+                      'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the analysis results table shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
+                  })
+                : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
+                    defaultMessage:
+                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
+                  })}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="xs" />
+        </>
+      )}
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -361,7 +414,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               )}
               {overrides !== undefined ? (
                 <p>
-                  <EuiButton size="s" onClick={() => startHandler(true)}>
+                  <EuiButton
+                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
+                    size="s"
+                    onClick={() => startHandler(true)}
+                  >
                     <FormattedMessage
                       id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
                       defaultMessage="Try to continue analysis"

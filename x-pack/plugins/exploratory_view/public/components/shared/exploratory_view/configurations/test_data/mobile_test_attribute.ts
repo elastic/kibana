@@ -48,6 +48,7 @@ export const testMobileKPIAttr = {
                 params: {},
                 scale: 'ratio',
                 sourceField: 'system.memory.usage',
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   query:

@@ -216,6 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a status summary if getStatusSummary provided', async () => {
       const { body: apiResponse } = await supertest
         .get('/api/fleet/agents?getStatusSummary=true&perPage=0')
+        .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
       expect(apiResponse.items).to.eql([]);

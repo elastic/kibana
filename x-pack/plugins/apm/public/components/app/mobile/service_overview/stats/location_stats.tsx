@@ -133,17 +133,18 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorDisabled,
+      color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
         defaultMessage: 'Most crashes',
       }),
-      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-        defaultMessage: 'Coming Soon',
+      extra: getComparisonValueFormatter({
+        currentPeriodValue: currentPeriod?.mostCrashes.value,
+        previousPeriodValue: previousPeriod?.mostCrashes.value,
       }),
       icon: getIcon('bug'),
-      value: NOT_AVAILABLE_LABEL,
+      value: currentPeriod?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value) => `${value}`,
-      trend: [],
+      trend: currentPeriod?.mostCrashes.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {

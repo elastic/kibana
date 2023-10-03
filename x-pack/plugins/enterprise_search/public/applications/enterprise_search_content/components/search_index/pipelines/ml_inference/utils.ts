@@ -12,6 +12,8 @@ import { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline'
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
+export const TRAINED_MODELS_PATH = '/app/ml/trained_models';
+
 export const isValidPipelineName = (input: string): boolean => {
   return input.length > 0 && VALID_PIPELINE_NAME_REGEX.test(input);
 };

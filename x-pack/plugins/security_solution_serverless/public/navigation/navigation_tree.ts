@@ -35,6 +35,10 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
   SecurityPageName.sessions,
 ]);
 
+const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
+  HIDDEN_BREADCRUMBS.has(id) ||
+  id.startsWith('management:'); /* management sub-pages set their breadcrumbs themselves */
+
 export const subscribeNavigationTree = (services: Services): void => {
   const { serverless, getProjectNavLinks$ } = services;
 
@@ -42,18 +46,7 @@ export const subscribeNavigationTree = (services: Services): void => {
 
   // projectNavLinks$ updates when chrome.navLinks changes, no need to subscribe chrome.navLinks.getNavLinks$() again.
   getProjectNavLinks$().subscribe((projectNavLinks) => {
-    // TODO: The root link is temporary until the Platform bug having multiple links at first level is solved.
-    // Assign using the following line when the issue is solved:
-    // const navigationTree = formatChromeProjectNavNodes(chrome.navLinks, projectNavLinks),
-    const navigationTree: ChromeProjectNavigationNode[] = [
-      {
-        id: 'root',
-        title: 'Root',
-        path: ['root'],
-        breadcrumbStatus: 'hidden',
-        children: formatChromeProjectNavNodes(projectNavLinks, ['root']),
-      },
-    ];
+    const navigationTree = formatChromeProjectNavNodes(projectNavLinks);
     serverless.setNavigation({ navigationTree });
   });
 };
@@ -70,13 +63,12 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
       const navLinkId = getNavLinkIdFromProjectPageName(id);
 
       if (chrome.navLinks.has(navLinkId)) {
-        const breadcrumbHidden = HIDDEN_BREADCRUMBS.has(id);
         const link: ChromeProjectNavigationNode = {
           id: navLinkId,
           title,
           path: [...path, navLinkId],
           deepLink: chrome.navLinks.get(navLinkId),
-          ...(breadcrumbHidden && { breadcrumbStatus: 'hidden' }),
+          ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
         };
         // check default navigation for children
         const defaultChildrenNav = getDefaultChildrenNav(id, link);
@@ -98,7 +90,7 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
     if (id === SecurityPageName.mlLanding) {
       return processDefaultNav(mlDefaultNav.children, link.path);
     }
-    if (id === ExternalPageName.devToolsRoot) {
+    if (id === ExternalPageName.devTools) {
       return processDefaultNav(devToolsDefaultNav.children, link.path);
     }
     return undefined;

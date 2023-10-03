@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertRulesFilterToKQL } from '../../../../../../../common/utils/kql';
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
@@ -47,6 +47,12 @@ export const prepareSearchParams = ({
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],
+        };
+        break;
+      case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],
         };
         break;
     }

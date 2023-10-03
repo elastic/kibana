@@ -12,15 +12,19 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-function createJobStats(jobsSummaryList) {
+function createJobStats(jobsSummaryList, showNodeInfo) {
   const jobStats = {
-    activeNodes: {
-      label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML nodes',
-      }),
-      value: 0,
-      show: true,
-    },
+    ...(showNodeInfo
+      ? {
+          activeNodes: {
+            label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
+              defaultMessage: 'Active ML nodes',
+            }),
+            value: 0,
+            show: true,
+          },
+        }
+      : {}),
     total: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.totalJobsLabel', {
         defaultMessage: 'Total jobs',
@@ -94,17 +98,20 @@ function createJobStats(jobsSummaryList) {
     jobStats.failed.show = false;
   }
 
-  jobStats.activeNodes.value = Object.keys(mlNodes).length;
+  if (showNodeInfo) {
+    jobStats.activeNodes.value = Object.keys(mlNodes).length;
+  }
 
   return jobStats;
 }
 
-export const JobStatsBar = ({ jobsSummaryList }) => {
-  const jobStats = createJobStats(jobsSummaryList);
+export const JobStatsBar = ({ jobsSummaryList, showNodeInfo }) => {
+  const jobStats = createJobStats(jobsSummaryList, showNodeInfo);
 
   return <StatsBar stats={jobStats} dataTestSub={'mlJobStatsBar'} />;
 };
 
 JobStatsBar.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
+  showNodeInfo: PropTypes.bool.isRequired,
 };

@@ -49,6 +49,7 @@ describe('Get artifact hook', () => {
     expect(result.data).toBe(apiResponse);
     expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
     expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items', {
+      version: '2023-10-31',
       query: {
         item_id: 'fakeId',
         namespace_type: 'agnostic',

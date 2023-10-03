@@ -24,7 +24,8 @@ export const getRule = async (
 ): Promise<RuleResponse> => {
   const response = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-    .set('kbn-xsrf', 'true');
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31');
 
   if (response.status !== 200) {
     log.error(

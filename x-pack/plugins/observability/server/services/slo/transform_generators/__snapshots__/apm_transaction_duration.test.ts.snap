@@ -24,7 +24,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -130,7 +130,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -163,7 +163,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -198,6 +198,11 @@ Object {
   "slo.description": Object {
     "terms": Object {
       "field": "slo.description",
+    },
+  },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
     },
   },
   "slo.id": Object {
@@ -272,7 +277,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -307,6 +312,11 @@ Object {
   "slo.description": Object {
     "terms": Object {
       "field": "slo.description",
+    },
+  },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
     },
   },
   "slo.id": Object {
@@ -381,7 +391,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -411,6 +421,11 @@ Object {
   "slo.description": Object {
     "terms": Object {
       "field": "slo.description",
+    },
+  },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
     },
   },
   "slo.id": Object {
@@ -490,7 +505,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -520,6 +535,11 @@ Object {
   "slo.description": Object {
     "terms": Object {
       "field": "slo.description",
+    },
+  },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
     },
   },
   "slo.id": Object {
@@ -650,6 +670,11 @@ Object {
           "field": "slo.description",
         },
       },
+      "slo.groupBy": Object {
+        "terms": Object {
+          "field": "slo.groupBy",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -714,6 +739,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -740,7 +766,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -777,6 +803,12 @@ Object {
       "slo.description": Object {
         "script": Object {
           "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.groupBy": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -918,6 +950,11 @@ Object {
           "field": "slo.description",
         },
       },
+      "slo.groupBy": Object {
+        "terms": Object {
+          "field": "slo.groupBy",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -977,6 +1014,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -1003,7 +1041,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -1040,6 +1078,12 @@ Object {
       "slo.description": Object {
         "script": Object {
           "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.groupBy": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },

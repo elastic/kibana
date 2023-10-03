@@ -33,6 +33,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+import { AssistantAvailability, AssistantTelemetry } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -45,13 +46,17 @@ type ShowAssistantOverlay = ({
   promptContextId,
   conversationId,
 }: ShowAssistantOverlayProps) => void;
-interface AssistantProviderProps {
+export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantAvailability: AssistantAvailability;
+  assistantLangChain: boolean;
+  assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
   defaultAllow: string[];
   defaultAllowReplacement: string[];
+  basePath: string;
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
   baseSystemPrompts?: Prompt[];
@@ -77,14 +82,18 @@ interface AssistantProviderProps {
 
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantAvailability: AssistantAvailability;
+  assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
+  assistantLangChain: boolean;
   baseAllow: string[];
   baseAllowReplacement: string[];
   docLinks: Omit<DocLinksStart, 'links'>;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
+  basePath: string;
   basePromptContexts: PromptContextTemplate[];
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
@@ -123,12 +132,16 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
+  assistantAvailability,
+  assistantLangChain,
+  assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
   defaultAllow,
   defaultAllowReplacement,
   docLinks,
+  basePath,
   basePromptContexts = [],
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
@@ -240,11 +253,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const value = useMemo(
     () => ({
       actionTypeRegistry,
+      assistantAvailability,
+      assistantLangChain,
+      assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
       allSystemPrompts: localStorageSystemPrompts ?? [],
       baseAllow: uniq(baseAllow),
       baseAllowReplacement: uniq(baseAllowReplacement),
+      basePath,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,
@@ -274,9 +291,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     }),
     [
       actionTypeRegistry,
+      assistantAvailability,
+      assistantLangChain,
+      assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
       baseAllowReplacement,
+      basePath,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,

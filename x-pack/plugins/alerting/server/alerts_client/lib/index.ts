@@ -15,3 +15,4 @@ export {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
 } from './get_summarized_alerts_query';
+export { expandFlattenedAlert } from './format_alert';

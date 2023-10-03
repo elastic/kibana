@@ -2,6 +2,7 @@
 
 exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
 <EuiPage
+  data-test-subj="fatalErrorScreen"
   style={
     Object {
       "alignItems": "center",

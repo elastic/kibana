@@ -15,3 +15,4 @@ export { alertsSummaryHttpResponse, type AlertsSummaryHttpMocks } from './alerts
 export { anomaliesHttpResponse, type AnomaliesHttpMocks } from './anomalies';
 export { snapshotAPItHttpResponse, type SnapshotAPIHttpMocks } from './snapshot_api';
 export { getLogEntries } from './log_entries';
+export { assetDetailsProps } from './asset_details_props';

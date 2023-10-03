@@ -7,7 +7,9 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   Comparator,
@@ -105,6 +107,7 @@ export async function registerMetricInventoryThresholdRuleType(
     defaultActionGroupId: FIRED_ACTIONS_ID,
     doesSetRecoveryContext: true,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -147,5 +150,7 @@ export async function registerMetricInventoryThresholdRuleType(
     },
     alerts: MetricsRulesTypeAlertDefinition,
     fieldsForAAD: O11Y_AAD_FIELDS,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

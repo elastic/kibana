@@ -1,0 +1,15 @@
+title: Bad request
+type: object
+required:
+  - statusCode
+  - error
+  - message
+properties:
+  statusCode:
+    type: number
+    example: 400
+  error:
+    type: string
+    example: Bad Request
+  message:
+    type: string

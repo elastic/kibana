@@ -8,7 +8,7 @@
 import React from 'react';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -39,6 +39,13 @@ jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
 }));
 
 jest.mock('../operations');
+
+const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
+  wrapper
+    .find(EuiComboBox)
+    .filter('[data-test-subj="indexPattern-dimension-field"]') as ReactWrapper<
+    EuiComboBoxProps<string | number | string[] | undefined>
+  >;
 
 describe('reference editor', () => {
   let wrapper: ReactWrapper | ShallowWrapper;
@@ -124,10 +131,7 @@ describe('reference editor', () => {
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
     );
 
-    const fields = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-dimension-field"]')
-      .prop('options');
+    const fields = getFieldSelectComboBox(wrapper).prop('options');
 
     expect(fields![0].options).not.toContainEqual(
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
@@ -163,10 +167,7 @@ describe('reference editor', () => {
       />
     );
 
-    const fields = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-dimension-field"]')
-      .prop('options');
+    const fields = getFieldSelectComboBox(wrapper).prop('options');
 
     const findFieldDataTestSubj = (l: string) => {
       return fields![0].options!.find(({ label }) => label === l)!['data-test-subj'];
@@ -207,9 +208,9 @@ describe('reference editor', () => {
       .filter('[data-test-subj="indexPattern-reference-function"]')
       .prop('options');
 
-    expect(functions.find(({ label }) => label === 'Average')!['data-test-subj']).toContain(
-      'incompatible'
-    );
+    expect(
+      functions.find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!['data-test-subj']
+    ).toContain('incompatible');
   });
 
   it('should not update when selecting the same operation', () => {
@@ -241,7 +242,9 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+    const option = comboBox
+      .prop('options')!
+      .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
@@ -280,7 +283,9 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Maximum')!;
+    const option = comboBox
+      .prop('options')!
+      .find(({ label }: EuiComboBoxOptionOption) => label === 'Maximum')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
@@ -325,7 +330,9 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+    const option = comboBox
+      .prop('options')!
+      .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);

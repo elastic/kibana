@@ -9,13 +9,9 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { Connector, FeatureName, IngestPipelineParams, SyncStatus } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../common/types/api';
-import {
-  Connector,
-  FeatureName,
-  IngestPipelineParams,
-  SyncStatus,
-} from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';

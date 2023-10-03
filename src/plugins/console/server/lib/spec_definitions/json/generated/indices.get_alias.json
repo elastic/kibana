@@ -1,15 +1,19 @@
 {
   "indices.get_alias": {
     "url_params": {
-      "ignore_unavailable": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
+      "ignore_unavailable": "__flag__",
       "local": "__flag__"
     },
     "methods": [
@@ -18,9 +22,13 @@
     "patterns": [
       "_alias",
       "_alias/{name}",
-      "{indices}/_alias/{name}",
-      "{indices}/_alias"
+      "{index}/_alias/{name}",
+      "{index}/_alias"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -69,9 +69,7 @@ export const ResolverWithoutProviders = React.memo(
     const timeAtRender = timestamp();
 
     const { processNodePositions, connectingEdgeLineSegments } = useSelector((state: State) =>
-      selectors.visibleNodesAndEdgeLines(state.analyzer.analyzerById[resolverComponentInstanceID])(
-        timeAtRender
-      )
+      selectors.visibleNodesAndEdgeLines(state.analyzer[resolverComponentInstanceID])(timeAtRender)
     );
 
     const {
@@ -95,16 +93,16 @@ export const ResolverWithoutProviders = React.memo(
       [cameraRef, refToForward]
     );
     const isLoading = useSelector((state: State) =>
-      selectors.isTreeLoading(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.isTreeLoading(state.analyzer[resolverComponentInstanceID])
     );
     const hasError = useSelector((state: State) =>
-      selectors.hadErrorLoadingTree(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.hadErrorLoadingTree(state.analyzer[resolverComponentInstanceID])
     );
     const activeDescendantId = useSelector((state: State) =>
-      selectors.ariaActiveDescendant(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.ariaActiveDescendant(state.analyzer[resolverComponentInstanceID])
     );
     const resolverTreeHasNodes = useSelector((state: State) =>
-      selectors.resolverTreeHasNodes(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID])
     );
     const colorMap = useColors();
 

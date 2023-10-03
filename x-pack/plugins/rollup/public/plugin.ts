@@ -11,6 +11,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 import { UIM_APP_NAME } from '../common';
 // @ts-ignore
@@ -23,6 +24,7 @@ export interface RollupPluginSetupDependencies {
   management: ManagementSetup;
   indexManagement?: IndexManagementPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  dataViews: DataViewsPublicPluginSetup;
 }
 
 export class RollupPlugin implements Plugin {
@@ -30,7 +32,7 @@ export class RollupPlugin implements Plugin {
 
   setup(
     core: CoreSetup,
-    { home, management, indexManagement, usageCollection }: RollupPluginSetupDependencies
+    { home, management, indexManagement, usageCollection, dataViews }: RollupPluginSetupDependencies
   ) {
     const {
       ui: { enabled: isRollupUiEnabled },
@@ -62,6 +64,7 @@ export class RollupPlugin implements Plugin {
     }
 
     if (isRollupUiEnabled) {
+      dataViews.enableRollups();
       const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
         defaultMessage: 'Rollup Jobs',
       });

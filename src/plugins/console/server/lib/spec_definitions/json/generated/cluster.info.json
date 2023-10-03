@@ -1,20 +1,30 @@
 {
   "cluster.info": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "url_components": {
+      "target": [
+        "_all",
+        "http",
+        "ingest",
+        "thread_pool",
+        "script"
+      ]
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_info/{target}"
     ],
-    "url_components": {
-      "target": [
-        "_all",
-        "http",
-        "ingest",
-        "script",
-        "thread_pool"
-      ]
-    },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-info.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-info.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

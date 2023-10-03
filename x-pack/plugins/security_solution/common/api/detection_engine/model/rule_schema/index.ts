@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export * from './common_attributes/field_overrides';
-export * from './common_attributes/misc_attributes';
-export * from './common_attributes/related_integrations';
-export * from './common_attributes/required_fields';
-export * from './common_attributes/saved_objects';
-export * from './common_attributes/timeline_template';
+export * from './common_attributes';
 
 export * from './specific_attributes/eql_attributes';
 export * from './specific_attributes/new_terms_attributes';

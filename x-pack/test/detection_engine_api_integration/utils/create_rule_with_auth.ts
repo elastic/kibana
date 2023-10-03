@@ -26,6 +26,7 @@ export const createRuleWithAuth = async (
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .auth(auth.user, auth.pass)
     .send(rule);
   return body;

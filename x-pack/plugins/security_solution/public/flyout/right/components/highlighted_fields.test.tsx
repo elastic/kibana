@@ -10,74 +10,55 @@ import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { HighlightedFields } from './highlighted_fields';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
-import { useHighlightedFields } from '../hooks/use_highlighted_fields';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { TestProviders } from '../../../common/mock';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-jest.mock('../hooks/use_highlighted_fields');
+jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+
+const renderHighlightedFields = (contextValue: RightPanelContext) =>
+  render(
+    <TestProviders>
+      <RightPanelContext.Provider value={contextValue}>
+        <HighlightedFields />
+      </RightPanelContext.Provider>
+    </TestProviders>
+  );
+
+const NO_DATA_MESSAGE = "There's no highlighted fields for this alert.";
 
 describe('<HighlightedFields />', () => {
-  it('should render the component', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue([
-      {
-        field: 'field',
-        description: {
-          field: 'field',
-          values: ['value'],
-        },
-      },
-    ]);
+  beforeEach(() => {
+    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: undefined });
+  });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <HighlightedFields />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+  it('should render the component', () => {
+    const contextValue = {
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
+    } as unknown as RightPanelContext;
+    (useHighlightedFields as jest.Mock).mockReturnValue({
+      field: {
+        values: ['value'],
+      },
+    });
+
+    const { getByTestId } = renderHighlightedFields(contextValue);
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
-  it(`should render empty component if there aren't any highlighted fields`, () => {
-    const panelContextValue = {
+  it(`should render no data message if there aren't any highlighted fields`, () => {
+    const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue([]);
+    (useHighlightedFields as jest.Mock).mockReturnValue({});
 
-    const { container } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFields />
-      </RightPanelContext.Provider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render empty component if dataFormattedForFieldBrowser is null', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue([
-      {
-        field: 'field',
-        description: {
-          field: 'field',
-          values: ['value'],
-        },
-      },
-    ]);
-
-    const { container } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFields />
-      </RightPanelContext.Provider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
+    const { getByText } = renderHighlightedFields(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });

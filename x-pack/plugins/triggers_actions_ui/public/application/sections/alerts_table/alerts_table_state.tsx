@@ -178,7 +178,7 @@ const AlertsTableStateWithQueryProvider = ({
     : EmptyConfiguration;
 
   const storage = useRef(new Storage(window.localStorage));
-  const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+  const localStorageAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
   const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
   const showInspectButton = alertsTableConfiguration?.showInspectButton ?? false;
 
@@ -186,25 +186,25 @@ const AlertsTableStateWithQueryProvider = ({
     propColumns && !isEmpty(propColumns) ? propColumns : alertsTableConfiguration?.columns ?? [];
 
   const columnsLocal =
-    localAlertsTableConfig &&
-    localAlertsTableConfig.columns &&
-    !isEmpty(localAlertsTableConfig?.columns)
-      ? localAlertsTableConfig?.columns ?? []
+    localStorageAlertsTableConfig &&
+    localStorageAlertsTableConfig.columns &&
+    !isEmpty(localStorageAlertsTableConfig?.columns)
+      ? localStorageAlertsTableConfig?.columns
       : columnConfigByClient;
 
   const getStorageConfig = () => ({
     columns: columnsLocal,
     sort:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.sort &&
-      !isEmpty(localAlertsTableConfig?.sort)
-        ? localAlertsTableConfig?.sort ?? []
+      localStorageAlertsTableConfig &&
+      localStorageAlertsTableConfig.sort &&
+      !isEmpty(localStorageAlertsTableConfig?.sort)
+        ? localStorageAlertsTableConfig?.sort
         : alertsTableConfiguration?.sort ?? [],
     visibleColumns:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.visibleColumns &&
-      !isEmpty(localAlertsTableConfig?.visibleColumns)
-        ? localAlertsTableConfig?.visibleColumns ?? []
+      localStorageAlertsTableConfig &&
+      localStorageAlertsTableConfig.visibleColumns &&
+      !isEmpty(localStorageAlertsTableConfig?.visibleColumns)
+        ? localStorageAlertsTableConfig?.visibleColumns
         : columnsLocal.map((c) => c.id),
   });
   const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());

@@ -12,6 +12,10 @@ import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server'
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  ProfilingDataAccessPluginSetup,
+  ProfilingDataAccessPluginStart,
+} from '@kbn/profiling-data-access-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
@@ -20,6 +24,7 @@ export interface ProfilingPluginSetupDeps {
   fleet: FleetSetupContract;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  profilingDataAccess: ProfilingDataAccessPluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {
@@ -28,6 +33,7 @@ export interface ProfilingPluginStartDeps {
   cloud: CloudStart;
   fleet: FleetStartContract;
   spaces?: SpacesPluginStart;
+  profilingDataAccess: ProfilingDataAccessPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

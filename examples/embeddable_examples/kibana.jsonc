@@ -10,17 +10,10 @@
     "requiredPlugins": [
       "embeddable",
       "uiActions",
-      "savedObjects",
       "dashboard",
-      "kibanaUtils"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
     ],
     "extraPublicDirs": [
-      "public/todo",
-      "public/hello_world",
-      "public/todo/todo_ref_embeddable"
+      "public/hello_world"
     ]
   }
 }

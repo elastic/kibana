@@ -162,6 +162,21 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertTableIsPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.not.eql(0, `Expected trained model row count to be '>0' (got '0')`);
+    }
+
+    public async assertTableIsNotPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.eql(
+        0,
+        `Expected trained model row count to be '0' (got '${rows.length}')`
+      );
+    }
+
     public async assertModelCollapsedActionsButtonExists(modelId: string, expectedValue: boolean) {
       const actionsExists = await this.doesModelCollapsedActionsButtonExist(modelId);
       expect(actionsExists).to.eql(
@@ -198,6 +213,19 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertModelDeployActionButtonExists(modelId: string, expectedValue: boolean) {
+      const actionsExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsTableRowDeployAction')
+      );
+
+      expect(actionsExists).to.eql(
+        expectedValue,
+        `Expected row deploy action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionsExists ? 'visible' : 'hidden'})`
+      );
+    }
+
     public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
       const actionExists = await testSubjects.exists(
         this.rowSelector(modelId, 'mlModelsTableRowTestAction')
@@ -226,10 +254,21 @@ export function TrainedModelsTableProvider(
       await trainedModelsActions.testModelOutput(modelType, inputParams, expectedResult);
     }
 
-    public async deleteModel(modelId: string) {
+    public async openTrainedModelsInferenceFlyout(modelId: string) {
       await mlCommonUI.invokeTableRowAction(
         this.rowSelector(modelId),
-        'mlModelsTableRowDeleteAction'
+        'mlModelsTableRowDeployAction',
+        false
+      );
+      await this.assertDeployModelFlyoutExists();
+    }
+
+    public async deleteModel(modelId: string) {
+      const fromContextMenu = await this.doesModelCollapsedActionsButtonExist(modelId);
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeleteAction',
+        fromContextMenu
       );
       await this.assertDeleteModalExists();
       await this.confirmDeleteModel();
@@ -264,12 +303,31 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deployModelsContinue(expectedStep?: string) {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineContinueButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineContinueButton');
+      if (expectedStep) {
+        await testSubjects.existOrFail(expectedStep);
+      }
+    }
+
+    public async assertDeployModelsCreateButton(expectedStep?: string) {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineCreateButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineCreateButton');
+    }
+
     public async assertDeleteModalExists() {
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
 
     public async assertTestFlyoutExists() {
       await testSubjects.existOrFail('mlTestModelsFlyout', { timeout: 60 * 1000 });
+    }
+
+    public async assertDeployModelFlyoutExists() {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineFlyout', {
+        timeout: 60 * 1000,
+      });
     }
 
     public async assertStartDeploymentModalExists(expectExist = true) {
@@ -403,9 +461,10 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickStopDeploymentAction(modelId: string) {
-      await testSubjects.clickWhenNotDisabled(
-        this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
-        { timeout: 5000 }
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowStopDeploymentAction',
+        true
       );
     }
 

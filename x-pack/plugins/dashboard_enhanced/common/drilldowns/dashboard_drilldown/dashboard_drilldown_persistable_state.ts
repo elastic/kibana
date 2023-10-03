@@ -8,7 +8,7 @@
 import { SavedObjectReference } from '@kbn/core/types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
-import { DrilldownConfig } from './types';
+import { DashboardDrilldownConfig } from './types';
 
 type DashboardDrilldownPersistableState = PersistableStateService<SerializedEvent>;
 
@@ -34,7 +34,7 @@ export const createInject = ({
   drilldownId: string;
 }): DashboardDrilldownPersistableState['inject'] => {
   return (state: SerializedEvent, references: SavedObjectReference[]) => {
-    const action = state.action as SerializedAction<DrilldownConfig>;
+    const action = state.action as SerializedAction<DashboardDrilldownConfig>;
     const refName = generateRefName(state, drilldownId);
     const ref = references.find((r) => r.name === refName);
     if (!ref) return state;
@@ -49,7 +49,7 @@ export const createExtract = ({
   drilldownId: string;
 }): DashboardDrilldownPersistableState['extract'] => {
   return (state: SerializedEvent) => {
-    const action = state.action as SerializedAction<DrilldownConfig>;
+    const action = state.action as SerializedAction<DashboardDrilldownConfig>;
     const references: SavedObjectReference[] = action.config.dashboardId
       ? [
           {

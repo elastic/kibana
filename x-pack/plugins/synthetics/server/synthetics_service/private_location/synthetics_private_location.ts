@@ -102,12 +102,10 @@ export class SyntheticsPrivateLocation {
           config_id: config.fields?.config_id,
           location_name: stringifyString(privateLocation.label),
           location_id: privateLocation.id,
-          'monitor.project.id': stringifyString(
-            config.fields?.['monitor.project.id'] ?? config[ConfigKey.PROJECT_ID]
-          ),
-          'monitor.project.name': stringifyString(
-            config.fields?.['monitor.project.name'] ?? config[ConfigKey.PROJECT_ID]
-          ),
+          'monitor.project.id':
+            config.fields?.['monitor.project.id'] ?? config[ConfigKey.PROJECT_ID],
+          'monitor.project.name':
+            config.fields?.['monitor.project.name'] ?? config[ConfigKey.PROJECT_ID],
           ...(testRunId
             ? {
                 test_run_id: testRunId,
@@ -437,9 +435,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    const agentPolicies = await getAgentPoliciesAsInternalUser(this.server);
-
-    return agentPolicies.items;
+    return await getAgentPoliciesAsInternalUser(this.server);
   }
 }
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -14,8 +13,9 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('Reader - only READ', () => {
+describe('Reader - only READ', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
@@ -37,7 +37,7 @@ describe('Reader - only READ', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.reader);
+    cy.login(ServerlessRoleName.READER);
   });
 
   after(() => {
@@ -47,7 +47,6 @@ describe('Reader - only READ', () => {
 
   it('should not be able to add nor run saved queries', () => {
     navigateTo('/app/osquery/saved_queries');
-    cy.waitForReact(1000);
     cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {
@@ -70,13 +69,11 @@ describe('Reader - only READ', () => {
 
   it('should not be able to enter live queries with just read and no run saved queries', () => {
     navigateTo('/app/osquery/live_queries/new');
-    cy.waitForReact(1000);
     cy.contains('Permission denied');
   });
 
   it('should not be able to play in live queries history', () => {
     navigateTo('/app/osquery/live_queries');
-    cy.waitForReact(1000);
     cy.contains('New live query').should('be.disabled');
     cy.contains(liveQueryQuery);
     cy.react('EuiIconPlay', { options: { timeout: 3000 } }).should('not.exist');
@@ -85,7 +82,6 @@ describe('Reader - only READ', () => {
 
   it('should not be able to add nor edit packs', () => {
     navigateTo('/app/osquery/packs');
-    cy.waitForReact(1000);
     cy.contains('Add pack').should('be.disabled');
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();

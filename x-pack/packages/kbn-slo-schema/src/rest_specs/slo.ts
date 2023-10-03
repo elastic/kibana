@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import {
+  allOrAnyString,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
@@ -39,7 +40,12 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ id: sloIdSchema, settings: optionalSettingsSchema, tags: tagsSchema }),
+    t.partial({
+      id: sloIdSchema,
+      settings: optionalSettingsSchema,
+      tags: tagsSchema,
+      groupBy: allOrAnyString,
+    }),
   ]),
 });
 
@@ -56,12 +62,6 @@ const getPreviewDataParamsSchema = t.type({
 const getPreviewDataResponseSchema = t.array(previewDataSchema);
 
 const deleteSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-});
-
-const getSLOParamsSchema = t.type({
   path: t.type({
     id: sloIdSchema,
   }),
@@ -85,25 +85,45 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const sloResponseSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  revision: t.number,
-  settings: settingsSchema,
-  enabled: t.boolean,
-  tags: tagsSchema,
-  createdAt: dateType,
-  updatedAt: dateType,
-});
+const sloResponseSchema = t.intersection([
+  t.type({
+    id: sloIdSchema,
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    revision: t.number,
+    settings: settingsSchema,
+    enabled: t.boolean,
+    tags: tagsSchema,
+    groupBy: allOrAnyString,
+    createdAt: dateType,
+    updatedAt: dateType,
+  }),
+  t.partial({
+    instanceId: allOrAnyString,
+  }),
+]);
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
   t.type({ summary: summarySchema }),
+]);
+
+const getSLOQuerySchema = t.partial({
+  query: t.partial({
+    instanceId: allOrAnyString,
+  }),
+});
+const getSLOParamsSchema = t.intersection([
+  t.type({
+    path: t.type({
+      id: sloIdSchema,
+    }),
+  }),
+  getSLOQuerySchema,
 ]);
 
 const getSLOResponseSchema = sloWithSummaryResponseSchema;
@@ -121,6 +141,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
+    groupBy: allOrAnyString,
   }),
 });
 
@@ -137,17 +158,39 @@ const findSLOResponseSchema = t.type({
   results: t.array(sloWithSummaryResponseSchema),
 });
 
-const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({ sloIds: t.array(sloIdSchema) }),
+const deleteSLOInstancesParamsSchema = t.type({
+  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
 });
-const fetchHistoricalSummaryResponseSchema = t.record(
-  sloIdSchema,
-  t.array(historicalSummarySchema)
+
+const fetchHistoricalSummaryParamsSchema = t.type({
+  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: allOrAnyString })) }),
+});
+
+const fetchHistoricalSummaryResponseSchema = t.array(
+  t.type({
+    sloId: sloIdSchema,
+    instanceId: allOrAnyString,
+    data: t.array(historicalSummarySchema),
+  })
 );
 
-const getSLODiagnosisParamsSchema = t.type({
-  path: t.type({ id: t.string }),
+/**
+ * The query params schema for /internal/observability/slo/_definitions
+ *
+ * @private
+ */
+const findSloDefinitionsParamsSchema = t.type({
+  query: t.type({
+    search: t.string,
+  }),
 });
+
+/**
+ * The response schema for /internal/observability/slo/_definitions
+ *
+ * @private
+ */
+const findSloDefinitionsResponseSchema = t.array(sloResponseSchema);
 
 const getSLOBurnRatesResponseSchema = t.type({
   burnRates: t.array(
@@ -162,6 +205,7 @@ const getSLOBurnRatesResponseSchema = t.type({
 const getSLOBurnRatesParamsSchema = t.type({
   path: t.type({ id: t.string }),
   body: t.type({
+    instanceId: allOrAnyString,
     windows: t.array(
       t.type({
         name: t.string,
@@ -171,6 +215,15 @@ const getSLOBurnRatesParamsSchema = t.type({
   }),
 });
 
+const getSLOInstancesParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+});
+
+const getSLOInstancesResponseSchema = t.type({
+  groupBy: t.string,
+  instances: t.array(t.string),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -178,6 +231,7 @@ type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Ra
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
+type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
@@ -189,12 +243,24 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
+type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
+
 type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
+/**
+ * The response type for /internal/observability/slo/_definitions
+ *
+ * @private
+ */
+type FindSloDefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
+
+type GetSLOInstancesResponse = t.OutputOf<typeof getSLOInstancesResponseSchema>;
 
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
@@ -210,15 +276,17 @@ type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 export {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
+  deleteSLOInstancesParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
-  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
+  findSloDefinitionsParamsSchema,
+  findSloDefinitionsResponseSchema,
   manageSLOParamsSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
@@ -226,20 +294,26 @@ export {
   updateSLOResponseSchema,
   getSLOBurnRatesParamsSchema,
   getSLOBurnRatesResponseSchema,
+  getSLOInstancesParamsSchema,
+  getSLOInstancesResponseSchema,
 };
 export type {
   BudgetingMethod,
   CreateSLOInput,
   CreateSLOParams,
   CreateSLOResponse,
+  DeleteSLOInstancesInput,
+  DeleteSLOInstancesParams,
   FindSLOParams,
   FindSLOResponse,
   GetPreviewDataParams,
   GetPreviewDataResponse,
+  GetSLOParams,
   GetSLOResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
+  FindSloDefinitionsResponse,
   ManageSLOParams,
   SLOResponse,
   SLOWithSummaryResponse,
@@ -249,6 +323,7 @@ export type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   GetSLOBurnRatesResponse,
+  GetSLOInstancesResponse,
   IndicatorType,
   Indicator,
   MetricCustomIndicator,

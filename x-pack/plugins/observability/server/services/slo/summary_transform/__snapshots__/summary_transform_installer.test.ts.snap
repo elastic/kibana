@@ -7,7 +7,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 7 days rolling time window",
       "dest": Object {
@@ -58,7 +58,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -110,6 +110,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -168,6 +173,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -230,7 +236,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 30 days rolling time window",
       "dest": Object {
@@ -281,7 +287,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -333,6 +339,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -391,6 +402,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -453,7 +465,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 90 days rolling time window",
       "dest": Object {
@@ -504,7 +516,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -556,6 +568,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -614,6 +631,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -676,7 +694,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a weekly calendar aligned time window",
       "dest": Object {
@@ -742,7 +760,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -792,6 +810,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -850,6 +873,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",
@@ -912,7 +936,7 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 2,
+        "version": 3,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a monthly calendar aligned time window",
       "dest": Object {
@@ -993,7 +1017,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -1043,6 +1067,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -1101,6 +1130,7 @@ Array [
       },
       "settings": Object {
         "deduce_mappings": false,
+        "unattended": true,
       },
       "source": Object {
         "index": ".slo-observability.sli-v2*",

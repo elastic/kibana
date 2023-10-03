@@ -10,6 +10,7 @@ import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/t
 export const assetsIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
   name: 'assets',
   priority: 100,
+  data_stream: {},
   template: {
     settings: {},
     mappings: {

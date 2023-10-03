@@ -10,6 +10,7 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiSelectableMessage,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
@@ -26,18 +27,16 @@ export interface Option {
 
 const NoFilterItems = () => {
   return (
-    <div className="euiFilterSelect__note">
-      <div className="euiFilterSelect__noteContent">
-        <EuiIcon type="minusInCircle" />
-        <EuiSpacer size="xs" />
-        <p>
-          <FormattedMessage
-            id="xpack.ml.multiSelectPicker.NoFiltersFoundMessage"
-            defaultMessage="No filters found"
-          />
-        </p>
-      </div>
-    </div>
+    <EuiSelectableMessage>
+      <EuiIcon type="minusInCircle" />
+      <EuiSpacer size="xs" />
+      <p>
+        <FormattedMessage
+          id="xpack.ml.multiSelectPicker.NoFiltersFoundMessage"
+          defaultMessage="No filters found"
+        />
+      </p>
+    </EuiSelectableMessage>
   );
 };
 

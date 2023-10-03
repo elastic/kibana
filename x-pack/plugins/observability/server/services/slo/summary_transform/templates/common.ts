@@ -16,6 +16,11 @@ export const groupBy = {
       field: 'slo.revision',
     },
   },
+  'slo.groupBy': {
+    terms: {
+      field: 'slo.groupBy',
+    },
+  },
   'slo.instanceId': {
     terms: {
       field: 'slo.instanceId',

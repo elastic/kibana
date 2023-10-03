@@ -16,6 +16,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     markdownPlugins: true,
     files: { maxSize: true, allowedMimeTypes: true },
+    stack: { enabled: true },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),

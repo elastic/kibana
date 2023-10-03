@@ -16,6 +16,7 @@ export const ErrorsLink = ({ disabled }: { disabled?: boolean }) => {
   return (
     <EuiToolTip content={VIEW_ERRORS}>
       <EuiButtonIcon
+        data-test-subj="syntheticsErrorsLinkButton"
         aria-label={VIEW_ERRORS}
         href={`${basePath}/app/synthetics/errors`}
         iconType="inspect"

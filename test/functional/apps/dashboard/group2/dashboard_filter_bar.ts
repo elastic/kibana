@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -193,7 +193,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved search filtering', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/167175
+    describe.skip('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();

@@ -31,6 +31,7 @@ import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
+import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -136,6 +137,9 @@ export class JobsListView extends Component {
         loadFullJob(jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
+            if (this.props.showNodeInfo === false) {
+              job = removeNodeInfo(job);
+            }
             fullJobsList[jobId] = job;
             this.setState({ fullJobsList }, () => {
               // take a fresh copy of the itemIdToExpandedRowMap object
@@ -314,6 +318,9 @@ export class JobsListView extends Component {
       const fullJobsList = {};
       const jobsSummaryList = jobs.map((job) => {
         if (job.fullJob !== undefined) {
+          if (this.props.showNodeInfo === false) {
+            job.fullJob = removeNodeInfo(job.fullJob);
+          }
           fullJobsList[job.id] = job.fullJob;
           delete job.fullJob;
         }
@@ -408,7 +415,10 @@ export class JobsListView extends Component {
             <>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <JobStatsBar jobsSummaryList={jobsSummaryList} />
+                  <JobStatsBar
+                    jobsSummaryList={jobsSummaryList}
+                    showNodeInfo={this.props.showNodeInfo}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NewJobButton />
