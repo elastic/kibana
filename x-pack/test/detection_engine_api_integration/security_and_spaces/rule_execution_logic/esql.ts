@@ -116,9 +116,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.space_ids': ['default'],
         'kibana.alert.rule.tags': [],
         'agent.name': 'test-1',
-        'agent.type': null,
-        'agent.version': null,
-        'host.name': null,
         id,
         'event.kind': 'signal',
         'kibana.alert.original_time': expect.any(String),
@@ -155,8 +152,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_tags': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
-        'kibana.alert.original_event.created': null,
-        'kibana.alert.original_event.ingested': null,
       });
     });
 
@@ -958,7 +953,7 @@ export default ({ getService }: FtrProviderContext) => {
             id,
           });
 
-          const { previewId, logs } = await previewRule({
+          const { previewId } = await previewRule({
             supertest,
             rule,
             timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
