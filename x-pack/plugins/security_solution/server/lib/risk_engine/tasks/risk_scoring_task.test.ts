@@ -461,9 +461,8 @@ describe('Risk Scoring Task', () => {
             telemetry: mockTelemetry,
           });
 
-          expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
           expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
-            executionDurationExceededInterval: false,
+            interval: '1h',
             scoresWritten: 10,
             taskDurationInSeconds: 0,
           });

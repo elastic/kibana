@@ -30,11 +30,7 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import {
-  buildScopedInternalSavedObjectsClientUnsafe,
-  convertRangeToISO,
-  isExecutionDurationExceededInterval,
-} from './helpers';
+import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
 import { RiskScoreEntity } from '../../../../common/risk_engine/types';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
@@ -258,10 +254,7 @@ export const runTask = async ({
     const telemetryEvent = {
       scoresWritten,
       taskDurationInSeconds,
-      executionDurationExceededInterval: isExecutionDurationExceededInterval(
-        taskInstance?.schedule?.interval,
-        taskDurationInSeconds
-      ),
+      interval: taskInstance?.schedule?.interval,
     };
 
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
