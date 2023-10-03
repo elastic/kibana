@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
           filter: {},
           interval: '1h',
-          pageSize: 10000,
+          pageSize: 3500,
           range: {
             end: 'now',
             start: 'now-30d',
