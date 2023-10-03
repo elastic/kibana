@@ -19,6 +19,7 @@ import { login } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
+// FIXME: Flaky. Needs fixing (security team issue #7763)
 describe.skip(
   'Endpoint generated alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
