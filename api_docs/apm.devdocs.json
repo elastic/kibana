@@ -2407,7 +2407,13 @@
           },
           ".span>]>; id: ",
           "StringC",
-          "; }>; }> | undefined; handler: ({}: ",
+          "; }>; query: ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { path: { processorEvent: ",
           {
@@ -2417,7 +2423,7 @@
             "section": "def-common.ProcessorEvent",
             "text": "ProcessorEvent"
           },
-          "; id: string; }; }; }) => Promise<{ metadata: Partial<Record<string, unknown[]>>; }>; } & ",
+          "; id: string; }; query: { start: number; end: number; }; }; }) => Promise<{ metadata: Partial<Record<string, unknown[]>>; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/has_data\": { endpoint: \"GET /internal/apm/has_data\"; params?: undefined; handler: ({}: ",
           "APMRouteHandlerResources",

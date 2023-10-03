@@ -8,6 +8,13 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
+  ALERT_CASE_IDS,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
+  EVENT_ACTION,
+} from '@kbn/rule-data-utils';
+import {
   BulkRequest,
   BulkResponse,
   BulkResponseItem,
@@ -20,15 +27,11 @@ const logger = loggingSystemMock.create().get();
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
 const alertDoc = {
-  event: { action: 'active' },
-  kibana: {
-    alert: {
-      status: 'untracked',
-      workflow_status: 'a-ok!',
-      workflow_tags: ['fee', 'fi', 'fo', 'fum'],
-      case_ids: ['123', '456', '789'],
-    },
-  },
+  [EVENT_ACTION]: 'active',
+  [ALERT_STATUS]: 'untracked',
+  [ALERT_WORKFLOW_STATUS]: 'a-ok!',
+  [ALERT_WORKFLOW_TAGS]: ['fee', 'fi', 'fo', 'fum'],
+  [ALERT_CASE_IDS]: ['123', '456', '789'],
 };
 
 describe('alert_conflict_resolver', () => {
