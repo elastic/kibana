@@ -402,6 +402,13 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         fieldList: textBasedQueryColumns,
+        indexPatternRefs: [
+          {
+            id: '1',
+            timeField: undefined,
+            title: 'foo',
+          },
+        ],
         layers: {
           newid: {
             allColumns: [

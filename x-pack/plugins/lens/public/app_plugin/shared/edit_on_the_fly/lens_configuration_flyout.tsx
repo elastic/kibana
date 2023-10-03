@@ -276,6 +276,10 @@ export function LensEditConfigurationFlyout({
             css={css`
               padding: ${euiTheme.size.s};
               border-bottom: ${euiTheme.border.thin};
+              // styles needed to display extra drop targets that are outside of the config panel main area
+              .euiAccordion__childWrapper {
+                overflow: inherit;
+              }
             `}
           >
             <LayerConfiguration
