@@ -194,7 +194,7 @@ export class TaskScheduling {
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => !!task.enabled,
+      filter: () => true,
       map: (task) => ({
         ...task,
         state: stateMapFn(task.state, task.id),
