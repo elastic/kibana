@@ -227,6 +227,11 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           ? partitionedFieldMetadata.incompatible.length
           : undefined;
 
+      const indexSameFamily: number | undefined =
+        error == null && partitionedFieldMetadata != null
+          ? partitionedFieldMetadata.sameFamily.length
+          : undefined;
+
       if (patternRollup != null) {
         const markdownComments =
           partitionedFieldMetadata != null
@@ -255,6 +260,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               indexName,
               markdownComments,
               pattern,
+              sameFamily: indexSameFamily,
             },
           },
         });
