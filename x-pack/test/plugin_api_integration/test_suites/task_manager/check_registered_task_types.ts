@@ -140,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-saved-queries',
         'report:execute',
         'reports:monitor',
+        'risk_engine:risk_scoring',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:telemetry-configuration',

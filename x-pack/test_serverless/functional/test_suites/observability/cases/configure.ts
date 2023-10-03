@@ -31,7 +31,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlCommonPage.forceLogout();
     });
 
-    describe('Closure options', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/166469
+    describe.skip('Closure options', function () {
       before(async () => {
         await common.clickAndValidate('configure-case-button', 'case-configure-title');
       });
