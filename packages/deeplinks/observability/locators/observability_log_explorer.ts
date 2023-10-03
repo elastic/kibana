@@ -10,13 +10,14 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { LogExplorerNavigationParams } from './log_explorer';
 
 // Will become a union once we have more origins
-export interface LocationState extends SerializableRecord {
+export interface ObservabilityLogExplorerLocationState extends SerializableRecord {
   origin?: {
     id: 'application-log-onboarding';
   };
 }
 
-export type DatasetLocatorParams = LogExplorerNavigationParams & LocationState;
+export type DatasetLocatorParams = LogExplorerNavigationParams &
+  ObservabilityLogExplorerLocationState;
 
 // All datasets locator
 export const ALL_DATASETS_LOCATOR_ID = 'ALL_DATASETS_LOCATOR';

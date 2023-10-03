@@ -33,6 +33,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
               size="s"
               target="_blank"
               color="warning"
+              iconType="editorComment"
             >
               {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.buttonText', {
                 defaultMessage: 'Take a quick survey',
