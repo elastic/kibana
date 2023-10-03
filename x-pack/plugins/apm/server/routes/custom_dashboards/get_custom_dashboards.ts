@@ -16,7 +16,7 @@ interface Props {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export async function getLinkedCustomDashboards({
+export async function getCustomDashboards({
   savedObjectsClient,
 }: Props): Promise<SavedApmCustomDashboard[]> {
   const result = await savedObjectsClient.find<ApmCustomDashboard>({
