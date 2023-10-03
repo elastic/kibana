@@ -233,7 +233,9 @@ const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): Te
 });
 
 export const logRateAnalysisTestData: TestData[] = [
-  kibanaLogsDataViewTestData,
+  // Temporarily disabling since the data seems out of sync on local dev installs and CI
+  // so it's not possible to compare and update assertions accordingly.
+  // kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
   getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE),
