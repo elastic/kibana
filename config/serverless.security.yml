@@ -17,6 +17,12 @@ xpack.securitySolutionServerless.productTypes:
     { product_line: 'endpoint', product_tier: 'complete' },
   ]
 
+xpack.securitySolution.settings: {
+  sideNavEnabled: false,
+  ILMEnabled: false,
+  ESQLEnabled: false
+}
+
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
 
@@ -36,7 +42,6 @@ xpack.fleet.internal.registry.spec.max: '3.0'
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
   - discoverInTimeline
-  - esqlRulesDisabled
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true

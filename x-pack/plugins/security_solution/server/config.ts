@@ -11,8 +11,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import type { SetupOptions } from '../common/setup_options';
-import { parseSetupOptionsConfig } from '../common/setup_options';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -126,20 +125,20 @@ export const configSchema = schema.object({
   /**
    * Used to setup options for the Security application.
    * @example
-   * xpack.securitySolution.setupOptions: {
-   *  "esqlEnabled": false,
+   * xpack.securitySolution.settings: {
+   *  "ILMEnabled": false,
    * }
    */
-  setupOptions: schema.recordOf(schema.string(), schema.any(), {
+  settings: schema.recordOf(schema.string(), schema.boolean(), {
     defaultValue: {},
   }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = ConfigSchema & {
+export type ConfigType = Omit<ConfigSchema, 'settings'> & {
   experimentalFeatures: ExperimentalFeatures;
-  readonly setupOptions: SetupOptions;
+  settings: ConfigSettings;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
@@ -159,20 +158,18 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
-  const { invalid: invalidSetupOptions, options: setupOptions } = parseSetupOptionsConfig(
-    pluginConfig.setupOptions
-  );
+  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(pluginConfig.settings);
 
-  if (invalidSetupOptions.length) {
+  if (invalidConfigSettings.length) {
     logger.warn(`Unsupported "xpack.securitySolution.setupOptions" values detected.
 The following configuration values are no longer supported and should be removed from the kibana configuration file:
-${invalidSetupOptions.map((key) => `      - ${key}`).join('\n')}
+${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
   return {
     ...pluginConfig,
     experimentalFeatures,
-    setupOptions,
+    settings,
   };
 };

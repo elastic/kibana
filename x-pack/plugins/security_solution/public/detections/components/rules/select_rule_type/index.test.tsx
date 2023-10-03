@@ -10,14 +10,16 @@ import { mount, shallow } from 'enzyme';
 
 import { SelectRuleType } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../common/lib/kibana');
-
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockESQLEnabled = jest.fn(() => true);
+jest.mock('../../../../common/lib/kibana', () => {
+  const useKibana = jest.requireActual('../../../../common/lib/kibana').useKibana;
+  return {
+    useKibana: () => ({
+      services: { ...useKibana().services, configSettings: { ESQLEnabled: mockESQLEnabled() } },
+    }),
+  };
+});
 
 describe('SelectRuleType', () => {
   it('renders correctly', () => {
@@ -188,7 +190,7 @@ describe('SelectRuleType', () => {
     });
 
     it('should not render "esql" rule type if its feature disabled', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      mockESQLEnabled.mockReturnValueOnce(false);
       const Component = () => {
         const field = useFormFieldMock();
 

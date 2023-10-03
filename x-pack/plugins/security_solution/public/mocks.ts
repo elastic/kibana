@@ -15,21 +15,17 @@ const upselling = new UpsellingService();
 
 export const contractStartServicesMock: ContractStartServices = {
   extraRoutes$: of([]),
-  isSidebarEnabled$: of(true),
   getComponent$: jest.fn(),
   upselling,
-  dataQualityPanelConfig: undefined,
 };
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
   setAppLinksSwitcher: jest.fn(),
-  setDataQualityPanelConfig: jest.fn(),
 });
 
 const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
-  setIsSidebarEnabled: jest.fn(),
   setComponents: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })

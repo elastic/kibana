@@ -9,23 +9,19 @@ import { BehaviorSubject } from 'rxjs';
 import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
-import type { DataQualityPanelConfig } from './overview/types';
 import type { AppLinksSwitcher } from './common/links';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 
 export class PluginContract {
-  public isSidebarEnabled$: BehaviorSubject<boolean>;
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
-  public dataQualityPanelConfig?: DataQualityPanelConfig;
 
   constructor() {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
-    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -34,10 +30,8 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
-      isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
       getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
-      dataQualityPanelConfig: this.dataQualityPanelConfig,
     };
   }
 
@@ -47,9 +41,6 @@ export class PluginContract {
       setAppLinksSwitcher: (appLinksSwitcher) => {
         this.appLinksSwitcher = appLinksSwitcher;
       },
-      setDataQualityPanelConfig: (dataQualityPanelConfig) => {
-        this.dataQualityPanelConfig = dataQualityPanelConfig;
-      },
     };
   }
 
@@ -57,8 +48,6 @@ export class PluginContract {
     return {
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
       setComponents: (components) => {
         this.componentsService.setComponents(components);
       },
