@@ -6,6 +6,7 @@
  */
 
 import { recurse } from 'cypress-recurse';
+import { performUserActions } from '../../tasks/perform_user_actions';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
@@ -13,7 +14,6 @@ import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
 import { login } from '../../tasks/login';
-import { performUserActions } from '../../tasks/perform_user_actions';
 import { request, loadPage } from '../../tasks/common';
 import {
   createAgentPolicyTask,
@@ -67,7 +67,6 @@ describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'
     yieldEndpointPolicyRevision().then((actualEndpointPolicyRevision) => {
       const hasReachedActualRevision = (revision: number) =>
         revision === actualEndpointPolicyRevision;
-
       // need to wait until revision is bumped to ensure test success
       recurse(yieldAppliedEndpointRevision, hasReachedActualRevision, { delay: 1500 });
     });
@@ -97,32 +96,34 @@ describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'
   for (const testData of getArtifactsListTestsData()) {
     describe(`${testData.title}`, () => {
       it(`should update Endpoint Policy on Endpoint when adding ${testData.artifactName}`, () => {
-        cy.getByTestSubj('policyListRevNo')
-          .first()
-          .invoke('text')
-          .then(parseRevNumber)
-          .then((initialRevisionNumber) => {
-            loadPage(`/app/security/administration/${testData.urlPath}`);
+        cy.get(`[data-endpoint-id="${createdHost.agentId}"]`).within(() => {
+          cy.getByTestSubj('policyListRevNo')
+            .invoke('text')
+            .then((text) => {
+              cy.wrap(parseRevNumber(text)).as('initialRevisionNumber');
+            });
+        });
 
-            cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
-            performUserActions(testData.create.formActions);
-            cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
+        loadPage(`/app/security/administration/${testData.urlPath}`);
 
-            //   Check new artifact is in the list
-            for (const checkResult of testData.create.checkResults) {
-              cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
-            }
+        cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
+        performUserActions(testData.create.formActions);
+        cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
 
-            loadPage(APP_ENDPOINTS_PATH);
+        for (const checkResult of testData.create.checkResults) {
+          cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
+        }
 
-            // depends on the 10s auto refresh
-            cy.getByTestSubj('policyListRevNo')
-              .first()
-              .should(($div) => {
-                const revisionNumber = parseRevNumber($div.text());
-                expect(revisionNumber).to.eq(initialRevisionNumber + 1);
-              });
-          });
+        loadPage(APP_ENDPOINTS_PATH);
+        (cy.get('@initialRevisionNumber') as unknown as Promise<number>).then(
+          (initialRevisionNumber) => {
+            cy.get(`[data-endpoint-id="${createdHost.agentId}"]`).within(() => {
+              cy.getByTestSubj('policyListRevNo')
+                .invoke('text')
+                .should('include', initialRevisionNumber + 1);
+            });
+          }
+        );
       });
     });
   }
