@@ -18,10 +18,27 @@ function getUpgradeStartDelay(scheduledAt?: string) {
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   switch (agentUpgradeDetails?.state) {
+    case 'UPG_REQUESTED':
+      return {
+        Badge: (
+          <EuiBadge color="accent">
+            <FormattedMessage
+              id="xpack.fleet.agentUpgradeStatusBadge.upgradeRequested"
+              defaultMessage="Upgrade requested"
+            />
+          </EuiBadge>
+        ),
+        TooltipText: (
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusTooltip.upgradeRequested"
+            defaultMessage="The agent has requested an upgrade."
+          />
+        ),
+      };
     case 'UPG_SCHEDULED':
       return {
         Badge: (
-          <EuiBadge color="warning">
+          <EuiBadge color="accent">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeScheduled"
               defaultMessage="Upgrade scheduled"
@@ -31,7 +48,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeScheduled"
-            defaultMessage="The agent has been instructed to upgrade. The upgrade will start in {scheduledAt} hours." // TODO check message
+            defaultMessage="The agent has been instructed to upgrade. The upgrade will start in {scheduledAt} hours."
             values={{
               scheduledAt: getUpgradeStartDelay(agentUpgradeDetails.metadata.scheduled_at),
             }}
@@ -51,17 +68,34 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
-            defaultMessage="Downloading the new Agent artifact version ({downloadPercent}%)." // TODO check message
+            defaultMessage="Downloading the new agent artifact version ({downloadPercent}%)."
             values={{
               downloadPercent: agentUpgradeDetails?.metadata.download_percent,
             }}
           />
         ),
       };
-    case 'UPG_REPLACING':
+    case 'UPG_EXTRACTING':
       return {
         Badge: (
           <EuiBadge color="accent">
+            <FormattedMessage
+              id="xpack.fleet.agentUpgradeStatusBadge.upgradeExtracting"
+              defaultMessage="Upgrade extracting"
+            />
+          </EuiBadge>
+        ),
+        TooltipText: (
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusTooltip.upgradeExtracting"
+            defaultMessage="The new agent artifact is extracting."
+          />
+        ),
+      };
+    case 'UPG_REPLACING':
+      return {
+        Badge: (
+          <EuiBadge color="warning">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeReplacing"
               defaultMessage="Upgrade replacing"
@@ -71,7 +105,24 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeReplacing"
-            defaultMessage="Replacing the Agent artifact version." // TODO check message
+            defaultMessage="Replacing the agent artifact version."
+          />
+        ),
+      };
+    case 'UPG_RESTARTING':
+      return {
+        Badge: (
+          <EuiBadge color="warning">
+            <FormattedMessage
+              id="xpack.fleet.agentUpgradeStatusBadge.upgradeRestarting"
+              defaultMessage="Upgrade restarting"
+            />
+          </EuiBadge>
+        ),
+        TooltipText: (
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusTooltip.upgradeRestarting"
+            defaultMessage="The agent is restarting to apply the update."
           />
         ),
       };
@@ -88,7 +139,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeMonitoring"
-            defaultMessage="Monitoring new Agent version." // TODO check message
+            defaultMessage="Monitoring the new agent version for errors."
           />
         ),
       };
@@ -105,7 +156,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeRolledBack"
-            defaultMessage="Upgrade unsuccessful. Rolling back to previous version." // TODO check message
+            defaultMessage="Upgrade unsuccessful. Rolling back to previous version."
           />
         ),
       };
@@ -122,7 +173,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeFailed"
-            defaultMessage="Upgrade failed: {errorMsg}" // TODO check message
+            defaultMessage="Upgrade failed: {errorMsg}."
             values={{
               errorMsg: agentUpgradeDetails?.metadata.error_msg,
             }}

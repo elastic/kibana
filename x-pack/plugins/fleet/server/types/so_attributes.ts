@@ -15,6 +15,7 @@ import type {
   ShipperOutput,
   KafkaAcknowledgeReliabilityLevel,
   KafkaConnectionTypeType,
+  AgentUpgradeDetails,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -73,6 +74,7 @@ export interface AgentSOAttributes {
   unenrollment_started_at?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;

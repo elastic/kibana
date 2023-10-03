@@ -100,6 +100,7 @@ interface AgentBase {
   unenrollment_started_at?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -113,7 +114,6 @@ interface AgentBase {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   agent?: FleetServerAgentMetadata;
-  upgrade_details?: AgentUpgradeDetails;
 }
 
 export interface AgentMetrics {
@@ -261,6 +261,10 @@ export interface FleetServerAgent {
   /**
    * ID of the API key the Elastic Agent must used to contact Fleet Server
    */
+  /**
+   * Upgrade state of the Elastic Agent
+   */
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   agent?: FleetServerAgentMetadata;
   /**
@@ -340,6 +344,7 @@ export interface FleetServerAgent {
    */
   outputs?: OutputMap;
 }
+
 /**
  * An Elastic Agent metadata
  */
