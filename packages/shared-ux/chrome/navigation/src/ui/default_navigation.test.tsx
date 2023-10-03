@@ -108,6 +108,7 @@ describe('<DefaultNavigation />', () => {
                 "href": "http://foo",
                 "id": "item1",
                 "isActive": false,
+                "isGroup": false,
                 "path": Array [
                   "group1",
                   "item1",
@@ -120,6 +121,7 @@ describe('<DefaultNavigation />', () => {
                 "href": "http://foo",
                 "id": "item2",
                 "isActive": false,
+                "isGroup": false,
                 "path": Array [
                   "group1",
                   "item2",
@@ -134,6 +136,7 @@ describe('<DefaultNavigation />', () => {
                     "href": "http://foo",
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "group1",
                       "group1A",
@@ -149,6 +152,7 @@ describe('<DefaultNavigation />', () => {
                         "href": "http://foo",
                         "id": "item1",
                         "isActive": false,
+                        "isGroup": false,
                         "path": Array [
                           "group1",
                           "group1A",
@@ -162,6 +166,7 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "group1A_1",
                     "isActive": false,
+                    "isGroup": true,
                     "path": Array [
                       "group1",
                       "group1A",
@@ -174,6 +179,7 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1A",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "group1A",
@@ -185,6 +191,7 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "group1",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "group1",
             ],
@@ -274,6 +281,7 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
@@ -293,6 +301,7 @@ describe('<DefaultNavigation />', () => {
                     "href": undefined,
                     "id": "item2",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
@@ -305,6 +314,7 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "root",
                   "group1",
@@ -316,6 +326,7 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "root",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "root",
             ],
@@ -375,6 +386,7 @@ describe('<DefaultNavigation />', () => {
                     "href": "https://example.com",
                     "id": "item1",
                     "isActive": false,
+                    "isGroup": false,
                     "path": Array [
                       "root",
                       "group1",
@@ -387,6 +399,7 @@ describe('<DefaultNavigation />', () => {
                 "href": undefined,
                 "id": "group1",
                 "isActive": false,
+                "isGroup": true,
                 "path": Array [
                   "root",
                   "group1",
@@ -398,6 +411,7 @@ describe('<DefaultNavigation />', () => {
             "href": undefined,
             "id": "root",
             "isActive": false,
+            "isGroup": true,
             "path": Array [
               "root",
             ],
