@@ -111,6 +111,7 @@ export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> =
           return opt.value!;
         }
       );
+      setChannelsToValidate('');
       resetChannelsToValidate(tempChannelIds);
     },
     [resetChannelsToValidate]
