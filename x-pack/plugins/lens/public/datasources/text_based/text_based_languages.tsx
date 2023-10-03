@@ -126,6 +126,17 @@ export function getTextBasedDatasource({
       const updatedState = {
         ...state,
         fieldList: textBasedQueryColumns,
+        ...(context.dataViewSpec.id
+          ? {
+              indexPatternRefs: [
+                {
+                  id: context.dataViewSpec.id,
+                  title: context.dataViewSpec.title,
+                  timeField: context.dataViewSpec.timeFieldName,
+                },
+              ],
+            }
+          : {}),
         layers: {
           ...state.layers,
           [newLayerId]: {

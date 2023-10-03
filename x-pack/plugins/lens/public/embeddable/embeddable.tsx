@@ -789,6 +789,15 @@ export class Embeddable
     }
   }
 
+  async updateSuggestion(attrs: LensSavedObjectAttributes) {
+    const viz = this.savedVis;
+    const newViz = {
+      ...viz,
+      ...attrs,
+    };
+    this.updateInput({ attributes: newViz });
+  }
+
   /**
    * Callback which allows the navigation to the editor.
    * Used for the Edit in Lens link inside the inline editing flyout.
@@ -842,6 +851,7 @@ export class Embeddable
         <Component
           attributes={attributes}
           updatePanelState={this.updateVisualization.bind(this)}
+          updateSuggestion={this.updateSuggestion.bind(this)}
           datasourceId={datasourceId}
           lensAdapters={this.lensInspector.adapters}
           output$={this.getOutput$()}

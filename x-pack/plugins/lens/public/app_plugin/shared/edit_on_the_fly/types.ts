@@ -20,8 +20,13 @@ export interface EditConfigPanelProps {
   datasourceMap: DatasourceMap;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensByValueInput['attributes'];
-  /** Callback for updating the visualization and datasources state */
+  /** Callback for updating the visualization and datasources state.
+   * Visualization type, title and query should be given if they have changed
+   */
   updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
+  updateSuggestion?: (attrs: TypedLensByValueInput['attributes']) => void;
+  /** Set the attributes state */
+  setCurrentAttributes?: (attrs: TypedLensByValueInput['attributes']) => void;
   /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
   datasourceId: 'formBased' | 'textBased';
   /** Embeddable output observable, useful for dashboard flyout  */

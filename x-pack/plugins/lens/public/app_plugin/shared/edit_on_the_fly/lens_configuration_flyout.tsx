@@ -19,6 +19,7 @@ import { extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
+import { getSuggestions } from './helpers';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -28,6 +29,8 @@ export function LensEditConfigurationFlyout({
   datasourceMap,
   datasourceId,
   updatePanelState,
+  updateSuggestion,
+  setCurrentAttributes,
   closeFlyout,
   saveByRef,
   savedObjectId,
@@ -83,28 +86,34 @@ export function LensEditConfigurationFlyout({
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
-
     if (attributesChanged) {
-      const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
-        ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-            previousAttrs.state.datasourceStates[datasourceId],
-            previousAttrs.references
-          )
-        : previousAttrs.state.datasourceStates[datasourceId];
-      updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
+      if (previousAttrs.visualizationType === visualization.activeId) {
+        const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
+          ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
+              previousAttrs.state.datasourceStates[datasourceId],
+              previousAttrs.references
+            )
+          : previousAttrs.state.datasourceStates[datasourceId];
+        updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
+      } else {
+        updateSuggestion?.(previousAttrs);
+      }
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId);
       }
     }
     closeFlyout?.();
   }, [
+    previousAttributes,
     attributesChanged,
-    savedObjectId,
     closeFlyout,
     datasourceMap,
     datasourceId,
     updatePanelState,
+    updateSuggestion,
+    savedObjectId,
     updateByRefInput,
+    visualization,
   ]);
 
   const onApply = useCallback(() => {
@@ -151,6 +160,33 @@ export function LensEditConfigurationFlyout({
     updateByRefInput,
     datasourceMap,
   ]);
+
+  const runQuery = useCallback(
+    async (q) => {
+      const attrs = await getSuggestions(q, startDependencies, datasourceMap, visualizationMap);
+      if (attrs) {
+        setCurrentAttributes?.(attrs);
+        // previousAttributes.current = attrs;
+        // setErrors([]);
+        // updatePanelState?.(
+        //   attrs.state.datasourceStates[datasourceId],
+        //   attrs.state.visualization,
+        //   attrs.visualizationType,
+        //   attrs.state.query,
+        //   attrs.title
+        // );
+        updateSuggestion?.(attrs);
+      }
+    },
+    [
+      // datasourceId,
+      datasourceMap,
+      startDependencies,
+      updateSuggestion,
+      visualizationMap,
+      setCurrentAttributes,
+    ]
+  );
 
   const framePublicAPI = useLensSelector((state) => {
     const newState = {
@@ -216,11 +252,10 @@ export function LensEditConfigurationFlyout({
               hideMinimizeButton
               editorIsInline
               hideRunQueryText
-              // editorIsInline={true}
               // disableSubmitAction={isEqual(queryTextBased, prevQuery.current)}
               onTextLangQuerySubmit={(q) => {
                 if (q) {
-                  // runQuery(q);
+                  runQuery(q);
                 }
               }}
               isDisabled={false}
