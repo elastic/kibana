@@ -4047,6 +4047,17 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleType.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleType.producer",
             "type": "string",
             "tags": [],
@@ -7300,6 +7311,20 @@
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.categoryIds",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "categoryIds",
+            "description": [],
+            "signature": [
+              "string[] | null | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9037,6 +9062,17 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.RuleType.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.RuleType.producer",
             "type": "string",
             "tags": [],
@@ -9851,7 +9887,7 @@
             "section": "def-common.RRuleParams",
             "text": "RRuleParams"
           },
-          "; }"
+          "; categoryIds?: string[] | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,

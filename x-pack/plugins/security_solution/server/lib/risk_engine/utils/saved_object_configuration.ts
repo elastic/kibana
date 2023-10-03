@@ -24,7 +24,7 @@ const getDefaultRiskEngineConfiguration = ({
   filter: {},
   identifierType: undefined,
   interval: '1h',
-  pageSize: 10_000,
+  pageSize: 3_500,
   range: { start: 'now-30d', end: 'now' },
 });
 

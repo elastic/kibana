@@ -7,6 +7,7 @@
 
 // Latest
 export * from './configure/latest';
+export * from './custom_field/latest';
 export * from './user_action/latest';
 export * from './external_service/latest';
 export * from './case/latest';
@@ -16,6 +17,7 @@ export * from './attachment/latest';
 
 // V1
 export * as configureDomainV1 from './configure/v1';
+export * as customFieldDomainV1 from './custom_field/v1';
 export * as userActionDomainV1 from './user_action/v1';
 export * as externalServiceDomainV1 from './external_service/v1';
 export * as caseDomainV1 from './case/v1';

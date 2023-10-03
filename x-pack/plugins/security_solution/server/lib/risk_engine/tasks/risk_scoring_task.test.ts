@@ -173,6 +173,7 @@ describe('Risk Scoring Task', () => {
   describe('runTask()', () => {
     let riskScoringTaskInstanceMock: ReturnType<typeof riskScoringTaskMock.createInstance>;
     let getRiskScoreService: (namespace: string) => Promise<RiskScoreService>;
+    let mockIsCancelled: jest.MockedFunction<() => boolean>;
 
     beforeEach(async () => {
       await startRiskScoringTask({
@@ -195,6 +196,7 @@ describe('Risk Scoring Task', () => {
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
       });
+      mockIsCancelled = jest.fn().mockReturnValue(false);
 
       getRiskScoreService = jest.fn().mockResolvedValueOnce(mockRiskScoreService);
     });
@@ -213,6 +215,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(1);
@@ -239,6 +242,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
         });
 
@@ -250,6 +254,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(2);
@@ -271,6 +276,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
         });
 
@@ -319,6 +325,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
           });
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
@@ -342,6 +349,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
         });
 
@@ -371,6 +379,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
           });
 
@@ -384,6 +393,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
           });
 
@@ -398,6 +408,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService: jest.fn().mockResolvedValueOnce(undefined),
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
           });
 
@@ -408,39 +419,78 @@ describe('Risk Scoring Task', () => {
         });
       });
 
-      it('send success telemetry event', async () => {
-        await runTask({
-          getRiskScoreService,
-          logger: mockLogger,
-          taskInstance: riskScoringTaskInstanceMock,
-          telemetry: mockTelemetry,
+      describe('when the task timeout has been exceeded', () => {
+        beforeEach(() => {
+          mockIsCancelled.mockReturnValue(true);
         });
 
-        expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
-        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
-          executionDurationExceededInterval: false,
-          scoresWritten: 10,
-          taskDurationInSeconds: 0,
-        });
-      });
-
-      it('send error telemetry event', async () => {
-        mockRiskScoreService.calculateAndPersistScores.mockReset();
-        mockRiskScoreService.calculateAndPersistScores.mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-        try {
+        it('stops task execution', async () => {
           await runTask({
             getRiskScoreService,
+            isCancelled: mockIsCancelled,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
           });
-        } catch (err) {
+
+          expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
+        });
+
+        it('logs that the task was cancelled', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockLogger.info).toHaveBeenCalledWith(
+            expect.stringContaining('task was cancelled')
+          );
+        });
+      });
+
+      describe('telemetry', () => {
+        it('send success telemetry event', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
           expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
-          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_error', {});
-        }
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
+            executionDurationExceededInterval: false,
+            scoresWritten: 10,
+            taskDurationInSeconds: 0,
+          });
+        });
+
+        it('send error telemetry event', async () => {
+          mockRiskScoreService.calculateAndPersistScores.mockReset();
+          mockRiskScoreService.calculateAndPersistScores.mockImplementationOnce(() => {
+            throw new Error();
+          });
+
+          try {
+            await runTask({
+              getRiskScoreService,
+              isCancelled: mockIsCancelled,
+              logger: mockLogger,
+              taskInstance: riskScoringTaskInstanceMock,
+              telemetry: mockTelemetry,
+            });
+          } catch (err) {
+            expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
+            expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+              'risk_score_execution_error',
+              {}
+            );
+          }
+        });
       });
     });
   });
