@@ -8,18 +8,18 @@
 import { mapValues } from 'lodash';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
-import { Rule } from '../../../common';
 import { SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { Alert } from '../../alert';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
+import { RuleAttributes } from '../../data/rule/types';
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
   id: string,
-  attributes: Rule
+  attributes: RuleAttributes
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
@@ -28,7 +28,6 @@ export const untrackRuleAlerts = async (
         await context.taskManager.get(attributes.scheduledTaskId),
         attributes as unknown as SanitizedRule
       );
-
       const { state } = taskInstance;
 
       const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(

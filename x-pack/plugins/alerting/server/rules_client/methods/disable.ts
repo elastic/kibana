@@ -6,13 +6,13 @@
  */
 import type { SavedObjectReference } from '@kbn/core/server';
 
-import { Rule } from '../../../common';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -62,12 +62,7 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     throw error;
   }
 
-  await untrackRuleAlerts(
-    context,
-    id,
-    // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
-    attributes as unknown as Rule<never>
-  );
+  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
 
   context.auditLogger?.log(
     ruleAuditEvent({
