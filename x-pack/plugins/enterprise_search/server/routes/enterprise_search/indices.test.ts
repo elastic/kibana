@@ -7,9 +7,14 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import { RequestHandlerContext } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { MlPluginSetup, MlTrainedModels } from '@kbn/ml-plugin/server';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -181,20 +186,13 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
       });
 
-      mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-        startTrainedModelDeployment: jest.fn(),
-        stopTrainedModelDeployment: jest.fn(),
-        inferTrainedModel: jest.fn(),
-        deleteTrainedModel: jest.fn(),
-        updateTrainedModelDeployment: jest.fn(),
-        putTrainedModel: jest.fn(),
-      } as MlTrainedModels;
+      mockMl = mlPluginServerMock.createSetupContract();
+      mockTrainedModelsProvider = mockMl.trainedModelsProvider(
+        {} as KibanaRequest,
+        {} as SavedObjectsClientContract
+      );
 
-      mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      mlPluginServerMock.createSetupContract();
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1007,20 +1005,11 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/pipelines/ml_inference',
       });
 
-      mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-        startTrainedModelDeployment: jest.fn(),
-        stopTrainedModelDeployment: jest.fn(),
-        inferTrainedModel: jest.fn(),
-        deleteTrainedModel: jest.fn(),
-        updateTrainedModelDeployment: jest.fn(),
-        putTrainedModel: jest.fn(),
-      } as MlTrainedModels;
-
-      mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      mockMl = mlPluginServerMock.createSetupContract();
+      mockTrainedModelsProvider = mockMl.trainedModelsProvider(
+        {} as KibanaRequest,
+        {} as SavedObjectsClientContract
+      );
 
       registerIndexRoutes({
         ...mockDependencies,
