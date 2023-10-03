@@ -61,7 +61,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167142
+  describe.skip('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
       await navigateTo('/render/core');
       const injectedMetadata = await getInjectedMetadata();
@@ -197,6 +198,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
@@ -249,6 +251,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
+        /**
+         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
+         */
+        'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -291,7 +298,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
-        'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
+        'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];

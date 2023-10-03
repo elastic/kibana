@@ -28,7 +28,7 @@ import {
   QueryRuleCreateProps,
   AlertSuppressionMissingFieldsStrategy,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -797,7 +797,7 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             es,
             createdRule,
-            RuleExecutionStatus.succeeded,
+            RuleExecutionStatusEnum.succeeded,
             undefined,
             afterTimestamp
           );
@@ -873,7 +873,7 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             es,
             createdRule,
-            RuleExecutionStatus.succeeded,
+            RuleExecutionStatusEnum.succeeded,
             undefined,
             afterTimestamp
           );
