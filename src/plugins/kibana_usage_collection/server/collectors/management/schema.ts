@@ -493,6 +493,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'labs:dashboard:linksPanel': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -553,6 +557,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:profilingPerCoreWatt': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingCo2PerKWH': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingDatacenterPUE': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmEnableCriticalPath': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -574,6 +590,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableLegacyUptimeApp': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingUseLegacyFlamegraphAPI': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

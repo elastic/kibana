@@ -87,8 +87,8 @@ export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
 export const GCP_SINGLE_ACCOUNT = 'single-account';
 export const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
-export const AZURE_SINGLE_ACCOUNT = 'single-account-azure';
-export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account-azure';
+export const AZURE_SINGLE_ACCOUNT = 'single-account';
+export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account';
 
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 type AzureAccountType = typeof AZURE_SINGLE_ACCOUNT | typeof AZURE_ORGANIZATION_ACCOUNT;
@@ -198,7 +198,7 @@ const AwsAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
@@ -341,7 +341,7 @@ const GcpAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
