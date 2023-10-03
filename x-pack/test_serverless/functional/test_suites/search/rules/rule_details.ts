@@ -9,7 +9,17 @@ import { expect } from 'expect';
 // import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createEsQueryRule as createRule } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+import {
+  createEsQueryRule as createRule,
+  createSlackConnector,
+  createIndexConnector,
+} from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+
+export enum RuleNotifyWhen {
+  CHANGE = 'onActionGroupChange',
+  ACTIVE = 'onActiveAlert',
+  THROTTLE = 'onThrottleInterval',
+}
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
@@ -21,6 +31,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const comboBox = getService('comboBox');
 
   async function refreshRulesList() {
     await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
@@ -231,6 +242,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const ruleName = `${testRunUuid}`;
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
       const RULE_TYPE_ID = '.es-query';
+      // const testRunUuid = uuidv4();
 
       before(async () => {
         await svlCommonPage.login();
@@ -321,6 +333,257 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const nameInputAfterCancel = await testSubjects.find('ruleNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
         expect(textAfterCancel).toEqual(updatedRuleName);
+      });
+    });
+
+    describe('Edit rule with deleted connector', function () {
+      const ALERT_ACTION_INDEX = 'alert-action-es-query';
+      const RULE_TYPE_ID = '.es-query';
+
+      before(async () => {
+        await svlCommonPage.login();
+      });
+
+      afterEach(async () => {
+        await Promise.all(
+          ruleIdList.map(async (ruleId) => {
+            await supertest
+              .delete(`/api/alerting/rule/${ruleId}`)
+              .set('kbn-xsrf', 'foo')
+              .set('x-elastic-internal-origin', 'foo');
+          })
+        );
+      });
+
+      after(async () => {
+        await svlCommonPage.forceLogout();
+      });
+
+      it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
+        const testRunUuid = uuidv4();
+
+        const connector1 = await createSlackConnector({
+          supertest,
+          name: `slack-${testRunUuid}-${0}`,
+        });
+
+        const connector2 = await createSlackConnector({
+          supertest,
+          name: `slack-${testRunUuid}-${1}`,
+        });
+
+        const rule = await createRule({
+          supertest,
+          consumer: 'alerts',
+          name: testRunUuid,
+          ruleTypeId: RULE_TYPE_ID,
+          schedule: { interval: '1m' },
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          actions: [
+            {
+              group: 'query matched',
+              id: connector1.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
+            },
+          ],
+        });
+
+        ruleIdList = [rule.id];
+
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        // navigate to connectors
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+        await testSubjects.click('app-card-triggersActionsConnectors');
+
+        // delete connector
+        await svlTriggersActionsUI.searchConnectors(connector1.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        await retry.try(async () => {
+          const resultToast = await toasts.getToastElement(1);
+          const toastText = await resultToast.getVisibleText();
+          expect(toastText).toEqual('Deleted 1 connector');
+        });
+
+        // click on first alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlTriggersActionsUI.searchRules(rule.name);
+        await find.clickDisplayedByCssSelector(
+          `[data-test-subj="rulesList"] [title="${rule.name}"]`
+        );
+
+        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).toEqual(true);
+
+        expect(await testSubjects.exists('selectActionConnector-.slack-0')).toEqual(true);
+        // click the super selector the reveal the options
+        await testSubjects.click('selectActionConnector-.slack-0');
+
+        // click the available option (my-slack1 is a preconfigured connector created before this test runs)
+        await testSubjects.click(`dropdown-connector-${connector2.id}`);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
+      });
+
+      it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
+        const testRunUuid = uuidv4();
+        const connector = await createIndexConnector({
+          supertest,
+          name: `index-${testRunUuid}-${2}`,
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        const rule = await createRule({
+          supertest,
+          consumer: 'alerts',
+          name: testRunUuid,
+          ruleTypeId: RULE_TYPE_ID,
+          schedule: { interval: '1m' },
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          actions: [
+            {
+              group: 'query matched',
+              id: connector.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
+            },
+            {
+              group: 'recovered',
+              id: connector.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+              frequency: {
+                summary: false,
+                notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1m',
+              },
+            },
+          ],
+        });
+        ruleIdList = [rule.id];
+
+        // refresh to see alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        // navigate to connectors
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+        await testSubjects.click('app-card-triggersActionsConnectors');
+
+        // delete connector
+        await svlTriggersActionsUI.searchConnectors(connector.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+        await retry.try(async () => {
+          const resultToast = await toasts.getToastElement(1);
+          const toastText = await resultToast.getVisibleText();
+          expect(toastText).toEqual('Deleted 1 connector');
+        });
+
+        // click on first alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlTriggersActionsUI.searchRules(rule.name);
+        await find.clickDisplayedByCssSelector(
+          `[data-test-subj="rulesList"] [title="${rule.name}"]`
+        );
+
+        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).toEqual(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).toEqual(false);
+        expect(await testSubjects.exists('alertActionAccordion-1')).toEqual(true);
+
+        await testSubjects.click('createActionConnectorButton-0');
+
+        await testSubjects.existOrFail('connectorAddModal');
+        await testSubjects.setValue('nameInput', 'new connector');
+        await retry.try(async () => {
+          // At times we find the driver controlling the ComboBox in tests
+          // can select the wrong item, this ensures we always select the correct index
+          await comboBox.set('connectorIndexesComboBox', 'test-index');
+          expect(
+            await comboBox.isOptionSelected(
+              await testSubjects.find('connectorIndexesComboBox'),
+              'test-index'
+            )
+          ).toEqual(true);
+        });
+        await testSubjects.click('connectorAddModal > saveActionButtonModal');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).toEqual(true);
+
+        // refresh to see alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        // navigate to connectors
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+        await testSubjects.click('app-card-triggersActionsConnectors');
+
+        // delete connector
+        await svlTriggersActionsUI.searchConnectors('new connector');
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
       });
     });
   });

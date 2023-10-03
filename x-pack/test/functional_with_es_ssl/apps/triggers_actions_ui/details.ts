@@ -169,8 +169,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await objectRemover.removeAll();
       });
 
-      it.only('renders the rule details', async () => {
-        await new Promise((resolve) => {});
+      it('renders the rule details', async () => {
         const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
         expect(headingText.includes(`test-rule-${testRunUuid}`)).to.be(true);
 
