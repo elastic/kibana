@@ -102,6 +102,34 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
+// hackish way to Refresh alerts list in rule, prior to this I tried setting interval - it didn't load values
+export function refreshAlerts(timeout: number) {
+  const startTime = new Date().getTime();
+
+  function clickButton() {
+    const currentTime = new Date().getTime();
+    const elapsedTime = currentTime - startTime;
+
+    if (elapsedTime >= timeout) {
+      // If timeout exceeded, stop trying
+      return;
+    }
+
+    cy.get('body').then(($body) => {
+      const alertsTable = $body.find('[data-test-subj="alertsTable"]');
+      if (alertsTable.length) {
+        return;
+      } else {
+        cy.getBySel('querySubmitButton').click({ force: true, multiple: true });
+        cy.wait(10000);
+        clickButton();
+      }
+    });
+  }
+
+  clickButton();
+}
+
 export const loadRuleAlerts = (ruleName: string, ruleId: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
   enableRule(ruleId, 'disable');
@@ -110,18 +138,8 @@ export const loadRuleAlerts = (ruleName: string, ruleId: string) => {
   cy.wait(2000);
   cy.visit('/app/security/rules');
   clickRuleName(ruleName);
-  cy.getBySel('alertsTable').within(() => {
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
-  });
+  refreshAlerts(120000);
+  cy.getBySel('alertsTable');
 };
 
 export const addToCase = (caseId: string) => {
