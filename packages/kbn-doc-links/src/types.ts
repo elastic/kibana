@@ -323,6 +323,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly artifactControl: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
@@ -600,6 +601,9 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
+  };
+  readonly esql: {
+    readonly statsBy: string;
   };
   readonly telemetry: {
     readonly settings: string;

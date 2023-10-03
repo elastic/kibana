@@ -54,6 +54,7 @@ export const sampleAttributeCoreWebVital = {
                 sourceField: 'user_agent.os.name',
               },
               'y-axis-column-1': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -67,6 +68,7 @@ export const sampleAttributeCoreWebVital = {
                 sourceField: RECORDS_FIELD,
               },
               'y-axis-column-2': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -79,6 +81,7 @@ export const sampleAttributeCoreWebVital = {
                 sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0-0': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',

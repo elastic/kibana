@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
+import { EuiAccordionProps } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -68,6 +70,8 @@ export interface ChromeProjectNavigationNode {
   deepLink?: ChromeNavLink;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
+  /** Optional flag to indicate if the node must be treated as a group title */
+  isGroupTitle?: boolean;
   /** Optional children of the navigation node */
   children?: ChromeProjectNavigationNode[];
   /**
@@ -88,6 +92,8 @@ export interface ChromeProjectNavigationNode {
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  accordionProps?: Partial<EuiAccordionProps>;
 }
 
 /** @public */
@@ -139,7 +145,12 @@ export interface NodeDefinition<
   cloudLink?: CloudLinkId;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
-  /** Optional children of the navigation node */
+  /**
+   * Optional flag to indicate if the node must be treated as a group title.
+   * Can not be used with `children`
+   */
+  isGroupTitle?: boolean;
+  /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Use href for absolute links only. Internal links should use "link".
@@ -155,6 +166,8 @@ export interface NodeDefinition<
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  accordionProps?: Partial<EuiAccordionProps>;
 }
 
 /**

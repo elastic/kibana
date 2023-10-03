@@ -27,6 +27,11 @@ export interface RulesSettingsQueryDelayProperties {
 export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
+export interface RulesSettingsProperties {
+  flapping: RulesSettingsFlappingProperties;
+  queryDelay: RulesSettingsQueryDelayProperties;
+}
+
 export interface RulesSettings {
   flapping: RulesSettingsFlapping;
   queryDelay: RulesSettingsQueryDelay;
@@ -42,7 +47,7 @@ export const MAX_QUERY_DELAY = 60;
 export const RULES_SETTINGS_FEATURE_ID = 'rulesSettings';
 export const ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'allFlappingSettings';
 export const READ_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'readFlappingSettings';
-export const ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'queryDelaySettings';
+export const ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'allQueryDelaySettings';
 export const READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'readQueryDelaySettings';
 
 export const API_PRIVILEGES = {
@@ -57,7 +62,8 @@ export const RULES_SETTINGS_SAVED_OBJECT_ID = 'rules-settings';
 
 export const DEFAULT_LOOK_BACK_WINDOW = 20;
 export const DEFAULT_STATUS_CHANGE_THRESHOLD = 4;
-export const DEFAULT_QUERY_DELAY = 15;
+export const DEFAULT_QUERY_DELAY = 0;
+export const DEFAULT_SERVERLESS_QUERY_DELAY = 15;
 
 export const DEFAULT_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
   enabled: true,
@@ -72,4 +78,7 @@ export const DISABLE_FLAPPING_SETTINGS: RulesSettingsFlappingProperties = {
 
 export const DEFAULT_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
   delay: DEFAULT_QUERY_DELAY,
+};
+export const DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
+  delay: DEFAULT_SERVERLESS_QUERY_DELAY,
 };

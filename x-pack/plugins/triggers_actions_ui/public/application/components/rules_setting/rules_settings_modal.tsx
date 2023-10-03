@@ -6,7 +6,11 @@
  */
 
 import React, { memo, useState } from 'react';
-import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
+import {
+  RulesSettingsFlappingProperties,
+  RulesSettingsProperties,
+  RulesSettingsQueryDelayProperties,
+} from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -14,52 +18,21 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiSwitch,
-  EuiSwitchProps,
-  EuiPanel,
-  EuiText,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  RulesSettingsFlappingFormSection,
-  RulesSettingsFlappingFormSectionProps,
-  RulesSettingsFlappingTitle,
-} from './rules_settings_flapping_form_section';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
-import { useUpdateFlappingSettings } from '../../hooks/use_update_flapping_settings';
+import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
+import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
+import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
+import { useUpdateRuleSettings } from '../../hooks/use_update_rule_settings';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
-
-const flappingDescription = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription',
-  {
-    defaultMessage:
-      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts.',
-  }
-);
-
-const flappingOnLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingOnLabel',
-  {
-    defaultMessage: 'On (recommended)',
-  }
-);
-
-const flappingOffLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingOffLabel',
-  {
-    defaultMessage: 'Off',
-  }
-);
 
 export const RulesSettingsErrorPrompt = memo(() => {
   return (
@@ -87,70 +60,6 @@ export const RulesSettingsErrorPrompt = memo(() => {
   );
 });
 
-interface RulesSettingsModalFormLeftProps {
-  settings: RulesSettingsFlappingProperties;
-  onChange: EuiSwitchProps['onChange'];
-  isSwitchDisabled: boolean;
-}
-
-export const RulesSettingsModalFormLeft = memo((props: RulesSettingsModalFormLeftProps) => {
-  const { settings, onChange, isSwitchDisabled } = props;
-
-  return (
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            <p>{flappingDescription}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            data-test-subj="rulesSettingsModalEnableSwitch"
-            label={settings!.enabled ? flappingOnLabel : flappingOffLabel}
-            checked={settings!.enabled}
-            disabled={isSwitchDisabled}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-});
-
-interface RulesSettingsModalFormRightProps {
-  settings: RulesSettingsFlappingProperties;
-  onChange: RulesSettingsFlappingFormSectionProps['onChange'];
-}
-
-export const RulesSettingsModalFormRight = memo((props: RulesSettingsModalFormRightProps) => {
-  const { settings, onChange } = props;
-
-  if (!settings) {
-    return null;
-  }
-  if (!settings.enabled) {
-    return (
-      <EuiFlexItem data-test-subj="rulesSettingsModalFlappingOffPrompt">
-        <EuiPanel borderRadius="none" color="subdued" grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsOffDescription"
-              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval, which might result in higher alert volumes."
-            />
-          </EuiText>
-        </EuiPanel>
-      </EuiFlexItem>
-    );
-  }
-
-  return (
-    <EuiFlexItem>
-      <RulesSettingsFlappingFormSection flappingSettings={settings} onChange={onChange} />
-    </EuiFlexItem>
-  );
-});
-
 export interface RulesSettingsModalProps {
   isVisible: boolean;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
@@ -165,10 +74,18 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     application: { capabilities },
   } = useKibana().services;
   const {
-    rulesSettings: { show, save, writeFlappingSettingsUI, readFlappingSettingsUI },
+    rulesSettings: {
+      show,
+      save,
+      writeFlappingSettingsUI,
+      readFlappingSettingsUI,
+      writeQueryDelaySettingsUI,
+      readQueryDelaySettingsUI,
+    },
   } = capabilities;
 
   const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
+  const [queryDelaySettings, setQueryDelaySettings] = useState<RulesSettingsQueryDelayProperties>();
 
   const { isLoading, isError: hasError } = useGetFlappingSettings({
     enabled: isVisible,
@@ -183,7 +100,18 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   });
 
-  const { mutate } = useUpdateFlappingSettings({
+  const { isLoading: isQueryDelayLoading, isError: hasQueryDelayError } = useGetQueryDelaySettings({
+    enabled: isVisible,
+    onSuccess: (fetchedSettings) => {
+      if (!queryDelaySettings) {
+        setQueryDelaySettings({
+          delay: fetchedSettings.delay,
+        });
+      }
+    },
+  });
+
+  const { mutate } = useUpdateRuleSettings({
     onSave,
     onClose,
     setUpdatingRulesSettings,
@@ -194,34 +122,55 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // sub-feature capabilities (writeXSettingsUI).
   const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
   const canShowFlappingSettings = show && readFlappingSettingsUI;
+  const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasQueryDelayError;
+  const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
 
   const handleSettingsChange = (
-    key: keyof RulesSettingsFlappingProperties,
-    value: number | boolean
+    setting: keyof RulesSettingsProperties,
+    key: keyof RulesSettingsFlappingProperties | keyof RulesSettingsQueryDelayProperties,
+    value: boolean | number
   ) => {
-    if (!settings) {
-      return;
+    if (setting === 'flapping') {
+      if (!settings) {
+        return;
+      }
+      const newSettings = {
+        ...settings,
+        [key]: value,
+      };
+      setSettings({
+        ...newSettings,
+        statusChangeThreshold: Math.min(
+          newSettings.lookBackWindow,
+          newSettings.statusChangeThreshold
+        ),
+      });
     }
 
-    const newSettings = {
-      ...settings,
-      [key]: value,
-    };
-
-    setSettings({
-      ...newSettings,
-      statusChangeThreshold: Math.min(
-        newSettings.lookBackWindow,
-        newSettings.statusChangeThreshold
-      ),
-    });
+    if (setting === 'queryDelay') {
+      if (!queryDelaySettings) {
+        return;
+      }
+      const newSettings = {
+        ...queryDelaySettings,
+        [key]: value,
+      };
+      setQueryDelaySettings(newSettings);
+    }
   };
 
   const handleSave = () => {
     if (!settings) {
       return;
     }
-    mutate(settings);
+    const updatedSettings: Partial<RulesSettingsProperties> = {};
+    if (canWriteFlappingSettings) {
+      updatedSettings.flapping = settings;
+    }
+    if (canWriteQueryDelaySettings) {
+      updatedSettings.queryDelay = queryDelaySettings;
+    }
+    mutate(updatedSettings);
   };
 
   if (!isVisible) {
@@ -229,32 +178,33 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   }
 
   const maybeRenderForm = () => {
-    if (hasError || !canShowFlappingSettings) {
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
       return <RulesSettingsErrorPrompt />;
     }
-    if (!settings || isLoading) {
+    if (isLoading || isQueryDelayLoading) {
       return <CenterJustifiedSpinner />;
     }
     return (
-      <EuiForm>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <RulesSettingsFlappingTitle />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
-          <RulesSettingsModalFormLeft
-            isSwitchDisabled={!canWriteFlappingSettings}
+      <>
+        {settings && (
+          <RulesSettingsFlappingSection
+            onChange={(key, value) => handleSettingsChange('flapping', key, value)}
             settings={settings}
-            onChange={(e) => handleSettingsChange('enabled', e.target.checked)}
+            canWrite={canWriteFlappingSettings}
+            canShow={canShowFlappingSettings}
+            hasError={hasError}
           />
-          <RulesSettingsModalFormRight
-            settings={settings}
-            onChange={(key, value) => handleSettingsChange(key, value)}
+        )}
+        {queryDelaySettings && (
+          <RulesSettingsQueryDelaySection
+            onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
+            settings={queryDelaySettings}
+            canWrite={canWriteQueryDelaySettings}
+            canShow={canShowQueryDelaySettings}
+            hasError={hasQueryDelayError}
           />
-        </EuiFlexGroup>
-      </EuiForm>
+        )}
+      </>
     );
   };
 
@@ -291,7 +241,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           fill
           data-test-subj="rulesSettingsModalSaveButton"
           onClick={handleSave}
-          disabled={!canWriteFlappingSettings}
+          disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"

@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
+  const { dashboardControls, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',

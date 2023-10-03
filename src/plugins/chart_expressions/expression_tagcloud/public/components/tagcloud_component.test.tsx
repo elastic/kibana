@@ -105,6 +105,7 @@ describe('TagCloudChart', function () {
       renderComplete: jest.fn(),
       syncColors: false,
       visType: 'tagcloud',
+      isDarkMode: false,
     };
 
     wrapperPropsWithColumnNames = {
@@ -135,6 +136,7 @@ describe('TagCloudChart', function () {
       renderComplete: jest.fn(),
       syncColors: false,
       visType: 'tagcloud',
+      isDarkMode: false,
     };
   });
 

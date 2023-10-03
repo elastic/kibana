@@ -142,6 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 serializedQuery: getEndpointAlertsQueryForAgentId(endpointAgentId).$stringify(),
               },
             },
+            savedSearchId: null,
           },
           timeline.data.persistTimeline.timeline.version
         );

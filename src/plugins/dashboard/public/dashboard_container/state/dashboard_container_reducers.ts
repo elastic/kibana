@@ -239,6 +239,9 @@ export const dashboardContainerReducers = {
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
   },
+  setFocusedPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.focusedPanelId = action.payload;
+  },
 
   setAnimatePanelTransforms: (
     state: DashboardReduxState,

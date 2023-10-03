@@ -51,6 +51,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           status_change_threshold: 10,
         })
         .expect(200);
+      await supertest
+        .post(`/internal/alerting/rules/settings/_query_delay`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          delay: 10,
+        })
+        .expect(200);
     });
 
     beforeEach(async () => {
@@ -78,20 +85,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping enabled by default
-      await testSubjects.missingOrFail('rulesSettingsModalFlappingOffPrompt');
+      await testSubjects.missingOrFail('rulesSettingsFlappingOffPrompt');
 
-      await testSubjects.existOrFail('rulesSettingsModalEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingEnableSwitch');
       await testSubjects.existOrFail('lookBackWindowRangeInput');
       await testSubjects.existOrFail('statusChangeThresholdRangeInput');
+      await testSubjects.existOrFail('queryDelayRangeInput');
 
       const lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       const statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
+      const queryDelayInput = await testSubjects.find('queryDelayRangeInput');
 
       const lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       const statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
+      const queryDelayValue = await queryDelayInput.getAttribute('value');
 
       expect(lookBackWindowValue).to.eql('10');
       expect(statusChangeThresholdValue).to.eql('10');
+      expect(queryDelayValue).to.eql('10');
     });
 
     it('should allow the user to modify rules settings', async () => {
@@ -100,18 +111,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await dragRangeInput('lookBackWindowRangeInput', 5, 'right');
       await dragRangeInput('statusChangeThresholdRangeInput', 5, 'left');
+      await dragRangeInput('queryDelayRangeInput', 5, 'left');
 
       let lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       let statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
+      let queryDelayInput = await testSubjects.find('queryDelayRangeInput');
 
       let lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       let statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
+      let queryDelayValue = await queryDelayInput.getAttribute('value');
 
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
+      expect(queryDelayValue).to.eql('5');
 
-      await testSubjects.click('rulesSettingsModalEnableSwitch');
-      await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
+      await testSubjects.click('rulesSettingsFlappingEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
 
       // Save
       await testSubjects.click('rulesSettingsModalSaveButton');
@@ -123,17 +138,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping initially disabled
-      await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
-      await testSubjects.click('rulesSettingsModalEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
+      await testSubjects.click('rulesSettingsFlappingEnableSwitch');
 
       lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
+      queryDelayInput = await testSubjects.find('queryDelayRangeInput');
 
       lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
+      queryDelayValue = await queryDelayInput.getAttribute('value');
 
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
+      expect(queryDelayValue).to.eql('5');
     });
   });
 };
