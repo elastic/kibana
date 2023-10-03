@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
 
-  async function assertDataDriftPageContent(testData) {
+  async function assertDataDriftPageContent(testData: TestData) {
     await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
     await ml.dataDrift.assertTimeRangeSelectorSectionExists();
 
