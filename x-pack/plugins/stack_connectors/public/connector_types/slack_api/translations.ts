@@ -64,7 +64,7 @@ export const ERROR_VALID_CHANNELS = i18n.translate(
 export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
   i18n.translate('xpack.stackConnectors.components.slack_api.errorInvalidChannelsText', {
     defaultMessage:
-      'Cannot valid channel ID "{channels}", please check the validity of your token and/or the channel ID',
+      'Cannot validate channel ID "{channels}", please check the validity of your token and/or the channel ID',
     values: {
       channels: invalidChannels.join(', '),
     },
