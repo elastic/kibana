@@ -155,8 +155,6 @@ describe('downgradeRequired', () => {
     expect(downgradeRequired(doc, latestVersions)).toEqual(false);
   });
 
-  /////
-
   it('returns true when targetTypeVersion is specified and lower than the document version', () => {
     const doc = createDoc({
       typeMigrationVersion: '8.0.0',
