@@ -62,7 +62,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     });
 
   // Failing: See https://github.com/elastic/kibana/issues/167142
-  describe.skip('rendering service', () => {
+  describe('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
       await navigateTo('/render/core');
       const injectedMetadata = await getInjectedMetadata();
@@ -307,6 +307,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // abundantly clear when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
       const extra = _.difference(actualExposedConfigKeys, expectedExposedConfigKeys).sort();
       const missing = _.difference(expectedExposedConfigKeys, actualExposedConfigKeys).sort();
+
       expect({ extra, missing }).to.eql({ extra: [], missing: [] }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
