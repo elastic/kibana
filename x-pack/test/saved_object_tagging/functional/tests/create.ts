@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const tagManagementPage = PageObjects.tagManagement;
 
-  describe('create tag', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/167812
+  describe.skip('create tag', () => {
     let tagModal: typeof tagManagementPage['tagModal'];
 
     before(async () => {
