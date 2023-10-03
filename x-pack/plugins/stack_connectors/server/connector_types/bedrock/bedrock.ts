@@ -63,15 +63,17 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     });
   }
 
-  protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
+  protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
     if (!error.response?.status) {
-      return `Unexpected API Error: ${error.code} - ${error.message}`;
+      return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
     if (error.response.status === 401) {
-      return 'Unauthorized API Error';
+      return `Unauthorized API Error${
+        error.response?.data?.message ? ` - ${error.response.data.message}` : ''
+      }`;
     }
-    return `API Error: ${error.response?.status} - ${error.response?.statusText}${
-      error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
+    return `API Error: ${error.response?.statusText}${
+      error.response?.data?.message ? ` - ${error.response.data.message}` : ''
     }`;
   }
 
