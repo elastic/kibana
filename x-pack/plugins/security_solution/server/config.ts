@@ -161,7 +161,7 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
   const { invalid: invalidConfigSettings, settings } = parseConfigSettings(pluginConfig.settings);
 
   if (invalidConfigSettings.length) {
-    logger.warn(`Unsupported "xpack.securitySolution.setupOptions" values detected.
+    logger.warn(`Unsupported "xpack.securitySolution.settings" values detected.
 The following configuration values are no longer supported and should be removed from the kibana configuration file:
 ${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
 `);
