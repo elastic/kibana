@@ -17,6 +17,7 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -97,5 +98,69 @@ describe('bulkUntrackAlerts()', () => {
       ['did you know that you can put whatever you want into these mocked values'],
       expect.any(Function)
     );
+  });
+
+  it('should remove provided uuids from task state', async () => {
+    const mockTaskId = 'task';
+    const mockAlertUuid = 'alert';
+
+    const trackedAlertsNotToRemove = {
+      "we're no strangers to love": { alertUuid: 'you know the rules and so do i' },
+      "a full commitment's what i'm thinkin' of": {
+        alertUuid: "you wouldn't get this from any other guy",
+      },
+      "i just wanna tell you how i'm feelin'": { alertUuid: 'got to make you understand' },
+      'never gonna give you up': { alertUuid: 'never gonna let you down' },
+      'never gonna run around and desert you': { alertUuid: 'never gonna make you cry' },
+      'never gonna say goodbye': { alertUuid: 'never gonna tell a lie and hurt you' },
+    };
+
+    const mockDate = new Date('2023-10-03T16:00:15.523Z');
+
+    const initialTask: ConcreteTaskInstance = {
+      id: mockTaskId,
+      state: {
+        alertTypeState: {
+          trackedAlerts: {
+            removeMe: { alertUuid: mockAlertUuid },
+            ...trackedAlertsNotToRemove,
+          },
+          alertInstances: {
+            removeMe: { alertUuid: mockAlertUuid },
+            ...trackedAlertsNotToRemove,
+          },
+        },
+      },
+      scheduledAt: mockDate,
+      runAt: mockDate,
+      startedAt: mockDate,
+      retryAt: mockDate,
+      ownerId: 'somebody',
+      taskType: "once told me the world was gonna roll me i ain't the sharpest tool in the shed",
+      params: {},
+      attempts: 0,
+      status: TaskStatus.Idle,
+    };
+
+    taskManager.bulkUpdateState.mockImplementationOnce(async (taskIds, updater) => ({
+      errors: [],
+      tasks: [{ ...initialTask, state: updater(initialTask.state, taskIds[0]) }],
+    }));
+
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([
+      {
+        [ALERT_RULE_UUID]: mockTaskId,
+        [ALERT_UUID]: mockAlertUuid,
+      },
+    ]);
+
+    await rulesClient.bulkUntrackAlerts({
+      indices: ["honestly who cares we're not even testing the index right now"],
+      alertUuids: [mockAlertUuid],
+    });
+
+    const bulkUntrackResults = taskManager.bulkUpdateState.mock.results;
+    const lastBulkUntrackResult = await bulkUntrackResults[bulkUntrackResults.length - 1].value;
+    expect(lastBulkUntrackResult).toMatchInlineSnapshot();
   });
 });
