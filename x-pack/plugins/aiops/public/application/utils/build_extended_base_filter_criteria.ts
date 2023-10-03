@@ -11,7 +11,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
@@ -40,8 +40,20 @@ export function buildExtendedBaseFilterCriteria(
   if (selectedGroup) {
     const allItems = selectedGroup.groupItemsSortedByUniqueness;
     for (const item of allItems) {
-      const { fieldName, fieldValue } = item;
-      groupFilter.push({ term: { [fieldName]: fieldValue } });
+      const { fieldName, fieldValue, key, type, docCount } = item;
+      if (type === SIGNIFICANT_TERM_TYPE.KEYWORD) {
+        groupFilter.push({ term: { [fieldName]: fieldValue } });
+      } else {
+        groupFilter.push(
+          getCategoryQuery(fieldName, [
+            {
+              key,
+              count: docCount,
+              examples: [],
+            },
+          ])
+        );
+      }
     }
   }
 
