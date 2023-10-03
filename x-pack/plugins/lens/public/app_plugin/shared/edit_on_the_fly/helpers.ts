@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
@@ -70,8 +71,8 @@ export const getSuggestions = async (
     const attrs = getLensAttributes({
       filters: [],
       query,
-      dataView,
       suggestion: firstSuggestion,
+      dataView,
     });
     return attrs;
   } catch (e) {
@@ -83,13 +84,15 @@ export const getSuggestions = async (
 export const getLensAttributes = ({
   filters,
   query,
-  dataView,
   suggestion,
+  dataView,
+  references,
 }: {
   filters: Filter[];
   query: Query | AggregateQuery;
-  dataView?: DataView;
   suggestion: Suggestion | undefined;
+  dataView?: DataView;
+  references?: SavedObjectReference[];
 }) => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -110,7 +113,7 @@ export const getLensAttributes = ({
       : i18n.translate('xpack.lens.config.suggestion.title', {
           defaultMessage: 'New suggestion',
         }),
-    references: [
+    references: references ?? [
       {
         id: dataView?.id ?? '',
         name: `textBasedLanguages-datasource-layer-suggestion`,

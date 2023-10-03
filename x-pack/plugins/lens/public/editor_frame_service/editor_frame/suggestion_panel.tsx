@@ -66,6 +66,8 @@ import {
   selectFrameDatasourceAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import type { Suggestion } from '../../types';
+
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
 
@@ -100,7 +102,8 @@ export interface SuggestionPanelProps {
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
-  getUserMessages: UserMessagesGetter;
+  getUserMessages?: UserMessagesGetter;
+  customSwitchSuggestionAction?: (s: Suggestion) => void;
   nowProvider: DataPublicPluginStart['nowProvider'];
   core: CoreStart;
 }
@@ -228,6 +231,7 @@ export function SuggestionPanel({
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
+  customSwitchSuggestionAction,
   nowProvider,
   core,
 }: SuggestionPanelProps) {
@@ -305,8 +309,10 @@ export function SuggestionPanel({
             ),
           }));
 
-    const hasErrors =
-      getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length > 0;
+    const hasErrors = getUserMessages
+      ? getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length >
+        0
+      : false;
 
     const newStateExpression =
       currentVisualization.state && currentVisualization.activeId && !hasErrors
@@ -469,7 +475,11 @@ export function SuggestionPanel({
                     rollbackToCurrentVisualization();
                   } else {
                     setLastSelectedSuggestion(index);
-                    switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                    if (customSwitchSuggestionAction) {
+                      customSwitchSuggestionAction(suggestion);
+                    } else {
+                      switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                    }
                   }
                 }}
                 selected={index === lastSelectedSuggestion}

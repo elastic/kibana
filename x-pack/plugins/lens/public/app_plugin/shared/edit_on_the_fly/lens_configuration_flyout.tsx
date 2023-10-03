@@ -19,7 +19,8 @@ import { extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions } from './helpers';
+import { getSuggestions, getLensAttributes } from './helpers';
+import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -166,15 +167,7 @@ export function LensEditConfigurationFlyout({
       const attrs = await getSuggestions(q, startDependencies, datasourceMap, visualizationMap);
       if (attrs) {
         setCurrentAttributes?.(attrs);
-        // previousAttributes.current = attrs;
         // setErrors([]);
-        // updatePanelState?.(
-        //   attrs.state.datasourceStates[datasourceId],
-        //   attrs.state.visualization,
-        //   attrs.visualizationType,
-        //   attrs.state.query,
-        //   attrs.title
-        // );
         updateSuggestion?.(attrs);
       }
     },
@@ -293,6 +286,31 @@ export function LensEditConfigurationFlyout({
               setIsInlineFlyoutFooterVisible={setIsInlineFlyoutFooterVisible}
             />
           </EuiAccordion>
+          <div
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
+            <SuggestionPanel
+              ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              frame={framePublicAPI}
+              core={coreStart}
+              nowProvider={startDependencies.data.nowProvider}
+              // showOnlyIcons
+              customSwitchSuggestionAction={(suggestion) => {
+                const attrs = getLensAttributes({
+                  filters: [],
+                  query: attributes.state.query,
+                  suggestion,
+                  references: attributes.references,
+                });
+                updateSuggestion?.(attrs);
+                setCurrentAttributes?.(attrs);
+              }}
+            />
+          </div>
         </>
       </FlyoutWrapper>
     </>
