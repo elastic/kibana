@@ -91,6 +91,11 @@ export default function ({ getService }: FtrProviderContext) {
         trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
+        advancedEditorContent: [
+          '{',
+          '  "description": "Regression job based on ft_egs_regression dataset with runtime fields",',
+          '  "source": {',
+        ],
         expected: {
           scatterplotMatrixColorStats: [
             // some marker colors of the continuous color scale
@@ -321,6 +326,14 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
           await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
+
+          // switch to json editor and back
+          await ml.testExecution.logTestStep('switches to advanced editor then back to form');
+          await ml.dataFrameAnalyticsCreation.openAdvancedEditor();
+          await ml.dataFrameAnalyticsCreation.assertAdvancedEditorCodeEditorContent(
+            testData.advancedEditorContent
+          );
+          await ml.dataFrameAnalyticsCreation.closeAdvancedEditor();
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
