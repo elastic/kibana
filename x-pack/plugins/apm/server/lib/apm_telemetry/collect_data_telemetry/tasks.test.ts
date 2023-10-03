@@ -845,7 +845,7 @@ describe('data telemetry collection tasks', () => {
           savedObjectsClient,
         } as any)
       ).toEqual({
-        service_groups: {
+        custom_dashboards: {
           kuery_fields: ['service.environment', 'service.environment'],
           total: 2,
         },
