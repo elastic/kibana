@@ -41,7 +41,7 @@ export async function getServicesBySignals(
   const { assets } = await collectServices({
     client: options.elasticsearchClient,
     from: options.from,
-    to: options.to,
+    to: options.to || 'now',
     sourceIndices: {
       apm: apmIndices,
     },

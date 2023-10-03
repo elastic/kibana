@@ -6,11 +6,17 @@
  */
 
 import { Asset } from '../../common/types_api';
-import { getHostsByAssets, getHostsBySignals, GetHostsOptions } from './accessors/hosts';
+import {
+  getHostsByAssets,
+  getHostsBySignals,
+  validateGetHostsOptions,
+  GetHostsOptions,
+} from './accessors/hosts';
 import {
   getServicesByAssets,
   getServicesBySignals,
   GetServicesOptions,
+  validateGetServicesOptions,
 } from './accessors/services';
 import {
   AssetClientClassOptions,
@@ -30,6 +36,7 @@ export class AssetClient {
   }
 
   async getHosts(options: GetHostsOptions): Promise<{ hosts: Asset[] }> {
+    validateGetHostsOptions(options);
     const withInjected = this.injectOptions(options);
     if (this.baseOptions.source === 'assets') {
       return await getHostsByAssets(withInjected);
@@ -39,6 +46,7 @@ export class AssetClient {
   }
 
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
+    validateGetServicesOptions(options);
     const withInjected = this.injectOptions(options);
     if (this.baseOptions.source === 'assets') {
       return await getServicesByAssets(withInjected);

@@ -5,6 +5,16 @@
  * 2.0.
  */
 
-export type { GetHostsOptions, GetHostsOptionsInjected } from './shared_types';
+import { validateESDate } from '../../validators/validate_es_date';
+import type { GetHostsOptions, GetHostsOptionsInjected } from './shared_types';
 export { getHostsByAssets } from './get_hosts_by_assets';
 export { getHostsBySignals } from './get_hosts_by_signals';
+
+export type { GetHostsOptions, GetHostsOptionsInjected };
+
+export function validateGetHostsOptions(options: GetHostsOptions) {
+  validateESDate(options.from);
+  if (options.to) {
+    validateESDate(options.to);
+  }
+}

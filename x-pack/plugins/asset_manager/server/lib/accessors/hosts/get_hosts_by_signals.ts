@@ -19,7 +19,7 @@ export async function getHostsBySignals(
   const { assets } = await collectHosts({
     client: options.elasticsearchClient,
     from: options.from,
-    to: options.to,
+    to: options.to || 'now',
     sourceIndices: {
       metrics: metricsIndices,
       logs: options.sourceIndices.logs,
