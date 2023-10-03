@@ -10,10 +10,11 @@ import {
   IntervalSchedule,
   parseDuration,
   RuleAction,
+  RuleDefaultAction,
   RuleNotifyWhenTypeValues,
   ThrottledActions,
-  RuleActionTypes,
 } from '../../common';
+import { isSystemAction } from '../../common/system_actions/is_system_action';
 
 export const isSummaryAction = (action?: RuleAction) => {
   if (action != null && isSystemAction(action)) {
@@ -108,7 +109,7 @@ export const getSummaryActionsFromTaskState = ({
   summaryActions?: ThrottledActions;
 }) => {
   const actionsWithoutSystemActions = actions.filter(
-    (action): action is RuleAction => !isSystemAction(action)
+    (action): action is RuleDefaultAction => !isSystemAction(action)
   );
 
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
@@ -154,15 +155,3 @@ export const getSummaryActionTimeBounds = (
 
   return { start: startDate.valueOf(), end: now.valueOf() };
 };
-
-/**
- * TODO: Substitute with a function which takes into
- * account system actions.
- *
- * Because RuleAction has the type set as RuleActionTypes.DEFAULT
- * TS produce an error as the check below will always return false.
- * We need the check to be able to test.
- */
-
-// @ts-expect-error
-const isSystemAction = (action: RuleAction) => action.type === RuleActionTypes.SYSTEM;

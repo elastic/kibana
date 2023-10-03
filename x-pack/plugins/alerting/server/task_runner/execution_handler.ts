@@ -39,7 +39,8 @@ import {
   RuleTypeState,
   SanitizedRule,
   RuleAlertData,
-  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
   RuleNotifyWhen,
 } from '../../common';
 import {
@@ -52,6 +53,7 @@ import {
   isSummaryActionThrottled,
 } from './rule_action_helper';
 import { ConnectorAdapter } from '../connector_adapters/types';
+import { isSystemAction } from '../../common/system_actions/is_system_action';
 
 enum Reasons {
   MUTED = 'muted',
@@ -64,7 +66,7 @@ export interface RunResult {
 }
 
 interface RunSummarizedActionArgs {
-  action: RuleAction;
+  action: RuleDefaultAction;
   summarizedAlerts: CombinedSummarizedAlerts;
   spaceId: string;
 }
@@ -75,14 +77,14 @@ interface RunActionArgs<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  action: RuleAction;
+  action: RuleDefaultAction;
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
   ruleId: string;
   spaceId: string;
 }
 
 interface RunSystemActionArgs<Params extends RuleTypeParams> {
-  action: RuleAction;
+  action: RuleSystemAction;
   connectorAdapter: ConnectorAdapter;
   summarizedAlerts: CombinedSummarizedAlerts;
   rule: SanitizedRule<Params>;
@@ -615,7 +617,7 @@ export class ExecutionHandler<
     action,
   }: {
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
-    action: RuleAction;
+    action: RuleDefaultAction;
   }) {
     const alertId = alert.getId();
     const { rule, ruleLabel, logger } = this;
@@ -943,15 +945,3 @@ export class ExecutionHandler<
     return bulkActions;
   }
 }
-
-/**
- * TODO: Substitute with a function which takes into
- * account system actions.
- *
- * Because RuleAction has the type set as RuleActionTypes.DEFAULT
- * TS produce an error as the check below will always return false.
- * We need the check to be able to test.
- */
-
-// @ts-expect-error
-const isSystemAction = (action: RuleAction) => action.type === RuleActionTypes.SYSTEM;
