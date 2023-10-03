@@ -23,9 +23,10 @@ import {
 import type { DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { canAppendWildcard, matchedIndicesDefault } from './data_drift_index_patterns_editor';
+import { matchedIndicesDefault } from './data_drift_index_patterns_editor';
 
 interface DataViewEditorProps {
+  id: string;
   label: ReactNode;
   dataViewEditorService: DataViewEditorService;
   indexPattern: string;
@@ -42,6 +43,7 @@ const mustMatchError = i18n.translate(
 );
 
 export function DataViewEditor({
+  id,
   label,
   dataViewEditorService,
   indexPattern,
@@ -65,7 +67,6 @@ export function DataViewEditor({
     indexPattern === '' || (indexPattern !== '' && matchedIndices.exactMatchedIndices.length === 0)
       ? matchedIndices.allIndices
       : matchedIndices.exactMatchedIndices;
-  const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
   const [pageState, updatePageState] = useState({
     pageIndex: 0,
@@ -131,25 +132,16 @@ export function DataViewEditor({
           isInvalid={errorMessage !== undefined}
           fullWidth
           helpText={helpText}
+          data-test-subj={`mlDataDriftIndexPatternFormRow-${id ?? ''}`}
         >
           <EuiFieldText
             value={indexPattern}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              let query = e.target.value;
-              if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
-                query += '*';
-                setAppendedWildcard(true);
-                setTimeout(() => e.target.setSelectionRange(1, 1));
-              } else {
-                if (['', '*'].includes(query) && appendedWildcard) {
-                  query = '';
-                  setAppendedWildcard(false);
-                }
-              }
+              const query = e.target.value;
               setIndexPattern(query);
             }}
             fullWidth
-            data-test-subj="createIndexPatternTitleInput"
+            data-test-subj={`mlDataDriftIndexPatternTitleInput-${id ?? ''}`}
             placeholder="example-pattern*"
           />
         </EuiFormRow>
@@ -183,6 +175,12 @@ export function DataViewEditor({
           columns={columns}
           pagination={pagination}
           onChange={onTableChange}
+          data-test-subject={`mlDataDriftIndexPatternTable-${id ?? ''}`}
+          rowProps={(item) => {
+            return {
+              'data-test-subj': `mlDataDriftIndexPatternTableRow row-${id}`,
+            };
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGrid>

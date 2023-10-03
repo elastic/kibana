@@ -206,8 +206,71 @@ export function MachineLearningDataDriftProvider({
     async runAnalysis() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(`aiopsRerunAnalysisButton`);
-        // As part of the interface for the histogram brushes, the button to clear the selection should be present
         await this.assertDataDriftTableExists();
+      });
+    },
+
+    async navigateToCreateNewDataViewPage() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`dataDriftCreateDataViewButton`);
+        await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
+      });
+    },
+
+    async assertIndexPatternNotEmptyFormErrorExists(id: 'reference' | 'comparison') {
+      const subj = `mlDataDriftIndexPatternFormRow-${id ?? ''}`;
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(subj);
+        const row = await testSubjects.find(subj);
+        const errorElements = await row.findAllByClassName('euiFormErrorText');
+        expect(await errorElements[0].getVisibleText()).eql('Index pattern must not be empty.');
+      });
+    },
+
+    async setIndexPatternInput(id: 'reference' | 'comparison', text: string) {
+      const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
+
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(inputSelector);
+        await testSubjects.setValue(inputSelector, text);
+      });
+    },
+
+    async assertAnalyzeWithoutSavingButtonMissing() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.missingOrFail('analyzeDataDriftWithoutSavingButton');
+      });
+    },
+
+    async assertAnalyzeWithoutSavingButtonState(disabled = true) {
+      await retry.tryForTime(5000, async () => {
+        const btn = await testSubjects.find('analyzeDataDriftWithoutSavingButton');
+        const isDisabled = await btn.getAttribute('disabled');
+        expect(isDisabled).to.equal(disabled ? 'true' : null);
+      });
+    },
+
+    async assertAnalyzeDataDriftButtonState(disabled = true) {
+      await retry.tryForTime(5000, async () => {
+        const btn = await testSubjects.find('analyzeDataDriftButton');
+        const isDisabled = await btn.getAttribute('disabled');
+        expect(isDisabled).to.equal(disabled ? 'true' : null);
+      });
+    },
+
+    async clickAnalyzeWithoutSavingButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('analyzeDataDriftWithoutSavingButton');
+        await testSubjects.click('analyzeDataDriftWithoutSavingButton');
+        await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
+      });
+    },
+
+    async clickAnalyzeDataDrift() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('analyzeDataDriftButton');
+        await testSubjects.click('analyzeDataDriftButton');
+        await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
       });
     },
   };
