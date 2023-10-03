@@ -3131,6 +3131,22 @@
       }
     }
   },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
+      }
+    }
+  },
   "enterprise_search_telemetry": {
     "dynamic": false,
     "properties": {}
