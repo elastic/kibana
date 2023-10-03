@@ -70,7 +70,7 @@ import type {
   CreateQueryRuleAdditionalOptions,
   CreateRuleOptions,
 } from './lib/detection_engine/rule_types/types';
-
+// eslint-disable-next-line no-restricted-imports
 import {
   legacyIsNotificationAlertExecutor,
   legacyRulesNotificationAlertType,

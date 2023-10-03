@@ -25,8 +25,8 @@ export const configSchema = schema.object({
    *
    * @example
    * xpack.securitySolutionServerless.enableExperimental:
-   *   - someCrazyFeature
-   *   - someEvenCrazierFeature
+   *   - someCrazyServerlessFeature
+   *   - someEvenCrazierServerlessFeature
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
