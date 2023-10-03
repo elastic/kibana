@@ -26,7 +26,9 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.selectMessage).toBe('Send a request to OpenAI systems.');
+    expect(actionTypeModel.selectMessage).toBe(
+      'Send a request to an OpenAI or Azure OpenAI service.'
+    );
     expect(actionTypeModel.actionTypeTitle).toBe('OpenAI');
   });
 });
