@@ -139,7 +139,7 @@ describe('RulesSettingsFlappingClient', () => {
           createdAt: '2023-03-24T00:00:00.000Z',
         }),
         queryDelay: expect.objectContaining({
-          delay: 15,
+          delay: 0,
         }),
       },
       { version: '123' }

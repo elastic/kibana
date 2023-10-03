@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DEFAULT_QUERY_DELAY_SETTINGS } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -95,7 +96,7 @@ export default function updateQueryDelaySettingsTest({ getService }: FtrProvider
           .auth(Superuser.username, Superuser.password);
 
         expect(getResponse.statusCode).to.eql(200);
-        expect(getResponse.body.delay).to.eql(15);
+        expect(getResponse.body.delay).to.eql(DEFAULT_QUERY_DELAY_SETTINGS.delay);
       });
     });
   });

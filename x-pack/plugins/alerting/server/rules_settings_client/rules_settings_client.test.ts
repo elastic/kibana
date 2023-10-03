@@ -100,7 +100,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
         queryDelay: expect.objectContaining({
-          delay: 15,
+          delay: 0,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
@@ -142,7 +142,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
         queryDelay: expect.objectContaining({
-          delay: 0,
+          delay: 15,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
@@ -220,7 +220,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
         queryDelay: expect.objectContaining({
-          delay: 15,
+          delay: 0,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
@@ -315,7 +315,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
         queryDelay: expect.objectContaining({
-          delay: 15,
+          delay: 0,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
@@ -343,7 +343,7 @@ describe('RulesSettingsClient', () => {
           updatedAt: expect.any(String),
         }),
         queryDelay: expect.objectContaining({
-          delay: 15,
+          delay: 0,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
