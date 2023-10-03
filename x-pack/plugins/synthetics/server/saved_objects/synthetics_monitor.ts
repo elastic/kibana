@@ -13,7 +13,7 @@ import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import { LegacyConfigKey, secretKeys } from '../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
 
-const legacyConfigKeys = Object.values(LegacyConfigKey);
+// const legacyConfigKeys = Object.values(LegacyConfigKey);
 
 export const LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
   type: syntheticsMonitorType,
