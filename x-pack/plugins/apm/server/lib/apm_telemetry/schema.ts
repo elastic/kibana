@@ -758,6 +758,15 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         },
       },
     },
+    global_labels: {
+      '1d': {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of global labels used for creating aggregation keys for internal metrics computed from indices which received data in the last 24 hours',
+        },
+      },
+    },
     max_transaction_groups_per_service: {
       '1d': {
         type: 'long',
@@ -1141,6 +1150,17 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           _meta: {
             description:
               'Execution time in milliseconds for the "agent_configuration" task',
+          },
+        },
+      },
+    },
+    global_labels: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "global_labels" task',
           },
         },
       },
