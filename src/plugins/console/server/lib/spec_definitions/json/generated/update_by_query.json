@@ -32,13 +32,17 @@
       "preference": "",
       "refresh": "__flag__",
       "request_cache": "__flag__",
-      "requests_per_second": "",
+      "requests_per_second": [
+        "-1"
+      ],
       "routing": "",
       "scroll": [
         "-1",
         "0"
       ],
-      "scroll_size": "",
+      "scroll_size": [
+        "1000"
+      ],
       "search_timeout": [
         "-1",
         "0"
@@ -48,18 +52,21 @@
         "dfs_query_then_fetch"
       ],
       "slices": [
+        "1",
         "auto"
       ],
       "sort": "",
       "stats": "",
       "terminate_after": "",
       "timeout": [
+        "1m",
         "-1",
         "0"
       ],
       "version": "__flag__",
       "version_type": "__flag__",
       "wait_for_active_shards": [
+        "1",
         "all",
         "index-setting"
       ],
