@@ -28,6 +28,7 @@ export type {
   SignificantTermGroupHistogram,
   SignificantTermHistogram,
   SignificantTermHistogramItem,
+  SignificantTermType,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,

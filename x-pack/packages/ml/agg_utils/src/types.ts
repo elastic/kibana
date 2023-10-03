@@ -193,6 +193,12 @@ export interface SignificantTermGroupHistogram {
  * @interface
  */
 export interface SignificantTermGroupItem extends FieldValuePair {
+  /** The key associated with the significant term. */
+  key: string;
+
+  /** The type of the significant term. */
+  type: SignificantTermType;
+
   /** The document count associated with this item. */
   docCount: number;
 
