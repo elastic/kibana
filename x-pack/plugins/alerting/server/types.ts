@@ -57,7 +57,6 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
-  RuleActionResponse,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
