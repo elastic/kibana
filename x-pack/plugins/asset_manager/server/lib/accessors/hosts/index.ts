@@ -7,8 +7,7 @@
 
 import { validateESDate } from '../../validators/validate_es_date';
 import type { GetHostsOptions, GetHostsOptionsInjected } from './shared_types';
-export { getHostsByAssets } from './get_hosts_by_assets';
-export { getHostsBySignals } from './get_hosts_by_signals';
+export { getHosts } from './get_hosts';
 
 export type { GetHostsOptions, GetHostsOptionsInjected };
 

@@ -10,7 +10,7 @@ import { GetServicesOptionsInjected } from './shared_types';
 import { collectServices } from '../../collectors/services';
 import { parseEan } from '../../parse_ean';
 
-export async function getServicesBySignals(
+export async function getServices(
   options: GetServicesOptionsInjected
 ): Promise<{ services: Asset[] }> {
   const filters = [];

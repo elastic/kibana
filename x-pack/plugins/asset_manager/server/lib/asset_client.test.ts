@@ -15,9 +15,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-function createAssetClient(source: 'signals' | 'assets', metricsDataClient: MetricsDataClient) {
+function createAssetClient(metricsDataClient: MetricsDataClient) {
   return new AssetClient({
-    source,
     sourceIndices: {
       logs: 'my-logs*',
     },
@@ -54,18 +53,14 @@ describe('Public assets client', () => {
   });
 
   describe('class instantiation', () => {
-    it('should successfully instantiate with source: signals', () => {
-      createAssetClient('signals', metricsDataClientMock);
-    });
-
-    it('should successfully instantiate with source: assets', () => {
-      createAssetClient('assets', metricsDataClientMock);
+    it('should successfully instantiate', () => {
+      createAssetClient(metricsDataClientMock);
     });
   });
 
   describe('getHosts', () => {
-    it('should query Elasticsearch via signals correctly', async () => {
-      const client = createAssetClient('signals', metricsDataClientMock);
+    it('should query Elasticsearch correctly', async () => {
+      const client = createAssetClient(metricsDataClientMock);
 
       await client.getHosts({
         from: 'now-5d',
@@ -106,42 +101,6 @@ describe('Public assets client', () => {
         { exists: { field: 'kubernetes.node.name' } },
         { exists: { field: 'kubernetes.pod.uid' } },
         { exists: { field: 'container.id' } },
-      ]);
-    });
-
-    it('should query Elasticsearch via assets correctly', async () => {
-      const client = createAssetClient('assets', metricsDataClientMock);
-
-      await client.getHosts({
-        from: 'now-5d',
-        to: 'now-3d',
-        elasticsearchClient: esClientMock,
-        savedObjectsClient: soClientMock,
-      });
-
-      expect(metricsDataClientMock.getMetricIndices).not.toHaveBeenCalled();
-
-      const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
-      const { bool } = dsl?.query || {};
-      expect(bool).toBeDefined();
-
-      expect(bool?.filter).toEqual([
-        {
-          range: {
-            '@timestamp': {
-              gte: 'now-5d',
-              lte: 'now-3d',
-            },
-          },
-        },
-      ]);
-
-      expect(bool?.must).toEqual([
-        {
-          terms: {
-            'asset.kind': ['host'],
-          },
-        },
       ]);
     });
   });

@@ -9,9 +9,7 @@ import type { GetHostsOptionsInjected } from './shared_types';
 import { Asset } from '../../../../common/types_api';
 import { collectHosts } from '../../collectors/hosts';
 
-export async function getHostsBySignals(
-  options: GetHostsOptionsInjected
-): Promise<{ hosts: Asset[] }> {
+export async function getHosts(options: GetHostsOptionsInjected): Promise<{ hosts: Asset[] }> {
   const metricsIndices = await options.metricsClient.getMetricIndices({
     savedObjectsClient: options.savedObjectsClient,
   });

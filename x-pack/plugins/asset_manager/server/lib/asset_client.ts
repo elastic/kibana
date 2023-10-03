@@ -6,52 +6,29 @@
  */
 
 import { Asset } from '../../common/types_api';
-import {
-  getHostsByAssets,
-  getHostsBySignals,
-  validateGetHostsOptions,
-  GetHostsOptions,
-} from './accessors/hosts';
-import {
-  getServicesByAssets,
-  getServicesBySignals,
-  GetServicesOptions,
-  validateGetServicesOptions,
-} from './accessors/services';
-import {
-  AssetClientClassOptions,
-  AssetClientOptionsWithInjectedValues,
-} from './asset_client_types';
+import { getHosts, validateGetHostsOptions, GetHostsOptions } from './accessors/hosts';
+import { getServices, GetServicesOptions, validateGetServicesOptions } from './accessors/services';
+import { AssetClientBaseOptions, AssetClientOptionsWithInjectedValues } from './asset_client_types';
 
 export class AssetClient {
-  constructor(private baseOptions: AssetClientClassOptions) {}
+  constructor(private baseOptions: AssetClientBaseOptions) {}
 
   injectOptions<T extends object = {}>(options: T): AssetClientOptionsWithInjectedValues<T> {
     return {
       ...options,
-      sourceIndices: this.baseOptions.sourceIndices,
-      getApmIndices: this.baseOptions.getApmIndices,
-      metricsClient: this.baseOptions.metricsClient,
+      ...this.baseOptions,
     };
   }
 
   async getHosts(options: GetHostsOptions): Promise<{ hosts: Asset[] }> {
     validateGetHostsOptions(options);
     const withInjected = this.injectOptions(options);
-    if (this.baseOptions.source === 'assets') {
-      return await getHostsByAssets(withInjected);
-    } else {
-      return await getHostsBySignals(withInjected);
-    }
+    return await getHosts(withInjected);
   }
 
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
     validateGetServicesOptions(options);
     const withInjected = this.injectOptions(options);
-    if (this.baseOptions.source === 'assets') {
-      return await getServicesByAssets(withInjected);
-    } else {
-      return await getServicesBySignals(withInjected);
-    }
+    return await getServices(withInjected);
   }
 }

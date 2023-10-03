@@ -16,17 +16,10 @@ export interface AssetClientDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-interface AssetClientInjectedValues {
+export interface AssetClientBaseOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
   metricsClient: MetricsDataClient;
 }
 
-export type AssetClientOptionsWithInjectedValues<T extends object> = T & AssetClientInjectedValues;
-
-export interface AssetClientClassOptions {
-  sourceIndices: AssetManagerConfig['sourceIndices'];
-  source: AssetManagerConfig['lockedSource'];
-  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
-  metricsClient: MetricsDataClient;
-}
+export type AssetClientOptionsWithInjectedValues<T extends object> = T & AssetClientBaseOptions;

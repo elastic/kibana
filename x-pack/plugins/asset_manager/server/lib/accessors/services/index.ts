@@ -9,8 +9,7 @@ import { validateESDate } from '../../validators/validate_es_date';
 import type { GetServicesOptions, GetServicesOptionsInjected } from './shared_types';
 
 export type { GetServicesOptions, GetServicesOptionsInjected };
-export { getServicesByAssets } from './get_services_by_assets';
-export { getServicesBySignals } from './get_services_by_signals';
+export { getServices } from './get_services';
 
 export function validateGetServicesOptions(options: GetServicesOptions) {
   validateESDate(options.from);
