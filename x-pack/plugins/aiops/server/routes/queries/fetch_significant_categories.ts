@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
+
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
@@ -93,12 +95,10 @@ export const fetchSignificantCategories = async (
     const categoriesDeviationTestData = getCategoriesTestData(categoriesDeviation.categories);
 
     // Get all unique keys from both arrays
-    const allKeys: string[] = Array.from(
-      new Set([
-        ...categoriesBaselineTestData.map((term) => term.key.toString()),
-        ...categoriesDeviationTestData.map((term) => term.key.toString()),
-      ])
-    ).slice(0, 100);
+    const allKeys: string[] = uniq([
+      ...categoriesBaselineTestData.map((term) => term.key.toString()),
+      ...categoriesDeviationTestData.map((term) => term.key.toString()),
+    ]);
 
     allKeys.forEach((key) => {
       const categoryData = categoriesOverall[i].categories.find((c) => c.key === key);
