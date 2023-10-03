@@ -79,7 +79,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const { assistantLangChain, http, selectedSettingsTab, setSelectedSettingsTab } =
+    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
       useAssistantContext();
     const {
       conversationSettings,
@@ -238,17 +238,15 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
-              {assistantLangChain && (
-                <EuiKeyPadMenuItem
-                  id={KNOWLEDGE_BASE_TAB}
-                  label={i18n.KNOWLEDGE_BASE_MENU_ITEM}
-                  isSelected={selectedSettingsTab === KNOWLEDGE_BASE_TAB}
-                  onClick={() => setSelectedSettingsTab(KNOWLEDGE_BASE_TAB)}
-                >
-                  <EuiIcon type="notebookApp" size="l" />
-                </EuiKeyPadMenuItem>
-              )}
-              {assistantLangChain && (
+              <EuiKeyPadMenuItem
+                id={KNOWLEDGE_BASE_TAB}
+                label={i18n.KNOWLEDGE_BASE_MENU_ITEM}
+                isSelected={selectedSettingsTab === KNOWLEDGE_BASE_TAB}
+                onClick={() => setSelectedSettingsTab(KNOWLEDGE_BASE_TAB)}
+              >
+                <EuiIcon type="notebookApp" size="l" />
+              </EuiKeyPadMenuItem>
+              {modelEvaluatorEnabled && (
                 <EuiKeyPadMenuItem
                   id={EVALUATION_TAB}
                   label={i18n.EVALUATION_MENU_ITEM}

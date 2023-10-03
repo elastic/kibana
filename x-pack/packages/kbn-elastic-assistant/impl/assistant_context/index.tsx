@@ -51,7 +51,6 @@ type ShowAssistantOverlay = ({
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
-  assistantLangChain: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -75,6 +74,7 @@ export interface AssistantProviderProps {
   }) => EuiCommentProps[];
   http: HttpSetup;
   getInitialConversations: () => Record<string, Conversation>;
+  modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
@@ -89,7 +89,6 @@ export interface UseAssistantContext {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
-  assistantLangChain: boolean;
   baseAllow: string[];
   baseAllowReplacement: string[];
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -115,6 +114,7 @@ export interface UseAssistantContext {
   knowledgeBase: KnowledgeBaseConfig;
   localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
+  modelEvaluatorEnabled: boolean;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs;
@@ -123,7 +123,7 @@ export interface UseAssistantContext {
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
-  setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
+  setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
@@ -137,7 +137,6 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   assistantAvailability,
-  assistantLangChain,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -153,6 +152,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   getInitialConversations,
+  modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
   setDefaultAllow,
@@ -266,7 +266,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       assistantAvailability,
-      assistantLangChain,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -284,7 +283,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: localStorageKnowledgeBase ?? {},
+      knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+      modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
       registerPromptContext,
@@ -306,7 +306,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       assistantAvailability,
-      assistantLangChain,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
@@ -326,6 +325,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       localStorageLastConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
+      modelEvaluatorEnabled,
       nameSpace,
       onConversationsUpdated,
       promptContexts,
