@@ -45,7 +45,7 @@ const defaultSorting = {
   },
 } as const;
 
-export const FieldsTable = ({
+export const FieldsSelectorTable = ({
   title,
   dataView,
   columns,
@@ -179,7 +179,7 @@ export const FieldsSelectorModal = ({
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <FieldsTable
+        <FieldsSelectorTable
           title={title}
           dataView={dataView}
           columns={columns}
