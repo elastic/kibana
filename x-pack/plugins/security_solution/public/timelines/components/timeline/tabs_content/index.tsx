@@ -175,7 +175,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
           data-test-subj={`timeline-tab-content-${TimelineTabs.query}`}
         >
           <QueryTab
-            // renderCellValue={renderCellValue}
+            renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />

@@ -199,6 +199,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
+  const isQueryLoading = useMemo(() => {
+    return (
+      dataLoadingState === DataLoadingState.loading ||
+      dataLoadingState === DataLoadingState.loadingMore
+    );
+  }, [dataLoadingState]);
+
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
   }, [timelineId, onEventClosed]);
@@ -258,7 +265,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 height={footerHeight}
                 id={timelineId}
                 isLive={false}
-                isLoading={dataLoadingState === DataLoadingState.loading || loadingSourcerer}
+                isLoading={isQueryLoading || loadingSourcerer}
                 itemsCount={events.length}
                 itemsPerPage={itemsPerPage}
                 itemsPerPageOptions={itemsPerPageOptions}

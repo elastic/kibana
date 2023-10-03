@@ -205,7 +205,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: 'eql',
-    limit: 500,
+    limit: itemsPerPage,
     runtimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,

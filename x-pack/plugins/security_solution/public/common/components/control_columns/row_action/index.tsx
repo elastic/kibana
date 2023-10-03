@@ -32,7 +32,7 @@ type Props = EuiDataGridCellValueElementProps & {
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
-  onRowSelected?: OnRowSelected;
+  onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;

@@ -46,7 +46,10 @@ import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
+import {
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  DEFAULT_COLUMN_MIN_WIDTH,
+} from '../timeline/body/constants';
 
 import type {
   OpenTimelineResult,
@@ -115,7 +118,8 @@ const setTimelineColumn = (col: ColumnHeaderResult) =>
     {
       columnHeaderType: defaultColumnHeaderType,
       id: col.id != null ? col.id : 'unknown',
-      initialWidth: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : undefined,
+      initialWidth:
+        col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
     }
   );
 

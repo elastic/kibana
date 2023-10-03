@@ -67,8 +67,6 @@ export const createFilterInCellActionFactory = ({
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
-      console.log("metadata")
-      console.log(metadata)
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
         const timelineFilterManager = getTimelineById(
           store.getState(),

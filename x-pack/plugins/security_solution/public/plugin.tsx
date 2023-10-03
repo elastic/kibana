@@ -200,7 +200,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
         charts: startPlugins.charts,
-        core: coreStart,
       };
       return services;
     };

@@ -26,25 +26,31 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.category',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.action',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.name',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'source.ip',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];

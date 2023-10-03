@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiBadge } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiBadge,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -19,14 +26,19 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
+import { StatefulBody } from '../body';
+import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
+import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
@@ -50,9 +62,13 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
+import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { SAMPLE_SIZE_SETTING, TimelineDataTable } from '../data_table';
+import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -73,6 +89,27 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   }
 `;
 
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  overflow-y: hidden;
+  flex: 1;
+  .euiFlyoutBody__overflow {
+    overflow: hidden;
+    mask-image: none;
+  }
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+    height: 100%;
+    display: flex;
+  }
+`;
+
+const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
+  background: none;
+  &.euiFlyoutFooter {
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0;`}
+  }
+`;
+
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
   width: 100%;
@@ -82,9 +119,17 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 const ScrollableFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
+`;
+
+const UnifiedTableScrollableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  overflow: hidden;
   width: 100%;
   padding: 10px 15px 0px 15px;
 `;
+
+const getScrollableFlexItem = (isUnifiedDataTable: boolean) =>
+  isUnifiedDataTable ? UnifiedTableScrollableFlexItem : ScrollableFlexItem;
 
 const SourcererFlex = styled(EuiFlexItem)`
   align-items: flex-end;
@@ -115,11 +160,16 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   deepEqual(prevProps.filters, nextProps.filters);
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
+const EMPTY_EVENTS: TimelineItem[] = [];
+
 export type Props = OwnProps & PropsFromRedux;
+
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -136,6 +186,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   kqlQueryExpression,
   kqlQueryLanguage,
   onEventClosed,
+  renderCellValue,
   rowRenderers,
   show,
   showCallOutUnauthorizedMsg,
@@ -146,11 +197,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
 }) => {
   const dispatch = useDispatch();
-
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+  const [useDiscoverComponentsInTimeline] = useUiSetting$<boolean>(
+    USE_DISCOVER_COMPONENTS_IN_TIMELINE
+  );
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
   const rows = useMemo(() => pageRows.flat(), [pageRows]);
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
     dataViewId,
@@ -162,6 +215,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const {
     services: { uiSettings },
   } = useKibana();
@@ -205,6 +260,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     endDate: end,
   });
 
+  const isBlankTimeline: boolean =
+    isEmpty(dataProviders) &&
+    isEmpty(filters) &&
+    isEmpty(kqlQuery.query) &&
+    combinedQueries?.filterQuery === undefined;
+
   const canQueryTimeline = useMemo(
     () =>
       combinedQueries != null &&
@@ -244,6 +305,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [dispatch, filterManager, timelineId]);
 
+  const limit = useMemo(
+    () => (useDiscoverComponentsInTimeline ? SAMPLE_SIZE_SETTING : itemsPerPage),
+    [itemsPerPage, useDiscoverComponentsInTimeline]
+  );
+
   const [
     dataLoadingState,
     { events, inspect, totalCount, refetch, loadPage, pageInfo, updatedAt },
@@ -255,7 +321,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: kqlQuery.language,
-    limit: SAMPLE_SIZE_SETTING,
+    limit,
     runtimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
@@ -297,7 +363,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     dispatch(
       timelineActions.updateIsLoading({
         id: timelineId,
-        isLoading: isQueryLoading,
+        isLoading: isQueryLoading || isSourcererLoading,
       })
     );
   }, [isSourcererLoading, timelineId, dispatch, dataLoadingState, isQueryLoading]);
@@ -305,6 +371,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const isDatePickerDisabled = useMemo(() => {
     return (combinedQueries && combinedQueries.kqlError != null) || false;
   }, [combinedQueries]);
+
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    [ACTION_BUTTON_COUNT]
+  );
+
+  const ScrollableItem = useMemo(
+    () => getScrollableFlexItem(useDiscoverComponentsInTimeline),
+    [useDiscoverComponentsInTimeline]
+  );
 
   return (
     <>
@@ -320,7 +400,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         skip={!canQueryTimeline}
       />
       <FullWidthFlexGroup>
-        <ScrollableFlexItem>
+        <ScrollableItem>
           <StyledEuiFlyoutHeader
             data-test-subj={`${activeTab}-tab-flyout-header`}
             hasBorder={false}
@@ -364,42 +444,90 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
           <EventDetailsWidthProvider>
-            <RootDragDropProvider>
-              <TimelineDataTable
-                columns={columnsHeader}
-                rowRenderers={rowRenderers}
-                timelineId={timelineId}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                sort={sort}
-                events={rows}
-                refetch={refetch}
-                dataLoadingState={dataLoadingState}
-                totalCount={totalCount}
-                onEventClosed={onEventClosed}
-                expandedDetail={expandedDetail}
-                showExpandedDetails={showExpandedDetails}
-                onChangePage={loadPage}
-                activeTab={activeTab}
-                updatedAt={updatedAt}
-              />
-            </RootDragDropProvider>
-            {showExpandedDetails && (
+            {useDiscoverComponentsInTimeline ? (
+              <RootDragDropProvider>
+                <TimelineDataTable
+                  columns={columnsHeader}
+                  rowRenderers={rowRenderers}
+                  timelineId={timelineId}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  sort={sort}
+                  events={rows}
+                  refetch={refetch}
+                  dataLoadingState={dataLoadingState}
+                  totalCount={totalCount}
+                  onEventClosed={onEventClosed}
+                  expandedDetail={expandedDetail}
+                  showExpandedDetails={showExpandedDetails}
+                  onChangePage={loadPage}
+                  activeTab={activeTab}
+                  updatedAt={updatedAt}
+                />
+              </RootDragDropProvider>
+            ) : (
               <>
-                <ScrollableFlexItem grow={1}>
-                  <DetailsPanel
+                <StyledEuiFlyoutBody
+                  data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
+                  className="timeline-flyout-body"
+                >
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
                     browserFields={browserFields}
-                    handleOnPanelClosed={handleOnPanelClosed}
-                    runtimeMappings={runtimeMappings}
+                    data={isBlankTimeline ? EMPTY_EVENTS : events}
+                    id={timelineId}
+                    refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    sort={sort}
                     tabType={TimelineTabs.query}
-                    scopeId={timelineId}
-                    isFlyoutView
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCount,
+                      itemsPerPage,
+                    })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
                   />
-                </ScrollableFlexItem>
+                </StyledEuiFlyoutBody>
+                <StyledEuiFlyoutFooter
+                  data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
+                  className="timeline-flyout-footer"
+                >
+                  {!isBlankTimeline && (
+                    <Footer
+                      activePage={pageInfo?.activePage ?? 0}
+                      data-test-subj="timeline-footer"
+                      updatedAt={updatedAt}
+                      height={footerHeight}
+                      id={timelineId}
+                      isLive={isLive}
+                      isLoading={isQueryLoading || isSourcererLoading}
+                      itemsCount={isBlankTimeline ? 0 : events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangePage={loadPage}
+                      totalCount={isBlankTimeline ? 0 : totalCount}
+                    />
+                  )}
+                </StyledEuiFlyoutFooter>
               </>
             )}
           </EventDetailsWidthProvider>
-        </ScrollableFlexItem>
+        </ScrollableItem>
+        {showExpandedDetails && (
+          <>
+            <ScrollableFlexItem grow={1}>
+              <DetailsPanel
+                browserFields={browserFields}
+                handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
+                tabType={TimelineTabs.query}
+                scopeId={timelineId}
+                isFlyoutView
+              />
+            </ScrollableFlexItem>
+          </>
+        )}
       </FullWidthFlexGroup>
     </>
   );

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
@@ -57,18 +57,23 @@ const ActionsContainer = styled.div.attrs(
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
+  checked,
   columnValues,
   ecsData,
   eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
+  loadingEventIds,
   onEventDetailsPanelOpened,
+  onRowSelected,
   onRuleChange,
+  showCheckboxes,
   showNotes,
   timelineId,
   toggleShowNotes,
   refetch,
+  setEventsLoading,
   isUnifiedDataTable = false,
 }) => {
   const dispatch = useDispatch();
@@ -90,6 +95,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const onUnPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
+  );
+
+  const handleSelectEvent = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      onRowSelected({
+        eventIds: [eventId],
+        isSelected: event.currentTarget.checked,
+      }),
+    [eventId, onRowSelected]
   );
 
   const handlePinClicked = useCallback(
@@ -218,9 +232,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     ) {
       incrementStep(SecurityStepId.alertsCases);
     }
-    if (onEventDetailsPanelOpened) {
-      onEventDetailsPanelOpened();
-    }
+    onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
   const evetTypeClassName = useMemo(
@@ -242,26 +254,45 @@ const ActionsComponent: React.FC<ActionProps> = ({
   return (
     <ActionsContainer className={`${evetTypeClassName} ${buildingBlockTypeClassName}`}>
       {!isUnifiedDataTable ? (
-        <GuidedOnboardingTourStep
-          isTourAnchor={isTourAnchor}
-          onClick={onExpandEvent}
-          step={AlertsCasesTourSteps.expandEvent}
-          tourId={SecurityStepId.alertsCases}
-        >
-          <div key="expand-event">
-            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-                <EuiButtonIcon
-                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                  data-test-subj="expand-event"
-                  iconType="expand"
-                  onClick={onExpandEvent}
-                  size="s"
-                />
-              </EuiToolTip>
-            </EventsTdContent>
-          </div>
-        </GuidedOnboardingTourStep>
+        <>
+          {showCheckboxes && (
+            <div key="select-event-container" data-test-subj="select-event-container">
+              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+                {loadingEventIds.includes(eventId) ? (
+                  <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
+                ) : (
+                  <EuiCheckbox
+                    aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
+                    data-test-subj="select-event"
+                    id={eventId}
+                    checked={checked}
+                    onChange={handleSelectEvent}
+                  />
+                )}
+              </EventsTdContent>
+            </div>
+          )}
+          <GuidedOnboardingTourStep
+            isTourAnchor={isTourAnchor}
+            onClick={onExpandEvent}
+            step={AlertsCasesTourSteps.expandEvent}
+            tourId={SecurityStepId.alertsCases}
+          >
+            <div key="expand-event">
+              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+                <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                  <EuiButtonIcon
+                    aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                    data-test-subj="expand-event"
+                    iconType="expand"
+                    onClick={onExpandEvent}
+                    size="s"
+                  />
+                </EuiToolTip>
+              </EventsTdContent>
+            </div>
+          </GuidedOnboardingTourStep>
+        </>
       ) : null}
       <>
         {timelineId !== TimelineId.active && (
