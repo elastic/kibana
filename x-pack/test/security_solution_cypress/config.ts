@@ -48,8 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'alertDetailsPageEnabled',
           'chartEmbeddablesEnabled',
           'discoverInTimeline',
-          'riskScoringRoutesEnabled',
-          'riskScoringPersistence',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
