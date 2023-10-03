@@ -70,7 +70,6 @@ export const LICENSE_ALLOWED = [
   '(Apache-2.0 AND MIT)',
   'BlueOak-1.0.0',
   '(MPL-2.0 OR Apache-2.0)',
-  'EPL-2.0',
 ];
 
 // The following list only applies to licenses that
