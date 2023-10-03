@@ -43,7 +43,6 @@ export class SecuritySolutionServerlessPlugin
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
     securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
-    securitySolution.setDataQualityPanelConfig({ isILMAvailable: false });
 
     return {};
   }

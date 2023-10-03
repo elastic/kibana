@@ -21,8 +21,7 @@ export const configureNavigation = (
   services: Services,
   serverConfig: ServerlessSecurityPublicConfig
 ) => {
-  const { serverless, securitySolution, management } = services;
-  securitySolution.setIsSidebarEnabled(false);
+  const { serverless, management } = services;
 
   if (!serverConfig.developer.disableManagementUrlRedirect) {
     management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
