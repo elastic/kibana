@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleActionTypes } from '../../../../../common';
 import {
   RuleResponseV1,
   RuleParamsV1,
@@ -38,18 +39,16 @@ const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
   };
 };
 
-export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
-  rule: Rule<Params>
-): RuleResponseV1<RuleParamsV1> => ({
-  id: rule.id,
-  enabled: rule.enabled,
-  name: rule.name,
-  tags: rule.tags,
-  rule_type_id: rule.alertTypeId,
-  consumer: rule.consumer,
-  schedule: rule.schedule,
-  actions: rule.actions.map(
-    ({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
+const transformRuleActions = (actions: Rule['actions']): RuleResponseV1['actions'] => {
+  return actions.map((action) => {
+    if (action.type === RuleActionTypes.SYSTEM) {
+      const { id, actionTypeId, params, uuid } = action;
+      return { id, params, uuid, connector_type_id: actionTypeId };
+    }
+
+    const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;
+
+    return {
       group,
       id,
       params,
@@ -65,8 +64,21 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
         : {}),
       ...(uuid && { uuid }),
       ...(alertsFilter && { alerts_filter: alertsFilter }),
-    })
-  ),
+    };
+  });
+};
+
+export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
+  rule: Rule<Params>
+): RuleResponseV1<RuleParamsV1> => ({
+  id: rule.id,
+  enabled: rule.enabled,
+  name: rule.name,
+  tags: rule.tags,
+  rule_type_id: rule.alertTypeId,
+  consumer: rule.consumer,
+  schedule: rule.schedule,
+  actions: transformRuleActions(rule.actions),
   params: rule.params,
   ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
