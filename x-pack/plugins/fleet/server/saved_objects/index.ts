@@ -347,18 +347,14 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'data_backfill',
             backfillFn: migratePackagePolicyToV81102,
           },
-        ],
-        schemas: {
-          forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
-        },
-      },
-      '4': {
-        changes: [
           {
             type: 'data_backfill',
             backfillFn: migrateCspPackagePolicyToV8110,
           },
         ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
+        },
       },
     },
     migrations: {
