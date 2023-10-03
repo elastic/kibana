@@ -40,11 +40,12 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    * (such as a keyword field or a keyword+text multi-field)
    */
   keywordOrText: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, fieldSpec, searchString, sort }: OptionsListRequestBody) => ({
       suggestions: {
         terms: {
           field: fieldName,
-          ...(searchString && searchString.length > 0
+          // disabling for date fields because applying a search string will return an error
+          ...(fieldSpec?.type !== 'date' && searchString && searchString.length > 0
             ? { include: `${getEscapedRegexQuery(searchString)}.*` }
             : {}),
           shard_size: 10,
