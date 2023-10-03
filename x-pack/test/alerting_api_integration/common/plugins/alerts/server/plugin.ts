@@ -27,6 +27,7 @@ import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineAlertTypes } from './alert_types';
+import { defineConnectorAdapters } from './connector_adapters';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -162,6 +163,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerting, ruleRegistry }, this.logger);
+    defineConnectorAdapters(core, { alerting });
     defineRoutes(core, this.taskManagerStart, this.notificationsStart, { logger: this.logger });
   }
 
