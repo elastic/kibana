@@ -112,7 +112,7 @@ describe('WorkplaceSearchConfigured', () => {
 
   it('initializes app data with passed props', () => {
     const { workplaceSearch } = DEFAULT_INITIAL_APP_DATA;
-    setMockValues({ organization: { kibanaUIsEnabled: false }, account: { isAdmin: true } });
+    setMockValues({ account: { isAdmin: true }, organization: { kibanaUIsEnabled: false } });
     shallow(<WorkplaceSearchConfigured workplaceSearch={workplaceSearch} />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ workplaceSearch });
@@ -120,9 +120,9 @@ describe('WorkplaceSearchConfigured', () => {
 
   it('does not re-initialize app data or re-render header actions', () => {
     setMockValues({
+      account: { isAdmin: true },
       hasInitialized: true,
       organization: { kibanaUIsEnabled: false },
-      account: { isAdmin: true },
     });
 
     shallow(<WorkplaceSearchConfigured />);
@@ -139,7 +139,7 @@ describe('WorkplaceSearchConfigured', () => {
     expect(wrapper.find(SourceAdded)).toHaveLength(1);
   });
   describe('when admin user is logged in', () => {
-    it('All routes accessible when kibanaUIsEnabled is true', () => {
+    it('all routes accessible when kibanaUIsEnabled is true', () => {
       setMockValues({
         account: { isAdmin: true },
         organization: { kibanaUIsEnabled: true },
@@ -150,7 +150,7 @@ describe('WorkplaceSearchConfigured', () => {
       expect(wrapper.find(RoleMappings)).toHaveLength(1);
     });
 
-    it('Only Overview and Notfound routes are available when kibanaUIsEnabled is false', () => {
+    it('only Overview and Notfound routes are available when kibanaUIsEnabled is false', () => {
       setMockValues({
         account: { isAdmin: true },
         organization: { kibanaUIsEnabled: false },
@@ -177,9 +177,9 @@ describe('WorkplaceSearchConfigured', () => {
     it('when kibanaUIsEnabled is false ', () => {
       setMockValues({
         account: { isAdmin: false },
-        organization: { kibanaUIsEnabled: true },
+        organization: { kibanaUIsEnabled: false },
       });
-      const props = { isAdmin: true, kibanaUIsEnabled: true };
+      const props = { isAdmin: false, kibanaUIsEnabled: false };
 
       const wrapper = shallow(<WorkplaceSearchConfiguredRoutes {...props} />);
       expect(wrapper.find(SourcesRouter)).toHaveLength(2);
