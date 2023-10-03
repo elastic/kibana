@@ -646,6 +646,42 @@ export class AnomalyTimelineStateService extends StateService {
     return this._viewBySwimLaneOptions$.asObservable();
   }
 
+  /**
+   * Currently selected jobs on the swim lane
+   */
+  public getSwimLaneJobs$(): Observable<ExplorerJob[]> {
+    return combineLatest([
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.getViewBySwimlaneFieldName$(),
+      this._viewBySwimLaneData$,
+      this._selectedCells$,
+    ]).pipe(
+      map(([selectedJobs, swimLaneFieldName, viewBySwimLaneData, selectedCells]) => {
+        // If there are selected lanes on the view by swim lane, use those to filter the jobs.
+        if (
+          selectedCells?.type === SWIMLANE_TYPE.VIEW_BY &&
+          selectedCells?.viewByFieldName === VIEW_BY_JOB_LABEL
+        ) {
+          return selectedJobs.filter((job) => {
+            return selectedCells.lanes.includes(job.id);
+          });
+        }
+
+        if (
+          selectedCells?.type === SWIMLANE_TYPE.OVERALL &&
+          selectedCells?.viewByFieldName === VIEW_BY_JOB_LABEL &&
+          viewBySwimLaneData
+        ) {
+          return selectedJobs.filter((job) => {
+            return viewBySwimLaneData.laneLabels.includes(job.id);
+          });
+        }
+
+        return selectedJobs;
+      })
+    );
+  }
+
   public getViewBySwimLaneOptions(): string[] {
     return this._viewBySwimLaneOptions$.getValue();
   }

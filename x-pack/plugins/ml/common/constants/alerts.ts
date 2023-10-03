@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
@@ -75,3 +76,11 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     ),
   },
 };
+
+const ML_ALERT_NAMESPACE = ALERT_NAMESPACE;
+export const ALERT_ANOMALY_TIMESTAMP = `${ML_ALERT_NAMESPACE}.anomaly_timestamp` as const;
+export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ML_ALERT_NAMESPACE}.job_id` as const;
+export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomaly_score` as const;
+export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.is_interim` as const;
+export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.top_records` as const;
+export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.top_influencers` as const;
