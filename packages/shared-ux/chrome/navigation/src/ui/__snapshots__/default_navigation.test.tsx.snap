@@ -10,6 +10,7 @@ Array [
         "href": undefined,
         "id": "item1",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "group1",
           "item1",
@@ -28,6 +29,7 @@ Array [
         "href": undefined,
         "id": "item2",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "group1",
           "item2",
@@ -46,6 +48,7 @@ Array [
         "href": undefined,
         "id": "item3",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "group1",
           "item3",
@@ -57,6 +60,7 @@ Array [
     "href": undefined,
     "id": "group1",
     "isActive": false,
+    "isGroup": true,
     "path": Array [
       "group1",
     ],
@@ -77,6 +81,7 @@ Array [
         "href": undefined,
         "id": "discover",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "rootNav:analytics",
           "discover",
@@ -95,6 +100,7 @@ Array [
         "href": undefined,
         "id": "dashboards",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "rootNav:analytics",
           "dashboards",
@@ -113,6 +119,7 @@ Array [
         "href": undefined,
         "id": "visualize",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "rootNav:analytics",
           "visualize",
@@ -125,6 +132,7 @@ Array [
     "icon": "stats",
     "id": "rootNav:analytics",
     "isActive": false,
+    "isGroup": true,
     "path": Array [
       "rootNav:analytics",
     ],
@@ -145,6 +153,7 @@ Array [
         "href": undefined,
         "id": "ml:overview",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "rootNav:ml",
           "ml:overview",
@@ -163,6 +172,7 @@ Array [
         "href": undefined,
         "id": "ml:notifications",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "rootNav:ml",
           "ml:notifications",
@@ -183,6 +193,7 @@ Array [
             "href": undefined,
             "id": "ml:anomalyDetection",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "anomaly_detection",
@@ -202,6 +213,7 @@ Array [
             "href": undefined,
             "id": "ml:anomalyExplorer",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "anomaly_detection",
@@ -221,6 +233,7 @@ Array [
             "href": undefined,
             "id": "ml:singleMetricViewer",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "anomaly_detection",
@@ -240,6 +253,7 @@ Array [
             "href": undefined,
             "id": "ml:settings",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "anomaly_detection",
@@ -252,6 +266,7 @@ Array [
         "href": undefined,
         "id": "anomaly_detection",
         "isActive": false,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "anomaly_detection",
@@ -272,6 +287,7 @@ Array [
             "href": undefined,
             "id": "ml:dataFrameAnalytics",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "data_frame_analytics",
@@ -291,6 +307,7 @@ Array [
             "href": undefined,
             "id": "ml:resultExplorer",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "data_frame_analytics",
@@ -310,6 +327,7 @@ Array [
             "href": undefined,
             "id": "ml:analyticsMap",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "data_frame_analytics",
@@ -322,6 +340,7 @@ Array [
         "href": undefined,
         "id": "data_frame_analytics",
         "isActive": false,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "data_frame_analytics",
@@ -342,6 +361,7 @@ Array [
             "href": undefined,
             "id": "ml:nodesOverview",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "model_management",
@@ -361,6 +381,7 @@ Array [
             "href": undefined,
             "id": "ml:nodes",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "model_management",
@@ -373,6 +394,7 @@ Array [
         "href": undefined,
         "id": "model_management",
         "isActive": false,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "model_management",
@@ -393,6 +415,7 @@ Array [
             "href": undefined,
             "id": "ml:fileUpload",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "data_visualizer",
@@ -412,6 +435,7 @@ Array [
             "href": undefined,
             "id": "ml:indexDataVisualizer",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "data_visualizer",
@@ -431,6 +455,7 @@ Array [
             "href": undefined,
             "id": "ml:dataDrift",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "data_visualizer",
@@ -443,6 +468,7 @@ Array [
         "href": undefined,
         "id": "data_visualizer",
         "isActive": false,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "data_visualizer",
@@ -463,6 +489,7 @@ Array [
             "href": undefined,
             "id": "ml:logRateAnalysis",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "aiops_labs",
@@ -482,6 +509,7 @@ Array [
             "href": undefined,
             "id": "ml:logPatternAnalysis",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "aiops_labs",
@@ -501,6 +529,7 @@ Array [
             "href": undefined,
             "id": "ml:changePointDetections",
             "isActive": false,
+            "isGroup": false,
             "path": Array [
               "rootNav:ml",
               "aiops_labs",
@@ -513,6 +542,7 @@ Array [
         "href": undefined,
         "id": "aiops_labs",
         "isActive": false,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "aiops_labs",
@@ -525,6 +555,7 @@ Array [
     "icon": "machineLearningApp",
     "id": "rootNav:ml",
     "isActive": false,
+    "isGroup": true,
     "path": Array [
       "rootNav:ml",
     ],
@@ -544,6 +575,7 @@ Array [
     "icon": "editorCodeBlock",
     "id": "devTools",
     "isActive": false,
+    "isGroup": true,
     "path": Array [
       "devTools",
     ],
@@ -565,6 +597,7 @@ Array [
         "href": undefined,
         "id": "management",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "project_settings_project_nav",
           "management",
@@ -577,6 +610,7 @@ Array [
         "href": "https://cloud.elastic.co/deployments/123456789/security/users",
         "id": "cloudLinkUserAndRoles",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "project_settings_project_nav",
           "cloudLinkUserAndRoles",
@@ -589,6 +623,7 @@ Array [
         "href": "https://cloud.elastic.co/account/billing",
         "id": "cloudLinkBilling",
         "isActive": false,
+        "isGroup": false,
         "path": Array [
           "project_settings_project_nav",
           "cloudLinkBilling",
@@ -601,6 +636,7 @@ Array [
     "icon": "gear",
     "id": "project_settings_project_nav",
     "isActive": false,
+    "isGroup": true,
     "path": Array [
       "project_settings_project_nav",
     ],
