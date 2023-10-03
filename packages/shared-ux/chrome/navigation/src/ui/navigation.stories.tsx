@@ -357,10 +357,8 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             title: 'Alerts',
           },
           {
-            link: 'item3',
-            title: 'Some other node',
-          },
-          {
+            // Panel with default content
+            // Groups with title
             id: 'group:openpanel1',
             title: 'Open panel (default 1)',
             openPanel: true,
@@ -376,6 +374,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     link: 'group:settings.signals',
                     title: 'Signals',
+                    openInNewTab: true,
                   },
                   {
                     link: 'group:settings.tracing',
@@ -408,13 +407,15 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
+            // Panel with default content
+            // Groups with **not** title
             id: 'group:openpanel1b',
             title: 'Open panel (default 2)',
             openPanel: true,
             children: [
-              // Groups with no title
               {
                 id: 'group1',
+                appendHorizontalRule: true, // Add a separator after the group
                 children: [
                   {
                     link: 'group:settings.logs',
@@ -454,6 +455,104 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
+            // Panel with default content
+            // Accordion to wrap groups
+            id: 'group:openpanel1c',
+            title: 'Open panel (default 3)',
+            openPanel: true,
+            children: [
+              {
+                id: 'group1',
+                appendHorizontalRule: true,
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                    withBadge: true, // Default to "Beta" badge
+                  },
+                ],
+              },
+              // Groups with accordion
+              {
+                id: 'group2',
+                title: 'MANAGEMENT',
+                isCollapsible: true,
+                children: [
+                  {
+                    id: 'group2-A',
+                    title: 'Group 1',
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                        withBadge: true, // Default to "Beta" badge
+                      },
+                    ],
+                  },
+                  {
+                    id: 'group2-B',
+                    title: 'Group 2 (marked as collapsible)',
+                    isCollapsible: true,
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        id: 'group2:settings.tracing',
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                      },
+                    ],
+                  },
+                  {
+                    id: 'group2-C',
+                    title: 'Group 3',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        id: 'group2:settings.tracing',
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
             id: 'group:openpanel2',
             title: 'Open panel (custom content)',
             openPanel: true,
@@ -478,16 +577,21 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             openPanel: true,
             children: [
               {
-                link: 'group:settings.logs',
-                title: 'Logs',
-              },
-              {
-                link: 'group:settings.signals',
-                title: 'Signals',
-              },
-              {
-                link: 'group:settings.tracing',
-                title: 'Tracing',
+                id: 'root',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Those links',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'are automatically',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'generated',
+                  },
+                ],
               },
             ],
           },

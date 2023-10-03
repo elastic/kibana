@@ -73,6 +73,11 @@ interface NodeDefinitionBase {
    */
   isGroupTitle?: boolean;
   /**
+   * Optional flag to indicate if the node is collapsible in an accordion.
+   * Default :false
+   */
+  isCollapsible?: boolean;
+  /**
    * Flag to indicate if the node opens a panel when clicking on it.
    * Note: Can't be used with a `link` or `href` value.
    */
@@ -104,6 +109,11 @@ interface NodeDefinitionBase {
    * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
    */
   openInNewTab?: boolean;
+  /**
+   * Optional flag to indicate if a horizontal rule should be rendered after the node.
+   * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation panel opening on the right of the side nav.
+   */
+  appendHorizontalRule?: boolean;
 }
 
 /** @public */
