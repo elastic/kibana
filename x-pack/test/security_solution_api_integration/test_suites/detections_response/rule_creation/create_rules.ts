@@ -48,6 +48,7 @@ import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../common/services/security_solution';
+import { EsArchivePathBuilder } from '../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -58,24 +59,17 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
   const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@serverless @ess create_rules', () => {
     describe('creating rules', () => {
       before(async () => {
-        // TODO ask about best approach here
-        if (isServerless)
-          await esArchiver.load(
-            'x-pack/test/security_solution_api_integration/es_archive/serverless/host_serverless'
-          );
-        else await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        if (isServerless)
-          await esArchiver.unload(
-            'x-pack/test/security_solution_api_integration/es_archive/serverless/host_serverless'
-          );
-        else await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       beforeEach(async () => {
