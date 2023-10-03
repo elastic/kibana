@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -42,6 +43,7 @@ import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
+  RESPONSE_BUTTON_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
@@ -160,5 +162,7 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER =
   getDataTestSubjectSelector(RESPONSE_SECTION_HEADER_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON =
+  getDataTestSubjectSelector(RESPONSE_BUTTON_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE =
   getDataTestSubjectSelector(RESPONSE_EMPTY_TEST_ID);
