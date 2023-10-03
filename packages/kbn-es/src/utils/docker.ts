@@ -37,7 +37,6 @@ import {
 } from './serverless_file_realm';
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
-import { getLocalhostRealIp } from './get_localhost_real_ip';
 
 interface ImageOptions {
   image?: string;
@@ -57,6 +56,8 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Publish ES docker container on additional host IP */
+  host?: string;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
@@ -312,10 +313,9 @@ export function resolveDockerImage({
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
   const port = options.port || DEFAULT_PORT;
   const value = ['-p', `127.0.0.1:${port}:${port}`];
-  const realLocalhostIp = getLocalhostRealIp();
 
-  if (realLocalhostIp) {
-    value.push('-p', `${realLocalhostIp}:${port}:${port}`);
+  if ((options as ServerlessOptions).host) {
+    value.push('-p', `${(options as ServerlessOptions).host}:${port}:${port}`);
   }
 
   if (options.port) {
