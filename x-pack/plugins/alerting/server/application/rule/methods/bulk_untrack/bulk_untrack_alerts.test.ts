@@ -161,6 +161,72 @@ describe('bulkUntrackAlerts()', () => {
 
     const bulkUntrackResults = taskManager.bulkUpdateState.mock.results;
     const lastBulkUntrackResult = await bulkUntrackResults[bulkUntrackResults.length - 1].value;
-    expect(lastBulkUntrackResult).toMatchInlineSnapshot();
+    expect(lastBulkUntrackResult).toMatchInlineSnapshot(`
+      Object {
+        "errors": Array [],
+        "tasks": Array [
+          Object {
+            "attempts": 0,
+            "id": "task",
+            "ownerId": "somebody",
+            "params": Object {},
+            "retryAt": 2023-10-03T16:00:15.523Z,
+            "runAt": 2023-10-03T16:00:15.523Z,
+            "scheduledAt": 2023-10-03T16:00:15.523Z,
+            "startedAt": 2023-10-03T16:00:15.523Z,
+            "state": Object {
+              "alertInstances": Object {},
+              "alertTypeState": Object {
+                "alertInstances": Object {
+                  "a full commitment's what i'm thinkin' of": Object {
+                    "alertUuid": "you wouldn't get this from any other guy",
+                  },
+                  "i just wanna tell you how i'm feelin'": Object {
+                    "alertUuid": "got to make you understand",
+                  },
+                  "never gonna give you up": Object {
+                    "alertUuid": "never gonna let you down",
+                  },
+                  "never gonna run around and desert you": Object {
+                    "alertUuid": "never gonna make you cry",
+                  },
+                  "never gonna say goodbye": Object {
+                    "alertUuid": "never gonna tell a lie and hurt you",
+                  },
+                  "removeMe": Object {
+                    "alertUuid": "alert",
+                  },
+                  "we're no strangers to love": Object {
+                    "alertUuid": "you know the rules and so do i",
+                  },
+                },
+                "trackedAlerts": Object {
+                  "a full commitment's what i'm thinkin' of": Object {
+                    "alertUuid": "you wouldn't get this from any other guy",
+                  },
+                  "i just wanna tell you how i'm feelin'": Object {
+                    "alertUuid": "got to make you understand",
+                  },
+                  "never gonna give you up": Object {
+                    "alertUuid": "never gonna let you down",
+                  },
+                  "never gonna run around and desert you": Object {
+                    "alertUuid": "never gonna make you cry",
+                  },
+                  "never gonna say goodbye": Object {
+                    "alertUuid": "never gonna tell a lie and hurt you",
+                  },
+                  "we're no strangers to love": Object {
+                    "alertUuid": "you know the rules and so do i",
+                  },
+                },
+              },
+            },
+            "status": "idle",
+            "taskType": "once told me the world was gonna roll me i ain't the sharpest tool in the shed",
+          },
+        ],
+      }
+    `);
   });
 });
