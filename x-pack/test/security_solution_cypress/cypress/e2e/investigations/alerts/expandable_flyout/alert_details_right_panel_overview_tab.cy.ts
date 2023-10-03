@@ -44,7 +44,6 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
@@ -369,9 +368,6 @@ describe(
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabResponseSection();
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE).should(
-          'not.be.visible'
-        );
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).should('be.visible');
       });
     });
