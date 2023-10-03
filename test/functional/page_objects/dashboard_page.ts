@@ -43,6 +43,7 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+  private readonly appsMenu = this.ctx.getService('appsMenu');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -63,6 +64,17 @@ export class DashboardPageObject extends FtrService {
 
   public async navigateToApp() {
     await this.common.navigateToApp(this.APP_ID);
+  }
+
+  public async navigateToAppFromAppsMenu() {
+    await this.retry.try(async () => {
+      await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await this.header.waitUntilLoadingHasFinished();
+      const currentUrl = await this.browser.getCurrentUrl();
+      if (!currentUrl.includes('app/dashboard')) {
+        throw(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
+      }
+    });
   }
 
   public async expectAppStateRemovedFromURL() {
