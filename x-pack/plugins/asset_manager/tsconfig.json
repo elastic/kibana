@@ -25,6 +25,7 @@
     "@kbn/logging",
     "@kbn/metrics-data-access-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-mocks"
   ]
 }
