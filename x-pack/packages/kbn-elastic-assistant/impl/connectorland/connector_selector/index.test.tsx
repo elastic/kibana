@@ -88,14 +88,16 @@ jest.mock('../use_load_action_types', () => ({
 
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
+jest.mock('../add_connector_modal', () => ({
   // @ts-ignore
-  ConnectorAddModal: ({ postSaveEventHandler }) => (
-    <button
-      type="button"
-      data-test-subj="modal-mock"
-      onClick={() => postSaveEventHandler(newConnector)}
-    />
+  AddConnectorModal: ({ onSaveConnector }) => (
+    <>
+      <button
+        type="button"
+        data-test-subj="modal-mock"
+        onClick={() => onSaveConnector(newConnector)}
+      />
+    </>
   ),
 }));
 
@@ -135,19 +137,17 @@ describe('Connector selector', () => {
       connectorTypeTitle: 'OpenAI',
     });
   });
-  it('Displays ActionTypeSelectorModal when "Add a new connector" is selected, then calls onConnectorSelectionChange once new connector is saved', () => {
-    const { getByTestId, queryByTestId } = render(
+  it('Calls onConnectorSelectionChange once new connector is saved', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelector {...defaultProps} />
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId('addNewConnectorButton'));
-    expect(getByTestId('action-type-selector-modal')).toBeInTheDocument();
-    fireEvent.click(getByTestId(`action-option-${actionTypes[1].name}`));
-    expect(queryByTestId('action-type-selector-modal')).not.toBeInTheDocument();
 
     fireEvent.click(getByTestId('modal-mock'));
+
     expect(onConnectorSelectionChange).toHaveBeenCalledWith({
       ...newConnector,
       connectorTypeTitle: 'OpenAI',
