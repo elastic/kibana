@@ -60,9 +60,9 @@ export function MachineLearningTestResourcesProvider(
       objectType: SavedObjectType,
       space?: string
     ): Promise<boolean> {
-      const response = await supertest.get(
-        `${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`
-      );
+      const response = await supertest
+        .get(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
+        .set(getCommonRequestHeader('1'));
       return response.status === 200;
     },
 
