@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-
   describe('CSV Generation from SearchSource', () => {
     describe('non-timebased', () => {
       it('Handle _id and _index columns', async () => {
