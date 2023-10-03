@@ -80,7 +80,7 @@ const renderHostEntityContent = () =>
 
 describe('<HostEntityContent />', () => {
   describe('license is valid', () => {
-    it('should render os family and host risk classification', () => {
+    it('should render os family and host risk level', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
