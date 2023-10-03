@@ -846,7 +846,7 @@ describe('data telemetry collection tasks', () => {
         } as any)
       ).toEqual({
         custom_dashboards: {
-          kuery_fields: ['service.environment', 'service.environment'],
+          kuery_fields: ['service.name', 'service.environment'],
           total: 2,
         },
       });
