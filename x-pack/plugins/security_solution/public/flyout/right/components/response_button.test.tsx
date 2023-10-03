@@ -31,10 +31,6 @@ const mockValidSearchHit = {
   },
 } as unknown as SearchHit;
 
-const mockInvalidSearchHit = {
-  fields: {},
-} as unknown as SearchHit;
-
 const renderResponseButton = (panelContextValue: RightPanelContext = mockContextValue) =>
   render(
     <IntlProvider locale="en">
