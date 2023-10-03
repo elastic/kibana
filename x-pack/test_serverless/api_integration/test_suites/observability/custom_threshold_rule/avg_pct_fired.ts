@@ -63,8 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
-        conflicts: 'proceed',
         query: { term: { 'rule.id': ruleId } },
+        conflicts: 'proceed',
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
