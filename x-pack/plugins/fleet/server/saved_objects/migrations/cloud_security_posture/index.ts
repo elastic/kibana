@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-
-export const getDestinationIndex = (jobConfig: DataFrameAnalyticsConfig | undefined) =>
-  jobConfig?.dest.index ?? '';
+export { migrateCspPackagePolicyToV8110 } from './to_v8_11_0';
