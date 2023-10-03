@@ -6,18 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SpaceHealthState } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { ClusterHealthState } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getRuleStatsAggregation, normalizeRuleStatsAggregation } from './rule_stats';
 
-export const getSpaceHealthAggregation = (): Record<
+export const getClusterHealthAggregation = (): Record<
   string,
   estypes.AggregationsAggregationContainer
 > => {
   return getRuleStatsAggregation();
 };
 
-export const normalizeSpaceHealthAggregationResult = (
-  aggregations: Record<string, unknown>
-): SpaceHealthState => {
-  return normalizeRuleStatsAggregation(aggregations);
+export const normalizeClusterHealthAggregationResult = (
+  aggregations: Record<string, unknown> | undefined
+): ClusterHealthState => {
+  return normalizeRuleStatsAggregation(aggregations ?? {});
 };
