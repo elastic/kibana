@@ -31,7 +31,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/core-notifications-browser",
     "@kbn/core-mount-utils-browser-internal",
-    "@kbn/xstate-utils"
+    "@kbn/xstate-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*"
