@@ -17,16 +17,24 @@ import type {
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common';
 import { AlertConsumers, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
+  ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
   ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
 import { StateService } from '../services/state_service';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 
+export interface AnomalyDetectionAlert {
+  anomalyScore: number;
+  jobId: string;
+  anomalyTimestamp: string;
+}
+
 export class AnomalyDetectionAlertsStateService extends StateService {
-  private _aadAlerts$ = new BehaviorSubject<any[]>([]);
+  private _aadAlerts$ = new BehaviorSubject<AnomalyDetectionAlert[]>([]);
 
   constructor(
     private readonly _anomalyTimelineStateServices: AnomalyTimelineStateService,
@@ -89,7 +97,18 @@ export class AnomalyDetectionAlertsStateService extends StateService {
         )
         .subscribe((response) => {
           if (isCompleteResponse(response)) {
-            this._aadAlerts$.next(response.rawResponse.hits.hits);
+            this._aadAlerts$.next(
+              response.rawResponse.hits.hits
+                .map(({ fields }) => {
+                  if (!isDefined(fields)) return;
+                  return {
+                    anomalyScore: fields[ALERT_ANOMALY_SCORE][0],
+                    jobId: fields[ALERT_ANOMALY_DETECTION_JOB_ID][0],
+                    anomalyTimestamp: fields[ALERT_ANOMALY_TIMESTAMP][0],
+                  };
+                })
+                .filter(isDefined)
+            );
           }
         })
     );
