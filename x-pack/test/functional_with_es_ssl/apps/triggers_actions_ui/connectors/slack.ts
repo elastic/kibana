@@ -68,7 +68,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         objectRemover.add(connector.id, 'action', 'actions');
       });
 
-      it('should create the web api connector', async () => {
+      /* FUTURE ENGINEER
+      /* With this https://github.com/elastic/kibana/pull/167150, we added an allowed list of channel IDs
+      /* we can not have this test running anymore because this allowed list is required
+      /* we will have to figure out how to simulate the slack API through functional/API integration testing
+      */
+      it.skip('should create the web api connector', async () => {
         const connectorName = generateUniqueKey();
         await actions.slack.createNewWebAPI({
           name: connectorName,
