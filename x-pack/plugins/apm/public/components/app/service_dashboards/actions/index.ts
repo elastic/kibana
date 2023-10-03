@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { apmTelemetry } from './apm_telemetry';
-export { apmServerSettings } from './apm_server_settings';
-export { apmServiceGroups } from './apm_service_groups';
-export { apmCustomDashboards } from './apm_custom_dashboards';
+import { LinkDashboard } from './link_dashboard';
+import { GotoDashboard } from './goto_dashboard';
+import { EditDashboard } from './edit_dashboard';
+
+export { LinkDashboard, GotoDashboard, EditDashboard };
