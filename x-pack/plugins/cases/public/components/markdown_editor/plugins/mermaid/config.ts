@@ -9,7 +9,7 @@ import type { MermaidConfig } from 'mermaid';
 
 export const defaultMermaidConfig: MermaidConfig = {
   startOnLoad: true,
-  theme: 'forest',
+  theme: 'neutral',
   logLevel: 0,
   securityLevel: 'strict',
   arrowMarkerAbsolute: false,
