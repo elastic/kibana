@@ -49,7 +49,7 @@ jest.mock('../../common/lib/kibana', () => {
             useCasesAddToNewCaseFlyout: jest.fn(),
           },
         },
-        setupOptions: { isILMAvailable: true },
+        configSettings: { ILMEnabled: true },
       },
     }),
     useUiSetting$: () => ['0,0.[000]'],

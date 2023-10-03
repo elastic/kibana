@@ -123,7 +123,7 @@ export const configSchema = schema.object({
     max: 104857600, // 100MB,
   }),
   /**
-   * Used to setup options for the Security application.
+   * Defines static settings for the Security Solution app.
    * @example
    * xpack.securitySolution.settings: {
    *  "ILMEnabled": false,

@@ -17,8 +17,8 @@ jest.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
-        setupOptions: {
-          isSideNavEnabled: mockIsSideNavEnabled(),
+        configSettings: {
+          sideNavEnabled: mockIsSideNavEnabled(),
         },
       },
     }),
