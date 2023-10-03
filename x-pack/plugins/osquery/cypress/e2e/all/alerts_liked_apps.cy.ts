@@ -29,7 +29,7 @@ describe(
     let ruleName: string;
 
     before(() => {
-      loadRule().then((data) => {
+      loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
 
@@ -102,7 +102,7 @@ describe(
       closeModalIfVisible();
     });
 
-    it('can visit discover from response action results', { tags: ['@ess'] }, () => {
+    it('can visit discover from response action results', () => {
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
@@ -128,7 +128,7 @@ describe(
         });
     });
 
-    it('can visit lens from response action results', { tags: ['@ess'] }, () => {
+    it('can visit lens from response action results', () => {
       const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
@@ -162,7 +162,7 @@ describe(
       cy.getBySel('breadcrumbs').contains(lensRegex);
     });
 
-    it('can add to timeline from response action results', { tags: ['@ess'] }, () => {
+    it('can add to timeline from response action results', () => {
       const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
       const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
       cy.getBySel('expand-event').first().click();
