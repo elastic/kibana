@@ -50,6 +50,7 @@ const createStartContractMock = () => {
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
+    getIsSideNavCollapsed$: jest.fn(),
     getBreadcrumbsAppendExtension$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn(),
