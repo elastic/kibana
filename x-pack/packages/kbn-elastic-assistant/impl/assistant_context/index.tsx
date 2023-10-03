@@ -24,10 +24,12 @@ import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { QuickPrompt } from '../assistant/quick_prompts/types';
-import { Prompt } from '../assistant/types';
+import type { KnowledgeBaseConfig, Prompt } from '../assistant/types';
 import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
+  DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
@@ -110,6 +112,7 @@ export interface UseAssistantContext {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
+  knowledgeBase: KnowledgeBaseConfig;
   localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
@@ -120,6 +123,7 @@ export interface UseAssistantContext {
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
@@ -173,6 +177,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
+
+  /**
+   * Local storage for knowledge base configuration, prefixed by assistant nameSpace
+   */
+  const [localStorageKnowledgeBase, setLocalStorageKnowledgeBase] = useLocalStorage(
+    `${nameSpace}.${KNOWLEDGE_BASE_LOCAL_STORAGE_KEY}`,
+    DEFAULT_KNOWLEDGE_BASE_SETTINGS
+  );
 
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
@@ -272,6 +284,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      knowledgeBase: localStorageKnowledgeBase ?? {},
       promptContexts,
       nameSpace,
       registerPromptContext,
@@ -281,6 +294,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setConversations: onConversationsUpdated,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       showAssistantOverlay,
@@ -308,6 +322,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      localStorageKnowledgeBase,
       localStorageLastConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
@@ -318,6 +333,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       selectedSettingsTab,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setLocalStorageKnowledgeBase,
       setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
