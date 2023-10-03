@@ -11,17 +11,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
-    label: 'Defend Workflows Cypress Tests, burning changed specs'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    soft_fail: true
-    parallelism: 1
-    retry:
-      automatic: false
-
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
