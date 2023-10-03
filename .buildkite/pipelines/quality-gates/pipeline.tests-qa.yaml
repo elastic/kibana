@@ -21,6 +21,8 @@ steps:
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
+        EC_ENV: qa
+        EC_REGION: aws-eu-west-1
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   - group: ":female-detective: Security Solution Tests"

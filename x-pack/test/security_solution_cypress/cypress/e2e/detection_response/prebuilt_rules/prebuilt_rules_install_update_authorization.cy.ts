@@ -15,8 +15,9 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
-import { login, waitForPageWithoutDateRange } from '../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   ADD_ELASTIC_RULES_BTN,
   getInstallSingleRuleButtonByRuleId,
@@ -52,7 +53,7 @@ const UPDATED_RULE_2 = createRuleAssetSavedObject({
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.reader);
-  waitForPageWithoutDateRange(url, ROLES.reader);
+  visit(url, { role: ROLES.reader });
 };
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
@@ -81,7 +82,7 @@ describe(
       beforeEach(() => {
         // Now login with read-only user in preparation for test
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-        loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
+        loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
       });
 
       it('should not be able to install prebuilt rules', () => {
@@ -108,7 +109,7 @@ describe(
           installToKibana: false,
         });
         // Now login with read-only user in preparation for test
-        loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
+        loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
       });
 
       it('should not be able to upgrade prebuilt rules', () => {

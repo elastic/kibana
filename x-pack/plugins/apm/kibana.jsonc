@@ -50,7 +50,6 @@
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
       "licenseManagement",
-      "profiling",
       "profilingDataAccess"
     ],
     "requiredBundles": [

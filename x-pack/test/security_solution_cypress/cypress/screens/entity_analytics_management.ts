@@ -7,7 +7,7 @@
 
 import { getDataTestSubjectSelector } from '../helpers/common';
 
-export const PAGE_TITLE = '[data-test-subj="entityAnalyticsManagmentPageTitle"]';
+export const PAGE_TITLE = '[data-test-subj="entityAnalyticsManagementPageTitle"]';
 
 export const HOST_RISK_PREVIEW_TABLE = '[data-test-subj="host-risk-preview-table"]';
 
@@ -29,7 +29,7 @@ export const RISK_SCORE_UPDATE_CANCEL = '[data-test-subj="risk-score-update-canc
 
 export const RISK_SCORE_UPDATE_CONFIRM = '[data-test-subj="risk-score-update-confirm"]';
 
-export const RISK_SCORE_UDATE_BUTTON = '[data-test-subj="risk-score-update-button"]';
+export const RISK_SCORE_UPDATE_BUTTON = '[data-test-subj="risk-score-update-button"]';
 
 export const RISK_SCORE_STATUS = '[data-test-subj="risk-score-status"]';
 

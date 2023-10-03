@@ -21,7 +21,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -53,8 +53,8 @@ interface KibanaLogicProps {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart;
+  ml: MlPluginStart;
   uiSettings: IUiSettingsClient;
-  user: AuthenticatedUser | null;
 }
 
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
@@ -94,8 +94,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share, {}],
+    ml: [props.ml, {}],
     uiSettings: [props.uiSettings, {}],
-    user: [props.user, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

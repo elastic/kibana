@@ -14,7 +14,6 @@ import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import {
-  CORRELATIONS_NO_DATA_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID,
@@ -82,6 +81,8 @@ const renderCorrelationsOverview = (contextValue: RightPanelContext) => (
   </TestProviders>
 );
 
+const NO_DATA_MESSAGE = 'No correlations data available.';
+
 describe('<CorrelationsOverview />', () => {
   it('should render wrapper component', () => {
     jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: false });
@@ -131,13 +132,13 @@ describe('<CorrelationsOverview />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    const { getByTestId, queryByText } = render(renderCorrelationsOverview(panelContextValue));
     expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_CASES_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SUPPRESSED_ALERTS_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should hide rows and show error message if show values are false', () => {
@@ -153,16 +154,13 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
-    const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    const { getByText, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_NO_DATA_TEST_ID)).toHaveTextContent(
-      'No correlations data available.'
-    );
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should hide rows if values are null', () => {
@@ -172,13 +170,13 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
-    const { queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    const { queryByTestId, queryByText } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should navigate to the left section Insights tab when clicking on button', () => {

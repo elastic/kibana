@@ -18682,6 +18682,20 @@
             "path": "x-pack/plugins/fleet/common/authz.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetAuthz.endpointExceptionsPrivileges",
+            "type": "Object",
+            "tags": [],
+            "label": "endpointExceptionsPrivileges",
+            "description": [],
+            "signature": [
+              "{ actions: { crudEndpointExceptions: boolean; showEndpointExceptions: boolean; }; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -19704,34 +19718,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.FullAgentPolicyOutputPermissions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FullAgentPolicyOutputPermissions",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.FullAgentPolicyOutputPermissions.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[packagePolicyName: string]: { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }",
-            "description": [],
-            "signature": [
-              "[packagePolicyName: string]:  { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -24507,6 +24493,23 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FullAgentPolicyOutputPermissions",
+        "type": "Type",
+        "tags": [],
+        "label": "FullAgentPolicyOutputPermissions",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "SecurityRoleDescriptor",
+          "; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.GetAgentPoliciesResponse",
         "type": "Type",
         "tags": [],
@@ -26950,7 +26953,9 @@
           "\ndefines endpoint package privileges\nthe key is the name of the packagePrivilege (ie. 'readSecuritySolution')\nthe value object is for mapping kibana privileges and capabilities\nsee x-pack/plugins/fleet/server/services/security/security.ts for example of how object values are used"
         ],
         "signature": [
-          "{ [x: string]: PrivilegeMapObject; }"
+          "{ [x: string]: ",
+          "PrivilegeMapObject",
+          "; }"
         ],
         "path": "x-pack/plugins/fleet/common/constants/authz.ts",
         "deprecated": false,
