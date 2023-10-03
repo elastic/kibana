@@ -17,3 +17,9 @@ export const kibanaDevServiceAccount = {
     env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
     'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
 };
+
+export const fleetServerDevServiceAccount = {
+  token:
+    env.TEST_FLEET_SERVER_SERVICE_ACCOUNT_TOKEN ||
+    'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ',
+};
