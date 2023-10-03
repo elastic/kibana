@@ -27,7 +27,7 @@
   }
 
   &:placeholder-shown, &::placeholder {
-  font-weight: $euiFontWeightRegular;
+    font-weight: $euiFontWeightRegular;
     color: $euiTextSubduedColor;
     text-decoration: none;
   }
