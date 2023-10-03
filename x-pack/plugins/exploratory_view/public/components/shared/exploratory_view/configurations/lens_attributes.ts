@@ -857,6 +857,7 @@ export class LensAttributes {
       dataType: 'number',
       isBucketed: false,
       label: label || 'Count of records',
+      customLabel: true,
       operationType: 'count',
       scale: 'ratio',
       sourceField: RECORDS_FIELD,
