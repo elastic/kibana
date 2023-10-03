@@ -315,7 +315,7 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
