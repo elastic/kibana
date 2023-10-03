@@ -13,9 +13,20 @@ import {
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
-import type { CloudbeatConfigKeyType, CloudSecurityInstallationStats } from './types';
+import type {
+  CloudbeatConfigKeyType,
+  CloudSecurityInstallationStats,
+  SetupAccessOption,
+} from './types';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
+
+interface CredentialMappings {
+  'gcp.credentials.file': 'credentials file';
+  'gcp.credentials.json': 'credentials json';
+  shared_credential_file: 'credentials file';
+  role_arn: 'role';
+}
 
 const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
   const enabledInput = packagePolicy.inputs.find((input) => input.enabled);
@@ -37,6 +48,32 @@ const getEnabledIsSetupAutomatic = (packagePolicy: PackagePolicy) => {
   const configKey = cloudbeatConfig[enabledInput.type as CloudbeatConfigKeyType];
 
   return !!configKey && !!enabledInput.config?.[configKey]?.value;
+};
+
+const getSetupAccessOption = (
+  packagePolicy: PackagePolicy
+): CloudSecurityInstallationStats['setup_access_option'] => {
+  const inputStreamVars = getEnabledInputStreamVars(packagePolicy);
+
+  if (!inputStreamVars) return null;
+
+  const credentialMappings: Record<string, SetupAccessOption> = {
+    'gcp.credentials.file': 'credentials file',
+    'gcp.credentials.json': 'credentials json',
+    shared_credential_file: 'credentials file',
+    role_arn: 'role',
+  };
+
+  for (const [key, config] of Object.entries(inputStreamVars)) {
+    if (config?.value && credentialMappings[key as keyof CredentialMappings]) {
+      return credentialMappings[key as keyof CredentialMappings];
+    }
+  }
+
+  if (inputStreamVars.session_token) return 'temporary access';
+  if (inputStreamVars.access_key && inputStreamVars.secret_access_key) return 'direct access';
+
+  return null;
 };
 
 const getAccountTypeField = (
@@ -64,6 +101,7 @@ const getInstalledPackagePolicies = (
       const agentCounts =
         agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
         0;
+      const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
 
       return {
         package_policy_id: packagePolicy.id,
@@ -74,7 +112,8 @@ const getInstalledPackagePolicies = (
         agent_policy_id: packagePolicy.policy_id,
         agent_count: agentCounts,
         account_type: getAccountTypeField(packagePolicy),
-        is_setup_automatic: getEnabledIsSetupAutomatic(packagePolicy),
+        is_setup_automatic: isSetupAutomatic,
+        setup_access_option: isSetupAutomatic ? null : getSetupAccessOption(packagePolicy),
       };
     }
   );

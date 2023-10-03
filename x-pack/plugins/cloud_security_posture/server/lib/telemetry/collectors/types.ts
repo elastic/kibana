@@ -123,6 +123,13 @@ export interface CspmRulesStats {
   failed_findings_count: number;
 }
 
+export type SetupAccessOption =
+  | 'temporary access'
+  | 'direct access'
+  | 'role'
+  | 'credentials file'
+  | 'credentials json'
+  | null;
 export interface CloudSecurityInstallationStats {
   package_policy_id: string;
   feature: string;
@@ -133,6 +140,7 @@ export interface CloudSecurityInstallationStats {
   agent_count: number;
   is_setup_automatic: boolean;
   account_type?: 'single-account' | 'organization-account';
+  setup_access_option: SetupAccessOption;
 }
 
 export interface CloudSecurityAlertsStats {

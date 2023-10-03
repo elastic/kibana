@@ -155,6 +155,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       agent_count: { type: 'long' },
       account_type: { type: 'keyword' },
       is_setup_automatic: { type: 'boolean' },
+      setup_access_option: { type: 'keyword' },
     },
   },
   alerts_stats: {

@@ -8,7 +8,6 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
-import { getSafeCloudAccountIdRuntimeMapping } from '../../../../common/runtime_mappings/get_cloud_account_id_mapping';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type {
@@ -207,14 +206,14 @@ export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
 
 export const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
-  runtime_mappings: getSafeCloudAccountIdRuntimeMapping(),
+  runtime_mappings: getPackagePolicyIdRuntimeMapping(),
   query: {
     match_all: {},
   },
   aggs: {
     accounts: {
       terms: {
-        field: 'asset_identifier',
+        field: 'cloud.account.id',
         order: {
           _count: 'desc',
         },
