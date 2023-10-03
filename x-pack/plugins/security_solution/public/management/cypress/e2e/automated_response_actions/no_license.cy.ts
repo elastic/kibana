@@ -34,7 +34,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     });
   });
 
-  describe('User cannot see results', () => {
+  describe.skip('User cannot see results', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);

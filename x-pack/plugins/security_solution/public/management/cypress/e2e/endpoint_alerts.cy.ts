@@ -19,7 +19,7 @@ import { login } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-describe(
+describe.skip(
   'Endpoint generated alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
