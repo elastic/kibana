@@ -64,6 +64,10 @@ export const fetchSignificantCategories = async (
 
   // Using for...of to allow `await` within the loop.
   for (const [i, fieldName] of fieldNames.entries()) {
+    if (categoriesOverall[i].categories.length === 0) {
+      continue;
+    }
+
     const categoriesBaseline = await fetchCategoryCounts(
       esClient,
       params,
