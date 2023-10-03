@@ -7,6 +7,7 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common/constants';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   Alerts,
@@ -193,8 +194,19 @@ export const useBulkUntrackActions = ({
   const hasApmPermission = application.capabilities.apm?.['alerting:show'];
   const hasInfrastructurePermission = application.capabilities.infrastructure?.show;
   const hasLogsPermission = application.capabilities.logs?.show;
+  const hasUptimePermission = application.capabilities.uptime?.show;
+  const hasSloPermission = application.capabilities.slo?.show;
+  const hasObservabilityPermission = application.capabilities.observability?.show;
 
-  if (!hasApmPermission && !hasInfrastructurePermission && !hasLogsPermission) return [];
+  if (
+    !hasApmPermission &&
+    !hasInfrastructurePermission &&
+    !hasLogsPermission &&
+    !hasUptimePermission &&
+    !hasSloPermission &&
+    !hasObservabilityPermission
+  )
+    return [];
 
   return [
     {
