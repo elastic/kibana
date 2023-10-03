@@ -477,22 +477,20 @@ xpack.actions.preconfigured:
     actionTypeId: .servicenow-itom
     config:
       apiUrl: https://example.service-now.com/
-      usesTableApi: false <1>
-      isOAuth: true <2>
-      userIdentifierValue: testuser@email.com <3>
-      clientId: abcdefghijklmnopqrstuvwxyzabcdef <4>
-      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <5>
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
-      clientSecret: secretsecret <6>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <7>
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
 --
-<1> Specifies whether the connector uses the Table API or the Import Set API. If set to `false`, the Elastic application should be installed in ServiceNow.
-<2> Specifies whether the connector uses basic or OAuth authentication.
-<3> The user identifier.
-<4> The client identifier assigned to your OAuth application.
-<5> The key identifier assigned to the JWT verifier map of your OAuth application.
-<6> The client secret assigned to your OAuth application.
-<7> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to your OAuth application.
+<4> The key identifier assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to your OAuth application.
+<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
 
 [float]
 [[preconfigured-servicenow-configuration]]

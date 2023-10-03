@@ -446,7 +446,7 @@ For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir
 For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HTTP basic authentication. Defaults to `true`.
 
 `xpack.actions.preconfigured.<connector-id>.config.usesTableApi`::
-For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies whether the connector uses the Table API or the Import Set API.
+For a <<servicenow-action-type,{sn-itsm}>> or <<servicenow-sir-action-type,{sn-sir} connector>>, specifies whether the connector uses the Table API or the Import Set API.
 If set to `false`, the Elastic application should be installed in ServiceNow.
 
 `xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl`::
