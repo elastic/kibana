@@ -69,13 +69,6 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
-      console.log(
-        'VALS',
-        Object.values(conversations).map((conversation) => ({
-          value: { isDefault: conversation.isDefault ?? false },
-          label: conversation.id,
-        }))
-      );
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
         label: conversation.id,
@@ -209,6 +202,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           className={'parentFlexGroup'}
           component={'span'}
           justifyContent="spaceBetween"
+          data-test-subj={`convo-option-${label}`}
         >
           <EuiFlexItem
             component={'span'}
@@ -238,6 +232,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                     e.stopPropagation();
                     onDelete(label);
                   }}
+                  data-test-subj="delete-option"
                   css={css`
                     visibility: hidden;
                     .parentFlexGroup:hover & {
