@@ -11,7 +11,6 @@ import type { Plugin, PluggableList } from 'unified';
 import type { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
 import type rehype2react from 'rehype-react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
-import type { MermaidProps } from './plugins/mermaid';
 
 export interface CursorPosition {
   start: number;
@@ -23,12 +22,7 @@ export type TemporaryProcessingPluginsType = [
   [
     typeof rehype2react,
     Parameters<typeof rehype2react>[0] & {
-      components: {
-        a: FunctionComponent<EuiLinkAnchorProps>;
-        lens: unknown;
-        timeline: unknown;
-        mermaid: FunctionComponent<MermaidProps>;
-      };
+      components: { a: FunctionComponent<EuiLinkAnchorProps>; lens: unknown; timeline: unknown };
     }
   ],
   ...PluggableList

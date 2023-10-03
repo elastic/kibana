@@ -16,7 +16,6 @@ import type { TemporaryProcessingPluginsType } from './types';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
-import * as mermaidPlugin from './plugins/mermaid';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();
@@ -28,9 +27,6 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
     const processingPlugins =
       getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
-
-    parsingPlugins.push([mermaidPlugin.parser, {}]);
-    processingPlugins[1][1].components.mermaid = mermaidPlugin.renderer;
 
     if (timelinePlugins) {
       uiPlugins.push(timelinePlugins.uiPlugin);
