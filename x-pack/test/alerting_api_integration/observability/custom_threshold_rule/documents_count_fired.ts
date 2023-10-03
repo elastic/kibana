@@ -34,6 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom  Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    // DATE_VIEW should match the index template:
+    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
     let actionId: string;
@@ -45,9 +48,9 @@ export default function ({ getService }: FtrProviderContext) {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await createDataView({
         supertest,
-        name: 'metrics-fake_hosts',
+        name: DATE_VIEW,
         id: DATA_VIEW_ID,
-        title: 'metrics-fake_hosts',
+        title: DATE_VIEW,
       });
     });
 
@@ -151,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (BETA)'
+          'Custom threshold (Technical Preview)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -175,6 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
+
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.group');
 
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')

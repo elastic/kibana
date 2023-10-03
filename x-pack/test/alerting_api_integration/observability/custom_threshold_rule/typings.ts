@@ -11,4 +11,5 @@ export interface ActionDocument {
   reason: string;
   value: string;
   host?: string;
+  group?: string;
 }
