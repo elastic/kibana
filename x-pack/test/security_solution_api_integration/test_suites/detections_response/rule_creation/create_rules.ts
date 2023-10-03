@@ -170,7 +170,6 @@ export default ({ getService }: FtrProviderContext) => {
             .query({ id: body.id })
             .expect(200);
 
-          console.log(rule);
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
           expect(rule?.execution_summary?.last_execution.message).to.eql(
