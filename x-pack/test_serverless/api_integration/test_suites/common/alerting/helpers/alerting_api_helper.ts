@@ -166,7 +166,8 @@ export async function createAnomalyRule({
       rule_type_id: ruleTypeId,
       actions,
       ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
-    });
+    })
+    .expect(200);
   return body;
 }
 
@@ -276,7 +277,8 @@ export async function createInventoryRule({
       rule_type_id: ruleTypeId,
       actions,
       ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
-    });
+    })
+    .expect(200);
   return body;
 }
 
@@ -431,6 +433,7 @@ export async function snoozeRule({
           tzid: 'UTC',
         },
       },
-    });
+    })
+    .expect(200);
   return body;
 }
