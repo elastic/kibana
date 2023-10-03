@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  AggregationsMultiBucketBase,
-} from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
 import { CspStatusCode } from '../../../../common/types';
 
 export type CloudSecurityUsageCollectorType =
