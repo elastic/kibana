@@ -222,3 +222,13 @@ export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+
+export const ALERT_ASSIGNING_CONTEXT_MENU_ITEM =
+  '[data-test-subj="alert-assignees-context-menu-item"]';
+
+export const ALERT_ASSIGNING_SELECTABLE_MENU_ITEM =
+  '[data-test-subj="alert-assignees-selectable-menu"]';
+
+export const ALERT_ASSIGNING_CONTEXT_MENU = '[data-test-subj="alert-assignees-selectable-menu"]';
+
+export const ALERT_ASSIGNING_UPDATE_BUTTON = '[data-test-subj="alert-assignees-update-button"]';

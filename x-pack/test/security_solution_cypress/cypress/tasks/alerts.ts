@@ -47,6 +47,10 @@ import {
   ALERTS_HISTOGRAM_LEGEND,
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
+  ALERT_ASSIGNING_CONTEXT_MENU_ITEM,
+  ALERT_ASSIGNING_CONTEXT_MENU,
+  ALERT_ASSIGNING_SELECTABLE_MENU_ITEM,
+  ALERT_ASSIGNING_UPDATE_BUTTON,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_CONTEXT_MENU,
   ALERT_TAGGING_UPDATE_BUTTON,
@@ -507,4 +511,31 @@ export const switchAlertTableToEventRenderedView = () => {
 export const switchAlertTableToGridView = () => {
   cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
   cy.get(ALERT_TABLE_GRID_VIEW_OPTION).should('be.visible').trigger('click');
+};
+
+export const openAlertAssigningBulkActionMenu = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
+  cy.get(ALERT_ASSIGNING_CONTEXT_MENU_ITEM).click();
+};
+
+export const clickAlertAssignee = (assignee: string) => {
+  cy.get(ALERT_ASSIGNING_CONTEXT_MENU).contains(assignee).click();
+};
+
+export const updateAlertAssignees = () => {
+  cy.get(ALERT_ASSIGNING_UPDATE_BUTTON).click();
+};
+
+export const findSelectedAlertAssignee = (assignee: string) => {
+  cy.get(ALERT_ASSIGNING_SELECTABLE_MENU_ITEM)
+    .find('[aria-checked="true"]')
+    .first()
+    .contains(assignee);
+};
+
+export const findUnselectedAlertAssignee = (assignee: string) => {
+  cy.get(ALERT_ASSIGNING_SELECTABLE_MENU_ITEM)
+    .find('[aria-checked="false"]')
+    .first()
+    .contains(assignee);
 };
