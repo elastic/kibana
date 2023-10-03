@@ -105,6 +105,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             : connectorTypeTitle;
           return {
             value: connector.id,
+            'data-test-subj': connector.id,
             inputDisplay: displayFancy ? displayFancy(connector.name) : connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
@@ -171,6 +172,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         <EuiSuperSelect
           aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
           compressed={true}
+          data-test-subj="connector-selector"
           disabled={localIsDisabled}
           hasDividers={true}
           isLoading={isLoading}

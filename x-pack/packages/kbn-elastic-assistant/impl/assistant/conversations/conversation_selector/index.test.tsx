@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useSendMessages } from '../../use_send_messages';
 import { ConversationSelector } from '.';
 import { render, fireEvent, within } from '@testing-library/react';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
@@ -14,7 +13,6 @@ import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversatio
 import { CONVERSATION_SELECTOR_PLACE_HOLDER } from './translations';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
-jest.mock('../../use_send_messages');
 const setConversation = jest.fn();
 const deleteConversation = jest.fn();
 const mockConversation = {
@@ -31,7 +29,6 @@ jest.mock('../../use_conversation', () => ({
   useConversation: () => mockConversation,
 }));
 
-const sendMessages = jest.fn();
 const onConversationSelected = jest.fn();
 const defaultProps = {
   isDisabled: false,
@@ -40,17 +37,12 @@ const defaultProps = {
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
 };
-const robotMessage = 'Response message from the robot';
 describe('Conversation selector', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
   beforeEach(() => {
     jest.clearAllMocks();
-    (useSendMessages as jest.Mock).mockReturnValue({
-      isLoading: false,
-      sendMessages: sendMessages.mockReturnValue(robotMessage),
-    });
   });
   it('renders with correct selected conversation', () => {
     const { getByTestId } = render(
