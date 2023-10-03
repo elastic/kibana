@@ -1210,7 +1210,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'arm_template' },
-        'azure.account_type': { value: 'single-account-azure' },
+        'azure.account_type': { value: 'single-account' },
       });
 
       const { getByText } = render(
@@ -1233,7 +1233,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'arm_template' },
-        'azure.account_type': { value: 'single-account-azure' },
+        'azure.account_type': { value: 'single-account' },
       });
 
       render(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure()} />);

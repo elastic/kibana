@@ -43,9 +43,9 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
     data,
     embeddable,
     notifications,
+    dashboardBackup,
     initializerContext,
     savedObjectsTagging,
-    dashboardSessionStorage,
   } = requiredServices;
   return {
     loadDashboardState: ({ id }) =>
@@ -64,10 +64,10 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         lastSavedId,
         currentState,
         notifications,
+        dashboardBackup,
         contentManagement,
         initializerContext,
         savedObjectsTagging,
-        dashboardSessionStorage,
       }),
     findDashboards: {
       search: ({ hasReference, hasNoReference, search, size, options }) =>
