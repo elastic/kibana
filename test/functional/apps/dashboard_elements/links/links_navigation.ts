@@ -18,13 +18,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { dashboard, common, timePicker } = getPageObjects(['dashboard', 'common', 'timePicker']);
+  const { dashboard, common, header, timePicker } = getPageObjects([
+    'dashboard',
+    'common',
+    'header',
+    'timePicker',
+  ]);
 
   const FROM_TIME = 'Oct 22, 2018 @ 00:00:00.000';
   const TO_TIME = 'Dec 3, 2018 @ 00:00:00.000';
 
-  // Failing: See https://github.com/elastic/kibana/issues/167713
-  describe.skip('links panel navigation', () => {
+  describe('links panel navigation', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles([
@@ -84,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
+        await header.waitUntilLoadingHasFinished();
         expect(await testSubjects.exists('dashboardLink--link004--error')).to.be(true);
         expect(await testSubjects.isEnabled('dashboardLink--link004--error')).to.be(false);
       });
@@ -96,7 +101,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * but should not override the date range.
          */
         await dashboard.loadSavedDashboard('links 002');
-        await testSubjects.click('dashboardLink--link001');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.clickWhenNotDisabled('dashboardLink--link001');
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '0930f310-5bc2-11ee-9a85-7b86504227bc'
         );
@@ -127,7 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * but should not pass its filters.
          */
         await dashboard.loadSavedDashboard('links 001');
-        await testSubjects.click('dashboardLink--link002');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.clickWhenNotDisabled('dashboardLink--link002');
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '24751520-5bc2-11ee-9a85-7b86504227bc'
         );
@@ -157,7 +164,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * to dashboard links003.
          */
         await dashboard.loadSavedDashboard('links 001');
-        await testSubjects.click('dashboardLink--link003');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.clickWhenNotDisabled('dashboardLink--link003');
 
         // Should have opened another tab
         const windowHandlers = await browser.getAllWindowHandles();
@@ -180,6 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('external links', () => {
       before(async () => {
         await dashboard.loadSavedDashboard('dashboard with external links');
+        await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {
@@ -198,7 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should create an external link when openInNewTab is enabled', async () => {
-        await testSubjects.click('externalLink--link999');
+        await testSubjects.clickWhenNotDisabled('externalLink--link999');
 
         // Should have opened another tab
         const windowHandlers = await browser.getAllWindowHandles();
@@ -209,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should open in same tab when openInNewTab is disabled', async () => {
-        await testSubjects.click('externalLink--link888');
+        await testSubjects.clickWhenNotDisabled('externalLink--link888');
 
         // Should have opened in the same tab
         const windowHandlers = await browser.getAllWindowHandles();
