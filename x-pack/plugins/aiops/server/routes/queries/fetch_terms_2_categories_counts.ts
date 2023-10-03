@@ -82,7 +82,7 @@ export async function fetchTerms2CategoriesCounts(
   const results: ItemsetResult[] = [];
 
   significantTerms.forEach((term) => {
-    return significantCategories.forEach((category) => {
+    significantCategories.forEach((category) => {
       searches.push({ index: params.index });
       searches.push(
         getTerm2CategoryCountRequest(
