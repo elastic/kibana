@@ -55,6 +55,10 @@ const navigationNodeToEuiItem = (
       }
       if (itemOpenPanel) {
         if (isSideNavCollapsed) {
+          // TEMP logic until we have the EUI 88.5.3 in Kibana
+          // https://github.com/elastic/kibana/pull/167555
+          // eslint-disable-next-line no-console
+          console.log('Side nav is collapsed, not opening panel....');
           return;
         }
         openPanel({ ...item, id });

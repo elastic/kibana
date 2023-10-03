@@ -674,7 +674,7 @@ export const WithUIComponents = (args: NavigationServices) => {
               <Navigation.Group id="group:settings" title="Open panel" openPanel>
                 <Navigation.Group id="group1">
                   <Navigation.Item<any> link="group:settings.logs" title="Logs" />
-                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
                   <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
                 </Navigation.Group>
                 <Navigation.Group id="group2" appendHorizontalRule title="Group 2">
@@ -685,7 +685,12 @@ export const WithUIComponents = (args: NavigationServices) => {
                 <Navigation.Group title="MANAGEMENT" id="group3" isCollapsible>
                   <Navigation.Group title="Group A" id="group3-a">
                     <Navigation.Item<any> link="group:settings.logs" title="Logs" />
-                    <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                    <Navigation.Item<any>
+                      link="group:settings.signals"
+                      title="Signals"
+                      withBadge
+                      badgeOptions={{ text: 'coolio' }}
+                    />
                     <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
                   </Navigation.Group>
                   <Navigation.Group title="Group B" id="group3-b">
