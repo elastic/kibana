@@ -35,7 +35,7 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
         log,
         es,
         createdRule,
-        RuleExecutionStatus.succeeded,
+        RuleExecutionStatusEnum.succeeded,
         100
       );
       expect(alerts.hits.hits.length).equal(88);
@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
         log,
         es,
         createdRule,
-        RuleExecutionStatus.succeeded,
+        RuleExecutionStatusEnum.succeeded,
         100
       );
       expect(alerts.hits.hits.length).equal(88);
@@ -559,7 +559,7 @@ export default ({ getService }: FtrProviderContext) => {
         log,
         es,
         createdRuleTerm,
-        RuleExecutionStatus.succeeded,
+        RuleExecutionStatusEnum.succeeded,
         100
       );
       const alertsMatch = await getOpenSignals(
@@ -567,7 +567,7 @@ export default ({ getService }: FtrProviderContext) => {
         log,
         es,
         createdRuleMatch,
-        RuleExecutionStatus.succeeded,
+        RuleExecutionStatusEnum.succeeded,
         100
       );
 
