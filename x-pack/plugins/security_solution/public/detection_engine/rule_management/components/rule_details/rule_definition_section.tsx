@@ -201,6 +201,8 @@ const getRuleTypeDescription = (ruleType: Type) => {
       return descriptionStepI18n.THRESHOLD_TYPE_DESCRIPTION;
     case 'eql':
       return descriptionStepI18n.EQL_TYPE_DESCRIPTION;
+    case 'esql':
+      return descriptionStepI18n.ESQL_TYPE_DESCRIPTION;
     case 'threat_match':
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
@@ -358,7 +360,7 @@ const prepareDefinitionSectionListItems = (
     }
   }
 
-  if ('filters' in rule && rule.filters && rule.filters.length > 0) {
+  if ('filters' in rule && 'data_view_id' in rule && rule.filters?.length) {
     definitionSectionListItems.push({
       title: savedQuery
         ? descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL

@@ -49,6 +49,7 @@ const RuleAdd = ({
   initialValues,
   reloadRules,
   onSave,
+  hideGrouping,
   hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
@@ -286,6 +287,7 @@ const RuleAdd = ({
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
+                hideGrouping={hideGrouping}
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
                 setConsumer={setSelectedConsumer}

@@ -10,6 +10,7 @@ import {
   AgentName,
   ElasticAgentName,
 } from '../../../typings/es_schemas/ui/fields/agent';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface TimeframeMap {
   '1d': number;
@@ -110,6 +111,7 @@ export interface APMUsage {
     services: TimeframeMap1d;
     environments: TimeframeMap1d;
     span_destination_service_resource: TimeframeMap1d;
+    global_labels: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
@@ -191,6 +193,7 @@ export interface APMUsage {
           };
         };
       };
+      metricset: DataStreamStats;
     };
     shards: {
       total: number;
@@ -221,6 +224,7 @@ export interface APMUsage {
     | 'host'
     | 'processor_events'
     | 'agent_configuration'
+    | 'global_labels'
     | 'services'
     | 'versions'
     | 'groupings'
@@ -235,6 +239,45 @@ export interface APMUsage {
     { took: { ms: number } }
   >;
 }
+
+export type MetricRollupIntervals =
+  | RollupInterval.OneMinute
+  | RollupInterval.TenMinutes
+  | RollupInterval.SixtyMinutes;
+
+export type MetricSupportingRollUp =
+  | 'service_destination'
+  | 'transaction'
+  | 'service_summary'
+  | 'service_transaction'
+  | 'span_breakdown';
+
+export type MetricNotSupportingRollup = 'app';
+
+export type MetricTypes = MetricSupportingRollUp | MetricNotSupportingRollup;
+
+export interface CapturedMetricStats {
+  total: {
+    shards: number;
+    docs: {
+      count: number;
+    };
+    store: {
+      size_in_bytes: number;
+    };
+  };
+}
+
+export interface LastDayCount {
+  doc_count: number;
+}
+
+export interface DataStreamCombined {
+  all: CapturedMetricStats;
+  '1d': LastDayCount;
+}
+
+export type DataStreamStats = Record<string, DataStreamCombined>;
 
 export type APMDataTelemetry = DeepPartial<APMUsage>;
 
