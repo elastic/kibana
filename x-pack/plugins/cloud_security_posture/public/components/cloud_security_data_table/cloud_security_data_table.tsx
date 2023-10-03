@@ -15,33 +15,21 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  EuiButtonEmpty,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridStyle,
-  EuiFlexItem,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import numeral from '@elastic/numeral';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPostureTableResult } from '../../common/hooks/use_cloud_posture_table';
-import { FindingsGroupBySelector } from '../../pages/configurations/layout/findings_group_by_selector';
 import { EmptyState } from '../empty_state';
 import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
-import { i18n } from '@kbn/i18n';
+import { AdditionalControls } from './additional_controls';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
 }
-
-const formatNumber = (value: number) => {
-  return value < 1000 ? value : numeral(value).format('0.0a');
-};
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -155,7 +143,12 @@ export const CloudSecurityDataTable = ({
     dataViewFieldEditor,
   };
 
-  const { columns: currentColumns, onSetColumns } = useColumns({
+  const {
+    columns: currentColumns,
+    onSetColumns,
+    onAddColumn,
+    onRemoveColumn,
+  } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
@@ -207,25 +200,36 @@ export const CloudSecurityDataTable = ({
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 
+  const externalAdditionalControls = (
+    <AdditionalControls
+      total={total}
+      dataView={dataView}
+      title={title}
+      columns={currentColumns}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
+    />
+  );
+
+  const dataTableStyle = {
+    // Change the height of the grid to fit the page
+    // If there are filters, leave space for the filter bar
+    // Todo: Replace this component with EuiAutoSizer
+    height: `calc(100vh - ${filters.length > 0 ? 454 : 414}px)`,
+  };
+
+  const loadingStyle = {
+    opacity: isLoading ? 1 : 0,
+  };
+
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
         data-test-subj={rest['data-test-subj']}
         className={styles.gridContainer}
-        style={{
-          // Change the height of the grid to fit the page
-          // If there are filters, leave space for the filter bar
-          // Todo: Replace this component with EuiAutoSizer
-          height: `calc(100vh - ${filters.length > 0 ? 454 : 414}px)`,
-        }}
+        style={dataTableStyle}
       >
-        <EuiProgress
-          size="xs"
-          color="accent"
-          style={{
-            opacity: isLoading ? 1 : 0,
-          }}
-        />
+        <EuiProgress size="xs" color="accent" style={loadingStyle} />
         <UnifiedDataTable
           className={styles.gridStyle}
           ariaLabelledBy={title}
@@ -254,39 +258,10 @@ export const CloudSecurityDataTable = ({
           onFetchMoreRecords={loadMore}
           externalCustomRenderers={externalCustomRenderers}
           rowHeightState={uiSettings.get(ROW_HEIGHT_OPTION)}
-          externalAdditionalControls={<AdditionalControls total={total} title={title} />}
+          externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}
         />
       </div>
     </CellActionsProvider>
-  );
-};
-
-const AdditionalControls = ({ total, title }: { total: number; title: string }) => {
-  const styles = useStyles();
-  return (
-    <>
-      <EuiFlexItem grow={0}>
-        <span className="cspDataTableTotal">{`${formatNumber(total)} ${title}`}</span>
-      </EuiFlexItem>
-      <EuiFlexItem grow={0}>
-        <EuiButtonEmpty
-          className="cspDataTableFields"
-          iconType="tableOfContents"
-          onClick={() => {
-            console.log('fields');
-          }}
-          size="xs"
-          color="text"
-        >
-          {i18n.translate('xpack.csp.dataTable.fields', {
-            defaultMessage: 'Fields',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} className={styles.groupBySelector}>
-        <FindingsGroupBySelector type="default" />
-      </EuiFlexItem>
-    </>
   );
 };
