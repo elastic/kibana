@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const FEEDBACK_DELAY = 180000; // 3 minutes
+export const FEEDBACK_DELAY_MS = 30000; // 30 seconds
+export const FEEDBACK_TOAST_LIFETIME_MS = 60000; // 1 minute

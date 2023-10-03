@@ -8,7 +8,7 @@
 import { IToasts } from '@kbn/core-notifications-browser';
 import { createMachine, InterpreterFrom } from 'xstate';
 import { ObservabilityLogExplorerHistory } from '../../../types';
-import { FEEDBACK_DELAY } from './constants';
+import { FEEDBACK_DELAY_MS } from './constants';
 import { DEFAULT_CONTEXT } from './defaults';
 import { initializeFromLocationState } from './location_state_service';
 import { createRequestFeedbackNotifier } from './notifications';
@@ -45,7 +45,7 @@ export const createPureOriginInterpreterStateMachine = (initialContext: OriginIn
           states: {
             waiting: {
               after: {
-                [FEEDBACK_DELAY]: {
+                [FEEDBACK_DELAY_MS]: {
                   target: '#done',
                   actions: ['requestFeedback'],
                 },
