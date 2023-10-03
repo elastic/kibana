@@ -491,6 +491,27 @@ describe('Risk Scoring Task', () => {
             );
           }
         });
+
+        it('sends a cancellation telemetry event if the task was cancelled', async () => {
+          mockIsCancelled.mockReturnValue(true);
+
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+            'risk_score_execution_cancellation',
+            {
+              interval: '1h',
+              scoresWritten: 0,
+              taskDurationInSeconds: 0,
+            }
+          );
+        });
       });
     });
   });
