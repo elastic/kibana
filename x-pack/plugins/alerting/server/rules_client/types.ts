@@ -21,6 +21,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { DistributiveOmit } from '@elastic/eui';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
@@ -29,6 +30,8 @@ import {
   SanitizedRule,
   RuleSnoozeSchedule,
   RawRuleAlertsFilter,
+  RuleSystemAction,
+  RuleDefaultAction,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -80,17 +83,28 @@ export interface RulesClientContext {
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly isSystemAction: (actionId: string) => boolean;
 }
 
-export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
+export type NormalizedSystemAction = Omit<RuleSystemAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithGeneratedValues = Omit<
-  NormalizedAlertAction,
-  'uuid' | 'alertsFilter'
+export type NormalizedAlertDefaultActionWithGeneratedValues = Omit<
+  RuleDefaultAction,
+  'uuid' | 'alertsFilter' | 'actionTypeId'
 > & {
   uuid: string;
   alertsFilter?: RawRuleAlertsFilter;
 };
+
+export type NormalizedAlertSystemActionWithGeneratedValues = Omit<
+  RuleSystemAction,
+  'uuid' | 'actionTypeId'
+> & { uuid: string };
+
+export type NormalizedAlertActionWithGeneratedValues =
+  | NormalizedAlertDefaultActionWithGeneratedValues
+  | NormalizedAlertSystemActionWithGeneratedValues;
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

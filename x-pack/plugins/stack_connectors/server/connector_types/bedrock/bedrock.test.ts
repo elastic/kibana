@@ -16,6 +16,7 @@ import {
   DEFAULT_BEDROCK_URL,
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
+import { AxiosError } from 'axios';
 
 jest.mock('aws4', () => ({
   sign: () => ({ signed: true }),
@@ -149,6 +150,56 @@ describe('BedrockConnector', () => {
         connector.request = mockError;
 
         await expect(connector.invokeAI(aiAssistantBody)).rejects.toThrow('API Error');
+      });
+    });
+    describe('getResponseErrorMessage', () => {
+      it('returns an unknown error message', () => {
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage({})).toEqual(
+          `Unexpected API Error:  - Unknown error`
+        );
+      });
+
+      it('returns the error.message', () => {
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage({ message: 'a message' })).toEqual(
+          `Unexpected API Error:  - a message`
+        );
+      });
+
+      it('returns the error.response.data.error.message', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 404,
+            statusText: 'Resource Not Found',
+            data: {
+              message: 'Resource not found',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+        expect(
+          // @ts-expect-error expects an axios error as the parameter
+          connector.getResponseErrorMessage(err)
+        ).toEqual(`API Error: Resource Not Found - Resource not found`);
+      });
+
+      it('returns auhtorization error', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 401,
+            statusText: 'Auth error',
+            data: {
+              message: 'The api key was invalid.',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage(err)).toEqual(
+          `Unauthorized API Error - The api key was invalid.`
+        );
       });
     });
   });

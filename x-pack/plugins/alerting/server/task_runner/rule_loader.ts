@@ -25,8 +25,12 @@ import {
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
-export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
-  indirectParams: RawRule;
+interface SerializableRawRule extends RawRule {
+  [key: string]: unknown;
+}
+
+export interface RuleData<Params extends RuleTypeParams>
+  extends LoadedIndirectParams<SerializableRawRule> {
   rule: SanitizedRule<Params>;
   version: string | undefined;
   fakeRequest: CoreKibanaRequest;
@@ -121,6 +125,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 
   const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
   const rulesClient = context.getRulesClientWithRequest(fakeRequest);
+
   const rule = rulesClient.getAlertFromRaw({
     id: ruleId,
     ruleTypeId: rawRule.attributes.alertTypeId as string,
@@ -133,7 +138,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   return {
     rule,
     version: rawRule.version,
-    indirectParams: rawRule.attributes,
+    indirectParams: rawRule.attributes as SerializableRawRule,
     fakeRequest,
     rulesClient,
   };

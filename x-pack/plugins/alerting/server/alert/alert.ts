@@ -6,8 +6,9 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
@@ -298,10 +299,10 @@ export class Alert<
     //
     // Related issue: https://github.com/elastic/kibana/issues/144862
 
-    return !summarizedAlerts.all.data.some(
-      (alert: AlertHit) =>
-        alert?.kibana?.alert?.uuid === this.getId() || alert?.kibana?.alert?.uuid === this.getUuid()
-    );
+    return !summarizedAlerts.all.data.some((alert: AlertHit) => {
+      const alertUuid = get(alert, ALERT_UUID);
+      return alertUuid === this.getId() || alertUuid === this.getUuid();
+    });
   }
 
   setMaintenanceWindowIds(maintenanceWindowIds: string[] = []) {
