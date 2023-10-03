@@ -79,6 +79,46 @@ export async function getAll({
   });
 }
 
+export async function getAllSystemConnectors({
+  context,
+}: {
+  context: GetAllParams['context'];
+}): Promise<FindConnectorResult[]> {
+  try {
+    await context.authorization.ensureAuthorized({ operation: 'get' });
+  } catch (error) {
+    context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.FIND,
+        error,
+      })
+    );
+
+    throw error;
+  }
+
+  const systemConnectors = context.inMemoryConnectors.filter(
+    (connector) => connector.isSystemAction
+  );
+
+  const transformedSystemConnectors = systemConnectors
+    .map((systemConnector) => ({
+      id: systemConnector.id,
+      actionTypeId: systemConnector.actionTypeId,
+      name: systemConnector.name,
+      isPreconfigured: systemConnector.isPreconfigured,
+      isDeprecated: isConnectorDeprecated(systemConnector),
+      isSystemAction: systemConnector.isSystemAction,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return await injectExtraFindData({
+    kibanaIndices: context.kibanaIndices,
+    scopedClusterClient: context.scopedClusterClient,
+    connectors: transformedSystemConnectors,
+  });
+}
+
 async function injectExtraFindData({
   kibanaIndices,
   scopedClusterClient,
