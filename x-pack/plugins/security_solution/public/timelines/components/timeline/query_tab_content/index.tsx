@@ -69,6 +69,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { SAMPLE_SIZE_SETTING, TimelineDataTable } from '../data_table';
 import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
+import { defaultUdtHeaders } from '../data_table/default_headers';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -123,9 +124,15 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 
 const UnifiedTableScrollableFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
   width: 100%;
   padding: 10px 15px 0px 15px;
+  overflow: hidden;
+
+  .dscPageBody__contents {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+  }
 `;
 
 const getScrollableFlexItem = (isUnifiedDataTable: boolean) =>
@@ -136,14 +143,6 @@ const SourcererFlex = styled(EuiFlexItem)`
 `;
 
 SourcererFlex.displayName = 'SourcererFlex';
-
-const VerticalRule = styled.div`
-  width: 2px;
-  height: 100%;
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
-VerticalRule.displayName = 'VerticalRule';
 
 const EventsCountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -278,8 +277,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   );
 
   const columnsHeader = useMemo(() => {
-    return isEmpty(columns) ? defaultHeaders : columns;
-  }, [columns]);
+    return isEmpty(columns)
+      ? useDiscoverComponentsInTimeline
+        ? defaultUdtHeaders
+        : defaultHeaders
+      : columns;
+  }, [columns, useDiscoverComponentsInTimeline]);
 
   const defaultColumns = useMemo(() => {
     return columnsHeader.map((c) => c.id);
@@ -400,7 +403,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         skip={!canQueryTimeline}
       />
       <FullWidthFlexGroup>
-        <ScrollableItem>
+        <ScrollableFlexItem>
           <StyledEuiFlyoutHeader
             data-test-subj={`${activeTab}-tab-flyout-header`}
             hasBorder={false}
@@ -513,7 +516,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               </>
             )}
           </EventDetailsWidthProvider>
-        </ScrollableItem>
+        </ScrollableFlexItem>
         {showExpandedDetails && (
           <>
             <ScrollableFlexItem grow={1}>

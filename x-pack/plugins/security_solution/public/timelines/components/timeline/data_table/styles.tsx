@@ -12,6 +12,15 @@ export const progressStyle = css`
   z-index: 2;
 `;
 
+export const StyledPageContentWrapper = styled.div.attrs(({ className = '' }) => ({
+  className: `udtPageContent__wrapper ${className}`,
+}))`
+  overflow: hidden; // Ensures horizontal scroll of table
+  display: flex;
+  // flex-direction: column;
+  height: 100%;
+`;
+
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
