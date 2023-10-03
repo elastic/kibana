@@ -61,8 +61,11 @@ export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => 
     getSettingsMock(requirePageReload),
     uiSettingsClientMock
   );
+  const categoryCounts = {};
+  const onClearQuery = () => {};
+  const queryText = '';
 
-  return <Component {...{ fields, isSavingEnabled }} />;
+  return <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery, queryText }} />;
 };
 
 Form.args = {

@@ -21,6 +21,9 @@ import { FormServices } from './types';
 
 const settingsMock = getSettingsMock();
 const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsClientMock);
+const categoryCounts = {};
+const onClearQuery = jest.fn();
+const queryText = '';
 
 describe('Form', () => {
   beforeEach(() => {
@@ -28,13 +31,21 @@ describe('Form', () => {
   });
 
   it('renders without errors', () => {
-    const { container } = render(wrap(<Form fields={fields} isSavingEnabled={true} />));
+    const { container } = render(
+      wrap(
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
+      )
+    );
 
     expect(container).toBeInTheDocument();
   });
 
   it('renders as read only if saving is disabled', () => {
-    const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={false} />));
+    const { getByTestId } = render(
+      wrap(
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
+      )
+    );
 
     (Object.keys(settingsMock) as SettingType[]).forEach((type) => {
       if (type === 'json' || type === 'markdown') {
@@ -53,7 +64,9 @@ describe('Form', () => {
 
   it('renders bottom bar when a field is changed', () => {
     const { getByTestId, queryByTestId } = render(
-      wrap(<Form fields={fields} isSavingEnabled={true} />)
+      wrap(
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
+      )
     );
 
     expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
@@ -69,7 +82,12 @@ describe('Form', () => {
 
   it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
-    const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={true} />, services));
+    const { getByTestId } = render(
+      wrap(
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />,
+        services
+      )
+    );
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
@@ -88,7 +106,11 @@ describe('Form', () => {
   });
 
   it('clears changes when Cancel button is clicked', async () => {
-    const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={false} />));
+    const { getByTestId } = render(
+      wrap(
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
+      )
+    );
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
@@ -112,7 +134,10 @@ describe('Form', () => {
     const testServices = { ...services, saveChanges: saveChangesWithError };
 
     const { getByTestId } = render(
-      wrap(<Form fields={fields} isSavingEnabled={true} />, testServices)
+      wrap(
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />,
+        testServices
+      )
     );
 
     const testFieldType = 'string';
@@ -137,7 +162,18 @@ describe('Form', () => {
       uiSettingsClientMock
     );
     const { getByTestId } = render(
-      wrap(<Form fields={testFields} isSavingEnabled={true} />, services)
+      wrap(
+        <Form
+          {...{
+            fields: testFields,
+            isSavingEnabled: false,
+            categoryCounts,
+            onClearQuery,
+            queryText,
+          }}
+        />,
+        services
+      )
     );
 
     const testFieldType = 'string';
