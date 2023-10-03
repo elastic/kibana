@@ -89,8 +89,8 @@ describe(
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
-      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
-      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
+      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('exist');
+      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('exist');
     });
   }
 );

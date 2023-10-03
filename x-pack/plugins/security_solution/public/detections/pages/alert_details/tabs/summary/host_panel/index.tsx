@@ -16,7 +16,7 @@ import { SummaryValueCell } from '../../../../../../common/components/event_deta
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -31,7 +31,7 @@ import {
   AGENT_STATUS_TITLE,
   HOST_NAME_TITLE,
   HOST_PANEL_TITLE,
-  HOST_RISK_CLASSIFICATION,
+  HOST_RISK_LEVEL,
   HOST_RISK_SCORE,
   IP_ADDRESSES_TITLE,
   LAST_SEEN_TITLE,
@@ -99,7 +99,7 @@ export const HostPanel = React.memo(
         ? Math.round(hostRiskData.host.risk.calculated_score_norm)
         : getEmptyTagValue();
       const hostRiskSeverity = hostRiskData ? (
-        <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+        <RiskScoreLevel severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
       ) : (
         getEmptyTagValue()
       );
@@ -156,9 +156,7 @@ export const HostPanel = React.memo(
                     <HostPanelSection title={HOST_RISK_SCORE}>{hostRiskScore}</HostPanelSection>
                   )}
                   {hostRiskLevel && (
-                    <HostPanelSection title={HOST_RISK_CLASSIFICATION}>
-                      {hostRiskLevel}
-                    </HostPanelSection>
+                    <HostPanelSection title={HOST_RISK_LEVEL}>{hostRiskLevel}</HostPanelSection>
                   )}
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
