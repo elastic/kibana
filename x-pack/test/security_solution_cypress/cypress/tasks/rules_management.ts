@@ -18,6 +18,6 @@ export function visitRulesManagementTable(role?: ROLES): void {
 
 export function openRuleManagementPageViaBreadcrumbs(): void {
   cy.log('Navigate back to rules table via breadcrumbs');
-  cy.get(`${RULE_MANAGEMENT_PAGE_BREADCRUMB}:not(${LAST_BREADCRUMB})`).click();
-  cy.get(`${RULE_MANAGEMENT_PAGE_BREADCRUMB}${LAST_BREADCRUMB}`).should('exist');
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).not(LAST_BREADCRUMB).click();
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).filter(LAST_BREADCRUMB).should('exist');
 }

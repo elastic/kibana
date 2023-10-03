@@ -8,4 +8,4 @@
 export const RULE_MANAGEMENT_PAGE_BREADCRUMB =
   '[data-test-subj~="breadcrumb"][title="Detection rules (SIEM)"]';
 
-export const LAST_BREADCRUMB = `[data-test-subj~="last"]`;
+export const LAST_BREADCRUMB = `[data-test-subj~="breadcrumb"][data-test-subj~="last"]`;
