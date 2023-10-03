@@ -28,7 +28,6 @@
     "@kbn/cases-plugin",
     "@kbn/lists-plugin",
     "@kbn/securitysolution-io-ts-alerting-types",
-    "@elastic/elasticsearch",
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-list-constants"
   ]
