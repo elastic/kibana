@@ -1507,8 +1507,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const { body, status } = await esSupertest.delete(
         `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
       );
-      // @todo
-      // this.assertResponseStatusCode(200, status, body);
+      this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
     },

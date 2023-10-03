@@ -22,6 +22,50 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.CategorizedFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategorizedFields",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/category.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.CategorizedFields.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[category: string]: { count: number; fields: FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>[]; }",
+            "description": [],
+            "signature": [
+              "[category: string]:  { count: number; fields: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]; }"
+            ],
+            "path": "packages/kbn-management/settings/types/category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
         "id": "def-common.FieldDefinition",
         "type": "Interface",
         "tags": [],
@@ -1267,10 +1311,74 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
-        "id": "def-common.OnChangeFn",
+        "id": "def-common.OnFieldChangeFn",
         "type": "Type",
         "tags": [],
-        "label": "OnChangeFn",
+        "label": "OnFieldChangeFn",
+        "description": [
+          "\nAn `onFieldChange` handler when a Field changes."
+        ],
+        "signature": [
+          "(id: string, change?: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<T> | undefined) => void"
+        ],
+        "path": "packages/kbn-management/settings/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.OnFieldChangeFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "A unique id corresponding to the particular setting being changed."
+            ],
+            "path": "packages/kbn-management/settings/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.OnFieldChangeFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [
+              "The {@link UnsavedFieldChange } corresponding to any unsaved change to the field."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.OnInputChangeFn",
+        "type": "Type",
+        "tags": [],
+        "label": "OnInputChangeFn",
         "description": [
           "\nA function that is called when the value of a {@link FieldInput} changes."
         ],
@@ -1292,7 +1400,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-common.OnChangeFn.$1",
+            "id": "def-common.OnInputChangeFn.$1",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -1602,6 +1710,37 @@
             "text": "UnsavedFieldChange"
           },
           "<\"undefined\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.UnsavedFieldChanges",
+        "type": "Type",
+        "tags": [],
+        "label": "UnsavedFieldChanges",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">; }"
         ],
         "path": "packages/kbn-management/settings/types/unsaved_change.ts",
         "deprecated": false,

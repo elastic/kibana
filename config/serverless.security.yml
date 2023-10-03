@@ -35,6 +35,7 @@ xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
   - discoverInTimeline
+  - esqlRulesDisabled
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
