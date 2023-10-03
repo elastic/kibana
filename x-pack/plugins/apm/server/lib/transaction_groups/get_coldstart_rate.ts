@@ -17,7 +17,7 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
@@ -66,7 +66,7 @@ export async function getColdstartRate({
     { exists: { field: FAAS_COLDSTART } },
     ...(transactionName ? termQuery(TRANSACTION_NAME, transactionName) : []),
     ...termQuery(TRANSACTION_TYPE, transactionType),
-    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+    ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
     ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
