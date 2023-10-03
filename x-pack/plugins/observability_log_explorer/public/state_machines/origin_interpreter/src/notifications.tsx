@@ -34,7 +34,6 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
                 href={LOGS_ONBOARDING_FEEDBACK_LINK}
                 size="s"
                 target="_blank"
-                iconType="editorComment"
                 color="primary"
               >
                 {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.buttonText', {
@@ -45,6 +44,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
           </EuiFlexGroup>
         </>
       ),
+      iconType: 'editorComment',
     },
     {
       toastLifeTimeMs: FEEDBACK_TOAST_LIFETIME_MS,
