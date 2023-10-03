@@ -16,7 +16,7 @@ import { PAYWALL_DESCRIPTION } from '../../../screens/entity_analytics_serverles
 describe(
   'Entity Analytics Dashboard in Serverless',
   {
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [

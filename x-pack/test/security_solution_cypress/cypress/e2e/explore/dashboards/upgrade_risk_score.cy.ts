@@ -36,8 +36,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 
 const spaceId = 'default';
 
-// Flaky on serverless
-describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

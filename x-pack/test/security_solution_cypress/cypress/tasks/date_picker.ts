@@ -31,9 +31,9 @@ export const setEndDateNow = (container: string = GLOBAL_FILTERS_CONTAINER) => {
 export const setEndDate = (date: string, container: string = GLOBAL_FILTERS_CONTAINER) => {
   cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).first().click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
     if (Cypress.dom.isAttached($el)) {
       cy.wrap($el).click({ force: true });
@@ -57,7 +57,7 @@ export const setStartDate = (date: string, container: string = GLOBAL_FILTERS_CO
 };
 
 export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
-  cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click();
+  cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click({ force: true });
   cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).should('not.have.text', 'Updating');
 };
 
