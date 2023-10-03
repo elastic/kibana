@@ -148,6 +148,25 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
                 timeRangeMs={timeRangeMs}
               />
             )}
+            {type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern',
+                  {
+                    defaultMessage:
+                      'The field value for this field shows an example of the identified significant text field pattern.',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="aggregate"
+                  data-test-subj={'aiopsLogPatternIcon'}
+                  css={{ marginLeft: euiTheme.euiSizeS, marginRight: euiTheme.euiSizeXS }}
+                  size="m"
+                />
+              </EuiToolTip>
+            )}
+
             {fieldName}
           </>
         );
