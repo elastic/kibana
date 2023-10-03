@@ -72,7 +72,7 @@ export class DashboardPageObject extends FtrService {
       await this.header.waitUntilLoadingHasFinished();
       const currentUrl = await this.browser.getCurrentUrl();
       if (!currentUrl.includes('app/dashboard')) {
-        throw(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
+        throw new Error(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
       }
     });
   }
