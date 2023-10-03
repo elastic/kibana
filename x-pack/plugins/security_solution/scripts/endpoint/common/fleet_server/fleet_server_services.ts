@@ -111,8 +111,6 @@ export const startFleetServer = async ({
   const response = await logger.indent(4, async () => {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
 
-    let policyId = policy ?? '';
-
     // Check if fleet already running if `force` is false
     if (!force) {
       const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
@@ -125,12 +123,9 @@ export const startFleetServer = async ({
     }
 
     // Only fetch/create a fleet-server policy
-    if (!policyId && !isServerless) {
-      policyId = await getOrCreateFleetServerAgentPolicyId(kbnClient, logger);
-    }
-
+    const policyId =
+      policy ?? !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
     const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
-
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,
