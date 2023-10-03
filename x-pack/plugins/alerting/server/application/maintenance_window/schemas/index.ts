@@ -8,4 +8,5 @@
 export {
   maintenanceWindowEventSchema,
   maintenanceWindowSchema,
+  maintenanceWindowCategoryIdsSchema,
 } from './maintenance_window_schemas';
