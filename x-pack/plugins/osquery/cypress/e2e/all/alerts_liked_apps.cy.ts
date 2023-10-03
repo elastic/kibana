@@ -13,15 +13,12 @@ import {
   inputQuery,
   loadRuleAlerts,
   submitQuery,
-  enableRule,
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-// OK!
 describe(
   'Alert Event Details',
   {
@@ -35,12 +32,8 @@ describe(
       loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
-        enableRule(data.id, 'disable');
-        cy.wait(2000);
-        enableRule(data.id, 'enable').then(() => {
-          cy.wait(2000);
-          loadRuleAlerts(data.name);
-        });
+
+        loadRuleAlerts(data.name, data.id);
       });
     });
 
@@ -49,7 +42,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      cy.login('elastic');
       cy.visit('/app/security/rules');
       clickRuleName(ruleName);
     });
@@ -105,15 +98,13 @@ describe(
       });
       cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
       // timeline unsaved changes modal
-      cy.visit('/app/osquery/live_queries');
+      cy.visit('/app/osquery');
       closeModalIfVisible();
     });
 
     it('can visit discover from response action results', { tags: ['@ess'] }, () => {
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
       cy.getBySel('expand-event').first().click();
-      // cy.getBySel('take-action-dropdown-btn').click();
-
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');

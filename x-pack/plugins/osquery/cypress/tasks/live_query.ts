@@ -102,8 +102,12 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
-export const loadRuleAlerts = (ruleName: string) => {
+export const loadRuleAlerts = (ruleName: string, ruleId: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
+  enableRule(ruleId, 'disable');
+  cy.wait(2000);
+  enableRule(ruleId, 'enable');
+  cy.wait(2000);
   cy.visit('/app/security/rules');
   clickRuleName(ruleName);
   cy.getBySel('alertsTable').within(() => {

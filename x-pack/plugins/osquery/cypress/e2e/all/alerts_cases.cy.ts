@@ -19,7 +19,6 @@ import {
   addToCase,
   checkActionItemsInResults,
   clickRuleName,
-  enableRule,
   loadRuleAlerts,
   submitQuery,
   viewRecentCaseAndCheckResults,
@@ -42,12 +41,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     loadRule(true).then((data) => {
       ruleId = data.id;
       ruleName = data.name;
-      enableRule(data.id, 'disable');
-      cy.wait(2000);
-      enableRule(data.id, 'enable').then(() => {
-        cy.wait(2000);
-        loadRuleAlerts(data.name);
-      });
+      loadRuleAlerts(data.name, data.id);
     });
   });
 

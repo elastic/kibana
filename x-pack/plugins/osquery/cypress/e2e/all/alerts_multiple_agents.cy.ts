@@ -12,7 +12,6 @@ import {
   loadRuleAlerts,
   submitQuery,
   takeOsqueryActionWithParams,
-  enableRule,
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -29,12 +28,7 @@ describe(
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
-        enableRule(data.id, 'disable');
-        cy.wait(2000);
-        enableRule(data.id, 'enable').then(() => {
-          cy.wait(2000);
-          loadRuleAlerts(data.name);
-        });
+        loadRuleAlerts(data.name, data.id);
       });
     });
 

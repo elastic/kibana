@@ -26,7 +26,6 @@ import {
   typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;
@@ -51,7 +50,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       ruleId = data.id;
       ruleName = data.name;
     });
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    cy.login('elastic');
   });
   afterEach(() => {
     cleanupPack(packId);
