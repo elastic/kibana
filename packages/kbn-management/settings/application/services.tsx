@@ -18,7 +18,7 @@ import { UiSettingMetadata } from '@kbn/management-settings-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { Subscription } from 'rxjs';
-import { AppMountParameters } from '@kbn/core-application-browser';
+import { ScopedHistory } from '@kbn/core-application-browser';
 
 export interface Services {
   getAllowlistedSettings: () => Record<string, UiSettingMetadata>;
@@ -34,7 +34,7 @@ export interface KibanaDependencies {
   settings: {
     client: Pick<IUiSettingsClient, 'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$'>;
   };
-  params: Pick<AppMountParameters, 'history'>;
+  history: ScopedHistory;
 }
 
 export type SettingsApplicationKibanaDependencies = KibanaDependencies & FormKibanaDependencies;
@@ -86,14 +86,7 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   children,
   ...dependencies
 }) => {
-  const {
-    docLinks,
-    notifications,
-    theme,
-    i18n,
-    settings,
-    params: { history },
-  } = dependencies;
+  const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
   const { client } = settings;
 
   const getAllowlistedSettings = () => {

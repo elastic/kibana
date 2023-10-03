@@ -59,5 +59,17 @@ export const useCategoryStory = ({ isFiltered, isSavingEnabled }: Params) => {
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
 
-  return { onClearQuery, onFieldChange, isSavingEnabled, unsavedChanges, categorizedFields };
+  const categoryCounts: { [category: string]: number } = {};
+  for (const category of Object.keys(categorizedFields)) {
+    categoryCounts[category] = categorizedFields[category].count;
+  }
+
+  return {
+    onClearQuery,
+    onFieldChange,
+    isSavingEnabled,
+    unsavedChanges,
+    categorizedFields,
+    categoryCounts,
+  };
 };

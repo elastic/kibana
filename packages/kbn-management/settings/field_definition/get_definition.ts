@@ -111,7 +111,7 @@ export const getFieldDefinition = <T extends SettingType>(
   } = setting;
 
   const { isCustom, isOverridden } = params;
-  const categories = category && category.length ? category : [DEFAULT_CATEGORY];
+  const categories = category && category.length ? [category[0]] : [DEFAULT_CATEGORY];
 
   const options = {
     values: optionValues || [],

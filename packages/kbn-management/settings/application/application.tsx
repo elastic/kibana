@@ -40,24 +40,34 @@ function addQueryParam(url: string, param: string, value: string) {
 export const SettingsApplication = () => {
   const { addUrlToHistory } = useServices();
   const fields = useFields();
-  const categories = Object.keys(categorizeFields(fields));
+  const categorizedFields = categorizeFields(fields);
+  const categories = Object.keys(categorizedFields);
   const [filteredFields, setFilteredFields] = useState(fields);
+  const [query, setQuery] = useState<Query | undefined>();
 
-  const onQueryChange: QueryInputProps['onQueryChange'] = (query) => {
-    if (!query) {
+  const onQueryChange: QueryInputProps['onQueryChange'] = (newQuery = Query.parse('')) => {
+    setQuery(newQuery);
+    if (!newQuery) {
       setFilteredFields(fields);
+      const search = addQueryParam(window.location.href, 'query', '');
+      addUrlToHistory(search);
       return;
     }
 
-    const newFields = Query.execute(query, fields);
+    const newFields = Query.execute(newQuery, fields);
     setFilteredFields(newFields);
 
-    const search = addQueryParam(window.location.href, 'query', query.text);
+    const search = addQueryParam(window.location.href, 'query', newQuery.text);
     addUrlToHistory(search);
   };
 
+  const categoryCounts: { [category: string]: number } = {};
+  for (const category of categories) {
+    categoryCounts[category] = categorizedFields[category].count;
+  }
+
   return (
-    <>
+    <div>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText>
@@ -65,11 +75,17 @@ export const SettingsApplication = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryInput {...{ categories, onQueryChange }} />
+          <QueryInput {...{ categories, query, onQueryChange }} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
-      <Form fields={filteredFields} isSavingEnabled={true} />
-    </>
+      <Form
+        fields={filteredFields}
+        categoryCounts={categoryCounts}
+        isSavingEnabled={true}
+        onClearQuery={() => onQueryChange()}
+        queryText={query?.text}
+      />
+    </div>
   );
 };

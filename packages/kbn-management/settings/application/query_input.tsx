@@ -24,9 +24,8 @@ export const parseErrorMsg = i18n.translate(
   { defaultMessage: 'Unable to parse query' }
 );
 
-export const QueryInput = ({ categories: categoryList, onQueryChange }: QueryInputProps) => {
+export const QueryInput = ({ categories: categoryList, query, onQueryChange }: QueryInputProps) => {
   const [queryError, setQueryError] = useState<string | null>(null);
-  const [query, setQuery] = useState<Query | undefined>();
 
   const categories = categoryList.map((category) => ({
     value: category,
@@ -35,8 +34,8 @@ export const QueryInput = ({ categories: categoryList, onQueryChange }: QueryInp
 
   const box = {
     incremental: true,
-    'data-test-subj': 'settingsSearchBar',
-    'aria-label': i18n.translate('management.settings.searchBarAriaLabel', {
+    'data-test-subj': `settingsSearchBar`,
+    placeholder: i18n.translate('management.settings.searchBarAriaLabel', {
       defaultMessage: 'Search advanced settings',
     }),
   };
@@ -56,7 +55,7 @@ export const QueryInput = ({ categories: categoryList, onQueryChange }: QueryInp
   const onChange: EuiSearchBarProps['onChange'] = ({ query: newQuery, error }) => {
     if (error) {
       setQueryError(error?.message || null);
-      setQuery(error ? undefined : newQuery);
+      onQueryChange(undefined);
     }
     onQueryChange(newQuery || undefined);
   };

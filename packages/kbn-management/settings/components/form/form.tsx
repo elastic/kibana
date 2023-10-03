@@ -13,6 +13,7 @@ import { FieldCategories } from '@kbn/management-settings-components-field-categ
 import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
+import { EmptyState } from './empty_state';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -22,8 +23,11 @@ import { useSave } from './use_save';
 export interface FormProps {
   /** A list of {@link FieldDefinition} corresponding to settings to be displayed in the form. */
   fields: FieldDefinition[];
+  categoryCounts: { [category: string]: number };
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
+  onClearQuery: () => void;
+  queryText: string | undefined;
 }
 
 /**
@@ -31,7 +35,7 @@ export interface FormProps {
  * @param props The {@link FormProps} for the {@link Form} component.
  */
 export const Form = (props: FormProps) => {
-  const { fields, isSavingEnabled } = props;
+  const { fields, categoryCounts, isSavingEnabled, onClearQuery, queryText } = props;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
@@ -66,14 +70,22 @@ export const Form = (props: FormProps) => {
 
   const categorizedFields = categorizeFields(fields);
 
-  /** TODO - Querying is not enabled yet. */
-  const onClearQuery = () => {};
-
   return (
     <Fragment>
-      <FieldCategories
-        {...{ categorizedFields, isSavingEnabled, onFieldChange, onClearQuery, unsavedChanges }}
-      />
+      {!isEmpty(categorizedFields) ? (
+        <FieldCategories
+          {...{
+            categorizedFields,
+            categoryCounts,
+            isSavingEnabled,
+            onFieldChange,
+            onClearQuery,
+            unsavedChanges,
+          }}
+        />
+      ) : (
+        <EmptyState {...{ queryText, onClearQuery }} />
+      )}
       {!isEmpty(unsavedChanges) && (
         <BottomBar
           onSaveAll={saveAll}
