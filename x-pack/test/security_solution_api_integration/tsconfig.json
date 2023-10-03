@@ -5,7 +5,6 @@
     "types": ["node"],
   },
   "include": [
-    "**/*",
     "../../test_serverless/shared/types/**/*",
     ], 
   "exclude": [
