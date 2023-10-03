@@ -23,6 +23,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
@@ -58,7 +59,7 @@ const shouldUpdateMetaValues = (
   currentCloudInfo: boolean,
   currentClusterName: string,
   currentClusterUUID: string,
-  currentLicenseUID: string,
+  currentLicenseUUID: string,
   currentIsServerlessEnabled: boolean
 ) => {
   return (
@@ -66,7 +67,7 @@ const shouldUpdateMetaValues = (
     endpointPackagePolicy.meta.cloud !== currentCloudInfo ||
     endpointPackagePolicy.meta.cluster_name !== currentClusterName ||
     endpointPackagePolicy.meta.cluster_uuid !== currentClusterUUID ||
-    endpointPackagePolicy.meta.license_uid !== currentLicenseUID ||
+    endpointPackagePolicy.meta.license_uuid !== currentLicenseUUID ||
     endpointPackagePolicy.meta.serverless !== currentIsServerlessEnabled
   );
 };
@@ -102,6 +103,9 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    if (newPackagePolicy?.inputs) {
+      validateEndpointPackagePolicy(newPackagePolicy.inputs);
+    }
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
 
@@ -205,6 +209,8 @@ export const getPackagePolicyUpdateCallback = (
       logger
     );
 
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
+
     notifyProtectionFeatureUsage(
       endpointIntegrationData,
       featureUsageService,
@@ -232,7 +238,7 @@ export const getPackagePolicyUpdateCallback = (
       newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
       newEndpointPackagePolicy.meta.cluster_name = esClientInfo.cluster_name;
       newEndpointPackagePolicy.meta.cluster_uuid = esClientInfo.cluster_uuid;
-      newEndpointPackagePolicy.meta.license_uid = licenseService.getLicenseUID();
+      newEndpointPackagePolicy.meta.license_uuid = licenseService.getLicenseUID();
       newEndpointPackagePolicy.meta.serverless = cloud?.isServerlessEnabled;
 
       endpointIntegrationData.inputs[0].config.policy.value = newEndpointPackagePolicy;

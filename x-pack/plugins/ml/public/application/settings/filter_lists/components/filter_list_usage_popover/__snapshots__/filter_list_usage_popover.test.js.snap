@@ -21,6 +21,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
     ownFocus={true}
     panelClassName="ml-filter-list-usage-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <ul>
       <li
@@ -64,6 +65,7 @@ exports[`FilterListUsagePopover renders the popover for 1 job 1`] = `
     ownFocus={true}
     panelClassName="ml-filter-list-usage-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <ul>
       <li
@@ -97,6 +99,7 @@ exports[`FilterListUsagePopover renders the popover for 2 detectors 1`] = `
     ownFocus={true}
     panelClassName="ml-filter-list-usage-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <ul>
       <li

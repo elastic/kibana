@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   SUMMARY_ROW_ICON_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
   SUMMARY_ROW_LOADING_TEST_ID,
-  INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
+  CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
 } from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
@@ -22,15 +23,18 @@ const documentId = 'documentId';
 const indices = ['indices'];
 const scopeId = 'scopeId';
 
-const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(
-  INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
-);
-const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
-  INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
-);
+const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
+const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
 const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
-  INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
+  CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
 );
+
+const renderRelatedAlertsByAncestry = () =>
+  render(
+    <IntlProvider locale="en">
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+    </IntlProvider>
+  );
 
 describe('<RelatedAlertsByAncestry />', () => {
   it('should render many related alerts correctly', () => {
@@ -40,9 +44,7 @@ describe('<RelatedAlertsByAncestry />', () => {
       dataCount: 2,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsByAncestry();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -57,9 +59,7 @@ describe('<RelatedAlertsByAncestry />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsByAncestry();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -72,9 +72,7 @@ describe('<RelatedAlertsByAncestry />', () => {
       loading: true,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsByAncestry();
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
@@ -84,9 +82,7 @@ describe('<RelatedAlertsByAncestry />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
-    );
+    const { container } = renderRelatedAlertsByAncestry();
     expect(container).toBeEmptyDOMElement();
   });
 });

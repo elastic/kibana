@@ -10,7 +10,7 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { searchResponseTimeoutWarningMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
@@ -206,7 +206,7 @@ describe('context app', function () {
       ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
-        expect(interceptedWarnings).toBeUndefined();
+        expect(interceptedWarnings).toEqual([]);
       });
     });
 
@@ -216,20 +216,10 @@ describe('context app', function () {
         { _id: '3', _index: 't' },
       ]);
 
-      const mockWarnings = [
-        {
-          originalWarning: searchResponseTimeoutWarningMock,
-        },
-      ];
-
       const services = discoverServiceMock;
       services.data.search.showWarnings = jest.fn((adapter, callback) => {
         // @ts-expect-error for empty meta
-        callback?.(mockWarnings[0].originalWarning, {});
-
-        // plus duplicates
-        // @ts-expect-error for empty meta
-        callback?.(mockWarnings[0].originalWarning, {});
+        callback?.(searchResponseIncompleteWarningLocalCluster, {});
       });
 
       return fetchAnchor(
@@ -242,7 +232,7 @@ describe('context app', function () {
       ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
-        expect(interceptedWarnings).toEqual(mockWarnings);
+        expect(interceptedWarnings?.length).toBe(1);
       });
     });
   });

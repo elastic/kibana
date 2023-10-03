@@ -29,7 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('opsgenie-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
       await testSubjects.click('toastCloseButton');
-      await commonScreenshots.takeScreenshot('opsgenie-params-test', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('opsgenie-create-alert-test', screenshotDirectories);
+      await testSubjects.click('opsgenie-subActionSelect-close-alert');
+      await testSubjects.click('opsgenie-display-more-options');
+      await commonScreenshots.takeScreenshot('opsgenie-close-alert-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });

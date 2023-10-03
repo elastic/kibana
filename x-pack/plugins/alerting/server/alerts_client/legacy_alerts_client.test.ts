@@ -6,7 +6,7 @@
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertInstanceContext, RecoveredActionGroup, RuleNotifyWhen } from '../types';
+import { AlertInstanceContext, RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
@@ -93,12 +93,14 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   validate: {
     params: schema.any(),
   },
+  validLegacyConsumers: [],
 };
 
 const testAlert1 = {
@@ -283,7 +285,7 @@ describe('Legacy Alerts Client', () => {
       ruleRunMetricsStore,
       shouldLogAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      notifyWhen: RuleNotifyWhen.CHANGE,
+      notifyOnActionGroupChange: true,
       maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
@@ -312,7 +314,7 @@ describe('Legacy Alerts Client', () => {
         lookBackWindow: 20,
         statusChangeThreshold: 4,
       },
-      RuleNotifyWhen.CHANGE,
+      true,
       'default',
       {},
       {

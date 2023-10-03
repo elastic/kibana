@@ -14,7 +14,7 @@ export interface UseInvestigationGuideParams {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
 
 export interface UseInvestigationGuideResult {

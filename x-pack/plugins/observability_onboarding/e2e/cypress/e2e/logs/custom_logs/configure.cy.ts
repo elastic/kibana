@@ -24,7 +24,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
     it('Users should be able to continue if logFilePaths is not empty', () => {
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')
-        .first()
         .type('myLogs.log');
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
         'not.be.disabled'
@@ -32,13 +31,13 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
     });
 
     it('Users can add multiple logFilePaths', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').first().click();
+      cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').click();
       cy.getByTestSubj('obltOnboardingLogFilePath-0').should('exist');
       cy.getByTestSubj('obltOnboardingLogFilePath-1').should('exist');
     });
 
     it('Users can delete logFilePaths', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').first().click();
+      cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').click();
       cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should(
         'have.length',
         2
@@ -55,23 +54,21 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       it('datasetname and integration name are auto generated if it is the first path', () => {
         cy.getByTestSubj('obltOnboardingLogFilePath-0')
           .find('input')
-          .first()
           .type('myLogs.log');
         cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
           'have.value',
-          'myLogs'
+          'mylogs'
         );
         cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
           'have.value',
-          'myLogs'
+          'mylogs'
         );
       });
 
       it('datasetname and integration name are not generated if it is not the first path', () => {
-        cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').first().click();
+        cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').click();
         cy.getByTestSubj('obltOnboardingLogFilePath-1')
           .find('input')
-          .first()
           .type('myLogs.log');
         cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
           'be.empty'
@@ -90,7 +87,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')
-        .first()
         .type('myLogs.log');
     });
 
@@ -109,7 +105,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')
-        .first()
         .type('myLogs.log');
     });
 
@@ -187,17 +182,15 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')
-        .first()
         .type('myLogs.log');
     });
 
     it('Users should not be able to continue if they do not specify an integrationName', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').clear();
 
-      // https://github.com/elastic/kibana/issues/165778
-      // cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-      //  'be.disabled'
-      // );
+      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
+        'be.disabled'
+      );
     });
 
     it('value will contain _ instead of special chars', () => {
@@ -227,7 +220,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')
-        .first()
         .type('myLogs.log');
     });
 
@@ -273,14 +265,13 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
         cy.getByTestSubj('obltOnboardingLogFilePath-0')
           .find('input')
-          .first()
           .type(`${CUSTOM_INTEGRATION_NAME}.log`);
 
         cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
       });
 
       it('installation fails', () => {
-        cy.getByTestSubj('obltOnboardingCustomIntegrationUnauthorized').should(
+        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
           'exist'
         );
       });
@@ -293,7 +284,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
         cy.getByTestSubj('obltOnboardingLogFilePath-0')
           .find('input')
-          .first()
           .type(`${CUSTOM_INTEGRATION_NAME}.log`);
 
         cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
@@ -304,8 +294,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('installation succeed and user is redirected install elastic agent step', () => {
-        cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
-
         cy.url().should(
           'include',
           '/app/observabilityOnboarding/customLogs/installElasticAgent'
@@ -320,7 +308,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.installCustomIntegration(CUSTOM_INTEGRATION_NAME);
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')
-        .first()
         .type(`${CUSTOM_INTEGRATION_NAME}.log`);
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
 
@@ -343,13 +330,12 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
         cy.getByTestSubj('obltOnboardingLogFilePath-0')
           .find('input')
-          .first()
           .type(`${CUSTOM_INTEGRATION_NAME}.log`);
         cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
       });
 
       it('user should see the error displayed', () => {
-        cy.getByTestSubj('obltOnboardingCustomIntegrationUnknownError').should(
+        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
           'exist'
         );
       });

@@ -1,0 +1,11 @@
+:root {
+  // height of the header banner
+  --kbnHeaderBannerHeight: #{$euiSizeXL};
+  // total height of all fixed headers (when the banner is *not* present) inherited from EUI
+  --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0);
+  // total height of everything when the banner is present
+  --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
+}
+
+// Quick note: This shouldn't be mixed with Sass variable declarations,
+// as each import will cause :root to be re-declared unnecessarily

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { RiskScore } from './risk_score';
 import { RightPanelContext } from '../context';
 

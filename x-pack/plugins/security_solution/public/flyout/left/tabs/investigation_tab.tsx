@@ -9,17 +9,11 @@ import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { InvestigationGuide } from '../components/investigation_guide';
 import { INVESTIGATION_TAB_CONTENT_TEST_ID } from './test_ids';
-import { useLeftPanelContext } from '../context';
 
 /**
  * Investigations view displayed in the document details expandable flyout left section
  */
 export const InvestigationTab: React.FC = memo(() => {
-  const { dataFormattedForFieldBrowser } = useLeftPanelContext();
-  if (dataFormattedForFieldBrowser == null) {
-    return null;
-  }
-
   return (
     <EuiPanel data-test-subj={INVESTIGATION_TAB_CONTENT_TEST_ID} hasShadow={false}>
       <InvestigationGuide />

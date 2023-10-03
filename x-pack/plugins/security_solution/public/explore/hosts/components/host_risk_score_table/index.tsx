@@ -31,6 +31,7 @@ import { SeverityBar } from '../../../components/risk_score/severity/severity_ba
 import { SeverityFilterGroup } from '../../../components/risk_score/severity/severity_filter_group';
 
 import type { SeverityCount } from '../../../components/risk_score/severity/types';
+import { RiskInformationButtonEmpty } from '../../../components/risk_score/risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -173,12 +174,19 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerFilters={
-        <SeverityFilterGroup
-          selectedSeverities={severitySelectionRedux}
-          severityCount={severityCount}
-          onSelect={onSelect}
-          riskEntity={RiskScoreEntity.host}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.host} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SeverityFilterGroup
+              selectedSeverities={severitySelectionRedux}
+              severityCount={severityCount}
+              onSelect={onSelect}
+              riskEntity={RiskScoreEntity.host}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       headerSupplement={risk}
       headerTitle={i18nHosts.HOST_RISK_TITLE}

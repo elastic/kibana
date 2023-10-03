@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const security = getService('security');
-  const PageObjects = getPageObjects(['reporting', 'common', 'canvas']);
+  const PageObjects = getPageObjects(['reporting', 'canvas']);
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/reports';
 
   describe('Canvas PDF Report Generation', () => {
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Generating and then comparing reports can take longer than the default 60s timeout
         this.timeout(180000);
 
-        await PageObjects.common.navigateToApp('canvas');
+        await PageObjects.canvas.goToListingPage();
         await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
 
         await PageObjects.reporting.openPdfReportingPanel();

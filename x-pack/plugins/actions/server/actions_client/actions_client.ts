@@ -11,7 +11,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined } from 'lodash';
+import { omitBy, isUndefined, compact } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -60,7 +60,7 @@ import {
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
-  getBulkAuthorizationModeBySource,
+  bulkGetAuthorizationModeBySource,
   AuthorizationMode,
 } from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
@@ -770,18 +770,16 @@ export class ActionsClient {
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
   ): Promise<ExecutionResponse> {
-    const sources: Array<ActionExecutionSource<unknown>> = [];
-    options.forEach((option) => {
-      if (option.source) {
-        sources.push(option.source);
-      }
-    });
+    const sources: Array<ActionExecutionSource<unknown>> = compact(
+      (options ?? []).map((option) => option.source)
+    );
 
-    const authCounts = await getBulkAuthorizationModeBySource(
+    const authModes = await bulkGetAuthorizationModeBySource(
+      this.context.logger,
       this.context.unsecuredSavedObjectsClient,
       sources
     );
-    if (authCounts[AuthorizationMode.RBAC] > 0) {
+    if (authModes[AuthorizationMode.RBAC] > 0) {
       /**
        * For scheduled executions the additional authorization check
        * for system actions (kibana privileges) will be performed
@@ -789,11 +787,11 @@ export class ActionsClient {
        */
       await this.context.authorization.ensureAuthorized({ operation: 'execute' });
     }
-    if (authCounts[AuthorizationMode.Legacy] > 0) {
+    if (authModes[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
         'bulkEnqueueExecution',
         this.context.usageCounter,
-        authCounts[AuthorizationMode.Legacy]
+        authModes[AuthorizationMode.Legacy]
       );
     }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);

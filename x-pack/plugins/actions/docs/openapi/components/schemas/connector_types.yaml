@@ -3,6 +3,7 @@ type: string
 description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
 enum:
   - .cases-webhook
+  - .d3security
   - .email
   - .gen-ai
   - .index
@@ -15,9 +16,11 @@ enum:
   - .servicenow-sir
   - .server-log
   - .slack
+  - .slack_api
   - .swimlane
   - .teams
   - .tines
+  - .torq
   - .webhook
   - .xmatters
 example: .server-log

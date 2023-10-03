@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { hostLensFormulas } from '../../../constants';
+import { hostLensFormulas } from '../../formulas';
 import type { XYChartLayerParams } from '../../../types';
 import { REFERENCE_LINE, XY_OVERRIDES } from '../constants';
 

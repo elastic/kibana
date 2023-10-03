@@ -700,6 +700,7 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );
@@ -743,6 +744,7 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Failed,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );

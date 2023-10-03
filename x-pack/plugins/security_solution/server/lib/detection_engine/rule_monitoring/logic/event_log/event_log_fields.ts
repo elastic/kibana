@@ -10,6 +10,7 @@
 
 export const TIMESTAMP = `@timestamp` as const;
 
+export const MESSAGE = 'message' as const;
 export const EVENT_PROVIDER = 'event.provider' as const;
 export const EVENT_ACTION = 'event.action' as const;
 export const EVENT_SEQUENCE = 'event.sequence' as const;

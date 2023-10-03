@@ -705,6 +705,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const logger = appContextService.getLogger();
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
       logger.error(error);
+      if (error.apiPassThrough) {
+        throw error;
+      }
       enrichedPackagePolicy = packagePolicyUpdate;
     }
 

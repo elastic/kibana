@@ -27,7 +27,7 @@ const rightSource = {
 } as ESTermSourceDescriptor;
 
 const mockSource = {
-  createField({ fieldName }: { fieldName: string }) {
+  getFieldByName(fieldName: string) {
     return {
       getName() {
         return fieldName;

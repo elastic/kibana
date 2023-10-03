@@ -8,9 +8,9 @@
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { PANEL_HEADER_ISOLATE_TITLE, PANEL_HEADER_RELEASE_TITLE } from './translations';
 
 /**
  * Document details expandable right section header for the isolate host panel
@@ -19,7 +19,17 @@ export const PanelHeader: FC = () => {
   const { isolateAction } = useIsolateHostPanelContext();
 
   const title =
-    isolateAction === 'isolateHost' ? PANEL_HEADER_ISOLATE_TITLE : PANEL_HEADER_RELEASE_TITLE;
+    isolateAction === 'isolateHost' ? (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
+        defaultMessage="Isolate host"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
+        defaultMessage="Release host"
+      />
+    );
 
   return (
     <EuiFlyoutHeader hasBorder>

@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { NetworkTopNFlowRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -18,7 +19,6 @@ import { networkSelectors } from '../../store';
 import type {
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowRequestOptions,
   PageInfoPaginated,
 } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
@@ -68,7 +68,7 @@ export const useNetworkTopNFlow = ({
   );
 
   const [networkTopNFlowRequest, setTopNFlowRequest] =
-    useState<NetworkTopNFlowRequestOptions | null>(null);
+    useState<NetworkTopNFlowRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -135,7 +135,7 @@ export const useNetworkTopNFlow = ({
 
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkTopNFlowRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.topNFlow,

@@ -42,6 +42,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -1058,6 +1062,24 @@
       }
     }
   },
+  "links": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
+      }
+    }
+  },
   "lens": {
     "properties": {
       "title": {
@@ -1348,6 +1370,41 @@
       },
       "category": {
         "type": "keyword"
+      },
+      "customFields": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword",
+            "fields": {
+              "number": {
+                "type": "long",
+                "ignore_malformed": true
+              },
+              "boolean": {
+                "type": "boolean",
+                "ignore_malformed": true
+              },
+              "string": {
+                "type": "text"
+              },
+              "date": {
+                "type": "date",
+                "ignore_malformed": true
+              },
+              "ip": {
+                "type": "ip",
+                "ignore_malformed": true
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2929,6 +2986,9 @@
       },
       "updatedBy": {
         "type": "text"
+      },
+      "savedSearchId": {
+        "type": "text"
       }
     }
   },
@@ -3068,6 +3128,22 @@
       },
       "color": {
         "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
       }
     }
   },

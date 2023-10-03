@@ -17,12 +17,21 @@ import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from
 import type { KnowledgeBaseEntry } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
+import { getCategoryQuery } from '../util/get_category_query';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
   resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
+}
+
+export interface RecalledEntry {
+  id: string;
+  text: string;
+  score: number | null;
+  is_correction: boolean;
+  labels: Record<string, string>;
 }
 
 function isAlreadyExistsError(error: Error) {
@@ -173,36 +182,43 @@ export class KnowledgeBaseService {
   recall = async ({
     user,
     queries,
+    contexts,
     namespace,
   }: {
     queries: string[];
+    contexts?: string[];
     user: { name: string };
     namespace: string;
-  }): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
+  }): Promise<{
+    entries: RecalledEntry[];
+  }> => {
     try {
+      const query = {
+        bool: {
+          should: queries.map((text) => ({
+            text_expansion: {
+              'ml.tokens': {
+                model_text: text,
+                model_id: '.elser_model_1',
+              },
+            } as unknown as QueryDslTextExpansionQuery,
+          })),
+          filter: [
+            ...getAccessQuery({
+              user,
+              namespace,
+            }),
+            ...getCategoryQuery({ contexts }),
+          ],
+        },
+      };
+
       const response = await this.dependencies.esClient.search<
-        Pick<KnowledgeBaseEntry, 'text' | 'id'>
+        Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
       >({
         index: this.dependencies.resources.aliases.kb,
-        query: {
-          bool: {
-            should: queries.map((query) => ({
-              text_expansion: {
-                'ml.tokens': {
-                  model_text: query,
-                  model_id: '.elser_model_1',
-                },
-              } as unknown as QueryDslTextExpansionQuery,
-            })),
-            filter: [
-              ...getAccessQuery({
-                user,
-                namespace,
-              }),
-            ],
-          },
-        },
-        size: 5,
+        query,
+        size: 10,
         _source: {
           includes: ['text', 'is_correction', 'labels'],
         },
@@ -211,7 +227,7 @@ export class KnowledgeBaseService {
       return {
         entries: response.hits.hits.map((hit) => ({
           ...hit._source!,
-          score: hit._score,
+          score: hit._score!,
           id: hit._id,
         })),
       };

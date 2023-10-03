@@ -29,7 +29,7 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -51,7 +51,6 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 
 export interface Props {
   conversationId?: string;
-  isAssistantEnabled: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
@@ -64,7 +63,6 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationId,
-  isAssistantEnabled,
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
@@ -73,6 +71,7 @@ const AssistantComponent: React.FC<Props> = ({
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,
+    assistantAvailability: { isAssistantEnabled },
     conversations,
     defaultAllow,
     defaultAllowReplacement,

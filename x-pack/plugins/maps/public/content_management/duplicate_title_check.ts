@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { OverlayStart } from '@kbn/core/public';
 
-import { mapsClient } from './maps_client';
+import type { MapAttributes } from '../../common/content_management';
+import { getMapClient } from './maps_client';
 
 const rejectErrorMessage = i18n.translate('xpack.maps.saveDuplicateRejectedDescription', {
   defaultMessage: 'Save with duplicate title confirmation was rejected',
@@ -48,7 +49,7 @@ export const checkForDuplicateTitle = async (
     return true;
   }
 
-  const { hits } = await mapsClient.search(
+  const { hits } = await getMapClient<MapAttributes>().search(
     {
       text: `"${title}"`,
       limit: 10,

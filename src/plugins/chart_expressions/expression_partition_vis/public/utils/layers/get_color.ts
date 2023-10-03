@@ -21,12 +21,22 @@ const isTreemapOrMosaicChart = (shape: ChartTypes) =>
 
 export const byDataColorPaletteMap = (
   rows: Datatable['rows'],
-  columnId: string,
+  column: Partial<BucketColumns>,
   paletteDefinition: PaletteDefinition,
-  { params }: PaletteOutput
+  { params }: PaletteOutput,
+  formatters: Record<string, FieldFormat | undefined>,
+  formatter: FieldFormatsStart
 ) => {
   const colorMap = new Map<string, string | undefined>(
-    rows.map((item) => [String(item[columnId]), undefined])
+    rows.map((item) => {
+      const formattedName = getNodeLabel(
+        item[column.id ?? ''],
+        column,
+        formatters,
+        formatter.deserialize
+      );
+      return [formattedName, undefined];
+    })
   );
   let rankAtDepth = 0;
 

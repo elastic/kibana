@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const cpuUsageSteal: FormulaValueConfig = {
-  label: 'steal',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.cpuUsage.stealLabel', {
+    defaultMessage: 'steal',
+  }),
   value: 'average(system.cpu.steal.pct) / max(system.cpu.cores)',
   format: {
     id: 'percent',
