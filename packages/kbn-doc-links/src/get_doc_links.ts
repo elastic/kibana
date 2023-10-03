@@ -510,6 +510,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
+      nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
