@@ -39,12 +39,23 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
 
           {activeNode.children && (
             <>
-              {activeNode.children.map((child, i) => (
-                <Fragment key={child.id}>
-                  <PanelGroup navNode={child} isFirstInList={i === 0} />
-                  {i < totalChildren - 1 && <EuiSpacer size="l" />}
-                </Fragment>
-              ))}
+              {activeNode.children.map((child, i) => {
+                const hasHorizontalRuleBefore =
+                  i === 0 ? false : !!activeNode.children?.[i - 1]?.appendHorizontalRule;
+
+                return (
+                  <Fragment key={child.id}>
+                    <PanelGroup
+                      navNode={child}
+                      isFirstInList={i === 0}
+                      hasHorizontalRuleBefore={hasHorizontalRuleBefore}
+                    />
+                    {i < totalChildren - 1 && (
+                      <EuiSpacer size={child.appendHorizontalRule ? 'm' : 'l'} />
+                    )}
+                  </Fragment>
+                );
+              })}
             </>
           )}
         </>

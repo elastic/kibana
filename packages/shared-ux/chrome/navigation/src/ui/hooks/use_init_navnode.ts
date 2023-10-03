@@ -109,12 +109,25 @@ function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
->({ link, href, cloudLink }: NodePropsEnhanced<LinkId, Id, ChildrenId>) {
+>({
+  link,
+  href,
+  cloudLink,
+  openPanel,
+  appendHorizontalRule,
+  isGroup,
+}: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>) {
   if (link && cloudLink) {
     throw new Error(`Only one of "link" or "cloudLink" can be provided.`);
   }
   if (href && cloudLink) {
     throw new Error(`Only one of "href" or "cloudLink" can be provided.`);
+  }
+  if ((href || link) && openPanel) {
+    throw new Error(`If "openPanel" is provided, "href" and "link" must not be provided.`);
+  }
+  if (appendHorizontalRule && !isGroup) {
+    throw new Error(`"appendHorizontalRule" can only be added for group with children.`);
   }
 }
 
@@ -171,7 +184,7 @@ export const useInitNavNode = <
   Id extends string = string,
   ChildrenId extends string = Id
 >(
-  node: NodePropsEnhanced<LinkId, Id, ChildrenId>,
+  node: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>,
   { cloudLinks }: { cloudLinks: CloudLinks }
 ) => {
   const { isActive: isActiveControlled } = node;

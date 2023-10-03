@@ -51,6 +51,8 @@ export interface NodePropsEnhanced<
    * even if the URL does not match any of the nodes in the group.
    */
   isActive?: boolean;
+  /** Flag to indicate if the navigation node is a group or not */
+  isGroup: boolean;
 }
 
 /** The preset that can be pass to the NavigationBucket component */
