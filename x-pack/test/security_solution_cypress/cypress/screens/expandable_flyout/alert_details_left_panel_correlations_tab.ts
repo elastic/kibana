@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
+import { INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/left/components/test_ids';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 

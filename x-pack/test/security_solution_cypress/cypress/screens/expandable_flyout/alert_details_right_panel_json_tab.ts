@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JSON_TAB_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/right/tabs/test_ids';
+import { JSON_TAB_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/right/tabs/test_ids';
 import { RIGHT_SECTION } from '@kbn/expandable-flyout/src/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 

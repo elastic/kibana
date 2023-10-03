@@ -23,7 +23,7 @@ import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { resolveFlyoutParams } from './utils';
-import { FLYOUT_URL_PARAM } from '../../../flyout/shared/hooks/url/use_sync_flyout_state_with_url';
+import { FLYOUT_URL_PARAM } from '../../../flyout/document_details/shared/hooks/url/use_sync_flyout_state_with_url';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
