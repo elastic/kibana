@@ -17,10 +17,10 @@ const {
   data,
   embeddable,
   notifications,
+  dashboardBackup,
   contentManagement,
   initializerContext,
   savedObjectsTagging,
-  dashboardSessionStorage,
 } = pluginServices.getServices();
 
 contentManagement.client.create = jest.fn().mockImplementation(({ options }) => {
@@ -34,10 +34,10 @@ const allServices = {
   data,
   embeddable,
   notifications,
+  dashboardBackup,
   contentManagement,
   initializerContext,
   savedObjectsTagging,
-  dashboardSessionStorage,
 };
 data.query.timefilter.timefilter.getTime = jest.fn().mockReturnValue({ from: 'then', to: 'now' });
 embeddable.extract = jest
@@ -112,7 +112,9 @@ describe('Save dashboard state', () => {
 
     expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ panelsJSON: expect.not.stringContaining('idOne') }),
+        data: expect.objectContaining({
+          panelsJSON: expect.not.stringContaining('neverGonnaGetThisId'),
+        }),
       })
     );
   });
