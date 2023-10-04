@@ -23,13 +23,13 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const svlCommonPage = getPageObject('svlCommonPage');
     const header = getPageObject('header');
 
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
     beforeEach(async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
       await header.waitUntilLoadingHasFinished();
-    });
-
-    before(async () => {
-      await svlCommonPage.login();
     });
 
     after(async () => {
