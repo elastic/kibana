@@ -11,28 +11,27 @@ import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 
 import { order } from '../model/order';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
+import { inspect } from '../model/inspect';
+import { FirstLastSeenQuery } from '../model/factory_query_type';
 
-export const firstLastSeenRequestOptionsSchema = z
-  .object({
-    order,
-    field: z.string(),
-    value: z.string(),
-  })
-  .extend(requestBasicOptionsSchema.partial().shape);
+export const firstLastSeenRequestOptionsSchema = requestBasicOptionsSchema.extend({
+  order,
+  field: z.string(),
+  value: z.string(),
+  factoryQueryType: z.literal(FirstLastSeenQuery),
+});
+
+export type FirstLastSeenRequestOptionsInput = z.input<typeof firstLastSeenRequestOptionsSchema>;
 
 export type FirstLastSeenRequestOptions = z.infer<typeof firstLastSeenRequestOptionsSchema>;
-
-const inspectSchema = z.object({
-  dsl: z.array(z.string()),
-});
 
 export const firstLastSeenResponseSchema = z
   .object({
     firstSeen: z.string().nullable(),
     lastSeen: z.string().nullable(),
-    inspect: inspectSchema,
+    inspect,
   })
   .partial();
 
-export type FirstLastSeenStrategyResponse = z.infer<typeof firstLastSeenResponseSchema> &
+export type FirstLastSeenStrategyResponse = z.input<typeof firstLastSeenResponseSchema> &
   IKibanaSearchResponse;

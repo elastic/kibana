@@ -6,21 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
 import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
-import {
-  ComparatorFns,
-  getComparatorScript,
-  getHumanReadableComparator,
-  STACK_ALERTS_FEATURE_ID,
-} from '../../../common';
+import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { Params, ParamsSchema } from './rule_type_params';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
@@ -206,6 +206,7 @@ export function getRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor,
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,

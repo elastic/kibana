@@ -43,6 +43,7 @@ export type {
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
   NotifyWhenSelectOptions,
+  RuleCreationValidConsumer,
 } from './types';
 
 export type {

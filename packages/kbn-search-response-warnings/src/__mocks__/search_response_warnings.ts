@@ -37,4 +37,5 @@ export const searchResponseIncompleteWarningLocalCluster: SearchResponseWarning 
       ],
     },
   },
+  openInInspector: () => {},
 };

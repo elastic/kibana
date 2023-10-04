@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { RunTimeMappings } from '../../../../common/api/search_strategy';
 import type { CtiEnrichment, EventFields } from '../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -53,7 +54,7 @@ export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsValue =
   const [isEventDataLoading, eventData] = useTimelineEventsDetails({
     indexName,
     eventId,
-    runtimeMappings: sourcererDataView.runtimeMappings,
+    runtimeMappings: sourcererDataView.runtimeMappings as RunTimeMappings,
     skip: !eventId,
   });
 

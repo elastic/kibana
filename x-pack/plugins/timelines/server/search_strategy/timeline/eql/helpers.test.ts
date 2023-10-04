@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Direction, TimelineEqlRequestOptions } from '../../../../common/search_strategy';
+import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
+import { Direction } from '../../../../common/search_strategy';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
 const defaultArgs = {

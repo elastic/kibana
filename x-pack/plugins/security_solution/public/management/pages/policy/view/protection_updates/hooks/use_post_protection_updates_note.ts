@@ -32,7 +32,7 @@ export const useCreateProtectionUpdatesNote = ({
   >(
     (payload) =>
       http.post(
-        resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { policy_id: packagePolicyId }),
+        resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { package_policy_id: packagePolicyId }),
         {
           version: '2023-10-31',
           body: JSON.stringify(payload),

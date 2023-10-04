@@ -354,7 +354,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   try {
-    const availableVersions = await AgentService.getAvailableVersions();
+    const availableVersions = await AgentService.getAvailableVersions({});
     const body: GetAvailableVersionsResponse = { items: availableVersions };
     return response.ok({ body });
   } catch (error) {
