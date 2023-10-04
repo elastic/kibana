@@ -434,6 +434,6 @@ export async function snoozeRule({
         },
       },
     })
-    .expect(200);
+    .expect(204);
   return body;
 }
