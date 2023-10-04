@@ -14,9 +14,11 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
+import { Connector } from '@kbn/search-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { useMutation } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
 
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
@@ -24,16 +26,42 @@ import { useConnectors } from '../hooks/api/use_connectors';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
+import { CREATE_CONNECTOR_PATH } from './connectors_router';
 
 export const ConnectorsOverview = () => {
-  const { http } = useKibanaServices();
   const { data } = useConnectors();
+  const {
+    application: { navigateToUrl },
+    http,
+  } = useKibanaServices();
+
+  const {
+    data: connector,
+    isLoading,
+    isSuccess,
+    mutate,
+  } = useMutation({
+    mutationFn: async () => {
+      const result = await http.post<{ connector: Connector }>(
+        '/internal/serverless_search/connectors'
+      );
+      return result.connector;
+    },
+  });
+
+  useEffect(() => {
+    navigateToUrl(`${CREATE_CONNECTOR_PATH}/${connector?.id}`);
+  }, [connector, isSuccess, navigateToUrl]);
+
+  const createConnector = () => mutate();
+
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
       <EuiPageTemplate.Header
         pageTitle={i18n.translate('xpack.serverlessSearch.connectors.title', {
           defaultMessage: 'Connectors',
         })}
+        restrictWidth
         rightSideItems={[
           <EuiFlexGroup direction="row" alignItems="flexStart">
             <EuiFlexItem>
@@ -61,7 +89,12 @@ export const ConnectorsOverview = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton fill iconType="plusInCircleFilled">
+              <EuiButton
+                isLoading={isLoading}
+                fill
+                iconType="plusInCircleFilled"
+                onClick={() => createConnector()}
+              >
                 {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
                   defaultMessage: 'Create connector',
                 })}

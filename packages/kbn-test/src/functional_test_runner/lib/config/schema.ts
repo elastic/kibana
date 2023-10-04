@@ -214,6 +214,12 @@ export const schema = Joi.object()
       })
       .default(),
 
+    esServerlessOptions: Joi.object()
+      .keys({
+        host: Joi.string().ip(),
+      })
+      .default(),
+
     kbnTestServer: Joi.object()
       .keys({
         buildArgs: Joi.array(),
