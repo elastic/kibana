@@ -25,7 +25,8 @@ export interface EnterpriseSearchApplicationDetails {
   template: {
     script: {
       lang: string;
-      params: unknown;
+      options: object;
+      params: object;
       source: string;
     };
   };
