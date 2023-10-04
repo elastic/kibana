@@ -11,7 +11,8 @@ import React, { FC, useEffect, useState } from 'react';
 import {
   EuiCollapsibleNavItem,
   EuiCollapsibleNavItemProps,
-  EuiCollapsibleNavSubItemGroupTitle,
+  EuiCollapsibleNavSubItemProps,
+  EuiTitle,
 } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
@@ -22,7 +23,7 @@ import { isAbsoluteLink } from '../../utils';
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNode,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
-): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
+): EuiCollapsibleNavSubItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
@@ -33,9 +34,30 @@ const navigationNodeToEuiItem = (
     [`nav-item-isActive`]: isSelected,
   });
 
+  // Note: this can be replaced with an `isGroup` API or whatever you prefer
+  // Could also probably be pulled out to a separate component vs inlined
+  if (item.isGroupTitle) {
+    return {
+      renderItem: () => (
+        <EuiTitle
+          size="xxxs"
+          className="eui-textTruncate"
+          css={({ euiTheme }: any) => ({
+            marginTop: euiTheme.size.base,
+            paddingBlock: euiTheme.size.xs,
+            paddingInline: euiTheme.size.s,
+          })}
+        >
+          <div id={id} data-test-subj={dataTestSubj}>
+            {item.title}
+          </div>
+        </EuiTitle>
+      ),
+    };
+  }
+
   return {
     id,
-    isGroupTitle: item.isGroupTitle,
     title: item.title,
     isSelected,
     accordionProps: {
