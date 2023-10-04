@@ -7,8 +7,6 @@
 
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
-import { request } from './common';
-import { API_VERSIONS } from '../../common/constants';
 import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
@@ -108,45 +106,11 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
-export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
-export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
-
-// hackish way to Refresh alerts list in rule, prior to this I tried setting interval - it didn't load values
-export function refreshAlerts(timeout: number) {
-  const startTime = new Date().getTime();
-
-  function clickButton() {
-    const currentTime = new Date().getTime();
-    const elapsedTime = currentTime - startTime;
-
-    if (elapsedTime >= timeout) {
-      throw new Error('Waiting for alerts to appear has timed out!');
-    }
-
-    cy.get('body').then(($body) => {
-      const alertsTable = $body.find('[data-test-subj="alertsTable"]');
-      if (alertsTable.length) {
-        return;
-      } else {
-        cy.get(REFRESH_BUTTON).click({ force: true });
-        cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
-        cy.wait(10000);
-        clickButton();
-      }
-    });
-  }
-
-  clickButton();
-}
-
-export const loadRuleAlerts = (ruleName: string, ruleId: string) => {
+export const loadRuleAlerts = (ruleName: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules');
   clickRuleName(ruleName);
-  // refreshAlerts(120000);
   waitForAlertsToPopulate();
-  cy.visit('/app/security/rules');
-  clickRuleName(ruleName);
 };
 
 export const addToCase = (caseId: string) => {
@@ -205,13 +169,3 @@ export const takeOsqueryActionWithParams = () => {
 export const clickRuleName = (ruleName: string) => {
   cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
 };
-
-export const enableRule = (ruleId: string, action: string) =>
-  request({
-    method: 'POST',
-    body: { action, ids: [ruleId] },
-    headers: {
-      'Elastic-Api-Version': API_VERSIONS.public.v1,
-    },
-    url: '/api/detection_engine/rules/_bulk_action',
-  });

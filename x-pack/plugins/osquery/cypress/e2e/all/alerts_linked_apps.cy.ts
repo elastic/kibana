@@ -34,7 +34,7 @@ describe(
         ruleId = data.id;
         ruleName = data.name;
 
-        loadRuleAlerts(data.name, data.id);
+        loadRuleAlerts(data.name);
       });
     });
 

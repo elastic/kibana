@@ -335,6 +335,7 @@ soc_manager:
         - auditbeat-*
         - endgame-*
         - filebeat-*
+        - logs-*
         - packetbeat-*
         - winlogbeat-*
       privileges:
@@ -345,7 +346,6 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - logs-*
       privileges:
         - read
         - write
@@ -402,10 +402,6 @@ soc_manager:
         - all
       resources: "*"
     - application: osquery
-      privileges:
-        - all
-      resources: "*"
-    - application: indexPatterns
       privileges:
         - all
       resources: "*"

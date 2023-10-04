@@ -41,7 +41,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     loadRule(true).then((data) => {
       ruleId = data.id;
       ruleName = data.name;
-      loadRuleAlerts(data.name, data.id);
+      loadRuleAlerts(data.name);
     });
   });
 
