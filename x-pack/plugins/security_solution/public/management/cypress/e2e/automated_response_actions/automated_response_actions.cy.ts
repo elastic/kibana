@@ -20,91 +20,87 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe(
-  'Automated Response Actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
-    let createdHost: CreateAndEnrollEndpointHostResponse;
+describe('Automated Response Actions', { tags: ['@ess', '@serverless'] }, () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
+  before(() => {
+    getEndpointIntegrationVersion().then((version) =>
+      createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      })
+    );
+  });
+
+  after(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost);
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
+
+  const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
+  const fleetHostname = `dev-fleet-server.${hostname}`;
+
+  beforeEach(() => {
+    login();
+    disableExpandableFlyoutAdvancedSettings();
+  });
+
+  describe('From alerts', () => {
+    let ruleId: string;
+    let ruleName: string;
 
     before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
-
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
-          });
-        })
-      );
+      loadRule().then((data) => {
+        ruleId = data.id;
+        ruleName = data.name;
+      });
     });
 
     after(() => {
-      if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost);
-      }
-
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-      }
-
-      if (createdHost) {
-        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      if (ruleId) {
+        cleanupRule(ruleId);
       }
     });
 
-    const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
-    const fleetHostname = `dev-fleet-server.${hostname}`;
+    it.skip('should have generated endpoint and rule', () => {
+      loadPage(APP_ENDPOINTS_PATH);
+      cy.contains(createdHost.hostname).should('exist');
 
-    beforeEach(() => {
-      login();
-      disableExpandableFlyoutAdvancedSettings();
+      toggleRuleOffAndOn(ruleName);
+
+      visitRuleAlerts(ruleName);
+      closeAllToasts();
+
+      changeAlertsFilter('event.category: "file"');
+      cy.getByTestSubj('expand-event').first().click();
+      cy.getByTestSubj('responseActionsViewTab').click();
+      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+
+      cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
+        .should('contain', 'isolate completed successfully')
+        .and('contain', createdHost.hostname);
+
+      cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
+        .should('contain', 'The host does not have Elastic Defend integration installed')
+        .and('contain', 'dev-fleet-server');
     });
-
-    describe('From alerts', () => {
-      let ruleId: string;
-      let ruleName: string;
-
-      before(() => {
-        loadRule().then((data) => {
-          ruleId = data.id;
-          ruleName = data.name;
-        });
-      });
-
-      after(() => {
-        if (ruleId) {
-          cleanupRule(ruleId);
-        }
-      });
-
-      it.skip('should have generated endpoint and rule', () => {
-        loadPage(APP_ENDPOINTS_PATH);
-        cy.contains(createdHost.hostname).should('exist');
-
-        toggleRuleOffAndOn(ruleName);
-
-        visitRuleAlerts(ruleName);
-        closeAllToasts();
-
-        changeAlertsFilter('event.category: "file"');
-        cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('responseActionsViewTab').click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-
-        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
-          .should('contain', 'isolate completed successfully')
-          .and('contain', createdHost.hostname);
-
-        cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
-          .should('contain', 'The host does not have Elastic Defend integration installed')
-          .and('contain', 'dev-fleet-server');
-      });
-    });
-  }
-);
+  });
+});

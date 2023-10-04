@@ -29,7 +29,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('`isolate` command', { tags: ['@brokenInServerless'] }, () => {
+  describe('`isolate` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let isolateRequestResponse: ActionDetails;
@@ -71,7 +71,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('`release` command', { tags: ['@brokenInServerless'] }, () => {
+  describe('`release` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let releaseRequestResponse: ActionDetails;

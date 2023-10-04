@@ -109,16 +109,12 @@ describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverle
       cy.getByTestSubj('endpointResponseActions-action-item').should('be.enabled');
     });
 
-    it(
-      'should display Responder response action interface',
-      { tags: ['@brokenInServerless'] },
-      () => {
-        loadPage(caseUrlPath);
-        closeAllToasts();
-        openCaseAlertDetails();
-        cy.getByTestSubj('endpointResponseActions-action-item').click();
-        performResponderSanityChecks();
-      }
-    );
+    it('should display Responder response action interface', () => {
+      loadPage(caseUrlPath);
+      closeAllToasts();
+      openCaseAlertDetails();
+      cy.getByTestSubj('endpointResponseActions-action-item').click();
+      performResponderSanityChecks();
+    });
   });
 });
