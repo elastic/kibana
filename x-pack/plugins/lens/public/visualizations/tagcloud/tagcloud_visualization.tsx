@@ -302,6 +302,7 @@ export const getTagcloudVisualization = ({
           setState={props.setState}
           frame={props.frame}
           panelRef={props.panelRef}
+          isInlineEditing={props.isInlineEditing}
         />
       );
     }
