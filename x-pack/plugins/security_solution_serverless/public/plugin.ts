@@ -18,9 +18,12 @@ import type {
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
-import { configureNavigation } from './navigation';
+import { setupNavigation, startNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
-import { projectAppLinksSwitcher } from './navigation/links/app_links';
+import {
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from '../common/experimental_features';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -32,19 +35,25 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityPublicConfig;
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
+    this.experimentalFeatures = {} as ExperimentalFeatures;
   }
 
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
-    securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
-    securitySolution.setDataQualityPanelConfig({ isILMAvailable: false });
 
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental,
+      securitySolution.experimentalFeatures
+    ).features;
+
+    setupNavigation(core, setupDeps, this.experimentalFeatures);
     return {};
   }
 
@@ -55,16 +64,16 @@ export class SecuritySolutionServerlessPlugin
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
-    const services = createServices(core, startDeps);
+    const services = createServices(core, startDeps, this.experimentalFeatures);
 
-    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
+    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setComponents({
       getStarted: getSecurityGetStartedComponent(services, productTypes),
       dashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
 
-    configureNavigation(services, this.config);
+    startNavigation(services, this.config);
     setRoutes(services);
 
     return {};

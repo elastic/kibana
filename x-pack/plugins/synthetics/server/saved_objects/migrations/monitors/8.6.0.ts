@@ -12,19 +12,23 @@ import {
 } from '../../../../common/runtime_types';
 import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor';
 
+export type SyntheticsMonitorWithSecretsAttributes860 = Omit<
+  SyntheticsMonitorWithSecretsAttributes,
+  ConfigKey.MAX_ATTEMPTS
+>;
+
+export type SyntheticsUnsanitizedDoc860 =
+  SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes860>;
+
 export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
   return encryptedSavedObjects.createMigration<
-    SyntheticsMonitorWithSecretsAttributes,
-    SyntheticsMonitorWithSecretsAttributes
+    SyntheticsMonitorWithSecretsAttributes860,
+    SyntheticsMonitorWithSecretsAttributes860
   >({
-    isMigrationNeededPredicate: function shouldBeMigrated(
-      doc
-    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes> {
+    isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SyntheticsUnsanitizedDoc860 {
       return true;
     },
-    migration: (
-      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>
-    ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes> => {
+    migration: (doc: SyntheticsUnsanitizedDoc860): SyntheticsUnsanitizedDoc860 => {
       const { attributes, id } = doc;
       return {
         ...doc,
