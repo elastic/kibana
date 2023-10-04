@@ -60,10 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       if (!saveToDashboard) {
-        await appsMenu.clickLink('Dashboard', {
-          category: 'kibana',
-          closeCollapsibleNav: true,
-        });
+        await dashboard.navigateToAppFromAppsMenu();
       }
     } else {
       await PageObjects.maps.clickSaveAndReturnButton();
