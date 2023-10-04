@@ -40,5 +40,7 @@
     "@kbn/import-locator",
     "@kbn/journeys",
     "@kbn/config-schema",
+    "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/core-test-helpers-kbn-server",
   ]
 }
