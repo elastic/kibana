@@ -11,7 +11,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
-import { fetchConnectorExecuteAction } from '../api';
+import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
 interface SendMessagesProps {
   http: HttpSetup;
@@ -21,11 +21,15 @@ interface SendMessagesProps {
 
 interface UseSendMessages {
   isLoading: boolean;
-  sendMessages: ({ apiConfig, http, messages }: SendMessagesProps) => Promise<string>;
+  sendMessages: ({
+    apiConfig,
+    http,
+    messages,
+  }: SendMessagesProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
 export const useSendMessages = (): UseSendMessages => {
-  const { assistantLangChain } = useAssistantContext();
+  const { knowledgeBase } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessages = useCallback(
@@ -33,7 +37,7 @@ export const useSendMessages = (): UseSendMessages => {
       setIsLoading(true);
       try {
         return await fetchConnectorExecuteAction({
-          assistantLangChain,
+          assistantLangChain: knowledgeBase.assistantLangChain,
           http,
           messages,
           apiConfig,
@@ -42,7 +46,7 @@ export const useSendMessages = (): UseSendMessages => {
         setIsLoading(false);
       }
     },
-    [assistantLangChain]
+    [knowledgeBase.assistantLangChain]
   );
 
   return { isLoading, sendMessages };

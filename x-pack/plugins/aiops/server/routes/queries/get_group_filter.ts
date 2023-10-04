@@ -7,7 +7,9 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+import { type SignificantTermGroup, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+
+import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 
 // Transforms a list of significant terms from a group in a query filter.
 // Uses a `term` filter for single field value combinations.
@@ -17,17 +19,33 @@ import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 export function getGroupFilter(
   significantTermGroup: SignificantTermGroup
 ): estypes.QueryDslQueryContainer[] {
-  return Object.entries(
-    significantTermGroup.group.reduce<Record<string, Array<string | number>>>((p, c) => {
-      if (p[c.fieldName]) {
-        p[c.fieldName].push(c.fieldValue);
-      } else {
-        p[c.fieldName] = [c.fieldValue];
-      }
-      return p;
-    }, {})
+  const groupKeywordFilter = Object.entries(
+    significantTermGroup.group
+      .filter((d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD)
+      .reduce<Record<string, Array<string | number>>>((p, c) => {
+        if (p[c.fieldName]) {
+          p[c.fieldName].push(c.fieldValue);
+        } else {
+          p[c.fieldName] = [c.fieldValue];
+        }
+        return p;
+      }, {})
   ).reduce<estypes.QueryDslQueryContainer[]>((p, [key, values]) => {
     p.push(values.length > 1 ? { terms: { [key]: values } } : { term: { [key]: values[0] } });
     return p;
   }, []);
+
+  const groupLogPatternFilter = significantTermGroup.group
+    .filter((d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN)
+    .map((d) =>
+      getCategoryQuery(d.fieldName, [
+        {
+          key: d.key,
+          count: d.docCount,
+          examples: [],
+        },
+      ])
+    );
+
+  return [...groupKeywordFilter, ...groupLogPatternFilter];
 }
