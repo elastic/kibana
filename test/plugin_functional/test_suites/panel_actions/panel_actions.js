@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard']);
 
@@ -46,8 +47,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await testSubjects.click('euiFlyoutCloseButton');
-      await testSubjects.waitForDeleted('samplePanelActionFlyout');
+      await retry.try(async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('samplePanelActionFlyout');
+      });
     });
   });
 }
