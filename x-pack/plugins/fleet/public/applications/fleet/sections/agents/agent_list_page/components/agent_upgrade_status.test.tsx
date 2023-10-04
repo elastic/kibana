@@ -150,7 +150,7 @@ describe('AgentUpgradeStatus', () => {
           action_id: 'xxx',
           state: 'UPG_FAILED',
           metadata: {
-            failed_state: 'UPG_*',
+            failed_state: 'UPG_DOWNLOADING',
             error_msg: 'Something went wrong',
           },
         },
