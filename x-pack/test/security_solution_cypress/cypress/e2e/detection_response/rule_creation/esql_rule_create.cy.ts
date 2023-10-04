@@ -31,8 +31,8 @@ import {
   selectEsqlRuleType,
   getDefineContinueButton,
   fillEsqlQueryBar,
-  pressRuleCreateBtn,
   fillAboutSpecificEsqlRuleAndContinue,
+  createRuleWithoutEnabling,
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -68,7 +68,7 @@ describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      pressRuleCreateBtn();
+      createRuleWithoutEnabling();
 
       // ensures after rule save ES|QL rule is displayed
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
@@ -91,7 +91,7 @@ describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
       fillScheduleRuleAndContinue(rule);
-      pressRuleCreateBtn();
+      createRuleWithoutEnabling();
 
       // ensure rule name override is displayed on details page
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
