@@ -34,33 +34,3 @@ export const add820Indices: SavedObjectMigrationFn<
 
   return migratedObj;
 };
-
-export const remove890Indices: SavedObjectMigrationFn<
-  DynamicSettingsAttributes,
-  DynamicSettingsAttributes
-> = (doc) => {
-  const heartbeatIndices = doc.attributes?.heartbeatIndices;
-
-  const indicesArr = !heartbeatIndices ? [] : heartbeatIndices.split(',');
-
-  // remove synthetics-* from the array
-  const indexToRemove = indicesArr.indexOf('synthetics-*');
-  if (indexToRemove > -1) {
-    indicesArr.splice(indexToRemove, 1);
-  }
-
-  if (!indicesArr.includes('heartbeat-8*')) {
-    indicesArr.push('heartbeat-8*');
-  }
-
-  const syntheticsIndexRemoved = indexToRemove > -1;
-
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      heartbeatIndices: indicesArr.join(','),
-      ...(syntheticsIndexRemoved && { syntheticsIndexRemoved }),
-    },
-  };
-};
