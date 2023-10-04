@@ -12,7 +12,8 @@ import { ConnectorsOverview } from './connectors_overview';
 
 export const BASE_CONNECTORS_PATH = 'connectors';
 export const CREATE_CONNECTOR_SLUG = `create_connector`;
-export const CREATE_CONNECTOR_PATH = `${BASE_CONNECTORS_PATH}/${CREATE_CONNECTOR_SLUG}`;
+export const EDIT_CONNECTOR_PATH = `${CREATE_CONNECTOR_SLUG}/:id`;
+export const CREATE_CONNECTOR_PATH = `${CREATE_CONNECTOR_SLUG}`;
 
 export const ConnectorsRouter: React.FC = () => {
   return (
