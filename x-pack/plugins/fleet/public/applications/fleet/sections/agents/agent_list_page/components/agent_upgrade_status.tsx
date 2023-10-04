@@ -190,7 +190,6 @@ export const AgentUpgradeStatus: React.FC<{
   agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
 }> = ({ agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
-  // TODO: check logic
   const isAgentUpgrading = useMemo(
     () => agentUpgradeStartedAt && !agentUpgradedAt,
     [agentUpgradeStartedAt, agentUpgradedAt]
@@ -215,7 +214,7 @@ export const AgentUpgradeStatus: React.FC<{
         content={
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDetailsNotAvailable"
-            defaultMessage="Agent upgrade details are available from version 8.11." // TODO: check message
+            defaultMessage="Detailed upgrade status is available for Elastic Agents on version 8.11 and higher."
           />
         }
         color="subdued"
