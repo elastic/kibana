@@ -5,21 +5,30 @@
  * 2.0.
  */
 
-import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
+import { getBridgeNetworkHostIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
 import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
+  const defendWorkflowsCypressConfig = await readConfigFile(
+    require.resolve(
+      '../../test_serverless/functional/test_suites/security/cypress/security_config.base.ts'
+    )
+  );
   const config = defendWorkflowsCypressConfig.getAll();
-  const hostIp = getLocalhostRealIp();
+  const hostIp = getBridgeNetworkHostIp();
 
   const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = [];
 
   return {
     ...config,
+
+    esTestCluster: {
+      ...config.esTestCluster,
+      serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
+    },
 
     servers: {
       ...config.servers,
