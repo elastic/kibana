@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   cleanupCase,
   cleanupPack,
@@ -76,7 +76,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
       cy.getBySel('osquery-action-item').click();
       cy.contains(/^\d+ agen(t|ts) selected/);
       cy.contains('Run a set of queries in a pack').click();
-      cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();

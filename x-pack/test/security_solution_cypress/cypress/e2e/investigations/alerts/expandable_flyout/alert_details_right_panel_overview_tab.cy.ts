@@ -70,7 +70,7 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
