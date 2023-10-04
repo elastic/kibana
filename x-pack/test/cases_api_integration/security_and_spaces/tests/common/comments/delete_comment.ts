@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      it.only('404s when comment belongs to different case', async () => {
+      it('404s when comment belongs to different case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCase = await createComment({
           supertest,
