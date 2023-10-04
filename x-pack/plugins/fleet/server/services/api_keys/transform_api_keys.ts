@@ -43,7 +43,7 @@ function createKibanaRequestFromAuth(authorizationHeader: HTTPAuthorizationHeade
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest, undefined, false);
 
   return fakeRequest;
 }

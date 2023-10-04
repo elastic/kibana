@@ -175,6 +175,6 @@ export class AnonymousAccessService {
       auth: { isAuthenticated: authenticateRequest },
       path: '/',
     };
-    return CoreKibanaRequest.from(fakeRawRequest);
+    return CoreKibanaRequest.from(fakeRawRequest, undefined, false);
   }
 }

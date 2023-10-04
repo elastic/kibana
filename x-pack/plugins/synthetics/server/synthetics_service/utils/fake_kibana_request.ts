@@ -20,5 +20,5 @@ export function getFakeKibanaRequest(apiKey: { id: string; api_key: string }) {
     path: '/',
   };
 
-  return CoreKibanaRequest.from(fakeRawRequest);
+  return CoreKibanaRequest.from(fakeRawRequest, undefined, false);
 }

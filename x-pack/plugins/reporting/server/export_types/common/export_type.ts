@@ -111,7 +111,7 @@ export abstract class ExportType<
       headers,
       path: '/',
     };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
+    const fakeRequest = CoreKibanaRequest.from(rawRequest, undefined, false);
 
     const spacesService = this.setupDeps.spaces?.spacesService;
     if (spacesService) {
