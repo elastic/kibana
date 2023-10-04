@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
 import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { EuiCommentList } from '@elastic/eui';
 
 const onSetupComplete = jest.fn();
 const defaultProps = {
@@ -47,6 +48,7 @@ jest.mock('../../assistant/use_conversation', () => ({
   useConversation: () => mockConversation,
 }));
 
+jest.spyOn(global, 'clearTimeout');
 describe('useConnectorSetup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -143,6 +145,32 @@ describe('useConnectorSetup', () => {
       });
       expect(getByTestId('skip-setup-button')).toBeInTheDocument();
       expect(queryByTestId('connectorButton')).not.toBeInTheDocument();
+    });
+  });
+  it('should call onSetupComplete and setConversation when onHandleMessageStreamingComplete', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
+        wrapper: ({ children }) => (
+          <TestProviders
+            providerContext={{
+              getInitialConversations: () => ({
+                [alertConvo.id]: alertConvo,
+                [welcomeConvo.id]: welcomeConvo,
+              }),
+            }}
+          >
+            {children}
+          </TestProviders>
+        ),
+      });
+      await waitForNextUpdate();
+      render(<EuiCommentList comments={result.current.comments} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(clearTimeout).toHaveBeenCalled();
+      expect(onSetupComplete).toHaveBeenCalled();
+      expect(setConversation).toHaveBeenCalled();
     });
   });
 });
