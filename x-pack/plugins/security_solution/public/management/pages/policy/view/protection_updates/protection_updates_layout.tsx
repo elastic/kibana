@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
+  EuiLink,
   EuiPanel,
   EuiShowFor,
   EuiSpacer,
@@ -25,15 +26,15 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
 import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
 import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useToasts } from '../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
@@ -62,6 +63,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const dispatch = useDispatch();
     const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
     const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+    const { docLinks } = useKibana().services;
 
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
 
@@ -254,10 +256,25 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               }
             )}
           >
-            {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated', {
-              defaultMessage:
-                'Manifest is older than 30 days. Recommended to update the manifest or enable "Update manifest automatically".',
-            })}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated"
+              defaultMessage="Your protection artifacts have not been updated in over 30 days. We strongly recommend keeping these up to date to ensure the highest level of security for your environment.{break}Note: After 18 months, protection artifacts will expire and cannot be rolled back. {learnMore}"
+              values={{
+                learnMore: (
+                  <EuiLink
+                    href={docLinks.links.securitySolution.artifactControl}
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated.learnMore"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+                break: <EuiSpacer size="m" />,
+              }}
+            />
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>

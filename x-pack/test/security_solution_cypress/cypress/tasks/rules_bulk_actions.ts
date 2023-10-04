@@ -372,6 +372,12 @@ export const checkMachineLearningRulesCannotBeModified = (rulesCount: number) =>
   );
 };
 
+export const checkEsqlRulesCannotBeModified = (rulesCount: number) => {
+  cy.get(MODAL_CONFIRMATION_BODY).contains(
+    `${rulesCount} custom ES|QL rule (these rules don't have index patterns)`
+  );
+};
+
 export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
