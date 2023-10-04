@@ -14,55 +14,22 @@ import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../packa
 import type {
   PackageInfo,
   NewPackagePolicy,
-  PackagePolicy,
+  PackagePolicyInput,
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
 } from '../../../../common/types';
 
-import { isPackageLimited } from '../../../../common/services';
-import { DEFAULT_OUTPUT } from '../../../constants';
-
 import { getPackageInfo } from '.';
 
-const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
-  return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
-};
-
 export const templatePackagePolicyToFullInputs = (
-  packagePolicy: PackagePolicy,
-  packageInfo?: PackageInfo,
-  outputId: string = DEFAULT_OUTPUT.name
+  packagePolicyInputs: PackagePolicyInput[]
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
-  if (!isPolicyEnabled(packagePolicy)) {
-    return fullInputs;
-  }
+  if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputs;
 
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
-
-  packagePolicy.inputs.forEach((input) => {
-    if (!input.enabled) {
-      return;
-    }
-
-    const inputId = appendInputId
-      ? `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
-          packagePolicy.id
-        }`
-      : packagePolicy.id;
-
-    const fullInput: FullAgentPolicyInput = {
-      id: inputId,
-      name: packagePolicy.name,
-      type: input.type,
-      data_stream: {
-        namespace: packagePolicy.namespace || 'default',
-      },
-      use_output: outputId,
-      package_policy_id: packagePolicy.id,
+  packagePolicyInputs.forEach((input) => {
+    const fullInput = {
       ...(input.compiled_input || {}),
       ...(input.streams.length
         ? {
@@ -116,31 +83,22 @@ export async function getInputs(
     });
   }
   // ensureInstalledPackage ?
-  const id = 'PACKAGE_POLICY_ID';
-  const emptyPackagePolicy = packageToPackagePolicy(packageInfo, id);
-  const inputs = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
+  const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
+  const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
 
   const compiledInputs = await _compilePackagePolicyInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
-    inputs
+    inputsWithStreamIds
   );
 
   const packagePolicyWithInputs: NewPackagePolicy = {
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
+  // TO FIX: ids are missing in streams
+  const fullAgentPolicyInputs = templatePackagePolicyToFullInputs(packagePolicyWithInputs.inputs);
+  const inputs = fullAgentPolicyInputs.flatMap((input) => input.streams);
 
-  const tempPackagePolicy = {
-    ...packagePolicyWithInputs,
-    id,
-    revision: 0,
-    updated_at: '',
-    updated_by: '',
-    created_at: '',
-    created_by: '',
-  } as PackagePolicy;
-  const fullInputs = templatePackagePolicyToFullInputs(tempPackagePolicy, packageInfo, 'OUTPUT_ID');
-
-  return { inputs: fullInputs };
+  return { inputs };
 }
