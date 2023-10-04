@@ -40,7 +40,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         const functionName = getFunctionName(functionDeclaration);
         const intent = getIntentFromNode(node);
 
-        const suggestion = `${appName}.${functionName}.${intent}`; // 'xpack.observability.overview.logsPageLoadMoreButton'
+        const translationIdSuggestion = `${appName}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
 
         // Check if i18n has already been imported into the file.
         const {
@@ -61,7 +61,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
             return [
               fixer.replaceText(
                 node,
-                `${whiteSpaces}{i18n.translate('${suggestion}', { defaultMessage: "${value}"})}`
+                `${whiteSpaces}{i18n.translate('${translationIdSuggestion}', { defaultMessage: "${value}"})}`
               ),
               !hasI18nImportLine
                 ? fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)

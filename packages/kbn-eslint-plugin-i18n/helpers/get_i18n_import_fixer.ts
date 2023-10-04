@@ -18,7 +18,18 @@ export function getI18nImportFixer({
   sourceCode: SourceCode;
   mode: 'i18n.translate' | 'FormattedMessage';
 }) {
-  const hasI18nImportLine = Boolean(sourceCode.lines.find((l) => l === KBN_I18N_I18N_IMPORT));
+  const hasI18nImportLine = Boolean(
+    sourceCode.lines.find((l) =>
+      mode === 'i18n.translate'
+        ? l === KBN_I18N_I18N_IMPORT
+        : l === KBN_I18N_REACT_FORMATTED_MESSAGE_IMPORT
+    )
+  );
+
+  if (hasI18nImportLine) return { hasI18nImportLine };
+
+  // Translation package has not been imported yet so we need to add it.
+  // Pretty safe bet to add it underneath the React import.
   const reactImportLineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'"));
 
   const targetLine = sourceCode.lines[reactImportLineIndex];

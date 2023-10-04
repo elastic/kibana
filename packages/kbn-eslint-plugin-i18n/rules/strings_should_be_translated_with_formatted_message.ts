@@ -40,7 +40,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
         const functionName = getFunctionName(functionDeclaration);
         const intent = getIntentFromNode(node);
 
-        const suggestion = `${appName}.${functionName}.${intent}`; // 'xpack.observability.overview.logsPageLoadMoreButton'
+        const translationIdSuggestion = `${appName}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
 
         // Check if i18n has already been imported into the file.
         const {
@@ -53,7 +53,6 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
         });
 
         // Show warning to developer and offer autofix suggestion
-
         report({
           node: node as any,
           message:
@@ -62,8 +61,8 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
             return [
               fixer.replaceText(
                 node,
-                `${whiteSpaces}<FormattedMessage
-  id="${suggestion}"
+                `${whiteSpaces}\n<FormattedMessage
+  id="${translationIdSuggestion}"
   defaultMessage="${value}"
 />`
               ),
