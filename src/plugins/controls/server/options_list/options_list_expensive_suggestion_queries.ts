@@ -65,7 +65,8 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
           },
         },
       };
-      if (searchString && searchString.length > 0) {
+      // disabling for date fields because applying a search string will return an error
+      if (fieldSpec?.type !== 'date' && searchString && searchString.length > 0) {
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
