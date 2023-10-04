@@ -31328,7 +31328,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.officeApplicationStartupDescription": "Office Application Startup (T1137)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.osCredentialDumpingDescription": "OS Credential Dumping (T1003)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.passwordPolicyDiscoveryDescription": "Password Policy Discovery (T1201)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.pathInterceptionDescription": "Path Interception (T1034)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.peripheralDeviceDiscoveryDescription": "Peripheral Device Discovery (T1120)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.permissionGroupsDiscoveryDescription": "Permission Groups Discovery (T1069)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.phishingDescription": "Phishing (T1566)",
