@@ -10,12 +10,12 @@ import { Readable } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type {
+  FleetFile,
   FleetFromHostFileClientInterface,
   FleetToHostFileClientInterface,
   HapiReadableStream,
+  HostUploadedFileMetadata,
 } from './types';
-import type { FleetFile } from './types';
-import type { HostUploadedFileMetadata } from './types';
 
 export const createFleetFromHostFilesClientMock =
   (): jest.Mocked<FleetFromHostFileClientInterface> => {
@@ -86,7 +86,7 @@ export const createFromHostEsSearchResponseMock =
         max_score: 0,
         hits: [
           {
-            _index: '.fleet-fileds-fromhost-meta-foo-000001',
+            _index: '.fleet-fields-fromhost-meta-foo-000001',
             _id: '123',
             _score: 1.0,
             _source: {
