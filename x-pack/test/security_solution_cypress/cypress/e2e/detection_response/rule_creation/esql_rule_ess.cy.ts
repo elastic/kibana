@@ -14,12 +14,7 @@ import {
   RULE_NAME_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import {
-  ESQL_TYPE,
-  NEW_TERMS_TYPE,
-  THRESHOLD_TYPE,
-  ESQL_QUERY_BAR,
-} from '../../../screens/create_new_rule';
+import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../screens/create_new_rule';
 
 import { getDetails, goBackToRulesTable } from '../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../tasks/alerts_detection_rules';
@@ -38,11 +33,8 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
-import { createRule } from '../../../tasks/api_calls/rules';
 
-// Failing: See https://github.com/elastic/kibana/issues/167716
-// Failing: See https://github.com/elastic/kibana/issues/167717
-describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
+describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -162,35 +154,6 @@ describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
-    });
-  });
-});
-
-describe('Detection ES|QL rules, creation', { tags: ['@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
-
-  it('does not display ES|QL rule on form', function () {
-    visit(CREATE_RULE_URL);
-
-    // ensure, page is loaded and rule types are displayed
-    cy.get(NEW_TERMS_TYPE).should('be.visible');
-    cy.get(THRESHOLD_TYPE).should('be.visible');
-
-    // ES|QL rule tile should not be rendered
-    cy.get(ESQL_TYPE).should('not.exist');
-  });
-
-  it('does not allow to create rule by API call', function () {
-    createRule(getEsqlRule()).then((response) => {
-      expect(response.status).to.equal(400);
-
-      expect(response.body).to.deep.equal({
-        status_code: 400,
-        message: 'Rule type "siem.esqlRule" is not registered.',
-      });
     });
   });
 });
