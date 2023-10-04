@@ -379,6 +379,7 @@ export class TaskRunner<
       maxAlerts: this.maxAlerts,
       ruleLabel,
       flappingSettings,
+      startedAt: this.taskInstance.startedAt!,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });

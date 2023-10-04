@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
@@ -275,7 +275,7 @@ export class AlertsService implements IAlertsService {
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
       const registeredOptions = this.registeredContexts.get(context);
-      if (!isEqual(opts, registeredOptions)) {
+      if (!isEqual(omit(opts, 'shouldWrite'), omit(registeredOptions, 'shouldWrite'))) {
         throw new Error(`${context} has already been registered with different options`);
       }
       this.options.logger.debug(`Resources for context "${context}" have already been registered.`);
