@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InfraConfig } from '../../common/plugin_config_types';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { PluginConfigProvider, usePluginConfig } from './plugin_config_context';
@@ -17,15 +18,18 @@ describe('usePluginConfig()', () => {
   });
 
   it('returns the plugin config what was set through the provider', () => {
-    const config = {
+    const config: Partial<InfraConfig> = {
       featureFlags: {
         metricsExplorerEnabled: false,
+        osqueryEnabled: false,
         customThresholdAlertsEnabled: true,
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {
       wrapper: ({ children }) => {
-        return <PluginConfigProvider value={config}>{children}</PluginConfigProvider>;
+        return (
+          <PluginConfigProvider value={config as InfraConfig}>{children}</PluginConfigProvider>
+        );
       },
     });
 

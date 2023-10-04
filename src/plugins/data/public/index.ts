@@ -197,7 +197,7 @@ export type {
 } from './search';
 
 export type { ISearchOptions } from '../common';
-export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export { isRunningResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -274,7 +274,7 @@ export type {
 } from './query';
 
 // TODO: move to @kbn/search-response-warnings
-export { OpenIncompleteResultsModalButton } from './incomplete_results_modal';
+export { ViewWarningButton } from './search/warnings';
 
 export type { AggsStart } from './search/aggs';
 

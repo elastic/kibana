@@ -1901,6 +1901,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   featureFlags: {
     metricsExplorerEnabled: true,
     customThresholdAlertsEnabled: false,
+    osqueryEnabled: true,
   },
   enabled: true,
   sources,

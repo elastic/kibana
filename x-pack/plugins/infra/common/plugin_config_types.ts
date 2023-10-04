@@ -28,6 +28,7 @@ export interface InfraConfig {
   featureFlags: {
     metricsExplorerEnabled: boolean;
     customThresholdAlertsEnabled: boolean;
+    osqueryEnabled: boolean;
   };
 }
 
