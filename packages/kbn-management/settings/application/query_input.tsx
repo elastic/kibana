@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getCategoryName } from '@kbn/management-settings-utilities';
 import React, { useState } from 'react';
 
+export const DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR = 'settingsSearchBar';
 export const CATEGORY_FIELD = 'categories';
 
 /**
@@ -40,7 +41,7 @@ export const QueryInput = ({ categories: categoryList, query, onQueryChange }: Q
 
   const box = {
     incremental: true,
-    'data-test-subj': `settingsSearchBar`,
+    'data-test-subj': DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR,
     placeholder: i18n.translate('management.settings.searchBarAriaLabel', {
       defaultMessage: 'Search advanced settings',
     }),
@@ -62,8 +63,10 @@ export const QueryInput = ({ categories: categoryList, query, onQueryChange }: Q
     if (error) {
       setQueryError(error?.message || null);
       onQueryChange(undefined);
+    } else {
+      setQueryError(null);
+      onQueryChange(newQuery || undefined);
     }
-    onQueryChange(newQuery || undefined);
   };
 
   return (

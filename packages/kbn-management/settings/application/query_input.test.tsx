@@ -50,9 +50,9 @@ describe('Search', () => {
   });
 
   it('should handle query parse error', async () => {
-    const onQueryChangeMock = jest.fn();
+    const onQueryChange = jest.fn();
     const component = mountWithI18nProvider(
-      <QueryInput {...{ categories, query }} onQueryChange={onQueryChangeMock} />
+      <QueryInput {...{ categories, query }} onQueryChange={onQueryChange} />
     );
 
     const searchBar = findTestSubject(component, 'settingsSearchBar');
@@ -62,20 +62,18 @@ describe('Search', () => {
       searchBar.simulate('keyup', { target: { value: '?' } });
     });
 
-    expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
-
     waitFor(() => {
       expect(component.contains('Unable to parse query')).toBe(true);
     });
 
-    onQueryChangeMock.mockReset();
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
 
     // Send valid query to ensure component can recover from invalid query
     act(() => {
       searchBar.simulate('keyup', { target: { value: 'dateFormat' } });
     });
 
-    expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    expect(onQueryChange).toHaveBeenCalledTimes(2);
 
     waitFor(() => {
       expect(component.contains('Unable to parse query')).toBe(false);

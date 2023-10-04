@@ -5,15 +5,15 @@ exports[`Search should render normally 1`] = `
   <EuiSearchBar
     box={
       Object {
-        "aria-label": "Search advanced settings",
         "data-test-subj": "settingsSearchBar",
         "incremental": true,
+        "placeholder": "Search advanced settings",
       }
     }
     filters={
       Array [
         Object {
-          "field": "category",
+          "field": "categories",
           "multiSelect": "or",
           "name": "Category",
           "options": Array [

@@ -10,6 +10,9 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
+export const DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE = 'settingsEmptyState';
+export const DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK = 'settingsClearSearchLink';
+
 /**
  * Props for a {@link EmptyState} component.
  */
@@ -31,7 +34,10 @@ export const EmptyState = ({ queryText, onClearQuery }: EmptyStateProps) => (
           defaultMessage="No settings found for {queryText} {clearSearch}"
           values={{
             clearSearch: (
-              <EuiLink onClick={onClearQuery}>
+              <EuiLink
+                onClick={onClearQuery}
+                data-test-subj={DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK}
+              >
                 <FormattedMessage
                   id="management.settings.emptyState.clearNoSearchResultText"
                   defaultMessage="(clear search)"
@@ -43,5 +49,6 @@ export const EmptyState = ({ queryText, onClearQuery }: EmptyStateProps) => (
         />
       </>
     }
+    data-test-subj={DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE}
   />
 );

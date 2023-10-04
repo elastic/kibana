@@ -59,10 +59,8 @@ export const useCategoryStory = ({ isFiltered, isSavingEnabled }: Params) => {
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
 
-  const categoryCounts: { [category: string]: number } = {};
-  for (const category of Object.keys(categorizedFields)) {
-    categoryCounts[category] = categorizedFields[category].count;
-  }
+  // This is only needed for when a search query is present
+  const categoryCounts = {};
 
   return {
     onClearQuery,

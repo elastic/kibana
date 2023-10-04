@@ -23,7 +23,6 @@ const settingsMock = getSettingsMock();
 const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsClientMock);
 const categoryCounts = {};
 const onClearQuery = jest.fn();
-const queryText = '';
 
 describe('Form', () => {
   beforeEach(() => {
@@ -32,9 +31,7 @@ describe('Form', () => {
 
   it('renders without errors', () => {
     const { container } = render(
-      wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
-      )
+      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
     );
 
     expect(container).toBeInTheDocument();
@@ -42,9 +39,7 @@ describe('Form', () => {
 
   it('renders as read only if saving is disabled', () => {
     const { getByTestId } = render(
-      wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
-      )
+      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
     );
 
     (Object.keys(settingsMock) as SettingType[]).forEach((type) => {
@@ -64,9 +59,7 @@ describe('Form', () => {
 
   it('renders bottom bar when a field is changed', () => {
     const { getByTestId, queryByTestId } = render(
-      wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
-      )
+      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
     );
 
     expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
@@ -83,10 +76,7 @@ describe('Form', () => {
   it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
     const { getByTestId } = render(
-      wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />,
-        services
-      )
+      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />, services)
     );
 
     const testFieldType = 'string';
@@ -107,9 +97,7 @@ describe('Form', () => {
 
   it('clears changes when Cancel button is clicked', async () => {
     const { getByTestId } = render(
-      wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />
-      )
+      wrap(<Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />)
     );
 
     const testFieldType = 'string';
@@ -135,7 +123,7 @@ describe('Form', () => {
 
     const { getByTestId } = render(
       wrap(
-        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery, queryText }} />,
+        <Form {...{ fields, isSavingEnabled: false, categoryCounts, onClearQuery }} />,
         testServices
       )
     );
@@ -169,7 +157,6 @@ describe('Form', () => {
             isSavingEnabled: false,
             categoryCounts,
             onClearQuery,
-            queryText,
           }}
         />,
         services
