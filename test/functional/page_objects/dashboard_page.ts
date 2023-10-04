@@ -425,7 +425,8 @@ export class DashboardPageObject extends FtrService {
   public async clearSavedObjectsFromAppLinks() {
     await this.header.clickVisualize();
     await this.visualize.gotoLandingPage();
-    await this.header.clickDashboard();
+    await this.navigateToAppFromAppsMenu();
+    await this.header.waitUntilLoadingHasFinished();
     await this.gotoDashboardLandingPage();
   }
 
