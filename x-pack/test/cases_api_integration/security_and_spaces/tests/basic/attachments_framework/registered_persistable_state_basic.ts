@@ -35,7 +35,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(types).to.eql({
           '.lens': '78559fd806809ac3a1008942ead2a079864054f5',
           '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
-          aiopsChangePointChart: 'a1212d71947ec34487b374cecc47ab9941b5d91c',
         });
       });
     });

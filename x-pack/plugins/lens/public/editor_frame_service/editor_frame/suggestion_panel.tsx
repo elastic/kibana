@@ -106,6 +106,7 @@ export interface SuggestionPanelProps {
   customSwitchSuggestionAction?: (s: Suggestion) => void;
   nowProvider: DataPublicPluginStart['nowProvider'];
   core: CoreStart;
+  showOnlyIcons?: boolean;
 }
 
 const PreviewRenderer = ({
@@ -234,6 +235,7 @@ export function SuggestionPanel({
   customSwitchSuggestionAction,
   nowProvider,
   core,
+  showOnlyIcons,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -443,7 +445,7 @@ export function SuggestionPanel({
           <SuggestionPreview
             preview={{
               error: currentStateError,
-              expression: currentStateExpression,
+              expression: !showOnlyIcons ? currentStateExpression : undefined,
               icon:
                 visualizationMap[currentVisualization.activeId].getDescription(
                   currentVisualization.state
@@ -464,7 +466,7 @@ export function SuggestionPanel({
             return (
               <SuggestionPreview
                 preview={{
-                  expression: suggestion.previewExpression,
+                  expression: !showOnlyIcons ? suggestion.previewExpression : undefined,
                   icon: suggestion.previewIcon,
                   title: suggestion.title,
                 }}
@@ -484,6 +486,7 @@ export function SuggestionPanel({
                 }}
                 selected={index === lastSelectedSuggestion}
                 onRender={() => onSuggestionRender(index + 1)}
+                showTitleAsLabel={showOnlyIcons}
               />
             );
           })}
