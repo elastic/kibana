@@ -149,7 +149,7 @@ export function registerAnomalyRuleType({
           datemath.parse('now-30m')!.valueOf()
             ? '30m'
             : `${ruleParams.windowSize}${ruleParams.windowUnit}`;
-        const { dateStart } = getTimeRange(window);
+        const { dateStart, dateEnd } = getTimeRange(window);
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
@@ -312,7 +312,7 @@ export function registerAnomalyRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateStart;
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,

@@ -186,7 +186,7 @@ export function buildQuery(
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
         aggs: {
-          ...buildWindowAggs(dateStart, slo, burnRateWindows),
+          ...buildWindowAggs(dateEnd, slo, burnRateWindows),
           ...buildEvaluation(burnRateWindows),
         },
       },

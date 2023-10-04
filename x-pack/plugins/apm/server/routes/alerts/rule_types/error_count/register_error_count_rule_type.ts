@@ -131,7 +131,7 @@ export function registerErrorCountRuleType({
             ]
           : [];
 
-        const { dateStart } = getTimeRange(
+        const { dateStart, dateEnd } = getTimeRange(
           `${ruleParams.windowSize}${ruleParams.windowUnit}`
         );
 
@@ -236,7 +236,7 @@ export function registerErrorCountRuleType({
               spaceId,
               relativeViewInAppUrl
             );
-            const indexedStartedAt = getAlertStartedDate(alertId) ?? dateStart;
+            const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
             const alertUuid = getAlertUuid(alertId);
             const alertDetailsUrl = await getAlertUrl(
               alertUuid,
