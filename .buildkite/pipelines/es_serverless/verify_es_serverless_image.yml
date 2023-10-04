@@ -50,7 +50,7 @@ steps:
         agents:
           queue: n2-4-spot
         depends_on: build
-        timeout_in_minutes: 40
+        timeout_in_minutes: 60
         parallelism: 2
         retry:
           automatic:
@@ -74,8 +74,8 @@ steps:
         agents:
           queue: n2-4-spot
         depends_on: build
-        timeout_in_minutes: 120
-        parallelism: 2
+        timeout_in_minutes: 60
+        parallelism: 4
         retry:
           automatic:
             - exit_status: '*'

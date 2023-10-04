@@ -108,7 +108,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Discover embedded within timeline
    *
    * */
-  discoverInTimeline: false,
+  discoverInTimeline: true,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page

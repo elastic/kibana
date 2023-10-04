@@ -29,7 +29,7 @@ interface UseSendMessages {
 }
 
 export const useSendMessages = (): UseSendMessages => {
-  const { assistantLangChain } = useAssistantContext();
+  const { knowledgeBase } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessages = useCallback(
@@ -37,7 +37,7 @@ export const useSendMessages = (): UseSendMessages => {
       setIsLoading(true);
       try {
         return await fetchConnectorExecuteAction({
-          assistantLangChain,
+          assistantLangChain: knowledgeBase.assistantLangChain,
           http,
           messages,
           apiConfig,
@@ -46,7 +46,7 @@ export const useSendMessages = (): UseSendMessages => {
         setIsLoading(false);
       }
     },
-    [assistantLangChain]
+    [knowledgeBase.assistantLangChain]
   );
 
   return { isLoading, sendMessages };
