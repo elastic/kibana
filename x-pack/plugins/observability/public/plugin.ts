@@ -99,7 +99,6 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
-  compositeSlo: { enabled: boolean };
 }
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;

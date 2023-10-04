@@ -10,5 +10,5 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig({
   license: 'trial',
   name: 'X-Pack Observability API integration test',
-  testFiles: [require.resolve('./composite_slo')],
+  testFiles: [],
 });
