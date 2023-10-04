@@ -22,19 +22,31 @@ describe('getTimeRange', () => {
   });
 
   test('returns time range with no query delay', () => {
-    const { dateStart, dateEnd } = getTimeRange('5m', { delay: 0 });
+    const { dateStart, dateEnd } = getTimeRange({ delay: 0 }, '5m');
     expect(dateStart).toBe('2023-10-03T23:55:00.000Z');
     expect(dateEnd).toBe('2023-10-04T00:00:00.000Z');
   });
 
   test('returns time range with a query delay', () => {
-    const { dateStart, dateEnd } = getTimeRange('5m', { delay: 45 });
+    const { dateStart, dateEnd } = getTimeRange({ delay: 45 }, '5m');
     expect(dateStart).toBe('2023-10-03T23:54:15.000Z');
     expect(dateEnd).toBe('2023-10-03T23:59:15.000Z');
   });
 
+  test('returns time range with no query delay and no time range', () => {
+    const { dateStart, dateEnd } = getTimeRange({ delay: 0 });
+    expect(dateStart).toBe('2023-10-04T00:00:00.000Z');
+    expect(dateEnd).toBe('2023-10-04T00:00:00.000Z');
+  });
+
+  test('returns time range with a query delay and no time range', () => {
+    const { dateStart, dateEnd } = getTimeRange({ delay: 45 });
+    expect(dateStart).toBe('2023-10-03T23:59:15.000Z');
+    expect(dateEnd).toBe('2023-10-03T23:59:15.000Z');
+  });
+
   test('throws an error when the time window is invalid', () => {
-    expect(() => getTimeRange('5k', { delay: 45 })).toThrowErrorMatchingInlineSnapshot(
+    expect(() => getTimeRange({ delay: 45 }, '5k')).toThrowErrorMatchingInlineSnapshot(
       `"Invalid format for windowSize: \\"5k\\""`
     );
   });

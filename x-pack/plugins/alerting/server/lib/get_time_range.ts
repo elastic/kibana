@@ -9,21 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { parseDuration, RulesSettingsQueryDelayProperties } from '../../common';
 
 export function getTimeRange(
-  window: string,
-  queryDelaySettings: RulesSettingsQueryDelayProperties
+  queryDelaySettings: RulesSettingsQueryDelayProperties,
+  window?: string
 ) {
-  let timeWindow: number;
-  try {
-    timeWindow = parseDuration(window);
-  } catch (err) {
-    throw new Error(
-      i18n.translate('xpack.alerting.invalidWindowSizeErrorMessage', {
-        defaultMessage: 'Invalid format for windowSize: "{window}"',
-        values: {
-          window,
-        },
-      })
-    );
+  let timeWindow: number = 0;
+  if (window) {
+    try {
+      timeWindow = parseDuration(window);
+    } catch (err) {
+      throw new Error(
+        i18n.translate('xpack.alerting.invalidWindowSizeErrorMessage', {
+          defaultMessage: 'Invalid format for windowSize: "{window}"',
+          values: {
+            window,
+          },
+        })
+      );
+    }
   }
   const queryDelay = queryDelaySettings.delay * 1000;
   const date = Date.now();

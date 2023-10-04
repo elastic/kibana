@@ -128,7 +128,7 @@ const mockOptions = {
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
   getTimeRange: () => {
-    const date = new Date(Date.now()).toISOString();
+    const date = STARTED_AT_MOCK_DATE.toISOString();
     return { dateStart: date, dateEnd: date };
   },
 };

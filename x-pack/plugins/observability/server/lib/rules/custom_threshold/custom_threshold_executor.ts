@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { isEqual } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -123,10 +124,10 @@ export const createMetricThresholdExecutor = ({
       services,
       params,
       state,
-      startedAt,
       executionId,
       spaceId,
       rule: { id: ruleId },
+      getTimeRange,
     } = options;
 
     const { criteria } = params;
@@ -191,6 +192,8 @@ export const createMetricThresholdExecutor = ({
       throw new Error('The selected data view does not have a timestamp field');
     }
 
+    // Calculate initial start and end date with no time window, as each criteria has it's own time window
+    const { dateStart, dateEnd } = getTimeRange();
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -199,8 +202,8 @@ export const createMetricThresholdExecutor = ({
       compositeSize,
       alertOnGroupDisappear,
       logger,
+      { end: dateEnd, start: dateStart },
       state.lastRunTimestamp,
-      { end: startedAt.valueOf() },
       convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 
@@ -275,7 +278,6 @@ export const createMetricThresholdExecutor = ({
       }
 
       if (reason) {
-        const timestamp = startedAt.toISOString();
         const actionGroupId: MetricThresholdActionGroup =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
@@ -309,7 +311,7 @@ export const createMetricThresholdExecutor = ({
           groupByKeysObjectMapping[group]
         );
         const alertUuid = getAlertUuid(group);
-        const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
+        const indexedStartedAt = getAlertStartedDate(group) ?? dateEnd;
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
@@ -322,7 +324,7 @@ export const createMetricThresholdExecutor = ({
           ),
           group: groupByKeysObjectMapping[group],
           reason,
-          timestamp,
+          timestamp: dateEnd,
           value: alertResults.map((result, index) => {
             const evaluation = result[group];
             if (!evaluation && criteria[index].aggType === 'count') {
@@ -347,8 +349,7 @@ export const createMetricThresholdExecutor = ({
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
-      const timestamp = startedAt.toISOString();
-      const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+      const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? dateEnd;
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
@@ -362,7 +363,7 @@ export const createMetricThresholdExecutor = ({
           basePath.publicBaseUrl
         ),
         group: groupByKeysObjectForRecovered[recoveredAlertId],
-        timestamp: startedAt.toISOString(),
+        timestamp: dateEnd,
         ...additionalContext,
       });
     }
@@ -373,7 +374,7 @@ export const createMetricThresholdExecutor = ({
     );
     return {
       state: {
-        lastRunTimestamp: startedAt.valueOf(),
+        lastRunTimestamp: moment(dateEnd).valueOf(),
         missingGroups: [...nextMissingGroups],
         groupBy: params.groupBy,
         searchConfiguration: params.searchConfiguration,
