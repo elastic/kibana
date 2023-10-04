@@ -45,9 +45,9 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.existOrFail('samplePanelActionBody');
     });
 
-    // after(async () => {
-    //   await testSubjects.click('euiFlyoutCloseButton');
-    //   await testSubjects.missingOrFail('samplePanelActionFlyout');
-    // });
+    after(async () => {
+      await testSubjects.click('euiFlyoutCloseButton');
+      await testSubjects.missingOrFail('samplePanelActionFlyout');
+    });
   });
 }

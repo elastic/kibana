@@ -426,7 +426,6 @@ export class DashboardPageObject extends FtrService {
     await this.header.clickVisualize();
     await this.visualize.gotoLandingPage();
     await this.navigateToAppFromAppsMenu();
-    await this.header.waitUntilLoadingHasFinished();
     await this.gotoDashboardLandingPage();
   }
 
