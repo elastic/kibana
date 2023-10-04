@@ -75,7 +75,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('exposes plugin config settings to authenticated users', async () => {
       // This retry loop to get the injectedMetadata is to overcome flakiness
       // (see comment in getInjectedMetadata)
-      let injectedMetadata: Partial<{uiPlugins:any}> = {uiPlugins: undefined};
+      let injectedMetadata: Partial<{ uiPlugins: any }> = { uiPlugins: undefined };
       await retry.waitFor('injectedMetadata', async () => {
         await navigateTo('/render/core');
         injectedMetadata = await getInjectedMetadata();
@@ -330,7 +330,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('exposes plugin config settings to unauthenticated users', async () => {
       // This retry loop to get the injectedMetadata is to overcome flakiness
       // (see comment in getInjectedMetadata)
-      let injectedMetadata: Partial<{uiPlugins:any}> = {uiPlugins: undefined};
+      let injectedMetadata: Partial<{ uiPlugins: any }> = { uiPlugins: undefined };
       await retry.waitFor('injectedMetadata', async () => {
         await navigateTo('/render/core?isAnonymousPage=true');
         injectedMetadata = await getInjectedMetadata();
