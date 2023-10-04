@@ -13671,10 +13671,6 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
@@ -21414,10 +21410,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "transform",

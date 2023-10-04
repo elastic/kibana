@@ -30601,7 +30601,7 @@
     "xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription": "Machine Learning",
     "xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription": "新字词",
     "xpack.securitySolution.detectionEngine.createRule.pageTitle": "创建新规则",
-    "xpack.securitySolution.detectionEngine.createRule.QueryLabel": "定制查询",
+    "xpack.securitySolution.detectionEngine.createRule.queryLabel": "定制查询",
     "xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription": "查询",
     "xpack.securitySolution.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle": "请修复下面所列的问题",
     "xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription": "规则预览反映了您的规则设置和例外的当前配置，单击刷新图标可查看已更新的预览。",
