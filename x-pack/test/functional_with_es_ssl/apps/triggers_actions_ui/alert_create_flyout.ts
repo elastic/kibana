@@ -70,6 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/167443
+  // FLAKY: https://github.com/elastic/kibana/issues/167444
   describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
