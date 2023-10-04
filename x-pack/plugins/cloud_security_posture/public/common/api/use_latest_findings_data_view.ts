@@ -15,9 +15,7 @@ import { CspClientPluginStartDeps } from '../../types';
 const cloudSecurityFieldLabels: Record<string, string> = {
   'result.evaluation': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
-    {
-      defaultMessage: 'Result',
-    }
+    { defaultMessage: 'Result' }
   ),
   'resource.id': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
@@ -33,9 +31,7 @@ const cloudSecurityFieldLabels: Record<string, string> = {
   ),
   'rule.benchmark.rule_number': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
-    {
-      defaultMessage: 'Rule Number',
-    }
+    { defaultMessage: 'Rule Number' }
   ),
   'rule.name': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
