@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SvlReportingServiceProvider } from 'x-pack/test_serverless/functional/services/svl_reporting';
+import { SvlReportingServiceProvider } from '../../functional/services/svl_reporting';
 import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 
