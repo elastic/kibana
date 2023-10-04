@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import { registerConnectorTypes } from './connector_types';
-import { getWellKnownEmailServiceRoute } from './routes';
+import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }
@@ -18,13 +18,18 @@ export interface ConnectorsPluginsStart {
 }
 
 export class StackConnectorsPlugin implements Plugin<void, void> {
-  constructor(context: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
 
   public setup(core: CoreSetup<ConnectorsPluginsStart>, plugins: ConnectorsPluginsSetup) {
     const router = core.http.createRouter();
     const { actions } = plugins;
 
     getWellKnownEmailServiceRoute(router);
+    validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
 
     registerConnectorTypes({
       actions,
