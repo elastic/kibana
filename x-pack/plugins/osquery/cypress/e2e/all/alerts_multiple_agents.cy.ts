@@ -14,7 +14,7 @@ import {
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
 describe(
   'Alert Event Details - dynamic params',
@@ -48,7 +48,7 @@ describe(
       cy.contains('Get processes').should('be.visible').dblclick({ force: true });
       // Cypress can properly reads the fields when the codeEditor is interacted with first
       // This is probably due to the tokenization of the fields when it's inactive
-      cy.get(LIVE_QUERY_EDITOR).click();
+      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click();
       cy.getBySel('flyout-body-osquery').contains("SELECT * FROM os_version where name='Ubuntu';");
       cy.getBySel('flyout-body-osquery').contains('host.os.platform');
       cy.getBySel('flyout-body-osquery').contains('platform');
