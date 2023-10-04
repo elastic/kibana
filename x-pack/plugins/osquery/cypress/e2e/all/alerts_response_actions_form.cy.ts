@@ -14,10 +14,10 @@ import {
   packFixture,
 } from '../../tasks/api_fixtures';
 import {
+  OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
   RESPONSE_ACTIONS_ITEM_0,
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
-  OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
 } from '../../tasks/response_actions';
 import {
   checkActionItemsInResults,
@@ -26,6 +26,7 @@ import {
   typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib/security/types';
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;
@@ -50,7 +51,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       ruleId = data.id;
       ruleName = data.name;
     });
-    cy.login('elastic');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
   });
   afterEach(() => {
     cleanupPack(packId);

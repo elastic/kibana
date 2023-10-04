@@ -27,6 +27,7 @@ export {};
 
 // @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
 import registerCypressGrep from '@cypress/grep';
+
 registerCypressGrep();
 
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
@@ -83,6 +84,42 @@ Cypress.Commands.add('login', (role) => {
 
   return login(role);
 });
+
+const waitUntil = (subject, fn) => {
+  const timeout = 90000;
+  const interval = 5000;
+  let attempts = Math.floor(timeout / interval);
+
+  const completeOrRetry = (result) => {
+    if (result) {
+      return result;
+    }
+
+    if (attempts < 1) {
+      throw new Error(`Timed out while retrying, last result was: {${result}}`);
+    }
+
+    cy.wait(interval, { log: false }).then(() => {
+      attempts--;
+
+      return evaluate();
+    });
+  };
+
+  const evaluate = () => {
+    const result = fn(subject);
+
+    if (result && result.then) {
+      return result.then(completeOrRetry);
+    } else {
+      return completeOrRetry(result);
+    }
+  };
+
+  return evaluate();
+};
+
+Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

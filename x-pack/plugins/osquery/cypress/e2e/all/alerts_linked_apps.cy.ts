@@ -10,12 +10,13 @@ import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/re
 import {
   checkActionItemsInResults,
   clickRuleName,
-  inputQuery,
+  inputQueryInFlyout,
   loadRuleAlerts,
   submitQuery,
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib/security/types';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -42,7 +43,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.login('elastic');
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       cy.visit('/app/security/rules');
       clickRuleName(ruleName);
     });
@@ -77,7 +78,7 @@ describe(
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');
-      inputQuery('select * from uptime;');
+      inputQueryInFlyout('select * from uptime;');
       submitQuery();
       cy.contains('Results');
       cy.contains('Add to timeline investigation');

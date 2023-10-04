@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
 import { request } from './common';
 import { API_VERSIONS } from '../../common/constants';
+import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -30,6 +31,11 @@ export const clearInputQuery = () =>
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
   cy.get(LIVE_QUERY_EDITOR).type(query, options);
+
+export const inputQueryInFlyout = (
+  query: string,
+  options?: { parseSpecialCharSequences: boolean }
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -102,6 +108,9 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
+export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
+export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
+
 // hackish way to Refresh alerts list in rule, prior to this I tried setting interval - it didn't load values
 export function refreshAlerts(timeout: number) {
   const startTime = new Date().getTime();
@@ -111,8 +120,7 @@ export function refreshAlerts(timeout: number) {
     const elapsedTime = currentTime - startTime;
 
     if (elapsedTime >= timeout) {
-      // If timeout exceeded, stop trying
-      return;
+      throw new Error('Waiting for alerts to appear has timed out!');
     }
 
     cy.get('body').then(($body) => {
@@ -120,7 +128,8 @@ export function refreshAlerts(timeout: number) {
       if (alertsTable.length) {
         return;
       } else {
-        cy.getBySel('querySubmitButton').click({ force: true, multiple: true });
+        cy.get(REFRESH_BUTTON).click({ force: true });
+        cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
         cy.wait(10000);
         clickButton();
       }
@@ -132,14 +141,12 @@ export function refreshAlerts(timeout: number) {
 
 export const loadRuleAlerts = (ruleName: string, ruleId: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
-  enableRule(ruleId, 'disable');
-  cy.wait(2000);
-  enableRule(ruleId, 'enable');
-  cy.wait(2000);
   cy.visit('/app/security/rules');
   clickRuleName(ruleName);
-  refreshAlerts(120000);
-  cy.getBySel('alertsTable');
+  // refreshAlerts(120000);
+  waitForAlertsToPopulate();
+  cy.visit('/app/security/rules');
+  clickRuleName(ruleName);
 };
 
 export const addToCase = (caseId: string) => {
