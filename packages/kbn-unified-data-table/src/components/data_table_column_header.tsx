@@ -53,7 +53,11 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
   );
 };
 
-function getRenderedToken({ dataView, columnName, columnTypes }: DataTableColumnHeaderProps) {
+function getRenderedToken({
+  dataView,
+  columnName,
+  columnTypes,
+}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnTypes'>) {
   if (!columnName || columnName === '_source') {
     return null;
   }
