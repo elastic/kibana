@@ -423,7 +423,7 @@ export function ConfigureLogsContent() {
                   helpText={
                     <FormattedMessage
                       id="xpack.observability_onboarding.configureLogs.customConfig.helper"
-                      defaultMessage="Here YAML configuration options can be used to be added to your configuration. Be careful using this as it might break your configuration file. {learnMoreLink}"
+                      defaultMessage="Add YAML configuration options to your agent configuration. Be careful using this feature as it can break your configuration file. {learnMoreLink}"
                       values={{
                         learnMoreLink: (
                           <EuiLink
@@ -431,7 +431,7 @@ export function ConfigureLogsContent() {
                             external
                             target="_blank"
                             href={
-                              'https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html'
+                              'https://www.elastic.co/guide/en/beats/filebeat/current/multiline-examples.html'
                             }
                           >
                             {i18n.translate(
