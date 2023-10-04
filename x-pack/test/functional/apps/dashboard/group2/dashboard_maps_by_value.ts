@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       if (!saveToDashboard) {
-        await dashboard.navigateToAppFromAppsMenu();
+        await PageObjects.dashboard.navigateToAppFromAppsMenu();
       }
     } else {
       await PageObjects.maps.clickSaveAndReturnButton();
