@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
   Aggregators,
@@ -21,8 +22,13 @@ import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
-import { waitForAlertInIndex, waitForRuleStatus } from '../helpers/alerting_wait_for_helpers';
+import {
+  waitForAlertInIndex,
+  waitForDocumentInIndex,
+  waitForRuleStatus,
+} from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ActionDocument } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -41,6 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
+    let startedAt: string;
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
@@ -118,6 +126,9 @@ export default function ({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
                   },
                 ],
               },
@@ -148,6 +159,8 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
+        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
@@ -197,6 +210,23 @@ export default function ({ getService }: FtrProviderContext) {
             alertOnGroupDisappear: true,
             searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
+        const resp = await waitForDocumentInIndex<ActionDocument>({
+          esClient,
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          'Custom equation is 1 in the last 1 min. Alert when > 0.9.'
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('1');
       });
     });
   });
