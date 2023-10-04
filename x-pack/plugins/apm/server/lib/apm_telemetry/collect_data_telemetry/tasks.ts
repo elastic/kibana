@@ -71,6 +71,10 @@ import {
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
+import {
+  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+  SavedApmCustomDashboard,
+} from '../../../../common/custom_dashboards';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -1485,6 +1489,32 @@ export const tasks: TelemetryTask[] = [
 
       return {
         service_groups: {
+          kuery_fields: uniq(kueryFields),
+          total: response.total ?? 0,
+        },
+      };
+    },
+  },
+  {
+    name: 'custom_dashboards',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<SavedApmCustomDashboard>({
+        type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 500,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+
+      const kueryNodes = response.saved_objects.map(
+        ({ attributes: { kuery } }) => fromKueryExpression(kuery ?? '')
+      );
+
+      const kueryFields = getKueryFields(kueryNodes);
+
+      return {
+        custom_dashboards: {
           kuery_fields: uniq(kueryFields),
           total: response.total ?? 0,
         },
