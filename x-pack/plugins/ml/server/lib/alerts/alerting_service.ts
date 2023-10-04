@@ -928,7 +928,7 @@ export function alertingServiceProvider(
           spaceId
         );
 
-        const message = i18n.translate(
+        const contextMessage = i18n.translate(
           'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
           {
             defaultMessage:
@@ -940,18 +940,26 @@ export function alertingServiceProvider(
           }
         );
 
+        const payloadMessage = i18n.translate(
+          'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredReason',
+          {
+            defaultMessage:
+              'No anomalies have been found in the concecutive bucket after the alert was triggered.',
+          }
+        );
+
         return {
           name: '',
           isHealthy: true,
           payload: {
             [ALERT_URL]: url,
-            [ALERT_REASON]: message,
+            [ALERT_REASON]: payloadMessage,
             job_id: queryParams.jobIds[0],
           },
           context: {
             anomalyExplorerUrl: url,
             jobIds: queryParams.jobIds,
-            message,
+            message: contextMessage,
           } as AnomalyDetectionAlertContext,
         };
       }
