@@ -384,7 +384,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               query={logStreamQuery}
             />
           </EuiPanel>
-          )
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SelectLogLevel agent={agent} />
