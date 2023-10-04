@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -19,8 +19,8 @@ import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../components/risk_score/severity/common';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
 
 export const getHostRiskScoreColumns = ({
@@ -76,21 +76,14 @@ export const getHostRiskScoreColumns = ({
   },
   {
     field: RiskScoreFields.hostRisk,
-    name: (
-      <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
-        <>
-          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
-          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-        </>
-      </EuiToolTip>
-    ),
+    name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
     render: (risk) => {
       if (risk != null) {
         return (
-          <RiskScore
+          <RiskScoreLevel
             toolTipContent={
               <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
                 <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>

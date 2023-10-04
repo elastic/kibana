@@ -30,7 +30,7 @@ import { useAssistantContext } from '../../assistant_context';
 import { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
 import { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quick_prompt_settings';
 import { SystemPromptSettings } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_settings';
-import { AdvancedSettings } from './advanced_settings/advanced_settings';
+import { KnowledgeBaseSettings } from '../../knowledge_base/knowledge_base_settings/knowledge_base_settings';
 import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 import { TEST_IDS } from '../constants';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
@@ -45,7 +45,7 @@ export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
 export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const ADVANCED_TAB = 'ADVANCED_TAB' as const;
+export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
 export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
 export type SettingsTabs =
@@ -53,7 +53,7 @@ export type SettingsTabs =
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
-  | typeof ADVANCED_TAB
+  | typeof KNOWLEDGE_BASE_TAB
   | typeof EVALUATION_TAB;
 interface Props {
   defaultConnectorId?: string;
@@ -68,7 +68,7 @@ interface Props {
 
 /**
  * Modal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,
- * anonymization, functions (coming soon!), and advanced settings.
+ * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({
@@ -79,17 +79,19 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const { assistantLangChain, http, selectedSettingsTab, setSelectedSettingsTab } =
+    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
       useAssistantContext();
     const {
       conversationSettings,
       defaultAllow,
       defaultAllowReplacement,
+      knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
       setUpdatedConversationSettings,
       setUpdatedDefaultAllow,
       setUpdatedDefaultAllowReplacement,
+      setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
@@ -236,17 +238,15 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
-              {assistantLangChain && (
-                <EuiKeyPadMenuItem
-                  id={ADVANCED_TAB}
-                  label={i18n.ADVANCED_MENU_ITEM}
-                  isSelected={selectedSettingsTab === ADVANCED_TAB}
-                  onClick={() => setSelectedSettingsTab(ADVANCED_TAB)}
-                >
-                  <EuiIcon type="advancedSettingsApp" size="l" />
-                </EuiKeyPadMenuItem>
-              )}
-              {assistantLangChain && (
+              <EuiKeyPadMenuItem
+                id={KNOWLEDGE_BASE_TAB}
+                label={i18n.KNOWLEDGE_BASE_MENU_ITEM}
+                isSelected={selectedSettingsTab === KNOWLEDGE_BASE_TAB}
+                onClick={() => setSelectedSettingsTab(KNOWLEDGE_BASE_TAB)}
+              >
+                <EuiIcon type="notebookApp" size="l" />
+              </EuiKeyPadMenuItem>
+              {modelEvaluatorEnabled && (
                 <EuiKeyPadMenuItem
                   id={EVALUATION_TAB}
                   label={i18n.EVALUATION_MENU_ITEM}
@@ -307,7 +307,12 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
                   />
                 )}
-                {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}
+                {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
+                  <KnowledgeBaseSettings
+                    knowledgeBase={knowledgeBase}
+                    setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+                  />
+                )}
                 {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner
