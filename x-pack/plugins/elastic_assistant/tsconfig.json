@@ -31,6 +31,7 @@
     "@kbn/logging",
     "@kbn/std",
     "@kbn/stack-connectors-plugin",
+    "@kbn/ml-plugin",
   ],
   "exclude": [
     "target/**/*",
