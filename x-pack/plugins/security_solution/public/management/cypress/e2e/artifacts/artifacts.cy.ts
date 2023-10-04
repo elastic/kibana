@@ -12,7 +12,7 @@ import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constan
 import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
-import { removeAllArtifacts } from '../../tasks/artifacts';
+import { removeAllArtifacts, removeAllArtifactsPromise } from '../../tasks/artifacts';
 import { login } from '../../tasks/login';
 import { request, loadPage } from '../../tasks/common';
 import {
@@ -55,30 +55,26 @@ describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'
         });
       })
     );
-
-    login();
-    removeAllArtifacts();
-
-    // wait for ManifestManager to pick up artifact changes that happened either here
-    // or in a previous test suite `after`
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(6000); //  packagerTaskInterval + 1s
-
-    yieldEndpointPolicyRevision().then((actualEndpointPolicyRevision) => {
-      const hasReachedActualRevision = (revision: number) =>
-        revision === actualEndpointPolicyRevision;
-      // need to wait until revision is bumped to ensure test success
-      recurse(yieldAppliedEndpointRevision, hasReachedActualRevision, { delay: 1500 });
-    });
   });
 
   beforeEach(() => {
-    login();
+    // We need to wait until revision is bumped to ensure test success.
+    // Fetch current revision, count how many artifacts are deleted, and wait until revision is bumped by that amount.
+    yieldEndpointPolicyRevision().then((actualEndpointPolicyRevision) => {
+      login();
+      removeAllArtifactsPromise().then((removedArtifactCount) => {
+        const hasReachedActualRevision = (revision: number) =>
+          revision === actualEndpointPolicyRevision + removedArtifactCount;
+        recurse(yieldAppliedEndpointRevision, hasReachedActualRevision, {
+          delay: 2000,
+          timeout: 90000,
+        });
+      });
+    });
   });
 
   after(() => {
     removeAllArtifacts();
-
     if (createdHost) {
       cy.task('destroyEndpointHost', createdHost);
     }
