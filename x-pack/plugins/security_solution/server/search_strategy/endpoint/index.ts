@@ -8,7 +8,6 @@
 import { map, mergeMap } from 'rxjs/operators';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { from } from 'rxjs';
 import type {
   EndpointStrategyParseResponseType,
@@ -37,9 +36,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
   data: PluginStart,
   endpointContext: EndpointAppContext
 ): ISearchStrategy<EndpointStrategyRequestType<T>, EndpointStrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy(
-    ENHANCED_ES_SEARCH_STRATEGY
-  ) as unknown as ISearchStrategy<
+  const es = data.search.searchAsInternalUser as unknown as ISearchStrategy<
     EndpointStrategyRequestType<T>,
     EndpointStrategyParseResponseType<T>
   >;
@@ -51,8 +48,18 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       return from(endpointContext.service.getEndpointAuthz(deps.request)).pipe(
         mergeMap((authz) => {
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
-          const dsl = queryFactory.buildDsl(request, { authz });
-          return es.search({ ...request, params: dsl }, options, deps).pipe(
+          const strictRequest = {
+            factoryQueryType: request.factoryQueryType,
+            sort: request.sort,
+            ...('alertIds' in request ? { alertIds: request.alertIds } : {}),
+            ...('agentId' in request ? { agentId: request.agentId } : {}),
+            ...('expiration' in request ? { expiration: request.expiration } : {}),
+            ...('actionId' in request ? { actionId: request.actionId } : {}),
+            ...('agents' in request ? { agents: request.agents } : {}),
+          };
+          const dsl = queryFactory.buildDsl(strictRequest, { authz });
+
+          return es.search({ ...strictRequest, params: dsl }, options, deps).pipe(
             map((response) => {
               return {
                 ...response,
