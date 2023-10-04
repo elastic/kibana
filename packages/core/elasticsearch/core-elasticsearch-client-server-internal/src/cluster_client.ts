@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { Headers, IAuthHeadersStorage } from '@kbn/core-http-server';
 import {
   ensureRawRequest,
-  filterHeaders,
+  pickHeaders,
   isKibanaRequest,
   isRealRequest,
 } from '@kbn/core-http-router-server-internal';
@@ -132,12 +132,12 @@ export class ClusterClient implements ICustomClusterClient {
       const authHeaders = this.authHeaders ? this.authHeaders.get(request) : {};
 
       scopedHeaders = {
-        ...filterHeaders(requestHeaders, this.config.requestHeadersWhitelist),
+        ...pickHeaders(requestHeaders, this.config.requestHeadersWhitelist),
         ...requestIdHeaders,
         ...authHeaders,
       };
     } else {
-      scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+      scopedHeaders = pickHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
 
     return {

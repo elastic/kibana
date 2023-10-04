@@ -36,6 +36,7 @@ import {
 import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
+import { redactSensitiveHeaders } from './headers';
 
 const requestSymbol = Symbol('request');
 
@@ -161,7 +162,12 @@ export class CoreKibanaRequest<
     this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealRawRequest(request) ? deepFreeze({ ...request.headers }) : request.headers;
+    const maybeFilteredHeaders = withoutSecretHeaders
+      ? redactSensitiveHeaders(request.headers)
+      : request.headers;
+    this.headers = (
+      isRealRawRequest(request) ? deepFreeze({ ...maybeFilteredHeaders }) : maybeFilteredHeaders
+    ) as Headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = isFakeRawRequest(request);
     this.isInternalApiRequest =

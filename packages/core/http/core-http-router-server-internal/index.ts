@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { filterHeaders } from './src/headers';
+export { pickHeaders } from './src/headers';
 export { Router, type RouterOptions } from './src/router';
 export type { HandlerResolutionStrategy } from './src/versioned_router';
 export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';

@@ -78,16 +78,6 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe('get all headers', () => {
-      it('returns all headers', () => {
-        const request = hapiMocks.createRequest({
-          headers: { custom: 'one', authorization: 'token' },
-        });
-        const kibanaRequest = CoreKibanaRequest.from(request);
-        expect(kibanaRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
-      });
-    });
-
     describe('headers property', () => {
       it('provides a frozen copy of request headers', () => {
         const rawRequestHeaders = { custom: 'one' };
@@ -101,12 +91,13 @@ describe('CoreKibanaRequest', () => {
         expect(Object.isFrozen(kibanaRequest.headers)).toBe(true);
       });
 
-      it.skip("doesn't expose authorization header by default", () => {
+      it("doesn't expose authorization header by default", () => {
         const request = hapiMocks.createRequest({
           headers: { custom: 'one', authorization: 'token' },
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.headers).toEqual({
+          authorization: '[REDACTED]',
           custom: 'one',
         });
       });

@@ -119,7 +119,7 @@ export interface KibanaRequest<
   /**
    * Readonly copy of incoming request headers.
    * @remarks
-   * This property will contain a `filtered` copy of request headers.
+   * This property will contain a `redacted` copy of request headers.
    */
   readonly headers: Headers;
 
