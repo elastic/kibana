@@ -16,23 +16,17 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { login, loginWithUser } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { ALERTS_TABLE_ROW_LOADER } from '../../screens/alerts';
 import { waitForAssigneesToPopulate } from '../../tasks/alert_assignees';
-import { createUsersAndRoles, secAll, secAllUser } from '../../tasks/privileges';
-
-const usersToCreate = [secAllUser];
-const rolesToCreate = [secAll];
 
 describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');
-    createUsersAndRoles(usersToCreate, rolesToCreate);
-    loginWithUser(secAllUser);
   });
 
   beforeEach(() => {
@@ -49,7 +43,7 @@ describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Add and remove an assignee using the alert bulk action menu', () => {
-    const userName = secAllUser.username;
+    const userName = Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME');
     // Add an assignee to one alert
     selectNumberOfAlerts(1);
     openAlertAssigningBulkActionMenu();
