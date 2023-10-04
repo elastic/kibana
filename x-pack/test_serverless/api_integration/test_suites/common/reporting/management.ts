@@ -13,8 +13,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 // the archived data holds a report created by test_user
 const TEST_USERNAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
-const REPORTING_USER_USERNAME = 'elastic_serverless'
-const REPORTING_USER_PASSWORD = 'changeme'
+const REPORTING_USER_USERNAME = 'elastic_serverless';
+const REPORTING_USER_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
