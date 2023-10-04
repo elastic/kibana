@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { StringsShouldBeTranslated } from './rules/strings_should_be_translated';
+import { StringsShouldBeTranslatedWithI18n } from './rules/strings_should_be_translated_with_i18n';
+import { StringsShouldBeTranslatedWithFormattedMessage } from './rules/strings_should_be_translated_with_formatted_message';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-telemetry'` to your eslint config to use them
  * @internal
  */
 export const rules = {
-  strings_should_be_translated: StringsShouldBeTranslated,
+  strings_should_be_translated_with_i18n: StringsShouldBeTranslatedWithI18n,
+  strings_should_be_translated_with_formatted_message:
+    StringsShouldBeTranslatedWithFormattedMessage,
 };

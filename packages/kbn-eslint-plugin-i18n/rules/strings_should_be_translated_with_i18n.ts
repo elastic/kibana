@@ -15,7 +15,7 @@ import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { nonNullable } from '../helpers/non_nullable';
 
-export const StringsShouldBeTranslated: Rule.RuleModule = {
+export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
@@ -43,14 +43,20 @@ export const StringsShouldBeTranslated: Rule.RuleModule = {
         const suggestion = `${appName}.${functionName}.${intent}`; // 'xpack.observability.overview.logsPageLoadMoreButton'
 
         // Check if i18n has already been imported into the file.
-        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine } = getI18nImportFixer({
+        const {
+          hasI18nImportLine,
+          i18nPackageImportLine: i18nImportLine,
+          rangeToAddI18nImportLine,
+        } = getI18nImportFixer({
           sourceCode,
+          mode: 'i18n.translate',
         });
 
         // Show warning to developer and offer autofix suggestion
         report({
           node: node as any,
-          message: `Strings should be translated. Use the autofix suggestion or add your own.`,
+          message:
+            'Strings should be translated with i18n. Use the autofix suggestion or add your own.',
           fix(fixer) {
             return [
               fixer.replaceText(

@@ -30,7 +30,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXText): string {
     const parentTagName = String(parent.openingElement.name.name);
 
     if (parentTagName.includes('Eui')) {
-      return `${value}${parentTagName.replace('Eui', '')}`;
+      return `${value}${parentTagName.replace('Eui', '')}Label`;
     }
 
     return `${lowerCaseFirstLetter(parentTagName)}.${value}Label`;

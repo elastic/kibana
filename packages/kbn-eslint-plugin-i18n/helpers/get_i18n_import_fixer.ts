@@ -8,10 +8,17 @@
 
 import { SourceCode } from 'eslint';
 
-const KIBANA_I18N_IMPORT = "import { i18n } from '@kbn/i18n';" as const;
-
-export function getI18nImportFixer({ sourceCode }: { sourceCode: SourceCode }) {
-  const hasI18nImportLine = Boolean(sourceCode.lines.find((l) => l === KIBANA_I18N_IMPORT));
+const KBN_I18N_I18N_IMPORT = "import { i18n } from '@kbn/i18n';" as const;
+const KBN_I18N_REACT_FORMATTED_MESSAGE_IMPORT =
+  "import { FormattedMessage } from '@kbn/i18n-react';" as const;
+export function getI18nImportFixer({
+  sourceCode,
+  mode,
+}: {
+  sourceCode: SourceCode;
+  mode: 'i18n.translate' | 'FormattedMessage';
+}) {
+  const hasI18nImportLine = Boolean(sourceCode.lines.find((l) => l === KBN_I18N_I18N_IMPORT));
   const reactImportLineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'"));
 
   const targetLine = sourceCode.lines[reactImportLineIndex];
@@ -25,7 +32,8 @@ export function getI18nImportFixer({ sourceCode }: { sourceCode: SourceCode }) {
 
   return {
     hasI18nImportLine,
-    i18nImportLine: KIBANA_I18N_IMPORT,
+    i18nPackageImportLine:
+      mode === 'i18n.translate' ? KBN_I18N_I18N_IMPORT : KBN_I18N_REACT_FORMATTED_MESSAGE_IMPORT,
     rangeToAddI18nImportLine: [start, end] as [number, number],
   };
 }
