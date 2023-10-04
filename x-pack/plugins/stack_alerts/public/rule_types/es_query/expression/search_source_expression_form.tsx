@@ -112,6 +112,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+      sourceFields: ruleParams.sourceFields ?? DEFAULT_VALUES.SOURCE_FIELDS,
     }
   );
 
@@ -223,6 +224,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeExcludeHitsFromPreviousRun = useCallback(
     (exclude: boolean) => dispatch({ type: 'excludeHitsFromPreviousRun', payload: exclude }),
+    []
+  );
+
+  const onChangeSourceFields = useCallback(
+    (selectedSourceFields: string[]) =>
+      dispatch({ type: 'sourceFields', payload: selectedSourceFields }),
     []
   );
 
@@ -372,6 +379,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        onChangeSourceFields={onChangeSourceFields}
+        sourceFields={ruleConfiguration.sourceFields}
       />
       <EuiSpacer />
     </Fragment>

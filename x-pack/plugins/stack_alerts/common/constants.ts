@@ -6,3 +6,4 @@
  */
 
 export const MAX_SELECTABLE_GROUP_BY_TERMS = 4;
+export const MAX_SELECTABLE_SOURCE_FIELDS = 5;

@@ -23,6 +23,7 @@ export const DEFAULT_VALUES = {
   GROUP_BY: 'all',
   EXCLUDE_PREVIOUS_HITS: true,
   CAN_SELECT_MULTI_TERMS: true,
+  SOURCE_FIELDS: [],
 };
 
 export const COMMON_EXPRESSION_ERRORS = {
@@ -36,6 +37,7 @@ export const COMMON_EXPRESSION_ERRORS = {
   groupBy: new Array<string>(),
   termSize: new Array<string>(),
   termField: new Array<string>(),
+  sourceFields: new Array<string>(),
 };
 
 export const SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = {

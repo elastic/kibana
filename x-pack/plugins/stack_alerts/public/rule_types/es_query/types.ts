@@ -29,6 +29,7 @@ export interface CommonRuleParams {
   termSize?: number;
   termField?: string | string[];
   excludeHitsFromPreviousRun: boolean;
+  sourceFields?: string[];
 }
 
 export interface CommonEsQueryRuleParams extends RuleTypeParams, CommonRuleParams {}
