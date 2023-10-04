@@ -162,7 +162,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
       });
 
-      it('filters by risk classification', () => {
+      it('filters by risk level', () => {
         openRiskTableFilterAndSelectTheLowOption();
 
         cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
@@ -250,7 +250,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         cy.get(USERS_TABLE_ALERT_CELL).should('have.length', 5);
       });
 
-      it('filters by risk classification', () => {
+      it('filters by risk level', () => {
         openRiskTableFilterAndSelectTheLowOption();
 
         cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
@@ -382,7 +382,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
       });
 
-      it('filters by risk classification', () => {
+      it('filters by risk level', () => {
         cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
         openRiskTableFilterAndSelectTheCriticalOption();
 
@@ -474,7 +474,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         cy.get(USERS_TABLE_ALERT_CELL).should('have.length', 5);
       });
 
-      it('filters by risk classification', () => {
+      it('filters by risk level', () => {
         cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
 
         openUserRiskTableFilterAndSelectTheLowOption(1);

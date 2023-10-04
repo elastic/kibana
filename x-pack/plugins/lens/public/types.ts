@@ -285,7 +285,7 @@ export interface UserMessage {
   uniqueId?: string;
   severity: 'error' | 'warning' | 'info';
   shortMessage: string;
-  longMessage: React.ReactNode | string;
+  longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }
@@ -780,6 +780,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   addLayer: (layerType: LayerType) => void;
   removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
+  isInlineEditing?: boolean;
 };
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
