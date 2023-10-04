@@ -113,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await queryBar.clickQuerySubmitButton();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
 
