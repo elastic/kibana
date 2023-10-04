@@ -37,6 +37,7 @@ import {
   SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
@@ -47,7 +48,7 @@ import {
   SwimlaneType,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { useMlKibana } from '../contexts/kibana';
+import { useFieldFormatter, useMlKibana } from '../contexts/kibana';
 import { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
@@ -55,12 +56,14 @@ import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from '
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
-import { MlTooltipComponent } from '../components/chart_tooltip';
+import { MlTooltipComponent, TooltipData } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
+import { AnnotationTimeline } from './annotation_timeline';
+import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -82,6 +85,14 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
   };
 }
 
+const durationLabel = i18n.translate('xpack.ml.explorer.alerts.alertsDuration', {
+  defaultMessage: 'Duration',
+});
+
+const anomalyTimeLabel = i18n.translate('xpack.ml.explorer.alerts.alertAnomalyTime', {
+  defaultMessage: 'Anomaly time',
+});
+
 export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
   ({ explorerState }) => {
     const {
@@ -93,12 +104,17 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       },
     } = useMlKibana();
 
+    const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
+
     const globalTimeRange = useTimeRangeUpdates(true);
 
     const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
-    const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
-      useAnomalyExplorerContext();
+    const {
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService,
+      anomalyDetectionAlertsStateService,
+    } = useAnomalyExplorerContext();
 
     const setSelectedCells = anomalyTimelineStateService.setSelectedCells.bind(
       anomalyTimelineStateService
@@ -157,6 +173,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const { viewByPerPage, viewByFromPage } = useObservable(
       anomalyTimelineStateService.getSwimLanePagination$(),
       anomalyTimelineStateService.getSwimLanePagination()
+    );
+
+    const alertsData = useObservable(
+      anomalyDetectionAlertsStateService.anomalyDetectionAlerts$,
+      []
     );
 
     const [severityUpdate, setSeverityUpdate] = useState(
@@ -506,6 +527,107 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
+
+          {annotationXDomain && Array.isArray(annotations) && annotations.length > 0 ? (
+            <>
+              <MlTooltipComponent>
+                {(tooltipService) => (
+                  <AnnotationTimeline<AnomalyDetectionAlert>
+                    key={'sdfsdfs'}
+                    label={i18n.translate('xpack.ml.explorer.swimLaneAlertsLabel', {
+                      defaultMessage: 'Alerts',
+                    })}
+                    chartWidth={swimlaneContainerWidth!}
+                    domain={annotationXDomain}
+                    data={alertsData}
+                    tooltipService={tooltipService}
+                    getTooltipContent={(item, hasMergedAnnotations) => {
+                      const tooltipData: TooltipData = [];
+
+                      let timespan = dateFormatter(item.timestamp);
+
+                      if (typeof item.end_timestamp !== 'undefined') {
+                        timespan += ` - ${dateFormatter(item.end_timestamp)}`;
+                      }
+
+                      if (hasMergedAnnotations) {
+                        tooltipData.push(
+                          {
+                            label: item.ruleName,
+                            value: `[${item.anomalyScore}]`,
+                            formattedValue: `[${item.anomalyScore}]`,
+                            seriesIdentifier: {
+                              key: `${item.id}_name`,
+                              specId: item.id,
+                            },
+                            isHighlighted: true,
+                            isVisible: true,
+                            color: item.color,
+                          },
+                          {
+                            label: anomalyTimeLabel,
+                            value: dateFormatter(item.anomalyTimestamp),
+                            formattedValue: dateFormatter(item.anomalyTimestamp),
+                            seriesIdentifier: {
+                              key: `${item.id}_time`,
+                              specId: item.id,
+                            },
+                            isHighlighted: true,
+                            isVisible: true,
+                            color: 'transparent',
+                          },
+                          {
+                            label: durationLabel,
+                            value: timespan,
+                            formattedValue: timespan,
+                            seriesIdentifier: {
+                              key: `${item.id}_duration`,
+                              specId: item.id,
+                            },
+                            isHighlighted: true,
+                            isVisible: true,
+                            color: 'transparent',
+                          }
+                        );
+                      } else {
+                        tooltipData.push(
+                          {
+                            label: item.ruleName,
+                            value: `${item.anomalyScore}`,
+                            formattedValue: `${item.anomalyScore}`,
+                            seriesIdentifier: {
+                              key: item.id,
+                              specId: item.id,
+                            },
+                            isHighlighted: true,
+                            isVisible: true,
+                            color: 'transparent',
+                          },
+                          {
+                            label: `Time`,
+                            skipHeader: true,
+                            value: `${timespan}`,
+                            formattedValue: `${timespan}`,
+                            seriesIdentifier: {
+                              key: item.id,
+                              specId: item.id,
+                            },
+                            valueAccessor: 'time',
+                            isHighlighted: true,
+                            isVisible: true,
+                            color: 'transparent',
+                          }
+                        );
+                      }
+                      return tooltipData;
+                    }}
+                  />
+                )}
+              </MlTooltipComponent>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+
           {annotationXDomain && Array.isArray(annotations) && annotations.length > 0 ? (
             <>
               <MlTooltipComponent>
