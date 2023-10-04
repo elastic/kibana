@@ -2,7 +2,7 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "mocha","jest"],
+    "types": ["node", "jest"],
   },
   "include": [
     "**/*",
