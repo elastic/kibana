@@ -22,7 +22,7 @@ import {
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
   ADDITIONAL_LOOK_BACK_DETAILS,
-  CUSTOM_QUERY_DETAILS,
+  EQL_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   removeExternalLinkText,
@@ -115,7 +115,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
+        getDetails(EQL_QUERY_DETAILS).should('have.text', rule.query);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
