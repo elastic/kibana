@@ -140,7 +140,7 @@ const navigationTree: NavigationTreeDefinition = {
               },
             },
             {
-              link: 'metrics:metrics-hosts',
+              link: 'metrics:hosts',
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
               },

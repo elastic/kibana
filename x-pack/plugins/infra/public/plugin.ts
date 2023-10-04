@@ -232,7 +232,7 @@ export class Plugin implements InfraClientPluginClass {
         navLinkStatus: AppNavLinkStatus.visible,
       },
       {
-        id: 'metrics-hosts',
+        id: 'hosts',
         title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
           defaultMessage: 'Hosts',
         }),
