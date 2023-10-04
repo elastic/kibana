@@ -8,7 +8,7 @@
 import lodash from 'lodash';
 import type { Moment } from 'moment';
 
-export { template } from './template';
+export { indexTemplate } from './index_template_def';
 
 const createGroupIndex = (index: number) => Math.floor(index / 1000) * 1000;
 
@@ -51,10 +51,10 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
             },
           },
           user: {
-            pct: randomBetween(1, 4),
+            pct: 2.5,
           },
           system: {
-            pct: randomBetween(1, 4),
+            pct: 3,
           },
         },
       },
