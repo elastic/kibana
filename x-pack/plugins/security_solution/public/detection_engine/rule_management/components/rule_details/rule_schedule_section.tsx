@@ -28,10 +28,14 @@ const From = ({ from, interval }: FromProps) => (
 );
 
 export interface RuleScheduleSectionProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
 }
 
 export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
+  if (!rule.interval || !rule.from) {
+    return null;
+  }
+
   const ruleSectionListItems = [];
 
   ruleSectionListItems.push(
@@ -46,7 +50,7 @@ export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
   );
 
   return (
-    <div>
+    <div data-test-subj="listItemColumnStepRuleDescription">
       <EuiDescriptionList
         type="column"
         listItems={ruleSectionListItems}

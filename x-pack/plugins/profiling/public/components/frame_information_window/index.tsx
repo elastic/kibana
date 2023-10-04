@@ -14,6 +14,7 @@ import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
 import { KeyValueList } from './key_value_list';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 export interface Frame {
   fileID: string;
@@ -39,9 +40,10 @@ export function FrameInformationWindow({
   frame,
   totalSamples,
   totalSeconds,
-  showAIAssistant = true,
   showSymbolsStatus = true,
 }: Props) {
+  const calculateImpactEstimates = useCalculateImpactEstimate();
+
   if (!frame) {
     return (
       <FrameInformationPanel>
@@ -87,6 +89,7 @@ export function FrameInformationWindow({
     countExclusive,
     totalSamples,
     totalSeconds,
+    calculateImpactEstimates,
   });
 
   return (
@@ -95,11 +98,9 @@ export function FrameInformationWindow({
         <EuiFlexItem>
           <KeyValueList data-test-subj="informationRows" rows={informationRows} />
         </EuiFlexItem>
-        {showAIAssistant ? (
-          <EuiFlexItem>
-            <FrameInformationAIAssistant frame={frame} />
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem>
+          <FrameInformationAIAssistant frame={frame} />
+        </EuiFlexItem>
         {showSymbolsStatus && symbolStatus !== FrameSymbolStatus.SYMBOLIZED ? (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />

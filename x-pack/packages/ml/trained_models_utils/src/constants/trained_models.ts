@@ -46,8 +46,12 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
 
+export const ELSER_ID_V1 = '.elser_model_1' as const;
+
 export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
   '.elser_model_1': {
+    modelName: 'elser',
+    hidden: true,
     version: 1,
     config: {
       input: {
@@ -58,7 +62,8 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
   },
-  '.elser_model_2_SNAPSHOT': {
+  '.elser_model_2': {
+    modelName: 'elser',
     version: 2,
     default: true,
     config: {
@@ -70,7 +75,8 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
     }),
   },
-  '.elser_model_2_linux-x86_64_SNAPSHOT': {
+  '.elser_model_2_linux-x86_64': {
+    modelName: 'elser',
     version: 2,
     os: 'Linux',
     arch: 'amd64',
@@ -87,6 +93,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
 } as const);
 
 export interface ModelDefinition {
+  modelName: string;
   version: number;
   config: object;
   description: string;
@@ -94,9 +101,10 @@ export interface ModelDefinition {
   arch?: string;
   default?: boolean;
   recommended?: boolean;
+  hidden?: boolean;
 }
 
-export type ModelDefinitionResponse = ModelDefinition & {
+export type ModelDefinitionResponse = Omit<ModelDefinition, 'modelName'> & {
   name: string;
 };
 
@@ -106,6 +114,7 @@ export const MODEL_STATE = {
   ...DEPLOYMENT_STATE,
   DOWNLOADING: 'downloading',
   DOWNLOADED: 'downloaded',
+  NOT_DOWNLOADED: 'notDownloaded',
 } as const;
 
 export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;
