@@ -90,10 +90,16 @@ export async function findDashboardById(
       id,
     })
     .then((result) => {
+      // try {
       dashboardContentManagementCache.addDashboard(result);
       return { id, status: 'success', attributes: result.item.attributes };
+
+      // return { status: 'error', error: { message: 'this is a test' } };
+      // } catch (e) {
+      // swallow - if there was an error adding it to the cache, that's fine.
+      // }
     })
-    .catch((e) => ({ status: 'error', error: e.body, id }));
+    .catch((e) => ({ status: 'error', error: e.body || e.message, id }));
 
   return response as FindDashboardsByIdResponse;
 }

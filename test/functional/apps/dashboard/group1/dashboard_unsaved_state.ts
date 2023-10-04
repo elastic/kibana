@@ -153,6 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('... after nav back to dashboard ...');
         await PageObjects.dashboard.getSessionStorage();
 
+        await testSubjects.missingOrFail('here123');
+
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);

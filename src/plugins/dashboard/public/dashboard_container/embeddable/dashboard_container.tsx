@@ -411,13 +411,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.searchSessionId = searchSessionId;
 
+    this.updateInput(newInput);
     batch(() => {
       this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
       this.dispatch.setManaged(loadDashboardReturn?.managed);
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
     });
-    this.updateInput(newInput);
     dashboardContainerReady$.next(this);
   };
 

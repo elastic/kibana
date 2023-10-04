@@ -29,6 +29,7 @@ export class CommonPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly screenshots = this.ctx.getService('screenshots');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -302,7 +303,12 @@ export class CommonPageObject extends FtrService {
         this.log.debug('... after refresh ...');
         const test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
         if (test) {
-          this.log.debug('--> Found session storage:', JSON.parse(test));
+          const sessionStorage = JSON.parse(test);
+          this.log.debug('--> Found session storage:', sessionStorage);
+          if (sessionStorage.default === {}) {
+            await this.screenshots.takeForFailure('this-is-an-error');
+            throw new Error('SESSION STORAGE WAS CLEARED!!!');
+          }
         }
 
         let currentUrl = shouldLoginIfPrompted

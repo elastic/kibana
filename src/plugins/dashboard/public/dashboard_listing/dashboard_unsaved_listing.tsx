@@ -121,6 +121,7 @@ export const DashboardUnsavedListing = ({
   } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
+  const [test, setTest] = useState<string | undefined>();
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -156,6 +157,7 @@ export const DashboardUnsavedListing = ({
       const newItems = results.reduce((map, result) => {
         if (result.status === 'error') {
           hasError = true;
+          setTest(result.error.message);
           dashboardBackup.clearState(result.id);
           return map;
         }
@@ -175,8 +177,11 @@ export const DashboardUnsavedListing = ({
     };
   }, [refreshUnsavedDashboards, dashboardBackup, unsavedDashboardIds, findDashboards]);
 
-  return unsavedDashboardIds.length === 0 ? null : (
+  return unsavedDashboardIds.length === 0 ? (
+    test && <h1 data-test-subj="here123">{test}</h1>
+  ) : (
     <>
+      {test && <h1 data-test-subj="here123">{test}</h1>}
       <EuiCallOut
         heading="h3"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
