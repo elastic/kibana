@@ -298,7 +298,8 @@ export function LensEditConfigurationFlyout({
               frame={framePublicAPI}
               core={coreStart}
               nowProvider={startDependencies.data.nowProvider}
-              // showOnlyIcons
+              showOnlyIcons
+              wrapSuggestions
               customSwitchSuggestionAction={(suggestion) => {
                 const attrs = getLensAttributes({
                   filters: [],

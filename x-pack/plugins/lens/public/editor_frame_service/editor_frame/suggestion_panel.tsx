@@ -10,6 +10,7 @@ import './suggestion_panel.scss';
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
@@ -107,6 +108,7 @@ export interface SuggestionPanelProps {
   nowProvider: DataPublicPluginStart['nowProvider'];
   core: CoreStart;
   showOnlyIcons?: boolean;
+  wrapSuggestions?: boolean;
 }
 
 const PreviewRenderer = ({
@@ -169,6 +171,7 @@ const SuggestionPreview = ({
   onSelect,
   showTitleAsLabel,
   onRender,
+  wrapSuggestions,
 }: {
   onSelect: () => void;
   preview: {
@@ -181,15 +184,31 @@ const SuggestionPreview = ({
   selected: boolean;
   showTitleAsLabel?: boolean;
   onRender: () => void;
+  wrapSuggestions?: boolean;
 }) => {
   return (
-    <EuiToolTip content={preview.title}>
+    <EuiToolTip
+      content={preview.title}
+      anchorProps={
+        wrapSuggestions
+          ? {
+              css: css`
+                display: flex;
+                flex-direction: column;
+                flex-basis: calc(50% - 8px);
+                margin-right: 8px;
+              `,
+            }
+          : undefined
+      }
+    >
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             'lnsSuggestionPanel__button-isSelected': selected,
+            'lnsSuggestionPanel__button-fixedWidth': !wrapSuggestions,
           })}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
@@ -236,6 +255,7 @@ export function SuggestionPanel({
   nowProvider,
   core,
   showOnlyIcons,
+  wrapSuggestions,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -459,6 +479,7 @@ export function SuggestionPanel({
             selected={lastSelectedSuggestion === -1}
             showTitleAsLabel
             onRender={() => onSuggestionRender(0)}
+            wrapSuggestions={wrapSuggestions}
           />
         )}
         {!hideSuggestions &&
@@ -487,6 +508,7 @@ export function SuggestionPanel({
                 selected={index === lastSelectedSuggestion}
                 onRender={() => onSuggestionRender(index + 1)}
                 showTitleAsLabel={showOnlyIcons}
+                wrapSuggestions={wrapSuggestions}
               />
             );
           })}
@@ -540,6 +562,9 @@ export function SuggestionPanel({
           data-test-subj="lnsSuggestionsPanel"
           role="list"
           tabIndex={0}
+          css={css`
+            flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
+          `}
         >
           {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
         </div>
