@@ -506,7 +506,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       const nextValue = array[index + 1];
       // by default the last range is right-open
       let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
-      const startValue = isPenultimate && hasSingleValue ? min : start;
+      const startValue =
+        isPenultimate && hasSingleValue && paletteParams?.range !== 'number' ? min : start;
+
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
         const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
