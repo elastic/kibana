@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -51,7 +50,6 @@ import {
   RuleAlertData,
   SanitizedRule,
   RuleNotifyWhen,
-  RulesSettingsQueryDelayProperties,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -82,6 +80,7 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { getTimeRange } from '../lib/get_time_range';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -516,7 +515,7 @@ export class TaskRunner<
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
-              getTimeRange: (timeWindow) => this.getTimeRange(timeWindow, queryDelaySettings),
+              getTimeRange: (timeWindow) => getTimeRange(timeWindow, queryDelaySettings),
             })
           );
 
@@ -1006,27 +1005,5 @@ export class TaskRunner<
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
     });
-  }
-
-  private getTimeRange(window: string, queryDelaySettings: RulesSettingsQueryDelayProperties) {
-    let timeWindow: number;
-    try {
-      timeWindow = parseDuration(window);
-    } catch (err) {
-      throw new Error(
-        i18n.translate('xpack.alerting.invalidWindowSizeErrorMessage', {
-          defaultMessage: 'Invalid format for windowSize: "{window}"',
-          values: {
-            window,
-          },
-        })
-      );
-    }
-
-    const date = Date.now();
-    const dateStart = new Date(date - (timeWindow + queryDelaySettings.delay)).toISOString();
-    const dateEnd = new Date(date - queryDelaySettings.delay).toISOString();
-
-    return { dateStart, dateEnd };
   }
 }
