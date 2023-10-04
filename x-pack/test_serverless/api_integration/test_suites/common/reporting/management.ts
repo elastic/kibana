@@ -13,19 +13,20 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 // the archived data holds a report created by test_user
 const TEST_USERNAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
+const REPORTING_USER_USERNAME = 'elastic_serverless'
+const REPORTING_USER_PASSWORD = 'changeme'
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const reportingAPI = getService('svlReportingAPI');
+  const reportingAPI = getService('svlReportingApi');
   const supertest = getService('supertestWithoutAuth');
 
   describe('Reporting Management', function () {
     const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
 
     before(async () => {
-      await reportingAPI.createReportingRole();
       await reportingAPI.createReportingUser();
       await reportingAPI.createReportingUser(TEST_USERNAME, TEST_USER_PASSWORD);
     });
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`user can not delete a report they haven't created`, async () => {
         const response = await supertest
           .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
-          .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
+          .auth(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD)
           .set(...API_HEADER)
           .set(...INTERNAL_HEADER);
 
