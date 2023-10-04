@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getBridgeNetworkHostIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
+import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     )
   );
   const config = defendWorkflowsCypressConfig.getAll();
-  const hostIp = getBridgeNetworkHostIp();
+  const hostIp = getLocalhostRealIp();
 
   const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = [];
 

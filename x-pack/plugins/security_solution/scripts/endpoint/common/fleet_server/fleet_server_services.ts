@@ -60,7 +60,7 @@ import {
   waitForHostToEnroll,
 } from '../fleet_services';
 import { dump } from '../../endpoint_agent_runner/utils';
-import { getLocalhostRealIp } from '../localhost_services';
+import { getLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
 
 export const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
