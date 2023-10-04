@@ -51,6 +51,8 @@ export interface Cluster {
   securityModel: 'certificate' | 'api_key';
 }
 
+export type ClusterPayload = Omit<Cluster, 'securityModel'>;
+
 export interface ClusterPayloadEs {
   skip_unavailable?: boolean | null;
   mode?: 'sniff' | 'proxy' | null;
@@ -151,7 +153,7 @@ export function deserializeCluster(
 }
 
 export function serializeCluster(
-  deserializedClusterObject: Omit<Cluster, 'securityModel'>
+  deserializedClusterObject: ClusterPayload
 ): ClusterSettingsPayloadEs {
   if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
