@@ -169,22 +169,27 @@ function getESServerlessOptions(esServerlessImageFromArg: string | undefined, co
   const serverlessResources: string[] =
     (config.has('esServerlessOptions.resources') && config.get('esServerlessOptions.resources')) ||
     [];
+  const serverlessHost: string | undefined =
+    config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
 
   if (esServerlessImageUrlOrTag) {
     if (esServerlessImageUrlOrTag.includes(':')) {
       return {
         resources: serverlessResources,
         image: esServerlessImageUrlOrTag,
+        host: serverlessHost,
       };
     } else {
       return {
         resources: serverlessResources,
         tag: esServerlessImageUrlOrTag,
+        host: serverlessHost,
       };
     }
   }
 
   return {
     resources: serverlessResources,
+    host: serverlessHost,
   };
 }

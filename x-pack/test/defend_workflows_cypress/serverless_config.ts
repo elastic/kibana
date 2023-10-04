@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
+import { getBridgeNetworkHostIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
@@ -13,55 +13,46 @@ import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/com
 import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
-  const svlSharedConfig = await readConfigFile(
-    require.resolve('../../test_serverless/shared/config.base.ts')
+  const defendWorkflowsCypressConfig = await readConfigFile(
+    require.resolve(
+      '../../test_serverless/functional/test_suites/security/cypress/security_config.base.ts'
+    )
   );
-
-  const hostIp = getLocalhostRealIp();
+  const config = defendWorkflowsCypressConfig.getAll();
+  const hostIp = getBridgeNetworkHostIp();
 
   const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = [];
 
   return {
-    ...svlSharedConfig.getAll(),
+    ...config,
+
     esTestCluster: {
-      ...svlSharedConfig.get('esTestCluster'),
-      serverArgs: [
-        ...svlSharedConfig.get('esTestCluster.serverArgs'),
-        // define custom es server here
-        // API Keys is enabled at the top level
-      ],
+      ...config.esTestCluster,
+      serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
     },
     esServerlessOptions: {
       ...(svlSharedConfig.get('esServerlessOptions') ?? {}),
       resources: Object.values(ES_RESOURCES),
     },
     servers: {
-      ...svlSharedConfig.get('servers'),
+      ...config.servers,
       fleetserver: {
         protocol: 'https',
         hostname: hostIp,
         port: 8220,
       },
     },
-    kbnTestServer: {
-      ...svlSharedConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
-        '--csp.warnLegacyBrowsers=false',
-        '--serverless=security',
-        '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
 
-        '--xpack.security.enabled=true',
+    kbnTestServer: {
+      ...config.kbnTestServer,
+      serverArgs: [
+        ...config.kbnTestServer.serverArgs,
         `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:8220"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
           'servers.elasticsearch.port'
         )}`,
-
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
-
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,
       ],
     },

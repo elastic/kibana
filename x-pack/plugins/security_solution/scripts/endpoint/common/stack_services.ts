@@ -18,7 +18,7 @@ import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
-import { getLocalhostRealIp } from './localhost_services';
+import { getBridgeNetworkHostIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
@@ -169,7 +169,7 @@ export const createRuntimeServices = async ({
       noCertForSsl,
     }),
     log,
-    localhostRealIp: getLocalhostRealIp(),
+    localhostRealIp: getBridgeNetworkHostIp(),
     apiKey: apiKey ?? '',
     user: {
       username,

@@ -19,7 +19,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
-import { ServerlessOptions } from '@kbn/es/src/utils';
+import type { ServerlessOptions } from '@kbn/es/src/utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -71,7 +71,7 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
-  esServerlessOptions?: Pick<ServerlessOptions, 'image' | 'tag' | 'resources'>;
+  esServerlessOptions?: Pick<ServerlessOptions, 'image' | 'tag' | 'resources' | 'host'>;
   esJavaOpts?: string;
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
@@ -244,6 +244,7 @@ export function createTestEsCluster<
           esArgs: customEsArgs,
           image: esServerlessOptions?.image,
           tag: esServerlessOptions?.tag,
+          host: esServerlessOptions?.host,
           resources: esServerlessOptions?.resources,
           port,
           clean: true,

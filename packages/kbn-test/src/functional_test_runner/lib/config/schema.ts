@@ -216,6 +216,7 @@ export const schema = Joi.object()
 
     esServerlessOptions: Joi.object()
       .keys({
+        host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
       })
       .default(),
