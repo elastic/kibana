@@ -12,7 +12,7 @@ interface ErrorOptions {
 export class AssetsValidationError extends Error {
   public statusCode: number;
 
-  constructor(message: string, { statusCode = 500 }: ErrorOptions = {}) {
+  constructor(message: string, { statusCode = 400 }: ErrorOptions = {}) {
     super(message);
     this.name = 'AssetsValidationError';
     this.statusCode = statusCode;
