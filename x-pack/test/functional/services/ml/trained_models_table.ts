@@ -264,9 +264,11 @@ export function TrainedModelsTableProvider(
     }
 
     public async deleteModel(modelId: string) {
+      const fromContextMenu = await this.doesModelCollapsedActionsButtonExist(modelId);
       await mlCommonUI.invokeTableRowAction(
         this.rowSelector(modelId),
-        'mlModelsTableRowDeleteAction'
+        'mlModelsTableRowDeleteAction',
+        fromContextMenu
       );
       await this.assertDeleteModalExists();
       await this.confirmDeleteModel();
@@ -459,9 +461,10 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickStopDeploymentAction(modelId: string) {
-      await testSubjects.clickWhenNotDisabled(
-        this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
-        { timeout: 5000 }
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowStopDeploymentAction',
+        true
       );
     }
 
