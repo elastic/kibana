@@ -18,14 +18,12 @@ export interface UseAlertAssigneesActionsProps {
   closePopover: () => void;
   ecsRowData: Ecs;
   refetch?: () => void;
-  refresh?: () => void;
 }
 
 export const useAlertAssigneesActions = ({
   closePopover,
   ecsRowData,
   refetch,
-  refresh,
 }: UseAlertAssigneesActionsProps) => {
   const { hasIndexWrite } = useAlertsPrivileges();
   const alertId = ecsRowData._id;
@@ -70,11 +68,10 @@ export const useAlertAssigneesActions = ({
           closePopoverMenu: closePopover,
           setIsBulkActionsLoading: () => {},
           alertItems: alertAssigneeData,
-          refresh,
         });
         return { title: panel.title, content, id: panel.id };
       }),
-    [alertAssigneeData, alertAssigneesPanels, closePopover, refresh]
+    [alertAssigneeData, alertAssigneesPanels, closePopover]
   );
 
   return {

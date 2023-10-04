@@ -13,7 +13,6 @@ import type { RightPanelPaths } from '.';
 import type { RightPanelTabsType } from './tabs';
 import { HeaderTitle } from './components/header_title';
 import { ExpandDetailButton } from './components/expand_detail_button';
-import { useRightPanelContext } from './context';
 
 export interface PanelHeaderProps {
   /**
@@ -37,7 +36,6 @@ export interface PanelHeaderProps {
 
 export const PanelHeader: VFC<PanelHeaderProps> = memo(
   ({ flyoutIsExpandable, selectedTabId, setSelectedTabId, tabs }) => {
-    const { refetchFlyoutData, scopeId } = useRightPanelContext();
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
@@ -64,11 +62,7 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
           </div>
         )}
         <EuiSpacer size="xs" />
-        <HeaderTitle
-          flyoutIsExpandable={flyoutIsExpandable}
-          scopeId={scopeId}
-          refetchFlyoutData={refetchFlyoutData}
-        />
+        <HeaderTitle flyoutIsExpandable={flyoutIsExpandable} />
         <EuiSpacer size="m" />
         <EuiTabs
           size="l"
