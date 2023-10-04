@@ -50,7 +50,9 @@ export const ConnectorsOverview = () => {
   });
 
   useEffect(() => {
-    navigateToUrl(`${CREATE_CONNECTOR_PATH}/${connector?.id}`);
+    if (isSuccess) {
+      navigateToUrl(`${CREATE_CONNECTOR_PATH}/${connector?.id}`);
+    }
   }, [connector, isSuccess, navigateToUrl]);
 
   const createConnector = () => mutate();

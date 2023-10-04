@@ -32,9 +32,11 @@ import {
   syncStatusToText,
 } from '@kbn/search-connectors';
 import React, { useEffect, useState } from 'react';
+import { generatePath } from 'react-router-dom';
 import { CONNECTORS_LABEL } from '../../../../common/i18n_string';
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { EDIT_CONNECTOR_PATH } from '../connectors_router';
 
 export const ConnectorsTable: React.FC = () => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -54,7 +56,13 @@ export const ConnectorsTable: React.FC = () => {
   }, [query, filter]);
 
   if (isError) {
-    return <EuiEmptyPrompt>Could not fetch data</EuiEmptyPrompt>;
+    return (
+      <EuiEmptyPrompt>
+        {i18n.translate('xpack.serverlessSearch.connectors.errorFetchingConnectors', {
+          defaultMessage: 'We encountered an error fetching your connectors.',
+        })}
+      </EuiEmptyPrompt>
+    );
   }
 
   const connectedLabel = i18n.translate('xpack.serverlessSearch.connectors.connected', {
@@ -94,7 +102,9 @@ export const ConnectorsTable: React.FC = () => {
       field: 'name',
       name: nameLabel,
       render: (name: string, connector: Connector) => (
-        <EuiLink href="TODO TODO TODO">{name || connector.id}</EuiLink>
+        <EuiLink href={generatePath(EDIT_CONNECTOR_PATH, { id: connector.id })}>
+          {name || connector.id}
+        </EuiLink>
       ),
       truncateText: true,
     },
@@ -169,7 +179,7 @@ export const ConnectorsTable: React.FC = () => {
       .filter((connector) =>
         filter ? `${connector[filter]}`.toLowerCase().includes(query.toLowerCase()) : true
       )
-      .slice(pageIndex * pageSize, pageIndex + 1 * pageSize) ?? [];
+      .slice(pageIndex * pageSize, (pageIndex + 1) * pageSize) ?? [];
 
   return (
     <>
@@ -194,7 +204,7 @@ export const ConnectorsTable: React.FC = () => {
             items: (
               <strong>
                 <EuiI18nNumber value={(pageIndex + 1) * pageSize} />-
-                <EuiI18nNumber value={pageIndex + 2 * pageSize} />
+                <EuiI18nNumber value={(pageIndex + 2) * pageSize} />
               </strong>
             ),
             count: <EuiI18nNumber value={items.length} />,
