@@ -108,7 +108,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Discover embedded within timeline
    *
    * */
-  discoverInTimeline: false,
+  discoverInTimeline: true,
 
   /**
    * disables ES|QL rules
