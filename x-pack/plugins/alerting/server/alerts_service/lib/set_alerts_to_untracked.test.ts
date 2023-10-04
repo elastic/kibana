@@ -83,8 +83,12 @@ describe('setAlertsToUntracked()', () => {
               "source": "
       if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
         ctx._source.kibana.alert.status = 'untracked';
+        ctx._source.kibana.alert.end = '2023-10-04T18:40:49.459Z';
+        ctx._source.kibana.alert.time_range.lte = '2023-10-04T18:40:49.459Z';
       } else {
-        ctx._source['kibana.alert.status'] = 'untracked'
+        ctx._source['kibana.alert.status'] = 'untracked';
+        ctx._source['kibana.alert.end'] = '2023-10-04T18:40:49.459Z';
+        ctx._source['kibana.alert.time_range'].lte = '2023-10-04T18:40:49.459Z';
       }",
             },
           },
@@ -147,8 +151,12 @@ describe('setAlertsToUntracked()', () => {
               "source": "
       if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
         ctx._source.kibana.alert.status = 'untracked';
+        ctx._source.kibana.alert.end = '2023-10-04T18:40:49.479Z';
+        ctx._source.kibana.alert.time_range.lte = '2023-10-04T18:40:49.479Z';
       } else {
-        ctx._source['kibana.alert.status'] = 'untracked'
+        ctx._source['kibana.alert.status'] = 'untracked';
+        ctx._source['kibana.alert.end'] = '2023-10-04T18:40:49.479Z';
+        ctx._source['kibana.alert.time_range'].lte = '2023-10-04T18:40:49.479Z';
       }",
             },
           },
