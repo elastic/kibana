@@ -13,6 +13,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 import { notificationServiceMock, applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
+import { breadcrumbService } from '../../../../../services/breadcrumbs';
 import { AppContextProvider } from '../../../../../app_context';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
@@ -34,12 +35,14 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?:
   trackMetric: () => {},
   docLinks: docLinksServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  setBreadcrumbs: () => {},
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
   executionContext: executionContextServiceMock.createInternalStartContract(),
 });
 
-export const setupEnvironment = initHttpRequests;
+export const setupEnvironment = () => {
+  breadcrumbService.setup(() => undefined);
+  return initHttpRequests();
+};
 
 export const WithAppDependencies =
   (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) =>

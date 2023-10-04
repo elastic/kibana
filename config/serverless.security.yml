@@ -4,6 +4,7 @@
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
+xpack.observabilityLogExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
@@ -26,8 +27,16 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 telemetry.labels.serverless: security
 
 # Fleet specific configuration
-xpack.fleet.internal.capabilities: ['security']
+xpack.fleet.internal.registry.capabilities: ['security']
+xpack.fleet.internal.registry.spec.max: '3.0'
+# Disabled until packages implement the new spec https://github.com/elastic/kibana/issues/166742
+# xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+# xpack.fleet.internal.registry.spec.min: '3.0'
 
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
-  - discoverInTimeline
+  - esqlRulesDisabled
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp.enabled: false

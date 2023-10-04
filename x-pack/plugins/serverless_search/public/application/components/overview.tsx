@@ -57,7 +57,7 @@ export const ElasticsearchOverview = () => {
   const elasticsearchURL = useMemo(() => {
     return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
   }, [cloud]);
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
@@ -153,7 +153,7 @@ export const ElasticsearchOverview = () => {
                 <EuiTitle size="xxxs">
                   <h6>
                     {i18n.translate('xpack.serverlessSearch.cloudIdDetails.url.title', {
-                      defaultMessage: 'Cloud URL',
+                      defaultMessage: 'Elasticsearch Endpoint',
                     })}
                   </h6>
                 </EuiTitle>

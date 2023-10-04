@@ -8,6 +8,7 @@
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
@@ -128,5 +129,16 @@ export const dryRunValidateBulkEditRule = async ({
         "Machine learning rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN
+  );
+
+  // if rule is es|ql, index pattern action can't be applied to it
+  await throwDryRunError(
+    () =>
+      invariant(
+        !isEsqlRule(rule.params.type) ||
+          !edit.some((action) => isIndexPatternsBulkEditAction(action.type)),
+        "ES|QL rule doesn't have index patterns"
+      ),
+    BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
   );
 };

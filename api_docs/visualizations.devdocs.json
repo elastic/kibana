@@ -6727,15 +6727,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; updateInput: (changes: Partial<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">) => void; openInspector: () => ",
+          " | undefined>; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -6807,7 +6799,15 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
+          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; getAppContext: () => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableAppContext",
+            "text": "EmbeddableAppContext"
+          },
+          " | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6931,7 +6931,15 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">; updateOutput: (outputChanges: Partial<",
+          ">; updateInput: (changes: Partial<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">) => void; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
         ],

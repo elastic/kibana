@@ -25,7 +25,12 @@ async function testRunner(ftrProviderContext: FtrProviderContext) {
     cypressExecution: cypress.run,
   });
 
-  if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+  if (
+    result &&
+    ((result as CypressCommandLine.CypressFailedRunResult)?.status ===
+      'failed' ||
+      (result as CypressCommandLine.CypressRunResult)?.totalFailed)
+  ) {
     process.exit(1);
   }
 }

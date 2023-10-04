@@ -23,6 +23,18 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+import { EuiFlexItem } from '@elastic/eui';
+
+const mockFlyoutCustomization: FlyoutCustomization = {
+  id: 'flyout',
+  actions: {},
+};
+
+jest.mock('../../customizations', () => ({
+  ...jest.requireActual('../../customizations'),
+  useDiscoverCustomization: jest.fn(),
+}));
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -93,6 +105,13 @@ describe('Discover flyout', function () {
 
     return { component, props };
   };
+
+  beforeEach(() => {
+    mockFlyoutCustomization.actions.defaultActions = undefined;
+    jest.clearAllMocks();
+
+    (useDiscoverCustomization as jest.Mock).mockImplementation(() => mockFlyoutCustomization);
+  });
 
   it('should be rendered correctly using an data view without timefield', async () => {
     const { component, props } = await mountComponent({});
@@ -205,5 +224,46 @@ describe('Discover flyout', function () {
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
     expect(flyoutTitle.text()).toBe('Expanded row');
+  });
+
+  describe('when customizations actions exists', () => {
+    it('should display actions added by getActionItems', async () => {
+      mockFlyoutCustomization.actions = {
+        getActionItems: jest.fn(() => [
+          {
+            id: 'action-item-1',
+            enabled: true,
+            Content: () => <EuiFlexItem data-test-subj="customActionItem1">Action 1</EuiFlexItem>,
+          },
+          {
+            id: 'action-item-2',
+            enabled: true,
+            Content: () => <EuiFlexItem data-test-subj="customActionItem2">Action 2</EuiFlexItem>,
+          },
+        ]),
+      };
+
+      const { component } = await mountComponent({});
+
+      const action1 = findTestSubject(component, 'customActionItem1');
+      const action2 = findTestSubject(component, 'customActionItem2');
+
+      expect(action1.text()).toBe('Action 1');
+      expect(action2.text()).toBe('Action 2');
+    });
+
+    it('should allow disabling default actions', async () => {
+      mockFlyoutCustomization.actions = {
+        defaultActions: {
+          viewSingleDocument: { disabled: true },
+          viewSurroundingDocument: { disabled: true },
+        },
+      };
+
+      const { component } = await mountComponent({});
+
+      const singleDocumentView = findTestSubject(component, 'docTableRowAction');
+      expect(singleDocumentView.length).toBeFalsy();
+    });
   });
 });

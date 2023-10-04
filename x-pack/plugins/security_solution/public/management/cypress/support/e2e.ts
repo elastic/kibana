@@ -24,10 +24,12 @@
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
-// force ESM in this module
-export {};
-
 import 'cypress-react-selector';
+
+// @ts-ignore
+import registerCypressGrep from '@cypress/grep';
+
+registerCypressGrep();
 
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',

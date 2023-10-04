@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { AppDeepLink } from '@kbn/core/public';
 
+import type { ExperimentalFeatures } from '../common/experimental_features';
+
 import { FLEET_ROUTING_PATHS } from './constants/page_paths';
 
 export enum FleetDeepLinkId {
@@ -19,7 +21,9 @@ export enum FleetDeepLinkId {
   settings = 'settings',
 }
 
-export const fleetDeepLinks: AppDeepLink[] = [
+export const getFleetDeepLinks: (experimentalFeatures: ExperimentalFeatures) => AppDeepLink[] = (
+  experimentalFeatures
+) => [
   {
     id: FleetDeepLinkId.agents,
     title: i18n.translate('xpack.fleet.deepLinks.agents.title', { defaultMessage: 'Agents' }),
@@ -39,13 +43,17 @@ export const fleetDeepLinks: AppDeepLink[] = [
     }),
     path: FLEET_ROUTING_PATHS.enrollment_tokens,
   },
-  {
-    id: FleetDeepLinkId.uninstallTokens,
-    title: i18n.translate('xpack.fleet.deepLinks.uninstallTokens.title', {
-      defaultMessage: 'Uninstall tokens',
-    }),
-    path: FLEET_ROUTING_PATHS.uninstall_tokens,
-  },
+  ...(experimentalFeatures.agentTamperProtectionEnabled
+    ? [
+        {
+          id: FleetDeepLinkId.uninstallTokens,
+          title: i18n.translate('xpack.fleet.deepLinks.uninstallTokens.title', {
+            defaultMessage: 'Uninstall tokens',
+          }),
+          path: FLEET_ROUTING_PATHS.uninstall_tokens,
+        },
+      ]
+    : []),
   {
     id: FleetDeepLinkId.dataStreams,
     title: i18n.translate('xpack.fleet.deepLinks.dataStreams.title', {

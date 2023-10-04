@@ -41,6 +41,7 @@ import {
   useKibanaVersion,
   useConfig,
   sendGetAgentStatus,
+  useAgentVersion,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -196,6 +197,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     },
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
+
+  // latest agent version might be earlier than kibana version
+  const latestAgentVersion = useAgentVersion();
+  useEffect(() => {
+    if (latestAgentVersion) {
+      setSelectedVersion([
+        {
+          label: latestAgentVersion,
+          value: latestAgentVersion,
+        },
+      ]);
+    }
+  }, [latestAgentVersion]);
+
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
@@ -257,7 +272,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }
 
   const onCreateOption = (searchValue: string) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+    const normalizedSearchValue = searchValue.trim();
 
     const newOption = {
       label: normalizedSearchValue,

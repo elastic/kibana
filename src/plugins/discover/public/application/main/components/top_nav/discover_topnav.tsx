@@ -114,6 +114,7 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -171,6 +172,17 @@ export const DiscoverTopNav = ({
   if (isESQLModeEnabled) {
     supportedTextBasedLanguages.push('ESQL');
   }
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
+
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
+  );
+
+  const shouldHideDefaultDataviewPicker =
+    !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
+
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: dataView?.getName() || '',
@@ -201,13 +213,6 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
-  const searchBarCustomization = useDiscoverCustomization('search_bar');
-
-  const SearchBar = useMemo(
-    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
-    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
-  );
-
   return (
     <SearchBar
       appName="discover"
@@ -220,7 +225,9 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
+      saveQueryMenuVisibility={
+        services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+      }
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerOverride={
@@ -229,7 +236,7 @@ export const DiscoverTopNav = ({
         ) : undefined
       }
       dataViewPickerComponentProps={
-        searchBarCustomization?.CustomDataViewPicker ? undefined : dataViewPickerProps
+        shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
       }
       displayStyle="detached"
       textBasedLanguageModeErrors={

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { ScopedHistory } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { useAppContext } from '../../../app_context';
-import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
     core: { executionContext },
-    config: { enableIndexDetailsPage },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
@@ -25,19 +24,13 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
     page: 'indexManagementIndicesTab',
   });
 
-  const openDetailPanel = useCallback(
-    (indexName: string) => {
-      return history.push(encodeURI(`/indices/${indexName}`));
-    },
-    [history]
-  );
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+  }, []);
+
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
-      <IndexTable
-        history={history as ScopedHistory}
-        openDetailPanel={enableIndexDetailsPage ? openDetailPanel : undefined}
-      />
-      {!enableIndexDetailsPage && <DetailPanel />}
+      <IndexTable history={history as ScopedHistory} />
     </div>
   );
 };

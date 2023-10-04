@@ -19,6 +19,27 @@ jest.mock('../services', () => {
           { agents: 1, data_output_id: 'logstash1' },
           { agents: 1, monitoring_output_id: 'kafka1' },
           { agents: 1, data_output_id: 'elasticsearch2', monitoring_output_id: 'elasticsearch2' },
+          {
+            agents: 1,
+            data_output_id: 'es-containerhost',
+            monitoring_output_id: 'es-containerhost',
+          },
+        ],
+      }),
+    },
+    outputService: {
+      list: jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'default-output',
+            is_default: true,
+            is_default_monitoring: true,
+            type: 'elasticsearch',
+          },
+          { id: 'logstash1', type: 'logstash' },
+          { id: 'kafka1', type: 'kafka' },
+          { id: 'elasticsearch2', type: 'elasticsearch' },
+          { id: 'es-containerhost', type: 'elasticsearch' },
         ],
       }),
     },
@@ -26,24 +47,12 @@ jest.mock('../services', () => {
 });
 
 describe('agents_per_output', () => {
-  const soClientMock = {
-    find: jest.fn().mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'default-output',
-          attributes: { is_default: true, is_default_monitoring: true, type: 'elasticsearch' },
-        },
-        { id: 'logstash1', attributes: { type: 'logstash' } },
-        { id: 'kafka1', attributes: { type: 'kafka' } },
-        { id: 'elasticsearch2', attributes: { type: 'elasticsearch' } },
-      ],
-    }),
-  } as unknown as SavedObjectsClientContract;
+  const soClientMock = {} as unknown as SavedObjectsClientContract;
 
   it('should return agent count by output type', async () => {
     const res = await getAgentsPerOutput(soClientMock, {} as unknown as ElasticsearchClient);
     expect(res).toEqual([
-      { output_type: 'elasticsearch', count_as_data: 3, count_as_monitoring: 3 },
+      { output_type: 'elasticsearch', count_as_data: 4, count_as_monitoring: 4 },
       { output_type: 'logstash', count_as_data: 1, count_as_monitoring: 0 },
       { output_type: 'kafka', count_as_data: 0, count_as_monitoring: 1 },
     ]);

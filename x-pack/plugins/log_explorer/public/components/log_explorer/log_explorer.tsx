@@ -8,17 +8,19 @@
 import React, { useMemo } from 'react';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverAppState, DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
-import {
-  createLogExplorerProfileCustomizations,
-  CreateLogExplorerProfileCustomizationsDeps,
-} from '../../customizations/log_explorer_profile';
+import { CoreStart } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
+import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
 import { createPropertyGetProxy } from '../../utils/proxies';
 import { LogExplorerProfileContext } from '../../state_machines/log_explorer_profile';
+import { LogExplorerStartDeps } from '../../types';
 
-export interface CreateLogExplorerArgs extends CreateLogExplorerProfileCustomizationsDeps {
-  discover: DiscoverStart;
+export interface CreateLogExplorerArgs {
+  core: CoreStart;
+  plugins: LogExplorerStartDeps;
 }
 
 export interface LogExplorerStateContainer {
@@ -31,18 +33,20 @@ export interface LogExplorerProps {
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
-export const createLogExplorer = ({
-  core,
-  data,
-  discover: { DiscoverContainer },
-}: CreateLogExplorerArgs) => {
+export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
+  const {
+    data,
+    discover: { DiscoverContainer },
+  } = plugins;
+
   const overrideServices = {
     data: createDataServiceProxy(data),
+    uiSettings: createUiSettingsServiceProxy(core.uiSettings),
   };
 
   return ({ scopedHistory, state$ }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, data, state$ })],
+      () => [createLogExplorerProfileCustomizations({ core, plugins, state$ })],
       [state$]
     );
 
@@ -73,5 +77,26 @@ const createDataServiceProxy = (data: DataPublicPluginStart) => {
 
   return createPropertyGetProxy(data, {
     search: () => searchServiceProxy,
+  });
+};
+/**
+ * Create proxy for the uiSettings service, in which settings preferences are overwritten
+ * with custom values
+ */
+const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
+  const overrides: Record<string, any> = {
+    [HIDE_ANNOUNCEMENTS]: true,
+  };
+
+  return createPropertyGetProxy(uiSettings, {
+    get:
+      () =>
+      (key, ...args) => {
+        if (key in overrides) {
+          return overrides[key];
+        }
+
+        return uiSettings.get(key, ...args);
+      },
   });
 };

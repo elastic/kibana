@@ -27,7 +27,11 @@ export default async () => {
       protocol: 'https',
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
-    elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
+    elasticsearch: {
+      ...esTestConfig.getUrlParts(),
+      protocol: 'https',
+      certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
+    },
   };
 
   // "Fake" SAML provider

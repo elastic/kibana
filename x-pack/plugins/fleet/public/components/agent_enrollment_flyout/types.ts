@@ -17,6 +17,7 @@ export type K8sMode =
 
 export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm';
 export type CloudSecurityIntegrationAwsAccountType = 'single-account' | 'organization-account';
+export type CloudSecurityIntegrationAzureAccountType = 'single-account' | 'organization-account';
 
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
@@ -26,11 +27,18 @@ export interface CloudFormationProps {
   awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined;
 }
 
+export interface AzureArmTemplateProps {
+  templateUrl: string | undefined;
+  azureAccountType: CloudSecurityIntegrationAzureAccountType | undefined;
+}
+
 export interface CloudSecurityIntegration {
   integrationType: CloudSecurityIntegrationType | undefined;
   isLoading: boolean;
   isCloudFormation: boolean;
+  isAzureArmTemplate: boolean;
   cloudFormationProps?: CloudFormationProps;
+  azureArmTemplateProps?: AzureArmTemplateProps;
   cloudShellUrl: string | undefined;
 }
 

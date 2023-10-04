@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiIcon,
+  EuiLink,
   EuiPortal,
   EuiSpacer,
   EuiToolTip,
@@ -26,6 +27,7 @@ import {
 } from '../../../../../../common/services/agent_status';
 
 import type { Agent } from '../../../types';
+import { useStartServices } from '../../../hooks';
 
 import { useAgentRefresh } from '../agent_details_page/hooks';
 
@@ -139,6 +141,8 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const refreshAgent = useAgentRefresh();
 
+  const { docLinks } = useStartServices();
+
   return (
     <>
       <EuiToolTip
@@ -158,16 +162,18 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
           </>
         }
       >
-        <>
-          {getStatusComponent(agent.status)}
-          {previousToOfflineStatus ? getStatusComponent(previousToOfflineStatus) : null}
-          {isStuckInUpdating(agent) && !fromDetails ? (
-            <>
-              &nbsp;
-              <EuiIcon type="warning" />
-            </>
-          ) : null}
-        </>
+        {isStuckInUpdating(agent) && !fromDetails ? (
+          <div className="eui-textNoWrap">
+            {getStatusComponent(agent.status)}
+            &nbsp;
+            <EuiIcon type="warning" color="warning" />
+          </div>
+        ) : (
+          <>
+            {getStatusComponent(agent.status)}
+            {previousToOfflineStatus ? getStatusComponent(previousToOfflineStatus) : null}
+          </>
+        )}
       </EuiToolTip>
       {fromDetails && isStuckInUpdating(agent) ? (
         <>
@@ -186,7 +192,19 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
             <p>
               <FormattedMessage
                 id="xpack.fleet.agentHealth.stuckUpdatingText"
-                defaultMessage="Agent has been updating for a while, and may be stuck. Consider restarting the upgrade."
+                defaultMessage="Agent has been updating for a while, and may be stuck. Consider restarting the upgrade. {learnMore}"
+                values={{
+                  learnMore: (
+                    <div>
+                      <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    </div>
+                  ),
+                }}
               />
             </p>
             <EuiButton

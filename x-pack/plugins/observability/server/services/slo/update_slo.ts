@@ -37,14 +37,18 @@ export class UpdateSLO {
     validateSLO(updatedSlo);
 
     await this.deleteObsoleteSLORevisionData(originalSlo);
+
+    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
     await this.transformManager.install(updatedSlo);
-    await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
+    await this.transformManager.preview(updatedSloTransformId);
+    await this.transformManager.start(updatedSloTransformId);
 
     await this.esClient.index({
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
       id: `slo-${updatedSlo.id}`,
       document: createTempSummaryDocument(updatedSlo),
+      refresh: true,
     });
 
     return this.toResponse(updatedSlo);
@@ -73,7 +77,7 @@ export class UpdateSLO {
   private async deleteSummaryData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
+      refresh: true,
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],

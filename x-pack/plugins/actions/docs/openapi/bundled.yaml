@@ -55,6 +55,7 @@ paths:
                 - $ref: '#/components/schemas/create_connector_request_swimlane'
                 - $ref: '#/components/schemas/create_connector_request_teams'
                 - $ref: '#/components/schemas/create_connector_request_tines'
+                - $ref: '#/components/schemas/create_connector_request_torq'
                 - $ref: '#/components/schemas/create_connector_request_webhook'
                 - $ref: '#/components/schemas/create_connector_request_xmatters'
               discriminator:
@@ -208,6 +209,7 @@ paths:
                 - $ref: '#/components/schemas/create_connector_request_swimlane'
                 - $ref: '#/components/schemas/create_connector_request_teams'
                 - $ref: '#/components/schemas/create_connector_request_tines'
+                - $ref: '#/components/schemas/create_connector_request_torq'
                 - $ref: '#/components/schemas/create_connector_request_webhook'
                 - $ref: '#/components/schemas/create_connector_request_xmatters'
               discriminator:
@@ -251,6 +253,7 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_cases_webhook'
                 - $ref: '#/components/schemas/update_connector_request_d3security'
                 - $ref: '#/components/schemas/update_connector_request_email'
+                - $ref: '#/components/schemas/create_connector_request_genai'
                 - $ref: '#/components/schemas/update_connector_request_index'
                 - $ref: '#/components/schemas/update_connector_request_jira'
                 - $ref: '#/components/schemas/update_connector_request_opsgenie'
@@ -263,6 +266,8 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_slack_webhook'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
                 - $ref: '#/components/schemas/update_connector_request_teams'
+                - $ref: '#/components/schemas/update_connector_request_tines'
+                - $ref: '#/components/schemas/update_connector_request_torq'
                 - $ref: '#/components/schemas/update_connector_request_webhook'
                 - $ref: '#/components/schemas/update_connector_request_xmatters'
             examples:
@@ -1026,14 +1031,14 @@ components:
           type: boolean
         host:
           description: |
-            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: string
         oauthTokenUrl:
           type: string
           nullable: true
         port:
           description: |
-            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: integer
         secure:
           description: |
@@ -1098,18 +1103,42 @@ components:
         secrets:
           $ref: '#/components/schemas/secrets_properties_email'
     config_properties_genai:
-      title: Connector request properties for a generative AI connector
+      title: Connector request properties for an OpenAI connector
       description: Defines properties for connectors when type is `.gen-ai`.
-      type: object
-      properties:
-        apiProvider:
-          type: string
-          description: The OpenAI API provider.
-        apiUrl:
-          type: string
-          description: The OpenAI API endpoint.
+      oneOf:
+        - type: object
+          required:
+            - apiProvider
+            - apiUrl
+          properties:
+            apiProvider:
+              type: string
+              description: The OpenAI API provider.
+              enum:
+                - Azure OpenAI
+            apiUrl:
+              type: string
+              description: The OpenAI API endpoint.
+        - type: object
+          required:
+            - apiProvider
+            - apiUrl
+          properties:
+            apiProvider:
+              type: string
+              description: The OpenAI API provider.
+              enum:
+                - OpenAI
+            apiUrl:
+              type: string
+              description: The OpenAI API endpoint.
+            defaultModel:
+              type: string
+              description: The default model to use for requests.
+      discriminator:
+        propertyName: apiProvider
     secrets_properties_genai:
-      title: Connector secrets properties for a generative AI connector
+      title: Connector secrets properties for an OpenAI connector
       description: Defines secrets for connectors when type is `.gen-ai`.
       type: object
       properties:
@@ -1117,9 +1146,9 @@ components:
           type: string
           description: The OpenAI API key.
     create_connector_request_genai:
-      title: Create generative AI connector request
+      title: Create OpenAI connector request
       description: |
-        The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.
+        The OpenAI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.
       type: object
       required:
         - config
@@ -1860,12 +1889,27 @@ components:
       title: Connector request properties for a Tines connector
       description: Defines properties for connectors when type is `.tines`.
       type: object
-      additionalProperties: true
+      required:
+        - url
+      properties:
+        url:
+          description: |
+            The Tines tenant URL. If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
+          type: string
     secrets_properties_tines:
       title: Connector secrets properties for a Tines connector
       description: Defines secrets for connectors when type is `.tines`.
       type: object
-      additionalProperties: true
+      required:
+        - email
+        - token
+      properties:
+        email:
+          description: The email used to sign in to Tines.
+          type: string
+        token:
+          description: The Tines API token.
+          type: string
     create_connector_request_tines:
       title: Create Tines connector request
       description: |
@@ -1891,6 +1935,51 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_tines'
+    config_properties_torq:
+      title: Connector request properties for a Torq connector
+      description: Defines properties for connectors when type is `.torq`.
+      type: object
+      required:
+        - webhookIntegrationUrl
+      properties:
+        webhookIntegrationUrl:
+          description: The endpoint URL of the Elastic Security integration in Torq.
+          type: string
+    secrets_properties_torq:
+      title: Connector secrets properties for a Torq connector
+      description: Defines secrets for connectors when type is `.torq`.
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          description: The secret of the webhook authentication header.
+          type: string
+    create_connector_request_torq:
+      title: Create Torq connector request
+      description: |
+        The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_torq'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .torq
+          example: .torq
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_torq'
     config_properties_webhook:
       title: Connector request properties for a Webhook connector
       description: Defines properties for connectors when type is `.webhook`.
@@ -2601,6 +2690,38 @@ components:
         name:
           type: string
           description: The display name for the connector.
+    connector_response_properties_torq:
+      title: Connector response properties for a Torq connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_torq'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .torq
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
+        name:
+          type: string
+          description: The display name for the connector.
     connector_response_properties_webhook:
       title: Connector response properties for a Webhook connector
       type: object
@@ -2686,6 +2807,7 @@ components:
         - $ref: '#/components/schemas/connector_response_properties_swimlane'
         - $ref: '#/components/schemas/connector_response_properties_teams'
         - $ref: '#/components/schemas/connector_response_properties_tines'
+        - $ref: '#/components/schemas/connector_response_properties_torq'
         - $ref: '#/components/schemas/connector_response_properties_webhook'
         - $ref: '#/components/schemas/connector_response_properties_xmatters'
       discriminator:
@@ -2897,6 +3019,36 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_teams'
+    update_connector_request_tines:
+      title: Update Tines connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_tines'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_tines'
+    update_connector_request_torq:
+      title: Update Torq connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_torq'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_torq'
     update_connector_request_webhook:
       title: Update Webhook connector request
       type: object
@@ -2950,6 +3102,7 @@ components:
         - .swimlane
         - .teams
         - .tines
+        - .torq
         - .webhook
         - .xmatters
       example: .server-log

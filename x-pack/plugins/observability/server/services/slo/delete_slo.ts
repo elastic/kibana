@@ -51,7 +51,7 @@ export class DeleteSLO {
   private async deleteSummaryData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
+      refresh: true,
       query: {
         match: {
           'slo.id': sloId,

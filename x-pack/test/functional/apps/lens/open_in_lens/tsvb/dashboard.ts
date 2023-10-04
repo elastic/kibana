@@ -42,8 +42,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
       await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
@@ -80,8 +80,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
       await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('legacyMtrVis');
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');

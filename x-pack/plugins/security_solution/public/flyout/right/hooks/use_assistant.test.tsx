@@ -9,7 +9,7 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
@@ -78,10 +78,13 @@ describe('useAssistant', () => {
 
     expect(await getPromptContext()).toEqual({
       '@timestamp': ['2023-01-01T01:01:01.000Z'],
+      'event.category': ['registry'],
       'kibana.alert.ancestors.id': ['ancestors-id'],
       'kibana.alert.rule.description': ['rule-description'],
+      'kibana.alert.rule.indices': ['rule-indices'],
       'kibana.alert.rule.name': ['rule-name'],
       'kibana.alert.rule.parameters.index': ['rule-parameters-index'],
+      'kibana.alert.rule.type': ['query'],
       'kibana.alert.rule.uuid': ['rule-uuid'],
       'kibana.alert.workflow_status': ['open'],
       'process.entity_id': ['process-entity_id'],
