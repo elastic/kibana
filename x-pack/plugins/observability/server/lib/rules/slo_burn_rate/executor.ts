@@ -19,7 +19,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, toDurationUnit } from '@kbn/slo-schema';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import {
   SLO_ID_FIELD,
@@ -61,8 +61,9 @@ export const getRuleExecutor = ({
   async function executor({
     services,
     params,
-    startedAt,
+    // startedAt,
     spaceId,
+    getTimeRange,
   }): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
@@ -88,7 +89,31 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const results = await evaluate(esClient.asCurrentUser, slo, params, startedAt);
+    const burnRateWindows = params.windows.map((winDef) => {
+      return {
+        ...winDef,
+        longDuration: new Duration(winDef.longWindow.value, toDurationUnit(winDef.longWindow.unit)),
+        shortDuration: new Duration(
+          winDef.shortWindow.value,
+          toDurationUnit(winDef.shortWindow.unit)
+        ),
+      };
+    });
+    const longestLookbackWindow = burnRateWindows.reduce((acc, winDef) => {
+      return winDef.longDuration.isShorterThan(acc.longDuration) ? acc : winDef;
+    }, burnRateWindows[0]);
+    const { dateStart, dateEnd } = getTimeRange(
+      `${longestLookbackWindow.longDuration.value}${longestLookbackWindow.longDuration.unit}`
+    );
+
+    const results = await evaluate(
+      esClient.asCurrentUser,
+      slo,
+      params,
+      dateStart,
+      dateEnd,
+      burnRateWindows
+    );
 
     if (results.length > 0) {
       for (const result of results) {
@@ -120,7 +145,7 @@ export const getRuleExecutor = ({
           );
 
           const alertId = instanceId;
-          const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateStart;
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,
@@ -136,7 +161,7 @@ export const getRuleExecutor = ({
             longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
             shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
             burnRateThreshold: windowDef.burnRateThreshold,
-            timestamp: startedAt.toISOString(),
+            timestamp: dateStart,
             viewInAppUrl,
             sloId: slo.id,
             sloName: slo.name,
@@ -165,7 +190,7 @@ export const getRuleExecutor = ({
       const recoveredAlerts = getRecoveredAlerts();
       for (const recoveredAlert of recoveredAlerts) {
         const alertId = recoveredAlert.getId();
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? dateStart;
         const alertUuid = recoveredAlert.getUuid();
         const alertDetailsUrl = await getAlertUrl(
           alertUuid,
@@ -183,7 +208,7 @@ export const getRuleExecutor = ({
         );
 
         const context = {
-          timestamp: startedAt.toISOString(),
+          timestamp: dateStart,
           viewInAppUrl,
           alertDetailsUrl,
           sloId: slo.id,
