@@ -53,6 +53,7 @@ import type {
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
+  GetInputsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -67,6 +68,7 @@ import {
   getLimitedPackages,
   getInstallation,
   getBulkAssets,
+  getInputs,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
@@ -645,6 +647,24 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
     });
 
     return response.ok({ body: resp });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getInputsHandler: FleetRequestHandler<
+  TypeOf<typeof GetInputsRequestSchema.params>,
+  undefined, // TypeOf<typeof GetInputsRequestSchema.query>,
+  undefined
+> = async (context, request, response) => {
+  const soClient = (await context.fleet).internalSoClient;
+
+  try {
+    const { pkgName, pkgVersion } = request.params;
+    const res = await getInputs(soClient, pkgName, pkgVersion);
+
+    // handle json/yml format
+    return response.ok({ body: res });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

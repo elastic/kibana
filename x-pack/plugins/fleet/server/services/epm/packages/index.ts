@@ -27,6 +27,7 @@ export {
 
 export { getBundledPackages } from './bundled_packages';
 export { getBulkAssets } from './get_bulk_assets';
+export { getInputs } from './get_inputs';
 
 export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
