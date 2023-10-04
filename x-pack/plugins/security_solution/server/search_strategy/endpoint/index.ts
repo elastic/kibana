@@ -56,7 +56,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
             ...('expiration' in request ? { expiration: request.expiration } : {}),
             ...('actionId' in request ? { actionId: request.actionId } : {}),
             ...('agents' in request ? { agents: request.agents } : {}),
-          };
+          } as EndpointStrategyRequestType<T>;
           const dsl = queryFactory.buildDsl(strictRequest, { authz });
 
           return es.search({ ...strictRequest, params: dsl }, options, deps).pipe(
