@@ -22,11 +22,10 @@ interface DataTableColumnHeaderProps {
 }
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
-  const { columnDisplayName } = props;
+  const { columnDisplayName, columnName, columnTypes, dataView } = props;
   const columnToken = useMemo(
-    () => getRenderedToken(props),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.dataView, props.columnName, props.columnTypes]
+    () => getRenderedToken({ columnName, columnTypes, dataView }),
+    [columnName, columnTypes, dataView]
   );
 
   return (
