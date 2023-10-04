@@ -8,7 +8,7 @@
 import { getEsqlRule } from '../../../objects/rule';
 
 import {
-  CUSTOM_QUERY_DETAILS,
+  ESQL_QUERY_DETAILS,
   DEFINITION_DETAILS,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
@@ -43,7 +43,7 @@ describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
 
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
+        getDetails(ESQL_QUERY_DETAILS).should('have.text', rule.query);
 
         getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
         // ensures ES|QL rule in technical preview

@@ -19,7 +19,6 @@ import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/serve
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_IS_INTERIM,
@@ -263,7 +262,7 @@ export function registerAnomalyDetectionAlertType({
           id: name,
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
           context,
-          payload: expandFlattenedAlert({
+          payload: {
             [ALERT_URL]: payload[ALERT_URL],
             [ALERT_REASON]: payload[ALERT_REASON],
             [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
@@ -272,7 +271,7 @@ export function registerAnomalyDetectionAlertType({
             [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
             [ALERT_TOP_RECORDS]: payload.top_records,
             [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-          }),
+          },
         });
       }
 
@@ -283,11 +282,11 @@ export function registerAnomalyDetectionAlertType({
           alertsClient.setAlertData({
             id: alertId,
             context,
-            payload: expandFlattenedAlert({
+            payload: {
               [ALERT_URL]: payload[ALERT_URL],
               [ALERT_REASON]: payload[ALERT_REASON],
               [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
-            }),
+            },
           });
         }
       }

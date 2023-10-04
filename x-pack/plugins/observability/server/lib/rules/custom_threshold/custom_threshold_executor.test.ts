@@ -389,8 +389,12 @@ describe('The metric threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.group).toEqual({ groupByField: 'a' });
-      expect(mostRecentAction(instanceIdB).action.group).toEqual({ groupByField: 'b' });
+      expect(mostRecentAction(instanceIdA).action.group).toEqual([
+        { field: 'groupByField', value: 'a' },
+      ]);
+      expect(mostRecentAction(instanceIdB).action.group).toEqual([
+        { field: 'groupByField', value: 'b' },
+      ]);
     });
     test('persists previous groups that go missing, until the groupBy param changes', async () => {
       setEvaluationResults([
