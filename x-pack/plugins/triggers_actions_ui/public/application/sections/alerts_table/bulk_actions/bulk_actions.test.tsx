@@ -49,6 +49,12 @@ const mockCaseService = createCasesServiceMock();
 const mockKibana = jest.fn().mockReturnValue({
   services: {
     cases: mockCaseService,
+    notifications: {
+      toasts: {
+        addDanger: jest.fn(),
+        addSuccess: jest.fn(),
+      },
+    },
   },
 });
 

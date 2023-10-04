@@ -72,6 +72,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     updateSavedSearch,
     restoreDiscoverAppStateFromSavedSearch,
     resetDiscoverAppState,
+    getDefaultDiscoverAppState,
   } = useDiscoverInTimelineContext();
 
   const {
@@ -126,9 +127,10 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
       if (status === 'draft') {
-        resetDiscoverAppState();
+        resetDiscoverAppState().then(() => {
+          setSavedSearchLoaded(true);
+        });
       }
-      setSavedSearchLoaded(true);
       return;
     }
     restoreDiscoverAppStateFromSavedSearch(savedSearchById);
@@ -227,15 +229,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
-      const finalAppState = savedSearchAppState?.appState ?? discoverAppState;
+      const defaultDiscoverAppState = await getDefaultDiscoverAppState();
 
-      if (finalAppState) {
-        stateContainer.appState.set(finalAppState);
-        await stateContainer.appState.replaceUrlState(finalAppState);
-      } else {
-        // set initial dataView Id
-        if (dataView) stateContainer.actions.setDataView(dataView);
-      }
+      const finalAppState =
+        savedSearchAppState?.appState ?? discoverAppState ?? defaultDiscoverAppState;
+
+      stateContainer.appState.set(finalAppState);
+      await stateContainer.appState.replaceUrlState(finalAppState);
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
         next: setDiscoverAppState,
@@ -272,12 +272,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       setDiscoverSavedSearchState,
       setDiscoverInternalState,
       setDiscoverAppState,
-      dataView,
       setDiscoverStateContainer,
       getAppStateFromSavedSearch,
       discoverDataService.query.timefilter.timefilter,
       savedSearchId,
       savedSearchService,
+      getDefaultDiscoverAppState,
     ]
   );
 
