@@ -17,9 +17,11 @@ import {
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiLink,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,7 +35,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useLink, useStartServices } from '../../../../../hooks';
+import { useConfig, useLink, useStartServices } from '../../../../../hooks';
 
 import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
@@ -119,6 +121,11 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
     const { data, application, http } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
+    const config = useConfig();
+    // console.log(JSON.stringify(config, null, 2));
+    const isLogsViewAvailable =
+      !config.internal?.registry?.capabilities ||
+      config.internal?.registry?.capabilities?.includes('observability');
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
@@ -238,6 +245,14 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       [http.basePath, state.start, state.end, logStreamQuery]
     );
 
+    const viewInDiscoverUrl = useMemo(
+      () =>
+        http.basePath.prepend(
+          `/app/discover#/?_a=(index:'logs-*',query:(language:kuery,query:'data_stream.dataset:elastic_agent%20AND%20elastic_agent.id:${agent.id}'))`
+        ),
+      [http.basePath, agent.id]
+    );
+
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
     const isLogFeatureAvailable = useMemo(() => {
       if (!agentVersion) {
@@ -283,7 +298,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       );
     }
 
-    return (
+    return isLogsViewAvailable ? (
       <WrapperFlexGroup direction="column" gutterSize="m">
         {agentPolicy && !agentPolicy.monitoring_enabled?.includes('logs') && (
           <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />
@@ -362,11 +377,37 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               query={logStreamQuery}
             />
           </EuiPanel>
+          )
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SelectLogLevel agent={agent} />
         </EuiFlexItem>
       </WrapperFlexGroup>
+    ) : (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <EuiEmptyPrompt
+            title={
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.agentLogs.logsViewNotAvailableText"
+                  defaultMessage="Logs View not available"
+                />
+              </p>
+            }
+            actions={
+              <RedirectAppLinks application={application}>
+                <EuiButton href={viewInDiscoverUrl} iconType="popout">
+                  <FormattedMessage
+                    id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
+                    defaultMessage="Open in Discover"
+                  />
+                </EuiButton>
+              </RedirectAppLinks>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );
