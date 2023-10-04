@@ -29,6 +29,7 @@ import {
   teardownServerlessClusterSync,
   verifyDockerInstalled,
   getESp12Volume,
+  ServerlessOptions,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
@@ -155,13 +156,15 @@ describe('resolvePort()', () => {
     `);
   });
 
-  test('should return default port when no options and real localhost ip', () => {
-    const port = resolvePort({});
+  test('should return default port when custom host passed in options', () => {
+    const port = resolvePort({ host: '192.168.25.1' } as ServerlessOptions);
 
     expect(port).toMatchInlineSnapshot(`
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "192.168.25.1:9200:9200",
       ]
     `);
   });
@@ -179,15 +182,15 @@ describe('resolvePort()', () => {
     `);
   });
 
-  test('should return custom port when passed in options and real localhost ip', () => {
-    const port = resolvePort({ port: 9220 });
+  test('should return custom port and host when passed in options', () => {
+    const port = resolvePort({ port: 9220, host: '192.168.25.1' });
 
     expect(port).toMatchInlineSnapshot(`
       Array [
         "-p",
         "127.0.0.1:9220:9220",
         "-p",
-        "192.168.1.15:9220:9220",
+        "192.168.25.1:9220:9220",
         "--env",
         "http.port=9220",
       ]
