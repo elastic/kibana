@@ -47,7 +47,7 @@ describe('SecurityUsageReportingTask', () => {
   let usageRecord: UsageRecord;
 
   function buildMockTaskInstance(overrides?: Partial<ConcreteTaskInstance>): ConcreteTaskInstance {
-    const timestamp = new Date(new Date().setMinutes(-15));
+    const timestamp = new Date(new Date().setMinutes(-15)).toISOString();
     return assign(
       {
         id: `${TYPE}:${VERSION}`,
@@ -173,7 +173,7 @@ describe('SecurityUsageReportingTask', () => {
           cloudSetup: taskArgs.cloudSetup,
           taskId: TASK_ID,
           config: taskArgs.config,
-          lastSuccessfulReport: task?.state.lastSuccessfulReport,
+          lastSuccessfulReport: new Date(task?.state.lastSuccessfulReport as string),
         })
       );
     });
@@ -203,7 +203,16 @@ describe('SecurityUsageReportingTask', () => {
         const taskInstance = buildMockTaskInstance();
         const task = await runTask(taskInstance);
         const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
-        expect(newLastSuccessfulReport).toEqual(expect.any(Date));
+        expect(newLastSuccessfulReport).toEqual(expect.any(String));
+        expect(newLastSuccessfulReport).not.toEqual(taskInstance.state.lastSuccessfulReport);
+      });
+
+      it('should set lastSuccessfulReport correctly if no usage records found', async () => {
+        meteringCallbackMock.mockResolvedValueOnce([]);
+        const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport: null } });
+        const task = await runTask(taskInstance);
+        const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
+        expect(newLastSuccessfulReport).toEqual(expect.any(String));
         expect(newLastSuccessfulReport).not.toEqual(taskInstance.state.lastSuccessfulReport);
       });
 
@@ -213,12 +222,20 @@ describe('SecurityUsageReportingTask', () => {
         });
 
         it('should set lastSuccessfulReport correctly', async () => {
-          const lastSuccessfulReport = new Date(new Date().setMinutes(-15));
+          const lastSuccessfulReport = new Date(new Date().setMinutes(-15)).toISOString();
           const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
           const task = await runTask(taskInstance);
-          const newLastSuccessfulReport = task?.state.lastSuccessfulReport as Date;
+          const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
 
           expect(newLastSuccessfulReport).toEqual(taskInstance.state.lastSuccessfulReport);
+        });
+
+        it('should set lastSuccessfulReport correctly if previously null', async () => {
+          const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport: null } });
+          const task = await runTask(taskInstance);
+          const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
+
+          expect(newLastSuccessfulReport).toEqual(expect.any(String));
         });
 
         describe('and lookBackLimitMinutes is set', () => {
@@ -226,10 +243,10 @@ describe('SecurityUsageReportingTask', () => {
             taskArgs = buildTaskArgs({ options: { lookBackLimitMinutes: 5 } });
             mockTask = new SecurityUsageReportingTask(taskArgs);
 
-            const lastSuccessfulReport = new Date(new Date().setMinutes(-30));
+            const lastSuccessfulReport = new Date(new Date().setMinutes(-30)).toISOString();
             const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
             const task = await runTask(taskInstance, 1);
-            const newLastSuccessfulReport = task?.state.lastSuccessfulReport as Date;
+            const newLastSuccessfulReport = new Date(task?.state.lastSuccessfulReport as string);
 
             // should be ~5 minutes so asserting between 4-6 minutes ago
             const sixMinutesAgo = new Date().setMinutes(-6);
@@ -242,10 +259,10 @@ describe('SecurityUsageReportingTask', () => {
             taskArgs = buildTaskArgs({ options: { lookBackLimitMinutes: 30 } });
             mockTask = new SecurityUsageReportingTask(taskArgs);
 
-            const lastSuccessfulReport = new Date(new Date().setMinutes(-15));
+            const lastSuccessfulReport = new Date(new Date().setMinutes(-15)).toISOString();
             const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
             const task = await runTask(taskInstance, 1);
-            const newLastSuccessfulReport = task?.state.lastSuccessfulReport as Date;
+            const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
 
             expect(newLastSuccessfulReport).toEqual(taskInstance.state.lastSuccessfulReport);
           });

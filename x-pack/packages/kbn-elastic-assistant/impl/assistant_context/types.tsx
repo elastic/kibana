@@ -17,6 +17,7 @@ export interface Message {
   role: ConversationRole;
   content: string;
   timestamp: string;
+  isError?: boolean;
   presentation?: MessagePresentation;
 }
 

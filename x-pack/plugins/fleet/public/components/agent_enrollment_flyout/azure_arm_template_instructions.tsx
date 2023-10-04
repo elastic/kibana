@@ -10,6 +10,8 @@ import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { AgentPolicy } from '../../../common';
+
 import { AzureArmTemplateGuide } from '../azure_arm_template_guide';
 
 import { useCreateAzureArmTemplateUrl } from '../../hooks/use_create_azure_arm_template_url';
@@ -19,10 +21,12 @@ import type { CloudSecurityIntegration } from './types';
 interface Props {
   enrollmentAPIKey?: string;
   cloudSecurityIntegration: CloudSecurityIntegration;
+  agentPolicy?: AgentPolicy;
 }
 export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   cloudSecurityIntegration,
+  agentPolicy,
 }) => {
   const { isLoading, azureArmTemplateUrl, error, isError } = useCreateAzureArmTemplateUrl({
     enrollmentAPIKey,
@@ -52,6 +56,8 @@ export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
     >
       <AzureArmTemplateGuide
         azureAccountType={cloudSecurityIntegration?.azureArmTemplateProps?.azureAccountType}
+        agentPolicy={agentPolicy}
+        enrollmentToken={enrollmentAPIKey}
       />
       <EuiSpacer size="m" />
       <EuiButton
