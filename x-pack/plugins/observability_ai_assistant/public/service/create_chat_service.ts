@@ -144,6 +144,9 @@ export async function createChatService({
     },
     getContexts,
     getFunctions,
+    hasFunction: (name: string) => {
+      return !!getFunctions().find((fn) => fn.options.name === name);
+    },
     hasRenderFunction: (name: string) => {
       return !!getFunctions().find((fn) => fn.options.name === name)?.render;
     },
