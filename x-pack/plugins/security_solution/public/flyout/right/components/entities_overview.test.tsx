@@ -11,7 +11,6 @@ import { RightPanelContext } from '../context';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
-  INSIGHTS_ENTITIES_NO_DATA_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
 } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
@@ -45,6 +44,8 @@ const renderEntitiesOverview = (contextValue: RightPanelContext) =>
     </TestProviders>
   );
 
+const NO_DATA_MESSAGE = 'Host and user information are unavailable for this alert.';
+
 describe('<EntitiesOverview />', () => {
   it('should render wrapper component', () => {
     const { getByTestId, queryByTestId } = renderEntitiesOverview(mockContextValue);
@@ -57,10 +58,10 @@ describe('<EntitiesOverview />', () => {
   });
 
   it('should render user and host', () => {
-    const { getByTestId, queryByTestId } = renderEntitiesOverview(mockContextValue);
+    const { getByTestId, queryByText } = renderEntitiesOverview(mockContextValue);
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should only render user when host name is null', () => {
@@ -69,11 +70,11 @@ describe('<EntitiesOverview />', () => {
       getFieldsData: (field: string) => (field === 'user.name' ? 'user1' : null),
     } as unknown as RightPanelContext;
 
-    const { queryByTestId, getByTestId } = renderEntitiesOverview(contextValue);
+    const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
 
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should only render host when user name is null', () => {
@@ -82,11 +83,11 @@ describe('<EntitiesOverview />', () => {
       getFieldsData: (field: string) => (field === 'host.name' ? 'host1' : null),
     } as unknown as RightPanelContext;
 
-    const { queryByTestId, getByTestId } = renderEntitiesOverview(contextValue);
+    const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
 
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should render no data message if both host name and user name are null/blank', () => {
@@ -95,11 +96,7 @@ describe('<EntitiesOverview />', () => {
       getFieldsData: (field: string) => {},
     } as unknown as RightPanelContext;
 
-    const { queryByTestId } = renderEntitiesOverview(contextValue);
-
-    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).toHaveTextContent(
-      'Host and user information are unavailable for this alert.'
-    );
+    const { getByText } = renderEntitiesOverview(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });

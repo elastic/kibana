@@ -132,4 +132,9 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
 export const defaultCustomQuery = {
   forNormalRules: stepDefineDefaultValue.queryBar,
   forThreatMatchRules: threatQueryBarDefaultValue,
+  forEsqlRules: {
+    query: { query: '', language: 'esql' },
+    filters: [],
+    saved_id: null,
+  },
 };

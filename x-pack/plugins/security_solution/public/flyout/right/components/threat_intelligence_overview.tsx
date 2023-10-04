@@ -67,6 +67,7 @@ export const ThreatIntelligenceOverview: FC = () => {
         iconType: 'arrowStart',
       }}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+      content={{ loading }}
     >
       <EuiFlexGroup
         direction="column"
@@ -74,7 +75,6 @@ export const ThreatIntelligenceOverview: FC = () => {
         data-test-subj={`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Container`}
       >
         <InsightsSummaryRow
-          loading={loading}
           icon={'warning'}
           value={threatMatchesCount}
           text={
@@ -87,7 +87,6 @@ export const ThreatIntelligenceOverview: FC = () => {
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
         />
         <InsightsSummaryRow
-          loading={loading}
           icon={'warning'}
           value={threatEnrichmentsCount}
           text={

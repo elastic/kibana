@@ -186,7 +186,7 @@ export function createSharedServices(
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
-      ...getTrainedModelsProvider(getGuards),
+      ...getTrainedModelsProvider(getGuards, cloud),
     },
     /**
      * Services providers for ML internal usage
