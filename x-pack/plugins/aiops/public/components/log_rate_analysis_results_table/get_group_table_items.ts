@@ -19,9 +19,24 @@ export function getGroupTableItems(
     const dedupedGroup: GroupTableItemGroup[] = [];
 
     sortedGroup.forEach((pair) => {
-      const { fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue, duplicate } = pair;
+      const {
+        key,
+        type,
+        fieldName,
+        fieldValue,
+        docCount: pairDocCount,
+        pValue: pairPValue,
+        duplicate,
+      } = pair;
       if ((duplicate ?? 0) <= 1) {
-        dedupedGroup.push({ fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue });
+        dedupedGroup.push({
+          key,
+          type,
+          fieldName,
+          fieldValue,
+          docCount: pairDocCount,
+          pValue: pairPValue,
+        });
       }
     });
 
