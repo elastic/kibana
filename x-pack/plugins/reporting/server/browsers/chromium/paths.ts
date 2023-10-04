@@ -125,7 +125,10 @@ export class ChromiumArchivePaths {
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 
-  public getBinaryPath(p: PackageInfo, chromiumPath = path.resolve(__dirname, '../../../chromium')) {
+  public getBinaryPath(
+    p: PackageInfo,
+    chromiumPath = path.resolve(__dirname, '../../../chromium')
+  ) {
     return path.join(chromiumPath, p.binaryRelativePath);
   }
 }
