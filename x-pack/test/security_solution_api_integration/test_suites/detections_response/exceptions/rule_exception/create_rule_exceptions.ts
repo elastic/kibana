@@ -49,8 +49,9 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
-  const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
+  console.log('ELASTICSEARCH_USERNAME', ELASTICSEARCH_USERNAME);
   describe('@serverless @ess create_rule_exception_route', () => {
     before(async () => {
       await createAlertsIndex(supertest, log);
