@@ -5,20 +5,20 @@
  * 2.0.
  */
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { Dataset } from '../../../../common/datasets/models/dataset';
+import { SearchDataViews } from '../../../hooks/use_data_views';
 import {
   DatasetSelection,
   DatasetSelectionChange,
   DataViewSelection,
 } from '../../../../common/dataset_selection';
-import type { IHashedCache } from '../../../../common/hashed_cache';
+import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
-import { SearchDataViews } from '../../../hooks/use_data_views';
 import {
   LoadMoreIntegrations,
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
+import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DatasetsSelectorSearchParams, PanelId, TabId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
@@ -122,9 +122,6 @@ export type DatasetsSelectorEvent =
   | {
       type: 'SORT_BY_ORDER';
       search: DatasetsSelectorSearchParams;
-    }
-  | {
-      type: 'NAVIGATE_TO_DISCOVER_ESQL';
     };
 
 export interface DatasetsSelectorStateMachineDependencies {
