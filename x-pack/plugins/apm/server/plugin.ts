@@ -11,6 +11,7 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClient,
 } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
@@ -32,6 +33,7 @@ import {
   apmTelemetry,
   apmServerSettings,
   apmServiceGroups,
+  apmCustomDashboards,
 } from './saved_objects';
 import {
   APMPluginSetup,
@@ -48,6 +50,7 @@ import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
+import { APM_STATIC_DATA_VIEW_ID } from '../common/data_view_constants';
 
 export class APMPlugin
   implements
@@ -75,6 +78,7 @@ export class APMPlugin
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
     core.savedObjects.registerType(apmServiceGroups);
+    core.savedObjects.registerType(apmCustomDashboards);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
@@ -118,6 +122,26 @@ export class APMPlugin
         },
       ],
     });
+
+    // ensure that the APM data view is globally available
+    getCoreStart()
+      .then(async (coreStart) => {
+        const soClient = new SavedObjectsClient(
+          coreStart.savedObjects.createInternalRepository()
+        );
+
+        await soClient.updateObjectsSpaces(
+          [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
+          ['*'],
+          []
+        );
+      })
+      .catch((e) => {
+        this.logger?.error(
+          'Failed to make APM data view available globally',
+          e
+        );
+      });
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
