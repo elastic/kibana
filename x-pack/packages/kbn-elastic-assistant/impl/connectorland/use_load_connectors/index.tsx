@@ -34,11 +34,10 @@ export const useLoadConnectors = ({
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
-      const filteredData = queryResult.filter(
-        (connector) => !connector.isMissingSecrets && connector.actionTypeId === '.gen-ai'
+      return queryResult.filter(
+        (connector) =>
+          !connector.isMissingSecrets && ['.bedrock', '.gen-ai'].includes(connector.actionTypeId)
       );
-
-      return filteredData;
     },
     {
       retry: false,

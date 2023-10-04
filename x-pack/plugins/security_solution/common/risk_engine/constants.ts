@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const MAX_SPACES_COUNT = 2;
+export const MAX_SPACES_COUNT = 1;
