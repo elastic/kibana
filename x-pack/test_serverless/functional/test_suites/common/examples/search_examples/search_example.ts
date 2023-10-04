@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/165730
   // FLAKY: https://github.com/elastic/kibana/issues/165735
-  describe.skip('Search example', () => {
+  describe('Search example', () => {
     describe('with bfetch', () => {
       testSearchExample();
     });
