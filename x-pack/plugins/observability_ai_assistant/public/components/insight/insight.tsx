@@ -110,7 +110,13 @@ function ChatContent({
   return (
     <>
       <MessagePanel
-        body={<MessageText content={lastMessage?.message.content ?? ''} loading={loading} />}
+        body={
+          <MessageText
+            content={lastMessage?.message.content ?? ''}
+            loading={loading}
+            onActionClick={async () => {}}
+          />
+        }
         error={pendingMessage?.error}
         controls={
           loading ? (

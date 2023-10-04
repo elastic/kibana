@@ -8,6 +8,7 @@
 import { toNumberRt } from '@kbn/io-ts-utils';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
+import { profilingUseLegacyFlamegraphAPI } from '@kbn/observability-plugin/common';
 import { HOST_NAME } from '../../../common/es_fields/apm';
 import { toKueryFilterFormat } from '../../../common/utils/to_kuery_filter_format';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -36,6 +37,10 @@ const profilingFlamegraphRoute = createApmServerRoute({
     { flamegraph: BaseFlameGraph; hostNames: string[] } | undefined
   > => {
     const { context, plugins, params } = resources;
+    const useLegacyFlamegraphAPI = await (
+      await context.core
+    ).uiSettings.client.get<boolean>(profilingUseLegacyFlamegraphAPI);
+
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
         (await context.core).elasticsearch.client,
@@ -57,12 +62,17 @@ const profilingFlamegraphRoute = createApmServerRoute({
         rollupInterval,
       });
 
+      if (!serviceHostNames.length) {
+        return undefined;
+      }
+
       const flamegraph =
         await profilingDataAccessStart?.services.fetchFlamechartData({
           esClient: esClient.asCurrentUser,
           rangeFromMs: start,
           rangeToMs: end,
           kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
+          useLegacyFlamegraphAPI,
         });
 
       return { flamegraph, hostNames: serviceHostNames };
@@ -116,6 +126,10 @@ const profilingFunctionsRoute = createApmServerRoute({
         rollupInterval,
       });
 
+      if (!serviceHostNames.length) {
+        return undefined;
+      }
+
       const functions = await profilingDataAccessStart?.services.fetchFunction({
         esClient: esClient.asCurrentUser,
         rangeFromMs: start,
@@ -131,7 +145,38 @@ const profilingFunctionsRoute = createApmServerRoute({
   },
 });
 
+const profilingStatusRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/profiling/status',
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<{ initialized: boolean }> => {
+    const { context, plugins, logger } = resources;
+    const [esClient, profilingDataAccessStart] = await Promise.all([
+      (await context.core).elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+    ]);
+    if (profilingDataAccessStart) {
+      try {
+        const response = await profilingDataAccessStart?.services.getStatus({
+          esClient: esClient.asCurrentUser,
+          soClient: (await context.core).savedObjects.client,
+          spaceId: (
+            await plugins.spaces?.start()
+          )?.spacesService.getSpaceId(resources.request),
+        });
+
+        return { initialized: response.has_setup };
+      } catch (e) {
+        // If any error happens just return as if profiling has not been initialized
+        logger.warn('Could not check Universal Profiling status');
+      }
+    }
+
+    return { initialized: false };
+  },
+});
+
 export const profilingRouteRepository = {
   ...profilingFlamegraphRoute,
+  ...profilingStatusRoute,
   ...profilingFunctionsRoute,
 };

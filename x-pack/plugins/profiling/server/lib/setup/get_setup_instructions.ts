@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
-import { getCollectorPolicy, getSymbolizerPolicy } from './fleet_policies';
+import { getCollectorPolicy, getSymbolizerPolicy } from '@kbn/profiling-data-access-plugin/common';
 
 export interface SetupDataCollectionInstructions {
   collector: {

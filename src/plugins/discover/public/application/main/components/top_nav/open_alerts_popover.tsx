@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -97,7 +98,7 @@ export function AlertsPopover({
 
     return triggersActionsUi?.getAddRuleFlyout({
       metadata: discoverMetadata,
-      consumer: 'discover',
+      consumer: STACK_ALERTS_FEATURE_ID,
       onClose: (_, metadata) => {
         onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
         onClose();

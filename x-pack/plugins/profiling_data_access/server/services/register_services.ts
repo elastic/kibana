@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { CloudStart } from '@kbn/cloud-plugin/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFetchFlamechart } from './fetch_flamechart';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { createGetStatusService } from './status';
+import { createGetSetupState } from './get_setup_state';
+import { ProfilingESClient } from '../../common/profiling_es_client';
 import { createFetchFunctions } from './functions';
 
 export interface RegisterServicesParams {
@@ -15,11 +19,18 @@ export interface RegisterServicesParams {
     esClient: ElasticsearchClient;
     useDefaultAuth?: boolean;
   }) => ProfilingESClient;
+  logger: Logger;
+  deps: {
+    fleet: FleetStartContract;
+    cloud: CloudStart;
+  };
 }
 
 export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
+    getStatus: createGetStatusService(params),
+    getSetupState: createGetSetupState(params),
     fetchFunction: createFetchFunctions(params),
   };
 }
