@@ -19,7 +19,8 @@ import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/c
 describe(
   'Policy Details',
   {
-    tags: '@ess',
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
     describe('Protection updates', () => {
