@@ -93,6 +93,11 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
           },
         },
         {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
+        {
           test: /\.scss$/,
           exclude: /\.module.(s(a|c)ss)$/,
           use: [
@@ -127,7 +132,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx', '.mjs'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
