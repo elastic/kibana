@@ -32,6 +32,7 @@ export function createIndexDocRecordsStream(
     await client.helpers.bulk(
       {
         retries: 5,
+        concurrency: 4,
         datasource: docs.map((doc) => {
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -68,7 +69,7 @@ export function createIndexDocRecordsStream(
   }
 
   return new Writable({
-    highWaterMark: 300,
+    highWaterMark: parseInt((process.env.HIGH_WATER_MARK as string) ?? 5000, 10),
     objectMode: true,
 
     async write(record, enc, callback) {
