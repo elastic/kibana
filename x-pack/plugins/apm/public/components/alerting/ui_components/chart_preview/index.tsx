@@ -17,7 +17,7 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
-  TooltipProps,
+  Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
@@ -57,6 +57,7 @@ export function ChartPreview({
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
+  const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const style = {
     fill: theme.eui.euiColorVis2,
@@ -66,17 +67,6 @@ export function ChartPreview({
       opacity: 1,
     },
     opacity: thresholdOpacity,
-  };
-
-  const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
-
-  const tooltipProps: TooltipProps = {
-    headerFormatter: ({ value }) => {
-      const dateFormat =
-        (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
-        DEFAULT_DATE_FORMAT;
-      return moment(value).format(dateFormat);
-    },
   };
 
   const barSeries = useMemo(() => {
@@ -126,8 +116,16 @@ export function ChartPreview({
         }}
         data-test-subj="ChartPreview"
       >
+        <Tooltip
+          type="none"
+          headerFormatter={({ value }) => {
+            const dateFormat =
+              (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
+              DEFAULT_DATE_FORMAT;
+            return moment(value).format(dateFormat);
+          }}
+        />
         <Settings
-          tooltip={tooltipProps}
           showLegend={true}
           legendPosition={'bottom'}
           legendSize={legendSize}

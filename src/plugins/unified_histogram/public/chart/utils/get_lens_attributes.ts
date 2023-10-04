@@ -17,6 +17,7 @@ import type {
   TypedLensByValueInput,
   Suggestion,
 } from '@kbn/lens-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export interface LensRequestData {
@@ -160,6 +161,8 @@ export const getLensAttributes = ({
         legend: {
           isVisible: true,
           position: 'right',
+          legendSize: LegendSize.EXTRA_LARGE,
+          shouldTruncate: false,
         },
         preferredSeriesType: 'bar_stacked',
         valueLabels: 'hide',

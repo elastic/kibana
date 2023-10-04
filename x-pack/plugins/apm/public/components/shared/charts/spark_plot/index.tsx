@@ -14,6 +14,7 @@ import {
   PartialTheme,
   ScaleType,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -142,8 +143,8 @@ function SparkPlotItem({
         <Settings
           theme={[sparkplotChartTheme, ...defaultChartTheme]}
           showLegend={false}
-          tooltip="none"
         />
+        <Tooltip type="none" />
         {type && type === 'bar' ? (
           <>
             <BarSeries

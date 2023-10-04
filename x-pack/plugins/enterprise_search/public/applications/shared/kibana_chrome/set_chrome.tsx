@@ -9,14 +9,14 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
+import { APPLICATIONS_PLUGIN, VECTOR_SEARCH_PLUGIN } from '../../../../common/constants';
 
 import { KibanaLogic } from '../kibana';
 
 import {
   useGenerateBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
-  useEnterpriseSearchEnginesBreadcrumbs,
+  useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
   useEsreBreadcrumbs,
@@ -25,6 +25,7 @@ import {
   useWorkplaceSearchBreadcrumbs,
   BreadcrumbTrail,
   useSearchExperiencesBreadcrumbs,
+  useVectorSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
   enterpriseSearchTitle,
@@ -34,6 +35,7 @@ import {
   workplaceSearchTitle,
   searchExperiencesTitle,
   esreTitle,
+  vectorSearchTitle,
 } from './generate_title';
 
 /**
@@ -191,14 +193,32 @@ export const SetSearchExperiencesChrome: React.FC<SetChromeProps> = ({ trail = [
   return null;
 };
 
-export const SetEnterpriseSearchEnginesChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetEnterpriseSearchApplicationsChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
   const docTitle = appSearchTitle(title);
 
-  const breadcrumbs = useEnterpriseSearchEnginesBreadcrumbs(
+  const breadcrumbs = useEnterpriseSearchApplicationsBreadcrumbs(
     useGenerateBreadcrumbs([APPLICATIONS_PLUGIN.NAV_TITLE, ...trail])
+  );
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetVectorSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = vectorSearchTitle(title);
+
+  const breadcrumbs = useVectorSearchBreadcrumbs(
+    useGenerateBreadcrumbs([VECTOR_SEARCH_PLUGIN.NAV_TITLE, ...trail])
   );
 
   useEffect(() => {

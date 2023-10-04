@@ -38,8 +38,9 @@ interface AuthorizedPurposes {
 const ALL_SPACE_RESULTS = [
   {
     id: 'default',
-    name: 'Default Space',
-    description: 'This is the default space',
+    name: 'Default',
+    color: '#00bfb3',
+    description: 'This is your default space!',
     _reserved: true,
     disabledFeatures: [],
   },

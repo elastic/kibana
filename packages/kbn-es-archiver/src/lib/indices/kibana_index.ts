@@ -121,6 +121,7 @@ export async function cleanSavedObjectIndices({
     const resp = await client.deleteByQuery(
       {
         index,
+        refresh: true,
         body: {
           query: {
             bool: {
@@ -139,7 +140,7 @@ export async function cleanSavedObjectIndices({
       }
     );
 
-    if (resp.total !== resp.deleted) {
+    if (resp.total !== resp.deleted && resp.total && resp.total > 1) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
         resp.deleted,

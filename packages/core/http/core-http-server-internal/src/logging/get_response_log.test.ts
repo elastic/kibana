@@ -211,6 +211,21 @@ describe('getEcsResponseLog', () => {
       `);
     });
 
+    test('redacts es-client-authentication headers by default', () => {
+      const req = createMockHapiRequest({
+        headers: { 'es-client-authentication': 'ae3fda37-xxx', 'user-agent': 'world' },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "es-client-authentication": "[REDACTED]",
+          "user-agent": "world",
+        }
+      `);
+    });
+
     test('does not mutate original headers', () => {
       const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
       const resHeaders = { headers: { c: 'bar' } };

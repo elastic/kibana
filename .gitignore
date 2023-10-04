@@ -11,6 +11,7 @@ node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 !/packages/kbn-import-resolver/src/__fixtures__/node_modules
+!/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
 trash
 /optimize
 /built_assets
@@ -92,7 +93,7 @@ npm-debug.log*
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
-x-pack/plugins/apm/scripts/apm-diagnostics*.json
+/apm-diagnostics*.json
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
@@ -131,4 +132,5 @@ fleet-server.yml
 **/.synthetics/
 **/.journeys/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
+
 

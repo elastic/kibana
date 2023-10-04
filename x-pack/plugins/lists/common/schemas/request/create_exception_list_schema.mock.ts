@@ -9,6 +9,7 @@ import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list
 
 import {
   DESCRIPTION,
+  DETECTION_TYPE,
   ENDPOINT_TYPE,
   LIST_ID,
   META,
@@ -55,5 +56,5 @@ export const getCreateExceptionListDetectionSchemaMock = (): CreateExceptionList
   description: DESCRIPTION,
   list_id: LIST_ID,
   name: NAME,
-  type: 'detection',
+  type: DETECTION_TYPE,
 });

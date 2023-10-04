@@ -17,6 +17,7 @@ import {
   LegendPositionConfig,
   LayoutDirection,
   Placement,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -198,6 +199,11 @@ export const TimelionVisComponent = ({
         </EuiTitle>
       )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
+        <Tooltip
+          snap={true}
+          headerFormatter={({ value }) => tickFormat(value)}
+          type={TooltipType.VerticalCursor}
+        />
         <Settings
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
@@ -211,11 +217,6 @@ export const TimelionVisComponent = ({
           }}
           theme={chartTheme}
           baseTheme={chartBaseTheme}
-          tooltip={{
-            snap: true,
-            headerFormatter: ({ value }) => tickFormat(value),
-            type: TooltipType.VerticalCursor,
-          }}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
         />

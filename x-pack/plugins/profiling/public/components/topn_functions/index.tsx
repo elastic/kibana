@@ -34,63 +34,69 @@ interface Row {
   rank: number;
   frame: StackFrameMetadata;
   samples: number;
+  exclusiveCPUPerc: number;
+  inclusiveCPUPerc: number;
   exclusiveCPU: number;
   inclusiveCPU: number;
   impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
+    exclusiveCPUPerc: number;
+    inclusiveCPUPerc: number;
     exclusiveCPU: number;
     inclusiveCPU: number;
   };
 }
 
-function getTotalSamplesLabel(samplingRate?: number) {
-  if (samplingRate === undefined) {
-    return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
-      defaultMessage: 'Total sample estimate:',
-    });
-  }
-  return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabelWithSamplingRate', {
-    defaultMessage: 'Total sample (estimate sample rate: {samplingRate}):',
-    values: { samplingRate },
-  });
-}
-
 function TotalSamplesStat({
-  totalSamples,
-  newSamples,
-  samplingRateA,
-  samplingRateB,
+  baselineTotalSamples,
+  baselineScaleFactor,
+  comparisonTotalSamples,
+  comparisonScaleFactor,
 }: {
-  totalSamples: number;
-  newSamples: number | undefined;
-  samplingRateA: number;
-  samplingRateB: number | undefined;
+  baselineTotalSamples: number;
+  baselineScaleFactor?: number;
+  comparisonTotalSamples?: number;
+  comparisonScaleFactor?: number;
 }) {
-  const value = totalSamples.toLocaleString();
+  const scaledBaselineTotalSamples = scaleValue({
+    value: baselineTotalSamples,
+    scaleFactor: baselineScaleFactor,
+  });
 
-  if (newSamples === undefined || newSamples === 0) {
+  const value = scaledBaselineTotalSamples.toLocaleString();
+
+  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
+    defaultMessage: ' Total sample estimate: ',
+  });
+
+  if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
-        description={getTotalSamplesLabel(samplingRateA)}
+        description={sampleHeader}
       />
     );
   }
 
-  const diffSamples = totalSamples - newSamples;
-  const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const scaledComparisonTotalSamples = scaleValue({
+    value: comparisonTotalSamples,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledBaselineTotalSamples - scaledComparisonTotalSamples;
+  const percentDelta = (diffSamples / (scaledBaselineTotalSamples - diffSamples)) * 100;
 
   return (
     <EuiStat
       title={
         <EuiText style={{ fontWeight: 'bold' }}>
           {value}
-          <GetLabel value={percentDelta} prepend=" (" append=")" />
+          <GetLabel value={percentDelta} prepend="(" append=")" />
         </EuiText>
       }
-      description={getTotalSamplesLabel(samplingRateB)}
+      description={sampleHeader}
     />
   );
 }
@@ -202,15 +208,15 @@ export function TopNFunctionsTable({
         scaleFactor: baselineScaleFactor,
       });
 
-      const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-      const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+      const inclusiveCPUPerc = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+      const exclusiveCPUPerc = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
       const totalSamples = topN.CountExclusive;
 
       const impactEstimates =
         totalSeconds > 0
           ? calculateImpactEstimates({
-              countExclusive: exclusiveCPU,
-              countInclusive: inclusiveCPU,
+              countExclusive: topN.CountExclusive,
+              countInclusive: topN.CountInclusive,
               totalSamples,
               totalSeconds,
             })
@@ -226,11 +232,13 @@ export function TopNFunctionsTable({
           return {
             rank: topN.Rank - comparisonRow.Rank,
             samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-            exclusiveCPU:
-              exclusiveCPU -
+            exclusiveCPU: comparisonRow.CountExclusive,
+            inclusiveCPU: comparisonRow.CountInclusive,
+            exclusiveCPUPerc:
+              exclusiveCPUPerc -
               (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-            inclusiveCPU:
-              inclusiveCPU -
+            inclusiveCPUPerc:
+              inclusiveCPUPerc -
               (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
           };
         }
@@ -240,8 +248,10 @@ export function TopNFunctionsTable({
         rank: topN.Rank,
         frame: topN.Frame,
         samples: topNCountExclusiveScaled,
-        exclusiveCPU,
-        inclusiveCPU,
+        exclusiveCPUPerc,
+        inclusiveCPUPerc,
+        exclusiveCPU: topN.CountExclusive,
+        inclusiveCPU: topN.CountInclusive,
         impactEstimates,
         diff: calculateDiff(),
       };
@@ -302,8 +312,8 @@ export function TopNFunctionsTable({
           iconSize="s"
         />
       ),
-      render: (_, { exclusiveCPU, diff }) => {
-        return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
+      render: (_, { exclusiveCPUPerc, diff }) => {
+        return <CPUStat cpu={exclusiveCPUPerc} diffCPU={diff?.exclusiveCPUPerc} />;
       },
       align: 'right',
     },
@@ -317,8 +327,8 @@ export function TopNFunctionsTable({
           iconSize="s"
         />
       ),
-      render: (_, { inclusiveCPU, diff }) => {
-        return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
+      render: (_, { inclusiveCPUPerc, diff }) => {
+        return <CPUStat cpu={inclusiveCPUPerc} diffCPU={diff?.inclusiveCPUPerc} />;
       },
       align: 'right',
     },
@@ -416,10 +426,10 @@ export function TopNFunctionsTable({
   return (
     <>
       <TotalSamplesStat
-        totalSamples={totalCount}
-        newSamples={comparisonTopNFunctions?.TotalCount}
-        samplingRateA={topNFunctions?.SamplingRate ?? 1.0}
-        samplingRateB={comparisonTopNFunctions?.SamplingRate ?? 1.0}
+        baselineTotalSamples={totalCount}
+        baselineScaleFactor={baselineScaleFactor}
+        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
+        comparisonScaleFactor={comparisonScaleFactor}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
@@ -458,7 +468,7 @@ export function TopNFunctionsTable({
             sourceLine: selectedRow.frame.SourceLine,
           }}
           totalSeconds={totalSeconds ?? 0}
-          totalSamples={selectedRow.samples}
+          totalSamples={totalCount}
           samplingRate={topNFunctions?.SamplingRate ?? 1.0}
         />
       )}

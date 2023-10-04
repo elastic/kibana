@@ -71,12 +71,14 @@ export const fetchUpsertMonitor = async ({
   }
 };
 
-export const fetchCreateMonitor = async ({
+export const createGettingStartedMonitor = async ({
   monitor,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor);
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
+    gettingStarted: true,
+  });
 };
 
 export const fetchMonitorFilters = async (): Promise<MonitorFiltersResult> => {

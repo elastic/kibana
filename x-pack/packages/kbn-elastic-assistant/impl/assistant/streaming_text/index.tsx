@@ -17,8 +17,10 @@ export interface StreamingTextProps {
 
 export const StreamingText: React.FC<StreamingTextProps> = React.memo<StreamingTextProps>(
   ({ text, children, chunkSize = 5, delay = 100, onStreamingComplete }) => {
-    const [displayText, setDisplayText] = useState<string>(delay === 0 ? text : '');
-    const [isStreamingComplete, setIsStreamingComplete] = useState<boolean>(delay === 0);
+    const [displayText, setDisplayText] = useState<string>(delay > 0 ? '' : text);
+    const [isStreamingComplete, setIsStreamingComplete] = useState<boolean>(
+      delay == null || delay === 0
+    );
 
     useEffect(() => {
       if (delay === 0) {
@@ -30,6 +32,7 @@ export const StreamingText: React.FC<StreamingTextProps> = React.memo<StreamingT
 
     useEffect(() => {
       if (isStreamingComplete || delay === 0) {
+        setDisplayText(text);
         return;
       }
 

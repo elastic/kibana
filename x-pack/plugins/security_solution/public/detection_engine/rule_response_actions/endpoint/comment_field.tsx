@@ -23,7 +23,7 @@ const CONFIG = {
   helpText: (
     <FormattedMessage
       id="xpack.securitySolution.responseActions.endpoint.commentDescription"
-      defaultMessage="Leave a note that explains or describes the action. You can see your comment in Response action history log."
+      defaultMessage="Leave a note that explains or describes the action. You can see your comment in the response actions history log."
     />
   ),
 };

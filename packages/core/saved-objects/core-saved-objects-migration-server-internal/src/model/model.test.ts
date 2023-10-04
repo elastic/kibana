@@ -2597,19 +2597,75 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if mappings do not match', () => {
-        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
-        const newState = model(
-          checkTargetMappingsState,
-          res
-        ) as UpdateTargetMappingsPropertiesState;
-        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+      describe('reindex migration', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if origin mappings did not exist', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'actual_mappings_incomplete' as const,
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
+        });
       });
 
-      it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
-        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: true });
-        const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
-        expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
+      describe('compatible migration', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'compared_mappings_changed' as const,
+            updatedRootFields: ['namespaces'],
+            updatedTypes: ['dashboard', 'lens'],
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          // since a core field has been updated, we must pickup ALL SOs.
+          // Thus, we must NOT define a filter query.
+          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if only SO types have changed', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'compared_mappings_changed' as const,
+            updatedRootFields: [],
+            updatedTypes: ['dashboard', 'lens'],
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          expect(
+            Option.isSome(newState.updatedTypesQuery) && newState.updatedTypesQuery.value
+          ).toEqual({
+            bool: {
+              should: [
+                {
+                  term: {
+                    type: 'dashboard',
+                  },
+                },
+                {
+                  term: {
+                    type: 'lens',
+                  },
+                },
+              ],
+            },
+          });
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
+            type: 'compared_mappings_match' as const,
+          });
+          const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
+          expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
+        });
       });
     });
 
@@ -2842,6 +2898,17 @@ describe('migrations v2 model', () => {
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
+        updatedTypesQuery: Option.fromNullable({
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'type1',
+                },
+              },
+            ],
+          },
+        }),
       };
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'> = Either.right({

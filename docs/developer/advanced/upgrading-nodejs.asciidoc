@@ -17,7 +17,7 @@ These files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
     These can be found on the https://nodejs.org[nodejs.org] website.
-    Example for Node.js v16.20.1: https://nodejs.org/dist/v16.20.1/SHASUMS256.txt.asc
+    Example for Node.js v16.20.2: https://nodejs.org/dist/v16.20.2/SHASUMS256.txt.asc
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
@@ -37,15 +37,21 @@ Use best judgement when backporting.
 
 ==== Node.js patch upgrades
 
-Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version (which currently is all of them, but this might change in the future once Node.js v18 is released and becomes LTS):
+Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version (which currently is all of them, but this might change in the future):
 
-  - If upgrading Node.js 16, and the current release is 8.1.x, the main PR should target `main` and be backported to `7.17` and `8.1`.
+  - If the current release is 8.1.x, the main PR should target `main` and be backported to `7.17` and `8.1` (GitHub tag example: `backport:all-open`).
 
 ==== Node.js minor upgrades
 
-Typically, you want to backport Node.js *minor* upgrades to the next minor {kib} release branch that runs the same *major* Node.js version:
+Typically, you want to backport Node.js *minor* upgrades to the previous major {kib} release branch (if it runs the same *major* Node.js version):
 
-  - If upgrading Node.js 16, and the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is.
+  - If the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is (GitHub tag example: `auto-backport` + `v7.17.13`).
+
+==== Node.js major upgrades
+
+Typically, you want to backport Node.js *major* upgrades to the previous major {kib} release branch:
+
+  - If the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is (GitHub tag example: `auto-backport` + `v7.17.13`).
 
 === Upgrading installed Node.js version
 

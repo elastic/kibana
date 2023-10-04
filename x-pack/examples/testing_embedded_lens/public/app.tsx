@@ -493,7 +493,11 @@ export const App = (props: {
 
   return (
     <KibanaContextProvider
-      services={{ uiSettings: props.core.uiSettings, settings: props.core.settings }}
+      services={{
+        uiSettings: props.core.uiSettings,
+        settings: props.core.settings,
+        theme: props.core.theme,
+      }}
     >
       <EuiPageTemplate fullHeight template="empty">
         <EuiFlexGroup

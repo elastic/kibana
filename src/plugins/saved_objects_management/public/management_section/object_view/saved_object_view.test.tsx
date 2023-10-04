@@ -20,6 +20,7 @@ import {
   uiSettingsServiceMock,
   scopedHistoryMock,
   docLinksServiceMock,
+  themeServiceMock,
 } from '@kbn/core/public/mocks';
 
 import type { SavedObjectWithMetadata } from '../../types';
@@ -42,6 +43,7 @@ describe('SavedObjectEdition', () => {
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
   let settings: ReturnType<typeof settingsServiceMock.createStartContract>;
+  let theme: ReturnType<typeof themeServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
     return shallowWithI18nProvider(
@@ -62,6 +64,7 @@ describe('SavedObjectEdition', () => {
     history = scopedHistoryMock.create();
     docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
+    theme = themeServiceMock.createStartContract();
     applications.capabilities = {
       navLinks: {},
       management: {},
@@ -86,6 +89,7 @@ describe('SavedObjectEdition', () => {
       uiSettings,
       docLinks: docLinks.links,
       settings,
+      theme,
     };
 
     bulkDeleteObjectsMock.mockResolvedValue([{}]);

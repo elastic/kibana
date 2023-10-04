@@ -1,0 +1,5 @@
+description: >
+  The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents.
+  Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+type: integer
+example: 5

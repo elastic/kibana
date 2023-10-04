@@ -13,7 +13,6 @@ import * as i18n from '../translations';
 
 export interface ConnectorButtonProps {
   setIsConnectorModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  connectorAdded?: boolean;
 }
 
 /**
@@ -22,18 +21,15 @@ export interface ConnectorButtonProps {
  * connector add logic.
  */
 export const ConnectorButton: React.FC<ConnectorButtonProps> = React.memo<ConnectorButtonProps>(
-  ({ setIsConnectorModalVisible, connectorAdded = false }) => {
+  ({ setIsConnectorModalVisible }) => {
     return (
       <EuiFlexGroup gutterSize="l" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type={GenAiLogo} />}
-            title={connectorAdded ? i18n.CONNECTOR_ADDED_TITLE : i18n.ADD_CONNECTOR_TITLE}
-            isDisabled={connectorAdded}
-            description={
-              connectorAdded ? i18n.CONNECTOR_ADDED_DESCRIPTION : i18n.ADD_CONNECTOR_DESCRIPTION
-            }
+            title={i18n.ADD_CONNECTOR_TITLE}
+            description={i18n.ADD_CONNECTOR_DESCRIPTION}
             onClick={() => setIsConnectorModalVisible(true)}
           />
         </EuiFlexItem>

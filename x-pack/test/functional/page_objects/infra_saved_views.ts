@@ -15,8 +15,15 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    clickSavedViewsButton() {
-      return testSubjects.click('savedViews-openPopover');
+    async clickSavedViewsButton() {
+      const button = await testSubjects.find('savedViews-openPopover');
+
+      await retry.waitFor('Wait for button to be enabled', async () => {
+        const isDisabled = Boolean(await button.getAttribute('disabled'));
+        return !isDisabled;
+      });
+
+      return button.click();
     },
     pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);

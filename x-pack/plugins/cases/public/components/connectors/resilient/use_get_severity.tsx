@@ -25,11 +25,10 @@ export const useGetSeverity = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<ResilientSeverity>, ServerError>(
     connectorsQueriesKeys.resilientGetSeverity(connector?.id ?? ''),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       return getSeverity({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
       });
     },

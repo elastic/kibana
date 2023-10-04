@@ -48,16 +48,14 @@ describe('SlackActionFields renders', () => {
       secrets: {
         token: 'some token',
       },
-      config: {
-        allowedChannels: ['foo', 'bar'],
-      },
+      config: {},
       id: 'test',
       actionTypeId: '.slack',
       name: 'slack',
       isDeprecated: false,
     };
 
-    const { container } = render(
+    render(
       <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
         <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
@@ -65,17 +63,6 @@ describe('SlackActionFields renders', () => {
 
     expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
     expect(screen.getByTestId('secrets.token-input')).toHaveValue('some token');
-    expect(screen.getByTestId('config.allowedChannels-input')).toBeInTheDocument();
-    const allowedChannels: string[] = [];
-    container
-      .querySelectorAll('[data-test-subj="config.allowedChannels-input"] .euiBadge')
-      .forEach((node) => {
-        const channel = node.getAttribute('title');
-        if (channel) {
-          allowedChannels.push(channel);
-        }
-      });
-    expect(allowedChannels).toEqual(['foo', 'bar']);
   });
 
   it('connector validation succeeds when connector config is valid for Web API type', async () => {
@@ -105,9 +92,6 @@ describe('SlackActionFields renders', () => {
         secrets: {
           token: 'some token',
         },
-        config: {
-          allowedChannels: [],
-        },
         id: 'test',
         actionTypeId: '.slack',
         name: 'slack',
@@ -115,63 +99,5 @@ describe('SlackActionFields renders', () => {
       },
       isValid: true,
     });
-  });
-
-  it('Allowed Channels combobox should be disable when there is NO token', async () => {
-    const actionConnector = {
-      secrets: {
-        token: '',
-      },
-      config: {
-        allowedChannels: ['foo', 'bar'],
-      },
-      id: 'test',
-      actionTypeId: '.slack',
-      name: 'slack',
-      isDeprecated: false,
-    };
-
-    const { container } = render(
-      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
-    expect(
-      container.querySelector(
-        '[data-test-subj="config.allowedChannels-input"].euiComboBox-isDisabled'
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('Allowed Channels combobox should NOT be disable when there is token', async () => {
-    const actionConnector = {
-      secrets: {
-        token: 'qwertyuiopasdfghjklzxcvbnm',
-      },
-      config: {
-        allowedChannels: ['foo', 'bar'],
-      },
-      id: 'test',
-      actionTypeId: '.slack',
-      name: 'slack',
-      isDeprecated: false,
-    };
-
-    (useFetchChannels as jest.Mock).mockImplementation(() => ({
-      channels: [{ label: 'foo' }, { label: 'bar' }, { label: 'hello' }, { label: 'world' }],
-      isLoading: false,
-    }));
-
-    const { container } = render(
-      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
-
-    expect(
-      container.querySelector(
-        '[data-test-subj="config.allowedChannels-input"].euiComboBox-isDisabled'
-      )
-    ).not.toBeInTheDocument();
   });
 });

@@ -135,6 +135,10 @@ export function getSuggestions({
   // and rank them by score
   return Object.entries(visualizationMap)
     .flatMap(([visualizationId, visualization]) => {
+      // in case a missing visualization type is passed via SO, just avoid to compute anything for it
+      if (!visualization) {
+        return [];
+      }
       const supportedLayerTypes = visualization.getSupportedLayers().map(({ type }) => type);
       return datasourceTableSuggestions
         .filter((datasourceSuggestion) => {

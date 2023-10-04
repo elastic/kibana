@@ -67,6 +67,7 @@
     "@kbn/aiops-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
+    "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]
 }

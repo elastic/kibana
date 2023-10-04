@@ -80,6 +80,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.email',
+                  id: 'notification-email',
+                  is_deprecated: false,
+                  is_preconfigured: true,
+                  name: 'Notification Email Connector',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
                   is_deprecated: false,
@@ -223,6 +231,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 1,
                 },
                 {
+                  connector_type_id: '.email',
+                  id: 'notification-email',
+                  is_deprecated: false,
+                  is_preconfigured: true,
+                  name: 'Notification Email Connector',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
                   is_deprecated: false,
@@ -329,6 +345,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
               );
               expect(nonCustomSslConnectors).to.eql([
+                {
+                  connector_type_id: '.email',
+                  id: 'notification-email',
+                  is_deprecated: false,
+                  is_preconfigured: true,
+                  name: 'Notification Email Connector',
+                  referenced_by_count: 0,
+                },
                 {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,

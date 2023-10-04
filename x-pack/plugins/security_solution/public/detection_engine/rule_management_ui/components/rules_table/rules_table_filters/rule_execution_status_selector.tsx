@@ -77,6 +77,7 @@ const RuleExecutionStatusSelectorComponent = ({
       isSelected={isExecutionStatusPopoverOpen}
       hasActiveFilters={selectedStatus !== undefined}
       numActiveFilters={selectedStatus !== undefined ? 1 : 0}
+      data-test-subj="executionStatusFilterButton"
     >
       {i18n.COLUMN_LAST_RESPONSE}
     </EuiFilterButton>
@@ -108,11 +109,13 @@ const RuleExecutionStatusSelectorComponent = ({
               css={`
                 margin-top: 4px; // aligns the badge within the option
               `}
+              data-test-subj="executionStatusFilterOption"
             >
               <RuleStatusBadge status={status} showTooltip={false} />
             </div>
           );
         }}
+        data-test-subj="executionStatusFilterSelectableList"
       >
         {(list) => (
           <div

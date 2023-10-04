@@ -40,7 +40,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
           validation_errors: validationErrors,
         } = configEntry;
 
-        if (key === 'document_level_security' && !hasDocumentLevelSecurityEnabled) {
+        if (key === 'use_document_level_security' && !hasDocumentLevelSecurityEnabled) {
           return null;
         }
 

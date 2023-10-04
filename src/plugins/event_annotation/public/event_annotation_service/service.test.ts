@@ -34,6 +34,7 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
       tags: [],
       ignoreGlobalFilters: false,
       annotations: [],
+      dataViewSpec: null,
     },
     type: 'event-annotation-group',
     references: [
@@ -514,7 +515,7 @@ describe('Event Annotation Service', () => {
       const searchTerm = 'my search';
 
       const content = await eventAnnotationService.findAnnotationGroupContent(searchTerm, 20, [
-        { type: 'mytype', id: '1234' },
+        '1234',
       ]);
 
       expect(content).toMatchSnapshot();
@@ -525,6 +526,13 @@ describe('Event Annotation Service', () => {
             Object {
               "contentTypeId": "event-annotation-group",
               "query": Object {
+                "limit": 20,
+                "tags": Object {
+                  "excluded": undefined,
+                  "included": Array [
+                    "1234",
+                  ],
+                },
                 "text": "my search*",
               },
             },
@@ -566,7 +574,7 @@ describe('Event Annotation Service', () => {
           title: 'newGroupTitle',
           description: 'my description',
           ignoreGlobalFilters: false,
-          dataViewSpec: undefined,
+          dataViewSpec: null,
           annotations,
         },
         options: {
@@ -616,7 +624,7 @@ describe('Event Annotation Service', () => {
           title: 'newTitle',
           description: '',
           annotations: [],
-          dataViewSpec: undefined,
+          dataViewSpec: null,
           ignoreGlobalFilters: false,
         } as EventAnnotationGroupAttributes,
         options: {

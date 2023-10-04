@@ -31,14 +31,25 @@ export interface VersionBuckets {
      */
     target: PrebuiltRuleAsset;
   }>;
+  /**
+   * All available rules
+   * (installed and not installed)
+   */
+  totalAvailableRules: PrebuiltRuleAsset[];
 }
 
 export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): VersionBuckets => {
   const currentRules: RuleResponse[] = [];
   const installableRules: PrebuiltRuleAsset[] = [];
+  const totalAvailableRules: PrebuiltRuleAsset[] = [];
   const upgradeableRules: VersionBuckets['upgradeableRules'] = [];
 
   ruleVersionsMap.forEach(({ current, target }) => {
+    if (target != null) {
+      // If this rule is available in the package
+      totalAvailableRules.push(target);
+    }
+
     if (current != null) {
       // If this rule is installed
       currentRules.push(current);
@@ -62,5 +73,6 @@ export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): V
     currentRules,
     installableRules,
     upgradeableRules,
+    totalAvailableRules,
   };
 };

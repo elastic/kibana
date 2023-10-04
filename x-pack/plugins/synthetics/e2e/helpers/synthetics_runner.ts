@@ -139,7 +139,9 @@ export class SyntheticsRunner {
   }
 
   assertResults(results: PromiseType<ReturnType<typeof syntheticsRun>>) {
+    console.log('Asserting results...');
     Object.entries(results).forEach(([_journey, result]) => {
+      console.log(`Journey: ${_journey}, Status: ${result.status}`);
       if (result.status !== 'succeeded') {
         process.exitCode = 1;
         process.exit();

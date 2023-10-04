@@ -26,6 +26,7 @@ export interface Actions<Args, Result> {
 
 export interface CreateApiOptions<Result> {
   clearFlashMessagesOnMakeRequest: boolean;
+  key: string; // for logics that use a key as a prop
   requestBreakpointMS?: number;
   showErrorFlash: boolean;
   showSuccessFlashFn?: (result: Result) => string;

@@ -42,6 +42,7 @@ import type {
   UserMessage,
   FrameDatasourceAPI,
   StateSetter,
+  IndexPatternMap,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -70,6 +71,7 @@ import {
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -498,7 +500,7 @@ export function getFormBasedDatasource({
       );
     },
 
-    uniqueLabels(state: FormBasedPrivateState) {
+    uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
 
@@ -509,7 +511,15 @@ export function getFormBasedDatasource({
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = uniqueLabelGenerator(column.label);
+          columnLabelMap[columnId] = uniqueLabelGenerator(
+            column.customLabel
+              ? column.label
+              : operationDefinitionMap[column.operationType].getDefaultLabel(
+                  column,
+                  indexPatternsMap[layer.indexPatternId],
+                  layer.columns
+                )
+          );
         });
       });
 
@@ -520,7 +530,7 @@ export function getFormBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
     ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
@@ -552,7 +562,7 @@ export function getFormBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionEditorProps<FormBasedPrivateState>
     ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -746,7 +756,7 @@ export function getFormBasedDatasource({
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<FormBasedPrivateState>) {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(state, indexPatterns);
       const layer = state.layers[layerId];
       const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
@@ -882,6 +892,7 @@ export function getFormBasedDatasource({
           core.docLinks,
           setState
         ),
+        ...getUnsupportedOperationsWarningMessage(state, frameDatasourceAPI, core.docLinks),
       ];
 
       const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);

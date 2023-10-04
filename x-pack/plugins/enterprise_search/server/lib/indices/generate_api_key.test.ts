@@ -59,7 +59,7 @@ describe('generateApiKey lib function', () => {
           cluster: ['monitor'],
           index: [
             {
-              names: ['index_name', `${CONNECTORS_INDEX}*`],
+              names: ['index_name', '.search-acl-filter-index_name', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],
@@ -85,16 +85,16 @@ describe('generateApiKey lib function', () => {
     }));
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name')
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test')
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
-      name: 'index_name-connector',
+      name: 'search-test-connector',
       role_descriptors: {
-        ['index-name-connector-role']: {
+        ['search-test-connector-role']: {
           cluster: ['monitor'],
           index: [
             {
-              names: ['index_name', `${CONNECTORS_INDEX}*`],
+              names: ['search-test', '.search-acl-filter-test', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],
@@ -141,7 +141,7 @@ describe('generateApiKey lib function', () => {
           cluster: ['monitor'],
           index: [
             {
-              names: ['index_name', `${CONNECTORS_INDEX}*`],
+              names: ['index_name', '.search-acl-filter-index_name', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],

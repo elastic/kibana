@@ -7,8 +7,11 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import expect from '@kbn/expect';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import expect from 'expect';
+import type {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
@@ -30,6 +33,7 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -126,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const bodyToCompare = removeServerGeneratedProperties(rule);
-          expect(bodyToCompare).to.eql(expected);
+          expect(bodyToCompare).toEqual(expected);
         });
 
         it('should create a single rule with an exception list and validate it ran successfully', async () => {
@@ -167,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-          expect(bodyToCompare).to.eql(expected);
+          expect(bodyToCompare).toEqual(expected);
         });
 
         it('should allow removing an exception list from an immutable rule through patch', async () => {
@@ -175,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one exceptions_list
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one exceptions_list
 
           // remove the exceptions list as a user is allowed to remove it from an immutable rule
           await supertest
@@ -185,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRuleSecondTime.exceptions_list.length).to.eql(0);
+          expect(immutableRuleSecondTime.exceptions_list.length).toEqual(0);
         });
 
         it('should allow adding a second exception list to an immutable rule through patch', async () => {
@@ -199,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
           await supertest
@@ -221,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
-          expect(immutableRuleSecondTime.exceptions_list.length).to.eql(2);
+          expect(immutableRuleSecondTime.exceptions_list.length).toEqual(2);
         });
 
         it('should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
@@ -229,7 +233,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
@@ -242,8 +246,8 @@ export default ({ getService }: FtrProviderContext) => {
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
           // We should have a length of 1 and it should be the same as our original before we tried to remove it using patch
-          expect(immutableRuleSecondTime.exceptions_list.length).to.eql(1);
-          expect(immutableRuleSecondTime.exceptions_list).to.eql(immutableRule.exceptions_list);
+          expect(immutableRuleSecondTime.exceptions_list.length).toEqual(1);
+          expect(immutableRuleSecondTime.exceptions_list).toEqual(immutableRule.exceptions_list);
         });
 
         it('should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
@@ -257,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // remove the exception list and only have a single list that is not an endpoint_list
           await supertest
@@ -280,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installMockPrebuiltRules(supertest, es);
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
-          expect(immutableRuleSecondTime.exceptions_list).to.eql([
+          expect(immutableRuleSecondTime.exceptions_list).toEqual([
             ...immutableRule.exceptions_list,
             {
               id,
@@ -296,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
           await installMockPrebuiltRules(supertest, es);
@@ -305,7 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // The installed rule should have both the original immutable exceptions list back and the
           // new list the user added.
-          expect(immutableRuleSecondTime.exceptions_list).to.eql([
+          expect(immutableRuleSecondTime.exceptions_list).toEqual([
             ...immutableRule.exceptions_list,
           ]);
         });
@@ -345,7 +349,7 @@ export default ({ getService }: FtrProviderContext) => {
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
           // It should be the same as what the user added originally
-          expect(immutableRuleSecondTime.exceptions_list).to.eql([
+          expect(immutableRuleSecondTime.exceptions_list).toEqual([
             ...immutableRule.exceptions_list,
             {
               id,
@@ -376,7 +380,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
 
           const immutableRule = await getRule(supertest, log, ruleId);
-          expect(immutableRule.exceptions_list.length).eql(0); // make sure we have no exceptions_list
+          expect(immutableRule.exceptions_list.length).toEqual(0); // make sure we have no exceptions_list
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
           await supertest
@@ -399,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installMockPrebuiltRules(supertest, es);
           const immutableRuleSecondTime = await getRule(supertest, log, ruleId);
 
-          expect(immutableRuleSecondTime.exceptions_list).to.eql([
+          expect(immutableRuleSecondTime.exceptions_list).toEqual([
             {
               id,
               list_id,
@@ -420,7 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
           await supertest
@@ -441,12 +445,12 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const body = await findImmutableRuleById(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
+          expect(body.data.length).toEqual(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
 
           const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
-          expect(bodyToCompare.rule_id).to.eql(immutableRule.rule_id); // Rule id should not change with a a patch
-          expect(bodyToCompare.immutable).to.eql(immutableRule.immutable); // Immutable should always stay the same which is true and never flip to false.
-          expect(bodyToCompare.version).to.eql(immutableRule.version); // The version should never update on a patch
+          expect(bodyToCompare.rule_id).toEqual(immutableRule.rule_id); // Rule id should not change with a a patch
+          expect(bodyToCompare.immutable).toEqual(immutableRule.immutable); // Immutable should always stay the same which is true and never flip to false.
+          expect(bodyToCompare.version).toEqual(immutableRule.version); // The version should never update on a patch
         });
 
         it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
@@ -460,7 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
-          expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+          expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
           await supertest
@@ -481,7 +485,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
-          expect(status.rules_not_installed).to.eql(0);
+          expect(status.rules_not_installed).toEqual(0);
         });
       });
 
@@ -578,7 +582,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id: createdId });
           await waitForSignalsToBePresent(supertest, log, 10, [createdId]);
           const signalsOpen = await getSignalsByIds(supertest, log, [createdId]);
-          expect(signalsOpen.hits.hits.length).equal(10);
+          expect(signalsOpen.hits.hits.length).toEqual(10);
         });
 
         it('should be able to execute against an exception list that does include valid entries and get back 0 signals', async () => {
@@ -605,7 +609,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-          expect(signalsOpen.hits.hits.length).equal(0);
+          expect(signalsOpen.hits.hits.length).toEqual(0);
         });
 
         it('generates no signals when an exception is added for an EQL rule', async () => {
@@ -624,7 +628,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-          expect(signalsOpen.hits.hits.length).equal(0);
+          expect(signalsOpen.hits.hits.length).toEqual(0);
         });
 
         it('generates no signals when an exception is added for a threshold rule', async () => {
@@ -646,7 +650,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-          expect(signalsOpen.hits.hits.length).equal(0);
+          expect(signalsOpen.hits.hits.length).toEqual(0);
         });
 
         it('generates no signals when an exception is added for a threat match rule', async () => {
@@ -689,7 +693,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-          expect(signalsOpen.hits.hits.length).equal(0);
+          expect(signalsOpen.hits.hits.length).toEqual(0);
         });
         describe('rules with value list exceptions', () => {
           beforeEach(async () => {
@@ -729,7 +733,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             ]);
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-            expect(signalsOpen.hits.hits.length).equal(0);
+            expect(signalsOpen.hits.hits.length).toEqual(0);
           });
 
           it('generates no signals when a value list exception is added for a threat match rule', async () => {
@@ -777,7 +781,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             ]);
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-            expect(signalsOpen.hits.hits.length).equal(0);
+            expect(signalsOpen.hits.hits.length).toEqual(0);
           });
 
           it('generates no signals when a value list exception is added for a threshold rule', async () => {
@@ -814,7 +818,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             ]);
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-            expect(signalsOpen.hits.hits.length).equal(0);
+            expect(signalsOpen.hits.hits.length).toEqual(0);
           });
 
           it('generates no signals when a value list exception is added for an EQL rule', async () => {
@@ -839,7 +843,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             ]);
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-            expect(signalsOpen.hits.hits.length).equal(0);
+            expect(signalsOpen.hits.hits.length).toEqual(0);
           });
           it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
             const valueListId = 'value-list-id';
@@ -878,6 +882,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
     describe('Synchronizations', () => {
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await deleteAllExceptions(supertest, log);
+      });
       /*
         This test to mimic if we have two browser tabs, and the user tried to 
         edit an exception in a tab after deleting it in another 
@@ -929,7 +938,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(404);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           message: `exception list item id: "${list_id}" does not exist`,
           status_code: 404,
         });
@@ -1004,12 +1013,119 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'simple',
           })
           .expect(404);
-        // expect(signalsOpen.hits.hits.length).equal(0);
-        // expect(body).to.eql({
-        //   message: `exception list item id: "${list_id}" does not exist`,
-        //   status_code: 404,
-        // });
+
         await deleteListsIndex(supertest, log);
+      });
+    });
+
+    describe('Add/edit exception comments by different users', () => {
+      const socManager = ROLES.soc_manager;
+      const detectionAdmin = ROLES.detections_admin;
+
+      beforeEach(async () => {
+        await createUserAndRole(getService, detectionAdmin);
+        await createUserAndRole(getService, socManager);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, detectionAdmin);
+        await deleteUserAndRole(getService, socManager);
+        await deleteAllExceptions(supertest, log);
+      });
+
+      it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
+        await supertestWithoutAuth
+          .post(EXCEPTION_LIST_URL)
+          .auth(detectionAdmin, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListDetectionSchemaMock())
+          .expect(200);
+
+        const { os_types, ...ruleException } = getCreateExceptionListItemMinimalSchemaMock();
+
+        // Add comment by the Detection Admin
+        await supertestWithoutAuth
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .auth(detectionAdmin, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...ruleException,
+            comments: [{ comment: 'Comment by user@detections_admin' }],
+          })
+          .expect(200);
+
+        const { body: items } = await supertestWithoutAuth
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .auth(detectionAdmin, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // Validate the first user comment
+        expect(items.total).toEqual(1);
+        const [item] = items.data;
+        const detectionAdminComments = item.comments;
+        expect(detectionAdminComments.length).toEqual(1);
+
+        expect(detectionAdminComments[0]).toEqual(
+          expect.objectContaining({
+            created_by: 'detections_admin',
+            comment: 'Comment by user@detections_admin',
+          })
+        );
+
+        const expectedId = item.id;
+
+        // Update exception comment by different user Soc-manager
+        const { item_id: _, ...updateItemWithoutItemId } =
+          getUpdateMinimalExceptionListItemSchemaMock();
+
+        const updatePayload: UpdateExceptionListItemSchema = {
+          ...updateItemWithoutItemId,
+          comments: [
+            ...(updateItemWithoutItemId.comments || []),
+            { comment: 'Comment by user@soc_manager' },
+          ],
+          id: expectedId,
+        };
+        await supertestWithoutAuth
+          .put(EXCEPTION_LIST_ITEM_URL)
+          .auth(socManager, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send(updatePayload)
+          .expect(200);
+
+        const { body: itemsAfterUpdate } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .auth(socManager, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+        const [itemAfterUpdate] = itemsAfterUpdate.data;
+        const detectionAdminAndSocManagerComments = itemAfterUpdate.comments;
+
+        expect(detectionAdminAndSocManagerComments.length).toEqual(2);
+
+        expect(detectionAdminAndSocManagerComments).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              created_by: 'detections_admin',
+              comment: 'Comment by user@detections_admin',
+            }),
+            expect.objectContaining({
+              created_by: 'soc_manager',
+              comment: 'Comment by user@soc_manager',
+            }),
+          ])
+        );
       });
     });
   });

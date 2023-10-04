@@ -18,6 +18,7 @@ import {
   ScaleType,
   Settings,
   TooltipHeaderFormatter,
+  Tooltip,
 } from '@elastic/charts';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
@@ -82,7 +83,8 @@ export const MetricDistributionChart: FC<Props> = ({
       className="dataGridChart__histogram"
     >
       <Chart size={{ width, height }}>
-        <Settings theme={theme} tooltip={{ headerFormatter }} />
+        <Tooltip headerFormatter={headerFormatter} />
+        <Settings theme={theme} />
         <Axis
           id="bottom"
           position={Position.Bottom}

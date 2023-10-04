@@ -206,6 +206,7 @@ function _generateMappings(
           case 'boolean':
             dynProperties = {
               type: field.object_type,
+              time_series_metric: field.metric_type,
             };
             matchingType = field.object_type_mapping_type ?? field.object_type;
           default:
@@ -683,7 +684,7 @@ const updateExistingDataStream = async ({
       delete mappings.properties.data_stream;
     }
 
-    logger.debug(`Updating mappings for ${dataStreamName}`);
+    logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -696,9 +697,8 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.error(`Mappings update for ${dataStreamName} failed`);
-    logger.error(err);
-
+    logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+    logger.info(`Triggering a rollover for ${dataStreamName}`);
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }

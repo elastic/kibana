@@ -36,7 +36,7 @@ export const HostsContent = () => {
         <HostsViewProvider>
           <HostsTableProvider>
             <Container>
-              <EuiFlexGroup direction="column">
+              <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem grow={false}>
                   <KPIGrid />
                 </EuiFlexItem>

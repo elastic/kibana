@@ -383,6 +383,7 @@ export function TrainedModelsTableProvider(
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been started successfully.`
       );
+      await this.waitForModelsToLoad();
     }
 
     public async stopDeployment(modelId: string) {

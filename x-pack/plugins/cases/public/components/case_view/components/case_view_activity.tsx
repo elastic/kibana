@@ -262,7 +262,7 @@ export const CaseViewActivity = ({
           </EuiFlexGroup>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem grow={2} data-test-subj="case-view-page-sidebar">
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
             <>

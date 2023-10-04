@@ -82,7 +82,8 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-describe(`UserActions`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/156741
+describe.skip(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
@@ -325,7 +326,8 @@ describe(`UserActions`, () => {
     });
   });
 
-  describe('Host isolation action', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156742
+  describe.skip('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];
       const props = {
@@ -372,7 +374,15 @@ describe(`UserActions`, () => {
     });
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156750
+  // FLAKY: https://github.com/elastic/kibana/issues/156749
+  // FLAKY: https://github.com/elastic/kibana/issues/156748
+  // FLAKY: https://github.com/elastic/kibana/issues/156747
+  // FLAKY: https://github.com/elastic/kibana/issues/156746
+  // FLAKY: https://github.com/elastic/kibana/issues/156745
+  // FLAKY: https://github.com/elastic/kibana/issues/156744
+  // FLAKY: https://github.com/elastic/kibana/issues/156743
+  describe.skip('pagination', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });

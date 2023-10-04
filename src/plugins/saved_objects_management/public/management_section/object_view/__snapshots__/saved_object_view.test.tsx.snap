@@ -32,6 +32,11 @@ exports[`SavedObjectEdition should render normally 1`] = `
           "set": [MockFunction],
         },
       },
+      "theme": Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      },
       "uiSettings": Object {
         "get": [MockFunction],
         "get$": [MockFunction],

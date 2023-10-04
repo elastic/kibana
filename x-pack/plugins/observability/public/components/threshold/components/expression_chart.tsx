@@ -14,6 +14,7 @@ import {
   Position,
   RectAnnotation,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -190,12 +191,13 @@ export function ExpressionChart({
             tickFormat={createFormatterForMetric(metric)}
             domain={domain}
           />
+          <Tooltip
+            headerFormatter={({ value }) =>
+              moment(value).format(uiSettings.get(UI_SETTINGS.DATE_FORMAT))
+            }
+          />
           <Settings
             onPointerUpdate={handleCursorUpdate}
-            tooltip={{
-              headerFormatter: ({ value }) =>
-                moment(value).format(uiSettings.get(UI_SETTINGS.DATE_FORMAT)),
-            }}
             externalPointerEvents={{
               tooltip: { visible: true },
             }}

@@ -52,7 +52,7 @@ export function createMockDatasource(
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
-    uniqueLabels: jest.fn((_state) => ({})),
+    uniqueLabels: jest.fn((_state, dataViews) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
     getDropProps: jest.fn(),

@@ -25,7 +25,6 @@ describe('useGetCaseMetrics', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('calls getSingleCaseMetrics with correct arguments', async () => {

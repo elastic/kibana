@@ -23,8 +23,10 @@ export const ErrorsTabContent = ({
   errorStates,
   loading,
   location,
+  upStates,
 }: {
   errorStates: PingState[];
+  upStates: PingState[];
   loading: boolean;
   location: ReturnType<typeof useSelectedLocation>;
 }) => {
@@ -69,7 +71,12 @@ export const ErrorsTabContent = ({
       <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
           <PanelWithTitle title={ERRORS_LABEL}>
-            <ErrorsList location={location} errorStates={errorStates} loading={loading} />
+            <ErrorsList
+              location={location}
+              errorStates={errorStates}
+              upStates={upStates}
+              loading={loading}
+            />
           </PanelWithTitle>
         </EuiFlexItem>
         <FailedTestsByStep time={time} />

@@ -25,6 +25,10 @@ const ContextWrapper: React.FC = ({ children }) => (
     baseAllowReplacement={[]}
     defaultAllow={[]}
     defaultAllowReplacement={[]}
+    docLinks={{
+      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+      DOC_LINK_VERSION: 'current',
+    }}
     getInitialConversations={mockGetInitialConversations}
     getComments={mockGetComments}
     http={mockHttp}

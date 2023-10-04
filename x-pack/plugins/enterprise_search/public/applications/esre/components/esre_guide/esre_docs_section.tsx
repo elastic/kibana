@@ -77,7 +77,7 @@ export const EsreDocsSection: React.FC = () => (
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.esre.esreDocsSection.learn.description"
-                      defaultMessage="These are complex topics, so we've curated some {learningTopics} to help you get started."
+                      defaultMessage="These are complex subjects, so we've curated some {learningTopics} to help you get started."
                       values={{
                         learningTopics: (
                           <EuiLink

@@ -23,16 +23,12 @@ export const useUpdateCase = () => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    (request: UpdateByKey) => {
-      const abortCtrlRef = new AbortController();
-
-      return patchCase(
-        request.caseData.id,
-        { [request.updateKey]: request.updateValue },
-        request.caseData.version,
-        abortCtrlRef.signal
-      );
-    },
+    (request: UpdateByKey) =>
+      patchCase({
+        caseId: request.caseData.id,
+        updatedCase: { [request.updateKey]: request.updateValue },
+        version: request.caseData.version,
+      }),
     {
       mutationKey: casesMutationsKeys.updateCase,
       onSuccess: (response, request) => {

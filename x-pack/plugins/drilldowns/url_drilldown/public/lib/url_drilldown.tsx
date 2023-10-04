@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IExternalUrl } from '@kbn/core/public';
+import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -52,6 +52,7 @@ interface UrlDrilldownDeps {
   getSyntaxHelpDocsLink: () => string;
   getVariablesHelpDocsLink: () => string;
   settings: SettingsStart;
+  theme: () => ThemeServiceStart;
 }
 
 export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
@@ -124,6 +125,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       <KibanaContextProvider
         services={{
           settings: this.deps.settings,
+          theme: this.deps.theme(),
         }}
       >
         <UrlDrilldownCollectConfig

@@ -8,12 +8,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks, EuiIcon } fro
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
+import { NoDataTabs } from '../views/no_data_view';
 
 export function ProfilingHeaderActionMenu() {
   const router = useProfilingRouter();
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <EuiHeaderLink href={router.link('/add-data-instructions')} color="primary">
+      <EuiHeaderLink
+        href={router.link('/add-data-instructions', {
+          query: { selectedTab: NoDataTabs.Kubernetes },
+        })}
+        color="primary"
+      >
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type="indexOpen" />

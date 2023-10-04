@@ -21,7 +21,7 @@ import { isEmpty } from 'lodash';
 import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
 
-import { useTheme } from './common';
+import { useThemes } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 import { DonutChartEmpty } from './donutchart_empty';
@@ -162,7 +162,7 @@ export const DonutChart = ({
   title,
   totalCount,
 }: DonutChartProps) => {
-  const theme = useTheme();
+  const { baseTheme, theme } = useThemes();
 
   const onElementClicked: ElementClickListener = useCallback(
     (event) => {
@@ -195,7 +195,11 @@ export const DonutChart = ({
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
-            <Settings theme={donutTheme} baseTheme={theme} onElementClick={onElementClicked} />
+            <Settings
+              theme={[donutTheme, theme]}
+              baseTheme={baseTheme}
+              onElementClick={onElementClicked}
+            />
             <Partition
               id="donut-chart"
               data={data}

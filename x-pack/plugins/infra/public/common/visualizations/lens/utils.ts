@@ -89,10 +89,10 @@ export const getDefaultReferences = (
   ];
 };
 
-export const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
+export const getAdhocDataView = (dataViewSpec: DataViewSpec): Record<string, DataViewSpec> => {
   return {
-    [dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID]: {
-      ...dataView.toSpec(),
+    [dataViewSpec.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID]: {
+      ...dataViewSpec,
     },
   };
 };

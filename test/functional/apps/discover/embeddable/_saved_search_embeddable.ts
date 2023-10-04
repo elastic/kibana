@@ -32,10 +32,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await PageObjects.common.setTime({
+        from: 'Sep 22, 2015 @ 00:00:00.000',
+        to: 'Sep 23, 2015 @ 00:00:00.000',
+      });
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
     });
 
     beforeEach(async () => {
@@ -43,10 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Sep 22, 2015 @ 00:00:00.000',
-        'Sep 23, 2015 @ 00:00:00.000'
-      );
     });
 
     const addSearchEmbeddableToDashboard = async () => {

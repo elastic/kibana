@@ -94,10 +94,9 @@ describe('useStatusAction', () => {
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
         expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith(
-          [{ status, id: basicCase.id, version: basicCase.version }],
-          expect.anything()
-        );
+        expect(updateSpy).toHaveBeenCalledWith({
+          cases: [{ status, id: basicCase.id, version: basicCase.version }],
+        });
       });
     }
   });

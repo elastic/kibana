@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import {
-  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
+  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   FILTER_GROUP_ADD_CONTROL,
   FILTER_GROUP_CONTEXT_EDIT_CONTROLS,
@@ -23,11 +24,18 @@ import {
   OPTION_LISTS_LOADING,
   FILTER_GROUP_CONTEXT_DISCARD_CHANGES,
   FILTER_GROUP_CONTROL_ACTION_EDIT,
+  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
 } from '../../screens/common/filter_group';
 import { waitForPageFilters } from '../alerts';
 
 export const openFilterGroupContextMenu = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click();
+  recurse(
+    () => {
+      cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN).click();
+      return cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).should(Cypress._.noop);
+    },
+    ($el) => $el.length === 1
+  );
 };
 
 export const waitForFilterGroups = () => {

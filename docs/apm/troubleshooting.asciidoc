@@ -176,7 +176,7 @@ These are dynamic by default, which means they will be indexed and become search
 
 [float]
 [[service-map-rum-connections]]
-=== Service maps: no connection between client and server
+=== Service Maps: no connection between client and server
 
 If the service map is not showing an expected connection between the client and server,
 it's likely because you haven't configured

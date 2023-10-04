@@ -20,7 +20,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('usePostPushToService', () => {
-  const abortCtrl = new AbortController();
   const connector = {
     id: '123',
     name: 'My connector',
@@ -69,7 +68,7 @@ describe('usePostPushToService', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(caseId, connector.id, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id });
   });
 
   it('shows a success toaster', async () => {

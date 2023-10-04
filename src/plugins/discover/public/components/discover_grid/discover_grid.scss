@@ -119,8 +119,8 @@
 }
 
 .dscDiscoverGrid__descriptionListDescription {
-  word-break: normal !important;
-  white-space: nowrap;
+  word-break: break-all;
+  white-space: normal;
 
   // Special handling for images coming from the image field formatter
   img {

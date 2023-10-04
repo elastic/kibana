@@ -59,6 +59,10 @@ import {
   getKibanaAlertIdField,
   highlightedFieldsPrefixToExclude,
   KIBANA_ALERT_RULE_TYPE,
+  AGENT_ID,
+  AGENT_TYPE,
+  KIBANA_ALERT_RULE_UUID,
+  ENDPOINT_ALERT,
 } from './highlighted_fields_config';
 
 export const filterIndexPatterns = (
@@ -906,6 +910,9 @@ export const buildRuleExceptionWithConditions = ({
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
  For the initial implementation the nested conditions are not considered
+ Converting a singular value to a string or an array of strings
+ is necessary because the "Match" or "Match any" operators
+ are designed to operate with string value(s).
  */
 export const buildExceptionEntriesFromAlertFields = ({
   highlightedFields,
@@ -916,18 +923,24 @@ export const buildExceptionEntriesFromAlertFields = ({
 }): EntriesArray => {
   return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
     const fieldKey = field.id;
-    const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
+    const fieldValue = get(alertData, fieldKey) ?? get(alertData, getKibanaAlertIdField(fieldKey));
 
-    if (fieldValue) {
+    if (fieldValue !== null && fieldValue !== undefined) {
+      const listOperatorType = Array.isArray(fieldValue)
+        ? ListOperatorTypeEnum.MATCH_ANY
+        : ListOperatorTypeEnum.MATCH;
+
+      const fieldValueAsString = Array.isArray(fieldValue)
+        ? fieldValue.map(String)
+        : fieldValue.toString();
       acc.push({
         field: fieldKey,
         operator: ListOperatorEnum.INCLUDED,
-        type: Array.isArray(fieldValue)
-          ? ListOperatorTypeEnum.MATCH_ANY
-          : ListOperatorTypeEnum.MATCH,
-        value: fieldValue,
+        type: listOperatorType,
+        value: fieldValueAsString,
       });
     }
+
     return acc;
   }, []);
 };
@@ -947,7 +960,10 @@ export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   const highlightedFields = getAlertHighlightedFields(alertData);
   if (!highlightedFields.length) return null;
 
-  const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({
+    highlightedFields,
+    alertData,
+  });
   if (!exceptionEntries.length) return null;
 
   return buildRuleExceptionWithConditions({
@@ -958,13 +974,19 @@ export const getPrepopulatedRuleExceptionWithHighlightFields = ({
 
 /**
   Filters out the irrelevant highlighted fields for Rule exceptions using 
-  the "highlightedFieldsPrefixToExclude" array.
+  1. The "highlightedFieldsPrefixToExclude" array
+  2. Agent.id field in case the alert was not generated from Endpoint
+  3. Threshold Rule 
 */
 export const filterHighlightedFields = (
   fields: EventSummaryField[],
-  prefixesToExclude: string[]
+  prefixesToExclude: string[],
+  alertData: AlertData
 ): EventSummaryField[] => {
   return fields.filter(({ id }) => {
+    // Exclude agent.id field only if the agent type was not Endpoint
+    if (id === AGENT_ID) return isAlertFromEndpointEvent(alertData);
+
     return !prefixesToExclude.some((field: string) => id.startsWith(field));
   });
 };
@@ -974,6 +996,7 @@ export const filterHighlightedFields = (
  * * event.category
  * * event.code
  * * kibana.alert.rule.type
+ * * Alert field ids filters
  * @param alertData The Alert data object
  */
 export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryField[] => {
@@ -982,7 +1005,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
 
   const eventCategories = {
-    primaryEventCategory: eventCategory,
+    primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],
   };
 
@@ -991,5 +1014,19 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
     eventCode,
     eventRuleType,
   });
-  return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude);
+  return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
+};
+
+/**
+ * Checks to see if the given set of Timeline event detail items includes data that indicates its
+ * an endpoint Alert
+ */
+export const isAlertFromEndpointEvent = (alertData: AlertData) => {
+  // Check to see if a timeline event item is an Alert
+  const isTimelineEventItemAnAlert = get(alertData, KIBANA_ALERT_RULE_UUID);
+  if (!isTimelineEventItemAnAlert) return false;
+
+  const agentTypes = get(alertData, AGENT_TYPE);
+  const agentType = Array.isArray(agentTypes) ? agentTypes[0] : agentTypes;
+  return agentType === ENDPOINT_ALERT;
 };

@@ -48,7 +48,7 @@ type UseCasesAddToExistingCaseModal = (props?: Record<string, unknown>) => {
   open: ({
     getAttachments,
   }: {
-    getAttachments: ({ theCase }: { theCase: { id: string } }) => any[];
+    getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
   }) => void;
   close: () => void;
 };

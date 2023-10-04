@@ -30,6 +30,7 @@ import {
   ConnectorTypeSecretsType,
 } from '.';
 import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -574,11 +575,12 @@ describe('execute()', () => {
     `);
   });
 
-  test('ensure parameters are as expected with HTML', async () => {
+  test('ensure parameters are as expected with HTML message with source NOTIFICATION', async () => {
     sendEmailMock.mockReset();
 
     const executorOptionsWithHTML = {
       ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',
@@ -625,6 +627,71 @@ describe('execute()', () => {
           "service": "__json",
           "user": "bob",
         },
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with no source', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "HTML email can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with source HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "HTML email can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with source SAVED_OBJECT', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "HTML email can only be sent via notifications",
+        "status": "error",
       }
     `);
   });

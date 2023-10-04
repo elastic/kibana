@@ -18,6 +18,7 @@ import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias
 import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
+import { addLog } from '../../utils/add_log';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -53,6 +54,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     const unsubscribe = stateContainer.actions.initializeAndSync();
+    addLog('[DiscoverMainApp] state container initialization triggers data fetching');
     stateContainer.actions.fetchData(true);
     return () => unsubscribe();
   }, [stateContainer]);

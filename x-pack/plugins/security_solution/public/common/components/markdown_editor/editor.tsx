@@ -30,6 +30,7 @@ interface MarkdownEditorProps {
   dataTestSubj?: string;
   height?: number;
   autoFocusDisabled?: boolean;
+  setIsMarkdownInvalid: (value: boolean) => void;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -41,11 +42,27 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ onChange, value, ariaLabel, editorId, dataTestSubj, height, autoFocusDisabled }, ref) => {
+  (
+    {
+      onChange,
+      value,
+      ariaLabel,
+      editorId,
+      dataTestSubj,
+      height,
+      autoFocusDisabled,
+      setIsMarkdownInvalid,
+    },
+    ref
+  ) => {
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse = useCallback((err, { messages }) => {
-      setMarkdownErrorMessages(err ? [err] : messages);
-    }, []);
+    const onParse = useCallback(
+      (err, { messages }) => {
+        setMarkdownErrorMessages(err ? [err] : messages);
+        setIsMarkdownInvalid(err ? true : false);
+      },
+      [setIsMarkdownInvalid]
+    );
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useEffect(() => {

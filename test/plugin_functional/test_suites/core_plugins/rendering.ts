@@ -265,6 +265,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
         'xpack.observability.aiAssistant.enabled (boolean)',
+        'xpack.observability.aiAssistant.feedback.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',

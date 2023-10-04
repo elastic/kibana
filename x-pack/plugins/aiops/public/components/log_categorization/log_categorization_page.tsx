@@ -230,7 +230,7 @@ export const LogCategorizationPage: FC = () => {
   };
 
   return (
-    <EuiPageBody data-test-subj="aiopsLogCategorizationPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
@@ -258,6 +258,7 @@ export const LogCategorizationPage: FC = () => {
               onChange={onFieldChange}
               selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="aiopsLogPatternAnalysisCategoryField"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -268,6 +269,7 @@ export const LogCategorizationPage: FC = () => {
               onClick={() => {
                 loadCategories();
               }}
+              data-test-subj="aiopsLogPatternAnalysisRunButton"
             >
               <FormattedMessage
                 id="xpack.aiops.logCategorization.runButton"

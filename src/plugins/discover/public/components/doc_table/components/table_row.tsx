@@ -183,7 +183,9 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
+          mapping(column)?.filterable &&
+            typeof filter === 'function' &&
+            !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell

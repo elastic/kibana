@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { sortBy } from 'lodash';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
@@ -153,8 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
           }));
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156581
-    describe.skip('wildcard namespace', () => {
+    describe('wildcard namespace', () => {
       it('should return 200 with individual responses from the all namespaces', async () =>
         await supertest
           .get(
@@ -165,7 +165,8 @@ export default function ({ getService }: FtrProviderContext) {
             const knownDocuments = resp.body.saved_objects.filter((so: { namespaces: string[] }) =>
               so.namespaces.some((ns) => [SPACE_ID, `${SPACE_ID}-foo`].includes(ns))
             );
-            const [obj1, obj2] = knownDocuments.map(
+
+            const [obj1, obj2] = sortBy(knownDocuments, 'namespaces').map(
               ({ id, originId, namespaces }: SavedObject) => ({ id, originId, namespaces })
             );
 

@@ -101,7 +101,7 @@ export function createCalleeTree(
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
     const lenStackTrace = stackTrace.FrameIDs.length;
-    const samples = (events.get(stackTraceID) ?? 0) * scalingFactor;
+    const samples = Math.floor((events.get(stackTraceID) ?? 0) * scalingFactor);
 
     let currentNode = 0;
 

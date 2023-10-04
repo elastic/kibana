@@ -11,6 +11,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '../assistant_context/types';
 import { Conversation } from '../assistant_context/types';
 import { API_ERROR } from './translations';
+import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
 
 export interface FetchConnectorExecuteAction {
   apiConfig: Conversation['apiConfig'];
@@ -33,7 +34,7 @@ export const fetchConnectorExecuteAction = async ({
   const body =
     apiConfig?.provider === OpenAiProviderType.OpenAi
       ? {
-          model: 'gpt-3.5-turbo',
+          model: apiConfig.model ?? MODEL_GPT_3_5_TURBO,
           messages: outboundMessages,
           n: 1,
           stop: null,

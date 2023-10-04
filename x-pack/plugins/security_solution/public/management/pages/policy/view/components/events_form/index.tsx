@@ -120,6 +120,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
             key={String(protectionField)}
             id={htmlIdGenerator()()}
             label={name}
+            // @ts-expect-error ts upgrade v4.7.4
             data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
             checked={selection[protectionField]}
             onChange={(event) => onValueSelection(protectionField, event.target.checked)}
@@ -164,6 +165,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
                     <EuiCheckbox
                       id={htmlIdGenerator()()}
                       label={name}
+                      // @ts-expect-error ts upgrade v4.7.4
                       data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
                       checked={selection[protectionField]}
                       onChange={(event) => onValueSelection(protectionField, event.target.checked)}

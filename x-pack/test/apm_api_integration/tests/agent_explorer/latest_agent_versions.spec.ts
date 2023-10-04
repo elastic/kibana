@@ -21,7 +21,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/161853
+  registry.when.skip(
     'Agent latest versions when configuration is defined',
     { config: 'basic', archives: [] },
     () => {

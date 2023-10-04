@@ -7,7 +7,6 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from './page_objects';
@@ -17,7 +16,6 @@ import type { CreateTestConfigOptions } from '../shared/types';
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
-    const svlBaseConfig = resolve(REPO_ROOT, 'config', 'serverless.yml');
 
     return {
       ...svlSharedConfig.getAll(),
@@ -28,9 +26,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          options.serverlessProject
-            ? `--serverless=${options.serverlessProject}`
-            : `--config=${svlBaseConfig}`,
+          `--serverless=${options.serverlessProject}`,
         ],
       },
       testFiles: options.testFiles,
@@ -62,6 +58,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         directory: resolve(__dirname, 'screenshots'),
       },
       junit: options.junit,
+      suiteTags: options.suiteTags,
     };
   };
 }

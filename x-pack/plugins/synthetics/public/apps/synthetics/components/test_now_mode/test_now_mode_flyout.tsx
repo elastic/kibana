@@ -20,13 +20,13 @@ import {
 } from '@elastic/eui';
 
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { MonitorFields, ServiceLocationErrors } from '../../../../../common/runtime_types';
+import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { TestNowMode } from './test_now_mode';
 
 export interface TestRun {
   id: string;
   name: string;
-  monitor: MonitorFields;
+  monitor: SyntheticsMonitor;
 }
 
 export function TestNowModeFlyout({

@@ -83,7 +83,6 @@ describe('utils', () => {
     clock.restore();
     jest.clearAllMocks();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('generateId', () => {

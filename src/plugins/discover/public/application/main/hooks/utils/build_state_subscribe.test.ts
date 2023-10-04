@@ -45,7 +45,7 @@ describe('buildStateSubscribe', () => {
   it('should not call refetch$ if nothing changes', async () => {
     await getSubscribeFn()(stateContainer.appState.getState());
 
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should call refetch$ if the chart is hidden', async () => {

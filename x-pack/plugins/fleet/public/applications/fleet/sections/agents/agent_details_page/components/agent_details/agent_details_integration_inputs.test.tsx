@@ -106,4 +106,21 @@ describe('AgentDetailsIntegrationInputs', () => {
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
     ).toBeInTheDocument();
   });
+
+  it('does not render when there is no units array', () => {
+    agent.components = [
+      {
+        id: 'endpoint-default',
+        type: 'endpoint',
+        status: 'HEALTHY',
+        message: 'Healthy',
+      },
+    ];
+
+    const component = renderComponent();
+    userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    expect(
+      component.queryByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
+    ).not.toBeInTheDocument();
+  });
 });

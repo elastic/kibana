@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Chart, Settings, LineSeries, Axis } from '@elastic/charts';
+import { Chart, LineSeries, Axis, Tooltip } from '@elastic/charts';
 
 import { AnalyticsChart } from '.';
 
@@ -74,8 +74,10 @@ describe('AnalyticsChart', () => {
 
   it('formats tooltip dates correctly', () => {
     const wrapper = shallow(<AnalyticsChart lines={[{ id: 'test', data: MOCK_DATA }]} />);
-    const dateFormatter: Function = (wrapper.find(Settings).prop('tooltip') as any).headerFormatter;
+    const dateFormatter = wrapper.find(Tooltip).prop('headerFormatter')!;
 
-    expect(dateFormatter({ value: '1970-12-03' })).toEqual('December 3, 1970');
+    expect(dateFormatter({ value: '1970-12-03', formattedValue: '1970-12-03' })).toEqual(
+      'December 3, 1970'
+    );
   });
 });

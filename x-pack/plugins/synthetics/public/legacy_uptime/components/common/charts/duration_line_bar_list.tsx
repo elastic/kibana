@@ -81,7 +81,7 @@ export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
             key={keyIndex}
             id={keyIndex}
             style={getRectStyle(rectAnnotation.color)}
-            renderTooltip={TooltipFormatter}
+            customTooltipDetails={TooltipFormatter}
           />
         ) : null;
       })}

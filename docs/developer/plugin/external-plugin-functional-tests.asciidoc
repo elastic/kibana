@@ -80,5 +80,5 @@ node ../../kibana/scripts/functional_test_runner
 [discrete]
 === Using esArchiver
 
-We're working on documentation for this, but for now the best place to look is the original {kib-repo}/issues/10359[pull request].
+We're working on documentation for this, but for now the best place to look is the original {kib-repo}issues/10359[pull request].
 

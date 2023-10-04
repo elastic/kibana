@@ -128,7 +128,7 @@ export async function getAggregatedCriticalPath({
                   "agent.name": doc['agent.name'].value
                 ];
 
-                def isSpan = !doc['span.id'].empty;
+                def isSpan = !doc['span.id'].empty && !doc['span.name'].empty;
                 
                 if (isSpan) {
                   id = doc['span.id'].value;

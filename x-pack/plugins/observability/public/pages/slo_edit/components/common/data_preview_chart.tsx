@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { EuiFlexItem, EuiIcon, EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
+import { CreateSLOForm } from '../../types';
+
 export function DataPreviewChart() {
-  const { watch, getFieldState } = useFormContext<CreateSLOInput>();
+  const { watch, getFieldState } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
 
   const { data: previewData, isLoading: isPreviewLoading } = useDebouncedGetPreviewData(
@@ -38,6 +39,7 @@ export function DataPreviewChart() {
       {!isPreviewLoading && !!previewData && (
         <EuiPanel hasBorder={true} hasShadow={false}>
           <Chart size={{ height: 160, width: '100%' }}>
+            <Tooltip type="vertical" />
             <Settings
               baseTheme={baseTheme}
               showLegend={false}
@@ -49,7 +51,6 @@ export function DataPreviewChart() {
                   },
                 },
               ]}
-              tooltip="vertical"
               noResults={
                 <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
               }

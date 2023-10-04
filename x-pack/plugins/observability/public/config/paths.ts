@@ -20,6 +20,8 @@ export const paths = {
     slos: SLOS_PAGE_LINK,
     slosWelcome: `${SLOS_PAGE_LINK}/welcome`,
     sloCreate: `${SLOS_PAGE_LINK}/create`,
+    sloCreateWithEncodedForm: (encodedParams: string) =>
+      `${SLOS_PAGE_LINK}/create?_a=${encodedParams}`,
     sloEdit: (sloId: string) => `${SLOS_PAGE_LINK}/edit/${encodeURI(sloId)}`,
     sloDetails: (sloId: string) => `${SLOS_PAGE_LINK}/${encodeURI(sloId)}`,
   },

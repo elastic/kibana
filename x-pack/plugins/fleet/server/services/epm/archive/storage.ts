@@ -215,10 +215,9 @@ export const getEsPackage = async (
       setArchiveEntry(path, buffer);
       paths.push(path);
     }
-    paths.push(path);
     if (path.endsWith(MANIFEST_NAME) && buffer) manifests[path] = buffer;
   });
-  // // Add asset references to cache
+  // Add asset references to cache
   setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
 
   const packageInfo = parseAndVerifyArchive(paths, manifests);

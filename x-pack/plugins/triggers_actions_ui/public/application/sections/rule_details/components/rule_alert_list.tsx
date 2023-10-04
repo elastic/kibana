@@ -72,10 +72,16 @@ const RuleAlertListMaintenanceWindowCell = (props: RuleAlertListMaintenanceWindo
       .filter(isMaintenanceWindowValid);
   }, [alert, maintenanceWindows]);
 
+  const idsWithoutMaintenanceWindow = useMemo(() => {
+    const maintenanceWindowIds = alert.maintenanceWindowIds || [];
+    return maintenanceWindowIds.filter((id) => !maintenanceWindows.get(id));
+  }, [alert, maintenanceWindows]);
+
   return (
     <MaintenanceWindowBaseCell
       timestamp={alert.start?.toISOString()}
       maintenanceWindows={validMaintenanceWindows}
+      maintenanceWindowIds={idsWithoutMaintenanceWindow}
       isLoading={isLoading}
     />
   );

@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  handlePromptChange?: (value: string) => void;
+  handlePromptChange: (value: string) => void;
   isDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
@@ -26,35 +26,30 @@ const StyledTextArea = styled(EuiTextArea)`
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
   ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
-    const [currentValue, setCurrentValue] = React.useState(value);
-
     const onChangeCallback = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setCurrentValue(event.target.value);
-        if (handlePromptChange) {
-          handlePromptChange(event.target.value);
-        }
+        handlePromptChange(event.target.value);
       },
       [handlePromptChange]
     );
 
     const onKeyDown = useCallback(
       (event) => {
-        if (event.key === 'Enter' && !event.shiftKey && currentValue.trim().length > 0) {
+        if (event.key === 'Enter' && !event.shiftKey && value.trim().length > 0) {
           event.preventDefault();
           onPromptSubmit(event.target.value?.trim());
-          setCurrentValue('');
-        } else if (event.key === 'Enter' && !event.shiftKey && currentValue.trim().length === 0) {
+          handlePromptChange('');
+        } else if (event.key === 'Enter' && !event.shiftKey && value.trim().length === 0) {
           event.preventDefault();
           event.stopPropagation();
         }
       },
-      [currentValue, onPromptSubmit]
+      [value, onPromptSubmit, handlePromptChange]
     );
 
     useEffect(() => {
-      setCurrentValue(value);
-    }, [value]);
+      handlePromptChange(value);
+    }, [handlePromptChange, value]);
 
     return (
       <StyledTextArea
@@ -66,7 +61,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         autoFocus
         disabled={isDisabled}
         placeholder={i18n.PROMPT_PLACEHOLDER}
-        value={currentValue}
+        value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}
       />

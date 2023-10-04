@@ -22,6 +22,7 @@ import {
   Settings,
   XYBrushEvent,
   XYChartSeriesIdentifier,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -150,34 +151,34 @@ export function TimeseriesChart({
       id={id}
     >
       <Chart ref={chartRef} id={id}>
-        <Settings
-          tooltip={{
-            stickTo: 'top',
-            showNullValues: false,
-            headerFormatter: ({ value }) => {
-              const formattedValue = xFormatter(value);
-              if (max === value) {
-                return (
-                  <>
-                    <EuiFlexGroup
-                      alignItems="center"
-                      responsive={false}
-                      gutterSize="xs"
-                      style={{ fontWeight: 'normal' }}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer size="xs" />
-                    {formattedValue}
-                  </>
-                );
-              }
-              return formattedValue;
-            },
+        <Tooltip
+          stickTo="top"
+          showNullValues={false}
+          headerFormatter={({ value }) => {
+            const formattedValue = xFormatter(value);
+            if (max === value) {
+              return (
+                <>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    responsive={false}
+                    gutterSize="xs"
+                    style={{ fontWeight: 'normal' }}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="iInCircle" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="xs" />
+                  {formattedValue}
+                </>
+              );
+            }
+            return formattedValue;
           }}
+        />
+        <Settings
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }

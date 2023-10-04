@@ -27,8 +27,7 @@ import { BlobStorageService } from '../blob_storage_service';
 import { FileServiceStart, FileServiceFactory } from '../file_service';
 import type { CreateFileArgs } from '../file_service/file_action_types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/158537
-describe.skip('FileService', () => {
+describe('FileService', () => {
   const fileKind: string = 'test';
   const fileKindNonDefault: string = 'test-non-default';
   const fileKindTinyFiles: string = 'tiny-files';
@@ -159,7 +158,7 @@ describe.skip('FileService', () => {
     const file1 = await createDisposableFile({ fileKind, name: 'test' });
     const unknownID = 'foo';
 
-    expect(async () => {
+    await expect(async () => {
       await fileService.bulkGetById({ ids: [file1.id, unknownID] });
     }).rejects.toThrowError(`File [${unknownID}] not found`);
   });

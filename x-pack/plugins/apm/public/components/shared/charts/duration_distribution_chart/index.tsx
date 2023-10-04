@@ -74,13 +74,6 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
     stroke: color,
     opacity: 0.8,
   },
-  details: {
-    fontSize: 8,
-    fontFamily: 'Arial',
-    fontStyle: 'normal',
-    fill: color,
-    padding: 0,
-  },
 });
 
 // With a log based y axis in combination with the `CURVE_STEP_AFTER` style,

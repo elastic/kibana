@@ -8,29 +8,62 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
-import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { diffMappings } from '../core/build_active_mappings';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getUpdatedHashes } from '../core/build_active_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
+  indexTypes: string[];
   actualMappings?: IndexMapping;
   expectedMappings: IndexMapping;
 }
 
 /** @internal */
-export interface TargetMappingsCompareResult {
-  match: boolean;
+export interface ComparedMappingsMatch {
+  type: 'compared_mappings_match';
+}
+
+export interface ActualMappingsIncomplete {
+  type: 'actual_mappings_incomplete';
+}
+
+export interface ComparedMappingsChanged {
+  type: 'compared_mappings_changed';
+  updatedRootFields: string[];
+  updatedTypes: string[];
 }
 
 export const checkTargetMappings =
   ({
+    indexTypes,
     actualMappings,
     expectedMappings,
-  }: CheckTargetMappingsParams): TaskEither.TaskEither<never, TargetMappingsCompareResult> =>
+  }: CheckTargetMappingsParams): TaskEither.TaskEither<
+    ActualMappingsIncomplete | ComparedMappingsChanged,
+    ComparedMappingsMatch
+  > =>
   async () => {
-    if (!actualMappings) {
-      return Either.right({ match: false });
+    if (
+      !actualMappings?._meta?.migrationMappingPropertyHashes ||
+      actualMappings.dynamic !== expectedMappings.dynamic
+    ) {
+      return Either.left({ type: 'actual_mappings_incomplete' as const });
     }
-    const diff = diffMappings(actualMappings, expectedMappings);
-    return Either.right({ match: !diff });
+
+    const updatedHashes = getUpdatedHashes({
+      actual: actualMappings,
+      expected: expectedMappings,
+    });
+
+    if (updatedHashes.length) {
+      const updatedTypes = updatedHashes.filter((field) => indexTypes.includes(field));
+      const updatedRootFields = updatedHashes.filter((field) => !indexTypes.includes(field));
+      return Either.left({
+        type: 'compared_mappings_changed' as const,
+        updatedRootFields,
+        updatedTypes,
+      });
+    } else {
+      return Either.right({ type: 'compared_mappings_match' as const });
+    }
   };

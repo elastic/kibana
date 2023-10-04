@@ -834,14 +834,13 @@ describe('AllCasesListGeneric', () => {
           userEvent.click(screen.getByTestId(`cases-bulk-action-status-${status}`));
 
           await waitFor(() => {
-            expect(updateCasesSpy).toBeCalledWith(
-              useGetCasesMockState.data.cases.map(({ id, version }) => ({
+            expect(updateCasesSpy).toBeCalledWith({
+              cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
                 status,
               })),
-              expect.anything()
-            );
+            });
           });
         }
       );
@@ -875,14 +874,13 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith(
-            useGetCasesMockState.data.cases.map(({ id, version }) => ({
+          expect(updateCasesSpy).toBeCalledWith({
+            cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
               id,
               version,
               severity,
             })),
-            expect.anything()
-          );
+          });
         });
       });
 
@@ -908,8 +906,8 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
-          expect(deleteCasesSpy).toHaveBeenCalledWith(
-            [
+          expect(deleteCasesSpy).toHaveBeenCalledWith({
+            caseIds: [
               'basic-case-id',
               '1',
               '2',
@@ -919,8 +917,7 @@ describe('AllCasesListGeneric', () => {
               'case-with-alerts-syncoff-id',
               'case-with-registered-attachment',
             ],
-            expect.anything()
-          );
+          });
         });
       });
 
@@ -987,10 +984,9 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId(`cases-bulk-action-status-${status}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toHaveBeenCalledWith(
-            [{ id: theCase.id, status, version: theCase.version }],
-            expect.anything()
-          );
+          expect(updateCasesSpy).toHaveBeenCalledWith({
+            cases: [{ id: theCase.id, status, version: theCase.version }],
+          });
         });
       });
 
@@ -1017,10 +1013,9 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toHaveBeenCalledWith(
-            [{ id: theCase.id, severity, version: theCase.version }],
-            expect.anything()
-          );
+          expect(updateCasesSpy).toHaveBeenCalledWith({
+            cases: [{ id: theCase.id, severity, version: theCase.version }],
+          });
         });
       });
 
@@ -1043,7 +1038,7 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
-          expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+          expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
         });
       });
 

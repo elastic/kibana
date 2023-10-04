@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Theme } from '@kbn/charts-plugin/public/plugin';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -35,7 +34,6 @@ export enum UnifiedHistogramFetchStatus {
  */
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
-  theme: Theme;
   uiActions: UiActionsStart;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;

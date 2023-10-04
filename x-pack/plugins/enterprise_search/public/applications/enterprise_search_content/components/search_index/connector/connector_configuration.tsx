@@ -36,6 +36,7 @@ import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
+import { SyncsContextMenu } from '../components/header_actions/syncs_context_menu';
 import { IndexNameLogic } from '../index_name_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -110,7 +111,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
-                          defaultMessage="The connectors repository contains several {link}. Use our framework for accelerated development against custom data sources."
+                          defaultMessage="The connectors repository contains several {link}. Use our framework to accelerate developing connectors for custom data sources."
                           values={{
                             link: (
                               <EuiLink
@@ -166,7 +167,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                           'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorDeployedText',
                           {
                             defaultMessage:
-                              'Once you’ve configured the connector, deploy the connector to your self managed infrastructure.',
+                              'Once configured, deploy the connector on your infrastructure.',
                           }
                         )}
                       </EuiText>
@@ -179,7 +180,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
                     {
-                      defaultMessage: 'Deploy a connector',
+                      defaultMessage: 'Deploy connector',
                     }
                   ),
                   titleSize: 'xs',
@@ -257,7 +258,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                             'xpack.enterpriseSearch.content.indices.configurationConnector.scheduleSync.description',
                             {
                               defaultMessage:
-                                'Once configured, set a recurring sync schedule to keep your documents in sync over time. You can also simply trigger a one-time sync.',
+                                'Finalize your connector by triggering a one-time sync, or setting a recurring sync to keep your data source in sync over time',
                             }
                           )}
                         </EuiText>
@@ -281,6 +282,9 @@ service_type: "${index.connector.service_type || 'changeme'}"
                               )}
                             </EuiButtonTo>
                           </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <SyncsContextMenu />
+                          </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -289,7 +293,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {
-                      defaultMessage: 'Set a recurring sync schedule',
+                      defaultMessage: 'Advanced configuration',
                     }
                   ),
                   titleSize: 'xs',
@@ -321,7 +325,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.description',
                         {
                           defaultMessage:
-                            'Your connector will have to be deployed to your own infrastructure.',
+                            'You need to deploy this connector on your own infrastructure.',
                         }
                       )}
                     </EuiText>
@@ -341,7 +345,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.manageKeys.label',
                         {
-                          defaultMessage: 'Manage keys',
+                          defaultMessage: 'Manage API keys',
                         }
                       )}
                     </EuiLinkTo>

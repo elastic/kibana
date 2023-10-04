@@ -29,10 +29,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./find_rules'));
     loadTestFile(require.resolve('./find_rule_exception_references'));
-    loadTestFile(require.resolve('./get_prebuilt_rules_status'));
-    loadTestFile(require.resolve('./get_prebuilt_timelines_status'));
-    loadTestFile(require.resolve('./install_prebuilt_rules'));
     loadTestFile(require.resolve('./get_rule_management_filters'));
-    loadTestFile(require.resolve('./fleet_integration'));
   });
 };

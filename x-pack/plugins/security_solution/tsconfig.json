@@ -12,8 +12,7 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../typings/**/*",
-    "./public/management/cypress/cypress.d.ts"
+    "../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",

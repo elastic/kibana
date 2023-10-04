@@ -72,12 +72,13 @@ export const getFieldEditorOpener =
     apiService,
   }: Dependencies) =>
   (options: OpenFieldEditorOptions): CloseEditor => {
-    const { uiSettings, overlays, docLinks, notifications, settings } = core;
+    const { uiSettings, overlays, docLinks, notifications, settings, theme } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
       docLinks,
       http: core.http,
       settings,
+      theme,
     });
 
     let overlayRef: OverlayRef | null = null;
@@ -152,14 +153,7 @@ export const getFieldEditorOpener =
 
       let field: Field | undefined;
       if (dataViewField) {
-        if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
-          // Composite runtime subfield
-          const [compositeName] = fieldNameToEdit!.split('.');
-          field = {
-            name: compositeName,
-            ...dataView.getRuntimeField(compositeName)!,
-          };
-        } else if (isExistingRuntimeField) {
+        if (isExistingRuntimeField) {
           // Runtime field
           field = {
             name: fieldNameToEdit!,

@@ -60,7 +60,9 @@ export const buildFiltersFromCriteria = (
     },
   };
 
-  return { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters };
+  const mustFiltersFields = positiveCriteria.map((criterion) => criterion.field);
+
+  return { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters, mustFiltersFields };
 };
 
 const buildFiltersForCriteria = (criteria: CountCriteria) => {

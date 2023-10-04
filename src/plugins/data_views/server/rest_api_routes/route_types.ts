@@ -17,6 +17,7 @@ import { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
 
 export type SourceFilterRestResponse = {
   value: string;
+  clientId?: string | number;
 };
 
 export type AggregationRestrictionsRestResponse = Record<
@@ -97,7 +98,7 @@ export type FieldSpecRestResponse = DataViewFieldBaseRestResponse & {
   fixedInterval?: string[];
   timeZone?: string[];
   timeSeriesDimension?: boolean;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
   shortDotsEnable?: boolean;
   isMapped?: boolean;
   parentName?: string;
@@ -161,6 +162,6 @@ export interface FieldDescriptorRestResponse {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge' | 'position';
   timeSeriesDimension?: boolean;
 }

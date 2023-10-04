@@ -202,7 +202,8 @@ export interface FleetServerAgentComponent {
   type: string;
   status: FleetServerAgentComponentStatus;
   message: string;
-  units: FleetServerAgentComponentUnit[];
+  // In some case units could be missing
+  units?: FleetServerAgentComponentUnit[];
 }
 
 /**

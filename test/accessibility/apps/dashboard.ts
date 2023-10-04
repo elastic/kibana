@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
-    const clonedDashboardName = 'Dashboard Listing A11y Copy';
+    const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
     it('dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
@@ -132,11 +132,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Confirm clone with *copy* appended', async () => {
-      await PageObjects.dashboard.confirmClone();
-      await a11y.testAppSnapshot();
-    });
-
     it('Dashboard listing table', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await a11y.testAppSnapshot();
@@ -148,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.clickDeleteSelected();
       await a11y.testAppSnapshot();
       await PageObjects.common.clickConfirmOnModal();
-      await listingTable.searchForItemWithName('');
+      await listingTable.isShowingEmptyPromptCreateNewButton();
     });
   });
 }

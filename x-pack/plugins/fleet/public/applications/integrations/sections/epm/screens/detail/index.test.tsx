@@ -95,7 +95,8 @@ describe('when on integration detail', () => {
     });
   }
 
-  describe('and the package is not installed and prerelease enabled', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/150607
+  describe.skip('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();

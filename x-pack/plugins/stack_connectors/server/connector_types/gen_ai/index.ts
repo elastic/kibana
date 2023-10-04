@@ -34,7 +34,7 @@ export const getConnectorType = (): SubActionConnectorType<GenAiConfig, GenAiSec
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [GeneralConnectorFeatureId],
-  minimumLicenseRequired: 'platinum' as const,
+  minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });
 

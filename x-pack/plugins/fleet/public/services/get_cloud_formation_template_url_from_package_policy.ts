@@ -5,31 +5,23 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
+import type { PackagePolicy } from '../types';
 
 /**
  * Get the cloud formation template url from a package policy
  * It looks for a config with a cloud_formation_template_url object present in
  * the enabled inputs of the package policy
  */
-export const getCloudFormationTemplateUrlFromPackagePolicy = (selectedPolicy?: AgentPolicy) => {
-  const cloudFormationTemplateUrl = selectedPolicy?.package_policies?.reduce(
-    (acc, packagePolicy) => {
-      const findCloudFormationTemplateUrlConfig = packagePolicy.inputs?.reduce(
-        (accInput, input) => {
-          if (input?.enabled && input?.config?.cloud_formation_template_url) {
-            return input.config.cloud_formation_template_url.value;
-          }
-          return accInput;
-        },
-        ''
-      );
-      if (findCloudFormationTemplateUrlConfig) {
-        return findCloudFormationTemplateUrlConfig;
-      }
-      return acc;
-    },
-    ''
-  );
+export const getCloudFormationTemplateUrlFromPackagePolicy = (packagePolicy?: PackagePolicy) => {
+  const cloudFormationTemplateUrl = packagePolicy?.inputs?.reduce((accInput, input) => {
+    if (accInput !== '') {
+      return accInput;
+    }
+    if (input?.enabled && input?.config?.cloud_formation_template_url) {
+      return input.config.cloud_formation_template_url.value;
+    }
+    return accInput;
+  }, '');
+
   return cloudFormationTemplateUrl !== '' ? cloudFormationTemplateUrl : undefined;
 };

@@ -51,6 +51,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
   return {
     categorizer_detector_missing_per_partition_field: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.categorizerMissingPerPartitionFieldHeading',
+        {
+          defaultMessage: 'Per-partition categorization',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.categorizerMissingPerPartitionFieldMessage',
         {
@@ -62,11 +68,17 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     categorizer_varying_per_partition_fields: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.categorizerVaryingPerPartitionFieldNamesHeading',
+        {
+          defaultMessage: 'Per-partition categorization',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.categorizerVaryingPerPartitionFieldNamesMessage',
         {
           defaultMessage:
-            'Detectors with keyword "mlcategory" cannot have different partition_field_name when per-partition categorization is enabled. Found [{fields}].',
+            'Detectors with keyword "mlcategory " cannot have different partition_field_name when per-partition categorization is enabled. Found [{fields}].',
 
           values: {
             fields: '"{{fields}}"',
@@ -77,8 +89,14 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     field_not_aggregatable: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.fieldNotAggregatableHeading',
+        {
+          defaultMessage: 'Detector field',
+        }
+      ),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldNotAggregatableMessage', {
-        defaultMessage: 'Detector field {fieldName} is not an aggregatable field.',
+        defaultMessage: '{fieldName} is not an aggregatable field.',
         values: {
           fieldName: '"{{fieldName}}"',
         },
@@ -87,6 +105,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     fields_not_aggregatable: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.fieldsNotAggregatableHeading',
+        {
+          defaultMessage: 'Detector fields',
+        }
+      ),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldsNotAggregatableMessage', {
         defaultMessage: 'One of the detector fields is not an aggregatable field.',
       }),
@@ -125,6 +149,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     cardinality_by_field: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.cardinalityByFieldHeading', {
+        defaultMessage: 'Field cardinality',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.cardinalityByFieldMessage', {
         defaultMessage:
           'Cardinality of {fieldName} is above 1000 and might result in high memory usage.',
@@ -136,6 +163,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     cardinality_over_field_low: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityOverFieldLowHeading',
+        {
+          defaultMessage: 'Over field cardinality',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityOverFieldLowMessage',
         {
@@ -150,6 +183,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     cardinality_over_field_high: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityOverFieldHighHeading',
+        {
+          defaultMessage: 'Over field cardinality',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityOverFieldHighMessage',
         {
@@ -164,6 +203,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     cardinality_partition_field: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityPartitionFieldHeading',
+        {
+          defaultMessage: 'Partition field cardinality',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityPartitionFieldMessage',
         {
@@ -192,21 +237,33 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     categorization_filters_valid: {
       status: VALIDATION_STATUS.SUCCESS,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.categorizationFiltersValidHeading',
+        {
+          defaultMessage: 'Categorization filters',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.categorizationFiltersValidMessage',
         {
-          defaultMessage: 'Categorization filters checks passed.',
+          defaultMessage: 'All checks passed.',
         }
       ),
       url: docLinks?.links.ml.anomalyDetectionConfiguringCategories,
     },
     categorization_filters_invalid: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.categorizationFiltersInvalidHeading',
+        {
+          defaultMessage: 'Categorization filters',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.categorizationFiltersInvalidMessage',
         {
           defaultMessage:
-            'The categorization filters configuration is invalid. ' +
+            'Configuration is invalid. ' +
             'Make sure filters are valid regular expressions and {categorizationFieldName} is set.',
           values: {
             categorizationFieldName: '"categorization_field_name"',
@@ -217,6 +274,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     bucket_span_empty: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanEmptyHeading', {
+        defaultMessage: 'Bucket span',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanEmptyMessage', {
         defaultMessage: 'The bucket span field must be specified.',
       }),
@@ -280,6 +340,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     detectors_duplicates: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsDuplicatesHeading', {
+        defaultMessage: 'Detector duplicates',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsDuplicatesMessage', {
         defaultMessage:
           'Duplicate detectors were found. Detectors having the same combined configuration for ' +
@@ -297,6 +360,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     detectors_empty: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsEmptyHeading', {
+        defaultMessage: 'Detectors',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsEmptyMessage', {
         defaultMessage: 'No detectors were found. At least one detector must be specified.',
       }),
@@ -304,6 +370,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     detectors_function_empty: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.detectorsFunctionEmptyHeading',
+        {
+          defaultMessage: 'Detector functions',
+        }
+      ),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsFunctionEmptyMessage', {
         defaultMessage: 'One of the detector functions is empty.',
       }),
@@ -339,6 +411,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     influencer_high: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.influencerHighHeading', {
+        defaultMessage: 'Influencers',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.influencerHighMessage', {
         defaultMessage:
           'The job configuration includes more than 3 influencers. ' +
@@ -348,6 +423,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     influencer_low: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.influencerLowHeading', {
+        defaultMessage: 'Influencers',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.influencerLowMessage', {
         defaultMessage:
           'No influencers have been configured. Picking an influencer is strongly recommended.',
@@ -356,6 +434,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     influencer_low_suggestion: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.influencerLowSuggestionHeading',
+        {
+          defaultMessage: 'Influencers',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.influencerLowSuggestionMessage',
         {
@@ -368,6 +452,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     influencer_low_suggestions: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.influencerLowSuggestionsHeading',
+        {
+          defaultMessage: 'Influencers',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.influencerLowSuggestionsMessage',
         {
@@ -380,13 +470,19 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     job_id_empty: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdEmptyHeading', {
+        defaultMessage: 'Job ID',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdEmptyMessage', {
-        defaultMessage: 'Job ID field must not be empty.',
+        defaultMessage: 'Field must not be empty.',
       }),
       url: docLinks?.links.ml.anomalyDetectionJobResource,
     },
     job_id_invalid: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdInvalidHeading', {
+        defaultMessage: 'Job ID',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdInvalidMessage', {
         defaultMessage:
           'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, ' +
@@ -396,6 +492,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     job_id_invalid_max_length: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.jobIdInvalidMaxLengthErrorHeading',
+        {
+          defaultMessage: 'Job ID',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.jobIdInvalidMaxLengthErrorMessage',
         {
@@ -426,6 +528,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     job_group_id_invalid: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdInvalidHeading', {
+        defaultMessage: 'Group name',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMessage', {
         defaultMessage:
           'One of the job group names is invalid. They can contain lowercase ' +
@@ -435,6 +540,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     job_group_id_invalid_max_length: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMaxLengthErrorHeading',
+        {
+          defaultMessage: 'Group name',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMaxLengthErrorMessage',
         {
@@ -503,8 +614,11 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     success_influencers: {
       status: VALIDATION_STATUS.SUCCESS,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.successInfluencersHeading', {
+        defaultMessage: 'Influencer configuration',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successInfluencersMessage', {
-        defaultMessage: 'Influencer configuration passed the validation checks.',
+        defaultMessage: 'Passed the validation checks.',
       }),
       url: docLinks?.links.ml.anomalyDetectionInfluencers,
     },
@@ -538,6 +652,9 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     mml_value_invalid: {
       status: VALIDATION_STATUS.ERROR,
+      heading: i18n.translate('xpack.ml.models.jobValidation.messages.mmlValueInvalidHeading', {
+        defaultMessage: 'Model memory limit',
+      }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.mmlValueInvalidMessage', {
         defaultMessage:
           '{mml} is not a valid value for model memory limit. The value needs to be at least ' +
@@ -548,6 +665,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     half_estimated_mml_greater_than_mml: {
       status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.halfEstimatedMmlGreaterThanMmlHeading',
+        {
+          defaultMessage: 'Model memory limit',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.halfEstimatedMmlGreaterThanMmlMessage',
         {
@@ -560,6 +683,12 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     estimated_mml_greater_than_mml: {
       status: VALIDATION_STATUS.INFO,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.halfEstimatedMmlGreaterThanMmlHeading',
+        {
+          defaultMessage: 'Model memory limit',
+        }
+      ),
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.estimatedMmlGreaterThanMmlMessage',
         {

@@ -28,9 +28,11 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error="A title is required"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Title"
@@ -85,43 +87,41 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter
-    css={
-      Object {
-        "map": undefined,
-        "name": "fy4vru",
-        "next": undefined,
-        "styles": "
-            align-items: center;
-          ",
-        "toString": [Function],
-      }
-    }
-  >
-    <EuiFlexItem
-      grow={true}
-    />
-    <EuiButtonEmpty
-      data-test-subj="saveCancelButton"
-      onClick={[Function]}
+  <EuiModalFooter>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
     >
-      <FormattedMessage
-        defaultMessage="Cancel"
-        id="savedObjects.saveModal.cancelButtonLabel"
-        values={Object {}}
-      />
-    </EuiButtonEmpty>
-    <EuiButton
-      color="primary"
-      data-test-subj="confirmSaveSavedObjectButton"
-      fill={true}
-      form="generated-id_form"
-      isLoading={false}
-      size="m"
-      type="submit"
-    >
-      Save
-    </EuiButton>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          form="generated-id_form"
+          isLoading={false}
+          size="m"
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiModalFooter>
 </EuiModal>
 `;
@@ -154,9 +154,11 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error="A title is required"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Title"
@@ -211,43 +213,41 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter
-    css={
-      Object {
-        "map": undefined,
-        "name": "fy4vru",
-        "next": undefined,
-        "styles": "
-            align-items: center;
-          ",
-        "toString": [Function],
-      }
-    }
-  >
-    <EuiFlexItem
-      grow={true}
-    />
-    <EuiButtonEmpty
-      data-test-subj="saveCancelButton"
-      onClick={[Function]}
+  <EuiModalFooter>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
     >
-      <FormattedMessage
-        defaultMessage="Cancel"
-        id="savedObjects.saveModal.cancelButtonLabel"
-        values={Object {}}
-      />
-    </EuiButtonEmpty>
-    <EuiButton
-      color="primary"
-      data-test-subj="confirmSaveSavedObjectButton"
-      fill={true}
-      form="generated-id_form"
-      isLoading={false}
-      size="m"
-      type="submit"
-    >
-      Save
-    </EuiButton>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          form="generated-id_form"
+          isLoading={false}
+          size="m"
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiModalFooter>
 </EuiModal>
 `;
@@ -280,9 +280,11 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error="A title is required"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Title"
@@ -337,43 +339,41 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter
-    css={
-      Object {
-        "map": undefined,
-        "name": "fy4vru",
-        "next": undefined,
-        "styles": "
-            align-items: center;
-          ",
-        "toString": [Function],
-      }
-    }
-  >
-    <EuiFlexItem
-      grow={true}
-    />
-    <EuiButtonEmpty
-      data-test-subj="saveCancelButton"
-      onClick={[Function]}
+  <EuiModalFooter>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
     >
-      <FormattedMessage
-        defaultMessage="Cancel"
-        id="savedObjects.saveModal.cancelButtonLabel"
-        values={Object {}}
-      />
-    </EuiButtonEmpty>
-    <EuiButton
-      color="primary"
-      data-test-subj="confirmSaveSavedObjectButton"
-      fill={true}
-      form="generated-id_form"
-      isLoading={false}
-      size="m"
-      type="submit"
-    >
-      Save
-    </EuiButton>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          form="generated-id_form"
+          isLoading={false}
+          size="m"
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiModalFooter>
 </EuiModal>
 `;
@@ -410,9 +410,11 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
           <EuiFormRow
             describedByIds={Array []}
             display="row"
+            error="A title is required"
             fullWidth={true}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
+            isInvalid={false}
             label={
               <FormattedMessage
                 defaultMessage="Title"
@@ -477,43 +479,41 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       </EuiFlexGroup>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter
-    css={
-      Object {
-        "map": undefined,
-        "name": "fy4vru",
-        "next": undefined,
-        "styles": "
-            align-items: center;
-          ",
-        "toString": [Function],
-      }
-    }
-  >
-    <EuiFlexItem
-      grow={true}
-    />
-    <EuiButtonEmpty
-      data-test-subj="saveCancelButton"
-      onClick={[Function]}
+  <EuiModalFooter>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
     >
-      <FormattedMessage
-        defaultMessage="Cancel"
-        id="savedObjects.saveModal.cancelButtonLabel"
-        values={Object {}}
-      />
-    </EuiButtonEmpty>
-    <EuiButton
-      color="primary"
-      data-test-subj="confirmSaveSavedObjectButton"
-      fill={true}
-      form="generated-id_form"
-      isLoading={false}
-      size="m"
-      type="submit"
-    >
-      Save
-    </EuiButton>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          form="generated-id_form"
+          isLoading={false}
+          size="m"
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiModalFooter>
 </EuiModal>
 `;

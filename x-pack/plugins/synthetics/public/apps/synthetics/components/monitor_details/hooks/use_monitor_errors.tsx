@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
 import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
@@ -51,11 +50,6 @@ export function useMonitorErrors(monitorIdArg?: string) {
               },
               {
                 term: {
-                  'state.up': 0,
-                },
-              },
-              {
-                term: {
                   config_id: monitorIdArg ?? monitorId,
                 },
               },
@@ -69,7 +63,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
         sort: [{ 'state.started_at': 'desc' }],
         aggs: {
-          errorStates: {
+          states: {
             terms: {
               field: 'state.id',
               size: 10000,
@@ -84,6 +78,13 @@ export function useMonitorErrors(monitorIdArg?: string) {
               },
             },
           },
+          latest: {
+            top_hits: {
+              size: 1,
+              _source: ['monitor.status'],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
         },
       },
     },
@@ -95,27 +96,35 @@ export function useMonitorErrors(monitorIdArg?: string) {
   );
 
   return useMemo(() => {
-    const errorStates = data?.aggregations?.errorStates.buckets?.map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as PingState;
-    });
+    const defaultValues = { upStates: [], errorStates: [] };
+    // re-bucket states into error/up
+    // including the `up` states is useful for determining error duration
+    const { errorStates, upStates } =
+      data?.aggregations?.states.buckets.reduce<{
+        upStates: PingState[];
+        errorStates: PingState[];
+      }>((prev, cur) => {
+        const source = cur.summary.hits.hits?.[0]._source as PingState | undefined;
+        if (source?.state.up === 0) {
+          prev.errorStates.push(source as PingState);
+        } else if (!!source?.state.up && source.state.up >= 1) {
+          prev.upStates.push(source as PingState);
+        }
+        return prev;
+      }, defaultValues) ?? defaultValues;
 
     const hasActiveError: boolean =
-      errorStates?.some((errorState) => isActiveState(errorState)) || false;
+      data?.aggregations?.latest.hits.hits.length === 1 &&
+      (data?.aggregations?.latest.hits.hits[0]._source as { monitor: { status: string } }).monitor
+        .status === 'down' &&
+      !!errorStates?.length;
 
     return {
       errorStates,
+      upStates,
       loading,
       data,
       hasActiveError,
     };
   }, [data, loading]);
 }
-
-export const isActiveState = (item: PingState) => {
-  const timestamp = item['@timestamp'];
-  const interval = moment(item.monitor.timespan?.lt).diff(
-    moment(item.monitor.timespan?.gte),
-    'milliseconds'
-  );
-  return moment().diff(moment(timestamp), 'milliseconds') < interval;
-};

@@ -53,7 +53,6 @@ export function getFetch$({
         );
       })
     ),
-    data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
   ).pipe(debounceTime(100));
 }

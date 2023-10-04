@@ -7,6 +7,9 @@
 
 import { callOutWithId, CALLOUT_DISMISS_BTN } from '../../screens/common/callouts';
 
+export const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
+export const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
+
 export const getCallOut = (id: string, options?: Cypress.Timeoutable) => {
   return cy.get(callOutWithId(id), options);
 };

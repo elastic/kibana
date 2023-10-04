@@ -1,0 +1,95 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "name": "Kibana Sample Data Logs",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-15T19:49:25.494Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-08-15T19:49:25.494Z",
+  "version": "WzIyLDFd"
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "color": "#6092c0",
+        "filter": {
+          "language": "kuery",
+          "query": "agent.keyword : \"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\" ",
+          "type": "kibana_query"
+        },
+        "icon": "asterisk",
+        "id": "499ee351-f541-46e0-b327-b3dcae91aff5",
+        "key": {
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "lineStyle": "dashed",
+        "timeField": "timestamp",
+        "type": "query"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "Another group"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-15T21:02:32.023Z",
+  "id": "0d1aa670-3baf-11ee-a4a7-c11cb33a9549",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-08-15T22:15:43.724Z",
+  "version": "WzU4LDFd"
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "1d9627a8-11dc-44f1-badb-4d40a80b6bee",
+        "key": {
+          "timestamp": "2023-08-10T15:00:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "A group"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-15T19:50:29.907Z",
+  "id": "fcebef20-3ba4-11ee-85d3-3dd00bdd66ef",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-08-15T22:13:19.290Z",
+  "version": "WzU0LDFd"
+}

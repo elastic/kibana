@@ -59,8 +59,6 @@ export interface APMRouteHandlerResources {
   params: {
     query: {
       _inspect: boolean;
-      start?: number;
-      end?: number;
     };
   };
   config: APMConfig;

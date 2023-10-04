@@ -47,8 +47,8 @@ export const getCases = async ({
 
 export const getCasesStatus = async ({
   http,
-  signal,
   query,
+  signal,
 }: HTTPService & { query: CasesStatusRequest }): Promise<CasesStatus> => {
   const response = await http.get<CasesStatusResponse>(CASE_STATUS_URL, {
     signal,

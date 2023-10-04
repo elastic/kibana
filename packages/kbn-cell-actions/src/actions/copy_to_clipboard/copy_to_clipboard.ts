@@ -9,6 +9,7 @@
 import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
+import { isString } from 'lodash';
 import { COPY_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
 
@@ -23,7 +24,7 @@ const COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
   }
 );
 
-const escapeValue = (value: string) => value.replace(/"/g, '\\"');
+const escapeValue = (value: string) => (isString(value) ? value.replace(/"/g, '\\"') : value);
 
 export const createCopyToClipboardActionFactory = createCellActionFactory(
   ({ notifications }: { notifications: NotificationsStart }) => ({

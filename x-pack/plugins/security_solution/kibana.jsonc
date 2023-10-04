@@ -6,10 +6,7 @@
     "id": "securitySolution",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "securitySolution"
-    ],
+    "configPath": ["xpack", "securitySolution"],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -24,6 +21,7 @@
       "embeddable",
       "eventLog",
       "features",
+      "fieldFormats",
       "guidedOnboarding",
       "inspector",
       "kubernetesSecurity",
@@ -43,7 +41,7 @@
       "controls",
       "dataViews",
       "savedObjectsManagement",
-      "stackConnectors",
+      "stackConnectors"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -71,8 +69,6 @@
       "unifiedSearch",
       "cloudChat"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

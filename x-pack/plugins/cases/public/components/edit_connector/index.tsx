@@ -90,7 +90,7 @@ export const EditConnector = React.memo(
       !needsToBePushed;
 
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="sidebar-connectors">
         <EuiText>
           <EuiFlexGroup
             alignItems="center"

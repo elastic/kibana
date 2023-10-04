@@ -8,6 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { StepDefineRule, aggregatableFields } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
@@ -280,11 +282,13 @@ const onOpenTimeline = jest.fn();
 describe('StepDefineRule', () => {
   const TestComp = ({
     setFormRef,
+    ruleType = stepDefineDefaultValue.ruleType,
   }: {
     setFormRef: (form: FormHook<DefineStepRule, DefineStepRule>) => void;
+    ruleType?: Type;
   }) => {
     const { defineStepForm, eqlOptionsSelected, setEqlOptionsSelected } = useRuleForms({
-      defineStepDefault: stepDefineDefaultValue,
+      defineStepDefault: { ...stepDefineDefaultValue, ruleType },
       aboutStepDefault: stepAboutDefaultValue,
       scheduleStepDefault: defaultSchedule,
       actionsStepDefault: stepActionsDefaultValue,
@@ -303,6 +307,17 @@ describe('StepDefineRule', () => {
         indexPattern={{ fields: [], title: '' }}
         isIndexPatternLoading={false}
         browserFields={{}}
+        isQueryBarValid={true}
+        setIsQueryBarValid={() => {}}
+        setIsThreatQueryBarValid={() => {}}
+        ruleType={ruleType}
+        index={stepDefineDefaultValue.index}
+        threatIndex={stepDefineDefaultValue.threatIndex}
+        groupByFields={stepDefineDefaultValue.groupByFields}
+        dataSourceType={stepDefineDefaultValue.dataSourceType}
+        shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
+        queryBarTitle=""
+        queryBarSavedId=""
       />
     );
   };
@@ -371,7 +386,7 @@ describe('StepDefineRule', () => {
       });
     const { getByTestId } = render(
       <TestProviders>
-        <TestComp setFormRef={() => {}} />
+        <TestComp setFormRef={() => {}} ruleType="eql" />
       </TestProviders>
     );
     expect(getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(eqlQuery.queryBar.query.query);

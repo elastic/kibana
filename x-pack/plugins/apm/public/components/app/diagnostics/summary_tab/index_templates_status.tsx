@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
@@ -16,9 +17,10 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function IndexTemplatesStatus() {
   const router = useApmRouter();
+  const { query } = useApmParams('/diagnostics/*');
   const { diagnosticsBundle, status } = useDiagnosticsContext();
   const isLoading = status === FETCH_STATUS.LOADING;
-  const tabStatus = getIndexTemplateStatus(diagnosticsBundle);
+  const tabStatus = getIsIndexTemplateOk(diagnosticsBundle);
 
   return (
     <TabStatus
@@ -29,7 +31,7 @@ export function IndexTemplatesStatus() {
       Index templates
       <EuiLink
         data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
-        href={router.link('/diagnostics/index-templates')}
+        href={router.link('/diagnostics/index-templates', { query })}
       >
         See details
       </EuiLink>
@@ -37,14 +39,18 @@ export function IndexTemplatesStatus() {
   );
 }
 
-export function getIndexTemplateStatus(diagnosticsBundle?: DiagnosticsBundle) {
+export function getIsIndexTemplateOk(diagnosticsBundle?: DiagnosticsBundle) {
+  if (!diagnosticsBundle) {
+    return true;
+  }
+
   const hasNonStandardIndexTemplates =
-    diagnosticsBundle?.apmIndexTemplates?.some(
+    diagnosticsBundle.apmIndexTemplates?.some(
       ({ isNonStandard }) => isNonStandard
     );
 
   const isEveryExpectedApmIndexTemplateInstalled =
-    diagnosticsBundle?.apmIndexTemplates.every(
+    diagnosticsBundle.apmIndexTemplates.every(
       ({ exists, isNonStandard }) => isNonStandard || exists
     );
 

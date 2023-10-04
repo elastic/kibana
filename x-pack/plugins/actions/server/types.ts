@@ -34,6 +34,11 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
+import type { ActionExecutionSource } from './lib';
+export type { ActionExecutionSource } from './lib';
+
+export { ActionExecutionSourceType } from './lib';
+
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
@@ -65,6 +70,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
+  source?: ActionExecutionSource<unknown>;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {

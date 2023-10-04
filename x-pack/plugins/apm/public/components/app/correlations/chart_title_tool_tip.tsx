@@ -16,7 +16,7 @@ export function ChartTitleToolTip() {
         'xpack.apm.correlations.latencyCorrelations.titleHelp',
         {
           defaultMessage:
-            'The chart uses logarithmic scales on both axes to avoid outliers distorting it',
+            'This chart uses logarithmic scales on both axes to avoid distortion from outliers.',
         }
       )}
       position="right"

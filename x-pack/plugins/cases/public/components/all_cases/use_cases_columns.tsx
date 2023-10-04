@@ -244,6 +244,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
+    width: '100px',
   });
 
   if (filterStatus === CaseStatuses.closed) {
@@ -342,6 +343,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
+    width: '90px',
   });
 
   if (isSelectorView) {

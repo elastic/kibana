@@ -59,7 +59,9 @@ export const getComments = ({
       ) : (
         <EuiAvatar name="machine" size="l" color="subdued" iconType="logoSecurity" />
       ),
-      timestamp: i18n.AT(message.timestamp),
+      timestamp: i18n.AT(
+        message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
+      ),
       username: isUser ? i18n.YOU : i18n.ASSISTANT,
     };
   });

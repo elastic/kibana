@@ -25,7 +25,6 @@
       "share",
       "unifiedSearch",
       "dataViews",
-      "advancedSettings",
       "unifiedFieldList",
       "lens",
       "maps",
@@ -37,6 +36,7 @@
       "cases",
       "charts",
       "cloud",
+      "discover",
       "fleet",
       "fieldFormats",
       "home",
@@ -49,6 +49,7 @@
       "licenseManagement"
     ],
     "requiredBundles": [
+      "advancedSettings",
       "fleet",
       "kibanaReact",
       "kibanaUtils",

@@ -410,6 +410,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
+
   return (
     <>
       {isAgentActivityFlyoutOpen ? (

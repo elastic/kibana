@@ -12,11 +12,10 @@ import type {
   XYState,
 } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {
   DEFAULT_LAYER_ID,
-  getAdhocDataView,
   getBreakdownColumn,
   getDefaultReferences,
   getHistogramColumn,
@@ -101,8 +100,8 @@ export class LineChart implements VisualizationAttributes<XYState> {
     ];
   }
 
-  getAdhocDataView(): Record<string, DataViewSpec> {
-    return getAdhocDataView(this.dataView);
+  getDataView(): DataView {
+    return this.dataView;
   }
 
   getTitle(): string {

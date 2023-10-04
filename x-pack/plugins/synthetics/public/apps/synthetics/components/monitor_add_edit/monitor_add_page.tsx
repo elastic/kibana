@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { useEnablement } from '../../hooks';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 
@@ -25,6 +26,9 @@ export const MonitorAddPage = () => {
   const { space } = useKibanaSpace();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
+
+  useEnablement();
+
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getServiceLocations());

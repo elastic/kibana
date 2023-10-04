@@ -14,7 +14,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { hasSimpleExecutableName } from '@kbn/securitysolution-utils';
+import { EntryFieldType, hasSimpleExecutableName } from '@kbn/securitysolution-utils';
 
 import type {
   ENDPOINT_BLOCKLISTS_LIST_ID,
@@ -22,7 +22,7 @@ import type {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type {
   InternalArtifactCompleteSchema,
@@ -168,13 +168,36 @@ export function translateToEndpointExceptions(
   const entriesFiltered: TranslatedExceptionListItem[] = [];
   if (schemaVersion === 'v1') {
     exceptions.forEach((entry) => {
-      const translatedItem = translateItem(schemaVersion, entry);
-      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
-      if (!entrySet.has(entryHash)) {
-        entriesFiltered.push(translatedItem);
-        entrySet.add(entryHash);
+      // For Blocklist, we create a single entry for each blocklist entry item
+      // if there is an entry with more than one hash type.
+      if (
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.blocklists.id &&
+        entry.entries.length > 1 &&
+        !!entry.entries[0].field.match(EntryFieldType.HASH)
+      ) {
+        entry.entries.forEach((blocklistSingleEntry) => {
+          const translatedItem = translateItem(schemaVersion, {
+            ...entry,
+            entries: [blocklistSingleEntry],
+          });
+          const entryHash = createHash('sha256')
+            .update(JSON.stringify(translatedItem))
+            .digest('hex');
+          if (!entrySet.has(entryHash)) {
+            entriesFiltered.push(translatedItem);
+            entrySet.add(entryHash);
+          }
+        });
+      } else {
+        const translatedItem = translateItem(schemaVersion, entry);
+        const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+        if (!entrySet.has(entryHash)) {
+          entriesFiltered.push(translatedItem);
+          entrySet.add(entryHash);
+        }
       }
     });
+
     return entriesFiltered;
   } else {
     throw new Error('unsupported schemaVersion');

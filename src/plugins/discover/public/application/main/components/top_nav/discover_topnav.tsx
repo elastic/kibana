@@ -18,6 +18,7 @@ import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { addLog } from '../../../../utils/add_log';
 
 export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
@@ -143,6 +144,7 @@ export const DiscoverTopNav = ({
       await stateContainer.actions.updateAdHocDataViewId();
     }
     stateContainer.actions.loadDataViewList();
+    addLog('[DiscoverTopNav] onEditDataView triggers data fetching');
     stateContainer.dataState.fetch();
   };
 

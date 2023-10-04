@@ -68,6 +68,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
         {
+          connector_type_id: '.email',
+          id: 'notification-email',
+          is_deprecated: false,
+          is_preconfigured: true,
+          name: 'Notification Email Connector',
+          referenced_by_count: 0,
+        },
+        {
           id: 'preconfigured-es-index-action',
           is_preconfigured: true,
           is_deprecated: false,
@@ -160,6 +168,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.index',
           is_preconfigured: true,
           is_deprecated: false,
+          referenced_by_count: 0,
+        },
+        {
+          connector_type_id: '.email',
+          id: 'notification-email',
+          is_deprecated: false,
+          is_preconfigured: true,
+          name: 'Notification Email Connector',
           referenced_by_count: 0,
         },
         {
@@ -268,6 +284,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             config: {
               unencrypted: `This value shouldn't get encrypted`,
             },
+            referencedByCount: 0,
+          },
+          {
+            actionTypeId: '.email',
+            id: 'notification-email',
+            isDeprecated: false,
+            isPreconfigured: true,
+            name: 'Notification Email Connector',
             referencedByCount: 0,
           },
           {

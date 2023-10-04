@@ -75,7 +75,6 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
         })}
         checked={showCustomTimeRangeSelector}
         onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}
-        compressed
       />
       {showCustomTimeRangeSelector ? (
         <>

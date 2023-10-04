@@ -8,7 +8,7 @@
 import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 
 import { EMPTY_STAT } from '../../helpers';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -38,7 +38,8 @@ jest.mock('../../use_ilm_explain', () => ({
   })),
 }));
 
-const defaultProps = {
+const defaultProps: ComponentProps<typeof Pattern> = {
+  pattern: '',
   addSuccessToast: jest.fn(),
   canUserCreateAndReadCases: jest.fn(),
   formatBytes,
@@ -51,7 +52,7 @@ const defaultProps = {
   patternRollup: undefined,
   selectedIndex: null,
   setSelectedIndex: jest.fn(),
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
   updatePatternIndexNames: jest.fn(),
   updatePatternRollup: jest.fn(),
 };

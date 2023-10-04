@@ -142,7 +142,10 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   }) {
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      scopedClusterClient.asCurrentUser
+      scopedClusterClient.asCurrentUser,
+      {
+        isLegacyAlert: true,
+      }
     );
     const { share, basePath } = server;
     const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =

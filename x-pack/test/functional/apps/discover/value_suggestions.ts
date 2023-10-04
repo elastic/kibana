@@ -36,10 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': false,
       });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await PageObjects.common.unsetTime();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

@@ -7,7 +7,16 @@
 
 import moment from 'moment';
 import React from 'react';
-import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  Tooltip,
+} from '@elastic/charts';
 import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
@@ -52,28 +61,43 @@ export const AlertSummaryWidgetFullSize = ({
       </EuiFlexItem>
       <EuiSpacer size="l" />
       <Chart size={['100%', 170]}>
+        <Tooltip
+          headerFormatter={(tooltip) =>
+            moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT)
+          }
+        />
         <Settings
           legendPosition={Position.Right}
           theme={chartTheme}
           baseTheme={baseTheme}
-          tooltip={{
-            headerFormatter: (tooltip) =>
-              moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT),
-          }}
           onBrushEnd={onBrushEnd}
         />
         <Axis
           id="bottom"
           position={Position.Bottom}
           timeAxisLayerCount={2}
-          showGridLines
+          gridLine={{
+            visible: true,
+          }}
           style={{
             tickLine: { size: 0.0001, padding: 4 },
             tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
           }}
         />
-        <Axis id="left" position={Position.Left} showGridLines integersOnly ticks={4} />
-        <Axis id="right" position={Position.Right} showGridLines integersOnly ticks={4} />
+        <Axis
+          id="left"
+          position={Position.Left}
+          gridLine={{ visible: true }}
+          integersOnly
+          ticks={4}
+        />
+        <Axis
+          id="right"
+          position={Position.Right}
+          gridLine={{ visible: true }}
+          integersOnly
+          ticks={4}
+        />
         <LineSeries
           id="Active"
           xScaleType={ScaleType.Time}

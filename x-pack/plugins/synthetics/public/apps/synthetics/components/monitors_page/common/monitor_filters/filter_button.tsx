@@ -32,7 +32,7 @@ export const FilterButton = ({
 
   // Transform the values to readable labels (if any) so that selected values are checked on filter dropdown
   const selectedValueLabels = getSyntheticsFilterDisplayValues(
-    (urlParams[field] || []).map(valueToLabelWithEmptyCount),
+    valueToLabelWithEmptyCount(urlParams[field]),
     field,
     []
   ).map(({ label: selectedValueLabel }) => selectedValueLabel);

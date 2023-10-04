@@ -14,14 +14,17 @@ import { useBulkAlertTagsItems } from '../../../../common/components/toolbar/bul
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { AlertTableContextMenuItem } from '../types';
 
-interface Props {
+export interface UseAlertTagsActionsProps {
   closePopover: () => void;
   ecsRowData: Ecs;
-  scopeId: string;
   refetch?: () => void;
 }
 
-export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch }: Props) => {
+export const useAlertTagsActions = ({
+  closePopover,
+  ecsRowData,
+  refetch,
+}: UseAlertTagsActionsProps) => {
   const { hasIndexWrite } = useAlertsPrivileges();
   const alertId = ecsRowData._id;
   const alertTagData = useMemo(() => {
@@ -40,7 +43,9 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
     ];
   }, [alertId, ecsRowData._index, ecsRowData?.kibana?.alert.workflow_tags]);
 
-  const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems({ refetch });
+  const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems({
+    refetch,
+  });
 
   const itemsToReturn: AlertTableContextMenuItem[] = useMemo(
     () =>

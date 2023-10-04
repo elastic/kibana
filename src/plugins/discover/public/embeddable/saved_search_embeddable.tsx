@@ -644,4 +644,8 @@ export class SavedSearchEmbeddable
 
     if (this.abortController) this.abortController.abort();
   }
+
+  public hasTimeRange() {
+    return this.getTimeRange() !== undefined;
+  }
 }

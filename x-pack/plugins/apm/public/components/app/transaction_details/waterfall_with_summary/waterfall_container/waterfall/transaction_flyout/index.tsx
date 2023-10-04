@@ -39,6 +39,8 @@ interface Props {
   rootTransactionDuration?: number;
   spanLinksCount: SpanLinksCount;
   flyoutDetailTab?: string;
+  start: string;
+  end: string;
 }
 
 export function TransactionFlyout({
@@ -49,15 +51,17 @@ export function TransactionFlyout({
   rootTransactionDuration,
   spanLinksCount,
   flyoutDetailTab,
+  start,
+  end,
 }: Props) {
   const { data: transaction, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
         'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
-        { params: { path: { traceId, transactionId } } }
+        { params: { path: { traceId, transactionId }, query: { start, end } } }
       );
     },
-    [traceId, transactionId]
+    [traceId, transactionId, start, end]
   );
 
   const isLoading = isPending(status);

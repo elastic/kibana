@@ -12,14 +12,9 @@ import {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import {
-  DEFAULT_LAYER_ID,
-  getAdhocDataView,
-  getDefaultReferences,
-  getHistogramColumn,
-} from '../utils';
+import { DEFAULT_LAYER_ID, getDefaultReferences, getHistogramColumn } from '../utils';
 
 import type {
   VisualizationAttributes,
@@ -147,8 +142,8 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
     ];
   }
 
-  getAdhocDataView(): Record<string, DataViewSpec> {
-    return getAdhocDataView(this.dataView);
+  getDataView(): DataView {
+    return this.dataView;
   }
 
   getTitle(): string {

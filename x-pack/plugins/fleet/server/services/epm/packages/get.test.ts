@@ -314,6 +314,82 @@ owner: elastic`,
       ]);
     });
 
+    it('should filter installed package that are not in registry and not valid packages', async () => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'invalidpackage',
+            attributes: {
+              name: 'invalidpackage',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: invalidpackage
+version: 0.0.1
+test: invalid manifest`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'invalidpackage',
+            attributes: {
+              name: 'invalidpackage',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: invalidpackage
+            version: 0.0.1
+            title: Elastic
+            test: invalid manifest`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'invalidpackage-0.0.1/manifest.yml',
+              data_utf8: `
+name: invalidpackage
+version: 0.0.1
+title: Elastic
+test: invalid manifest
+`,
+            },
+          },
+        ],
+      });
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages).toMatchObject([
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+      ]);
+
+      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledTimes(1);
+      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
+        'Installed package invalidpackage 0.0.1 is not a valid package anymore'
+      );
+    });
+
     it('should call audit logger', async () => {
       const soClient = savedObjectsClientMock.create();
 

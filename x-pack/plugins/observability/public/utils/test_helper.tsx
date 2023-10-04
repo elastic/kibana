@@ -41,6 +41,9 @@ const defaultConfig: ConfigSchema = {
   compositeSlo: { enabled: false },
   aiAssistant: {
     enabled: false,
+    feedback: {
+      enabled: false,
+    },
   },
 };
 

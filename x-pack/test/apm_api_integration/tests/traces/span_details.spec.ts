@@ -30,7 +30,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: `GET /internal/apm/traces/{traceId}/spans/{spanId}`,
       params: {
         path: { traceId, spanId },
-        query: { parentTransactionId },
+        query: {
+          parentTransactionId,
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
       },
     });
   }

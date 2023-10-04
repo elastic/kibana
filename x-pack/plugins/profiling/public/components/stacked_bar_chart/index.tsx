@@ -141,7 +141,7 @@ export function StackedBarChart({
       <Axis
         id="left-axis"
         position="left"
-        showGridLines
+        gridLine={{ visible: true }}
         tickFormat={(d) => (asPercentages ? asPercentage(d) : d.toFixed(0))}
       />
     </Chart>

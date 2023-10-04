@@ -12,6 +12,9 @@ import { ConnectorDocument } from '../../../common/types/connectors';
 import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
 export const generateApiKey = async (client: IScopedClusterClient, indexName: string) => {
+  // removes the "search-" prefix if present, and applies the new prefix
+  const aclIndexName = indexName.replace(/^(?:search-)?(.*)$/, '.search-acl-filter-$1');
+
   const apiKeyResult = await client.asCurrentUser.security.createApiKey({
     name: `${indexName}-connector`,
     role_descriptors: {
@@ -19,7 +22,7 @@ export const generateApiKey = async (client: IScopedClusterClient, indexName: st
         cluster: ['monitor'],
         index: [
           {
-            names: [indexName, `${CONNECTORS_INDEX}*`],
+            names: [indexName, aclIndexName, `${CONNECTORS_INDEX}*`],
             privileges: ['all'],
           },
         ],

@@ -11,6 +11,10 @@ import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
+Cypress.Commands.add('loginAsSuperUser', () => {
+  return cy.loginAs({ username: 'elastic', password: 'changeme' });
+});
+
 Cypress.Commands.add('loginAsViewerUser', () => {
   return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme' });
 });

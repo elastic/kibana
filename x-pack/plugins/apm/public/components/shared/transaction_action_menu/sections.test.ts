@@ -62,6 +62,9 @@ describe('Transaction action menu', () => {
         apmRouter,
         infraLocators,
         infraLinksAvailable: false,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -79,7 +82,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -124,6 +127,9 @@ describe('Transaction action menu', () => {
         apmRouter,
         infraLocators,
         infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -160,7 +166,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -205,6 +211,9 @@ describe('Transaction action menu', () => {
         apmRouter,
         infraLocators,
         infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -240,7 +249,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {

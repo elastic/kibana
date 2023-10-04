@@ -130,7 +130,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           tableCaption={i18n.translate(
             'xpack.apm.storageExplorer.indicesStats.table.caption',
             {
-              defaultMessage: 'Storage explorer indices breakdown',
+              defaultMessage: 'Storage Explorer indices breakdown',
             }
           )}
           items={indicesStats}

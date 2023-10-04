@@ -31,6 +31,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.custom,
   },
+  dropbox: {
+    docsUrl: docLinks.connectorsDropbox,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.dropbox,
+  },
   google_cloud_storage: {
     docsUrl: docLinks.connectorsGoogleCloudStorage,
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
@@ -85,6 +91,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://docs.aws.amazon.com/s3/index.html',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.amazon_s3,
+  },
+  servicenow: {
+    docsUrl: docLinks.connectorsServiceNow,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.servicenow,
   },
   sharepoint: {
     docsUrl: docLinks.connectorsSharepoint,

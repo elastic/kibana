@@ -23,6 +23,7 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
+  isInvalidSearchApplicationNameException,
   isNotFoundException,
   isVersionConflictEngineException,
 } from '../../utils/identify_exceptions';
@@ -100,21 +101,45 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
 
         return response.ok({ body: engine });
       } catch (error) {
-        if (isVersionConflictEngineException(error)) {
-          return createError({
-            errorCode: ErrorCode.SEARCH_APPLICATION_ALREADY_EXISTS,
-            message: i18n.translate(
-              'xpack.enterpriseSearch.server.routes.createSearchApplication.searchApplciationExistsError',
-              {
-                defaultMessage: 'Search application name already taken. Choose another name.',
-              }
-            ),
-            response,
-            statusCode: 409,
-          });
-        }
+        switch (true) {
+          case isVersionConflictEngineException(error):
+            return createError({
+              errorCode: ErrorCode.SEARCH_APPLICATION_ALREADY_EXISTS,
+              message: i18n.translate(
+                'xpack.enterpriseSearch.server.routes.createSearchApplication.searchApplciationExistsError',
+                {
+                  defaultMessage: 'Search application name already taken. Choose another name.',
+                }
+              ),
+              response,
+              statusCode: 409,
+            });
+          case isInvalidSearchApplicationNameException(error):
+            let exceptionReason = '';
+            const unSupportedCharacters =
+              error.meta?.body?.error?.reason?.match(/\[(.*?)\]|'(.*?)'/gi);
 
-        throw error;
+            if (unSupportedCharacters && unSupportedCharacters.length === 2) {
+              exceptionReason =
+                'Search application name must not contain: ' +
+                unSupportedCharacters[1].replace(/\'(.*?)\'/g, ' $& ');
+            }
+            return createError({
+              errorCode: ErrorCode.SEARCH_APPLICATION_NAME_INVALID,
+              message: i18n.translate(
+                'xpack.enterpriseSearch.server.routes.createSearchApplication.searchApplicationInvalidName',
+                {
+                  defaultMessage: 'Invalid Search application name. {exceptionReason}',
+                  values: { exceptionReason },
+                }
+              ),
+              response,
+              statusCode: 400,
+            });
+
+          default:
+            throw error;
+        }
       }
     })
   );

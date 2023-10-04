@@ -62,6 +62,9 @@ export const config: PluginConfigDescriptor = {
     unsafe: true,
     aiAssistant: {
       enabled: true,
+      feedback: {
+        enabled: true,
+      },
     },
   },
   schema: configSchema,

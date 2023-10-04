@@ -9,7 +9,6 @@
 import { resolve, dirname } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
-import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 
 import del from 'del';
 
@@ -85,20 +84,9 @@ export class ScreenshotsService extends FtrService {
   }
 
   private async capture(path: string, el?: WebElementWrapper) {
-    try {
-      this.log.info(`Taking screenshot "${path}"`);
-      const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
-      await mkdirAsync(dirname(path), { recursive: true });
-      await writeFileAsync(path, screenshot, 'base64');
-    } catch (err) {
-      this.log.error('SCREENSHOT FAILED');
-      this.log.error(err);
-      if (err instanceof NoSuchSessionError) {
-        // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
-        this.log.error(
-          `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
-        );
-      }
-    }
+    this.log.info(`Taking ${el ? 'element' : 'window'} screenshot "${path}"`);
+    const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
+    await mkdirAsync(dirname(path), { recursive: true });
+    await writeFileAsync(path, screenshot, 'base64');
   }
 }

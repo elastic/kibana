@@ -26,7 +26,7 @@ export const useFindCspRuleTemplates = (
     [CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE, { search, page, perPage, packagePolicyId }],
     () => {
       return http.get<GetCspRuleTemplateResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
-        query: { packagePolicyId, page, perPage },
+        query: { packagePolicyId, page, perPage, search },
         version: '1',
       });
     }

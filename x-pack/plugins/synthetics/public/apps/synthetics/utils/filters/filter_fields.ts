@@ -81,10 +81,12 @@ export function getSyntheticsFilterKeyForLabel(value: string, field: SyntheticsM
   }
 }
 
-export const valueToLabelWithEmptyCount = (value: string): LabelWithCountValue => ({
-  label: value,
-  count: 0,
-});
+export const valueToLabelWithEmptyCount = (value?: string | string[]): LabelWithCountValue[] => {
+  if (Array.isArray(value)) {
+    return value.map((v) => ({ label: v, count: 0 }));
+  }
+  return value ? [{ label: value, count: 0 }] : [];
+};
 
 export const monitorTypeKeyLabelMap: Record<DataStream, string> = {
   [DataStream.BROWSER]: 'Journey / Page',

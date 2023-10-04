@@ -110,7 +110,9 @@ describe('getCerts', () => {
       Object {
         "certs": Array [
           Object {
+            "@timestamp": undefined,
             "common_name": "r2.shared.global.fastly.net",
+            "configId": undefined,
             "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
             "locationName": undefined,
             "monitorName": "Real World Test",
@@ -139,6 +141,8 @@ describe('getCerts', () => {
           Object {
             "body": Object {
               "_source": Array [
+                "@timestamp",
+                "config_id",
                 "monitor.id",
                 "monitor.name",
                 "monitor.type",

@@ -85,14 +85,21 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const createUpgradeButtonColumn = (
   upgradeOneRule: UpgradePrebuiltRulesTableActions['upgradeOneRule'],
-  loadingRules: RuleSignatureId[]
+  loadingRules: RuleSignatureId[],
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleUpgradeInfoForReview['rule_id']) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
+    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled;
     return (
-      <EuiButtonEmpty size="s" disabled={isRuleUpgrading} onClick={() => upgradeOneRule(ruleId)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isUpgradeButtonDisabled}
+        onClick={() => upgradeOneRule(ruleId)}
+        data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
+      >
         {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -106,9 +113,11 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules },
+    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeOneRule },
   } = useUpgradePrebuiltRulesTableContext();
+
+  const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
   return useMemo(
     () => [
@@ -136,8 +145,10 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules)] : []),
+      ...(hasCRUDPermissions
+        ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules, isDisabled)]
+        : []),
     ],
-    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeOneRule]
+    [hasCRUDPermissions, loadingRules, isDisabled, showRelatedIntegrations, upgradeOneRule]
   );
 };

@@ -34,7 +34,8 @@ export interface EventAnnotationGroupSavedObjectAttributes {
   description: string;
   ignoreGlobalFilters: boolean;
   annotations: EventAnnotationConfig[];
-  dataViewSpec?: DataViewSpec;
+  // NULL is important here - undefined will not properly remove this property from the saved object
+  dataViewSpec: DataViewSpec | null;
 }
 
 export interface EventAnnotationGroupSavedObject {
@@ -120,6 +121,9 @@ export interface EventAnnotationGroupSearchQuery {
   searchFields?: string[];
 }
 
-export type EventAnnotationGroupSearchIn = SearchIn<EventAnnotationGroupContentType, {}>;
+export type EventAnnotationGroupSearchIn = SearchIn<
+  EventAnnotationGroupContentType,
+  EventAnnotationGroupSearchQuery
+>;
 
 export type EventAnnotationGroupSearchOut = SearchResult<EventAnnotationGroupSavedObject>;

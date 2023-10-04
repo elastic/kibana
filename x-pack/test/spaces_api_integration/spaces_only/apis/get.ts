@@ -17,10 +17,7 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
   const { getTest, createExpectResults, createExpectNotFoundResult, nonExistantSpaceId } =
     getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  // Failing: See https://github.com/elastic/kibana/issues/155723, https://github.com/elastic/kibana/issues/156422
-  // Also, https://github.com/elastic/kibana/issues/158918
-  // esArchiver fails with no_shard_available_action_exception after deleting indexes
-  describe.skip('get', () => {
+  describe('get', () => {
     // valid spaces
     [
       {

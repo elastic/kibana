@@ -334,7 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -344,7 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Average of bytes'
@@ -365,7 +365,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Average of bytes'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
     });
 
@@ -378,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
         await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
+      ).to.eql(['Top 7 values of geo.dest', 'Top 3 values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );

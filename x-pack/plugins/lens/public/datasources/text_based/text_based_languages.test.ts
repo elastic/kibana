@@ -133,29 +133,32 @@ describe('Textbased Data Source', () => {
 
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
-      const map = TextBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+                {
+                  columnId: 'b',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-            ],
-            index: 'foo',
+              ],
+              index: 'foo',
+            },
           },
-        },
-      } as unknown as TextBasedPrivateState);
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {

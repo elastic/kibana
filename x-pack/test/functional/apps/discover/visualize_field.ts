@@ -38,8 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/148225
-  describe.skip('discover field visualize button', () => {
+  describe('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
     });
@@ -115,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
-        expect(values).to.eql(['Other', 'png', 'css', 'jpg']);
+        expect(values).to.eql(['jpg', 'css', 'png', 'Other']);
       });
     });
 

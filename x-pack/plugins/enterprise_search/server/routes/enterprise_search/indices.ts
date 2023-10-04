@@ -26,6 +26,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices, fetchSearchIndices } from '../../lib/indices/fetch_indices';
@@ -201,6 +202,7 @@ export function registerIndexRoutes({
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 

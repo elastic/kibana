@@ -48,7 +48,8 @@ describe('CTI Enrichment', () => {
     goToRuleDetails();
   });
 
-  it('Displays enrichment matched.* fields on the timeline', () => {
+  // Skipped: https://github.com/elastic/kibana/issues/162818
+  it.skip('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
       'threat.enrichments.matched.atomic': indicatorRuleMatchingDoc.atomic,
       'threat.enrichments.matched.type': indicatorRuleMatchingDoc.matchedType,

@@ -14,10 +14,12 @@ export function useLast50DurationChart({
   monitorId,
   locationId,
   timestamp,
+  schedule,
 }: {
   monitorId: string;
   timestamp?: string;
   locationId: string;
+  schedule: string;
 }) {
   const { hits, loading } = useLastXChecks<{
     'monitor.duration.us': number[] | undefined;
@@ -27,6 +29,7 @@ export function useLast50DurationChart({
     fields,
     size: 50,
     timestamp,
+    schedule,
   });
   const { data, median, min, max, avg } = useMemo(() => {
     if (loading) {

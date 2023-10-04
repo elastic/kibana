@@ -75,7 +75,8 @@ export class NotificationsService {
           title,
           error,
           openModal: overlays.openModal,
-          i18nContext: () => i18nDep.Context,
+          i18n: i18nDep,
+          theme,
         }),
     };
   }
