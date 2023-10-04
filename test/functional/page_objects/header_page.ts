@@ -15,7 +15,6 @@ export class HeaderPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly screenshot = this.ctx.getService('screenshots');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -37,15 +36,11 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async clickDashboard() {
-    await this.retry.try(async () => {
-      await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
-    });
-    await this.screenshot.take('some-test-screenshot');
+    await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
     await this.retry.waitFor('dashboard app to be loaded', async () => {
       const isNavVisible = await this.testSubjects.exists('top-nav');
-      const isBreadcrumbVisible = await this.testSubjects.exists('~dashboardListingBreadcrumb');
       const isLandingPageVisible = await this.testSubjects.exists('dashboardLandingPage');
-      return isNavVisible && (isBreadcrumbVisible || isLandingPageVisible);
+      return isNavVisible || isLandingPageVisible;
     });
     await this.awaitGlobalLoadingIndicatorHidden();
   }
