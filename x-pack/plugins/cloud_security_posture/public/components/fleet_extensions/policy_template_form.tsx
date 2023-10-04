@@ -87,8 +87,8 @@ export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
 export const GCP_SINGLE_ACCOUNT = 'single-account';
 export const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
-export const AZURE_SINGLE_ACCOUNT = 'single-account-azure';
-export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account-azure';
+export const AZURE_SINGLE_ACCOUNT = 'single-account';
+export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account';
 
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 type AzureAccountType = typeof AZURE_SINGLE_ACCOUNT | typeof AZURE_ORGANIZATION_ACCOUNT;
@@ -169,11 +169,13 @@ const AwsAccountTypeSelect = ({
   newPolicy,
   updatePolicy,
   packageInfo,
+  disabled,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
+  disabled: boolean;
 }) => {
   // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const isValidSemantic = semverValid(packageInfo.version);
@@ -198,7 +200,7 @@ const AwsAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
@@ -221,6 +223,7 @@ const AwsAccountTypeSelect = ({
         </>
       )}
       <RadioGroup
+        disabled={disabled}
         idSelected={getAwsAccountType(input) || ''}
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
@@ -272,11 +275,13 @@ const GcpAccountTypeSelect = ({
   newPolicy,
   updatePolicy,
   packageInfo,
+  disabled,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
+  disabled: boolean;
 }) => {
   // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const validSemantic = semverValid(packageInfo.version);
@@ -341,7 +346,7 @@ const GcpAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
@@ -364,6 +369,7 @@ const GcpAccountTypeSelect = ({
         </>
       )}
       <RadioGroup
+        disabled={disabled}
         idSelected={getGcpAccountType(input) || ''}
         options={gcpAccountTypeOptions}
         onChange={(accountType) =>
@@ -405,10 +411,12 @@ const AzureAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
+  disabled,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  disabled: boolean;
 }) => {
   const azureAccountTypeOptions = getAzureAccountTypeOptions();
 
@@ -440,6 +448,7 @@ const AzureAccountTypeSelect = ({
       </EuiText>
       <EuiSpacer size="l" />
       <RadioGroup
+        disabled={disabled}
         idSelected={getAzureAccountType(input) || ''}
         options={azureAccountTypeOptions}
         onChange={(accountType) => {
@@ -628,6 +637,27 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             <EuiSpacer size="l" />
           </>
         )}
+
+        {isEditPage && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
+                defaultMessage: 'Agent Installation Required for Changes',
+              })}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
+                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts or change where CSPM is deployed (Organization vs Single Account), please install a new CSPM integration."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
         {/* Shows info on the active policy template */}
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
@@ -646,6 +676,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}
+            disabled={isEditPage}
           />
         )}
 
@@ -655,11 +686,17 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}
+            disabled={isEditPage}
           />
         )}
 
         {input.type === 'cloudbeat/cis_azure' && (
-          <AzureAccountTypeSelect input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
+          <AzureAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            disabled={isEditPage}
+          />
         )}
 
         {/* Defines the name/description */}
@@ -677,6 +714,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           packageInfo={packageInfo}
           onChange={onChange}
           setIsValid={setIsValid}
+          disabled={isEditPage}
         />
         <EuiSpacer />
       </>

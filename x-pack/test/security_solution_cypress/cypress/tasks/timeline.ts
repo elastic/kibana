@@ -102,7 +102,7 @@ export const addDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -112,7 +112,7 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -315,7 +315,7 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {

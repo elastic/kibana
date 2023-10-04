@@ -509,4 +509,27 @@ describe('UnifiedDataTable', () => {
       expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
     });
   });
+  describe('rowLineHeightOverride', () => {
+    it('should render the grid with the default row line height if no rowLineHeightOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+      expect(gridRowCell.prop('style')).toMatchObject({
+        lineHeight: '1.6em',
+      });
+    });
+    it('should render the grid with row line height override if rowLineHeightOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        rowLineHeightOverride: '24px',
+      });
+
+      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+      expect(gridRowCell.prop('style')).toMatchObject({
+        lineHeight: '24px',
+      });
+    });
+  });
 });

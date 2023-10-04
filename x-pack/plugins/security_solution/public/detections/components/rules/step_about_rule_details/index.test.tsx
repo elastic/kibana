@@ -11,7 +11,10 @@ import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
 import { ThemeProvider } from 'styled-components';
 
 import { StepAboutRuleToggleDetails } from '.';
-import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+import {
+  mockRule,
+  mockAboutStepRule,
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../step_about_rule';
 import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
@@ -24,10 +27,10 @@ const mockTheme = getMockTheme({
 });
 
 describe('StepAboutRuleToggleDetails', () => {
-  let mockRule: AboutStepRule;
+  let stepDataMock: AboutStepRule;
 
   beforeEach(() => {
-    mockRule = mockAboutStepRule();
+    stepDataMock = mockAboutStepRule();
   });
 
   test('it renders loading component when "loading" is true', () => {
@@ -35,11 +38,12 @@ describe('StepAboutRuleToggleDetails', () => {
       <StepAboutRuleToggleDetails
         loading={true}
         stepDataDetails={{
-          note: mockRule.note,
-          description: mockRule.description,
+          note: stepDataMock.note,
+          description: stepDataMock.description,
           setup: '',
         }}
-        stepData={mockRule}
+        stepData={stepDataMock}
+        rule={mockRule('mocked-rule-id')}
       />
     );
 
@@ -49,7 +53,12 @@ describe('StepAboutRuleToggleDetails', () => {
 
   test('it does not render details if stepDataDetails is null', () => {
     const wrapper = shallow(
-      <StepAboutRuleToggleDetails loading={true} stepDataDetails={null} stepData={mockRule} />
+      <StepAboutRuleToggleDetails
+        loading={true}
+        stepDataDetails={null}
+        stepData={stepDataMock}
+        rule={mockRule('mocked-rule-id')}
+      />
     );
 
     expect(wrapper.find(StepAboutRule).exists()).toBeFalsy();
@@ -65,6 +74,7 @@ describe('StepAboutRuleToggleDetails', () => {
           setup: '',
         }}
         stepData={null}
+        rule={mockRule('mocked-rule-id')}
       />
     );
 
@@ -74,7 +84,7 @@ describe('StepAboutRuleToggleDetails', () => {
   describe('note value is empty string', () => {
     test('it does not render toggle buttons', () => {
       const mockAboutStepWithoutNote = {
-        ...mockRule,
+        ...stepDataMock,
         note: '',
       };
       const wrapper = shallow(
@@ -82,10 +92,11 @@ describe('StepAboutRuleToggleDetails', () => {
           loading={false}
           stepDataDetails={{
             note: '',
-            description: mockRule.description,
+            description: stepDataMock.description,
             setup: '',
           }}
           stepData={mockAboutStepWithoutNote}
+          rule={mockRule('mocked-rule-id')}
         />
       );
 
@@ -103,11 +114,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
+              note: stepDataMock.note,
+              description: stepDataMock.description,
               setup: '',
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
@@ -123,11 +135,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
+              note: stepDataMock.note,
+              description: stepDataMock.description,
               setup: '',
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
@@ -151,11 +164,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
+              note: stepDataMock.note,
+              description: stepDataMock.description,
               setup: '',
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
@@ -180,11 +194,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
+              note: stepDataMock.note,
+              description: stepDataMock.description,
               setup: '',
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
@@ -203,11 +218,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              note: stepDataMock.note,
+              description: stepDataMock.description,
+              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
@@ -224,11 +240,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              note: stepDataMock.note,
+              description: stepDataMock.description,
+              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
@@ -254,11 +271,12 @@ describe('StepAboutRuleToggleDetails', () => {
           <StepAboutRuleToggleDetails
             loading={false}
             stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              note: stepDataMock.note,
+              description: stepDataMock.description,
+              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
             }}
-            stepData={mockRule}
+            stepData={stepDataMock}
+            rule={mockRule('mocked-rule-id')}
           />
         </ThemeProvider>
       );
