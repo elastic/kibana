@@ -202,7 +202,6 @@ export function DataTableDocumentToolbarBtn({
               <FormattedMessage
                 id="unifiedDataTable.selectedDocumentsButtonLabel"
                 defaultMessage="Selected documents"
-                values={{ nr: selectedDocs.length }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
