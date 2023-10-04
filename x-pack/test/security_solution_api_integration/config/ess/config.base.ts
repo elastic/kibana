@@ -9,7 +9,6 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
 import { services } from '../../../api_integration/services';
 
-// TODO combine it with
 interface CreateTestConfigOptions {
   license: string;
   ssl?: boolean;
