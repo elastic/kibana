@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe.only('Panel Actions', () => {
+  describe('Panel Actions', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
