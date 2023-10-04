@@ -24,5 +24,6 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/core-application-browser",
+    "@kbn/i18n-react",
   ]
 }
