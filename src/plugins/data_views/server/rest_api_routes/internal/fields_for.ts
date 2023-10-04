@@ -18,6 +18,7 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
+import { getIndexFilterDsl } from './utils';
 
 /**
  * Accepts one of the following:
@@ -113,8 +114,11 @@ const validate: FullValidationConfig<any, any, any> = {
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
-    const { asCurrentUser } = (await context.core).elasticsearch.client;
+    const core = await context.core;
+    const { asCurrentUser } = core.elasticsearch.client;
+    const excludeFrozen = await core.uiSettings.client.get<boolean>('dataViews:fieldsFromFrozen');
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+
     const {
       pattern,
       meta_fields: metaFields,
@@ -146,7 +150,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        indexFilter,
+        indexFilter: getIndexFilterDsl({ indexFilter, excludeFrozen }),
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 

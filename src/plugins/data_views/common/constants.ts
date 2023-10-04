@@ -57,3 +57,5 @@ export const PLUGIN_NAME = 'DataViews';
  * @public
  */
 export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
+
+export const DATA_VIEWS_FIELDS_FROM_FROZEN = 'data_views:fields_from_frozen';
