@@ -58,12 +58,12 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       );
 
       const assertRadioGroupValue = await testSubjects.find(testSubject);
-      const input = await assertRadioGroupValue.findByCssSelector(':checked');
-      const selectedOptionId = await input.getAttribute('id');
 
       await retry.waitFor(
-        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`,
+        `assertRadioGroupValue: Expected the radio group value to equal "${expectedValue}"`,
         async () => {
+          const input = await assertRadioGroupValue.findByCssSelector(':checked');
+          const selectedOptionId = await input.getAttribute('id');
           return selectedOptionId === expectedValue;
         }
       );
@@ -78,14 +78,6 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       );
 
       const radioGroup = await testSubjects.find(testSubject);
-
-      await retry.waitFor(
-        `selectRadioGroupValue: Expected the radio group ${testSubject} to exists`,
-        async () => {
-          const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
-          return (await label.isDisplayed()) && (await label.isEnabled());
-        }
-      );
 
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
