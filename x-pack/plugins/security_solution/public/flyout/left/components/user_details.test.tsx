@@ -119,7 +119,14 @@ const mockRelatedHostsResponse = {
   loading: false,
 };
 
-describe('<HostDetails />', () => {
+const renderUserDetails = () =>
+  render(
+    <TestProviders>
+      <UserDetails {...defaultProps} />
+    </TestProviders>
+  );
+
+describe('<UserDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
@@ -129,21 +136,13 @@ describe('<HostDetails />', () => {
   });
 
   it('should render host details correctly', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserDetails {...defaultProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = renderUserDetails();
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID))).toBeInTheDocument();
   });
 
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderUserDetails();
       expect(mockUseObservedUserDetails).toBeCalledWith({
         id: 'entities-users-details-uuid',
         startDate: from,
@@ -160,32 +159,20 @@ describe('<HostDetails />', () => {
         isPlatinumOrTrialLicense: true,
         capabilities: {},
       });
-      const { getByText } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByText } = renderUserDetails();
       expect(getByText('User risk score')).toBeInTheDocument();
     });
 
     it('should not render user risk score when license is not valid', () => {
       mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
-      const { queryByText } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryByText } = renderUserDetails();
       expect(queryByText('User risk score')).not.toBeInTheDocument();
     });
   });
 
   describe('Related hosts', () => {
     it('should render the related host table with correct dates and indices', () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderUserDetails();
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
         userName: 'test user',
@@ -200,11 +187,7 @@ describe('<HostDetails />', () => {
         isPlatinumOrTrialLicense: true,
         capabilities: {},
       });
-      const { queryAllByRole } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryAllByRole } = renderUserDetails();
       expect(queryAllByRole('columnheader').length).toBe(3);
       expect(queryAllByRole('row')[1].textContent).toContain('test host');
       expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
@@ -212,11 +195,7 @@ describe('<HostDetails />', () => {
     });
 
     it('should not render host risk score column when license is not valid', () => {
-      const { queryAllByRole } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { queryAllByRole } = renderUserDetails();
       expect(queryAllByRole('columnheader').length).toBe(2);
     });
 
@@ -227,11 +206,7 @@ describe('<HostDetails />', () => {
         loading: false,
       });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <UserDetails {...defaultProps} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderUserDetails();
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID).textContent).toContain(
         'No hosts identified'
       );

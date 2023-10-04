@@ -11,7 +11,6 @@ import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
-import nodeFetch from 'node-fetch';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
@@ -19,7 +18,7 @@ import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
-import { getLocalhostRealIp } from './localhost_services';
+import { getBridgeNetworkHostIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
@@ -117,7 +116,9 @@ export const createRuntimeServices = async ({
   let password = _password;
 
   if (asSuperuser) {
-    await waitForKibana(kibanaUrl);
+    await waitForKibana(
+      createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl })
+    );
     const tmpEsClient = createEsClient({
       url: elasticsearchUrl,
       username,
@@ -162,7 +163,7 @@ export const createRuntimeServices = async ({
       noCertForSsl,
     }),
     log,
-    localhostRealIp: getLocalhostRealIp(),
+    localhostRealIp: getBridgeNetworkHostIp(),
     apiKey: apiKey ?? '',
     user: {
       username,
@@ -306,24 +307,15 @@ export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusRes
 
 /**
  * Checks to ensure Kibana is up and running
- * @param kbnUrl
+ * @param kbnClient
  */
-export const waitForKibana = async (kbnUrl: string): Promise<void> => {
-  const url = (() => {
-    const u = new URL(kbnUrl);
-    // This API seems to be available even if user is not authenticated
-    u.pathname = '/api/status';
-    return u.toString();
-  })();
-
+export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
     async () => {
-      const response = await nodeFetch(url);
-
-      if (response.status !== 200) {
-        throw new Error(
-          `Kibana not available. Returned: [${response.status}]: ${response.statusText}`
-        );
+      try {
+        await kbnClient.status.get();
+      } catch (err) {
+        throw new Error(`Kibana not available: ${err.message}`);
       }
     },
     { maxTimeout: 10000 }

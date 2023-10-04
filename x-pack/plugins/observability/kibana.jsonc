@@ -30,10 +30,11 @@
       "security",
       "share",
       "unifiedSearch",
-      "visualizations"
+      "visualizations",
+      "dashboard",
     ],
     "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "stackAlerts", "spaces"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "stackAlerts", "spaces"],
     "extraPublicDirs": ["common"]
   }
 }

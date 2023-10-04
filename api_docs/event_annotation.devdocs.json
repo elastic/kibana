@@ -1053,43 +1053,6 @@
       },
       {
         "parentPluginId": "eventAnnotation",
-        "id": "def-common.EventAnnotationArgs",
-        "type": "Type",
-        "tags": [],
-        "label": "EventAnnotationArgs",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualPointEventAnnotationArgs",
-            "text": "ManualPointEventAnnotationArgs"
-          },
-          " | ",
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualRangeEventAnnotationArgs",
-            "text": "ManualRangeEventAnnotationArgs"
-          },
-          " | ",
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.QueryPointEventAnnotationArgs",
-            "text": "QueryPointEventAnnotationArgs"
-          }
-        ],
-        "path": "src/plugins/event_annotation/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "eventAnnotation",
         "id": "def-common.EventAnnotationGroupCreateIn",
         "type": "Type",
         "tags": [],

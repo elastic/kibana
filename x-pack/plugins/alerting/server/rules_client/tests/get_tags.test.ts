@@ -54,6 +54,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const listedTypes = new Set<RegistryRuleType>([
@@ -66,10 +68,12 @@ const listedTypes = new Set<RegistryRuleType>([
     recoveryActionGroup: RecoveredActionGroup,
     id: 'myType',
     name: 'myType',
+    category: 'test',
     producer: 'myApp',
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   },
 ]);
 
@@ -116,6 +120,7 @@ describe('getTags()', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           recoveryActionGroup: RecoveredActionGroup,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -123,6 +128,7 @@ describe('getTags()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );

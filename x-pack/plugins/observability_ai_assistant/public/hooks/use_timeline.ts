@@ -9,7 +9,7 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Subscription } from 'rxjs';
+import { isObservable, Observable, Subscription } from 'rxjs';
 import usePrevious from 'react-use/lib/usePrevious';
 import { i18n } from '@kbn/i18n';
 import {
@@ -29,6 +29,7 @@ import {
 } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
 import { useKibana } from './use_kibana';
+import { ChatActionClickType } from '../components/chat/types';
 
 export function createNewConversation({
   contexts,
@@ -49,7 +50,7 @@ export function createNewConversation({
 
 export type UseTimelineResult = Pick<
   ChatTimelineProps,
-  'onEdit' | 'onFeedback' | 'onRegenerate' | 'onStopGenerating' | 'items'
+  'onEdit' | 'onFeedback' | 'onRegenerate' | 'onStopGenerating' | 'onActionClick' | 'items'
 > &
   Pick<ChatPromptEditorProps, 'onSubmit'>;
 
@@ -98,6 +99,8 @@ export function useTimeline({
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
 
+  const [isFunctionLoading, setIsFunctionLoading] = useState(false);
+
   const prevConversationId = usePrevious(conversationId);
   useEffect(() => {
     if (prevConversationId !== conversationId && pendingMessage?.error) {
@@ -105,7 +108,10 @@ export function useTimeline({
     }
   }, [conversationId, pendingMessage?.error, prevConversationId]);
 
-  function chat(nextMessages: Message[]): Promise<Message[]> {
+  function chat(
+    nextMessages: Message[],
+    response$: Observable<PendingMessage> | undefined = undefined
+  ): Promise<Message[]> {
     const controller = new AbortController();
 
     return new Promise<PendingMessage | undefined>((resolve, reject) => {
@@ -124,10 +130,12 @@ export function useTimeline({
         return;
       }
 
-      const response$ = chatService!.chat({
-        messages: nextMessages,
-        connectorId,
-      });
+      response$ =
+        response$ ||
+        chatService!.chat({
+          messages: nextMessages,
+          connectorId,
+        });
 
       let pendingMessageLocal = pendingMessage;
 
@@ -181,13 +189,23 @@ export function useTimeline({
       if (lastMessage?.message.function_call?.name) {
         const name = lastMessage.message.function_call.name;
 
+        setIsFunctionLoading(true);
+
         try {
-          const message = await chatService!.executeFunction({
+          let message = await chatService!.executeFunction({
             name,
             args: lastMessage.message.function_call.arguments,
             messages: messagesAfterChat.slice(0, -1),
             signal: controller.signal,
+            connectorId: connectorId!,
           });
+
+          let nextResponse$: Observable<PendingMessage> | undefined;
+
+          if (isObservable(message)) {
+            nextResponse$ = message;
+            message = { content: '', data: '' };
+          }
 
           return await chat(
             messagesAfterChat.concat({
@@ -198,7 +216,8 @@ export function useTimeline({
                 content: JSON.stringify(message.content),
                 data: JSON.stringify(message.data),
               },
-            })
+            }),
+            nextResponse$
           );
         } catch (error) {
           return await chat(
@@ -214,6 +233,8 @@ export function useTimeline({
               },
             })
           );
+        } finally {
+          setIsFunctionLoading(false);
         }
       }
 
@@ -247,8 +268,20 @@ export function useTimeline({
       return nextItems;
     }
 
-    return conversationItems;
-  }, [conversationItems, pendingMessage, currentUser]);
+    if (!isFunctionLoading) {
+      return conversationItems;
+    }
+
+    return conversationItems.map((item, index) => {
+      if (index < conversationItems.length - 1) {
+        return item;
+      }
+      return {
+        ...item,
+        loading: true,
+      };
+    });
+  }, [conversationItems, pendingMessage, currentUser, isFunctionLoading]);
 
   useEffect(() => {
     return () => {
@@ -284,6 +317,29 @@ export function useTimeline({
     onSubmit: async (message) => {
       const nextMessages = await chat(messages.concat(message));
       onChatComplete(nextMessages);
+    },
+    onActionClick: async (payload) => {
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery:
+          const nextMessages = await chat(
+            messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'execute_query',
+                  arguments: JSON.stringify({
+                    query: payload.query,
+                  }),
+                  trigger: MessageRole.User,
+                },
+              },
+            })
+          );
+          onChatComplete(nextMessages);
+          break;
+      }
     },
   };
 }

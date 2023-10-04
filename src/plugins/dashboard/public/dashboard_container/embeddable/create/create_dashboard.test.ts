@@ -21,7 +21,7 @@ import {
   ControlGroupContainerFactory,
 } from '@kbn/controls-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { createDashboard } from './create_dashboard';
@@ -94,7 +94,70 @@ test('pulls state from dashboard saved object when given a saved object id', asy
   expect(dashboard!.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
-test('pulls state from session storage which overrides state from saved object', async () => {
+test('passes managed state from the saved object into the Dashboard component state', async () => {
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+      managed: true,
+    });
+  const dashboard = await createDashboard({}, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().componentState.managed).toBe(true);
+});
+
+test('pulls view mode from dashboard backup', async () => {
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: DEFAULT_DASHBOARD_INPUT,
+    });
+  pluginServices.getServices().dashboardBackup.getViewMode = jest
+    .fn()
+    .mockReturnValue(ViewMode.EDIT);
+  const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
+});
+
+test('new dashboards start in edit mode', async () => {
+  pluginServices.getServices().dashboardBackup.getViewMode = jest
+    .fn()
+    .mockReturnValue(ViewMode.VIEW);
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      newDashboardCreated: true,
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+    });
+  const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
+});
+
+test('managed dashboards start in view mode', async () => {
+  pluginServices.getServices().dashboardBackup.getViewMode = jest
+    .fn()
+    .mockReturnValue(ViewMode.EDIT);
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: DEFAULT_DASHBOARD_INPUT,
+      managed: true,
+    });
+  const dashboard = await createDashboard({}, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().componentState.managed).toBe(true);
+  expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.VIEW);
+});
+
+test('pulls state from backup which overrides state from saved object', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
@@ -103,7 +166,7 @@ test('pulls state from session storage which overrides state from saved object',
         description: 'wow this description is okay',
       },
     });
-  pluginServices.getServices().dashboardSessionStorage.getState = jest
+  pluginServices.getServices().dashboardBackup.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
@@ -122,7 +185,7 @@ test('pulls state from creation options initial input which overrides all other 
         description: 'wow this description is okay',
       },
     });
-  pluginServices.getServices().dashboardSessionStorage.getState = jest
+  pluginServices.getServices().dashboardBackup.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard(
@@ -262,7 +325,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     .fn()
     .mockReturnValue(mockContactCardFactory);
 
-  await createDashboard({
+  const dashboard = await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
     getInitialInput: () => ({
       panels: {
@@ -286,6 +349,75 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     }),
     expect.any(Object)
   );
+  expect(dashboard!.getState().explicitInput.panels.i_match.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'i_match',
+      firstName: 'wow look at this new panel wow',
+    })
+  );
+  expect(dashboard!.getState().explicitInput.panels.i_do_not_match.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'i_do_not_match',
+      firstName: 'phew... I will not be replaced',
+    })
+  );
+
+  // expect panel to be created with the default size.
+  expect(dashboard!.getState().explicitInput.panels.i_match.gridData.w).toBe(24);
+  expect(dashboard!.getState().explicitInput.panels.i_match.gridData.h).toBe(15);
+});
+
+test('creates new embeddable with specified size if size is provided', async () => {
+  const incomingEmbeddable: EmbeddablePackageState = {
+    type: CONTACT_CARD_EMBEDDABLE,
+    input: {
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    } as ContactCardEmbeddableInput,
+    size: { width: 1, height: 1 },
+    embeddableId: 'new_panel',
+  };
+  const mockContactCardFactory = {
+    create: jest.fn().mockReturnValue({ destroy: jest.fn() }),
+    getDefaultInput: jest.fn().mockResolvedValue({}),
+  };
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockContactCardFactory);
+
+  const dashboard = await createDashboard({
+    getIncomingEmbeddable: () => incomingEmbeddable,
+    getInitialInput: () => ({
+      panels: {
+        i_do_not_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: {
+            id: 'i_do_not_match',
+            firstName: 'phew... I will not be replaced',
+          },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
+    }),
+  });
+
+  // flush promises
+  await new Promise((r) => setTimeout(r, 1));
+
+  expect(mockContactCardFactory.create).toHaveBeenCalledWith(
+    expect.objectContaining({
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    }),
+    expect.any(Object)
+  );
+  expect(dashboard!.getState().explicitInput.panels.new_panel.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    })
+  );
+  expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.w).toBe(1);
+  expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.h).toBe(1);
 });
 
 test('creates a control group from the control group factory and waits for it to be initialized', async () => {

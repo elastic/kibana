@@ -14,36 +14,13 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import type { Role } from '@kbn/security-plugin/common';
+import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion, isServerlessKibanaFlavor } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import { getWithResponseActionsRole } from './common/roles_users/with_response_actions_role';
-import { getNoResponseActionsRole } from './common/roles_users/without_response_actions_role';
-import { getT1Analyst } from './common/roles_users/t1_analyst';
-import { getT2Analyst } from './common/roles_users/t2_analyst';
-import { getEndpointOperationsAnalyst } from './common/roles_users/endpoint_operations_analyst';
-import { getEndpointSecurityPolicyManager } from './common/roles_users/endpoint_security_policy_manager';
-import { getHunter } from './common/roles_users/hunter';
-import { getPlatformEngineer } from './common/roles_users/platform_engineer';
-import { getSocManager } from './common/roles_users/soc_manager';
-import { getThreatIntelligenceAnalyst } from './common/roles_users/threat_intelligence_analyst';
-
-const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
-  t1Analyst: getT1Analyst(),
-  t2Analyst: getT2Analyst(),
-  hunter: getHunter(),
-  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
-  socManager: getSocManager(),
-  platformEngineer: getPlatformEngineer(),
-  endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
-  endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
-  withResponseActionsRole: getWithResponseActionsRole(),
-  noResponseActionsRole: getNoResponseActionsRole(),
-};
 
 main();
 
@@ -64,31 +41,6 @@ async function deleteIndices(indices: string[], client: Client) {
     } catch (err) {
       handleErr(err);
     }
-  }
-}
-
-async function addRole(kbnClient: KbnClient, role: Role): Promise<string | undefined> {
-  if (!role) {
-    console.log('No role data given');
-    return;
-  }
-
-  const { name, ...permissions } = role;
-  const path = `/api/security/role/${name}?createOnly=true`;
-
-  // add role if doesn't exist already
-  try {
-    console.log(`Adding ${name} role`);
-    await kbnClient.request({
-      method: 'PUT',
-      path,
-      body: permissions,
-    });
-
-    return name;
-  } catch (error) {
-    console.log(error);
-    handleErr(error);
   }
 }
 
@@ -422,19 +374,7 @@ async function main() {
       throw new Error(`Can not use '--rbacUser' option against serverless deployment`);
     }
 
-    // Add roles and users with response actions kibana privileges
-    for (const role of Object.keys(rolesMapping)) {
-      const addedRole = await addRole(kbnClient, {
-        name: role,
-        ...rolesMapping[role],
-      });
-      if (addedRole) {
-        logger.info(`Successfully added ${role} role`);
-        await addUser(client, { username: role, password: 'changeme', roles: [role] });
-      } else {
-        logger.warning(`Failed to add role, ${role}`);
-      }
-    }
+    await loadRbacTestUsers(kbnClient, logger);
   }
 
   const seed = argv.seed || Math.random().toString();
@@ -499,3 +439,12 @@ async function main() {
 
   logger.info(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }
+
+const loadRbacTestUsers = async (kbnClient: KbnClient, logger: ToolingLog): Promise<void> => {
+  const loadedRoles = await new EndpointSecurityTestRolesLoader(kbnClient, logger).loadAll();
+
+  logger.info(`Roles and associated users loaded. Login accounts:
+  ${Object.values(loadedRoles)
+    .map(({ username, password }) => `${username} / ${password}`)
+    .join('\n  ')}`);
+};

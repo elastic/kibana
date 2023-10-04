@@ -55,6 +55,7 @@ export class ObservabilityLogExplorerPlugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
       searchable: true,
+      keywords: ['logs', 'log', 'explorer', 'logs explorer'],
       mount: async (appMountParams) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
 

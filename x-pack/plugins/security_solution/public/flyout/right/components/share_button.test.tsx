@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { copyToClipboard } from '@elastic/eui';
 import { ShareButton } from './share_button';
 import React from 'react';
-import { FLYOUT_HEADER_SHARE_BUTTON_TEST_ID } from './test_ids';
+import { SHARE_BUTTON_TEST_ID } from './test_ids';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 
 jest.mock('@elastic/eui', () => ({
@@ -36,7 +36,7 @@ describe('ShareButton', () => {
   it('renders the share button', () => {
     renderShareButton();
 
-    expect(screen.getByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('copies the alert URL to clipboard', () => {
@@ -51,7 +51,7 @@ describe('ShareButton', () => {
 
     renderShareButton();
 
-    fireEvent.click(screen.getByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID));
+    fireEvent.click(screen.getByTestId(SHARE_BUTTON_TEST_ID));
 
     expect(copyToClipboard).toHaveBeenCalledWith(
       `${alertUrl}&${FLYOUT_URL_PARAM}=${syncedFlyoutState}`

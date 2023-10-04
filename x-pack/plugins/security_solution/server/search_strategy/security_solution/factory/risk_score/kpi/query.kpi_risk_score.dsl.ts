@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../../common/search_strategy';
-import type { KpiRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildKpiRiskScoreQuery = ({
   defaultIndex,
   filterQuery,
   entity,
-}: KpiRiskScoreRequestOptions) => {
+}: RiskScoreKpiRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {

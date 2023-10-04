@@ -7,7 +7,7 @@
 
 import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { loginServerless } from '../../tasks/login_serverless';
+import { login } from '../../tasks/login';
 import {
   getConsoleActionMenuItem,
   getUnIsolateActionMenuItem,
@@ -18,6 +18,7 @@ import {
 describe(
   'When on the Endpoint List in Security Essentials PLI',
   {
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
@@ -41,7 +42,7 @@ describe(
       });
 
       beforeEach(() => {
-        loginServerless();
+        login();
         visitEndpointList();
         openRowActionMenu();
       });

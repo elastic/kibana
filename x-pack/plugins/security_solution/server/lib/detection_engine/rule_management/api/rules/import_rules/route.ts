@@ -5,40 +5,34 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
-import { schema } from '@kbn/config-schema';
-import { createPromiseFromStreams } from '@kbn/utils';
-
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-
-import type { IKibanaResponse } from '@kbn/core/server';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { ImportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
-import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { SetupPlugins } from '../../../../../../plugin';
+import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import type { ImportRuleResponse, BulkError } from '../../../../routes/utils';
-import { isBulkError, isImportRegular, buildSiemResponse } from '../../../../routes/utils';
-
+import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
+import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
+import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
+import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
+import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
+import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
+import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
 import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
-import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
-import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
-import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
-import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
-import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -64,10 +58,7 @@ export const importRulesRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof ImportRulesRequestQuery,
-              ImportRulesRequestQueryDecoded
-            >(ImportRulesRequestQuery),
+            query: buildRouteValidationWithZod(ImportRulesRequestQuery),
             body: schema.any(), // validation on file object is accomplished later in the handler.
           },
         },
@@ -202,12 +193,7 @@ export const importRulesRoute = (
             action_connectors_warnings: actionConnectorWarnings,
           };
 
-          const [validated, errors] = validate(importRules, ImportRulesResponse);
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+          return response.ok({ body: ImportRulesResponse.parse(importRules) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

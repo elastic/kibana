@@ -6,24 +6,20 @@
  */
 
 import React, { RefCallback } from 'react';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
-  uncategorizedLabel,
-  UNMANAGED_STREAMS_PANEL_ID,
+  noDatasetsDescriptionLabel,
+  noDatasetsLabel,
+  noDataViewsDescriptionLabel,
+  noDataViewsLabel,
+  noIntegrationsDescriptionLabel,
+  noIntegrationsLabel,
 } from './constants';
 import { DatasetSelectionHandler } from './types';
-import { LoadDatasets } from '../../hooks/use_datasets';
-import { dynamic } from '../../utils/dynamic';
-import type { IntegrationsListStatusProps } from './sub_components/integrations_list_status';
-
-const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
+import ListStatus, { ListStatusProps } from './sub_components/list_status';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -82,30 +78,59 @@ export const buildIntegrationsTree = ({
   );
 };
 
-export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
+export const createAllLogDatasetsItem = () => {
   const allLogDataset = Dataset.createAllLogsDataset();
   return {
+    'data-test-subj': 'datasetSelectorshowAllLogs',
+    iconType: allLogDataset.iconType,
     name: allLogDataset.title,
-    'data-test-subj': 'allLogDatasets',
-    icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
-    onClick,
   };
 };
 
-export const createUnmanagedDatasetsItem = ({ onClick }: { onClick: LoadDatasets }) => {
-  return {
-    name: uncategorizedLabel,
-    'data-test-subj': 'unmanagedDatasets',
-    icon: <EuiIcon type="documents" />,
-    onClick,
-    panel: UNMANAGED_STREAMS_PANEL_ID,
-  };
-};
-
-export const createIntegrationStatusItem = (props: IntegrationsListStatusProps) => {
+export const createIntegrationStatusItem = (
+  props: Omit<ListStatusProps, 'description' | 'title'>
+) => {
   return {
     disabled: true,
-    name: <IntegrationsListStatus {...props} />,
-    'data-test-subj': 'integrationStatusItem',
+    name: (
+      <ListStatus
+        key="integrationStatusItem"
+        description={noIntegrationsDescriptionLabel}
+        title={noIntegrationsLabel}
+        {...props}
+      />
+    ),
+  };
+};
+
+export const createUncategorizedStatusItem = (
+  props: Omit<ListStatusProps, 'description' | 'title'>
+) => {
+  return {
+    disabled: true,
+    name: (
+      <ListStatus
+        key="uncategorizedStatusItem"
+        description={noDatasetsDescriptionLabel}
+        title={noDatasetsLabel}
+        {...props}
+      />
+    ),
+  };
+};
+
+export const createDataViewsStatusItem = (
+  props: Omit<ListStatusProps, 'description' | 'title'>
+) => {
+  return {
+    disabled: true,
+    name: (
+      <ListStatus
+        key="dataViewsStatusItem"
+        description={noDataViewsDescriptionLabel}
+        title={noDataViewsLabel}
+        {...props}
+      />
+    ),
   };
 };
