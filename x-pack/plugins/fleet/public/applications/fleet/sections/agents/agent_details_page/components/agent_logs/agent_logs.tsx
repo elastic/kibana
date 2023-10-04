@@ -21,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiLink,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -122,8 +121,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
     const { data, application, http } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
     const config = useConfig();
-    // console.log(JSON.stringify(config, null, 2));
-    const isLogsViewAvailable =
+    const isLogsUIAvailable =
       !config.internal?.registry?.capabilities ||
       config.internal?.registry?.capabilities?.includes('observability');
 
@@ -298,7 +296,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       );
     }
 
-    return isLogsViewAvailable ? (
+    return (
       <WrapperFlexGroup direction="column" gutterSize="m">
         {agentPolicy && !agentPolicy.monitoring_enabled?.includes('logs') && (
           <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />
@@ -357,12 +355,21 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
             </DatePickerFlexItem>
             <EuiFlexItem grow={false}>
               <RedirectAppLinks application={application}>
-                <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                    defaultMessage="Open in Logs"
-                  />
-                </EuiButtonEmpty>
+                {isLogsUIAvailable ? (
+                  <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
+                    <FormattedMessage
+                      id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+                      defaultMessage="Open in Logs"
+                    />
+                  </EuiButtonEmpty>
+                ) : (
+                  <EuiButton href={viewInDiscoverUrl} iconType="popout">
+                    <FormattedMessage
+                      id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
+                      defaultMessage="Open in Discover"
+                    />
+                  </EuiButton>
+                )}
               </RedirectAppLinks>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -383,31 +390,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           <SelectLogLevel agent={agent} />
         </EuiFlexItem>
       </WrapperFlexGroup>
-    ) : (
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            title={
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.agentLogs.logsViewNotAvailableText"
-                  defaultMessage="Logs View not available"
-                />
-              </p>
-            }
-            actions={
-              <RedirectAppLinks application={application}>
-                <EuiButton href={viewInDiscoverUrl} iconType="popout">
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
-                    defaultMessage="Open in Discover"
-                  />
-                </EuiButton>
-              </RedirectAppLinks>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
     );
   }
 );
