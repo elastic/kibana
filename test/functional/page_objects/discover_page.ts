@@ -232,6 +232,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getChartInterval() {
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // close any tooltips which can obstruct the button
     await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
     const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);

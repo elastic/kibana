@@ -111,8 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/146223
-      it.skip('should show correct initial chart interval of Auto', async function () {
+      it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
