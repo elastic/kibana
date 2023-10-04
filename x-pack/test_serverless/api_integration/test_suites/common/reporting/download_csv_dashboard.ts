@@ -11,7 +11,7 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const ELASTIC_USERNAME = 'elastic';
+const ELASTIC_USERNAME = 'elastic_serverless';
 const ELASTIC_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];

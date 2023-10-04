@@ -9,13 +9,13 @@ import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const ELASTIC_USERNAME = 'elastic';
+const ELASTIC_USERNAME = 'elastic_serverless';
 const ELASTIC_PASSWORD = 'changeme';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const reportingAPI = getService('svlReportingAPI');
+  const reportingAPI = getService('svlReportingApi');
 
   describe.skip('Generate CSV from SearchSource: Discover', () => {
     const archives = {

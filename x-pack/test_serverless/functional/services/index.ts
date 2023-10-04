@@ -7,12 +7,12 @@
 
 import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
+
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
 import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
 import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 import { SvlCommonScreenshotsProvider } from './svl_common_screenshots';
-import { SvlReportingServiceProvider } from './svl_reporting';
 import { MachineLearningProvider } from './ml';
 
 export const services = {
@@ -26,6 +26,5 @@ export const services = {
   svlSearchNavigation: SvlSearchNavigationServiceProvider,
   svlSecNavigation: SvlSecNavigationServiceProvider,
   svlCommonScreenshots: SvlCommonScreenshotsProvider,
-  svlReportingAPI: SvlReportingServiceProvider,
   svlMl: MachineLearningProvider,
 };

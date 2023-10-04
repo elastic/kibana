@@ -87,7 +87,6 @@ export class ReportingStore {
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
   config: ReportingCore['config'];
-  ilmPolicyManager?: IlmPolicyManager;
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
     this.config = reportingCore.getConfig();
