@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import type { GetHostsOptionsInjected } from './shared_types';
 import { Asset } from '../../../../common/types_api';
 import { collectHosts } from '../../collectors/hosts';
+import { GetHostsOptionsPublic } from '../../../../common/types_client';
+import {
+  AssetClientDependencies,
+  AssetClientOptionsWithInjectedValues,
+} from '../../asset_client_types';
+
+export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
+export type GetHostsOptionsInjected = AssetClientOptionsWithInjectedValues<GetHostsOptions>;
 
 export async function getHosts(options: GetHostsOptionsInjected): Promise<{ hosts: Asset[] }> {
   const metricsIndices = await options.metricsClient.getMetricIndices({

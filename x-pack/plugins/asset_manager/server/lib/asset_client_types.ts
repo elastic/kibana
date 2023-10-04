@@ -11,6 +11,9 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { AssetManagerConfig } from '../../common/config';
 
+export type GetApmIndicesMethod = (
+  soClient: SavedObjectsClientContract
+) => Promise<APMDataAccessConfig['indices']>;
 export interface AssetClientDependencies {
   elasticsearchClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
@@ -18,7 +21,7 @@ export interface AssetClientDependencies {
 
 export interface AssetClientBaseOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
-  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
+  getApmIndices: GetApmIndicesMethod;
   metricsClient: MetricsDataClient;
 }
 

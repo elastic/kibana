@@ -6,9 +6,16 @@
  */
 
 import { Asset } from '../../../../common/types_api';
-import { GetServicesOptionsInjected } from './shared_types';
 import { collectServices } from '../../collectors/services';
 import { parseEan } from '../../parse_ean';
+import { GetServicesOptionsPublic } from '../../../../common/types_client';
+import {
+  AssetClientDependencies,
+  AssetClientOptionsWithInjectedValues,
+} from '../../asset_client_types';
+
+export type GetServicesOptions = GetServicesOptionsPublic & AssetClientDependencies;
+export type GetServicesOptionsInjected = AssetClientOptionsWithInjectedValues<GetServicesOptions>;
 
 export async function getServices(
   options: GetServicesOptionsInjected
