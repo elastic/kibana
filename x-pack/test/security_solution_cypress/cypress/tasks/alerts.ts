@@ -162,7 +162,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
     }
   });
-  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
+  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click({ force: true });
 };
 
 export const refreshAlertPageFilter = () => {
