@@ -69,7 +69,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  describe('create alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/167443
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
