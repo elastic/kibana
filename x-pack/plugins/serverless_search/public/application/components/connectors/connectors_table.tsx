@@ -187,7 +187,7 @@ export const ConnectorsTable: React.FC = () => {
       <EuiSpacer size="xl" />
       <EuiText size="xs">
         <FormattedMessage
-          id="xpack.enterpriseSearch.analytics.collectionsView.explorer.tableSummaryIndeterminate"
+          id="xpack.serverlessSearch.connectorsTable.summaryLabel"
           defaultMessage="Showing {items} of {count} {connectors}"
           values={{
             connectors: <strong>{CONNECTORS_LABEL}</strong>,
