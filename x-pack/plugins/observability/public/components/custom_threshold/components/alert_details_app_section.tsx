@@ -280,6 +280,7 @@ export default function AlertDetailsAppSection({
                 </EuiTitle>
                 <EuiHorizontalRule margin="xs" />
                 <EmbeddableChangePointChart
+                  id={`relatedMetric${relatedMetricIndex}`}
                   key={`relatedMetric${relatedMetricIndex}`}
                   dataViewId={dataView.id}
                   timeRange={relatedEventsTimeRange()}
