@@ -15,5 +15,15 @@
     { "path": "../../test_serverless/api_integration/**/*" },
     { "path": "../../test_serverless/shared/**/*" },
     { "path": "../../api_integration/services/**/*" },
+    "@kbn/dev-utils",
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/security-solution-plugin",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/lists-plugin",
+    "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/tooling-log",
+    "@kbn/rule-data-utils",
+    "@kbn/securitysolution-list-constants",
   ]
 }
