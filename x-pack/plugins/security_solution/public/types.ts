@@ -79,6 +79,8 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { DataQualityPanelConfig } from './overview/types';
 import type { SetComponents, GetComponent$ } from './contract_components';
 
@@ -176,7 +178,9 @@ export type StartServices = CoreStart &
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  experimentalFeatures: ExperimentalFeatures;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
+  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
   setDataQualityPanelConfig: (dataQualityPanelConfig: DataQualityPanelConfig) => void;
 }
 
