@@ -446,7 +446,7 @@ export interface AgentUpgradeDetails {
   metadata: {
     scheduled_at?: string;
     download_percent?: number;
-    failed_state?: string; // TODO: create type with possible failed states
+    failed_state?: AgentUpgradeStateType;
     error_msg?: string;
   };
 }
