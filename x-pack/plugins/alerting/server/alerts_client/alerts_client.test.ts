@@ -145,7 +145,7 @@ const fetchedAlert1 = {
   [EVENT_ACTION]: 'open',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
-  [ALERT_DURATION]: '0',
+  [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
@@ -175,7 +175,7 @@ const fetchedAlert2 = {
   [EVENT_ACTION]: 'active',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
-  [ALERT_DURATION]: '36000000000000',
+  [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
@@ -205,7 +205,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [EVENT_ACTION]: 'open',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
-  [ALERT_DURATION]: '0',
+  [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
@@ -234,7 +234,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   ...getNewIndexedAlertDoc(),
   [EVENT_ACTION]: 'active',
-  [ALERT_DURATION]: '36000000000000',
+  [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
@@ -244,7 +244,7 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
 const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   ...getNewIndexedAlertDoc(),
   [EVENT_ACTION]: 'close',
-  [ALERT_DURATION]: '36000000000000',
+  [ALERT_DURATION]: 36000000000,
   [ALERT_ACTION_GROUP]: 'recovered',
   [ALERT_FLAPPING_HISTORY]: [true, true],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -669,7 +669,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
@@ -855,7 +855,7 @@ describe('Alerts Client', () => {
                 [ALERT_UUID]: 'def',
                 [ALERT_INSTANCE_ID]: '2',
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
-                [ALERT_DURATION]: '72000000000000',
+                [ALERT_DURATION]: 72000000000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
               }),
@@ -958,7 +958,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '72000000000000',
+                [ALERT_DURATION]: 72000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
@@ -1005,7 +1005,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'close',
                 [ALERT_ACTION_GROUP]: 'recovered',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
@@ -1177,7 +1177,7 @@ describe('Alerts Client', () => {
               getOngoingIndexedAlertDoc({
                 [ALERT_UUID]: 'def',
                 [ALERT_INSTANCE_ID]: '2',
-                [ALERT_DURATION]: '72000000000000',
+                [ALERT_DURATION]: 72000000000,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
@@ -1799,7 +1799,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'open',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '0',
+                [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
@@ -1834,7 +1834,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'open',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '0',
+                [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '2',
@@ -1993,7 +1993,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'open',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '0',
+                [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
@@ -2096,7 +2096,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'active',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_INSTANCE_ID]: '1',
@@ -2198,7 +2198,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'close',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'recovered',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_END]: date,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
@@ -2329,53 +2329,6 @@ describe('Alerts Client', () => {
           expect(recoveredAlert.alert.getUuid()).toEqual('abc');
           expect(recoveredAlert.alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
           expect(recoveredAlert.hit).toBeUndefined();
-        });
-      });
-
-      describe('setAlertStatusToUntracked()', () => {
-        test('should call updateByQuery on provided ruleIds', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-
-          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
-        });
-
-        test('should retry updateByQuery on failure', async () => {
-          clusterClient.updateByQuery.mockResponseOnce({
-            total: 10,
-            updated: 8,
-          });
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-
-          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
-          expect(logger.warn).toHaveBeenCalledWith(
-            'Attempt 1: Failed to untrack 2 of 10; indices test-index, ruleIds test-rule'
-          );
         });
       });
     });

@@ -18,7 +18,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const retry = getService('retry');
 
-  describe('Configure Case', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/166469
+  describe.skip('Configure Case', function () {
     before(async () => {
       await svlCommonPage.login();
 
@@ -49,7 +50,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Connectors', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/167869
+    describe.skip('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
         await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
           return await testSubjects.exists('dropdown-connector-no-connector');

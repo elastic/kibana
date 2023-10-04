@@ -62,6 +62,10 @@ import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
 import { getTags, GetTagsParams } from './methods/get_tags';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
+import {
+  bulkUntrackAlerts,
+  BulkUntrackBody,
+} from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -166,6 +170,8 @@ export class RulesClient {
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
   public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
+
+  public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
