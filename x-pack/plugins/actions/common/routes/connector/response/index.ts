@@ -6,7 +6,7 @@
  */
 
 // Latest
-export type { ConnectorResponse, AllConnectorsResponse, ActionTypeConfig } from './types/latest';
+export type { ConnectorResponse, AllConnectorsResponse } from './types/latest';
 export {
   connectorResponseSchema,
   allConnectorsResponseSchema,
@@ -18,7 +18,6 @@ export type {
   ConnectorResponse as ConnectorResponseV1,
   AllConnectorsResponse as AllConnectorsResponseV1,
   ConnectorTypesResponse as ConnectorTypesResponseV1,
-  ActionTypeConfig as ActionTypeConfigV1,
 } from './types/v1';
 export {
   connectorResponseSchema as connectorResponseSchemaV1,

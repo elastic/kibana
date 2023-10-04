@@ -12,14 +12,13 @@ import {
   allConnectorsResponseSchema,
 } from '..';
 
-export type ActionTypeConfig = Record<string, unknown>;
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;
 type AllConnectorsResponseSchemaType = TypeOf<typeof allConnectorsResponseSchema>;
 
-export interface ConnectorResponse<Config extends ActionTypeConfig = ActionTypeConfig> {
+export interface ConnectorResponse {
   id: ConnectorResponseSchemaType['id'];
   name: ConnectorResponseSchemaType['name'];
-  config?: Config;
+  config?: ConnectorResponseSchemaType['config'];
   connector_type_id: ConnectorResponseSchemaType['connector_type_id'];
   is_missing_secrets?: ConnectorResponseSchemaType['is_missing_secrets'];
   is_preconfigured: ConnectorResponseSchemaType['is_preconfigured'];
@@ -27,8 +26,7 @@ export interface ConnectorResponse<Config extends ActionTypeConfig = ActionTypeC
   is_system_action: ConnectorResponseSchemaType['is_system_action'];
 }
 
-export interface AllConnectorsResponse<Config extends ActionTypeConfig = ActionTypeConfig>
-  extends ConnectorResponse {
+export interface AllConnectorsResponse extends ConnectorResponse {
   referenced_by_count: AllConnectorsResponseSchemaType['referenced_by_count'];
 }
 

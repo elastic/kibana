@@ -78,12 +78,12 @@ export interface ActionTypeExecutorOptions<
   source?: ActionExecutionSource<unknown>;
 }
 
-export type ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> = Connector<Config>;
+export type ActionResult = Connector;
 
 export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
-> extends ActionResult<Config> {
+> extends ActionResult {
   secrets: Secrets;
   config: Config;
 }
