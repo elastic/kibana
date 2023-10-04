@@ -7,3 +7,4 @@
  */
 
 export * from './is_category_entry';
+export * from './sync_status_to_text';

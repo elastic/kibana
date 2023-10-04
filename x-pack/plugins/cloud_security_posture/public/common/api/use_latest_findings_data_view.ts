@@ -15,9 +15,7 @@ import { CspClientPluginStartDeps } from '../../types';
 const cloudSecurityFieldLabels: Record<string, string> = {
   'result.evaluation': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
-    {
-      defaultMessage: 'Result',
-    }
+    { defaultMessage: 'Result' }
   ),
   'resource.id': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
@@ -33,9 +31,7 @@ const cloudSecurityFieldLabels: Record<string, string> = {
   ),
   'rule.benchmark.rule_number': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
-    {
-      defaultMessage: 'Rule Number',
-    }
+    { defaultMessage: 'Rule Number' }
   ),
   'rule.name': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
@@ -56,7 +52,7 @@ const cloudSecurityFieldLabels: Record<string, string> = {
  */
 export const useLatestFindingsDataView = (dataView: string) => {
   const {
-    data: { dataViews, indexPatterns },
+    data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const findDataView = async (): Promise<DataView> => {
@@ -68,13 +64,13 @@ export const useLatestFindingsDataView = (dataView: string) => {
     if (dataView === LATEST_FINDINGS_INDEX_PATTERN) {
       Object.entries(cloudSecurityFieldLabels).forEach(([field, label]) => {
         if (
-          !dataViewObj?.getFieldAttrs()?.[field]?.customLabel ||
-          dataViewObj.getFieldAttrs()[field].customLabel === field
+          !dataViewObj.getFieldAttrs()[field]?.customLabel ||
+          dataViewObj.getFieldAttrs()[field]?.customLabel === field
         ) {
           dataViewObj.setFieldCustomLabel(field, label);
         }
       });
-      await indexPatterns.updateSavedObject(dataViewObj);
+      await dataViews.updateSavedObject(dataViewObj);
     }
 
     return dataViewObj;

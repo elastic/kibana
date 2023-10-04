@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       const metricData = await lens.getMetricVisualizationData();
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
 
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
@@ -132,7 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickSeriesOption();
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
@@ -141,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickPanelOptions('metric');
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
