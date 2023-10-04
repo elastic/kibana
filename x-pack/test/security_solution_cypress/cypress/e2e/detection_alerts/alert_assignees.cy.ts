@@ -21,7 +21,11 @@ import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { ALERTS_TABLE_ROW_LOADER } from '../../screens/alerts';
-import { waitForAssigneesToPopulate } from '../../tasks/alert_assignees';
+import {
+  waitForAssigneesToPopulatePopover,
+  waitForAssigneeToAppearInTable,
+  waitForAssigneeToDisappearInTable,
+} from '../../tasks/alert_assignees';
 
 describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -44,24 +48,28 @@ describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Add and remove an assignee using the alert bulk action menu', () => {
     const userName = Cypress.env('ELASTICSEARCH_USERNAME');
+
     // Add an assignee to one alert
     selectNumberOfAlerts(1);
     openAlertAssigningBulkActionMenu();
-    waitForAssigneesToPopulate();
+    waitForAssigneesToPopulatePopover();
     clickAlertAssignee(userName);
     updateAlertAssignees();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    waitForAssigneeToAppearInTable(userName);
     selectNumberOfAlerts(1);
     openAlertAssigningBulkActionMenu();
-    waitForAssigneesToPopulate();
+    waitForAssigneesToPopulatePopover();
     findSelectedAlertAssignee(userName);
+
     // Remove assignee from that alert
     clickAlertAssignee(userName);
     updateAlertAssignees();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    waitForAssigneeToDisappearInTable(userName);
     selectNumberOfAlerts(1);
     openAlertAssigningBulkActionMenu();
-    waitForAssigneesToPopulate();
+    waitForAssigneesToPopulatePopover();
     findUnselectedAlertAssignee(userName);
   });
 });
