@@ -1791,6 +1791,25 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.useBulkUntrackAlerts",
+        "type": "Function",
+        "tags": [],
+        "label": "useBulkUntrackAlerts",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseMutationResult",
+          "<string, string, { indices: string[]; alertUuids: string[]; }, unknown>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_untrack_alerts.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.useConnectorContext",
         "type": "Function",
         "tags": [],
