@@ -43,6 +43,7 @@ interface Props {
   frame: FramePublicAPI;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   isDarkMode: boolean;
+  isInlineEditing?: boolean;
 }
 
 export function TagsDimensionEditor({
@@ -52,6 +53,7 @@ export function TagsDimensionEditor({
   panelRef,
   isDarkMode,
   paletteService,
+  isInlineEditing,
 }: Props) {
   const { inputValue: localState, handleInputChange: setLocalState } =
     useDebouncedValue<TagcloudState>({
@@ -137,6 +139,7 @@ export function TagsDimensionEditor({
                     defaultMessage: 'Edit colors',
                   })
             }
+            isInlineEditing={isInlineEditing}
           >
             <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
               <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
