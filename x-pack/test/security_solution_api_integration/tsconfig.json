@@ -1,12 +1,12 @@
 {
   "extends": "../../../tsconfig.base.json",
-    "compilerOptions": {
+  "compilerOptions": {
     "outDir": "target/types",
     "types": ["node"],
   },
   "include": [
     "../../test_serverless/shared/types/**/*",
-    ], 
+  ], 
   "exclude": [
     "target/**/*",
     "../../test_serverless/shared/types/**/*",
@@ -16,18 +16,5 @@
     { "path": "../../test_serverless/api_integration/**/*" },
     { "path": "../../test_serverless/shared/**/*" },
     { "path": "../../api_integration/services/**/*" },
-    "@kbn/expect",
-    "@kbn/dev-utils",
-    "@kbn/test",
-    "@kbn/repo-info",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/securitysolution-io-ts-list-types",
-    "@kbn/security-solution-plugin",
-    "@kbn/tooling-log",
-    "@kbn/cases-plugin",
-    "@kbn/lists-plugin",
-    "@kbn/securitysolution-io-ts-alerting-types",
-    "@kbn/rule-data-utils",
-    "@kbn/securitysolution-list-constants"
   ]
 }
