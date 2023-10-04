@@ -181,7 +181,7 @@ describe('Update rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
   describe('rule containing response actions', () => {
@@ -283,9 +283,7 @@ describe('Update rule route', () => {
         },
       });
       const result = await server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "processes" supplied to "response_actions,params,command"'
-      );
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid input');
     });
   });
 });

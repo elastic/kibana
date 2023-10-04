@@ -13,6 +13,7 @@ components:
 
     RuleObjectId:
       type: string
+      format: uuid
 
     RuleSignatureId:
       type: string
@@ -27,19 +28,22 @@ components:
       minLength: 1
 
     RuleVersion:
-      type: string
-      format: version
+      type: integer
+      minimum: 1
+      description: The rule's version number.
 
     IsRuleImmutable:
       type: boolean
 
     IsRuleEnabled:
       type: boolean
+      description: Determines whether the rule is enabled.
 
     RuleTagArray:
       type: array
       items:
         type: string
+      description: String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
 
     RuleMetadata:
       type: object
@@ -47,6 +51,7 @@ components:
 
     RuleLicense:
       type: string
+      description: The rule's license.
 
     RuleAuthorArray:
       type: array
@@ -121,6 +126,23 @@ components:
         - name
         - reference
 
+    Tactic:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Tactic ID
+        name:
+          type: string
+          description: Tactic name
+        reference:
+          type: string
+          description: Tactic reference
+      required:
+        - id
+        - name
+        - reference
+
     Threat:
       type: object
       properties:
@@ -128,21 +150,7 @@ components:
           type: string
           description: Relevant attack framework
         tactic:
-          type: object
-          properties:
-            id:
-              type: string
-              description: Tactic ID
-            name:
-              type: string
-              description: Tactic name
-            reference:
-              type: string
-              description: Tactic reference
-          required:
-            - id
-            - name
-            - reference
+          $ref: '#/components/schemas/Tactic'
         technique:
           type: array
           items:
@@ -155,7 +163,7 @@ components:
     ThreatArray:
       type: array
       items:
-        $ref: '#/components/schemas/Threat' # Assuming a schema named 'Threat' is defined in the components section.
+        $ref: '#/components/schemas/Threat'
 
     IndexPatternArray:
       type: array
@@ -170,9 +178,7 @@ components:
 
     RuleFilterArray:
       type: array
-      items:
-        type: object
-        additionalProperties: true
+      items: {} # unknown
 
     RuleNameOverride:
       type: string
@@ -194,6 +200,10 @@ components:
           minLength: 1
         ecs:
           type: boolean
+      required:
+        - name
+        - type
+        - ecs
 
     RequiredFieldArray:
       type: array
@@ -242,3 +252,76 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/RelatedIntegration'
+
+    # Schema for fields relating to investigation fields, these are user defined fields we use to highlight in various features in the UI such as alert details flyout and exceptions auto-population from alert. Added in PR #163235
+    # Right now we only have a single field but anticipate adding more related fields to store various configuration states such as `override` - where a user might say if they want only these fields to display, or if they want these fields + the fields we select.
+    InvestigationFields:
+      type: object
+      properties:
+        field_names:
+          type: array
+          items:
+            type: string
+          minItems: 1
+      required:
+        - field_names
+
+    RuleActionThrottle:
+      description: Defines the interval on which a rule's actions are executed.
+      oneOf:
+        - type: string
+          enum:
+            - 'no_actions'
+            - 'rule'
+        - type: string
+          # any number except zero followed by one of the suffixes 's', 'm', 'h', 'd'
+          pattern: '^[1-9]\d*[smhd]$'
+
+    RuleActionFrequency:
+      type: object
+      description: The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
+      properties:
+        summary:
+          type: boolean
+        notifyWhen:
+          type: string
+          enum:
+            - onActionGroupChange
+            - onActiveAlert
+            - onThrottleInterval
+        throttle:
+          $ref: '#/components/schemas/RuleActionThrottle'
+          nullable: true
+      required:
+        - summary
+        - notifyWhen
+        - throttle
+
+    RuleAction:
+      type: object
+      properties:
+        action_type_id:
+          type: string
+          description: The action type used for sending notifications.
+        group:
+          type: string
+          description: Optionally groups actions by use cases. Use `default` for alert notifications.
+        id:
+          type: string
+          description: The connector ID.
+        params:
+          type: object
+          description: Object containing the allowed connector fields, which varies according to the connector type.
+          additionalProperties: true
+        uuid:
+          type: string
+        alerts_filter:
+          type: object
+          description: TODO implement the schema type
+        frequency:
+          $ref: '#/components/schemas/RuleActionFrequency'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params

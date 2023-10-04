@@ -810,6 +810,7 @@
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
+    "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
     "@loaders.gl/shapefile": "^3.4.7",

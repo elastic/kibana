@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
+import { stringifyZodError } from '@kbn/securitysolution-es-utils';
 import {
   RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
@@ -34,15 +33,9 @@ import type {
   RuleResponseAction,
 } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
-export const transformValidate = (
-  rule: PartialRule<RuleParams>
-): [RuleResponse, null] | [null, string] => {
+export const transformValidate = (rule: PartialRule<RuleParams>): RuleResponse => {
   const transformed = transform(rule);
-  if (transformed == null) {
-    return [null, 'Internal error transforming'];
-  } else {
-    return validateNonExact(transformed, RuleResponse);
-  }
+  return RuleResponse.parse(transformed);
 };
 
 export const transformValidateBulkError = (
@@ -51,16 +44,15 @@ export const transformValidateBulkError = (
 ): RuleResponse | BulkError => {
   if (isAlertType(rule)) {
     const transformed = internalRuleToAPIResponse(rule);
-    const [validated, errors] = validateNonExact(transformed, RuleResponse);
-    if (errors != null || validated == null) {
+    const result = RuleResponse.safeParse(transformed);
+    if (!result.success) {
       return createBulkErrorObject({
         ruleId,
         statusCode: 500,
-        message: errors ?? 'Internal error transforming',
+        message: stringifyZodError(result.error),
       });
-    } else {
-      return validated;
     }
+    return result.data;
   } else {
     return createBulkErrorObject({
       ruleId,

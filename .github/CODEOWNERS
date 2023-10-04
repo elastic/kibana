@@ -822,6 +822,7 @@ packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/infra-monitoring-ui
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/kbn-zod-helpers @elastic/security-detection-engine
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:

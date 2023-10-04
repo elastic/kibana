@@ -11,24 +11,13 @@ import {
   PositiveIntegerGreaterThanZero,
   enumeration,
 } from '@kbn/securitysolution-io-ts-types';
-
-/**
- * describes how alerts will be generated for documents with missing suppress by fields
- */
-export enum AlertSuppressionMissingFieldsStrategy {
-  // per each document a separate alert will be created
-  DoNotSuppress = 'doNotSuppress',
-  // only alert will be created per suppress by bucket
-  Suppress = 'suppress',
-}
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../rule_schema/specific_attributes/query_attributes.gen';
 
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
 export const AlertSuppressionMissingFields = enumeration(
   'AlertSuppressionMissingFields',
-  AlertSuppressionMissingFieldsStrategy
+  AlertSuppressionMissingFieldsStrategyEnum
 );
-export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY =
-  AlertSuppressionMissingFieldsStrategy.Suppress;
 
 export const AlertSuppressionGroupBy = LimitedSizeArray({
   codec: t.string,
@@ -79,5 +68,3 @@ export const AlertSuppressionCamel = t.intersection([
     })
   ),
 ]);
-
-export const minimumLicenseForSuppression = 'platinum';

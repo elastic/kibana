@@ -17,7 +17,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';

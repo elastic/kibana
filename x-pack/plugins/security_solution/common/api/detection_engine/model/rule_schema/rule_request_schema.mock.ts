@@ -17,7 +17,7 @@ import type {
   ThresholdRuleCreateProps,
   NewTermsRuleCreateProps,
   NewTermsRuleUpdateProps,
-} from './rule_schemas';
+} from './rule_schemas.gen';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
   description: 'Detecting root and admin users',

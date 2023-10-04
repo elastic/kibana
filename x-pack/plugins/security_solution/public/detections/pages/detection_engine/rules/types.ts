@@ -33,7 +33,7 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
-  AlertSuppressionMissingFields,
+  AlertSuppressionMissingFieldsStrategy,
   InvestigationFields,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
@@ -157,7 +157,7 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
-  suppressionMissingFields?: AlertSuppressionMissingFields;
+  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
 }
 
 export interface QueryDefineStep {

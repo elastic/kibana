@@ -89,10 +89,6 @@ export const indexRecord = t.record(
   })
 );
 
-export const indexType = t.type({
-  index: indexRecord,
-});
-
 export const privilege = t.type({
   username: t.string,
   has_all_requested: t.boolean,

@@ -44,7 +44,7 @@ export const RuleTagArray = t.array(t.string); // should be non-empty strings?
  * to be added to the meta object
  */
 export type RuleMetadata = t.TypeOf<typeof RuleMetadata>;
-export const RuleMetadata = t.object; // should be a more specific type?
+export const RuleMetadata = t.UnknownRecord; // should be a more specific type?
 
 export type RuleLicense = t.TypeOf<typeof RuleLicense>;
 export const RuleLicense = t.string;

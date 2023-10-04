@@ -5,8 +5,8 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_delete:
     delete:
-      operationId: DeleteRulesBulk
-      x-codegen-enabled: false
+      operationId: BulkDeleteRules
+      x-codegen-enabled: true
       deprecated: true
       description: Deletes multiple rules.
       tags:

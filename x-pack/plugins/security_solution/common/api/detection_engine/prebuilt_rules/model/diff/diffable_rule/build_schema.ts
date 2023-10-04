@@ -6,7 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { orUndefined } from '../../../../model';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { orUndefined } from '../../../../model/rule_schema_legacy';
 
 interface RuleFields<TRequired extends t.Props, TOptional extends t.Props> {
   required: TRequired;

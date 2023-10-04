@@ -38,6 +38,8 @@ import {
 } from '@kbn/securitysolution-rules';
 
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   AlertsIndex,
   AlertsIndexNamespace,
@@ -78,14 +80,16 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema_legacy';
 import {
   savedIdOrUndefined,
   saved_id,
   anomaly_threshold,
 } from '../../../../../common/api/detection_engine';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/api/detection_engine/model/rule_response_actions';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/api/detection_engine/model/rule_response_actions/response_actions_legacy';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 

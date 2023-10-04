@@ -26,7 +26,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   QueryRuleCreateProps,
-  AlertSuppressionMissingFieldsStrategy,
+  AlertSuppressionMissingFieldsStrategyEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
@@ -1468,7 +1468,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1539,7 +1539,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1594,7 +1594,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1648,7 +1648,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1746,7 +1746,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1825,7 +1825,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1896,7 +1896,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 300,
                   unit: 'm',
                 },
-                missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
               },
               from: 'now-1h',
               interval: '1h',
@@ -1963,7 +1963,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 300,
                   unit: 'm',
                 },
-                missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
               },
               from: 'now-1h',
               interval: '1h',

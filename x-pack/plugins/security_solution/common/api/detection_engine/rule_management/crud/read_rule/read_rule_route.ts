@@ -13,4 +13,4 @@ export const ReadRuleRequestQuery = QueryRuleByIds;
 export type ReadRuleRequestQuery = t.TypeOf<typeof ReadRuleRequestQuery>;
 
 export const ReadRuleResponse = RuleResponse;
-export type ReadRuleResponse = t.TypeOf<typeof ReadRuleResponse>;
+export type ReadRuleResponse = RuleResponse;

@@ -29,7 +29,7 @@ import type {
   PreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { previewRulesSchema } from '../../../../../../common/api/detection_engine';
+import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -39,7 +39,7 @@ import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logge
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -90,7 +90,7 @@ export const previewRulesRoute = async (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidation(previewRulesSchema) } },
+        validate: { request: { body: buildRouteValidationWithZod(PreviewRulesSchema) } },
       },
       async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);

@@ -28,15 +28,17 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { RuleExecutionSummary } from '../../rule_monitoring/model';
-import { ResponseActionArray } from '../rule_response_actions';
+// eslint-disable-next-line no-restricted-imports
+import { ResponseActionArray } from '../rule_response_actions/response_actions_legacy';
+
 import {
-  saved_id,
   anomaly_threshold,
-  updated_at,
-  updated_by,
   created_at,
   created_by,
   revision,
+  saved_id,
+  updated_at,
+  updated_by,
 } from '../schemas';
 
 import {
@@ -46,6 +48,7 @@ import {
   DataViewId,
   ExceptionListArray,
   IndexPatternArray,
+  InvestigationFields,
   InvestigationGuide,
   IsRuleEnabled,
   IsRuleImmutable,
@@ -53,7 +56,6 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleAuthorArray,
-  InvestigationFields,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleFilterArray,
@@ -77,16 +79,55 @@ import {
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
 } from './common_attributes';
-import {
-  EventCategoryOverride,
-  TiebreakerField,
-  TimestampField,
-} from './specific_attributes/eql_attributes';
-import { Threshold } from './specific_attributes/threshold_attributes';
-import { HistoryWindowStart, NewTermsFields } from './specific_attributes/new_terms_attributes';
-import { AlertSuppression } from './specific_attributes/query_attributes';
+import { EventCategoryOverride, TiebreakerField, TimestampField } from './eql_attributes';
+import { HistoryWindowStart, NewTermsFields } from './new_terms_attributes';
+import { AlertSuppression } from './query_attributes';
+import { Threshold } from './threshold_attributes';
 
-import { buildRuleSchemas } from './build_rule_schemas';
+import type { RuleResponse as GenRuleResponse } from '../rule_schema/rule_schemas.gen';
+
+export const buildRuleSchemas = <
+  Required extends t.Props,
+  Optional extends t.Props,
+  Defaultable extends t.Props
+>({
+  required,
+  optional,
+  defaultable,
+}: {
+  required: Required;
+  optional: Optional;
+  defaultable: Defaultable;
+}) => ({
+  create: t.intersection([
+    t.exact(t.type(required)),
+    t.exact(t.partial(optional)),
+    t.exact(t.partial(defaultable)),
+  ]),
+  patch: t.intersection([t.partial(required), t.partial(optional), t.partial(defaultable)]),
+  response: t.intersection([
+    t.exact(t.type(required)),
+    // This bit of logic is to force all fields to be accounted for in conversions from the internal
+    // rule schema to the response schema. Rather than use `t.partial`, which makes each field optional,
+    // we make each field required but possibly undefined. The result is that if a field is forgotten in
+    // the conversion from internal schema to response schema TS will report an error. If we just used t.partial
+    // instead, then optional fields can be accidentally omitted from the conversion - and any actual values
+    // in those fields internally will be stripped in the response.
+    t.exact(t.type(orUndefined(optional))),
+    t.exact(t.type(defaultable)),
+  ]),
+});
+
+export type OrUndefined<P extends t.Props> = {
+  [K in keyof P]: P[K] | t.UndefinedC;
+};
+
+export const orUndefined = <P extends t.Props>(props: P): OrUndefined<P> => {
+  return Object.keys(props).reduce<t.Props>((acc, key) => {
+    acc[key] = t.union([props[key], t.undefined]);
+    return acc;
+  }, {}) as OrUndefined<P>;
+};
 
 // -------------------------------------------------------------------------------------------------
 // Base schema
@@ -106,7 +147,7 @@ export const baseSchema = buildRuleSchemas({
     // Timeline template
     timeline_id: TimelineTemplateId,
     timeline_title: TimelineTemplateTitle,
-    // Atributes related to SavedObjectsClient.resolve API
+    // Attributes related to SavedObjectsClient.resolve API
     outcome: SavedObjectResolveOutcome,
     alias_target_id: SavedObjectResolveAliasTargetId,
     alias_purpose: SavedObjectResolveAliasPurpose,
@@ -578,4 +619,21 @@ export type RulePatchProps = t.TypeOf<typeof RulePatchProps>;
 export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatchProps]);
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
-export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
+export const RuleResponse = t.intersection([TypeSpecificResponse, SharedResponseProps]);
+
+// Verify that the generated schemas are compatible with the legacy schemas
+// TODO remove this once we have migrated all the code to use the generated schemas
+(() => {
+  const legacySchema: RuleResponse = {} as RuleResponse;
+  let generatedSchema: GenRuleResponse = {} as GenRuleResponse;
+
+  generatedSchema = legacySchema;
+  return generatedSchema;
+})();
+(() => {
+  let legacySchema: RuleResponse = {} as RuleResponse;
+  const generatedSchema: GenRuleResponse = {} as GenRuleResponse;
+
+  legacySchema = generatedSchema;
+  return legacySchema;
+})();

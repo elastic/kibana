@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';

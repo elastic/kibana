@@ -16,10 +16,10 @@ import { z } from 'zod';
  * A universally unique identifier
  */
 export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string();
+export const UUID = z.string().uuid();
 
 export type RuleObjectId = z.infer<typeof RuleObjectId>;
-export const RuleObjectId = z.string();
+export const RuleObjectId = z.string().uuid();
 
 /**
  * Could be any string, not necessarily a UUID
@@ -33,21 +33,33 @@ export const RuleName = z.string().min(1);
 export type RuleDescription = z.infer<typeof RuleDescription>;
 export const RuleDescription = z.string().min(1);
 
+/**
+ * The rule's version number.
+ */
 export type RuleVersion = z.infer<typeof RuleVersion>;
-export const RuleVersion = z.string();
+export const RuleVersion = z.number().int().min(1);
 
 export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
 export const IsRuleImmutable = z.boolean();
 
+/**
+ * Determines whether the rule is enabled.
+ */
 export type IsRuleEnabled = z.infer<typeof IsRuleEnabled>;
 export const IsRuleEnabled = z.boolean();
 
+/**
+ * String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
+ */
 export type RuleTagArray = z.infer<typeof RuleTagArray>;
 export const RuleTagArray = z.array(z.string());
 
 export type RuleMetadata = z.infer<typeof RuleMetadata>;
-export const RuleMetadata = z.object({});
+export const RuleMetadata = z.object({}).catchall(z.unknown());
 
+/**
+ * The rule's license.
+ */
 export type RuleLicense = z.infer<typeof RuleLicense>;
 export const RuleLicense = z.string();
 
@@ -114,26 +126,29 @@ export const Technique = z.object({
   subtechnique: z.array(Subtechnique).optional(),
 });
 
+export type Tactic = z.infer<typeof Tactic>;
+export const Tactic = z.object({
+  /**
+   * Tactic ID
+   */
+  id: z.string(),
+  /**
+   * Tactic name
+   */
+  name: z.string(),
+  /**
+   * Tactic reference
+   */
+  reference: z.string(),
+});
+
 export type Threat = z.infer<typeof Threat>;
 export const Threat = z.object({
   /**
    * Relevant attack framework
    */
   framework: z.string(),
-  tactic: z.object({
-    /**
-     * Tactic ID
-     */
-    id: z.string(),
-    /**
-     * Tactic name
-     */
-    name: z.string(),
-    /**
-     * Tactic reference
-     */
-    reference: z.string(),
-  }),
+  tactic: Tactic,
   /**
    * Array containing information on the attack techniques (optional)
    */
@@ -153,7 +168,7 @@ export type RuleQuery = z.infer<typeof RuleQuery>;
 export const RuleQuery = z.string();
 
 export type RuleFilterArray = z.infer<typeof RuleFilterArray>;
-export const RuleFilterArray = z.array(z.object({}));
+export const RuleFilterArray = z.array(z.unknown());
 
 export type RuleNameOverride = z.infer<typeof RuleNameOverride>;
 export const RuleNameOverride = z.string();
@@ -166,9 +181,9 @@ export const TimestampOverrideFallbackDisabled = z.boolean();
 
 export type RequiredField = z.infer<typeof RequiredField>;
 export const RequiredField = z.object({
-  name: z.string().min(1).optional(),
-  type: z.string().min(1).optional(),
-  ecs: z.boolean().optional(),
+  name: z.string().min(1),
+  type: z.string().min(1),
+  ecs: z.boolean(),
 });
 
 export type RequiredFieldArray = z.infer<typeof RequiredFieldArray>;
@@ -205,3 +220,53 @@ export const RelatedIntegration = z.object({
 
 export type RelatedIntegrationArray = z.infer<typeof RelatedIntegrationArray>;
 export const RelatedIntegrationArray = z.array(RelatedIntegration);
+
+export type InvestigationFields = z.infer<typeof InvestigationFields>;
+export const InvestigationFields = z.object({
+  field_names: z.array(z.string()).min(1),
+});
+
+/**
+ * Defines the interval on which a rule's actions are executed.
+ */
+export type RuleActionThrottle = z.infer<typeof RuleActionThrottle>;
+export const RuleActionThrottle = z.union([
+  z.enum(['no_actions', 'rule']),
+  z.string().regex(/^[1-9]\d*[smhd]$/),
+]);
+
+/**
+ * The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
+ */
+export type RuleActionFrequency = z.infer<typeof RuleActionFrequency>;
+export const RuleActionFrequency = z.object({
+  summary: z.boolean(),
+  notifyWhen: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
+  throttle: RuleActionThrottle.nullable(),
+});
+
+export type RuleAction = z.infer<typeof RuleAction>;
+export const RuleAction = z.object({
+  /**
+   * The action type used for sending notifications.
+   */
+  action_type_id: z.string(),
+  /**
+   * Optionally groups actions by use cases. Use `default` for alert notifications.
+   */
+  group: z.string(),
+  /**
+   * The connector ID.
+   */
+  id: z.string(),
+  /**
+   * Object containing the allowed connector fields, which varies according to the connector type.
+   */
+  params: z.object({}).catchall(z.unknown()),
+  uuid: z.string().optional(),
+  /**
+   * TODO implement the schema type
+   */
+  alerts_filter: z.object({}).optional(),
+  frequency: RuleActionFrequency.optional(),
+});

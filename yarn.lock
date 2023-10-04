@@ -6216,6 +6216,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kwsites/file-exists@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@kwsites/file-exists/-/file-exists-1.1.1.tgz#ad1efcac13e1987d8dbaf235ef3be5b0d96faa99"

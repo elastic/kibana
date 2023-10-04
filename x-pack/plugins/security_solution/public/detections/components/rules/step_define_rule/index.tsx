@@ -79,11 +79,9 @@ import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
-import {
-  minimumLicenseForSuppression,
-  AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/constants';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -420,7 +418,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
       <EuiRadioGroup
         disabled={
-          !license.isAtLeast(minimumLicenseForSuppression) ||
+          !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
           groupByFields == null ||
           groupByFields.length === 0
         }
@@ -439,7 +437,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
                   isDisabled={
-                    !license.isAtLeast(minimumLicenseForSuppression) ||
+                    !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
                     groupByFields?.length === 0 ||
                     groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
                   }
@@ -462,18 +460,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
         disabled={
-          !license.isAtLeast(minimumLicenseForSuppression) ||
+          !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
           groupByFields == null ||
           groupByFields.length === 0
         }
         idSelected={suppressionMissingFields.value}
         options={[
           {
-            id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
           },
           {
-            id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            id: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
           },
         ]}
@@ -841,7 +839,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 browserFields: termsAggregationFields,
                 disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
                 isDisabled:
-                  !license.isAtLeast(minimumLicenseForSuppression) && groupByFields?.length === 0,
+                  !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) &&
+                  groupByFields?.length === 0,
               }}
             />
           </RuleTypeEuiFormRow>

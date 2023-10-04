@@ -6,7 +6,7 @@
  */
 
 import type { Rule } from '../../../rule_management/logic';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 /*
  * This is a temporary workaround to suppress TS errors when using

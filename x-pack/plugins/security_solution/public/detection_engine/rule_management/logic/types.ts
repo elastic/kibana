@@ -34,6 +34,8 @@ import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import type { WarningSchema } from '../../../../common/api/detection_engine';
 import { RuleExecutionSummary } from '../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   AlertSuppression,
   AlertsIndex,
@@ -74,7 +76,7 @@ import {
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
   InvestigationFields,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../../common/api/detection_engine/model/rule_schema_legacy';
 
 import type {
   CoverageOverviewFilter,

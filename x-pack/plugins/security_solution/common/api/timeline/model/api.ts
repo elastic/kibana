@@ -14,11 +14,13 @@ import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
 import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from '../../detection_engine/model/rule_schema';
+} from '../../detection_engine/model/rule_schema_legacy';
 import { ErrorSchema, success, success_count as successCount } from '../../detection_engine';
 
 export const BareNoteSchema = runtimeTypes.intersection([

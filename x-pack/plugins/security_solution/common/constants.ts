@@ -7,8 +7,8 @@
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
+import { AlertSuppressionMissingFieldsStrategyEnum } from './api/detection_engine/model/rule_schema/specific_attributes/query_attributes.gen';
 import * as i18n from './translations';
-
 export { SecurityPageName } from '@kbn/security-solution-navigation';
 
 /**
@@ -507,3 +507,8 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY =
+  AlertSuppressionMissingFieldsStrategyEnum.suppress;
+
+export const MINIMUM_LICENSE_FOR_SUPPRESSION = 'platinum';

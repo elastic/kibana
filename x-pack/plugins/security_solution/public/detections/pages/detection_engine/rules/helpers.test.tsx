@@ -24,7 +24,7 @@ import {
   mockRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
@@ -286,7 +286,7 @@ describe('rule helpers', () => {
       test('returns default suppress value in suppress strategy is missing', () => {
         const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.Suppress,
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         });
 
         expect(result).toEqual(expected);
@@ -297,11 +297,11 @@ describe('rule helpers', () => {
           ...mockRule('test-id'),
           alert_suppression: {
             group_by: [],
-            missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
           },
         });
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
         });
 
         expect(result).toEqual(expected);

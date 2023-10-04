@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
 import { RulePatchProps, RuleResponse } from '../../../model';
 
 /**
@@ -16,4 +15,4 @@ export type PatchRuleRequestBody = RulePatchProps;
 export const PatchRuleRequestBody = RulePatchProps;
 
 export const PatchRuleResponse = RuleResponse;
-export type PatchRuleResponse = t.TypeOf<typeof PatchRuleResponse>;
+export type PatchRuleResponse = RuleResponse;

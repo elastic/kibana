@@ -19,7 +19,7 @@ import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
 import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import * as i18n from './translations';
 

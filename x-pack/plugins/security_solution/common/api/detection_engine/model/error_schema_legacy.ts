@@ -8,7 +8,10 @@
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
-import { RuleSignatureId } from './rule_schema';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { RuleSignatureId } from './rule_schema_legacy';
+
 import { status_code, message } from './schemas';
 
 // We use id: t.string intentionally and _never_ the id from global schemas as

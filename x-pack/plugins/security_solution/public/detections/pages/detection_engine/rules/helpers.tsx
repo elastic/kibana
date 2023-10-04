@@ -23,7 +23,6 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
@@ -40,6 +39,7 @@ import type {
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/constants';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;

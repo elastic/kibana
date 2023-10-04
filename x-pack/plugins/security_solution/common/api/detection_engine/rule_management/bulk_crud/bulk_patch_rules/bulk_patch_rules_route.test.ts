@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
+import { stringifyZodError } from '@kbn/securitysolution-es-utils';
+import { expectParseError, expectParseSuccess } from '../../../../../test/zod_helpers';
 import type { PatchRuleRequestBody } from '../../crud/patch_rule/patch_rule_route';
-import { BulkPatchRulesRequestBody } from './bulk_patch_rules_route';
+import { BulkPatchRulesRequestBody } from './bulk_patch_rules_route.gen';
 
 // only the basics of testing are here.
 // see: patch_rules_schema.test.ts for the bulk of the validation tests
@@ -16,21 +17,17 @@ describe('Bulk patch rules request schema', () => {
   test('can take an empty array and validate it', () => {
     const payload: BulkPatchRulesRequestBody = [];
 
-    const decoded = BulkPatchRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(output.errors).toEqual([]);
-    expect(output.schema).toEqual([]);
+    const result = BulkPatchRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('single array of [id] does validate', () => {
     const payload: BulkPatchRulesRequestBody = [{ id: '4125761e-51da-4de9-a0c8-42824f532ddb' }];
 
-    const decoded = BulkPatchRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkPatchRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('two arrays of [id] validate', () => {
@@ -39,11 +36,9 @@ describe('Bulk patch rules request schema', () => {
       { id: '192f403d-b285-4251-9e8b-785fcfcf22e8' },
     ];
 
-    const decoded = BulkPatchRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkPatchRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('can set "note" to be a string', () => {
@@ -52,11 +47,9 @@ describe('Bulk patch rules request schema', () => {
       { note: 'hi' },
     ];
 
-    const decoded = BulkPatchRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkPatchRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('can set "note" to be an empty string', () => {
@@ -65,11 +58,9 @@ describe('Bulk patch rules request schema', () => {
       { note: '' },
     ];
 
-    const decoded = BulkPatchRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkPatchRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('cannot set "note" to be anything other than a string', () => {
@@ -78,12 +69,8 @@ describe('Bulk patch rules request schema', () => {
       { note: { someprop: 'some value here' } },
     ];
 
-    const decoded = BulkPatchRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "{"someprop":"some value here"}" supplied to "note"',
-    ]);
-    expect(output.schema).toEqual({});
+    const result = BulkPatchRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"1: Invalid input"`);
   });
 });

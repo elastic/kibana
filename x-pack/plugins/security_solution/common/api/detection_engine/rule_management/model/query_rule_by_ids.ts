@@ -6,7 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { RuleObjectId, RuleSignatureId } from '../../model';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { RuleObjectId, RuleSignatureId } from '../../model/rule_schema_legacy';
 
 export type QueryRuleByIds = t.TypeOf<typeof QueryRuleByIds>;
 export const QueryRuleByIds = t.exact(

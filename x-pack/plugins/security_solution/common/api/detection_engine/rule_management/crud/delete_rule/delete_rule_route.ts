@@ -13,4 +13,4 @@ export const DeleteRuleRequestQuery = QueryRuleByIds;
 export type DeleteRuleRequestQuery = t.TypeOf<typeof DeleteRuleRequestQuery>;
 
 export const DeleteRuleResponse = RuleResponse;
-export type DeleteRuleResponse = t.TypeOf<typeof DeleteRuleResponse>;
+export type DeleteRuleResponse = RuleResponse;
