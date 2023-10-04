@@ -8,17 +8,18 @@
 import { mapValues } from 'lodash';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule, SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
+import { SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { Alert } from '../../alert';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
+import { RuleAttributes } from '../../data/rule/types';
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
   id: string,
-  attributes: RawRule
+  attributes: RuleAttributes
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
@@ -27,7 +28,6 @@ export const untrackRuleAlerts = async (
         await context.taskManager.get(attributes.scheduledTaskId),
         attributes as unknown as SanitizedRule
       );
-
       const { state } = taskInstance;
 
       const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(
@@ -78,24 +78,10 @@ export const untrackRuleAlerts = async (
 
       // Untrack Lifecycle alerts (Alerts As Data-enabled)
       if (isLifecycleAlert) {
-        const alertsClient = await context.alertsService?.createAlertsClient({
-          namespace: context.namespace!,
-          rule: {
-            id,
-            name: attributes.name,
-            consumer: attributes.consumer,
-            revision: attributes.revision,
-            spaceId: context.spaceId,
-            tags: attributes.tags,
-            parameters: attributes.parameters,
-            executionId: '',
-          },
-          ruleType,
-          logger: context.logger,
-        });
-        if (!alertsClient) throw new Error('Could not create alertsClient');
         const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
-        await alertsClient.setAlertStatusToUntracked(indices, [id]);
+        if (!context.alertsService)
+          throw new Error('Could not access alertsService to untrack alerts');
+        await context.alertsService.setAlertsToUntracked({ indices, ruleIds: [id] });
       }
     } catch (error) {
       // this should not block the rest of the disable process

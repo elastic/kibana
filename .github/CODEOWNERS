@@ -772,7 +772,6 @@ src/plugins/ui_actions_enhanced @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
 src/plugins/ui_actions @elastic/appex-sharedux
-packages/kbn-ui-framework @elastic/kibana-design
 test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations

@@ -58,7 +58,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           default: true,
           description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
-          name: '.elser_model_2_SNAPSHOT',
+          name: '.elser_model_2',
           version: 2,
         },
         {
@@ -66,7 +66,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
-          name: '.elser_model_2_linux-x86_64_SNAPSHOT',
+          name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           recommended: true,
           version: 2,
@@ -110,7 +110,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           recommended: true,
           description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
-          name: '.elser_model_2_SNAPSHOT',
+          name: '.elser_model_2',
           version: 2,
         },
         {
@@ -118,7 +118,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
-          name: '.elser_model_2_linux-x86_64_SNAPSHOT',
+          name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           version: 2,
         },
@@ -129,7 +129,7 @@ describe('modelsProvider', () => {
   describe('getELSER', () => {
     test('provides a recommended definition by default', async () => {
       const result = await modelService.getELSER();
-      expect(result.name).toEqual('.elser_model_2_linux-x86_64_SNAPSHOT');
+      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
     });
 
     test('provides a default version if there is no recommended', async () => {
@@ -155,7 +155,7 @@ describe('modelsProvider', () => {
       });
 
       const result = await modelService.getELSER();
-      expect(result.name).toEqual('.elser_model_2_SNAPSHOT');
+      expect(result.name).toEqual('.elser_model_2');
     });
 
     test('provides the requested version', async () => {
@@ -165,7 +165,7 @@ describe('modelsProvider', () => {
 
     test('provides the requested version of a recommended architecture', async () => {
       const result = await modelService.getELSER({ version: 2 });
-      expect(result.name).toEqual('.elser_model_2_linux-x86_64_SNAPSHOT');
+      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
     });
   });
 });
