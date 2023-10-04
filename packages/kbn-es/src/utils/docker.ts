@@ -308,7 +308,7 @@ export function resolveDockerImage({
 }
 
 /**
- * Determine the port to bind the Serverless index node or Docker node to
+ * Determine the port and optionally an additional host to bind the Serverless index node or Docker node to
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
   const port = options.port || DEFAULT_PORT;
