@@ -150,7 +150,7 @@ const replaceEmptyStringWithQuotation = (s: string) => (s === '' ? '""' : s);
  * @param value fieldValue of selection
  * @returns {string} escaped `name:value` compatible with embeddable input
  */
-export function getEscapedKueryForSelectionInfluencer(
+export function escapeKueryForEmbeddableFieldValuePair(
   name: string,
   value: string | number | boolean | undefined
 ): string {

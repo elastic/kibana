@@ -14,7 +14,7 @@ import {
   toLocaleString,
   mlEscape,
   escapeForElasticsearchQuery,
-  getEscapedKueryForSelectionInfluencer,
+  escapeKueryForEmbeddableFieldValuePair,
 } from './string_utils';
 
 describe('ML - string utils', () => {
@@ -161,11 +161,11 @@ describe('ML - string utils', () => {
       expect(escapeForElasticsearchQuery('foo/bar')).toBe('foo\\/bar');
     });
   });
-  describe('getEscapedKueryForSelectionInfluencer', () => {
+  describe('escapeKueryForEmbeddableFieldValuePair', () => {
     test('should return correct escaping of kuery values', () => {
-      expect(getEscapedKueryForSelectionInfluencer('fieldName', '')).toBe('fieldName:""');
-      expect(getEscapedKueryForSelectionInfluencer('', 'fieldValue')).toBe('"":fieldValue');
-      expect(getEscapedKueryForSelectionInfluencer('@#specialCharsName%', '<>:;[})')).toBe(
+      expect(escapeKueryForEmbeddableFieldValuePair('fieldName', '')).toBe('fieldName:""');
+      expect(escapeKueryForEmbeddableFieldValuePair('', 'fieldValue')).toBe('"":fieldValue');
+      expect(escapeKueryForEmbeddableFieldValuePair('@#specialCharsName%', '<>:;[})')).toBe(
         '@#specialCharsName%:\\<\\>\\:;[}\\)'
       );
     });
