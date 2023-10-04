@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"],
+  },
+  "include": [
+    "**/*",
+  ], 
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    { "path": "../../test_serverless/tsconfig.json" },
+    { "path": "../../test_serverless/api_integration/**/*" },
+    { "path": "../../test_serverless/shared/**/*" },
+    { "path": "../../api_integration/services/**/*" },
+  ]
+}
