@@ -14,8 +14,8 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiLoadingSpinner,
-  EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
@@ -80,29 +80,42 @@ const MetadataSummaryListWrapper = ({
   };
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
-        <EuiFlexGroup alignItems="flexStart">
-          <MetadataSectionTitle />
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="spaceBetween"
+      direction="column"
+      wrap
+      css={css`
+        position: relative;
+      `}
+    >
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <MetadataSectionTitle />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} key="metadata-link">
+            <EuiButtonEmpty
+              data-test-subj="infraAssetDetailsMetadataShowAllButton"
+              onClick={onClick}
+              size="xs"
+              flush="both"
+              iconSide="right"
+              iconType="sortRight"
+            >
+              <FormattedMessage
+                id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+                defaultMessage="Show all"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false} key="metadata-link">
-          <EuiButtonEmpty
-            data-test-subj="infraAssetDetailsMetadataShowAllButton"
-            onClick={onClick}
-            size="xs"
-            flush="both"
-            iconSide="right"
-            iconType="sortRight"
-          >
-            <FormattedMessage
-              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
-              defaultMessage="Show all"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem>
+            <MetadataExplanationMessage />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
-      <MetadataExplanationMessage />
-      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="flexStart">
         {visibleMetadata.map(
           (metadataValue) =>
@@ -111,7 +124,7 @@ const MetadataSummaryListWrapper = ({
                 <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
                   <MetadataHeader metadataValue={metadataValue} />
                   <EuiDescriptionListDescription>
-                    {metadataLoading ? (
+                    {metadataLoading && !metadataValue.value ? (
                       <EuiLoadingSpinner />
                     ) : (
                       <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
@@ -122,7 +135,7 @@ const MetadataSummaryListWrapper = ({
             )
         )}
       </EuiFlexGroup>
-    </>
+    </EuiFlexGroup>
   );
 };
 export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => (

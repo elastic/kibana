@@ -98,11 +98,11 @@ export const Processes = () => {
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <SummaryTable
-            isLoading={loading}
+            isLoading={loading && !response}
             processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
@@ -118,12 +118,18 @@ export const Processes = () => {
               <TopProcessesTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        {loading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          !error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
-        )}
+          {!error && (
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem>
+                {loading && !response ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}

@@ -64,7 +64,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
       ? [
           {
             text: (
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiIcon size="s" type="arrowLeft" />
                 </EuiFlexItem>

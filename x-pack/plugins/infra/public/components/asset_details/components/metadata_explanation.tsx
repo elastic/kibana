@@ -55,10 +55,10 @@ const MetadataExplanationTooltipContent = React.memo(() => {
 export const MetadataExplanationMessage = () => {
   const { metadata, loading } = useMetadataStateProviderContext();
 
-  return loading ? (
+  return loading && !metadata ? (
     <EuiLoadingSpinner />
   ) : metadata?.info?.timestamp ? (
-    <EuiFlexGroup gutterSize="xs" alignItems="baseline">
+    <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           <FormattedMessage

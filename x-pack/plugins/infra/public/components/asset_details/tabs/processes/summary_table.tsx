@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { mapValues } from 'lodash';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiLoadingSpinner,
@@ -45,19 +44,10 @@ const processSummaryNotAvailable = {
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
   const summary = !processSummary?.total ? processSummaryNotAvailable : processSummary;
 
-  const processCount = useMemo(
-    () =>
-      ({
-        total: isLoading ? -1 : summary.total,
-        ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
-        ...(isLoading ? {} : summary),
-      } as SummaryRecord),
-    [summary, isLoading]
-  );
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
-        {Object.entries(processCount).map(([field, value]) => (
+        {Object.entries(summary).map(([field, value]) => (
           <EuiFlexItem key={field}>
             <EuiDescriptionList
               data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
@@ -71,17 +61,7 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
                 {columnTitles[field as keyof SummaryRecord]}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {value === -1 ? (
-                  <EuiLoadingSpinner
-                    size="m"
-                    css={css`
-                      margin-top: 2px;
-                      margin-bottom: 3px;
-                    `}
-                  />
-                ) : (
-                  value
-                )}
+                {isLoading ? <EuiLoadingSpinner size="m" /> : value}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
