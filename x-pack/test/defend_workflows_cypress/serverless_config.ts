@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
     },
     esServerlessOptions: {
-      ...(svlSharedConfig.get('esServerlessOptions') ?? {}),
+      ...(config.get('esServerlessOptions') ?? {}),
       resources: Object.values(ES_RESOURCES),
     },
     servers: {
