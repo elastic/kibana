@@ -105,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits1[ALERT_MAINTENANCE_WINDOW_IDS]).to.be.an(Array);
       expect(typeof hits1[ALERT_REASON]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_UUID]).to.be('string');
-      expect(typeof hits1[ALERT_DURATION]).to.be('string');
+      expect(typeof hits1[ALERT_DURATION]).to.be('number');
       expect(new Date(hits1[ALERT_START])).to.be.a(Date);
       expect(typeof hits1[ALERT_TIME_RANGE]).to.be('object');
       expect(typeof hits1[ALERT_UUID]).to.be('string');
@@ -235,8 +235,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2['@timestamp']).to.be.greaterThan(hits1['@timestamp']);
       expect(OPEN_OR_ACTIVE.has(hits1[EVENT_ACTION])).to.be(true);
       expect(hits2[EVENT_ACTION]).to.be('active');
-      expect(parseInt(hits1[ALERT_DURATION], 10)).to.not.be.lessThan(0);
-      expect(hits2[ALERT_DURATION]).not.to.be('0');
+      expect(hits1[ALERT_DURATION]).to.not.be.lessThan(0);
+      expect(hits2[ALERT_DURATION]).not.to.be(0);
 
       // remove fields we know will be different
       const fields = [
