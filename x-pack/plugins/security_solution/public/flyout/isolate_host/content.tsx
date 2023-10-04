@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
-import { RightPanelKey } from '../right';
 import { useBasicDataFromDetailsData } from '../../timelines/components/side_panel/event_details/helpers';
 import { EndpointIsolateSuccess } from '../../common/components/endpoint/host_isolation';
 import { useHostIsolationTools } from '../../timelines/components/side_panel/event_details/use_host_isolation_tools';
@@ -32,7 +31,7 @@ export const PanelContent: FC = () => {
   const showAlertDetails = useCallback(
     () =>
       openRightPanel({
-        id: RightPanelKey,
+        id: 'document-details-right',
         params: {
           id: eventId,
           indexName,

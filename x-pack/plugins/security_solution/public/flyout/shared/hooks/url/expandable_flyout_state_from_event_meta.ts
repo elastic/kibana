@@ -6,7 +6,6 @@
  */
 
 import type { ExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RightPanelKey } from '../../../right';
 
 interface RedirectParams {
   index: string;
@@ -26,7 +25,7 @@ export const expandableFlyoutStateFromEventMeta = ({
 }: RedirectParams): ExpandableFlyoutContext['panels'] => {
   return {
     right: {
-      id: RightPanelKey,
+      id: 'document-details-right',
       params: {
         id: eventId,
         indexName: index,

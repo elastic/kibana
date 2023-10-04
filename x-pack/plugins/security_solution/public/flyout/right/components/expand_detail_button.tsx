@@ -12,7 +12,6 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { COLLAPSE_DETAILS_BUTTON_TEST_ID, EXPAND_DETAILS_BUTTON_TEST_ID } from './test_ids';
-import { LeftPanelKey } from '../../left';
 import { useRightPanelContext } from '../context';
 
 /**
@@ -26,7 +25,7 @@ export const ExpandDetailButton: FC = memo(() => {
 
   const expandDetails = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: 'document-details-left',
       params: {
         id: eventId,
         indexName,

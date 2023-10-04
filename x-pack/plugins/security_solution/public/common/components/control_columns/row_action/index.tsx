@@ -12,7 +12,6 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { RightPanelKey } from '../../../../flyout/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -101,7 +100,7 @@ const RowActionComponent = ({
     if (isSecurityFlyoutEnabled && tableId !== TableId.rulePreview) {
       openFlyout({
         right: {
-          id: RightPanelKey,
+          id: 'document-details-right',
           params: {
             id: eventId,
             indexName,

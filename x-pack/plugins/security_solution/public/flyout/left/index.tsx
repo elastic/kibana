@@ -45,7 +45,7 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
 
   const setSelectedTabId = (tabId: LeftPanelTabsType[number]['id']) => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: 'document-details-left',
       path: {
         tab: tabId,
       },

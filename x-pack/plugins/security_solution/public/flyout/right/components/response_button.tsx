@@ -15,7 +15,7 @@ import type {
   RawEventData,
 } from '../../../../common/types/response_actions';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelResponseTab } from '../../left';
+import { LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 
 /**
@@ -33,7 +33,7 @@ export const ResponseButton: React.FC = () => {
 
   const goToResponseTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: 'document-details-left',
       path: { tab: LeftPanelResponseTab },
       params: {
         id: eventId,

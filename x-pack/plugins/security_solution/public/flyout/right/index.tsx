@@ -50,7 +50,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   const setSelectedTabId = (tabId: RightPanelTabsType[number]['id']) => {
     openRightPanel({
-      id: RightPanelKey,
+      id: 'document-details-right',
       path: {
         tab: tabId,
       },
