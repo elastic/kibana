@@ -52,7 +52,7 @@ const cloudSecurityFieldLabels: Record<string, string> = {
  */
 export const useLatestFindingsDataView = (dataView: string) => {
   const {
-    data: { dataViews, indexPatterns },
+    data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const findDataView = async (): Promise<DataView> => {
@@ -70,7 +70,7 @@ export const useLatestFindingsDataView = (dataView: string) => {
           dataViewObj.setFieldCustomLabel(field, label);
         }
       });
-      await indexPatterns.updateSavedObject(dataViewObj);
+      await dataViews.updateSavedObject(dataViewObj);
     }
 
     return dataViewObj;
