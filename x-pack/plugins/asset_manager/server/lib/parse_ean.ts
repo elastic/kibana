@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-export interface SharedAssetsOptionsPublic {
-  from: string;
-  to?: string;
-}
+export function parseEan(ean: string) {
+  const [kind, id, ...rest] = ean.split(':');
 
-export type GetHostsOptionsPublic = SharedAssetsOptionsPublic;
+  if (!kind || !id || rest.length > 0) {
+    throw new Error(`${ean} is not a valid EAN`);
+  }
 
-export interface GetServicesOptionsPublic extends SharedAssetsOptionsPublic {
-  parent?: string;
+  return { kind, id };
 }

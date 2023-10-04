@@ -6,12 +6,17 @@
  */
 
 import { Asset } from '../../../../common/types_api';
-import { GetHostsOptionsInjected } from '.';
 import { collectHosts } from '../../collectors/hosts';
+import { GetHostsOptionsPublic } from '../../../../common/types_client';
+import {
+  AssetClientDependencies,
+  AssetClientOptionsWithInjectedValues,
+} from '../../asset_client_types';
 
-export async function getHostsBySignals(
-  options: GetHostsOptionsInjected
-): Promise<{ hosts: Asset[] }> {
+export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
+export type GetHostsOptionsInjected = AssetClientOptionsWithInjectedValues<GetHostsOptions>;
+
+export async function getHosts(options: GetHostsOptionsInjected): Promise<{ hosts: Asset[] }> {
   const metricsIndices = await options.metricsClient.getMetricIndices({
     savedObjectsClient: options.savedObjectsClient,
   });
@@ -19,7 +24,7 @@ export async function getHostsBySignals(
   const { assets } = await collectHosts({
     client: options.elasticsearchClient,
     from: options.from,
-    to: options.to,
+    to: options.to || 'now',
     sourceIndices: {
       metrics: metricsIndices,
       logs: options.sourceIndices.logs,
