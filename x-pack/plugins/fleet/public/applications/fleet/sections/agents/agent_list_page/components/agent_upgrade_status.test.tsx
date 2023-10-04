@@ -163,6 +163,7 @@ describe('AgentUpgradeStatus', () => {
     it('should render an icon with tooltip if the agent is upgrading', () => {
       const results = render({
         agentUpgradeStartedAt: '2023-10-03T14:34:12Z',
+        agentUpgradedAt: null,
       });
       expectNoBadges(results);
       expect(
@@ -171,7 +172,10 @@ describe('AgentUpgradeStatus', () => {
     });
 
     it('should not render anything if the agent is not upgrading', () => {
-      const results = render({});
+      const results = render({
+        agentUpgradeStartedAt: null,
+        agentUpgradedAt: '2023-10-03T14:34:12Z',
+      });
       expectNoBadges(results);
       expect(
         results.container.querySelector('[data-euiicon-type="iInCircle"]')

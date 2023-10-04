@@ -187,8 +187,14 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
 
 export const AgentUpgradeStatus: React.FC<{
   agentUpgradeStartedAt?: string | null;
+  agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
-}> = ({ agentUpgradeStartedAt, agentUpgradeDetails }) => {
+}> = ({ agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
+  // TODO: check logic
+  const isAgentUpgrading = useMemo(
+    () => agentUpgradeStartedAt && !agentUpgradedAt,
+    [agentUpgradeStartedAt, agentUpgradedAt]
+  );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
 
   if (agentUpgradeDetails && status) {
@@ -202,8 +208,7 @@ export const AgentUpgradeStatus: React.FC<{
     );
   }
 
-  // TODO: check logic
-  if (agentUpgradeStartedAt) {
+  if (isAgentUpgrading) {
     return (
       <EuiIconTip
         type="iInCircle"
