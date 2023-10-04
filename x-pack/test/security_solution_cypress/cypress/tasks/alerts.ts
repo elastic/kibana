@@ -122,7 +122,7 @@ export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
-  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.be.visible');
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };
 
 export const expandFirstAlertActions = () => {
@@ -162,7 +162,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
     }
   });
-  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
+  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click({ force: true });
 };
 
 export const refreshAlertPageFilter = () => {

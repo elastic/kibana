@@ -135,6 +135,7 @@ export interface UsageStats {
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:linksPanel': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'labs:dashboard:dashboardControls': boolean;
   'discover:rowHeightOption': number;
@@ -154,4 +155,8 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
+  'observability:profilingUseLegacyFlamegraphAPI': boolean;
+  'observability:profilingPerCoreWatt': number;
+  'observability:profilingCo2PerKWH': number;
+  'observability:profilingDatacenterPUE': number;
 }

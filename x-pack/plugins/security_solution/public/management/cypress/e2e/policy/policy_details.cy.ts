@@ -19,7 +19,7 @@ import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/c
 describe(
   'Policy Details',
   {
-    tags: '@ess',
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
@@ -57,10 +57,10 @@ describe(
 
         it('should render the protection updates tab content', () => {
           loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protection-updates-warning-callout');
           cy.getByTestSubj('protection-updates-automatic-updates-enabled');
           cy.getByTestSubj('protection-updates-manifest-switch');
           cy.getByTestSubj('protection-updates-manifest-name-title');
-          cy.getByTestSubj('protection-updates-manifest-name');
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
 
           cy.getByTestSubj('protection-updates-manifest-switch').click();
@@ -201,6 +201,11 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
         });
+
+        it('should preserve note', () => {
+          loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
+        });
       });
 
       describe('Renders read only protection updates for user without write permissions', () => {
@@ -238,7 +243,6 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-switch').should('not.exist');
           cy.getByTestSubj('protection-updates-state-view-mode');
           cy.getByTestSubj('protection-updates-manifest-name-title');
-          cy.getByTestSubj('protection-updates-manifest-name');
 
           cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
           cy.getByTestSubj('protection-updates-deployed-version').contains(

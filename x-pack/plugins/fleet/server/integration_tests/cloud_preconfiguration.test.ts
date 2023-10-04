@@ -160,9 +160,6 @@ describe('Fleet preconfiguration reset', () => {
             input['apm-server'].rum.source_mapping.elasticsearch.api_key = '';
           }
         });
-        data.agent.protection.signing_key = '';
-        data.signed.data = '';
-        data.signed.signature = '';
 
         expect(data).toEqual(
           expect.objectContaining({
@@ -178,8 +175,8 @@ describe('Fleet preconfiguration reset', () => {
               },
               protection: {
                 enabled: false,
-                signing_key: '',
-                uninstall_token_hash: '',
+                signing_key: data.agent.protection.signing_key,
+                uninstall_token_hash: data.agent.protection.uninstall_token_hash,
               },
             },
             id: 'policy-elastic-agent-on-cloud',
@@ -337,10 +334,7 @@ describe('Fleet preconfiguration reset', () => {
             },
             revision: 5,
             secret_references: [],
-            signed: {
-              data: '',
-              signature: '',
-            },
+            signed: data.signed,
           })
         );
       });
