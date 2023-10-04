@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
-import { RiskScore } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
@@ -52,13 +52,12 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
             <RiskScoreHeaderTitle
               title={i18n.RISK_DATA_TITLE(riskEntity)}
               riskScoreEntity={riskEntity}
-              showTechnicalPreviewBadge
             />
           }
           toolTipContent={
             <FormattedMessage
               id="xpack.securitySolution.alertDetails.overview.riskDataTooltipContent"
-              defaultMessage="Risk classification is displayed only when available for a {riskEntity}. Ensure {riskScoreDocumentationLink} is enabled within your environment."
+              defaultMessage="Risk level is displayed only when available for a {riskEntity}. Ensure {riskScoreDocumentationLink} is enabled within your environment."
               values={{
                 riskEntity,
                 riskScoreDocumentationLink: (
@@ -77,10 +76,10 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
         {!risk.loading && (
           <>
             <EnrichedDataRow
-              field={i18n.CURRENT_RISK_CLASSIFICATION(riskEntity)}
+              field={i18n.CURRENT_RISK_LEVEL(riskEntity)}
               value={
                 currentRiskScore ? (
-                  <RiskScore severity={currentRiskScore} hideBackgroundColor />
+                  <RiskScoreLevel severity={currentRiskScore} hideBackgroundColor />
                 ) : (
                   getEmptyValue()
                 )
@@ -90,8 +89,8 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
             {originalRisk && currentRiskScore !== originalRisk && (
               <>
                 <EnrichedDataRow
-                  field={i18n.ORIGINAL_RISK_CLASSIFICATION(riskEntity)}
-                  value={<RiskScore severity={originalRisk} hideBackgroundColor />}
+                  field={i18n.ORIGINAL_RISK_LEVEL(riskEntity)}
+                  value={<RiskScoreLevel severity={originalRisk} hideBackgroundColor />}
                 />
               </>
             )}

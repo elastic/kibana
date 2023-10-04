@@ -23,6 +23,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -65,7 +66,7 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import { handleWarnings } from './fetch/handle_warnings';
+import { handleWarnings } from './warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -85,6 +86,7 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsContract;
+  inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
   scriptedFieldsEnabled: boolean;
 }
@@ -225,6 +227,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     {
       fieldFormats,
       indexPatterns,
+      inspector,
       screenshotMode,
       scriptedFieldsEnabled,
     }: SearchServiceStartDependencies
@@ -250,8 +253,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             request: request.body,
             response: rawResponse,
             theme,
-            sessionId: options.sessionId,
             requestId: request.id,
+            inspector: options.inspector,
+            inspectorService: inspector,
           });
         }
         return response;
@@ -299,6 +303,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             theme,
             callback,
             requestId: request.id,
+            inspector: {
+              adapter,
+              title: request.name,
+              id: request.id,
+            },
+            inspectorService: inspector,
           });
         });
       },

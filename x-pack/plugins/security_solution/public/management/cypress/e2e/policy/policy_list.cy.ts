@@ -16,7 +16,7 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe(
   'Policy List',
   {
-    tags: '@ess',
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
