@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
-const REPORTING_ROLE = 'reporting_user_role';
+// const REPORTING_ROLE = 'reporting_user_role';
 // const REPORTING_USER_PASSWORD = 'reporting_user-password';
 // const REPORTING_USER_USERNAME = 'reporting_user';
 const REPORTING_USER_USERNAME = 'elastic_serverless';
@@ -29,7 +29,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
-  const security = getService('security');
 
   return {
     /**
@@ -59,16 +58,16 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     //   });
     // },
 
-    async createReportingUser(
-      username = REPORTING_USER_USERNAME,
-      password = REPORTING_USER_PASSWORD
-    ) {
-      await security.user.create(username, {
-        password,
-        roles: [REPORTING_ROLE],
-        full_name: 'Reporting User',
-      });
-    },
+    // async createReportingUser(
+    //   username = REPORTING_USER_USERNAME,
+    //   password = REPORTING_USER_PASSWORD
+    // ) {
+    //   await security.user.create(username, {
+    //     password,
+    //     roles: [REPORTING_ROLE],
+    //     full_name: 'Reporting User',
+    //   });
+    // },
 
     /**
      * Use the internal API to create any kind of report job
@@ -76,8 +75,8 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async createReportJobInternal(
       jobType: string,
       job: object,
-      username: string,
-      password: string
+      username: string = REPORTING_USER_USERNAME,
+      password: string = REPORTING_USER_PASSWORD
     ) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);

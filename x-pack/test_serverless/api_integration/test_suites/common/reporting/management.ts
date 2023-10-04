@@ -20,16 +20,10 @@ const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'K
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const reportingAPI = getService('svlReportingApi');
   const supertest = getService('supertestWithoutAuth');
 
   describe('Reporting Management', function () {
     const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
-
-    before(async () => {
-      await reportingAPI.createReportingUser();
-      await reportingAPI.createReportingUser(TEST_USERNAME, TEST_USER_PASSWORD);
-    });
 
     beforeEach(async () => {
       await esArchiver.load(dataArchive);
