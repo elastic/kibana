@@ -10,24 +10,30 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
+/**
+ * Props for a {@link EmptyState} component.
+ */
 interface EmptyStateProps {
   queryText: string | undefined;
   onClearQuery: () => void;
 }
 
+/**
+ * Component for displaying a prompt to inform that no settings are found for a given query.
+ */
 export const EmptyState = ({ queryText, onClearQuery }: EmptyStateProps) => (
   <EuiCallOut
     color="danger"
     title={
       <>
         <FormattedMessage
-          id="management.settings.fieldCategory.noSearchResultText"
+          id="management.settings.emptyState.noSearchResultText"
           defaultMessage="No settings found for {queryText} {clearSearch}"
           values={{
             clearSearch: (
               <EuiLink onClick={onClearQuery}>
                 <FormattedMessage
-                  id="management.settings.fieldCategory.clearNoSearchResultText"
+                  id="management.settings.emptyState.clearNoSearchResultText"
                   defaultMessage="(clear search)"
                 />
               </EuiLink>

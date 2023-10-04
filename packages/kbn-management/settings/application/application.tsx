@@ -15,6 +15,7 @@ import { categorizeFields } from '@kbn/management-settings-utilities';
 
 import { useFields } from './hooks/use_fields';
 import { QueryInput, QueryInputProps } from './query_input';
+import { EmptyState } from './empty_state';
 import { useServices } from './services';
 
 const title = i18nLib.translate('management.settings.advancedSettingsLabel', {
@@ -79,13 +80,16 @@ export const SettingsApplication = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
-      <Form
-        fields={filteredFields}
-        categoryCounts={categoryCounts}
-        isSavingEnabled={true}
-        onClearQuery={() => onQueryChange()}
-        queryText={query?.text}
-      />
+      {filteredFields.length ? (
+        <Form
+          fields={filteredFields}
+          categoryCounts={categoryCounts}
+          isSavingEnabled={true}
+          onClearQuery={() => onQueryChange()}
+        />
+      ) : (
+        <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
+      )}
     </div>
   );
 };

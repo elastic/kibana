@@ -13,7 +13,6 @@ import { FieldCategories } from '@kbn/management-settings-components-field-categ
 import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
-import { EmptyState } from './empty_state';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -27,7 +26,6 @@ export interface FormProps {
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
   onClearQuery: () => void;
-  queryText: string | undefined;
 }
 
 /**
@@ -35,7 +33,7 @@ export interface FormProps {
  * @param props The {@link FormProps} for the {@link Form} component.
  */
 export const Form = (props: FormProps) => {
-  const { fields, categoryCounts, isSavingEnabled, onClearQuery, queryText } = props;
+  const { fields, categoryCounts, isSavingEnabled, onClearQuery } = props;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
@@ -72,20 +70,16 @@ export const Form = (props: FormProps) => {
 
   return (
     <Fragment>
-      {!isEmpty(categorizedFields) ? (
-        <FieldCategories
-          {...{
-            categorizedFields,
-            categoryCounts,
-            isSavingEnabled,
-            onFieldChange,
-            onClearQuery,
-            unsavedChanges,
-          }}
-        />
-      ) : (
-        <EmptyState {...{ queryText, onClearQuery }} />
-      )}
+      <FieldCategories
+        {...{
+          categorizedFields,
+          categoryCounts,
+          isSavingEnabled,
+          onFieldChange,
+          onClearQuery,
+          unsavedChanges,
+        }}
+      />
       {!isEmpty(unsavedChanges) && (
         <BottomBar
           onSaveAll={saveAll}

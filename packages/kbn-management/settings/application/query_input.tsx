@@ -13,6 +13,9 @@ import React, { useState } from 'react';
 
 export const CATEGORY_FIELD = 'categories';
 
+/**
+ * Props for a {@link QueryInput} component.
+ */
 export interface QueryInputProps {
   categories: string[];
   query?: Query;
@@ -24,6 +27,9 @@ export const parseErrorMsg = i18n.translate(
   { defaultMessage: 'Unable to parse query' }
 );
 
+/**
+ * Component for displaying a {@link EuiSearchBar} component for filtering settings and setting categories.
+ */
 export const QueryInput = ({ categories: categoryList, query, onQueryChange }: QueryInputProps) => {
   const [queryError, setQueryError] = useState<string | null>(null);
 
