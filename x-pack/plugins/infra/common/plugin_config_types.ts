@@ -27,6 +27,7 @@ export interface InfraConfig {
   };
   featureFlags: {
     metricsExplorerEnabled: boolean;
+    osqueryEnabled: boolean;
   };
 }
 
