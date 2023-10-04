@@ -109,9 +109,9 @@ import {
   waitForTheRuleToBeExecuted,
   visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
-
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
@@ -435,6 +435,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         fillAboutRuleAndContinue(rule);
         fillScheduleRuleAndContinue(rule);
         createAndEnableRule();
+        openRuleManagementPageViaBreadcrumbs();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

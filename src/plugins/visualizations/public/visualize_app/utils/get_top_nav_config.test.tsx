@@ -224,6 +224,49 @@ describe('getTopNavConfig', () => {
       ]
     `);
   });
+
+  test('navigates to origin app and path on cancel', async () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+    const mockNavigateToApp = jest.fn();
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: 'testApp',
+        originatingPath: '/testPath',
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      {
+        ...services,
+        application: { navigateToApp: mockNavigateToApp },
+      } as unknown as VisualizeServices
+    );
+
+    const executionFunction = topNavLinks.find(({ id }) => id === 'cancel')?.run;
+    const mockAnchorElement = document.createElement('div');
+    await executionFunction?.(mockAnchorElement);
+    expect(mockNavigateToApp).toHaveBeenCalledWith('testApp', { path: '/testPath' });
+  });
+
   test('returns correct links for by reference visualization', () => {
     const vis = {
       savedVis: {
