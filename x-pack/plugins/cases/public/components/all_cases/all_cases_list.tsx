@@ -22,7 +22,7 @@ import type { EuiBasicTableOnChange, Solution } from './types';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
-import { OWNER_INFO } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE, OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
@@ -219,11 +219,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
     });
 
+    const totalCases = data.total && data.total >= MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
+
     const pagination = useMemo(
       () => ({
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
-        totalItemCount: data.total ?? 0,
+        totalItemCount: totalCases ?? 0,
         pageSizeOptions: CASES_TABLE_PERPAGE_VALUES,
       }),
       [data, queryParams]
