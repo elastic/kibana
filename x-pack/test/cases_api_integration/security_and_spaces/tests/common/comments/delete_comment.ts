@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   // Failing: See https://github.com/elastic/kibana/issues/157589
-  describe.skip('delete_comment', () => {
+  describe('delete_comment', () => {
     afterEach(async () => {
       await deleteCasesByESQuery(es);
       await deleteComments(es);
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      it('404s when comment belongs to different case', async () => {
+      it.only('404s when comment belongs to different case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCase = await createComment({
           supertest,
