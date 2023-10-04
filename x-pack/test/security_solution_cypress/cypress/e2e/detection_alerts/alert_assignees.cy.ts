@@ -43,9 +43,7 @@ describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Add and remove an assignee using the alert bulk action menu', () => {
-    const userName = `${Cypress.env('KIBANA_USERNAME')} <=> ${Cypress.env(
-      'ELASTICSEARCH_USERNAME'
-    )}`;
+    const userName = Cypress.env('ELASTICSEARCH_USERNAME');
     // Add an assignee to one alert
     selectNumberOfAlerts(1);
     openAlertAssigningBulkActionMenu();
