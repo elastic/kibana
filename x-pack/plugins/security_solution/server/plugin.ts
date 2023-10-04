@@ -456,6 +456,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     return {
       setAppFeaturesConfigurator:
         appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
+      experimentalFeatures: { ...config.experimentalFeatures },
     };
   }
 
