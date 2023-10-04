@@ -17,18 +17,23 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { Connector, ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
-import React from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
 
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
+import { CREATE_CONNECTOR_PATH } from './connectors_router';
+import { useConnectorTypes } from '../hooks/api/use_connector_types';
 
 export const ConnectorsOverview = () => {
-  const { http } = useKibanaServices();
+  const {
+    application: { navigateToUrl },
+    http,
+  } = useKibanaServices();
 
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
   const connectorsPath = assetBasePath + '/connectors.svg';
@@ -39,19 +44,35 @@ export const ConnectorsOverview = () => {
       http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
   });
 
-  const { data: connectorTypes } = useQuery({
-    queryKey: ['fetchConnectorTypes'],
-    queryFn: () =>
-      http.fetch<{ connectors: ConnectorServerSideDefinition[] }>(
-        '/internal/serverless_search/connector_types'
-      ),
+  const { data: connectorTypes } = useConnectorTypes();
+
+  const {
+    data: connector,
+    isLoading,
+    isSuccess,
+    mutate,
+  } = useMutation({
+    mutationFn: async () => {
+      const result = await http.post<{ connector: Connector }>(
+        '/internal/serverless_search/connectors'
+      );
+      return result.connector;
+    },
   });
+
+  useEffect(() => {
+    navigateToUrl(`${CREATE_CONNECTOR_PATH}/${connector?.id}`);
+  }, [connector, isSuccess, navigateToUrl]);
+
+  const createConnector = () => mutate();
+
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
       <EuiPageTemplate.Header
         pageTitle={i18n.translate('xpack.serverlessSearch.connectors.title', {
           defaultMessage: 'Connectors',
         })}
+        restrictWidth
         rightSideItems={[
           <EuiFlexGroup direction="row" alignItems="flexStart">
             <EuiFlexItem>
@@ -79,7 +100,12 @@ export const ConnectorsOverview = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton fill iconType="plusInCircleFilled">
+              <EuiButton
+                isLoading={isLoading}
+                fill
+                iconType="plusInCircleFilled"
+                onClick={() => createConnector()}
+              >
                 {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
                   defaultMessage: 'Create connector',
                 })}
@@ -107,7 +133,7 @@ export const ConnectorsOverview = () => {
       {(data?.connectors || []).length > 0 ? (
         <></>
       ) : (
-        <EuiPageTemplate.Section restrictWidth color="subdued">
+        <EuiPageTemplate.Section grow restrictWidth color="subdued">
           <EuiFlexGroup alignItems="center" direction="column">
             <EuiFlexItem>
               <EuiPanel paddingSize="l" hasShadow={false} hasBorder>
@@ -248,7 +274,12 @@ export const ConnectorsOverview = () => {
                     </EuiPanel>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill iconType="plusInCircleFilled">
+                    <EuiButton
+                      isLoading={isLoading}
+                      fill
+                      iconType="plusInCircleFilled"
+                      onClick={() => createConnector()}
+                    >
                       {i18n.translate('xpack.serverlessSearch.connectorsEmpty.createConnector', {
                         defaultMessage: 'Create connector',
                       })}
@@ -269,7 +300,7 @@ export const ConnectorsOverview = () => {
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s">
                 {connectorTypes?.connectors.map((connectorType) => (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={connectorType.name}>
                     <EuiToolTip content={connectorType.name}>
                       <EuiIcon
                         size="l"

@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await waitAndClickByTestId('close');
 
       const headers = await find.allByCssSelector('.euiDataGridHeaderCell');
-      expect(headers.length).to.be(6);
+      expect(headers.length).to.be(7);
     });
 
     it('should take into account the column type when sorting', async () => {
