@@ -55,6 +55,10 @@ import {
   ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
+  COVERAGE_OVERVIEW_TECHNIQUE_PANEL,
+  COVERAGE_OVERVIEW_ACTIVITY_FILTER_BUTTON,
+  COVERAGE_OVERVIEW_FILTER_LIST,
+  COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -507,4 +511,22 @@ export const switchAlertTableToEventRenderedView = () => {
 export const switchAlertTableToGridView = () => {
   cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
   cy.get(ALERT_TABLE_GRID_VIEW_OPTION).should('be.visible').trigger('click');
+};
+
+export const openTechniquePanel = (label: string) => {
+  cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL).contains(label).click();
+};
+
+export const selectCoverageOverviewActivityFilterOption = (option: string) => {
+  cy.get(COVERAGE_OVERVIEW_ACTIVITY_FILTER_BUTTON).click(); // open filter popover
+  cy.get(COVERAGE_OVERVIEW_FILTER_LIST).contains(option).click();
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(COVERAGE_OVERVIEW_ACTIVITY_FILTER_BUTTON).click(); // close filter popover
+};
+
+export const selectCoverageOverviewSourceFilterOption = (option: string) => {
+  cy.get(COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON).click(); // open filter popover
+  cy.get(COVERAGE_OVERVIEW_FILTER_LIST).contains(option).click();
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON).click(); // close filter popover
 };

@@ -222,3 +222,23 @@ export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+
+export const COVERAGE_OVERVIEW_TECHNIQUE_PANEL =
+  '[data-test-subj="coverageOverviewTechniquePanel"]';
+
+export const COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES =
+  '[data-test-subj="coverageOverviewEnabledRulesList"]';
+
+export const COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES =
+  '[data-test-subj="coverageOverviewDisabledRulesList"]';
+
+export const COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON =
+  '[data-test-subj="enableAllDisabledButton"]';
+
+export const COVERAGE_OVERVIEW_ACTIVITY_FILTER_BUTTON =
+  '[data-test-subj="coverageOverviewRuleActivityFilterButton"]';
+
+export const COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON =
+  '[data-test-subj="coverageOverviewRuleSourceFilterButton"]';
+
+export const COVERAGE_OVERVIEW_FILTER_LIST = '[data-test-subj="coverageOverviewFilterList"]';

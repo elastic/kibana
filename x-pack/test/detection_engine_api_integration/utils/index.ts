@@ -8,6 +8,7 @@
 export * from './binary_to_string';
 export * from './count_down_es';
 export * from './count_down_test';
+export * from './coverage_overview';
 export * from './create_container_with_endpoint_entries';
 export * from './create_container_with_entries';
 export * from './create_exception_list';
