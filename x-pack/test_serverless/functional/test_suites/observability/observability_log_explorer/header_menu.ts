@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'observabilityLogExplorer',
     'svlCommonPage',
     'timePicker',
+    'header',
   ]);
 
   describe('Header menu', () => {
@@ -28,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -46,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Discover fallback link', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {
@@ -95,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Add data link', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {
