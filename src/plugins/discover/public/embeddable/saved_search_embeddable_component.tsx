@@ -43,7 +43,6 @@ export function SavedSearchEmbeddableComponent({
       {...(searchProps as DiscoverGridEmbeddableProps)} // TODO later: remove the type casting to prevent unexpected errors due to missing props!
       loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       showFullScreenButton={false}
-      showColumnTokens
       query={query}
       className="unifiedDataTable"
     />

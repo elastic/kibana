@@ -38,7 +38,6 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../components/discover_tour';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -192,7 +191,6 @@ export function ContextAppContent({
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
-              showColumnTokens
               columns={columns}
               rows={rows}
               dataView={dataView}
@@ -214,7 +212,6 @@ export function ContextAppContent({
               maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
               renderDocumentView={renderDocumentView}
               services={services}
-              componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
             />
           </CellActionsProvider>
         </div>

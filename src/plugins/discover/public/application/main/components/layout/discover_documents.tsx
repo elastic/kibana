@@ -301,7 +301,6 @@ function DiscoverDocumentsComponent({
             >
               <DiscoverGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
-                showColumnTokens
                 columns={currentColumns}
                 columnTypes={columnTypes}
                 expandedDoc={expandedDoc}
