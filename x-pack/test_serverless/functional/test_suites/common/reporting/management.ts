@@ -15,14 +15,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
-    await retry.tryForTime(60 * 1000, async () => {
-      // await PageObjects.common.login('elastic_serverless', 'changeme')
+      await retry.tryForTime(60 * 1000, async () => {
+      await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('reportingManagement');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('reportingPageHeader', { timeout: 2000 });
     });
   };
@@ -60,10 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     xit(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
-        CSV_REPORT_TYPE_V2,
-        job
-      );
+      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job);
 
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
