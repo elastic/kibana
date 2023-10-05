@@ -95,6 +95,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
       ) : (
         <EuiSwitch
           showLabel={false}
+          data-test-subj="assistantLangChainSwitch"
           checked={knowledgeBase.assistantLangChain}
           onChange={onEnableAssistantLangChainChange}
           label={i18n.KNOWLEDGE_BASE_LABEL}
@@ -123,6 +124,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         <EuiButtonEmpty
           color={isKnowledgeBaseEnabled ? 'danger' : 'primary'}
           flush="left"
+          data-test-subj={'knowledgeBaseActionButton'}
           onClick={() => onEnableKB(!isKnowledgeBaseEnabled)}
           size="xs"
         >
@@ -135,14 +137,14 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
     const knowledgeBaseDescription = useMemo(() => {
       return isKnowledgeBaseEnabled ? (
-        <>
+        <span data-test-subj="kb-installed">
           {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(KNOWLEDGE_BASE_INDEX_PATTERN)}{' '}
           {knowledgeBaseActionButton}
-        </>
+        </span>
       ) : (
-        <>
+        <span data-test-subj="install-kb">
           {i18n.KNOWLEDGE_BASE_DESCRIPTION} {knowledgeBaseActionButton}
-        </>
+        </span>
       );
     }, [isKnowledgeBaseEnabled, knowledgeBaseActionButton]);
 
@@ -166,6 +168,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         <EuiButtonEmpty
           color={isESQLEnabled ? 'danger' : 'primary'}
           flush="left"
+          data-test-subj="esqlEnableButton"
           onClick={() => onEnableESQL(!isESQLEnabled)}
           size="xs"
         >
@@ -176,13 +179,13 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
     const esqlDescription = useMemo(() => {
       return isESQLEnabled ? (
-        <>
+        <span data-test-subj="esql-installed">
           {i18n.ESQL_DESCRIPTION_INSTALLED} {esqlActionButton}
-        </>
+        </span>
       ) : (
-        <>
+        <span data-test-subj="install-esql">
           {i18n.ESQL_DESCRIPTION} {esqlActionButton}
-        </>
+        </span>
       );
     }, [esqlActionButton, isESQLEnabled]);
 
