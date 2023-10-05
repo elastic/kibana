@@ -50,8 +50,10 @@ export const fetchSignificantCategories = async (
     esClient,
     params,
     fieldNames,
-    params.baselineMin,
-    params.deviationMax,
+    // For analysing dips, the baseline and deviation will be swapped around,
+    // so to get the full range correctly we have to pick the right start/end.
+    Math.min(params.baselineMin, params.deviationMax),
+    Math.max(params.baselineMin, params.deviationMax),
     logger,
     sampleProbability,
     emitError,
