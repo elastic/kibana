@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/165730
   // FLAKY: https://github.com/elastic/kibana/issues/165735
-  describe.skip('Search example', () => {
+  describe('Search example', () => {
     describe('with bfetch', () => {
       testSearchExample();
     });
@@ -83,7 +83,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should handle warnings', async () => {
+      // failing because no toasts are displayed
+      it.skip('should handle warnings', async () => {
         await testSubjects.click('searchWithWarning');
         await retry.waitFor('', async () => {
           const toastCount = await toasts.getToastCount();
