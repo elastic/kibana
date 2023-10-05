@@ -6,7 +6,6 @@
  */
 
 import { expect } from 'expect';
-// import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -25,6 +24,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
+  const svlRuleDetailsUI = getPageObject('svlRuleDetailsUI');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -40,7 +40,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe('Rule details', () => {
     let ruleIdList: string[];
 
-    describe('Header', function () {
+    describe('Header', () => {
       const testRunUuid = uuidv4();
       const ruleName = `test-rule-${testRunUuid}`;
       const RULE_TYPE_ID = '.es-query';
@@ -237,7 +237,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit rule button', function () {
+    describe('Edit rule button', () => {
       const testRunUuid = uuidv4();
       const ruleName = `${testRunUuid}`;
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
@@ -336,7 +336,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit rule with deleted connector', function () {
+    describe('Edit rule with deleted connector', () => {
       const ALERT_ACTION_INDEX = 'alert-action-es-query';
       const RULE_TYPE_ID = '.es-query';
 
@@ -584,6 +584,174 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('deleteIdsConfirmation');
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
+      });
+    });
+
+    describe('Edit rule with legacy rule-level notify values', () => {
+      before(async () => {
+        await svlCommonPage.login();
+      });
+
+      afterEach(async () => {
+        await Promise.all(
+          ruleIdList.map(async (ruleId) => {
+            await supertest
+              .delete(`/api/alerting/rule/${ruleId}`)
+              .set('kbn-xsrf', 'foo')
+              .set('x-elastic-internal-origin', 'foo');
+          })
+        );
+      });
+
+      after(async () => {
+        await svlCommonPage.forceLogout();
+      });
+
+      it('should convert rule-level params to action-level params and save the alert successfully', async () => {
+        const testRunUuid = uuidv4();
+        const RULE_TYPE_ID = '.es-query';
+
+        const connector1 = await createSlackConnector({
+          supertest,
+          name: `slack-${testRunUuid}-${0}`,
+        });
+
+        const connector2 = await createSlackConnector({
+          supertest,
+          name: `slack-${testRunUuid}-${1}`,
+        });
+
+        const rule = await createRule({
+          supertest,
+          consumer: 'alerts',
+          name: `test-rule-${testRunUuid}`,
+          ruleTypeId: RULE_TYPE_ID,
+          schedule: { interval: '1m' },
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          actions: [connector1, connector2].map((connector) => ({
+            id: connector.id,
+            group: 'query matched',
+            params: {
+              message: 'from alert 1s',
+              level: 'warn',
+            },
+            frequency: {
+              summary: false,
+              notify_when: RuleNotifyWhen.THROTTLE,
+              throttle: '2d',
+            },
+          })),
+        });
+        ruleIdList = [rule.id];
+
+        const updatedRuleName = `Changed rule ${rule.name}`;
+
+        // refresh to see alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        // click on first alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlTriggersActionsUI.searchRules(rule.name);
+        await find.clickDisplayedByCssSelector(
+          `[data-test-subj="rulesList"] [title="${rule.name}"]`
+        );
+
+        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
+        await editButton.click();
+        const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
+        expect(await notifyWhenSelect.getVisibleText()).toEqual('On custom action intervals');
+        const throttleInput = await testSubjects.find('throttleInput');
+        const throttleUnitInput = await testSubjects.find('throttleUnitInput');
+        expect(await throttleInput.getAttribute('value')).toEqual('2');
+        expect(await throttleUnitInput.getAttribute('value')).toEqual('d');
+        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+          clearWithKeyboard: true,
+        });
+
+        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+
+        await retry.try(async () => {
+          const resultToast = await toasts.getToastElement(1);
+          const toastText = await resultToast.getVisibleText();
+          expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
+        });
+      });
+    });
+
+    describe('View In App', () => {
+      const ruleName = uuidv4();
+      const RULE_TYPE_ID = '.es-query';
+
+      before(async () => {
+        await svlCommonPage.login();
+      });
+
+      afterEach(async () => {
+        await Promise.all(
+          ruleIdList.map(async (ruleId) => {
+            await supertest
+              .delete(`/api/alerting/rule/${ruleId}`)
+              .set('kbn-xsrf', 'foo')
+              .set('x-elastic-internal-origin', 'foo');
+          })
+        );
+      });
+
+      after(async () => {
+        await svlCommonPage.forceLogout();
+      });
+
+      it('renders a disabled rule details view in app button', async () => {
+        const rule = await createRule({
+          supertest,
+          consumer: 'alerts',
+          name: ruleName,
+          ruleTypeId: RULE_TYPE_ID,
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          actions: [],
+        });
+
+        ruleIdList = [rule.id];
+
+        // refresh to see alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        // click on first alert
+        await svlObltNavigation.navigateToLandingPage();
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlTriggersActionsUI.searchRules(rule.name);
+        await find.clickDisplayedByCssSelector(
+          `[data-test-subj="rulesList"] [title="${rule.name}"]`
+        );
+
+        expect(await svlRuleDetailsUI.isViewInAppDisabled()).toEqual(true);
       });
     });
   });
