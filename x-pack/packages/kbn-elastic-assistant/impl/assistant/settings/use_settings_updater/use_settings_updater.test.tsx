@@ -115,7 +115,7 @@ describe('useSettingsUpdater', () => {
     });
   });
 
-  it.only('should update all state variables to their updated values when saveSettings is called', async () => {
+  it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
       await waitForNextUpdate();
