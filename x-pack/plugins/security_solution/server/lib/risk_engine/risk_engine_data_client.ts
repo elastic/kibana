@@ -41,7 +41,6 @@ import {
   getLegacyTransforms,
   getLatestTransformId,
   removeLegacyTransforms,
-  startTransform,
   createTransform,
 } from './utils/transforms';
 import {
@@ -362,8 +361,6 @@ export class RiskEngineDataClient {
           }),
         },
       });
-
-      await startTransform({ esClient, transformId });
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
       throw error;

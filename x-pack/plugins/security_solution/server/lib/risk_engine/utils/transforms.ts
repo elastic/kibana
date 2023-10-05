@@ -103,9 +103,7 @@ export const createTransform = async ({
 export const getLatestTransformId = (namespace: string): string =>
   `risk_score_latest_transform_${namespace}`;
 
-const isTransformInProgress = (
-  transformStats: TransformGetTransformStatsTransformStats
-): boolean => {
+const hasTransformStarted = (transformStats: TransformGetTransformStatsTransformStats): boolean => {
   return transformStats.state === 'indexing' || transformStats.state === 'started';
 };
 
@@ -124,7 +122,7 @@ export const startTransform = async ({
       `Unable to find transform status for [${transformId}] while attempting to start`
     );
   }
-  if (isTransformInProgress(transformStats.transforms[0])) {
+  if (hasTransformStarted(transformStats.transforms[0])) {
     return;
   }
 
@@ -146,11 +144,16 @@ export const scheduleTransformNow = async ({
       `Unable to find transform status for [${transformId}] while attempting to schedule now`
     );
   }
-  if (isTransformInProgress(transformStats.transforms[0])) {
-    return;
-  }
 
-  return esClient.transform.scheduleNowTransform({ transform_id: transformId });
+  if (!hasTransformStarted(transformStats.transforms[0])) {
+    await esClient.transform.startTransform({
+      transform_id: transformId,
+    });
+  } else {
+    await esClient.transform.scheduleNowTransform({
+      transform_id: transformId,
+    });
+  }
 };
 
 export const scheduleLatestTransformNow = async ({
