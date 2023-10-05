@@ -112,6 +112,7 @@ export function registerTransactionErrorRateRuleType({
         services,
         spaceId,
         params: ruleParams,
+        startedAt,
         getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
@@ -154,7 +155,7 @@ export function registerTransactionErrorRateRuleType({
             ]
           : [];
 
-        const { dateStart, dateEnd } = getTimeRange(
+        const { dateStart } = getTimeRange(
           `${ruleParams.windowSize}${ruleParams.windowUnit}`
         );
 
@@ -290,7 +291,8 @@ export function registerTransactionErrorRateRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
+          const indexedStartedAt =
+            getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,

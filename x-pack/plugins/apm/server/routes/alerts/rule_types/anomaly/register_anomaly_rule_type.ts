@@ -97,7 +97,13 @@ export function registerAnomalyRuleType({
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params, services, spaceId, getTimeRange }) => {
+      executor: async ({
+        params,
+        services,
+        spaceId,
+        startedAt,
+        getTimeRange,
+      }) => {
         if (!ml) {
           return { state: {} };
         }
@@ -149,7 +155,7 @@ export function registerAnomalyRuleType({
           datemath.parse('now-30m')!.valueOf()
             ? '30m'
             : `${ruleParams.windowSize}${ruleParams.windowUnit}`;
-        const { dateStart, dateEnd } = getTimeRange(window);
+        const { dateStart } = getTimeRange(window);
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
@@ -312,7 +318,8 @@ export function registerAnomalyRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
+          const indexedStartedAt =
+            getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,

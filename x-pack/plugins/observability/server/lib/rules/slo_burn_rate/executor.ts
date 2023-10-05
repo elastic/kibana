@@ -62,6 +62,7 @@ export const getRuleExecutor = ({
     services,
     params,
     spaceId,
+    startedAt,
     getTimeRange,
   }): ReturnType<
     ExecutorType<
@@ -135,7 +136,7 @@ export const getRuleExecutor = ({
           );
 
           const alertId = instanceId;
-          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,
@@ -151,7 +152,7 @@ export const getRuleExecutor = ({
             longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
             shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
             burnRateThreshold: windowDef.burnRateThreshold,
-            timestamp: dateEnd,
+            timestamp: startedAt.toISOString(),
             viewInAppUrl,
             sloId: slo.id,
             sloName: slo.name,
@@ -180,7 +181,7 @@ export const getRuleExecutor = ({
       const recoveredAlerts = getRecoveredAlerts();
       for (const recoveredAlert of recoveredAlerts) {
         const alertId = recoveredAlert.getId();
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const alertUuid = recoveredAlert.getUuid();
         const alertDetailsUrl = await getAlertUrl(
           alertUuid,
@@ -198,7 +199,7 @@ export const getRuleExecutor = ({
         );
 
         const context = {
-          timestamp: dateEnd,
+          timestamp: startedAt.toISOString(),
           viewInAppUrl,
           alertDetailsUrl,
           sloId: slo.id,

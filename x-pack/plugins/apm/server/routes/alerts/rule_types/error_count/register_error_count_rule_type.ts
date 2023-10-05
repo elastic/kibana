@@ -103,6 +103,7 @@ export function registerErrorCountRuleType({
         params: ruleParams,
         services,
         spaceId,
+        startedAt,
         getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
@@ -131,7 +132,7 @@ export function registerErrorCountRuleType({
             ]
           : [];
 
-        const { dateStart, dateEnd } = getTimeRange(
+        const { dateStart } = getTimeRange(
           `${ruleParams.windowSize}${ruleParams.windowUnit}`
         );
 
@@ -236,7 +237,8 @@ export function registerErrorCountRuleType({
               spaceId,
               relativeViewInAppUrl
             );
-            const indexedStartedAt = getAlertStartedDate(alertId) ?? dateEnd;
+            const indexedStartedAt =
+              getAlertStartedDate(alertId) ?? startedAt.toISOString();
             const alertUuid = getAlertUuid(alertId);
             const alertDetailsUrl = await getAlertUrl(
               alertUuid,
