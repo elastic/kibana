@@ -26,7 +26,6 @@ export const DocumentViewModeToggle = ({
 
   const tabsCss = css`
     padding: 0 ${euiTheme.size.s};
-    border-bottom: ${euiTheme.border.thin};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -36,7 +35,7 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
+    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
