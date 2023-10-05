@@ -21,6 +21,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const svlCommonPage = getPageObject('svlCommonPage');
     const config = getService('config');
+    const header = getPageObject('header');
 
     before(async () => {
       await svlCommonPage.login();
@@ -28,6 +29,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
