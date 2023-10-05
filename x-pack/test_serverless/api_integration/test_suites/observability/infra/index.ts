@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Infra UI', function () {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./snapshot'));
+    loadTestFile(require.resolve('./processes'));
   });
 }

@@ -6,12 +6,8 @@
  */
 
 export const DATES = {
-  logs_and_metrics: {
-    min: 1562786660845,
-    max: 1562786716965,
-  },
-  logs_and_metrics_with_aws: {
-    min: 1564083185000,
-    max: 1564083493080,
+  serverlessTestingHost: {
+    min: 1679873400139,
+    max: 1680027672003,
   },
 };

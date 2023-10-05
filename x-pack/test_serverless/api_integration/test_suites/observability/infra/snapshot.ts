@@ -38,12 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('snapshot nodes', () => {
     describe('8.0.0', () => {
-      const { min, max } = DATES.logs_and_metrics;
+      const { min, max } = DATES.serverlessTestingHost;
       before(() =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+        esArchiver.load('x-pack/test/functional/es_archives/infra/serverless-testing-host')
       );
       after(() =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/serverless-testing-host')
       );
 
       it('should work', async () => {
@@ -52,10 +52,10 @@ export default function ({ getService }: FtrProviderContext) {
           timerange: {
             to: max,
             from: min,
-            interval: '1m',
+            interval: '10m',
           },
           metrics: [{ type: 'cpu' }],
-          nodeType: 'container',
+          nodeType: 'host',
           groupBy: [],
           includeTimeseries: false,
         });
@@ -67,20 +67,18 @@ export default function ({ getService }: FtrProviderContext) {
         expect(snapshot).to.have.property('nodes');
 
         const { nodes } = snapshot;
-        expect(nodes.length).to.equal(135);
+        expect(nodes.length).to.equal(1);
         if (snapshot) {
-          const firstNode = first(nodes) as any;
+          const firstNode = nodes[0];
           expect(firstNode).to.have.property('path');
           expect(firstNode.path.length).to.equal(1);
-          expect(first(firstNode.path)).to.have.property(
-            'value',
-            '01078c21eef4194b0b96253c7c6c32796aba66e3f3f37e26ac97d1dff3e2e91a'
-          );
-          expect(first(firstNode.path)).to.have.property(
-            'label',
-            'k8s_prometheus-to-sd-exporter_fluentd-gcp-v3.2.0-wcmm4_kube-system_b214d17a-9ae0-11e9-9a96-42010a84004d_0'
-          );
-          expect(firstNode.metrics).to.eql([{ name: 'cpu', value: 0, max: 0, avg: 0 }]);
+          expect(first(firstNode.path)).to.eql({
+            value: 'serverless-host',
+            label: 'serverless-host',
+            ip: '192.168.1.79',
+            os: 'macOS',
+            cloudProvider: null,
+          });
         }
       });
     });
