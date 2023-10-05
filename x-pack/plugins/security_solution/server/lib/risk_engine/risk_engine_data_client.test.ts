@@ -7,7 +7,6 @@
 
 import {
   createOrUpdateComponentTemplate,
-  createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
   getDataStreamAdapter,
 } from '@kbn/alerting-plugin/server';
@@ -133,27 +132,6 @@ describe('RiskEngineDataClient', () => {
           await riskEngineDataClient.initializeResources({ namespace: 'default' });
 
           expect(getDataStreamAdapter).toHaveBeenCalledWith({ useDataStreamForAlerts });
-
-          expect(createOrUpdateIlmPolicy).toHaveBeenCalledWith({
-            logger,
-            esClient,
-            name: '.risk-score-ilm-policy',
-            policy: {
-              _meta: {
-                managed: true,
-              },
-              phases: {
-                hot: {
-                  actions: {
-                    rollover: {
-                      max_age: '30d',
-                      max_primary_shard_size: '50gb',
-                    },
-                  },
-                },
-              },
-            },
-          });
 
           expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -312,12 +290,10 @@ describe('RiskEngineDataClient', () => {
                 index_patterns: ['risk-score.risk-score-default'],
                 composed_of: ['.risk-score-mappings'],
                 template: {
+                  lifecycle: {},
                   settings: {
                     auto_expand_replicas: '0-1',
                     hidden: true,
-                    'index.lifecycle': {
-                      name: '.risk-score-ilm-policy',
-                    },
                     'index.mapping.total_fields.limit': totalFieldsLimit,
                   },
                   mappings: {
@@ -522,7 +498,7 @@ describe('RiskEngineDataClient', () => {
       describe('initializeResources error', () => {
         it('should handle errors during initialization', async () => {
           const error = new Error('There error');
-          (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValueOnce(error);
+          (createOrUpdateIndexTemplate as jest.Mock).mockRejectedValueOnce(error);
 
           try {
             await riskEngineDataClient.initializeResources({ namespace: 'default' });
