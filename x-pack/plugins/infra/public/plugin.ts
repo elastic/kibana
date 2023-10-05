@@ -293,6 +293,20 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
+    /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
+    to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
+    core.application.register({
+      id: 'infra',
+      appRoute: '/app/infra',
+      title: 'infra',
+      navLinkStatus: 3,
+      mount: async (params: AppMountParameters) => {
+        const { renderApp } = await import('./apps/legacy_app');
+
+        return renderApp(params);
+      },
+    });
+
     startDep$AndHostViewFlag$.subscribe(
       ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
         this.appUpdater$.next(() => ({
