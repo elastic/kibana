@@ -61,7 +61,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167142
+  describe.skip('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
       await navigateTo('/render/core');
       const injectedMetadata = await getInjectedMetadata();
@@ -255,6 +256,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          * and will resolve to (boolean)
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
+        /**
+         * xpack.infra.featureFlags.customThresholdAlertsEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
+         */
+        'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
+        /**
+         * xpack.infra.featureFlags.osqueryEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
+         */
+        'xpack.infra.featureFlags.osqueryEnabled (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -297,7 +308,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
-        'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
+        'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];

@@ -33,8 +33,8 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { deleteRiskEngineConfiguration } from '../../tasks/api_calls/risk_engine';
 import { enableRiskEngine } from '../../tasks/entity_analytics';
 
-const CURRENT_HOST_RISK_CLASIFICATION = 'Current host risk classification';
-const ORIGINAL_HOST_RISK_CLASIFICATION = 'Original host risk classification';
+const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
+const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -80,16 +80,16 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
         scrollAlertTableColumnIntoView(ACTION_COLUMN);
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Low');
-        cy.get(ENRICHED_DATA_ROW).contains(CURRENT_HOST_RISK_CLASIFICATION);
+        cy.get(ENRICHED_DATA_ROW).contains(CURRENT_HOST_RISK_LEVEL);
         cy.get(ENRICHED_DATA_ROW).contains('Critical').should('not.exist');
-        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_CLASIFICATION).should('not.exist');
+        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL).should('not.exist');
 
         closeAlertFlyout();
         cy.task('esArchiverUnload', 'risk_hosts');
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Critical');
-        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_CLASIFICATION);
+        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL);
       });
     });
 
@@ -124,16 +124,16 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
         scrollAlertTableColumnIntoView(ACTION_COLUMN);
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Critical');
-        cy.get(ENRICHED_DATA_ROW).contains(CURRENT_HOST_RISK_CLASIFICATION);
+        cy.get(ENRICHED_DATA_ROW).contains(CURRENT_HOST_RISK_LEVEL);
         cy.get(ENRICHED_DATA_ROW).contains('Low').should('not.exist');
-        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_CLASIFICATION).should('not.exist');
+        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL).should('not.exist');
 
         closeAlertFlyout();
         cy.task('esArchiverUnload', 'risk_scores_new');
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_updated' });
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Low');
-        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_CLASIFICATION);
+        cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL);
       });
     });
   });
