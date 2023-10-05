@@ -19,6 +19,9 @@ export const useStyles = () => {
   `;
 
   const gridStyle = css`
+    & .euiDataGrid__content {
+      background: transparent;
+    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
