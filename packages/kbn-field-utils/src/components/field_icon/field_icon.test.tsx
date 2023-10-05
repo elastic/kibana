@@ -15,7 +15,7 @@ import { getFieldIconProps } from './get_field_icon_props';
 const dateField = dataView.getFieldByName('@timestamp')!;
 const scriptedField = dataView.getFieldByName('script date')!;
 
-describe('UnifiedFieldList <FieldIcon />', () => {
+describe('FieldUtils <FieldIcon />', () => {
   test('renders properly', () => {
     const component = shallow(<FieldIcon {...getFieldIconProps(dateField)} />);
     expect(component).toMatchSnapshot();
