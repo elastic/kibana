@@ -20,11 +20,11 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
+  API_VERSIONS,
+  APP_API_ROUTES,
   FLEET_SERVER_PACKAGE,
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  API_VERSIONS,
-  APP_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
 import type {
   FleetServerHost,
@@ -43,8 +43,8 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
-import { resolve } from 'path';
-import { SERVERLESS_NODES, verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
+import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
+import { FLEET_SERVER_CUSTOM_CONFIG } from '../common/fleet_server/fleet_server_services';
 import { isServerlessKibanaFlavor } from '../common/stack_services';
 import type { FormattedAxiosError } from '../common/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
@@ -52,8 +52,6 @@ import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
-
-const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 
 export const runFleetServerIfNeeded = async (): Promise<
   { fleetServerContainerId: string; fleetServerAgentPolicyId: string | undefined } | undefined
