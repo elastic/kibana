@@ -53,6 +53,10 @@ discover-app {
   position: relative;
   overflow: hidden;
   height: 100%;
+
+  .euiDataGrid__controls {
+    border-top: none;
+  }
 }
 
 .dscPageContent--centered {
