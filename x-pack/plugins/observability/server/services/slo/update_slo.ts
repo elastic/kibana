@@ -38,9 +38,25 @@ export class UpdateSLO {
 
     const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
-    await this.transformManager.install(updatedSlo);
-    await this.transformManager.preview(updatedSloTransformId);
-    await this.transformManager.start(updatedSloTransformId);
+
+    try {
+      await this.transformManager.install(updatedSlo);
+    } catch (err) {
+      await this.repository.save(originalSlo);
+      throw err;
+    }
+
+    try {
+      await this.transformManager.preview(updatedSloTransformId);
+      await this.transformManager.start(updatedSloTransformId);
+    } catch (err) {
+      await Promise.all([
+        this.transformManager.uninstall(updatedSloTransformId),
+        this.repository.save(originalSlo),
+      ]);
+
+      throw err;
+    }
 
     await this.esClient.index({
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
