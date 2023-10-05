@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const noIntegrationsTitle = 'No integrations found';
   const noUncategorizedTitle = 'No data streams found';
 
-  // Failing: See https://github.com/elastic/kibana/issues/167773
-  describe.skip('Dataset Selector', () => {
+  describe('Dataset Selector', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
@@ -55,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.openDatasetSelector();
       });
 
-      it('should always display the Integrations Uncategorized and Data Views top level tabs', async () => {
+      it('should always display the Integrations, Uncategorized and Data Views top level tabs', async () => {
         const integrationsTab = await PageObjects.observabilityLogExplorer.getIntegrationsTab();
         const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
         const dataViewsTab = await PageObjects.observabilityLogExplorer.getDataViewsTab();
