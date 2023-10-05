@@ -28,10 +28,7 @@ export const OverviewCard: FunctionComponent<Props> = ({
   footer: { left: footerLeft, right: footerRight } = {},
 }) => {
   return (
-    <EuiSplitPanel.Outer
-      grow
-      hasBorder={true}
-    >
+    <EuiSplitPanel.Outer grow hasBorder={true}>
       <EuiSplitPanel.Inner>
         <EuiTitle size="xxxs">
           <h4>{title}</h4>
