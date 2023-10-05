@@ -5,7 +5,7 @@
 To convert existing code over to TypeScript:
 1. rename the file from `.js` to either `.ts` (if there is no html or jsx in the file) or `.tsx` (if there is).
 2. Ensure eslint is running and installed in the IDE of your choice. There will usually be some linter errors after the file rename.
-3. Auto-fix what you can. This will save you a lot of time! VSCode can be set to auto fix eslint errors when files are saved.
+3. Auto fix what you can. This will save you a lot of time! VSCode can be set to auto fix eslint errors when files are saved.
 
 ### How to fix common TypeScript errors
 
@@ -161,7 +161,7 @@ interface State {
 
 Note that the name of `Props` and `State` doesn't matter, the order does. If you are exporting those interfaces to be used elsewhere, you probably should give them more fleshed out names, such as `ButtonProps` and `ButtonState`.
 
-### Typing functions
+### Typing Functions
 
 In react proptypes, we often will use `PropTypes.func`. In TypeScript, a function is `() => void`, or you can more fully flesh it out, for example:
 
@@ -204,7 +204,7 @@ Using any is sometimes valid, but should rarely be used, even if to make quicker
 
 If you use a variable that isn't initially defined, you should give it a type, or it will be `any` by default (and strangely this isn't a warning, even though I think it should be)
 
-Before - `color` will be type `any`:
+Before - `color` will be typed `any`:
 ```js
 let color;
 
