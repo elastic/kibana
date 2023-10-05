@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { getBridgeNetworkHostIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
+import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
+import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';
 import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -18,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     )
   );
   const config = defendWorkflowsCypressConfig.getAll();
-  const hostIp = getBridgeNetworkHostIp();
+  const hostIp = getLocalhostRealIp();
 
   const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = [];
 
@@ -29,7 +30,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...config.esTestCluster,
       serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
     },
-
+    esServerlessOptions: {
+      ...(config.esServerlessOptions ?? {}),
+      resources: Object.values(ES_RESOURCES),
+    },
     servers: {
       ...config.servers,
       fleetserver: {

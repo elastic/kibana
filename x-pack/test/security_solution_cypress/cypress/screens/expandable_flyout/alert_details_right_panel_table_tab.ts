@@ -17,6 +17,8 @@ export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER =
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW = getDataTestSubjectSelector(
   'event-fields-table-row-@timestamp'
 );
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL =
+  getDataTestSubjectSelector('event-field-@timestamp');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW = getDataTestSubjectSelector(
   'event-fields-table-row-_id'
 );
