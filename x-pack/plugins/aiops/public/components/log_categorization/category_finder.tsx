@@ -79,6 +79,7 @@ export const CategoryFinder: FC<Props> = ({
         <>
           <EuiSpacer size="s" />
           <EuiTextArea
+            data-test-subj="aiopsCategoryFinderTextArea"
             fullWidth
             value={fieldValue}
             onChange={(e) => onChange(e.target.value)}
