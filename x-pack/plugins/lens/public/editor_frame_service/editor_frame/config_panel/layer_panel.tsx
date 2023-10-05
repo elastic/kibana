@@ -823,6 +823,7 @@ export function LayerPanel(
                         addLayer: props.addLayer,
                         removeLayer: props.onRemoveLayer,
                         panelRef,
+                        isInlineEditing: Boolean(props?.setIsInlineFlyoutFooterVisible),
                       }}
                     />
                   </div>

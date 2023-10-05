@@ -6,9 +6,11 @@
  */
 
 import {
-  AppMountParameters,
-  AppUpdater,
-  CoreStart,
+  type AppMountParameters,
+  type AppUpdater,
+  type CoreStart,
+  type AppDeepLink,
+  AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -17,7 +19,7 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public'
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { InfraPublicConfig } from '../common/plugin_config_types';
+import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
@@ -27,7 +29,7 @@ import { createLazyPodMetricsTable } from './components/infrastructure_node_metr
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
-  InfraLocators,
+  type InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
 } from '../common/locators';
@@ -36,7 +38,7 @@ import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
-import {
+import type {
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,
@@ -220,20 +222,22 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
-    const infraDeepLinks = [
+    const infraDeepLinks: AppDeepLink[] = [
       {
         id: 'inventory',
         title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
           defaultMessage: 'Inventory',
         }),
         path: '/inventory',
+        navLinkStatus: AppNavLinkStatus.visible,
       },
       {
-        id: 'metrics-hosts',
+        id: 'hosts',
         title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
           defaultMessage: 'Hosts',
         }),
         path: '/hosts',
+        navLinkStatus: AppNavLinkStatus.visible,
       },
       ...(this.config.featureFlags.metricsExplorerEnabled
         ? [
@@ -254,6 +258,7 @@ export class Plugin implements InfraClientPluginClass {
         path: '/settings',
       },
     ];
+
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
