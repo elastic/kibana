@@ -85,7 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(typeof storageSizeBytes).to.be('number');
   };
 
-  describe('Data streams', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/168021
+  describe.skip('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
