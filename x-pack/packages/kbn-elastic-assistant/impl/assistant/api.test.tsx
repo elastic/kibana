@@ -92,8 +92,8 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-    expect(result).toEqual({ response: API_ERROR, isError: true });
-  });
+      expect(result).toEqual({ response: API_ERROR, isError: true });
+    });
 
     it('returns API_ERROR when there are no choices', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
@@ -106,16 +106,16 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-    expect(result).toEqual({ response: API_ERROR, isError: true });
-  });
-
-  it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
-    const response = '```json\n{"action_input": "value from action_input"}\n```';
-
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: response,
+      expect(result).toEqual({ response: API_ERROR, isError: true });
     });
+
+    it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
+      const response = '```json\n{"action_input": "value from action_input"}\n```';
+
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'ok',
+        data: response,
+      });
 
       const testProps: FetchConnectorExecuteAction = {
         assistantLangChain: true, // <-- requires response parsing
@@ -126,16 +126,16 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-    expect(result).toEqual({ response: 'value from action_input', isError: false });
-  });
-
-  it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
-    const response = '```json\n{"some_key": "some value"}\n```';
-
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: response,
+      expect(result).toEqual({ response: 'value from action_input', isError: false });
     });
+
+    it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
+      const response = '```json\n{"some_key": "some value"}\n```';
+
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'ok',
+        data: response,
+      });
 
       const testProps: FetchConnectorExecuteAction = {
         assistantLangChain: true, // <-- requires response parsing
@@ -146,16 +146,16 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-    expect(result).toEqual({ response, isError: false });
-  });
-
-  it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
-    const response = 'plain text content';
-
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: response,
+      expect(result).toEqual({ response, isError: false });
     });
+
+    it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
+      const response = 'plain text content';
+
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'ok',
+        data: response,
+      });
 
       const testProps: FetchConnectorExecuteAction = {
         assistantLangChain: true, // <-- requires response parsing
@@ -166,9 +166,9 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-    expect(result).toEqual({ response, isError: false });
+      expect(result).toEqual({ response, isError: false });
+    });
   });
-});
 
   describe('getKnowledgeBaseStatus', () => {
     it('calls the knowledge base API when correct resource path', async () => {
