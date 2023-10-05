@@ -106,9 +106,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteActionConnector({ supertest, es, actionId });
-        await deleteAlertsByRuleId({ es, ruleId });
-        await deleteRuleById({ supertest, ruleId });
+        try {
+          await deleteActionConnector({ supertest, es, actionId });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule or action connector', e);
+        }
       });
 
       it('checks if rule is active', async () => {
