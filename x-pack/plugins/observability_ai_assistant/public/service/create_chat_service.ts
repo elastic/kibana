@@ -295,7 +295,7 @@ export async function createChatService({
           subject.complete();
         });
 
-      const MIN_DELAY = 50;
+      const MIN_DELAY = 35;
 
       const pendingMessages$ = subject.pipe(
         // make sure the request is only triggered once,
