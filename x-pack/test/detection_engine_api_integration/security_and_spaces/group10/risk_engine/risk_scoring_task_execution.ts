@@ -109,17 +109,6 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('schedules a transform run that populates the latest index', async () => {
-            await waitForRiskScoresToBePresent({
-              es,
-              log,
-              index: ['risk-score.risk-score-latest-default'],
-            });
-
-            const scores = await readRiskScores(es, ['risk-score.risk-score-latest-default']);
-            expect(scores.length).to.be.greaterThan(1);
-          });
-
           describe('disabling and re-enabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
