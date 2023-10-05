@@ -133,3 +133,7 @@ xpack.task_manager.allow_reading_invalid_state: false
 
 ## TaskManager requeue invalid tasks, supports ZDT
 xpack.task_manager.requeue_invalid_tasks.enabled: true
+
+# Disables ElasticSearch version compatibility check in serverless cases
+elasticsearch.ignoreVersionMismatch: true
+
