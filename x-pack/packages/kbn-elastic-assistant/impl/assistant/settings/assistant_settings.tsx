@@ -30,7 +30,7 @@ import { useAssistantContext } from '../../assistant_context';
 import { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
 import { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quick_prompt_settings';
 import { SystemPromptSettings } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_settings';
-import { KnowledgeBaseSettings } from '../../knowledge_base/knowledge_base_settings/knowledge_base_settings';
+import { KnowledgeBaseSettings } from '../../knowledge_base/knowledge_base_settings';
 import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 import { TEST_IDS } from '../constants';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';

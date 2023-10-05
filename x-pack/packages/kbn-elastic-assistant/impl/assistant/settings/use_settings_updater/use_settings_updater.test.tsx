@@ -30,6 +30,7 @@ const setAllSystemPromptsMock = jest.fn();
 const setConversationsMock = jest.fn();
 const setDefaultAllowMock = jest.fn();
 const setDefaultAllowReplacementMock = jest.fn();
+const setKnowledgeBaseMock = jest.fn();
 
 const mockValues = {
   conversations: mockConversations,
@@ -37,11 +38,15 @@ const mockValues = {
   allQuickPrompts: mockQuickPrompts,
   defaultAllow: initialDefaultAllow,
   defaultAllowReplacement: initialDefaultAllowReplacement,
+  knowledgeBase: {
+    assistantLangChain: true,
+  },
   setAllQuickPrompts: setAllQuickPromptsMock,
   setConversations: setConversationsMock,
   setAllSystemPrompts: setAllSystemPromptsMock,
   setDefaultAllow: setDefaultAllowMock,
   setDefaultAllowReplacement: setDefaultAllowReplacementMock,
+  setKnowledgeBase: setKnowledgeBaseMock,
 };
 
 const updatedValues = {
@@ -50,6 +55,9 @@ const updatedValues = {
   allQuickPrompts: [{ title: 'Prompt 2', prompt: 'Prompt 2', color: 'red' }],
   defaultAllow: ['allow2'],
   defaultAllowReplacement: ['replacement2'],
+  knowledgeBase: {
+    assistantLangChain: false,
+  },
 };
 
 jest.mock('../../../assistant_context', () => {
@@ -61,25 +69,6 @@ jest.mock('../../../assistant_context', () => {
 });
 
 describe('useSettingsUpdater', () => {
-  it('should return an object with all the necessary state variables and functionse', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
-      await waitForNextUpdate();
-      expect(result.current).toHaveProperty('conversationSettings');
-      expect(result.current).toHaveProperty('defaultAllow');
-      expect(result.current).toHaveProperty('defaultAllowReplacement');
-      expect(result.current).toHaveProperty('quickPromptSettings');
-      expect(result.current).toHaveProperty('resetSettings');
-      expect(result.current).toHaveProperty('systemPromptSettings');
-      expect(result.current).toHaveProperty('saveSettings');
-      expect(result.current).toHaveProperty('setUpdatedDefaultAllow');
-      expect(result.current).toHaveProperty('setUpdatedDefaultAllowReplacement');
-      expect(result.current).toHaveProperty('setUpdatedConversationSettings');
-      expect(result.current).toHaveProperty('setUpdatedQuickPromptSettings');
-      expect(result.current).toHaveProperty('setUpdatedSystemPromptSettings');
-    });
-  });
-
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
@@ -90,6 +79,7 @@ describe('useSettingsUpdater', () => {
         setUpdatedSystemPromptSettings,
         setUpdatedDefaultAllow,
         setUpdatedDefaultAllowReplacement,
+        setUpdatedKnowledgeBaseSettings,
         resetSettings,
       } = result.current;
 
@@ -98,12 +88,14 @@ describe('useSettingsUpdater', () => {
       setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
       setUpdatedDefaultAllow(updatedValues.defaultAllow);
       setUpdatedDefaultAllowReplacement(updatedValues.defaultAllowReplacement);
+      setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
       expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
       expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
       expect(result.current.systemPromptSettings).toEqual(updatedValues.allSystemPrompts);
       expect(result.current.defaultAllow).toEqual(updatedValues.defaultAllow);
       expect(result.current.defaultAllowReplacement).toEqual(updatedValues.defaultAllowReplacement);
+      expect(result.current.knowledgeBase).toEqual(updatedValues.knowledgeBase);
 
       resetSettings();
 
@@ -112,6 +104,7 @@ describe('useSettingsUpdater', () => {
       expect(result.current.systemPromptSettings).toEqual(mockValues.allSystemPrompts);
       expect(result.current.defaultAllow).toEqual(mockValues.defaultAllow);
       expect(result.current.defaultAllowReplacement).toEqual(mockValues.defaultAllowReplacement);
+      expect(result.current.knowledgeBase).toEqual(mockValues.knowledgeBase);
     });
   });
 
@@ -125,6 +118,7 @@ describe('useSettingsUpdater', () => {
         setUpdatedSystemPromptSettings,
         setUpdatedDefaultAllow,
         setUpdatedDefaultAllowReplacement,
+        setUpdatedKnowledgeBaseSettings,
       } = result.current;
 
       setUpdatedConversationSettings(updatedValues.conversations);
@@ -132,12 +126,7 @@ describe('useSettingsUpdater', () => {
       setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
       setUpdatedDefaultAllow(updatedValues.defaultAllow);
       setUpdatedDefaultAllowReplacement(updatedValues.defaultAllowReplacement);
-
-      expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
-      expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
-      expect(result.current.systemPromptSettings).toEqual(updatedValues.allSystemPrompts);
-      expect(result.current.defaultAllow).toEqual(updatedValues.defaultAllow);
-      expect(result.current.defaultAllowReplacement).toEqual(updatedValues.defaultAllowReplacement);
+      setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
       result.current.saveSettings();
 
@@ -148,6 +137,7 @@ describe('useSettingsUpdater', () => {
       expect(setDefaultAllowReplacementMock).toHaveBeenCalledWith(
         updatedValues.defaultAllowReplacement
       );
+      expect(setKnowledgeBaseMock).toHaveBeenCalledWith(updatedValues.knowledgeBase);
     });
   });
 });
