@@ -21,6 +21,7 @@ export function registerReloadRoute({
   router,
   indexDataEnricher,
   lib: { handleEsError },
+  config,
 }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
@@ -29,7 +30,7 @@ export function registerReloadRoute({
       const { indexNames = [] } = (request.body as typeof bodySchema.type) ?? {};
 
       try {
-        const indices = await fetchIndices(client, indexDataEnricher, indexNames);
+        const indices = await fetchIndices({ client, indexDataEnricher, config, indexNames });
         return response.ok({ body: indices });
       } catch (error) {
         return handleEsError({ error, response });

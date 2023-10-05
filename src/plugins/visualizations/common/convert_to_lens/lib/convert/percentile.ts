@@ -9,7 +9,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { isFieldValid, PercentileParams } from '../..';
-import { getFieldNameFromField, getLabelForPercentile } from '../utils';
+import { getAggIdAndValue, getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
 import { PercentileColumn, CommonColumnConverterArgs } from './types';
 import { SUPPORTED_METRICS } from './supported_metrics';
@@ -40,7 +40,7 @@ const getPercent = (
 
   const { percents } = aggParams;
 
-  const [, percentStr] = aggId.split('.');
+  const [, percentStr] = getAggIdAndValue(aggId);
 
   const percent = Number(percentStr);
   if (!percents || !percents.length || percentStr === '' || isNaN(percent)) {

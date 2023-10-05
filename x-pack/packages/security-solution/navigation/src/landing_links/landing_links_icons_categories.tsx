@@ -7,13 +7,14 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { NavigationLink, LinkCategory } from '../types';
+import type { NavigationLink, LinkCategories } from '../types';
 import { LandingLinksIcons } from './landing_links_icons';
 import { LinkCategoryType } from '../constants';
 
 export interface LandingLinksIconsCategoriesProps {
   links: Readonly<NavigationLink[]>;
-  categories: Readonly<LinkCategory[]>;
+  /** Only `title` and `separator` category types supported */
+  categories: Readonly<LinkCategories>;
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }
@@ -36,13 +37,13 @@ export const LandingLinksIconsCategories: React.FC<LandingLinksIconsCategoriesPr
       const linksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
       return categories.reduce<CategoriesLinks>((acc, { label, linkIds, type }) => {
-        const linksItem = linkIds.reduce<NavigationLink[]>((linksAcc, linkId) => {
+        const linksItem = linkIds?.reduce<NavigationLink[]>((linksAcc, linkId) => {
           if (linksById[linkId]) {
             linksAcc.push(linksById[linkId]);
           }
           return linksAcc;
         }, []);
-        if (linksItem.length > 0) {
+        if (linksItem?.length) {
           acc.push({ type, label, links: linksItem });
         }
         return acc;

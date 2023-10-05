@@ -6,94 +6,55 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeRange } from '@kbn/es-query';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { MetadataExplanationMessage } from '../../components/metadata_explanation';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface MetadataProps {
-  dateRange: TimeRange;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  showActionsColumn?: boolean;
-  search?: string;
-  onSearchChange?: (query: string) => void;
-}
-
 export const Metadata = () => {
-  const { node, nodeType, overrides, dateRangeTs, onTabsStateChange } =
-    useAssetDetailsStateContext();
-  const { query, showActionsColumn = false } = overrides?.metadata ?? {};
-
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { overrides } = useAssetDetailsRenderPropsContext();
   const {
+    metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    metadata,
-  } = useMetadata(node.name, nodeType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
+  } = useMetadataStateProviderContext();
+  const { showActionsColumn = false } = overrides?.metadata ?? {};
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
   const onSearchChange = useCallback(
     (newQuery: string) => {
-      if (onTabsStateChange) {
-        onTabsStateChange({ metadata: { query: newQuery } });
-      }
+      setUrlState({ metadataSearch: newQuery });
     },
-    [onTabsStateChange]
+    [setUrlState]
   );
 
-  if (fetchMetadataError) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.infra.metadataEmbeddable.errorTitle', {
-          defaultMessage: 'Sorry, there was an error',
-        })}
-        color="danger"
-        iconType="error"
-        data-test-subj="infraMetadataErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.infra.metadataEmbeddable.errorMessage"
-          defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
-          values={{
-            reload: (
-              <EuiLink
-                data-test-subj="infraMetadataReloadPageLink"
-                onClick={() => window.location.reload()}
-              >
-                {i18n.translate('xpack.infra.metadataEmbeddable.errorAction', {
-                  defaultMessage: 'reload the page',
-                })}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
-    );
+  if (fetchMetadataError && !metadataLoading) {
+    return <MetadataErrorCallout />;
   }
 
   return (
-    <Table
-      search={query}
-      onSearchChange={onSearchChange}
-      showActionsColumn={showActionsColumn}
-      rows={fields}
-      loading={metadataLoading}
-    />
+    <>
+      <MetadataExplanationMessage />
+      <EuiHorizontalRule margin="m" />
+      <Table
+        search={urlState?.metadataSearch}
+        onSearchChange={onSearchChange}
+        showActionsColumn={showActionsColumn}
+        rows={fields}
+        loading={metadataLoading}
+      />
+    </>
   );
 };
 

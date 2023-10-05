@@ -52,7 +52,9 @@ type KibanaRequestWithQueryVersion = KibanaRequest<
   { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: unknown }
 >;
 
-export function hasQueryVersion(request: KibanaRequest): request is KibanaRequestWithQueryVersion {
+export function hasQueryVersion(
+  request: Mutable<KibanaRequest>
+): request is Mutable<KibanaRequestWithQueryVersion> {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
 export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersion>): void {

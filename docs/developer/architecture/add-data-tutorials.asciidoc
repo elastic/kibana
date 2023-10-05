@@ -16,7 +16,7 @@ Each tutorial contains three sets of instructions:
 The function must return a function object that conforms to the `TutorialSchema` interface link:{kib-repo}tree/{branch}/src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts[tutorial schema].
 3. Register the tutorial in link:{kib-repo}tree/{branch}/src/plugins/home/server/tutorials/register.ts[register.ts] by adding it to the `builtInTutorials`.
 // TODO update path once assets are migrated
-4. Add image assets to the link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/tutorial_resources[tutorial_resources directory].
+4. Add image assets to the `tutorial_resources` directory.
 5. Run {kib} locally to preview the tutorial.
 6. Create a PR and go through the review process to get the changes approved.
 
@@ -34,5 +34,5 @@ link:{kib-repo}tree/{branch}/src/plugins/home/public/application/components/tuto
 ==== Markdown
 String values can contain limited Markdown syntax.
 
-link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/components/tutorial/content.js[Enabled Markdown grammars]
+https://elastic.github.io/eui/#/editors-syntax/markdown-format[Enabled Markdown grammars]
 

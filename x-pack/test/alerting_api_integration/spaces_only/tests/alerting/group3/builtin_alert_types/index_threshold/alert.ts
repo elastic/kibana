@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
+import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
@@ -33,6 +35,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
+  const esTestIndexToolAAD = new ESTestIndexTool(
+    es,
+    retry,
+    `.internal.alerts-${STACK_AAD_INDEX_NAME}.alerts-default-000001`
+  );
 
   describe('rule', async () => {
     let endDate: string;
@@ -60,6 +67,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
       await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
+      await esTestIndexToolAAD.removeAll();
     });
 
     // The tests below create two alerts, one that will fire, one that will
@@ -86,6 +94,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       const docs = await waitForDocs(2);
+      const messagePattern =
+        /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+
       for (const doc of docs) {
         const { group } = doc._source;
         const { name, title, message } = doc._source.params;
@@ -96,10 +107,22 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         // we'll check title and message in this test, but not subsequent ones
         expect(title).to.be('alert always fire group all documents met threshold');
 
-        const messagePattern =
-          /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
+
+      const aadDocs = await esTestIndexToolAAD.getAll(1);
+
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      // @ts-ignore
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      // @ts-ignore
+      expect(alertDoc['kibana.alert.title']).to.be(
+        'alert always fire group all documents met threshold'
+      );
+      // @ts-ignore
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('count is greater than -1');
+      // @ts-ignore
+      expect(alertDoc['kibana.alert.evaluation.value']).greaterThan(0);
     });
 
     it('runs correctly: count grouped <= =>', async () => {

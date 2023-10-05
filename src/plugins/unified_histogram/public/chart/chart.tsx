@@ -7,6 +7,7 @@
  */
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
+import type { Observable } from 'rxjs';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -14,10 +15,14 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type {
+  EmbeddableComponentProps,
+  Suggestion,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -68,7 +73,10 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  isOnHistogramMode?: boolean;
+  isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -78,6 +86,7 @@ export interface ChartProps {
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -103,7 +112,10 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  lensTablesAdapter,
+  lensAdapters,
+  lensEmbeddableOutput$,
+  isOnHistogramMode,
+  isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -113,6 +125,7 @@ export function Chart({
   onChartLoad,
   onFilter,
   onBrushEnd,
+  withDefaultActions,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -412,6 +425,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
+            {isChartLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
@@ -425,10 +446,11 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={Boolean(currentSuggestion)}
+              hasLensSuggestions={!Boolean(isOnHistogramMode)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}
+              withDefaultActions={withDefaultActions}
             />
           </section>
           {appendHistogram}
@@ -447,8 +469,8 @@ export function Chart({
           {...{
             services,
             lensAttributesContext,
-            dataView,
-            lensTablesAdapter,
+            lensAdapters,
+            lensEmbeddableOutput$,
             currentSuggestion,
             isFlyoutVisible,
             setIsFlyoutVisible,

@@ -66,7 +66,6 @@ describe('request', () => {
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'get',
-      data: {},
       httpAgent: undefined,
       httpsAgent: expect.any(HttpsAgent),
       proxy: false,
@@ -100,7 +99,6 @@ describe('request', () => {
 
     expect(axiosMock).toHaveBeenCalledWith(TestUrl, {
       method: 'get',
-      data: {},
       httpAgent,
       httpsAgent,
       proxy: false,
@@ -132,7 +130,6 @@ describe('request', () => {
 
     expect(axiosMock).toHaveBeenCalledWith('https://testProxy', {
       method: 'get',
-      data: {},
       httpAgent: undefined,
       httpsAgent: expect.any(HttpsAgent),
       proxy: false,

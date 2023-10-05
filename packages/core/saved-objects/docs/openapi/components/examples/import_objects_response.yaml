@@ -1,0 +1,16 @@
+summary: The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.
+value:
+  {
+    "successCount":1,
+    "success":true,
+    "successResults":[
+      {
+        "type":"index-pattern",
+        "id":"90943e30-9a47-11e8-b64d-95841ca0b247",
+        "meta":{
+          "title":"Kibana Sample Data Logs","icon":"indexPatternApp"},
+        "managed":false,
+        "destinationId":"82d2760c-468f-49cf-83aa-b9a35b6a8943"
+      }
+    ]
+  }

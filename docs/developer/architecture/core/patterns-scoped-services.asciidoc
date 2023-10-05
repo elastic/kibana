@@ -7,9 +7,7 @@ should perform a check whether an end-user has access to the data.
 The Kibana Platform introduced a handler interface on the server-side to perform that association
 internally. Core services, that require impersonation with an incoming
 request, are exposed via `context` argument of
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandler.md[the
-request handler interface.]
-as
+{kib-repo}/blob/8.9/packages/core/http/core-http-server/src/router/request_handler.ts[the request handler interface].
 
 [source,js]
 ----
@@ -18,13 +16,11 @@ async function handler(context, req, res) {
 }
 ----
 
-The
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[request
-handler context] exposes the following scoped *core* services:
+The {kib-repo}/blob/8.9/packages/core/http/core-http-server/src/router/request_handler.ts[request handler context] exposes the following scoped *core* services:
 
-* {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
-* {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
-* {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
+* {kib-repo}/blob/8.9/packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts[`context.savedObjects.client`]
+* {kib-repo}/blob/8.9/packages/core/elasticsearch/core-elasticsearch-server/src/client/scoped_cluster_client.ts[`context.elasticsearch.client`]
+* {kib-repo}/blob/8.9/packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts[`context.uiSettings.client`]
 
 ==== Declare a custom scoped service
 

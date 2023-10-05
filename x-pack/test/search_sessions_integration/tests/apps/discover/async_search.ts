@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
       );
       await kibanaServer.uiSettings.replace({
-        'discover:enableSql': true,
+        'discover:enableESQL': true,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -130,6 +130,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchesCountAfterRestore = searchSessionListAfterRestore[0].searchesCount;
 
       expect(searchesCountBeforeRestore).to.be(searchesCountAfterRestore); // no new searches started during restore
+    });
+
+    it('should should clean the search session when navigating to ESQL mode, and reinitialize when navigating back', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await searchSessions.exists()).to.be(true);
+      await PageObjects.discover.selectTextBaseLang();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.missingOrFail();
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await searchSessions.exists()).to.be(true);
     });
   });
 

@@ -202,7 +202,7 @@ describe('setRecoveredAlertsContext', () => {
       configId,
       monitorQueryId: 'stale-config',
       status: 'up',
-      location: '',
+      locationId: '',
       ping: {
         '@timestamp': new Date().toISOString(),
         state: {
@@ -235,7 +235,7 @@ describe('setRecoveredAlertsContext', () => {
         configId,
         monitorQueryId: 'stale-config',
         status: 'down',
-        location: 'location',
+        locationId: 'location',
         ping: {
           '@timestamp': new Date().toISOString(),
           state: {
@@ -294,7 +294,7 @@ describe('setRecoveredAlertsContext', () => {
         configId,
         monitorQueryId: 'stale-config',
         status: 'down',
-        location: 'location',
+        locationId: 'location',
         ping: {
           '@timestamp': new Date().toISOString(),
           state: {
@@ -355,7 +355,7 @@ describe('setRecoveredAlertsContext', () => {
         configId,
         monitorQueryId: 'stale-config',
         status: 'down',
-        location: 'location',
+        locationId: 'location',
         ping: {
           state: {
             id: '123456',

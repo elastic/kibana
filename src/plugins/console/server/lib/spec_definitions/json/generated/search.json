@@ -1,45 +1,53 @@
 {
   "search": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "allow_partial_search_results": "__flag__",
       "analyzer": "",
       "analyze_wildcard": "__flag__",
+      "batched_reduce_size": [
+        "512"
+      ],
       "ccs_minimize_roundtrips": "__flag__",
       "default_operator": [
-        "AND",
-        "OR"
+        "and",
+        "or"
       ],
       "df": "",
-      "explain": "__flag__",
-      "stored_fields": [],
       "docvalue_fields": [],
-      "from": "0",
-      "force_synthetic_source": "__flag__",
-      "ignore_unavailable": "__flag__",
-      "ignore_throttled": "__flag__",
-      "allow_no_indices": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
+      "explain": "__flag__",
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
-      "preference": "random",
-      "q": "",
-      "routing": [],
-      "scroll": "",
+      "max_concurrent_shard_requests": [
+        "5"
+      ],
+      "min_compatible_shard_node": "",
+      "preference": "",
+      "pre_filter_shard_size": "",
+      "request_cache": "__flag__",
+      "routing": "",
+      "scroll": [
+        "-1",
+        "0"
+      ],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
-      "size": "10",
-      "sort": [],
-      "_source": [],
-      "_source_excludes": [],
-      "_source_includes": [],
-      "terminate_after": "",
-      "stats": [],
+      "stats": "",
+      "stored_fields": [],
       "suggest_field": "",
       "suggest_mode": [
         "missing",
@@ -48,20 +56,30 @@
       ],
       "suggest_size": "",
       "suggest_text": "",
-      "timeout": "",
+      "terminate_after": "",
+      "timeout": [
+        "-1",
+        "0"
+      ],
+      "track_total_hits": [
+        "10000",
+        "true",
+        "false"
+      ],
       "track_scores": "__flag__",
-      "track_total_hits": "",
-      "allow_partial_search_results": "__flag__",
       "typed_keys": "__flag__",
-      "version": "__flag__",
-      "seq_no_primary_term": "__flag__",
-      "request_cache": "__flag__",
-      "batched_reduce_size": "",
-      "max_concurrent_shard_requests": "",
-      "pre_filter_shard_size": "",
       "rest_total_hits_as_int": "__flag__",
-      "min_compatible_shard_node": "",
-      "include_named_queries_score": "__flag__"
+      "version": "__flag__",
+      "_source": "__flag__",
+      "_source_excludes": [],
+      "_source_includes": [],
+      "seq_no_primary_term": "__flag__",
+      "q": "",
+      "size": [
+        "10"
+      ],
+      "from": "",
+      "sort": []
     },
     "methods": [
       "GET",
@@ -71,6 +89,10 @@
       "_search",
       "{index}/_search"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

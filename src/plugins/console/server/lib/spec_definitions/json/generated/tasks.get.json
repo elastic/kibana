@@ -1,8 +1,16 @@
 {
   "tasks.get": {
     "url_params": {
-      "wait_for_completion": "__flag__",
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "GET"
@@ -10,6 +18,10 @@
     "patterns": [
       "_tasks/{task_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

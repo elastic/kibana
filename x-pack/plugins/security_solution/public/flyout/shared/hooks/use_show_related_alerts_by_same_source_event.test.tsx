@@ -8,45 +8,29 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { ShowRelatedAlertsBySameSourceEventParams } from './use_show_related_alerts_by_same_source_event';
+import type {
+  ShowRelatedAlertsBySameSourceEventParams,
+  ShowRelatedAlertsBySameSourceEventResult,
+} from './use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts_by_same_source_event';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 describe('useShowRelatedAlertsBySameSourceEvent', () => {
-  let hookResult: RenderHookResult<ShowRelatedAlertsBySameSourceEventParams, boolean>;
+  let hookResult: RenderHookResult<
+    ShowRelatedAlertsBySameSourceEventParams,
+    ShowRelatedAlertsBySameSourceEventResult
+  >;
 
-  it('should return false if dataFormattedForFieldBrowser is null', () => {
-    const dataFormattedForFieldBrowser = null;
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsBySameSourceEvent({ dataFormattedForFieldBrowser })
-    );
+  it('should return false if getFieldsData returns null', () => {
+    const getFieldsData = () => null;
+    hookResult = renderHook(() => useShowRelatedAlertsBySameSourceEvent({ getFieldsData }));
 
-    expect(hookResult.result.current).toEqual(false);
+    expect(hookResult.result.current).toEqual({ show: false });
   });
 
-  it('should return false if dataFormattedForFieldBrowser is missing the correct field', () => {
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsBySameSourceEvent({ dataFormattedForFieldBrowser })
-    );
+  it('should return true if getFieldsData has the correct field', () => {
+    const getFieldsData = () => 'original_event';
+    hookResult = renderHook(() => useShowRelatedAlertsBySameSourceEvent({ getFieldsData }));
 
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it('should return true if dataFormattedForFieldBrowser has the correct field', () => {
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      {
-        category: 'kibana',
-        field: 'kibana.alert.original_event.id',
-        isObjectArray: false,
-        originalValue: ['abc'],
-        values: ['abc'],
-      },
-    ];
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsBySameSourceEvent({ dataFormattedForFieldBrowser })
-    );
-
-    expect(hookResult.result.current).toEqual(true);
+    expect(hookResult.result.current).toEqual({ show: true, originalEventId: 'original_event' });
   });
 });

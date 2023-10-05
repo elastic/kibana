@@ -32,7 +32,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
-  describe('Cloud Posture Dashboard Page', () => {
+  describe('Cloud Posture Dashboard Page', function () {
+    this.tags(['cloud_security_posture_compliance_dashboard']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
 

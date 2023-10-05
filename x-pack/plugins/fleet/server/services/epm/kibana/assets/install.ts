@@ -53,7 +53,7 @@ export type ArchiveAsset = Pick<
   SavedObject,
   | 'id'
   | 'attributes'
-  | 'migrationVersion'
+  | 'migrationVersion' // deprecated
   | 'references'
   | 'coreMigrationVersion'
   | 'typeMigrationVersion'
@@ -99,15 +99,15 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
     references: asset.references || [],
   };
 
-  if (asset.migrationVersion) {
-    so.migrationVersion = asset.migrationVersion;
-  } else {
-    if (asset.coreMigrationVersion) {
-      so.coreMigrationVersion = asset.coreMigrationVersion;
-    }
-    if (asset.typeMigrationVersion) {
-      so.typeMigrationVersion = asset.typeMigrationVersion;
-    }
+  // migrating deprecated migrationVersion to typeMigrationVersion
+  if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
+    so.typeMigrationVersion = asset.migrationVersion[asset.type];
+  }
+  if (asset.coreMigrationVersion) {
+    so.coreMigrationVersion = asset.coreMigrationVersion;
+  }
+  if (asset.typeMigrationVersion) {
+    so.typeMigrationVersion = asset.typeMigrationVersion;
   }
   return so as SavedObjectToBe;
 }
@@ -320,6 +320,7 @@ export async function installKibanaSavedObjects({
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
         refresh: false,
+        managed: true,
       })
     );
 
@@ -371,6 +372,7 @@ export async function installKibanaSavedObjects({
         await savedObjectsImporter.resolveImportErrors({
           readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
+          managed: true,
           retries,
         });
 

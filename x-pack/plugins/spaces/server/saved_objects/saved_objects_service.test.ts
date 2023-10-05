@@ -7,9 +7,9 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 
+import { SpacesSavedObjectsService } from './saved_objects_service';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
-import { SpacesSavedObjectsService } from './saved_objects_service';
 
 describe('SpacesSavedObjectsService', () => {
   describe('#setup', () => {

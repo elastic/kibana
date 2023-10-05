@@ -9,11 +9,11 @@ import { uniq } from 'lodash';
 import pLimit from 'p-limit';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function updateToV3({
   logger,
@@ -23,7 +23,7 @@ export async function updateToV3({
 }: {
   logger: Logger;
   mlClient?: MlClient;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   esClient: ElasticsearchClient;
 }) {
   const allJobs = await getAnomalyDetectionJobs(mlClient);

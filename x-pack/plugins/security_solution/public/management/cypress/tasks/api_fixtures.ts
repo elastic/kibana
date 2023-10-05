@@ -13,7 +13,13 @@ export const generateRandomStringName = (length: number) =>
   Array.from({ length }, () => Math.random().toString(36).substring(2));
 
 export const cleanupRule = (id: string) => {
-  request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
+  request({
+    method: 'DELETE',
+    url: `/api/detection_engine/rules?id=${id}`,
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
+  });
 };
 
 export const loadRule = (body = {}, includeResponseActions = true) =>
@@ -66,6 +72,9 @@ export const loadRule = (body = {}, includeResponseActions = true) =>
             ],
           }
         : {}),
+    },
+    headers: {
+      'elastic-api-version': '2023-10-31',
     },
   }).then((response) => response.body);
 

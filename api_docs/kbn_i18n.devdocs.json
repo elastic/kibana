@@ -39,7 +39,7 @@
             "label": "number",
             "description": [],
             "signature": [
-              "Partial<{ [key: string]: NumberFormatOptions<\"decimal\" | \"percent\" | \"currency\">; currency: NumberFormatOptions<\"currency\">; percent: NumberFormatOptions<\"percent\">; }> | undefined"
+              "Partial<{ [key: string]: NumberFormatOptions<\"percent\" | \"currency\" | \"decimal\">; currency: NumberFormatOptions<\"currency\">; percent: NumberFormatOptions<\"percent\">; }> | undefined"
             ],
             "path": "packages/kbn-i18n/src/core/formats.ts",
             "deprecated": false,
@@ -517,7 +517,7 @@
                 "section": "def-common.TranslateArguments",
                 "text": "TranslateArguments"
               },
-              ") => any"
+              ") => string"
             ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,

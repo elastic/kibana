@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -12,8 +13,10 @@ import {
   RuleType,
   AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
+  GetViewInAppRelativeUrlFnOpts,
 } from '@kbn/alerting-plugin/server';
 import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import {
   createMetricAnomalyExecutor,
@@ -64,6 +67,7 @@ export const registerMetricAnomalyRuleType = (
   },
   defaultActionGroupId: FIRED_ACTIONS_ID,
   actionGroups: [FIRED_ACTIONS],
+  category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',
   isExportable: true,
@@ -116,4 +120,6 @@ export const registerMetricAnomalyRuleType = (
       },
     ],
   },
+  getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+    observabilityPaths.ruleDetails(rule.id),
 });

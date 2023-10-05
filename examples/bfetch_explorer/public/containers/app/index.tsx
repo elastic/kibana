@@ -11,7 +11,6 @@ import { Redirect } from 'react-router-dom';
 import { BrowserRouter as Router, Route, Routes } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
-import { Sidebar } from './sidebar';
 import { routes } from '../../routes';
 
 export const App: React.FC = () => {
@@ -27,7 +26,6 @@ export const App: React.FC = () => {
   return (
     <Router basename={appBasePath}>
       <EuiPage>
-        <Sidebar />
         <Routes>
           {routeElements}
           <Redirect to="/count-until" />

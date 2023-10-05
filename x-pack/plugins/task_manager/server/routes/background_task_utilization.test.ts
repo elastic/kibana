@@ -57,11 +57,13 @@ describe('backgroundTaskUtilizationRoute', () => {
       `"/internal/task_manager/_background_task_utilization"`
     );
     expect(config1.options?.authRequired).toEqual(true);
+    expect(config1.options?.tags).toEqual(['security:acceptJWT']);
 
     const [config2] = router.get.mock.calls[1];
 
     expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
     expect(config2.options?.authRequired).toEqual(true);
+    expect(config2.options?.tags).toEqual(['security:acceptJWT']);
   });
 
   it(`sets "authRequired" to false when config.unsafe.authenticate_background_task_utilization is set to false`, async () => {

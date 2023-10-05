@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
@@ -49,7 +49,6 @@ jest.mock('react-reverse-portal', () => ({
 }));
 
 describe('global header', () => {
-  const mockSetHeaderActionMenu = jest.fn();
   const state = {
     ...mockGlobalState,
     timeline: {
@@ -75,7 +74,7 @@ describe('global header', () => {
     ]);
     const { getByText } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByText('Add integrations')).toBeInTheDocument();
@@ -87,7 +86,7 @@ describe('global header', () => {
     ]);
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -98,7 +97,7 @@ describe('global header', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -118,7 +117,7 @@ describe('global header', () => {
     );
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -130,7 +129,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -141,7 +140,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -166,10 +165,24 @@ describe('global header', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
 
     expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
+  });
+
+  it('shows AI Assistant header link', () => {
+    (useLocation as jest.Mock).mockReturnValue([
+      { pageName: SecurityPageName.overview, detailName: undefined },
+    ]);
+
+    const { findByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    waitFor(() => expect(findByTestId('assistantHeaderLink')).toBeInTheDocument());
   });
 });

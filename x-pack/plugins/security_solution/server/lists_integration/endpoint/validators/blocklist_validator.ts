@@ -21,12 +21,16 @@ import { isValidHash } from '../../../../common/endpoint/service/artifacts/valid
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
+const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
 
 const FileHashField = schema.oneOf(
   allowedHashes.map((hash) => schema.literal(hash)) as [Type<string>]
 );
 
-const FilePath = schema.literal('file.path');
+const FilePath = schema.oneOf(
+  allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
+);
+
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
 const ConditionEntryTypeSchema = schema.literal('match_any');

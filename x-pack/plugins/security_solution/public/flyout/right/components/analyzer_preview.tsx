@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
+import { getTreeNodes } from '../utils/analyzer_helpers';
+import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import { AnalyzerTree } from './analyzer_tree';
 import { isActiveTimeline } from '../../../helpers';
 
 const CHILD_COUNT_LIMIT = 3;
@@ -31,14 +35,14 @@ export const AnalyzerPreview: React.FC = () => {
   const [cache, setCache] = useState<Partial<Cache>>({});
   const { dataFormattedForFieldBrowser: data, scopeId } = useRightPanelContext();
 
-  const documentId = find({ category: 'kibana', field: 'kibana.alert.ancestors.id' }, data);
+  const documentId = find({ category: 'kibana', field: ANCESTOR_ID }, data);
   const processDocumentId =
     documentId && Array.isArray(documentId.values) ? documentId.values[0] : '';
 
-  const index = find({ category: 'kibana', field: 'kibana.alert.rule.parameters.index' }, data);
+  const index = find({ category: 'kibana', field: RULE_INDICES }, data);
   const indices = index?.values ?? [];
 
-  const { loading, error, statsNodes } = useAlertPrevalenceFromProcessTree({
+  const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimeline(scopeId),
     documentId: processDocumentId,
     indices,
@@ -50,19 +54,41 @@ export const AnalyzerPreview: React.FC = () => {
     }
   }, [statsNodes, setCache]);
 
-  return (
-    <div data-test-subj={ANALYZER_PREVIEW_TEST_ID}>
-      {documentId && index && (
-        <AnalyzerTree
-          statsNodes={cache.statsNodes}
-          loading={loading}
-          error={error}
-          childCountLimit={CHILD_COUNT_LIMIT}
-          ancestorLevel={ANCESTOR_LEVEL}
-          descendantLevel={DESCENDANT_LEVEL}
-        />
+  const items = useMemo(
+    () => getTreeNodes(cache.statsNodes ?? [], CHILD_COUNT_LIMIT, ANCESTOR_LEVEL, DESCENDANT_LEVEL),
+    [cache.statsNodes]
+  );
+
+  const showAnalyzerTree = documentId && index && items && items.length > 0 && !error;
+
+  return loading ? (
+    <EuiSkeletonText
+      data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
+      contentAriaLabel={i18n.translate(
+        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+        {
+          defaultMessage: 'analyzer preview',
+        }
       )}
-    </div>
+    />
+  ) : showAnalyzerTree ? (
+    <EuiTreeView
+      items={items}
+      display="compressed"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
+        {
+          defaultMessage: 'Analyzer preview',
+        }
+      )}
+      showExpansionArrows
+      data-test-subj={ANALYZER_PREVIEW_TEST_ID}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+      defaultMessage="An error is preventing this alert from being analyzed."
+    />
   );
 };
 

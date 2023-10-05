@@ -5,60 +5,45 @@
  * 2.0.
  */
 
-import type { CoreStart, HttpResponse } from '@kbn/core/public';
-import { filter, map } from 'rxjs';
-import type { Message } from '../../common';
+import type { CoreStart } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
-import { CreateChatCompletionResponseChunk, ObservabilityAIAssistantService } from '../types';
-import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
+import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
 
-export function createService(coreStart: CoreStart): ObservabilityAIAssistantService {
+export function createService({
+  coreStart,
+  enabled,
+  licenseStart,
+  securityStart,
+  shareStart,
+}: {
+  coreStart: CoreStart;
+  enabled: boolean;
+  licenseStart: LicensingPluginStart;
+  securityStart: SecurityPluginStart;
+  shareStart: SharePluginStart;
+}): ObservabilityAIAssistantService & { register: (fn: ChatRegistrationFunction) => void } {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
+
+  const registrations: ChatRegistrationFunction[] = [];
 
   return {
     isEnabled: () => {
-      return true;
+      return enabled;
     },
-    async chat({
-      connectorId,
-      messages,
-      signal,
-    }: {
-      connectorId: string;
-      messages: Message[];
-      signal: AbortSignal;
-    }) {
-      const response = (await client('POST /internal/observability_ai_assistant/chat', {
-        params: {
-          body: {
-            messages,
-            connectorId,
-          },
-        },
-        signal,
-        asResponse: true,
-        rawResponse: true,
-      })) as unknown as HttpResponse;
-
-      const status = response.response?.status;
-
-      if (!status || status >= 400) {
-        throw new Error(response.response?.statusText || 'Unexpected error');
-      }
-
-      const reader = response.response.body?.getReader();
-
-      if (!reader) {
-        throw new Error('Could not get reader from response');
-      }
-
-      return readableStreamReaderIntoObservable(reader).pipe(
-        map((line) => line.substring(6)),
-        filter((line) => !!line && line !== '[DONE]'),
-        map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk),
-        filter((line) => line.object === 'chat.completion.chunk')
-      );
+    register: (fn) => {
+      registrations.push(fn);
     },
+    start: async ({ signal }) => {
+      const mod = await import('./create_chat_service');
+      return await mod.createChatService({ client, signal, registrations });
+    },
+
     callApi: client,
+    getCurrentUser: () => securityStart.authc.getCurrentUser(),
+    getLicense: () => licenseStart.license$,
+    getLicenseManagementLocator: () => shareStart,
   };
 }

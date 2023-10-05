@@ -9,7 +9,7 @@ import type { AxiosResponse } from 'axios';
 
 import type { KbnClient } from '@kbn/test';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
 
 export const getEndpointPackageInfo = async (
   kbnClient: KbnClient
@@ -18,6 +18,7 @@ export const getEndpointPackageInfo = async (
   const endpointPackage = (
     (await kbnClient.request({
       path,
+      headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
       method: 'GET',
     })) as AxiosResponse<GetInfoResponse>
   ).data.item;

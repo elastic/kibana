@@ -7,11 +7,11 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX } from '../..';
+import { CURRENT_CONNECTORS_INDEX, IngestPipelineParams } from '@kbn/search-connectors';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../common/constants';
 
 import { DefaultConnectorsPipelineMeta } from '../../../common/constants';
-import { IngestPipelineParams } from '../../../common/types/connectors';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const getDefaultPipeline = async (

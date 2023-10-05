@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useMetricsDataViewContext } from '../../../../pages/metrics/hosts/hooks/use_data_view';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import { buildMetadataFilter } from './build_metadata_filter';
+import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 
 interface AddMetadataFilterButtonProps {
   item: {
@@ -75,7 +75,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
             color="text"
             iconType="filter"
             display="base"
-            data-test-subj="hostsView-flyout-metadata-remove-filter"
+            data-test-subj="infraAssetDetailsMetadataRemoveFilterButton"
             aria-label={i18n.translate('xpack.infra.metadataEmbeddable.filterAriaLabel', {
               defaultMessage: 'Filter',
             })}
@@ -102,7 +102,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           color="primary"
           size="s"
           iconType="filter"
-          data-test-subj="hostsView-flyout-metadata-add-filter"
+          data-test-subj="infraAssetDetailsMetadataAddFilterButton"
           aria-label={i18n.translate('xpack.infra.metadataEmbeddable.AddFilterAriaLabel', {
             defaultMessage: 'Add Filter',
           })}

@@ -58,8 +58,8 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
 
   it('should show execute context accordion as `closed`', async () => {
     render();
-    expect(renderResult.getByTestId('test-executeResponseOutput-context').className).toEqual(
-      'euiAccordion'
+    expect(renderResult.getByTestId('test-executeResponseOutput-context').className).not.toContain(
+      'euiAccordion-isOpen'
     );
   });
 

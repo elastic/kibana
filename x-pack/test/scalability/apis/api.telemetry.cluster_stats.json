@@ -1,5 +1,5 @@
 {
-  "journeyName": "POST /api/telemetry/v2/clusters/_stats",
+  "journeyName": "POST /internal/telemetry/clusters/_stats",
   "scalabilitySetup": {
     "warmup": [
       {
@@ -28,13 +28,15 @@
         {
           "http": {
             "method": "POST",
-            "path": "/api/telemetry/v2/clusters/_stats",
+            "path": "/internal/telemetry/clusters/_stats",
             "body": "{}",
             "headers": {
               "Cookie": "",
               "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "elastic-api-version": "2",
+              "x-elastic-internal-origin": "kibana"
             },
             "statusCode": 200
           }

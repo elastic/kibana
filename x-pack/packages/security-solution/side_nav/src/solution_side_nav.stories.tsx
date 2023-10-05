@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
+import { LinkCategoryType } from '@kbn/security-solution-navigation';
 import readme from '../../README.mdx';
 import {
   SolutionSideNav as SolutionSideNavComponent,
@@ -35,6 +36,13 @@ const items: SolutionSideNavItem[] = [
       },
       {
         id: 'panelLink2',
+        label: 'I am an external link that opens in a new tab',
+        href: '#',
+        openInNewTab: true,
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+      {
+        id: 'panelLink3',
         label: 'I have an icon',
         iconType: 'logoVulnerabilityManagement',
         href: '#',
@@ -57,6 +65,15 @@ const items: SolutionSideNavItem[] = [
           text: 'Technical Preview',
         },
       },
+      {
+        id: 'panelLinkAll',
+        label: 'I have all things',
+        href: '#',
+        iconType: 'logoSiteSearch',
+        openInNewTab: true,
+        isBeta: true,
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
     ],
   },
   {
@@ -64,31 +81,55 @@ const items: SolutionSideNavItem[] = [
     label: 'I have categories',
     href: '#',
     categories: [
-      { label: 'First Category', linkIds: ['panelCatLink1', 'panelCatLink2'] },
-      { label: 'Second Category', linkIds: ['panelCatLink3', 'panelCatLink4'] },
+      { type: LinkCategoryType.separator, linkIds: ['panelCatLink1'] },
+      {
+        type: LinkCategoryType.title,
+        label: 'Title Category',
+        linkIds: ['panelCatLink2', 'panelCatLink3'],
+      },
+      {
+        type: LinkCategoryType.accordion,
+        label: 'ACCORDION CATEGORY',
+        categories: [
+          { label: 'Nested Category', linkIds: ['panelCatLink4', 'panelCatLink5'] },
+          { label: 'Second Nested', linkIds: ['panelCatLink6'] },
+        ],
+      },
     ],
     items: [
       {
         id: 'panelCatLink1',
-        label: 'I am the first nested',
+        label: 'I am in a separator category',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'panelCatLink2',
-        label: 'I am the second nested',
+        label: 'I am in a title category',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'panelCatLink3',
-        label: 'I am the third nested',
+        label: 'Me too',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'panelCatLink4',
-        label: 'I am the fourth nested',
+        label: 'I am in an accordion category',
+        href: '#',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+      {
+        id: 'panelCatLink5',
+        label: 'Me too',
+        href: '#',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+      {
+        id: 'panelCatLink6',
+        label: 'I am another nested sub-category',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },

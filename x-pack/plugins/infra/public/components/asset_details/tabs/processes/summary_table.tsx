@@ -17,7 +17,7 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 import { STATE_NAMES } from './states';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
@@ -59,10 +59,29 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
         {Object.entries(processCount).map(([field, value]) => (
           <EuiFlexItem key={field}>
-            <EuiDescriptionList data-test-subj="infraProcessesSummaryTableItem" compressed>
-              <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
+            <EuiDescriptionList
+              data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
+              compressed
+            >
+              <EuiDescriptionListTitle
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
+                {columnTitles[field as keyof SummaryRecord]}
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {value === -1 ? <LoadingSpinner /> : value}
+                {value === -1 ? (
+                  <EuiLoadingSpinner
+                    size="m"
+                    css={css`
+                      margin-top: 2px;
+                      margin-bottom: 3px;
+                    `}
+                  />
+                ) : (
+                  value
+                )}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
@@ -79,12 +98,3 @@ const columnTitles = {
   }),
   ...STATE_NAMES,
 };
-
-const LoadingSpinner = euiStyled(EuiLoadingSpinner).attrs({ size: 'm' })`
-  margin-top: 2px;
-  margin-bottom: 3px;
-`;
-
-const ColumnTitle = euiStyled(EuiDescriptionListTitle)`
-  white-space: nowrap;
-`;

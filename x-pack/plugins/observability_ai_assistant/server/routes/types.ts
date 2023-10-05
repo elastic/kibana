@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from '../types';
-import type { IObservabilityAIAssistantService } from '../service/types';
+
+export type ObservabilityAIAssistantRequestHandlerContext = CustomRequestHandlerContext<{
+  rac: RacApiRequestHandlerContext;
+}>;
 
 export interface ObservabilityAIAssistantRouteHandlerResources {
   request: KibanaRequest;
-  context: RequestHandlerContext;
+  context: ObservabilityAIAssistantRequestHandlerContext;
   logger: Logger;
-  service: IObservabilityAIAssistantService;
+  service: ObservabilityAIAssistantService;
   plugins: {
     [key in keyof ObservabilityAIAssistantPluginSetupDependencies]: {
       setup: Required<ObservabilityAIAssistantPluginSetupDependencies>[key];
@@ -31,6 +36,9 @@ export interface ObservabilityAIAssistantRouteHandlerResources {
 
 export interface ObservabilityAIAssistantRouteCreateOptions {
   options: {
+    timeout?: {
+      idleSocket?: number;
+    };
     tags: Array<'access:ai_assistant'>;
   };
 }

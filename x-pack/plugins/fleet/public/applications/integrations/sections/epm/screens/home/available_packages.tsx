@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
@@ -110,6 +110,7 @@ export const AvailablePackages: React.FC<{
     mainCategories,
     preference,
     setPreference,
+    isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
@@ -126,7 +127,25 @@ export const AvailablePackages: React.FC<{
     setSelectedSubCategory,
   } = useAvailablePackages();
 
-  if (!isLoadingCategories && !categoryExists(initialSelectedCategory, allCategories)) {
+  const onCategoryChange = useCallback(
+    ({ id }: { id: string }) => {
+      setCategory(id as ExtendedIntegrationCategory);
+      setSearchTerm('');
+      setSelectedSubCategory(undefined);
+      setUrlandPushHistory({ searchString: '', categoryId: id, subCategoryId: '' });
+    },
+    [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory]
+  );
+
+  const onPrereleaseEnabledChange = useCallback(
+    (isEnabled: boolean) => {
+      setPrereleaseIntegrationsEnabled(isEnabled);
+      setPrereleaseEnabled(isEnabled);
+    },
+    [setPrereleaseIntegrationsEnabled, setPrereleaseEnabled]
+  );
+
+  if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlandReplaceHistory({ searchString: searchTerm, categoryId: '', subCategoryId: '' });
     return null;
   }
@@ -137,10 +156,7 @@ export const AvailablePackages: React.FC<{
       <IntegrationPreference
         initialType={preference}
         onChange={setPreference}
-        onPrereleaseEnabledChange={(isEnabled) => {
-          setPrereleaseIntegrationsEnabled(isEnabled);
-          setPrereleaseEnabled(isEnabled);
-        }}
+        onPrereleaseEnabledChange={onPrereleaseEnabledChange}
       />
     </EuiFlexItem>,
   ];
@@ -149,17 +165,10 @@ export const AvailablePackages: React.FC<{
     controls = [
       <EuiFlexItem className="eui-yScrollWithShadows">
         <CategoryFacets
-          isLoading={
-            isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
-          }
+          isLoading={isLoading}
           categories={mainCategories}
           selectedCategory={selectedCategory}
-          onCategoryChange={({ id }) => {
-            setCategory(id as ExtendedIntegrationCategory);
-            setSearchTerm('');
-            setSelectedSubCategory(undefined);
-            setUrlandPushHistory({ searchString: '', categoryId: id, subCategoryId: '' });
-          }}
+          onCategoryChange={onCategoryChange}
         />
       </EuiFlexItem>,
       ...controls,
@@ -174,7 +183,7 @@ export const AvailablePackages: React.FC<{
 
   return (
     <PackageListGrid
-      isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
+      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}

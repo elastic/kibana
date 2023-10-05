@@ -1,10 +1,19 @@
 {
   "transform.get_transform_stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
       "from": "",
-      "size": "",
-      "timeout": "",
-      "allow_no_match": "__flag__"
+      "size": [
+        "100"
+      ],
+      "timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +21,10 @@
     "patterns": [
       "_transform/{transform_id}/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

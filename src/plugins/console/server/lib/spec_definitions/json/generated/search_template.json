@@ -1,28 +1,35 @@
 {
   "search_template": {
     "url_params": {
-      "ignore_unavailable": "__flag__",
-      "ignore_throttled": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
+      "ccs_minimize_roundtrips": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
-      "preference": "random",
-      "routing": [],
-      "scroll": "",
+      "explain": "__flag__",
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "preference": "",
+      "profile": "__flag__",
+      "routing": "",
+      "scroll": [
+        "-1",
+        "0"
+      ],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
-      "explain": "__flag__",
-      "profile": "__flag__",
-      "typed_keys": "__flag__",
       "rest_total_hits_as_int": "__flag__",
-      "ccs_minimize_roundtrips": "__flag__"
+      "typed_keys": "__flag__"
     },
     "methods": [
       "GET",
@@ -32,6 +39,10 @@
       "_search/template",
       "{index}/_search/template"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

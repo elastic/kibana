@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
 import { getFieldCaps } from './get_field_caps';
@@ -17,7 +17,7 @@ export async function getIndicesStates({
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
 }) {
   const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
     esClient,

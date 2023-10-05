@@ -44,8 +44,8 @@ export const EmbeddablePanelHeader = ({
   );
 
   const title = embeddable.getTitle();
+  const description = embeddable.getDescription();
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
-  const description = useSelectFromEmbeddableInput('description', embeddable);
   const hidePanelTitle = useSelectFromEmbeddableInput('hidePanelTitles', embeddable);
   const parentHidePanelTitle = useSelectFromEmbeddableInput('hidePanelTitles', embeddable.parent);
 

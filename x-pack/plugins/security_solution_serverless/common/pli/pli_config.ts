@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppFeatureKey, type AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import type { AppFeatureKeys } from '@kbn/security-solution-features';
+import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductLine, SecurityProductTier } from '../config';
 
 type PliAppFeatures = Readonly<
@@ -17,6 +18,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     essentials: [AppFeatureKey.endpointHostManagement, AppFeatureKey.endpointPolicyManagement],
     complete: [
       AppFeatureKey.advancedInsights,
+      AppFeatureKey.assistant,
       AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
@@ -24,12 +26,15 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
   },
   endpoint: {
     essentials: [
-      AppFeatureKey.endpointHostManagement,
-      AppFeatureKey.endpointPolicyManagement,
       AppFeatureKey.endpointPolicyProtections,
       AppFeatureKey.endpointArtifactManagement,
+      AppFeatureKey.endpointExceptions,
     ],
-    complete: [AppFeatureKey.endpointResponseActions],
+    complete: [
+      AppFeatureKey.endpointResponseActions,
+      AppFeatureKey.osqueryAutomatedResponseActions,
+      AppFeatureKey.endpointExceptions,
+    ],
   },
   cloud: {
     essentials: [],

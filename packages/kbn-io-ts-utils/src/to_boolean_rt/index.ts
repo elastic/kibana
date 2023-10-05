@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-export const toBooleanRt = new t.Type<boolean, unknown, unknown>(
+export const toBooleanRt = new t.Type<boolean, boolean, unknown>(
   'ToBoolean',
   t.boolean.is,
   (input) => {

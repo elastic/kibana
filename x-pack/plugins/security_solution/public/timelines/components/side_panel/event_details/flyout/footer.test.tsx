@@ -15,8 +15,8 @@ import { mockAlertDetailsData } from '../../../../../common/components/event_det
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {
   KibanaServices,
-  useKibana,
   useGetUserCasesPermissions,
+  useKibana,
 } from '../../../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -132,6 +132,15 @@ describe('event details footer component', () => {
           query: jest.fn(),
         },
         cases: mockCasesContract(),
+        application: {
+          ...coreStartMock.application,
+          capabilities: {
+            ...coreStartMock.application.capabilities,
+            siem: {
+              crudEndpointExceptions: true,
+            },
+          },
+        },
       },
     });
   });

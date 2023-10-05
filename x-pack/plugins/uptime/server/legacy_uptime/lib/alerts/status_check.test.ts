@@ -1069,6 +1069,7 @@ describe('status check alert', () => {
       // @ts-ignore the `props` key here isn't described
       expect(Object.keys(alert.validate?.params?.props ?? {})).toMatchInlineSnapshot(`
         Array [
+          "stackVersion",
           "availability",
           "filters",
           "locations",

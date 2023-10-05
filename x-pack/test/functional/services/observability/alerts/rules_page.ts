@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
@@ -23,10 +24,18 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
 
   const clickDisableFromDropDownMenu = async () => testSubjects.click('statusDropdownDisabledItem');
 
+  const clickLogsTab = async () => testSubjects.click('ruleLogsTab');
+
+  const clickOnRuleInEventLogs = async () => {
+    await find.clickByButtonText('metric-threshold');
+  };
+
   return {
     getManageRulesPageHref,
     clickCreateRuleButton,
     clickRuleStatusDropDownMenu,
     clickDisableFromDropDownMenu,
+    clickLogsTab,
+    clickOnRuleInEventLogs,
   };
 }

@@ -64,9 +64,11 @@ export const useMetricsTime = () => {
     parseRange(urlState.time || DEFAULT_TIMERANGE)
   );
 
-  const updateTimeRange = useCallback((range: MetricsTimeInput) => {
+  const updateTimeRange = useCallback((range: MetricsTimeInput, parseDate = true) => {
     setTimeRange(range);
-    setParsedTimeRange(parseRange(range));
+    if (parseDate) {
+      setParsedTimeRange(parseRange(range));
+    }
   }, []);
 
   return {

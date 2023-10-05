@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
@@ -15,10 +15,7 @@ import {
   useEditTransformFlyout,
   type EditTransformHookTextInputSelectors,
 } from './use_edit_transform_flyout';
-
-function capitalizeFirstLetter(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+import { capitalizeFirstLetter } from './capitalize_first_letter';
 
 interface EditTransformFlyoutFormTextInputProps {
   field: EditTransformHookTextInputSelectors;

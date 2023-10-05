@@ -25,18 +25,35 @@
 // force ESM in this module
 export {};
 
+// @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
+import registerCypressGrep from '@cypress/grep';
+registerCypressGrep();
+
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
+import type { ServerlessRoleName } from './roles';
+
 import 'cypress-react-selector';
-// import './coverage';
+import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
+    interface SuiteConfigOverrides {
+      env?: {
+        ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
+      };
+    }
+
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
+
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
+
+      login(role?: ServerlessRoleName | 'elastic'): void;
     }
   }
 }
@@ -54,6 +71,18 @@ Cypress.Commands.add(
   'clickOutside',
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
+
+Cypress.Commands.add('login', (role) => {
+  // TODO Temporary approach to login until login with role is supported in serverless
+  // Cypress.Commands.add('login', login);
+  const isServerless = Cypress.env().IS_SERVERLESS;
+
+  if (isServerless) {
+    return login.with('system_indices_superuser', 'changeme');
+  }
+
+  return login(role);
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

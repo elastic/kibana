@@ -47,8 +47,8 @@ export const AddMetadataPinToRow = ({
             size="s"
             color="primary"
             iconType="pinFilled"
-            data-test-subj="infraMetadataEmbeddableRemovePin"
-            aria-label={i18n.translate('xpack.infra.metadataEmbeddable.pinAriaLabel', {
+            data-test-subj="infraAssetDetailsMetadataRemovePin"
+            aria-label={i18n.translate('xpack.infra.metadata.pinAriaLabel', {
               defaultMessage: 'Pinned field',
             })}
             onClick={handleRemovePin}
@@ -65,7 +65,7 @@ export const AddMetadataPinToRow = ({
           color="primary"
           size="s"
           iconType="pin"
-          data-test-subj="infraMetadataEmbeddableAddPin"
+          data-test-subj="infraAssetDetailsMetadataAddPin"
           aria-label={PIN_FIELD}
           onClick={handleAddPin}
         />

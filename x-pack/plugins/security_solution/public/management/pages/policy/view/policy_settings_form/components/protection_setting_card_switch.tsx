@@ -102,9 +102,9 @@ export const ProtectionSettingCardSwitch = React.memo(
             }
             if (isPlatinumPlus) {
               if (protection === 'behavior_protection') {
-                newPayload.windows.behavior_protection.reputation_service = false;
-                newPayload.mac.behavior_protection.reputation_service = false;
-                newPayload.linux.behavior_protection.reputation_service = false;
+                newPayload.windows.behavior_protection.reputation_service = true;
+                newPayload.mac.behavior_protection.reputation_service = true;
+                newPayload.linux.behavior_protection.reputation_service = true;
               }
               if (os === 'windows') {
                 newPayload[os].popup[protection].enabled = event.target.checked;

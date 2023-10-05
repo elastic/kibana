@@ -63,13 +63,16 @@ export async function executeEsQuery(
                         },
                       },
                     ],
-                    docvalue_fields: [
+                    fields: [
                       entity,
                       {
                         field: dateField,
                         format: 'strict_date_optional_time',
                       },
-                      geoField,
+                      {
+                        field: geoField,
+                        format: 'wkt',
+                      },
                     ],
                     _source: false,
                   },

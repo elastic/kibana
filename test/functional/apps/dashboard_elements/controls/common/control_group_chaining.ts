@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/162777
-  describe.skip('Dashboard control group hierarchical chaining', () => {
+  describe('Dashboard control group hierarchical chaining', () => {
     const newDocuments: Array<{ index: string; id: string }> = [];
     let controlIds: string[];
 
@@ -56,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       /* then, create our testing dashboard */
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();

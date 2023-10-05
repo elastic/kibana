@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink } from '../../../../hooks';
+import { useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { OutputsTable } from '../outputs_table';
 
@@ -23,6 +23,7 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
   deleteOutput,
 }) => {
   const { getHref } = useLink();
+  const { docLinks } = useStartServices();
 
   return (
     <>
@@ -33,10 +34,12 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiText color="subdued" size="m">
-        <FormattedMessage
-          id="xpack.fleet.settings.outputSectionSubtitle"
-          defaultMessage="Specify where agents will send data."
-        />
+        <EuiLink href={docLinks.links.fleet.settings} external target="_blank">
+          <FormattedMessage
+            id="xpack.fleet.settings.outputSectionSubtitle"
+            defaultMessage="Specify where agents will send data."
+          />
+        </EuiLink>
       </EuiText>
       <EuiSpacer size="m" />
       <OutputsTable outputs={outputs} deleteOutput={deleteOutput} />

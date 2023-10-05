@@ -19,6 +19,7 @@ import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
 import { registerSetupRoute } from './setup';
+import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
@@ -34,6 +35,7 @@ export interface RouteRegisterParameters {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
     config: ProfilingConfig;
+    stackVersion: string;
     telemetryUsageCounter?: TelemetryUsageCounter;
   };
   services: {
@@ -56,4 +58,5 @@ export function registerRoutes(params: RouteRegisterParameters) {
   // Setup of Profiling resources, automates the configuration of Universal Profiling
   // and will show instructions on how to add data
   registerSetupRoute(params);
+  registerStorageExplorerRoute(params);
 }

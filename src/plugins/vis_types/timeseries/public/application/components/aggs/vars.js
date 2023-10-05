@@ -44,6 +44,7 @@ export class CalculationVars extends Component {
           <EuiFlexItem>
             <EuiFieldText
               className="tvbAggs__varName"
+              data-test-subj="tvbAggsVarNameInput"
               aria-label={i18n.translate('visTypeTimeseries.vars.variableNameAriaLabel', {
                 defaultMessage: 'Variable name',
               })}
@@ -54,7 +55,10 @@ export class CalculationVars extends Component {
               value={row.name}
             />
           </EuiFlexItem>
-          <EuiFlexItem className="tvbAggs__varMetricWrapper">
+          <EuiFlexItem
+            className="tvbAggs__varMetricWrapper"
+            data-test-subj="tvbAggsVarMetricWrapper"
+          >
             <MetricSelect
               onChange={this.handleChange(row, 'field')}
               metrics={this.props.metrics}

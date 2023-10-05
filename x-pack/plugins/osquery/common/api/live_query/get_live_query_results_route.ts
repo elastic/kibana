@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 
 export const getLiveQueryResultsRequestQuerySchema = t.type({
-  filterQuery: t.union([t.string, t.undefined]),
+  kuery: t.union([t.string, t.undefined]),
   page: t.union([toNumberRt, t.undefined]),
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),

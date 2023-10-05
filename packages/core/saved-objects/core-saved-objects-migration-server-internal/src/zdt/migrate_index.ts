@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import {
   type SavedObjectsMigrationConfigType,
   type MigrationResult,
@@ -45,6 +48,8 @@ export interface MigrateIndexOptions {
   elasticsearchClient: ElasticsearchClient;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
+  /** Capabilities of the ES cluster we're using */
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 export const migrateIndex = async ({

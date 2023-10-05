@@ -103,12 +103,12 @@ describe('<TemplateCreate />', () => {
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
 
     // disable all react-beautiful-dnd development warnings
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
   });
 
   describe('composable index template', () => {

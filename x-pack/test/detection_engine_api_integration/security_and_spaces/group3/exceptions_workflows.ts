@@ -185,6 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({ rule_id: ELASTIC_SECURITY_RULE_ID, exceptions_list: [] })
             .expect(200);
 
@@ -209,6 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -238,6 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({ rule_id: ELASTIC_SECURITY_RULE_ID, exceptions_list: [] })
             .expect(200);
 
@@ -267,6 +270,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -330,6 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -386,6 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ruleId,
               exceptions_list: [
@@ -430,6 +436,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -470,6 +477,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -610,6 +618,61 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
           const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
           expect(signalsOpen.hits.hits.length).toEqual(0);
+        });
+
+        it('should be able to execute against an exception list that does include valid case sensitive entries and get back 0 signals', async () => {
+          const rule: QueryRuleCreateProps = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
+            from: '1900-01-01T00:00:00.000Z',
+            query: 'host.name: "suricata-sensor-amsterdam"',
+          };
+          const rule2: QueryRuleCreateProps = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-2',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
+            from: '1900-01-01T00:00:00.000Z',
+            query: 'host.name: "suricata-sensor-amsterdam"',
+          };
+          const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+            [
+              {
+                field: 'host.os.name',
+                operator: 'included',
+                type: 'match_any',
+                value: ['ubuntu'],
+              },
+            ],
+          ]);
+          const createdRule2 = await createRuleWithExceptionEntries(supertest, log, rule2, [
+            [
+              {
+                field: 'host.os.name', // This matches the query above which will exclude everything
+                operator: 'included',
+                type: 'match_any',
+                value: ['ubuntu', 'Ubuntu'],
+              },
+            ],
+          ]);
+          const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+          const signalsOpen2 = await getOpenSignals(supertest, log, es, createdRule2);
+          // Expect signals here because all values are "Ubuntu"
+          // and exception is one of ["ubuntu"]
+          expect(signalsOpen.hits.hits.length).toEqual(10);
+          // Expect no signals here because all values are "Ubuntu"
+          // and exception is one of ["ubuntu", "Ubuntu"]
+          expect(signalsOpen2.hits.hits.length).toEqual(0);
         });
 
         it('generates no signals when an exception is added for an EQL rule', async () => {

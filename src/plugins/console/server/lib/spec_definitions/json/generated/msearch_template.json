@@ -1,14 +1,18 @@
 {
   "msearch_template": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ccs_minimize_roundtrips": "__flag__",
+      "max_concurrent_searches": "",
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
-      "typed_keys": "__flag__",
-      "max_concurrent_searches": "",
       "rest_total_hits_as_int": "__flag__",
-      "ccs_minimize_roundtrips": "__flag__"
+      "typed_keys": "__flag__"
     },
     "methods": [
       "GET",
@@ -18,6 +22,10 @@
       "_msearch/template",
       "{index}/_msearch/template"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

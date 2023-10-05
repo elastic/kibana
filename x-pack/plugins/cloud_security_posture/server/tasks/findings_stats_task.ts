@@ -14,7 +14,6 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { getSafeVulnerabilitiesQueryFilter } from '../../common/utils/get_safe_vulnerabilities_query_filter';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
@@ -186,7 +185,9 @@ const getScoreQuery = (): SearchRequest => ({
 const getVulnStatsTrendQuery = (): SearchRequest => ({
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   size: 0,
-  query: getSafeVulnerabilitiesQueryFilter(),
+  query: {
+    match_all: {},
+  },
   aggs: {
     critical: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },

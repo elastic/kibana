@@ -44,6 +44,8 @@ filters
 [role="screenshot"]
 image::https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-11ea-9e68-86f66862a183.png[]
 
+////
+// Commenting out due to broken links
 === API documentation
 
 ==== Server API
@@ -57,3 +59,4 @@ https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions
 
 ==== Other documentation
 https://www.elastic.co/guide/en/kibana/current/canvas-function-arguments.html[See Canvas documentation about expressions]
+////

@@ -8,6 +8,7 @@
 
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
 import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
@@ -31,7 +32,13 @@ const searchArgsToSOFindOptions = (
 };
 
 export class DashboardStorage extends SOContentStorage<DashboardCrudTypes> {
-  constructor() {
+  constructor({
+    logger,
+    throwOnResultValidationError,
+  }: {
+    logger: Logger;
+    throwOnResultValidationError: boolean;
+  }) {
     super({
       savedObjectType: CONTENT_ID,
       cmServicesDefinition,
@@ -46,9 +53,12 @@ export class DashboardStorage extends SOContentStorage<DashboardCrudTypes> {
         'optionsJSON',
         'panelsJSON',
         'timeFrom',
+        'version',
         'timeTo',
         'title',
       ],
+      logger,
+      throwOnResultValidationError,
     });
   }
 }

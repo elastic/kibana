@@ -7,11 +7,7 @@
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
-import {
-  AggregationsCardinalityAggregate,
-  AggregationsFilterAggregate,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
@@ -41,6 +37,7 @@ export async function getServiceGroupAlerts({
   }, {});
   const params = {
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [
@@ -66,17 +63,7 @@ export async function getServiceGroupAlerts({
   };
   const result = await apmAlertsClient.search(params);
 
-  interface ServiceGroupsAggResponse {
-    buckets: Record<
-      string,
-      AggregationsFilterAggregate & {
-        alerts_count: AggregationsCardinalityAggregate;
-      }
-    >;
-  }
-
-  const { buckets: filterAggBuckets } = (result.aggregations
-    ?.service_groups ?? { buckets: {} }) as ServiceGroupsAggResponse;
+  const filterAggBuckets = result.aggregations?.service_groups.buckets ?? {};
 
   const serviceGroupAlertsCount = Object.keys(filterAggBuckets).reduce<
     Record<string, number>

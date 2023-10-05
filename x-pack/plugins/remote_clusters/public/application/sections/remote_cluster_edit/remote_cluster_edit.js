@@ -12,8 +12,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiCallOut,
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageTemplate,
+  EuiPageSection,
+  EuiPageBody,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -95,22 +96,23 @@ export class RemoteClusterEdit extends Component {
 
     if (isLoading) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
           <SectionLoading>
             <FormattedMessage
               id="xpack.remoteClusters.edit.loadingLabel"
               defaultMessage="Loading remote cluster…"
             />
           </SectionLoading>
-        </EuiPageContent>
+        </EuiPageTemplate>
       );
     }
 
     if (!cluster) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-          <EuiEmptyPrompt
+        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+          <EuiPageTemplate.EmptyPrompt
             iconType="warning"
+            color="danger"
             title={
               <h2>
                 <FormattedMessage
@@ -142,7 +144,7 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageContent>
+        </EuiPageTemplate>
       );
     }
 
@@ -150,8 +152,8 @@ export class RemoteClusterEdit extends Component {
 
     if (isConfiguredByNode) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="primary">
-          <EuiEmptyPrompt
+        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+          <EuiPageTemplate.EmptyPrompt
             iconType="iInCircle"
             title={
               <h2>
@@ -179,50 +181,52 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageContent>
+        </EuiPageTemplate>
       );
     }
 
     return (
-      <>
-        <RemoteClusterPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.editTitle"
-              defaultMessage="Edit remote cluster"
-            />
-          }
-        />
-
-        {hasDeprecatedProxySetting ? (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.remoteClusters.edit.deprecatedSettingsTitle"
-                  defaultMessage="Proceed with caution"
-                />
-              }
-              color="warning"
-              iconType="help"
-            >
+      <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-edit">
+        <EuiPageSection paddingSize="none">
+          <RemoteClusterPageTitle
+            title={
               <FormattedMessage
-                id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
-                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+                id="xpack.remoteClusters.editTitle"
+                defaultMessage="Edit remote cluster"
               />
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        ) : null}
+            }
+          />
 
-        <RemoteClusterForm
-          cluster={cluster}
-          isSaving={isEditingCluster}
-          saveError={getEditClusterError}
-          save={this.save}
-          cancel={this.cancel}
-        />
-      </>
+          {hasDeprecatedProxySetting ? (
+            <>
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.remoteClusters.edit.deprecatedSettingsTitle"
+                    defaultMessage="Proceed with caution"
+                  />
+                }
+                color="warning"
+                iconType="help"
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
+                  defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+                />
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          ) : null}
+
+          <RemoteClusterForm
+            cluster={cluster}
+            isSaving={isEditingCluster}
+            saveError={getEditClusterError}
+            save={this.save}
+            cancel={this.cancel}
+          />
+        </EuiPageSection>
+      </EuiPageBody>
     );
   }
 }

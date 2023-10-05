@@ -10,12 +10,21 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { APPLICATIONS_PLUGIN } from '../../../../../common/constants';
-import { docLinks } from '../../../shared/doc_links';
 import searchAppLogo from '../../assets/search_applications_logo.svg';
 import { ProductCard } from '../product_card';
 
-export const SearchApplicationsProductCard = () => (
+export interface SearchApplicationProductCardProps {
+  hasBorder: boolean;
+  hasShadow: boolean;
+}
+
+export const SearchApplicationsProductCard: React.FC<SearchApplicationProductCardProps> = ({
+  hasBorder = true,
+  hasShadow = true,
+}) => (
   <ProductCard
+    hasBorder={hasBorder}
+    hasShadow={hasShadow}
     cta={i18n.translate('xpack.enterpriseSearch.searchApplications.productCardCTA', {
       defaultMessage: 'Explore Search Applications',
     })}
@@ -24,35 +33,10 @@ export const SearchApplicationsProductCard = () => (
         'Search Applications help make your Elasticsearch data easily searchable for end users',
     })}
     emptyCta
-    features={[
-      i18n.translate('xpack.enterpriseSearch.searchApplications.features.queries', {
-        defaultMessage: 'Build queries using search templates and DLS',
-      }),
-      i18n.translate('xpack.enterpriseSearch.searchApplications.features.indices', {
-        defaultMessage: 'Combine your Elasticsearch indices',
-      }),
-      i18n.translate('xpack.enterpriseSearch.searchApplications.features.docsExplorer', {
-        defaultMessage: 'Easily preview your search results',
-      }),
-      i18n.translate('xpack.enterpriseSearch.searchApplications.features.api', {
-        defaultMessage: 'Elasticsearch Search Application API',
-      }),
-    ]}
     icon={searchAppLogo}
     iconSize="l"
     name={APPLICATIONS_PLUGIN.NAV_TITLE}
     productId={APPLICATIONS_PLUGIN.ID}
-    resourceLinks={[
-      {
-        label: i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.resources.gettingStartedLabel',
-          {
-            defaultMessage: 'Getting started with Search Applications',
-          }
-        ),
-        to: docLinks.searchApplications,
-      },
-    ]}
     url={APPLICATIONS_PLUGIN.URL}
   />
 );

@@ -11,6 +11,9 @@ import {
   type ExpandableFlyoutProps,
   ExpandableFlyoutProvider,
 } from '@kbn/expandable-flyout';
+import type { IsolateHostPanelProps } from './isolate_host';
+import { IsolateHostPanel, IsolateHostPanelKey } from './isolate_host';
+import { IsolateHostPanelProvider } from './isolate_host/context';
 import type { RightPanelProps } from './right';
 import { RightPanel, RightPanelKey } from './right';
 import { RightPanelProvider } from './right/context';
@@ -52,6 +55,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
         <PreviewPanel path={props.path as PreviewPanelProps['path']} />
       </PreviewPanelProvider>
+    ),
+  },
+  {
+    key: IsolateHostPanelKey,
+    component: (props) => (
+      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
+        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
+      </IsolateHostPanelProvider>
     ),
   },
 ];

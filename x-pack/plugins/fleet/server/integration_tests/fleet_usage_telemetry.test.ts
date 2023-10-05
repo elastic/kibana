@@ -136,6 +136,16 @@ describe('fleet usage telemetry', () => {
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
           },
+          components: [
+            {
+              id: 'filestream-monitoring',
+              status: 'UNHEALTHY',
+            },
+            {
+              id: 'beat/metrics-monitoring',
+              status: 'HEALTHY',
+            },
+          ],
         },
         {
           create: {
@@ -156,6 +166,16 @@ describe('fleet usage telemetry', () => {
               version: '20.04.5 LTS (Focal Fossa)',
             },
           },
+          components: [
+            {
+              id: 'filestream-monitoring',
+              status: 'HEALTHY',
+            },
+            {
+              id: 'beat/metrics-monitoring',
+              status: 'HEALTHY',
+            },
+          ],
         },
         {
           create: {
@@ -176,6 +196,30 @@ describe('fleet usage telemetry', () => {
               version: '20.04.5 LTS (Focal Fossa)',
             },
           },
+          components: [
+            {
+              id: 'filestream-monitoring',
+              status: 'HEALTHY',
+            },
+            {
+              id: 'beat/metrics-monitoring',
+              status: 'HEALTHY',
+            },
+          ],
+        },
+        {
+          create: {
+            _id: 'agent3',
+          },
+        },
+        {
+          agent: {
+            version: '8.6.0',
+          },
+          last_checkin_status: 'online',
+          last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
+          active: true,
+          policy_id: 'policy2',
         },
       ],
       refresh: 'wait_for',
@@ -318,20 +362,24 @@ describe('fleet usage telemetry', () => {
       { id: 'output3' }
     );
 
-    await soClient.create('ingest-agent-policies', {
-      namespace: 'default',
-      monitoring_enabled: ['logs', 'metrics'],
-      name: 'Another policy',
-      description: 'Policy 2',
-      inactivity_timeout: 1209600,
-      status: 'active',
-      is_managed: false,
-      revision: 2,
-      updated_by: 'system',
-      schema_version: '1.0.0',
-      data_output_id: 'output2',
-      monitoring_output_id: 'output3',
-    });
+    await soClient.create(
+      'ingest-agent-policies',
+      {
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        name: 'Another policy',
+        description: 'Policy 2',
+        inactivity_timeout: 1209600,
+        status: 'active',
+        is_managed: false,
+        revision: 2,
+        updated_by: 'system',
+        schema_version: '1.0.0',
+        data_output_id: 'output2',
+        monitoring_output_id: 'output3',
+      },
+      { id: 'policy2' }
+    );
   });
 
   afterAll(async () => {
@@ -349,13 +397,13 @@ describe('fleet usage telemetry', () => {
       expect.objectContaining({
         agents_enabled: true,
         agents: {
-          total_enrolled: 2,
+          total_enrolled: 3,
           healthy: 0,
           unhealthy: 0,
           inactive: 0,
           unenrolled: 1,
-          offline: 2,
-          total_all_statuses: 3,
+          offline: 3,
+          total_all_statuses: 4,
           updating: 0,
         },
         fleet_server: {
@@ -370,6 +418,16 @@ describe('fleet usage telemetry', () => {
         packages: [],
         agents_per_version: [
           {
+            version: '8.6.0',
+            count: 2,
+            healthy: 0,
+            inactive: 0,
+            offline: 2,
+            unenrolled: 0,
+            unhealthy: 0,
+            updating: 0,
+          },
+          {
             version: '8.5.1',
             count: 1,
             healthy: 0,
@@ -379,19 +437,9 @@ describe('fleet usage telemetry', () => {
             unhealthy: 0,
             updating: 0,
           },
-          {
-            version: '8.6.0',
-            count: 1,
-            healthy: 0,
-            inactive: 0,
-            offline: 1,
-            unenrolled: 0,
-            unhealthy: 0,
-            updating: 0,
-          },
         ],
         agent_checkin_status: { error: 1, degraded: 1 },
-        agents_per_policy: [2],
+        agents_per_policy: [2, 1],
         agents_per_os: [
           {
             name: 'Ubuntu',
@@ -402,6 +450,18 @@ describe('fleet usage telemetry', () => {
             name: 'Ubuntu',
             version: '22.04.2 LTS (Jammy Jellyfish)',
             count: 1,
+          },
+        ],
+        agents_per_output_type: [
+          {
+            count_as_data: 1,
+            count_as_monitoring: 0,
+            output_type: 'third_type',
+          },
+          {
+            count_as_data: 0,
+            count_as_monitoring: 1,
+            output_type: 'logstash',
           },
         ],
         fleet_server_config: {

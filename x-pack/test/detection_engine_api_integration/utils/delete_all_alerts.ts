@@ -25,7 +25,11 @@ export const deleteAllAlerts = async (
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      await supertest
+        .delete(DETECTION_ENGINE_INDEX_URL)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .send();
       await es.deleteByQuery({
         index,
         body: {

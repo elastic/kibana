@@ -641,13 +641,10 @@
           {
             "parentPluginId": "@kbn/ui-actions-browser",
             "id": "def-common.rowClickTrigger.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -655,13 +652,10 @@
           {
             "parentPluginId": "@kbn/ui-actions-browser",
             "id": "def-common.rowClickTrigger.description",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false

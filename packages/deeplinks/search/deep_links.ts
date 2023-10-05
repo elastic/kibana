@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SERVERLESS_ES_APP_ID, SERVERLESS_ES_INDEXING_API_ID } from './constants';
+import { SERVERLESS_ES_APP_ID, SERVERLESS_ES_CONNECTORS_ID } from './constants';
 
 export type AppId = typeof SERVERLESS_ES_APP_ID;
-export type IndexingApiId = typeof SERVERLESS_ES_INDEXING_API_ID;
+export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 
-export type DeepLinkId = AppId | IndexingApiId;
+export type DeepLinkId = AppId | ConnectorsId;

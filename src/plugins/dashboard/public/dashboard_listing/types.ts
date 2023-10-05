@@ -17,6 +17,7 @@ export type DashboardListingProps = PropsWithChildren<{
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
   urlStateEnabled?: boolean;
+  showCreateDashboardButton?: boolean;
 }>;
 
 // because the type of `application.capabilities.advancedSettings` is so generic, the provider
@@ -26,6 +27,7 @@ export type TableListViewApplicationService = DashboardApplicationService & {
 };
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  managed?: boolean;
   attributes: {
     title: string;
     description?: string;

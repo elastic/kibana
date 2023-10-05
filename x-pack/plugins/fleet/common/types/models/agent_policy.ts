@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
@@ -13,6 +15,8 @@ import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
+// adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
+// x-pack/plugins/fleet/server/services/agent_policy.ts#L571
 export interface NewAgentPolicy {
   id?: string;
   name: string;
@@ -75,15 +79,7 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
-export interface FullAgentPolicyOutputPermissions {
-  [packagePolicyName: string]: {
-    cluster?: string[];
-    indices?: Array<{
-      names: string[];
-      privileges: string[];
-    }>;
-  };
-}
+export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   proxy_url?: string;

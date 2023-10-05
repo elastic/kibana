@@ -7,7 +7,6 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import type {
   UseFetchRelatedAlertsBySameSourceEventParams,
   UseFetchRelatedAlertsBySameSourceEventResult,
@@ -17,7 +16,7 @@ import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsBySameSourceEvent', () => {
@@ -34,7 +33,7 @@ describe('useFetchRelatedAlertsBySameSourceEvent', () => {
       count: 0,
     });
     hookResult = renderHook(() =>
-      useFetchRelatedAlertsBySameSourceEvent({ dataFormattedForFieldBrowser, scopeId })
+      useFetchRelatedAlertsBySameSourceEvent({ originalEventId, scopeId })
     );
 
     expect(hookResult.result.current.loading).toEqual(true);
@@ -51,7 +50,7 @@ describe('useFetchRelatedAlertsBySameSourceEvent', () => {
       count: 0,
     });
     hookResult = renderHook(() =>
-      useFetchRelatedAlertsBySameSourceEvent({ dataFormattedForFieldBrowser, scopeId })
+      useFetchRelatedAlertsBySameSourceEvent({ originalEventId, scopeId })
     );
 
     expect(hookResult.result.current.loading).toEqual(false);
@@ -68,7 +67,7 @@ describe('useFetchRelatedAlertsBySameSourceEvent', () => {
       count: 2,
     });
     hookResult = renderHook(() =>
-      useFetchRelatedAlertsBySameSourceEvent({ dataFormattedForFieldBrowser, scopeId })
+      useFetchRelatedAlertsBySameSourceEvent({ originalEventId, scopeId })
     );
 
     expect(hookResult.result.current.loading).toEqual(false);

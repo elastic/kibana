@@ -2291,7 +2291,7 @@ describe('IndexPattern Data Source', () => {
           disabled: { kuery: [], lucene: [] },
         });
       });
-      it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
+      it('should collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = FormBasedDatasource.getPublicAPI({
           state: {
             ...baseState,
@@ -2335,10 +2335,10 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
             kuery: [
-              [{ language: 'kuery', query: 'geo.src: *' }],
+              [{ language: 'kuery', query: '"geo.src": *' }],
               [
-                { language: 'kuery', query: 'geo.dest: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.dest": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [],
@@ -2903,8 +2903,8 @@ describe('IndexPattern Data Source', () => {
                 { language: 'kuery', query: 'memory > 500000' },
               ],
               [
-                { language: 'kuery', query: 'geo.src: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.src": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [

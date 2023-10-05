@@ -25,7 +25,7 @@ interface Props {
 
 export function LabelWithHint({ label, hint, iconSize, labelSize, labelStyle }: Props) {
   return (
-    <EuiFlexGroup gutterSize="xs" style={{ flexGrow: 0 }}>
+    <EuiFlexGroup gutterSize="xs" style={{ flexGrow: 0 }} alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiText size={labelSize} style={labelStyle}>
           {label}

@@ -62,6 +62,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.getBySel('pagination-button-next').click().wait(500).click();
         cy.contains('columns hidden').should('exist');
 
+        // enter fullscreen
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
         cy.contains(/Enter fullscreen$/).should('not.exist');
         cy.contains('Exit fullscreen').should('exist');

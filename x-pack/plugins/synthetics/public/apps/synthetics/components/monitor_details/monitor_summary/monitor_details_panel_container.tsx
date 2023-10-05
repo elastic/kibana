@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   MonitorDetailsPanelProps,
   MonitorDetailsPanel,
@@ -42,10 +41,3 @@ export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelP
     />
   );
 };
-
-export const WrapperStyle = euiStyled.div`
-  .euiDescriptionList.euiDescriptionList--column > *,
-  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
-    margin-top: ${({ theme }) => theme.eui.euiSizeS};
-  }
-`;

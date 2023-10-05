@@ -7,3 +7,4 @@
 
 export const SLO_ID_FIELD = 'slo.id';
 export const SLO_REVISION_FIELD = 'slo.revision';
+export const SLO_INSTANCE_ID_FIELD = 'slo.instanceId';

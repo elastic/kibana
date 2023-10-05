@@ -578,6 +578,14 @@
               "path": "x-pack/plugins/cases/public/plugin.ts"
             },
             {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+            },
+            {
               "plugin": "imageEmbeddable",
               "path": "src/plugins/image_embeddable/public/plugin.ts"
             },
@@ -5458,6 +5466,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/client/factory.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/plugin.test.ts"
             }
           ]
         }

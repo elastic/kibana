@@ -69,13 +69,13 @@ export const createGridColumns = (
             const filterForText = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueText',
               {
-                defaultMessage: 'Filter for value',
+                defaultMessage: 'Filter for',
               }
             );
             const filterForAriaLabel = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueAriaLabel',
               {
-                defaultMessage: 'Filter for value: {cellContent}',
+                defaultMessage: 'Filter for: {cellContent}',
                 values: {
                   cellContent,
                 },
@@ -105,13 +105,13 @@ export const createGridColumns = (
             const filterOutText = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueText',
               {
-                defaultMessage: 'Filter out value',
+                defaultMessage: 'Filter out',
               }
             );
             const filterOutAriaLabel = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueAriaLabel',
               {
-                defaultMessage: 'Filter out value: {cellContent}',
+                defaultMessage: 'Filter out: {cellContent}',
                 values: {
                   cellContent,
                 },

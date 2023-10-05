@@ -1,24 +1,31 @@
 {
   "cat.segments": {
     "url_params": {
-      "format": "",
-      "bytes": [
-        "b",
-        "k",
-        "kb",
-        "m",
-        "mb",
-        "g",
-        "gb",
-        "t",
-        "tb",
-        "p",
-        "pb"
+      "format": [
+        "text"
       ],
       "h": [],
       "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "s": [],
-      "v": "__flag__"
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ]
     },
     "methods": [
       "GET"
@@ -27,6 +34,10 @@
       "_cat/segments",
       "_cat/segments/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-segments.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-segments.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

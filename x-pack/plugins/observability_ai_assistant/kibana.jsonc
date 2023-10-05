@@ -6,18 +6,21 @@
     "id": "observabilityAIAssistant",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "observabilityAIAssistant"
-    ],
+    "configPath": ["xpack", "observabilityAIAssistant"],
     "requiredPlugins": [
-      "triggersActionsUi",
       "actions",
-      "security"
+      "dataViews",
+      "features",
+      "lens",
+      "licensing",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "share",
+      "taskManager",
+      "triggersActionsUi"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "requiredBundles": ["fieldFormats", "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

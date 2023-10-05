@@ -288,6 +288,7 @@ export interface RuleType<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
     AlertData
   >;
+  category: string;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
@@ -468,3 +469,5 @@ export interface RawRule extends SavedObjectAttributes {
   revision: number;
   running?: boolean | null;
 }
+
+export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

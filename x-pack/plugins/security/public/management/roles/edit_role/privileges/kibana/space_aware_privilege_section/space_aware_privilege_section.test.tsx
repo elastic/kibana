@@ -9,13 +9,13 @@ import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { PrivilegeSpaceForm } from './privilege_space_form';
+import { PrivilegeSpaceTable } from './privilege_space_table';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSummary } from '../privilege_summary';
-import { PrivilegeSpaceForm } from './privilege_space_form';
-import { PrivilegeSpaceTable } from './privilege_space_table';
-import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 
 const buildProps = (customProps: any = {}) => {
   return {

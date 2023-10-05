@@ -54,4 +54,30 @@ describe('textBasedQueryStateToExpressionAst', () => {
       })
     );
   });
+
+  it('returns an object with the correct structure for an ES|QL query', async () => {
+    const actual = await textBasedQueryStateToExpressionAst({
+      filters: [],
+      query: { sql: 'FROM foo' },
+      time: {
+        from: 'now',
+        to: 'now+7d',
+      },
+    });
+
+    expect(actual).toHaveProperty(
+      'chain.1.arguments.timeRange.0.chain.0.arguments',
+      expect.objectContaining({
+        from: ['now'],
+        to: ['now+7d'],
+      })
+    );
+
+    expect(actual).toHaveProperty(
+      'chain.2.arguments',
+      expect.objectContaining({
+        query: ['FROM foo'],
+      })
+    );
+  });
 });

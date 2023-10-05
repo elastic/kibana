@@ -1,4 +1,4 @@
-title: Connector response properties for a generative AI connector
+title: Connector response properties for an OpenAI connector
 type: object
 required:
   - config
@@ -24,6 +24,8 @@ properties:
     $ref: 'is_missing_secrets.yaml'
   is_preconfigured:
     $ref: 'is_preconfigured.yaml'
+  is_system_action:
+    $ref: 'is_system_action.yaml'
   name:
     type: string
     description: The display name for the connector.

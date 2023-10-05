@@ -9,10 +9,15 @@ import moment from 'moment';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import {
+  CONNECTORS_INDEX,
+  CONNECTORS_JOBS_INDEX,
+  ConnectorStatus,
+  SyncStatus,
+} from '@kbn/search-connectors';
+
 import { SyncJobsStats } from '../../../common/stats';
 
-import { ConnectorStatus, SyncStatus } from '../../../common/types/connectors';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<SyncJobsStats> => {

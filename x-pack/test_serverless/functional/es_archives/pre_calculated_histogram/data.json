@@ -1,0 +1,231 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:histogram-test",
+    "index": ".kibana_analytics_1",
+    "source": {
+      "index-pattern": {
+        "fieldAttrs": "{}",
+        "title": "histogram-test",
+        "sourceFilters": "[]",
+        "fields": "[]",
+        "fieldFormatMap": "{}",
+        "typeMeta": "{}",
+        "runtimeFieldMap": "{}",
+        "name": "histogram-test"
+      },
+      "type": "index-pattern",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0",
+      "updated_at": "2023-08-05T05:41:10.360Z",
+      "created_at": "2023-08-05T05:41:10.360Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e69404d93193e4074f0ec1a",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "incididunt reprehenderit mollit",
+      "histogram-content": {
+        "values": [
+          0.3,
+          1,
+          3,
+          4.2,
+          4.8
+        ],
+        "counts": [
+          237,
+          170,
+          33,
+          149,
+          241
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e69408f2fc61f57fd5bc762",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "culpa cillum ullamco",
+      "histogram-content": {
+        "values": [
+          0.5,
+          1,
+          1.2,
+          1.3,
+          2.8,
+          3.9,
+          4.3
+        ],
+        "counts": [
+          113,
+          197,
+          20,
+          66,
+          20,
+          39,
+          178
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e6940b979b57ad343114cc3",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "enim veniam et",
+      "histogram-content": {
+        "values": [
+          3.7,
+          4.2
+        ],
+        "counts": [
+          227,
+          141
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e6940d3e95de786eeb7586d",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "est incididunt sunt",
+      "histogram-content": {
+        "values": [
+          1.8,
+          2.4,
+          2.6,
+          4.9
+        ],
+        "counts": [
+          92,
+          101,
+          122,
+          244
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e694119fb2f956a822b93b9",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "qui qui tempor",
+      "histogram-content": {
+        "values": [
+          0.5,
+          2.1,
+          2.7,
+          3,
+          3.2,
+          3.5,
+          4.2,
+          5
+        ],
+        "counts": [
+          210,
+          168,
+          182,
+          181,
+          97,
+          164,
+          77,
+          2
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e694145ad3c741aa12d6e8e",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "ullamco nisi sunt",
+      "histogram-content": {
+        "values": [
+          1.7,
+          4.5,
+          4.8
+        ],
+        "counts": [
+          74,
+          146,
+          141
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e694159d909d9d99b5e12d1",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "magna eu incididunt",
+      "histogram-content": {
+        "values": [
+          1,
+          3.4,
+          4.8
+        ],
+        "counts": [
+          103,
+          205,
+          11
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e694159d909d9d99b5e12d1",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "single value",
+      "histogram-content": {
+        "values": [
+          1
+        ],
+        "counts": [
+          1
+        ]
+      }
+    }
+  }
+}

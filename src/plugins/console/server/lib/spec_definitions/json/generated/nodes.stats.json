@@ -1,18 +1,31 @@
 {
   "nodes.stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "completion_fields": [],
       "fielddata_fields": [],
       "fields": [],
       "groups": "__flag__",
+      "include_segment_file_sizes": "__flag__",
       "level": [
+        "cluster",
         "indices",
-        "node",
         "shards"
       ],
-      "types": [],
-      "timeout": "",
-      "include_segment_file_sizes": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "types": "",
       "include_unloaded_segments": "__flag__"
     },
     "methods": [
@@ -26,42 +39,10 @@
       "_nodes/stats/{metric}/{index_metric}",
       "_nodes/{node_id}/stats/{metric}/{index_metric}"
     ],
-    "url_components": {
-      "node_id": null,
-      "metric": [
-        "_all",
-        "breaker",
-        "discovery",
-        "fs",
-        "http",
-        "indexing_pressure",
-        "indices",
-        "jvm",
-        "os",
-        "process",
-        "thread_pool",
-        "transport"
-      ],
-      "index_metric": [
-        "_all",
-        "bulk",
-        "completion",
-        "docs",
-        "fielddata",
-        "flush",
-        "get",
-        "indexing",
-        "merge",
-        "query_cache",
-        "refresh",
-        "request_cache",
-        "search",
-        "segments",
-        "shard_stats",
-        "store",
-        "warmer"
-      ]
-    },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

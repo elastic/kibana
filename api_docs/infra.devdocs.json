@@ -258,7 +258,8 @@
           "label": "metricsExplorerViews",
           "description": [],
           "signature": [
-            "MetricsExplorerViewsServiceStart"
+            "MetricsExplorerViewsServiceStart",
+            " | undefined"
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
           "deprecated": false,
@@ -470,20 +471,6 @@
           },
           {
             "parentPluginId": "infra",
-            "id": "def-server.InfraConfig.logs",
-            "type": "Object",
-            "tags": [],
-            "label": "logs",
-            "description": [],
-            "signature": [
-              "{ app_target: \"discover\" | \"logs-ui\"; }"
-            ],
-            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "infra",
             "id": "def-server.InfraConfig.sources",
             "type": "Object",
             "tags": [],
@@ -491,6 +478,20 @@
             "description": [],
             "signature": [
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraConfig.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "{ metricsExplorerEnabled: boolean; customThresholdAlertsEnabled: boolean; osqueryEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
@@ -603,7 +604,7 @@
           "label": "metricsExplorerViews",
           "description": [],
           "signature": [
-            "void"
+            "void | undefined"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
@@ -646,72 +647,12 @@
           "label": "metricsExplorerViews",
           "description": [],
           "signature": [
-            "MetricsExplorerViewsServiceStart"
+            "MetricsExplorerViewsServiceStart",
+            " | undefined"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "infra",
-          "id": "def-server.InfraPluginStart.getMetricIndices",
-          "type": "Function",
-          "tags": [],
-          "label": "getMetricIndices",
-          "description": [],
-          "signature": [
-            "(savedObjectsClient: ",
-            {
-              "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "common",
-              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-common.SavedObjectsClientContract",
-              "text": "SavedObjectsClientContract"
-            },
-            ", sourceId?: string | undefined) => Promise<string>"
-          ],
-          "path": "x-pack/plugins/infra/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "infra",
-              "id": "def-server.InfraPluginStart.getMetricIndices.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "savedObjectsClient",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "common",
-                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-common.SavedObjectsClientContract",
-                  "text": "SavedObjectsClientContract"
-                }
-              ],
-              "path": "x-pack/plugins/infra/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            },
-            {
-              "parentPluginId": "infra",
-              "id": "def-server.InfraPluginStart.getMetricIndices.$2",
-              "type": "string",
-              "tags": [],
-              "label": "sourceId",
-              "description": [],
-              "signature": [
-                "string | undefined"
-              ],
-              "path": "x-pack/plugins/infra/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",

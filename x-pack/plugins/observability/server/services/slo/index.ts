@@ -7,6 +7,7 @@
 
 export * from './create_slo';
 export * from './delete_slo';
+export * from './delete_slo_instances';
 export * from './fetch_historical_summary';
 export * from './find_slo';
 export * from './get_slo';

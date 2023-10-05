@@ -185,6 +185,33 @@ describe('EditableTitle', () => {
     ).toBe(true);
   });
 
+  it('trims the title before submit', () => {
+    const newTitle = 'new test title with spaces          ';
+
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
+    wrapper.update();
+
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .last()
+      .simulate('change', { target: { value: newTitle } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+
+    expect(submitTitle).toHaveBeenCalled();
+    expect(submitTitle.mock.calls[0][0]).toEqual(newTitle.trim());
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(true);
+  });
+
   it('does not submit the title when the length is longer than 160 characters', () => {
     const longTitle = 'a'.repeat(161);
 

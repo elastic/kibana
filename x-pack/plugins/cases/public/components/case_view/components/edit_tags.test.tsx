@@ -82,6 +82,22 @@ describe('EditTags ', () => {
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
 
+  it('trims the tags on submit', async () => {
+    appMockRender.render(<EditTags {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
+    });
+
+    userEvent.type(screen.getByRole('combobox'), 'dude      {enter}');
+
+    userEvent.click(screen.getByTestId('edit-tags-submit'));
+
+    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+  });
+
   it('cancels on cancel', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 

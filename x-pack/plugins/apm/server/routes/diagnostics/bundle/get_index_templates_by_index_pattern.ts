@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getApmIndexPatterns } from './get_indices';
 import { getIndexTemplate } from './get_index_template';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
@@ -19,7 +19,7 @@ export async function getIndexTemplatesByIndexPattern({
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
 }) {
   const indexPatterns = getApmIndexPatterns([
     apmIndices.error,
@@ -110,6 +110,8 @@ async function handleInvalidIndexTemplateException<T>(promise: Promise<T>) {
       return [];
     }
 
-    throw error;
+    console.error(`Suppressed unknown exception: ${error.message}`);
+
+    return [];
   }
 }

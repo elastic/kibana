@@ -62,6 +62,7 @@ describe('get_list_item_by_values', () => {
 
     expect(listItem).toEqual([
       {
+        '@timestamp': DATE_NOW,
         created_at: DATE_NOW,
         created_by: USER,
         id: LIST_ITEM_ID,

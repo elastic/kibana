@@ -95,7 +95,7 @@
                 "section": "def-public.FormatEditorState",
                 "text": "FormatEditorState"
               },
-              ") => { error: any; samples: ",
+              ") => { error: string | undefined; samples: ",
               {
                 "pluginId": "dataViewFieldEditor",
                 "scope": "public",

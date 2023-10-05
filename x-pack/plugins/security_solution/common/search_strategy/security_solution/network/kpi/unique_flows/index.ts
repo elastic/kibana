@@ -7,9 +7,6 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
-
-export type NetworkKpiUniqueFlowsRequestOptions = RequestBasicOptions;
 
 export interface NetworkKpiUniqueFlowsStrategyResponse extends IEsSearchResponse {
   uniqueFlowId: number;

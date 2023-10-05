@@ -9,7 +9,6 @@
     "browser": true,
     "requiredPlugins": [
       "expressions",
-      "savedObjectsManagement",
       "data",
       "presentationUtil",
       "visualizations",
@@ -25,7 +24,6 @@
       "data",
       "savedObjectsFinder",
       "dataViews",
-      "kibanaReact",
     ],
     "extraPublicDirs": [
       "common"

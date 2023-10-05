@@ -29,8 +29,7 @@ import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
+  isRunningResponse,
 } from '@kbn/data-plugin/public';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -210,7 +209,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
             const aggResult: number | undefined = res.rawResponse.aggregations
@@ -247,9 +246,6 @@ export const SearchExamplesApp = ({
                 text: toMountPoint(res.warning),
               });
             }
-          } else if (isErrorResponse(res)) {
-            // TODO: Make response error status clearer
-            notifications.toasts.addDanger('An error has occurred');
           }
         },
         error: (e) => {
@@ -315,17 +311,15 @@ export const SearchExamplesApp = ({
       const result = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          disableShardFailureWarning: !showWarningToastNotifications,
+          disableWarningToasts: !showWarningToastNotifications,
           inspector,
         })
       );
       setRawResponse(result.rawResponse);
 
-      /* Here is an example of using showWarnings on the search service, using an optional callback to
-       * intercept the warnings before notification warnings are shown.
-       *
-       * Suppressing the shard failure warning notification from appearing by default requires setting
-       * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
+      /*
+       * Set disableWarningToasts to true to disable warning toasts and customize warning display.
+       * Then use showWarnings to customize warning notification.
        */
       if (showWarningToastNotifications) {
         setWarningContents([]);
@@ -395,16 +389,12 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           setResponse(res);
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
               text: 'Query finished',
             });
-          } else if (isErrorResponse(res)) {
-            setIsLoading(false);
-            // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
           }
         },
         error: (e) => {
@@ -506,7 +496,7 @@ export const SearchExamplesApp = ({
             {' '}
             <FormattedMessage
               id="searchExamples.warningsObject"
-              defaultMessage="Timeout and shard failure warnings for high-level search may be handled in a callback to the showWarnings method on the search service."
+              defaultMessage="Search warnings may optionally be handed with search service showWarnings method."
             />{' '}
           </EuiText>{' '}
           <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}

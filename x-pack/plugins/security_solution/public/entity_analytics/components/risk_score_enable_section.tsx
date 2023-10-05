@@ -38,7 +38,7 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
+import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine';
 
 const docsLinks = [
   {
@@ -82,9 +82,77 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
   </>
 );
 
+interface RiskScoreUpdateModalParams {
+  isLoading: boolean;
+  isVisible: boolean;
+  closeModal: () => void;
+  onConfirm: () => void;
+}
+
+const RiskScoreUpdateModal = ({
+  closeModal,
+  isLoading,
+  onConfirm,
+  isVisible,
+}: RiskScoreUpdateModalParams) => {
+  if (!isVisible) return null;
+
+  return (
+    <EuiModal onClose={closeModal}>
+      {isLoading ? (
+        <EuiModalHeader>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiLoadingSpinner size="m" />
+            <EuiModalHeaderTitle>{i18n.UPDATING_RISK_ENGINE}</EuiModalHeaderTitle>
+          </EuiFlexGroup>
+        </EuiModalHeader>
+      ) : (
+        <>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{i18n.UPDATE_RISK_ENGINE_MODAL_TITLE}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiText>
+              <p>
+                <b>{i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_1}</b>
+                {i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2}
+              </p>
+              <EuiSpacer size="s" />
+              <p>
+                <b>{i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_1}</b>
+                {i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_2}
+              </p>
+            </EuiText>
+            <EuiSpacer />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              color="primary"
+              data-test-subj="risk-score-update-cancel"
+              onClick={closeModal}
+            >
+              {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_NO}
+            </EuiButtonEmpty>
+            <EuiButton
+              color="primary"
+              data-test-subj="risk-score-update-confirm"
+              onClick={onConfirm}
+              fill
+            >
+              {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_YES}
+            </EuiButton>
+          </EuiModalFooter>
+        </>
+      )}
+    </EuiModal>
+  );
+};
+
 export const RiskScoreEnableSection = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { data: riskEngineStatus } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSettled: () => {
       setIsModalVisible(false);
@@ -102,7 +170,8 @@ export const RiskScoreEnableSection = () => {
   const isLoading =
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
-    disableRiskEngineMutation.isLoading;
+    disableRiskEngineMutation.isLoading ||
+    isStatusLoading;
 
   const isUpdateAvailable = riskEngineStatus?.isUpdateAvailable;
   const btnIsDisabled = !currentRiskEngineStatus || isLoading;
@@ -121,62 +190,6 @@ export const RiskScoreEnableSection = () => {
     }
   };
 
-  let modal;
-
-  if (isModalVisible) {
-    modal = (
-      <EuiModal onClose={closeModal}>
-        {initRiskEngineMutation.isLoading ? (
-          <EuiModalHeader>
-            <EuiFlexGroup gutterSize="m" alignItems="center">
-              <EuiLoadingSpinner size="m" />
-              <EuiModalHeaderTitle>{i18n.UPDATING_RISK_ENGINE}</EuiModalHeaderTitle>
-            </EuiFlexGroup>
-          </EuiModalHeader>
-        ) : (
-          <>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>{i18n.UPDATE_RISK_ENGINE_MODAL_TITLE}</EuiModalHeaderTitle>
-            </EuiModalHeader>
-
-            <EuiModalBody>
-              <EuiText>
-                <p>
-                  <b>{i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_1}</b>
-                  {i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2}
-                </p>
-                <EuiSpacer size="s" />
-                <p>
-                  <b>{i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_1}</b>
-                  {i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_2}
-                </p>
-              </EuiText>
-              <EuiSpacer />
-            </EuiModalBody>
-
-            <EuiModalFooter>
-              <EuiButtonEmpty
-                color="primary"
-                data-test-subj="risk-score-update-cancel"
-                onClick={closeModal}
-              >
-                {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_NO}
-              </EuiButtonEmpty>
-              <EuiButton
-                color="primary"
-                data-test-subj="risk-score-update-confirm"
-                onClick={() => initRiskEngineMutation.mutate()}
-                fill
-              >
-                {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_YES}
-              </EuiButton>
-            </EuiModalFooter>
-          </>
-        )}
-      </EuiModal>
-    );
-  }
-
   let initRiskEngineErrors: string[] = [];
 
   if (initRiskEngineMutation.isError) {
@@ -186,6 +199,22 @@ export const RiskScoreEnableSection = () => {
     } else {
       initRiskEngineErrors = [errorBody];
     }
+  }
+
+  if (
+    currentRiskEngineStatus !== RiskEngineStatus.ENABLED &&
+    riskEngineStatus?.is_max_amount_of_risk_engines_reached
+  ) {
+    return (
+      <EuiCallOut
+        title={i18n.getMaxSpaceTitle(MAX_SPACES_COUNT)}
+        color="warning"
+        iconType="error"
+        data-test-subj="risk-score-warning-panel"
+      >
+        <p>{i18n.MAX_SPACE_PANEL_MESSAGE}</p>
+      </EuiCallOut>
+    );
   }
   return (
     <>
@@ -203,7 +232,12 @@ export const RiskScoreEnableSection = () => {
 
         <EuiSpacer size="m" />
         <EuiFlexItem grow={0}>
-          {modal}
+          <RiskScoreUpdateModal
+            isVisible={isModalVisible}
+            onConfirm={() => initRiskEngineMutation.mutate()}
+            isLoading={initRiskEngineMutation.isLoading}
+            closeModal={closeModal}
+          />
           <EuiHorizontalRule margin="s" />
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -217,7 +251,9 @@ export const RiskScoreEnableSection = () => {
               {isUpdateAvailable && (
                 <EuiFlexGroup gutterSize="s" alignItems={'center'}>
                   <EuiFlexItem>
-                    {initRiskEngineMutation.isLoading && <EuiLoadingSpinner size="m" />}
+                    {initRiskEngineMutation.isLoading && !isModalVisible && (
+                      <EuiLoadingSpinner size="m" />
+                    )}
                   </EuiFlexItem>
                   <EuiButtonEmpty
                     disabled={initRiskEngineMutation.isLoading}

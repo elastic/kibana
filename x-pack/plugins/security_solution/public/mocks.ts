@@ -5,26 +5,40 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
-import { UpsellingService } from './common/lib/upsellings';
-import type { PluginStart, PluginSetup } from './types';
+import { allowedExperimentalValues } from '../common/experimental_features';
+import type { PluginStart, PluginSetup, ContractStartServices } from './types';
+
+const upselling = new UpsellingService();
+
+export const contractStartServicesMock: ContractStartServices = {
+  extraRoutes$: of([]),
+  isSidebarEnabled$: of(true),
+  getComponent$: jest.fn(),
+  upselling,
+  dataQualityPanelConfig: undefined,
+};
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
-  upselling: new UpsellingService(),
+  experimentalFeatures: allowedExperimentalValues, // default values
+  setAppLinksSwitcher: jest.fn(),
+  setDeepLinksFormatter: jest.fn(),
+  setDataQualityPanelConfig: jest.fn(),
 });
 
 const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setIsSidebarEnabled: jest.fn(),
-  setGetStartedPage: jest.fn(),
+  setComponents: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
-  setExtraAppLinks: jest.fn(),
   setExtraRoutes: jest.fn(),
+  getUpselling: () => upselling,
 });
 
 export const securitySolutionMock = {

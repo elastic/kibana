@@ -13,12 +13,11 @@ import type {
   UseFetchRelatedAlertsBySessionResult,
 } from './use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const entityId = 'entityId';
 const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsBySession', () => {
@@ -34,9 +33,7 @@ describe('useFetchRelatedAlertsBySession', () => {
       alertIds: [],
       count: 0,
     });
-    hookResult = renderHook(() =>
-      useFetchRelatedAlertsBySession({ dataFormattedForFieldBrowser, scopeId })
-    );
+    hookResult = renderHook(() => useFetchRelatedAlertsBySession({ entityId, scopeId }));
 
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
@@ -51,9 +48,7 @@ describe('useFetchRelatedAlertsBySession', () => {
       alertIds: [],
       count: 0,
     });
-    hookResult = renderHook(() =>
-      useFetchRelatedAlertsBySession({ dataFormattedForFieldBrowser, scopeId })
-    );
+    hookResult = renderHook(() => useFetchRelatedAlertsBySession({ entityId, scopeId }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(true);
@@ -68,9 +63,7 @@ describe('useFetchRelatedAlertsBySession', () => {
       alertIds: ['1', '2'],
       count: 2,
     });
-    hookResult = renderHook(() =>
-      useFetchRelatedAlertsBySession({ dataFormattedForFieldBrowser, scopeId })
-    );
+    hookResult = renderHook(() => useFetchRelatedAlertsBySession({ entityId, scopeId }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);

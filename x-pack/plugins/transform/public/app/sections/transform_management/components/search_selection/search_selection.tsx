@@ -5,21 +5,49 @@
  * 2.0.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import { EuiButton, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React, { type FC, Fragment, useCallback, useEffect, useRef } from 'react';
+
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
+  onCloseModal: () => void;
 }
 
 const fixedPageSize: number = 8;
 
-export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const { uiSettings, http, savedObjectsManagement } = useAppDependencies();
+export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected, onCloseModal }) => {
+  const { contentManagement, uiSettings, dataViewEditor } = useAppDependencies();
+
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+
+  const closeDataViewEditor = useRef<() => void | undefined>();
+
+  const createNewDataView = useCallback(() => {
+    onCloseModal();
+    closeDataViewEditor.current = dataViewEditor?.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          onSearchSelected(dataView.id, 'index-pattern');
+        }
+      },
+
+      allowAdHocDataView: true,
+    });
+  }, [dataViewEditor, onCloseModal, onSearchSelected]);
+
+  useEffect(function cleanUpFlyout() {
+    return () => {
+      // Close the editor when unmounting
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -67,16 +95,28 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
                   defaultMessage: 'Data view',
                 }
               ),
-              defaultSearchField: 'name',
             },
           ]}
           fixedPageSize={fixedPageSize}
-          services={{
-            uiSettings,
-            http,
-            savedObjectsManagement,
-          }}
-        />
+          services={{ contentClient: contentManagement.client, uiSettings }}
+        >
+          {canEditDataView ? (
+            <EuiButton
+              onClick={createNewDataView}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="newDataViewButton"
+              disabled={!canEditDataView}
+            >
+              <FormattedMessage
+                id="xpack.transform.newTransform.searchSelection.createADataView"
+                defaultMessage="Create a data view"
+              />
+            </EuiButton>
+          ) : (
+            <Fragment />
+          )}
+        </SavedObjectFinder>
       </EuiModalBody>
     </>
   );

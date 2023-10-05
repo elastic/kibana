@@ -923,6 +923,20 @@ export function getCoreUsageCollector(
             'How many times this API has been called without the `createNewCopiesEnabled` option.',
         },
       },
+      'apiCalls.savedObjectsImport.compatibilityModeEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called with the `compatibilityMode` option.',
+        },
+      },
+      'apiCalls.savedObjectsImport.compatibilityModeEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called without the `compatibilityMode` option.',
+        },
+      },
       'apiCalls.savedObjectsImport.overwriteEnabled.yes': {
         type: 'long',
         _meta: {

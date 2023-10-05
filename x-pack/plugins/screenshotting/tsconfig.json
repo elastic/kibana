@@ -23,6 +23,8 @@
     "@kbn/utils",
     "@kbn/safer-lodash-set",
     "@kbn/core-logging-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

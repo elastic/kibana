@@ -22,47 +22,52 @@ export const telemetryDetectionRulesPreviewRoute = (
   telemetryReceiver: ITelemetryReceiver,
   telemetrySender: ITelemetryEventsSender
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: SECURITY_TELEMETRY_URL,
-      validate: false,
+      access: 'internal',
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const detectionRules = await getDetectionRulesPreview({
-        logger,
-        telemetryReceiver,
-        telemetrySender,
-      });
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      async (context, request, response) => {
+        const detectionRules = await getDetectionRulesPreview({
+          logger,
+          telemetryReceiver,
+          telemetrySender,
+        });
 
-      const securityLists = await getSecurityListsPreview({
-        logger,
-        telemetryReceiver,
-        telemetrySender,
-      });
+        const securityLists = await getSecurityListsPreview({
+          logger,
+          telemetryReceiver,
+          telemetrySender,
+        });
 
-      const endpoints = await getEndpointPreview({
-        logger,
-        telemetryReceiver,
-        telemetrySender,
-      });
+        const endpoints = await getEndpointPreview({
+          logger,
+          telemetryReceiver,
+          telemetrySender,
+        });
 
-      const diagnostics = await getDiagnosticsPreview({
-        logger,
-        telemetryReceiver,
-        telemetrySender,
-      });
+        const diagnostics = await getDiagnosticsPreview({
+          logger,
+          telemetryReceiver,
+          telemetrySender,
+        });
 
-      return response.ok({
-        body: {
-          detection_rules: detectionRules,
-          security_lists: securityLists,
-          endpoints,
-          diagnostics,
-        },
-      });
-    }
-  );
+        return response.ok({
+          body: {
+            detection_rules: detectionRules,
+            security_lists: securityLists,
+            endpoints,
+            diagnostics,
+          },
+        });
+      }
+    );
 };

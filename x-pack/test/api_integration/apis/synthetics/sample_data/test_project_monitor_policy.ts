@@ -6,6 +6,15 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import { getDataStream } from './test_policy';
+
+export const commonVars = {
+  max_attempts: {
+    type: 'integer',
+    value: 2,
+  },
+};
 
 export const getTestProjectSyntheticsPolicyLightweight = (
   {
@@ -37,7 +46,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -122,6 +131,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'integer',
               value: '0',
             },
+            ...commonVars,
             mode: {
               type: 'text',
               value: 'any',
@@ -240,6 +250,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             schedule: '@every 60m',
             timeout: '80s',
             max_redirects: 0,
+            max_attempts: 2,
             tags: ['tag2', 'tag2'],
             proxy_url: 'testGlobalParamOverwrite',
             'run_from.geo.name': locationName ?? 'Test private location 0',
@@ -314,6 +325,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'ssl.supported_protocols': { type: 'yaml' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
+            ...commonVars,
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -348,6 +360,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             tags: { type: 'yaml' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
+            ...commonVars,
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -416,6 +429,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'source.zip_url.proxy_url': { type: 'text' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
+            ...commonVars,
             id: { type: 'text' },
             origin: { type: 'text' },
             ...inputs,
@@ -520,7 +534,7 @@ export const getTestProjectSyntheticsPolicy = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -570,6 +584,7 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.supported_protocols': { type: 'yaml' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
+            ...commonVars,
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -612,6 +627,7 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
             location_name: { value: 'Fleet managed', type: 'text' },
+            ...commonVars,
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -645,6 +661,10 @@ export const getTestProjectSyntheticsPolicy = (
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
             location_name: { value: 'Fleet managed', type: 'text' },
+            max_attempts: {
+              type: 'integer',
+              value: 2,
+            },
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -662,15 +682,7 @@ export const getTestProjectSyntheticsPolicy = (
       streams: [
         {
           enabled: true,
-          data_stream: {
-            type: 'synthetics',
-            dataset: 'browser',
-            elasticsearch: {
-              privileges: {
-                indices: ['auto_configure', 'create_doc', 'read'],
-              },
-            },
-          },
+          data_stream: getDataStream('browser'),
           vars: {
             __ui: {
               value: '{"script_source":{"is_generated_script":false,"file_name":""}}',
@@ -719,6 +731,7 @@ export const getTestProjectSyntheticsPolicy = (
             'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
             'source.zip_url.proxy_url': { type: 'text' },
             location_name: { value: 'Test private location 0', type: 'text' },
+            ...commonVars,
             location_id: { value: 'fleet_managed', type: 'text' },
             id: { value: id, type: 'text' },
             origin: { value: 'project', type: 'text' },
@@ -756,15 +769,7 @@ export const getTestProjectSyntheticsPolicy = (
         },
         {
           enabled: true,
-          data_stream: {
-            type: 'synthetics',
-            dataset: 'browser.network',
-            elasticsearch: {
-              privileges: {
-                indices: ['auto_configure', 'create_doc', 'read'],
-              },
-            },
-          },
+          data_stream: getDataStream('browser.network'),
           id: `synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
             processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
@@ -772,15 +777,7 @@ export const getTestProjectSyntheticsPolicy = (
         },
         {
           enabled: true,
-          data_stream: {
-            type: 'synthetics',
-            dataset: 'browser.screenshot',
-            elasticsearch: {
-              privileges: {
-                indices: ['auto_configure', 'create_doc', 'read'],
-              },
-            },
-          },
+          data_stream: getDataStream('browser.screenshot'),
           id: `synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
             processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],

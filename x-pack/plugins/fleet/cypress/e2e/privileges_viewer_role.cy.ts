@@ -7,12 +7,13 @@
 
 import { FLEET, INTEGRATIONS } from '../tasks/navigation';
 import { createUsers, BuiltInViewerUser, deleteUsers } from '../tasks/privileges';
-import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { getIntegrationCard } from '../screens/integrations';
 
 import { MISSING_PRIVILEGES } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
+import { scrollToIntegration } from '../tasks/integrations';
 
 const usersToCreate = [BuiltInViewerUser];
 
@@ -20,6 +21,10 @@ const usersToCreate = [BuiltInViewerUser];
 describe('When the user has Viewer built-in role', () => {
   before(() => {
     createUsers(usersToCreate);
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   afterEach(() => {
@@ -44,6 +49,7 @@ describe('When the user has Viewer built-in role', () => {
   describe('Integrations', () => {
     it('are visible but cannot be added', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, BuiltInViewerUser);
+      scrollToIntegration(getIntegrationCard('apache'));
       cy.getBySel(getIntegrationCard('apache')).click();
       cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
     });

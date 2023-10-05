@@ -79,9 +79,11 @@
     "@kbn/babel-register",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-page-kibana-template",
   ],
   "exclude": [
     "target/**/*",

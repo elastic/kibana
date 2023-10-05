@@ -12,12 +12,12 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
+import type { UsageData } from './spaces_usage_collector';
+import { getSpacesUsageCollector } from './spaces_usage_collector';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
-import type { UsageData } from './spaces_usage_collector';
-import { getSpacesUsageCollector } from './spaces_usage_collector';
 
 interface SetupOpts {
   license?: Partial<ILicense>;

@@ -9,7 +9,6 @@ import React from 'react';
 import type { Store } from 'redux';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import type { DroppableProps, DraggableProps } from 'react-beautiful-dnd';
 
 import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
@@ -38,6 +37,12 @@ import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
+import type {
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from '@hello-pangea/dnd';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock(
@@ -171,52 +176,55 @@ jest.mock(
   }
 );
 
-jest.mock('react-beautiful-dnd', () => {
-  const original = jest.requireActual('react-beautiful-dnd');
-  return {
-    ...original,
-    Droppable: ({ children }: { children: DroppableProps['children'] }) =>
-      children(
-        {
-          droppableProps: {
-            'data-rbd-droppable-context-id': '',
-            'data-rbd-droppable-id': '',
-          },
-          innerRef: jest.fn(),
+jest.mock('@hello-pangea/dnd', () => ({
+  Droppable: ({
+    children,
+  }: {
+    children: (a: DroppableProvided, b: DroppableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        droppableProps: {
+          'data-rfd-droppable-context-id': '123',
+          'data-rfd-droppable-id': '123',
         },
-        {
-          isDraggingOver: false,
-          isUsingPlaceholder: false,
-        }
-      ),
-    Draggable: ({ children }: { children: DraggableProps['children'] }) =>
-      children(
-        {
-          draggableProps: {
-            'data-rbd-draggable-context-id': '',
-            'data-rbd-draggable-id': '',
-          },
-          innerRef: jest.fn(),
+        innerRef: jest.fn(),
+        placeholder: null,
+      },
+      {
+        isDraggingOver: false,
+        draggingOverWith: null,
+        draggingFromThisWith: null,
+        isUsingPlaceholder: false,
+      }
+    ),
+  Draggable: ({
+    children,
+  }: {
+    children: (a: DraggableProvided, b: DraggableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        draggableProps: {
+          'data-rfd-draggable-context-id': '123',
+          'data-rfd-draggable-id': '123',
         },
-        {
-          isDragging: false,
-          isDropAnimating: false,
-        },
-        {
-          draggableId: '',
-          mode: 'SNAP',
-          source: {
-            droppableId: '',
-            index: 0,
-          },
-        }
-      ),
-    DraggableProvided: () => <></>,
-    DraggableStateSnapshot: () => <></>,
-    DraggingStyle: () => <></>,
-    NotDraggingStyle: () => <></>,
-  };
-});
+        innerRef: jest.fn(),
+        dragHandleProps: null,
+      },
+      {
+        isDragging: false,
+        isDropAnimating: false,
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
+      }
+    ),
+  DragDropContext: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 describe('Body', () => {
   const getWrapper = async (childrenComponent: JSX.Element, store?: { store: Store<State> }) => {

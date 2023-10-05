@@ -1,5 +1,5 @@
 {
-  "xpack.rollup.put_job": {
+  "rollup.put_job": {
     "data_autocomplete_rules": {
       "index_pattern": "",
       "rollup_index": "",

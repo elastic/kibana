@@ -178,14 +178,31 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     );
 
     const fieldOptions: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = useMemo(() => {
-      const selectableFields: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = (
-        ['file.hash.*', 'file.path'] as BlocklistConditionEntryField[]
-      ).map((field) => ({
-        value: field,
-        inputDisplay: CONDITION_FIELD_TITLE[field],
-        dropdownDisplay: getDropdownDisplay(field),
-        'data-test-subj': getTestId(field),
-      }));
+      const selectableFields: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = [];
+
+      selectableFields.push({
+        value: 'file.hash.*',
+        inputDisplay: CONDITION_FIELD_TITLE['file.hash.*'],
+        dropdownDisplay: getDropdownDisplay('file.hash.*'),
+        'data-test-subj': getTestId('file.hash.*'),
+      });
+
+      if (selectedOs === OperatingSystem.LINUX) {
+        selectableFields.push({
+          value: 'file.path',
+          inputDisplay: CONDITION_FIELD_TITLE['file.path'],
+          dropdownDisplay: getDropdownDisplay('file.path'),
+          'data-test-subj': getTestId('file.path'),
+        });
+      } else {
+        selectableFields.push({
+          value: 'file.path.caseless',
+          inputDisplay: CONDITION_FIELD_TITLE['file.path.caseless'],
+          dropdownDisplay: getDropdownDisplay('file.path.caseless'),
+          'data-test-subj': getTestId('file.path.caseless'),
+        });
+      }
+
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
           value: 'file.Ext.code_signature',

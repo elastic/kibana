@@ -24,7 +24,7 @@ import {
   embeddableStart,
   usageCollection,
   savedObjectsTaggingOss,
-  savedObjectsManagement,
+  contentManagement,
 } from '../kibana_services';
 import {
   IContainer,
@@ -85,7 +85,7 @@ export const AddPanelFlyout = ({
           (embeddableFactory) =>
             Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
         )
-        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData<unknown>),
+        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData),
     [factoriesBySavedObjectType]
   );
 
@@ -103,7 +103,8 @@ export const AddPanelFlyout = ({
 
       const embeddable = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
         factoryForSavedObjectType.type,
-        { savedObjectId: id }
+        { savedObjectId: id },
+        savedObject.attributes
       );
       onAddPanel?.(embeddable.id);
 
@@ -125,10 +126,9 @@ export const AddPanelFlyout = ({
       <EuiFlyoutBody>
         <SavedObjectFinder
           services={{
-            http: core.http,
-            savedObjectsManagement,
-            uiSettings: core.uiSettings,
+            contentClient: contentManagement.client,
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+            uiSettings: core.uiSettings,
           }}
           onChoose={onChoose}
           savedObjectMetaData={metaData}

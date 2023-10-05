@@ -27,80 +27,91 @@ import { getIdError } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      validate: {
-        body: buildRouteValidation(UpdateRuleRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<UpdateRuleResponse>> => {
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateUpdateRuleProps(request.body);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
-      try {
-        const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: buildRouteValidation(UpdateRuleRequestBody),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<UpdateRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validateUpdateRuleProps(request.body);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
+        try {
+          const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
-        const rulesClient = ctx.alerting.getRulesClient();
-        const savedObjectsClient = ctx.core.savedObjects.client;
+          const rulesClient = ctx.alerting.getRulesClient();
+          const savedObjectsClient = ctx.core.savedObjects.client;
 
-        const mlAuthz = buildMlAuthz({
-          license: ctx.licensing.license,
-          ml,
-          request,
-          savedObjectsClient,
-        });
-        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+          const mlAuthz = buildMlAuthz({
+            license: ctx.licensing.license,
+            ml,
+            request,
+            savedObjectsClient,
+          });
+          throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
-        checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
+          checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
-        await validateRuleDefaultExceptionList({
-          exceptionsList: request.body.exceptions_list,
-          rulesClient,
-          ruleRuleId: request.body.rule_id,
-          ruleId: request.body.id,
-        });
+          await validateRuleDefaultExceptionList({
+            exceptionsList: request.body.exceptions_list,
+            rulesClient,
+            ruleRuleId: request.body.rule_id,
+            ruleId: request.body.id,
+          });
 
-        const existingRule = await readRules({
-          rulesClient,
-          ruleId: request.body.rule_id,
-          id: request.body.id,
-        });
+          const existingRule = await readRules({
+            rulesClient,
+            ruleId: request.body.rule_id,
+            id: request.body.id,
+          });
 
-        await validateResponseActionsPermissions(ctx.securitySolution, request.body, existingRule);
+          await validateResponseActionsPermissions(
+            ctx.securitySolution,
+            request.body,
+            existingRule
+          );
 
-        const rule = await updateRules({
-          rulesClient,
-          existingRule,
-          ruleUpdate: request.body,
-        });
+          const rule = await updateRules({
+            rulesClient,
+            existingRule,
+            ruleUpdate: request.body,
+          });
 
-        if (rule != null) {
-          const [validated, errors] = transformValidate(rule);
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+          if (rule != null) {
+            const [validated, errors] = transformValidate(rule);
+            if (errors != null) {
+              return siemResponse.error({ statusCode: 500, body: errors });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           } else {
-            return response.ok({ body: validated ?? {} });
+            const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
           }
-        } else {
-          const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

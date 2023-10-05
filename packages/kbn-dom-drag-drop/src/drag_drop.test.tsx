@@ -119,6 +119,28 @@ describe('DragDrop', () => {
     });
   });
 
+  test('dragstart sets dragClassName as expected', async () => {
+    const dndDispatch = jest.fn();
+    const component = mount(
+      <ChildDragDropProvider value={[{ ...defaultContextState, dragging: undefined }, dndDispatch]}>
+        <DragDrop value={value} draggable={true} order={[2, 0, 1, 0]} dragClassName="dragTest">
+          <button>Hi!</button>
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+    const dragDrop = component.find('[data-test-subj="testDragDrop"]').at(0);
+
+    expect(dragDrop.getDOMNode().querySelector('.dragTest')).toBeNull();
+    dragDrop.simulate('dragstart', { dataTransfer });
+    expect(dragDrop.getDOMNode().querySelector('.dragTest')).toBeDefined();
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(dragDrop.getDOMNode().querySelector('.dragTest')).toBeNull();
+  });
+
   test('drop resets all the things', async () => {
     const preventDefault = jest.fn();
     const stopPropagation = jest.fn();

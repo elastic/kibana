@@ -28,9 +28,11 @@ describe('DataQualityPanel', () => {
             httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
             isAssistantEnabled={true}
+            isILMAvailable={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
           />
@@ -62,9 +64,11 @@ describe('DataQualityPanel', () => {
             httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
             isAssistantEnabled={true}
+            isILMAvailable={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
           />
