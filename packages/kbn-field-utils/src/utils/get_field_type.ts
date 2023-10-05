@@ -7,15 +7,16 @@
  */
 
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldListItem } from '../../types';
-import { getFieldIconType } from '../../utils/field_types';
-import { type FieldIconProps } from './field_icon';
+import type { FieldBase, FieldTypeKnown } from '../types';
 
-export function getFieldIconProps<T extends FieldListItem = DataViewField>(
-  field: T
-): FieldIconProps {
-  return {
-    type: getFieldIconType(field),
-    scripted: field.scripted,
-  };
+/**
+ * Returns a field type. Time series metric type will override the original field type.
+ * @param field
+ */
+export function getFieldType<T extends FieldBase = DataViewField>(field: T): FieldTypeKnown {
+  const timeSeriesMetric = field.timeSeriesMetric;
+  if (timeSeriesMetric) {
+    return timeSeriesMetric;
+  }
+  return field.type ?? 'string';
 }

@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getFieldTypeDescription } from './get_field_type_description';
-export { getFieldType } from './get_field_type';
-export { getFieldIconType } from './get_field_icon_type';
+export type { FieldTypeKnown, FieldBase } from './src/types';
