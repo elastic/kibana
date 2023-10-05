@@ -17,8 +17,6 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ScaleCategoricalIcon } from './scale_categorical';
-import { ScaleSequentialIcon } from './scale_sequential';
 
 import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
@@ -228,14 +226,14 @@ export function PaletteSelector({
                   label: i18n.translate('coloring.colorMapping.paletteSelector.categoricalLabel', {
                     defaultMessage: `Categorical`,
                   }),
-                  iconType: ScaleCategoricalIcon,
+                  iconType: 'palette',
                 },
                 {
                   id: `gradient`,
                   label: i18n.translate('coloring.colorMapping.paletteSelector.sequentialLabel', {
                     defaultMessage: `Sequential`,
                   }),
-                  iconType: ScaleSequentialIcon,
+                  iconType: 'gradient',
                 },
               ]}
               isFullWidth
