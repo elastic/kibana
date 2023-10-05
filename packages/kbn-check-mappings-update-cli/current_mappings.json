@@ -880,9 +880,6 @@
     "properties": {
       "flapping": {
         "properties": {}
-      },
-      "queryDelay": {
-        "properties": {}
       }
     }
   },
