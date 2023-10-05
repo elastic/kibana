@@ -286,7 +286,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             validColumns: 'indicatorField',
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('have.text', 'agent.name');
+          getIndicatorIndexComboField().find('input').should('have.value', 'agent.name');
           getIndicatorMappingComboField().should(
             'have.text',
             getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
@@ -309,7 +309,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             validColumns: 'indexField',
           });
           getIndicatorDeleteButton().click();
-          getIndicatorMappingComboField().should('have.text', 'second-non-existent-value');
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('have.value', 'second-non-existent-value');
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -328,7 +330,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             validColumns: 'indicatorField',
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('have.text', 'second-non-existent-value');
+          getIndicatorIndexComboField()
+            .find('input')
+            .should('have.value', 'second-non-existent-value');
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
