@@ -203,28 +203,38 @@ export async function createChatService({
 
           const subscription = readableStreamReaderIntoObservable(reader)
             .pipe(
+              // lines start with 'data: '
               map((line) => line.substring(6)),
+              // a message completes with the line '[DONE]'
               rxJsFilter((line) => !!line && line !== '[DONE]'),
+              // parse the JSON, add the type
               map(
                 (line) =>
                   JSON.parse(line) as
                     | CreateChatCompletionResponseChunk
                     | { error: { message: string } }
               ),
+              // validate the message. in some cases OpenAI
+              // will throw halfway through the message
               tap((line) => {
                 if ('error' in line) {
                   throw new ServerError(line.error.message);
                 }
               }),
+              // there also might be some metadata that we need
+              // to exclude
               rxJsFilter(
                 (line): line is CreateChatCompletionResponseChunk =>
                   'object' in line && line.object === 'chat.completion.chunk'
               ),
+              // this is how OpenAI signals that the context window
+              // limit has been exceeded
               tap((line) => {
                 if (line.choices[0].finish_reason === 'length') {
                   throw new TokenLimitReachedError();
                 }
               }),
+              // merge the messages
               scan(
                 (acc, { choices }) => {
                   acc.message.content += choices[0].delta.content ?? '';
@@ -245,6 +255,7 @@ export async function createChatService({
                   },
                 }
               ),
+              // convert an error into state
               catchError((error) =>
                 of({
                   ...subject.value,
@@ -255,6 +266,7 @@ export async function createChatService({
             )
             .subscribe(subject);
 
+          // if the request is aborted, convert that into state as well
           controller.signal.addEventListener('abort', () => {
             subscription.unsubscribe();
             subject.next({
@@ -286,11 +298,18 @@ export async function createChatService({
       const MIN_DELAY = 50;
 
       const pendingMessages$ = subject.pipe(
+        // make sure the request is only triggered once,
+        // even with multiple subscribers
         shareReplay(1),
+        // if the Observable is no longer subscribed,
+        // abort the running request
         finalize(() => {
           controller.abort();
         }),
+        // append a timestamp of when each value was emitted
         timestamp(),
+        // use the previous timestamp to calculate a target
+        // timestamp for emitting the next value
         scan((acc, value) => {
           const lastTimestamp = acc.timestamp || 0;
           const emitAt = Math.max(lastTimestamp + MIN_DELAY, value.timestamp);
@@ -299,6 +318,10 @@ export async function createChatService({
             value: value.value,
           };
         }),
+        // add the delay based on the elapsed time
+        // using concatMap(of(value).pipe(delay(50))
+        // leads to browser issues because timers
+        // are throttled when the tab is not active
         concatMap((value) => {
           const now = Date.now();
           const delayFor = value.timestamp - now;
