@@ -152,13 +152,14 @@ export const FieldsSelectorTable = ({
           <EuiText data-test-subj="csp:dataTable:fieldsModal:fieldsShowing" size="xs">
             <FormattedMessage
               id="xpack.csp.dataTable.fieldsModalFieldsShowing"
-              defaultMessage="Showing {totalFields} fields"
+              defaultMessage="Showing"
+            />{' '}
+            <strong data-test-subj="csp:dataTable:fieldsModal:fieldsCount">{totalFields}</strong>{' '}
+            <FormattedMessage
+              id="xpack.csp.dataTable.fieldsModalFieldsCount"
+              defaultMessage="{totalFields, plural, one {field} other {fields}}"
               values={{
-                totalFields: (
-                  <strong data-test-subj="csp:dataTable:fieldsModal:fieldsCount">
-                    {totalFields}
-                  </strong>
-                ),
+                totalFields,
               }}
             />
           </EuiText>
