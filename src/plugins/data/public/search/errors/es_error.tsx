@@ -27,6 +27,10 @@ export class EsError extends KbnError {
     this.attributes = err.attributes;
   }
 
+  public getAttributes() {
+    return this.attributes;
+  }
+
   public getErrorMessage(application: ApplicationStart) {
     const rootCause = getRootCause(this.err)?.reason;
     const topLevelCause = this.attributes?.reason;
