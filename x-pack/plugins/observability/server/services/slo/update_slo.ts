@@ -36,8 +36,6 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
-    await this.deleteObsoleteSLORevisionData(originalSlo);
-
     const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
     await this.transformManager.install(updatedSlo);
@@ -50,6 +48,8 @@ export class UpdateSLO {
       document: createTempSummaryDocument(updatedSlo),
       refresh: true,
     });
+
+    await this.deleteObsoleteSLORevisionData(originalSlo);
 
     return this.toResponse(updatedSlo);
   }
