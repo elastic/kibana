@@ -5,7 +5,7 @@
     padding-left: $euiFormMaxWidth;
     margin-left: -$euiFormMaxWidth;
     pointer-events: none;
-    > * {
+    .euiFlyoutFooter {
       pointer-events: auto;
     }
   }
