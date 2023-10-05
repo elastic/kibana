@@ -29,6 +29,7 @@ import { AdditionalControls } from './additional_controls';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
+  width?: number;
 }
 
 const gridStyle: EuiDataGridStyle = {
@@ -39,6 +40,9 @@ const gridStyle: EuiDataGridStyle = {
 };
 
 const useNewFieldsApi = true;
+
+// Hide Checkbox, enable open details Flyout
+const controlColumnIds = ['openDetails'];
 
 interface CloudSecurityDataGridProps {
   dataView: DataView;
@@ -103,7 +107,8 @@ export const CloudSecurityDataTable = ({
     `${columnsLocalStorageKey}:settings`,
     {
       columns: defaultColumns.reduce((prev, curr) => {
-        const newColumn = { [curr.id]: {} };
+        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
+        const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
     }
@@ -215,7 +220,7 @@ export const CloudSecurityDataTable = ({
     // Change the height of the grid to fit the page
     // If there are filters, leave space for the filter bar
     // Todo: Replace this component with EuiAutoSizer
-    height: `calc(100vh - ${filters.length > 0 ? 454 : 414}px)`,
+    height: `calc(100vh - ${filters.length > 0 ? 443 : 403}px)`,
   };
 
   const rowHeightState =
@@ -263,6 +268,7 @@ export const CloudSecurityDataTable = ({
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
+          controlColumnIds={controlColumnIds}
         />
       </div>
     </CellActionsProvider>
