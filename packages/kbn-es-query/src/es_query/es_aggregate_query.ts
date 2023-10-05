@@ -29,7 +29,8 @@ export function getAggregateQueryMode(query: AggregateQuery): Language {
 }
 
 export function getLanguageDisplayName(language?: string): string {
-  return language && language === 'esql' ? 'es|ql' : language ?? 'es|ql';
+  const displayName = language && language === 'esql' ? 'es|ql' : language ?? 'es|ql';
+  return displayName.toUpperCase();
 }
 
 // retrieves the index pattern from the aggregate query for SQL

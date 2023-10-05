@@ -39,7 +39,7 @@ export default function TextBasedLanguagesTransitionModal({
     setDismissModalChecked(e.target.checked);
   }, []);
 
-  const language = getLanguageDisplayName(textBasedLanguage).toUpperCase();
+  const language = getLanguageDisplayName(textBasedLanguage);
   return (
     <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
       <EuiModalHeader>

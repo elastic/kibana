@@ -84,7 +84,7 @@ const getWrapperWithTooltip = (
 ) => {
   if (enableTooltip && query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
-    const displayName = getLanguageDisplayName(textBasedLanguage).toUpperCase();
+    const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
       <EuiToolTip
         position="top"
