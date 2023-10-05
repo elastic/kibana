@@ -30,6 +30,8 @@ export function getGroupsWithReaddedDuplicates(
         group.push(
           ...duplicates.group.map((d) => {
             return {
+              key: d.key,
+              type: d.type,
               fieldName: d.fieldName,
               fieldValue: d.fieldValue,
               pValue: d.pValue,

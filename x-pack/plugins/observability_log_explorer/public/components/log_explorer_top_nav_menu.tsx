@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import { type BehaviorSubject, distinctUntilChanged, filter, take } from 'rxjs';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -37,12 +36,13 @@ import {
   onboardingLinkTitle,
 } from '../../common/translations';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
+import { ObservabilityLogExplorerAppMountParameters } from '../types';
 
 interface LogExplorerTopNavMenuProps {
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
   services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
   state$: BehaviorSubject<LogExplorerStateContainer>;
-  theme$: AppMountParameters['theme$'];
+  theme$: ObservabilityLogExplorerAppMountParameters['theme$'];
 }
 
 export const LogExplorerTopNavMenu = ({
