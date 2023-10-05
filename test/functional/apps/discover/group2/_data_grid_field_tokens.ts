@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -21,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -31,26 +31,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   async function findFirstColumnTokens() {
-    const header = await testSubjects.find('euiDataGridBody > dataGridHeader');
-    return await findFirstFieldIcons(header);
+    return await findFirstFieldIcons('euiDataGridBody > dataGridHeader');
   }
 
   async function findFirstDocViewerTokens() {
     await dataGrid.clickRowToggle({ rowIndex: 0 });
-    const docViewer = await testSubjects.find('docTableDetailsFlyout');
-    return await findFirstFieldIcons(docViewer);
+    return await findFirstFieldIcons('docTableDetailsFlyout');
   }
 
-  async function findFirstFieldIcons(element: WebElementWrapper) {
-    const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
+  async function findFirstFieldIcons(elementSelector: string) {
+    let firstFieldIcons: string[] = [];
 
-    return await Promise.all(
-      fieldIcons.map((fieldIcon) => fieldIcon.getAttribute('aria-label')).slice(0, 10)
-    );
+    await retry.try(async () => {
+      const element = await testSubjects.find(elementSelector);
+      const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
+
+      try {
+        firstFieldIcons = await Promise.all(
+          fieldIcons.map((fieldIcon) => fieldIcon.getAttribute('aria-label')).slice(0, 10)
+        );
+      } catch {
+        throw new Error('stale references to elements');
+      }
+    });
+
+    return firstFieldIcons;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/168115
-  describe.skip('discover data grid field tokens', function () {
+  describe('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
