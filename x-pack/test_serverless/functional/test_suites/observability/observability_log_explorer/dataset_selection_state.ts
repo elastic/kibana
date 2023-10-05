@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
     'header',
   ]);
-  
+
   describe('DatasetSelection initialization and update', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
