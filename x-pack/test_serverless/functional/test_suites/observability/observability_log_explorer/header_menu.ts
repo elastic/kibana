@@ -18,10 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'observabilityLogExplorer',
     'svlCommonPage',
     'timePicker',
+    'header',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/167189
-  describe.skip('Header menu', () => {
+  describe('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -47,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Discover fallback link', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {
@@ -55,9 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
-        // Set timerange to specific values to match data and retrieve config
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
@@ -99,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Add data link', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {
