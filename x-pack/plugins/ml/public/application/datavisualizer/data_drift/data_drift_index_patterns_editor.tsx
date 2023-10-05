@@ -329,7 +329,7 @@ export function DataDriftIndexPatternsEditor({
                   }}
                   isClearable={false}
                   isDisabled={comparisonIndexPattern === '' && referenceIndexPattern === ''}
-                  data-test-subj="timestampField"
+                  data-test-subj="mlDataDriftTimestampField"
                   aria-label={i18n.translate(
                     'xpack.ml.dataDrift.indexPatternsEditor.timestampSelectAriaLabel',
                     {

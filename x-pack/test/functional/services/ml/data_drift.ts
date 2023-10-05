@@ -17,6 +17,7 @@ export function MachineLearningDataDriftProvider({
   const PageObjects = getPageObjects(['discover', 'header']);
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const comboBox = getService('comboBox');
 
   type RandomSamplerOption =
     | 'dvRandomSamplerOptionOnAutomatic'
@@ -272,6 +273,24 @@ export function MachineLearningDataDriftProvider({
         await testSubjects.click('analyzeDataDriftButton');
         await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
       });
+    },
+
+    async assertDataDriftTimestampField(expectedIdentifier: string) {
+      await retry.tryForTime(2000, async () => {
+        const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+          'mlDataDriftTimestampField > comboBoxInput'
+        );
+        expect(comboBoxSelectedOptions).to.eql(
+          expectedIdentifier === '' ? [] : [expectedIdentifier],
+          `Expected type field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        );
+      });
+    },
+
+    async selectTimeField(timeFieldName: string) {
+      await comboBox.set('mlDataDriftTimestampField', timeFieldName);
+
+      await this.assertDataDriftTimestampField(timeFieldName);
     },
   };
 }

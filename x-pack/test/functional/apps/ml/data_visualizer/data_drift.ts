@@ -59,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
     await ml.dataDrift.runAnalysis();
   }
+
   describe('data drift', async function () {
     before(async () => {
       await ml.testResources.deleteIndexPatternByTitle('ft_fare*');
@@ -125,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await elasticChart.setNewChartUiDebugFlag(true);
       });
 
-      it(`${testData.suiteTitle} allows analyzing data drift without setting time field`, async () => {
+      it(`${testData.suiteTitle} allows analyzing data drift without saving`, async () => {
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} loads the saved search selection page`
         );
@@ -141,6 +142,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testExecution.logTestStep(`${testData.suiteTitle} sets index patterns`);
         await ml.dataDrift.setIndexPatternInput('reference', 'ft_fare*');
         await ml.dataDrift.setIndexPatternInput('comparison', 'ft_fareq*');
+
+        await ml.dataDrift.selectTimeField(testData.dateTimeField);
 
         await ml.dataDrift.assertAnalyzeWithoutSavingButtonState(false);
         await ml.dataDrift.assertAnalyzeDataDriftButtonState(false);
