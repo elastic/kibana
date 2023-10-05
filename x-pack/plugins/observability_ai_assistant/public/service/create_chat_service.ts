@@ -23,6 +23,7 @@ import {
   scan,
   shareReplay,
   tap,
+  timestamp,
 } from 'rxjs';
 import {
   ContextRegistry,
@@ -282,13 +283,35 @@ export async function createChatService({
           subject.complete();
         });
 
-      return subject.pipe(
-        concatMap((value) => of(value).pipe(delay(50))),
+      const MIN_DELAY = 50;
+
+      const pendingMessages$ = subject.pipe(
         shareReplay(1),
         finalize(() => {
           controller.abort();
+        }),
+        timestamp(),
+        scan((acc, value) => {
+          const lastTimestamp = acc.timestamp || 0;
+          const emitAt = Math.max(lastTimestamp + MIN_DELAY, value.timestamp);
+          return {
+            timestamp: emitAt,
+            value: value.value,
+          };
+        }),
+        concatMap((value) => {
+          const now = Date.now();
+          const delayFor = value.timestamp - now;
+
+          if (delayFor <= 0) {
+            return of(value.value);
+          }
+
+          return of(value.value).pipe(delay(delayFor));
         })
       );
+
+      return pendingMessages$;
     },
   };
 }
