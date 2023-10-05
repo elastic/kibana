@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export const waitUntil = (subject: unknown, fn: (subject: unknown) => Promise<boolean>) => {
+export const waitUntil = (subject: unknown, fn: (subject: unknown) => Promise<unknown>) => {
   const timeout = 90000;
   const interval = 5000;
   let attempts = Math.floor(timeout / interval);
 
-  const completeOrRetry = (result?: Promise<boolean> | boolean) => {
+  const completeOrRetry = (result?: Promise<unknown>) => {
     if (result) {
       return result;
     }
