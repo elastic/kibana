@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
@@ -28,6 +22,7 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ActionDocument } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -35,24 +30,27 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
-  let alertId: string;
-  let startedAt: string;
 
   describe('Custom  Threshold rule - GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    // DATE_VIEW should match the index template:
+    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
+    let startedAt: string;
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await createDataView({
         supertest,
-        name: 'metrics-fake_hosts',
+        name: DATE_VIEW,
         id: DATA_VIEW_ID,
-        title: 'metrics-fake_hosts',
+        title: DATE_VIEW,
       });
     });
 
@@ -161,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (BETA)'
+          'Custom threshold (Technical Preview)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -232,14 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should set correct action variables', async () => {
         const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{
-          ruleType: string;
-          alertDetailsUrl: string;
-          reason: string;
-          value: string;
-          host: string;
-          group: string;
-        }>({
+        const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
         });

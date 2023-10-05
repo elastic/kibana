@@ -30,15 +30,12 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import {
-  buildScopedInternalSavedObjectsClientUnsafe,
-  convertRangeToISO,
-  isExecutionDurationExceededInterval,
-} from './helpers';
+import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
 import { RiskScoreEntity } from '../../../../common/risk_engine/types';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
+  RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
 } from '../../telemetry/event_based/events';
 
 const logFactory =
@@ -161,11 +158,13 @@ export const removeRiskScoringTask = async ({
 
 export const runTask = async ({
   getRiskScoreService,
+  isCancelled,
   logger,
   taskInstance,
   telemetry,
 }: {
   logger: Logger;
+  isCancelled: () => boolean;
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
@@ -228,7 +227,7 @@ export const runTask = async ({
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
     await asyncForEach(identifierTypes, async (identifierType) => {
-      let isWorkComplete = false;
+      let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
       while (!isWorkComplete) {
         const result = await riskScoreService.calculateAndPersistScores({
@@ -242,7 +241,7 @@ export const runTask = async ({
           weights: [],
         });
 
-        isWorkComplete = isRiskScoreCalculationComplete(result);
+        isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
         afterKeys = result.after_keys;
         scoresWritten += result.scores_written;
       }
@@ -251,19 +250,19 @@ export const runTask = async ({
     updatedState.scoresWritten = scoresWritten;
 
     const taskCompletionTime = moment().utc().toISOString();
-
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
-
     const telemetryEvent = {
       scoresWritten,
       taskDurationInSeconds,
-      executionDurationExceededInterval: isExecutionDurationExceededInterval(
-        taskInstance?.schedule?.interval,
-        taskDurationInSeconds
-      ),
+      interval: taskInstance?.schedule?.interval,
     };
 
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
+
+    if (isCancelled()) {
+      log('task was cancelled');
+      telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
+    }
 
     log('task run completed');
     log(JSON.stringify(telemetryEvent));
@@ -287,8 +286,13 @@ const createTaskRunnerFactory =
     telemetry: AnalyticsServiceSetup;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+    let cancelled = false;
+    const isCancelled = () => cancelled;
     return {
-      run: async () => runTask({ getRiskScoreService, logger, taskInstance, telemetry }),
-      cancel: async () => {},
+      run: async () =>
+        runTask({ getRiskScoreService, isCancelled, logger, taskInstance, telemetry }),
+      cancel: async () => {
+        cancelled = true;
+      },
     };
   };
