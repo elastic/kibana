@@ -159,7 +159,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           }
           return acc;
         }, [] as string[]);
-        log.info('Resolved spec files after findChangedFiles:', files);
 
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
