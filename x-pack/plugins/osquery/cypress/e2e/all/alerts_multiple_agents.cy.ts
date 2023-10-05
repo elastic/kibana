@@ -7,13 +7,11 @@
 
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
-  clickRuleName,
   inputQuery,
   loadRuleAlerts,
   submitQuery,
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
 describe(
@@ -29,7 +27,6 @@ describe(
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
-        loadRuleAlerts(data.name);
       });
     });
 
@@ -38,9 +35,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
-      cy.visit('/app/security/rules');
-      clickRuleName(ruleName);
+      loadRuleAlerts(ruleName);
     });
 
     it('should substitute parameters in investigation guide', () => {

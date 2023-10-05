@@ -18,13 +18,11 @@ import {
 import {
   addToCase,
   checkActionItemsInResults,
-  clickRuleName,
   loadRuleAlerts,
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
@@ -41,14 +39,11 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     loadRule(true).then((data) => {
       ruleId = data.id;
       ruleName = data.name;
-      loadRuleAlerts(data.name);
     });
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-    cy.visit('/app/security/rules');
-    clickRuleName(ruleName);
+    loadRuleAlerts(ruleName);
   });
 
   after(() => {
