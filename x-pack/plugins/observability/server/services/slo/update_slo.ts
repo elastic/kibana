@@ -49,15 +49,21 @@ export class UpdateSLO {
       refresh: true,
     });
 
-    await this.deleteObsoleteSLORevisionData(originalSlo);
+    await this.deleteOriginalSLO(originalSlo);
 
     return this.toResponse(updatedSlo);
   }
 
-  private async deleteObsoleteSLORevisionData(originalSlo: SLO) {
-    const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    await this.transformManager.stop(originalSloTransformId);
-    await this.transformManager.uninstall(originalSloTransformId);
+  private async deleteOriginalSLO(originalSlo: SLO) {
+    try {
+      const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
+      await this.transformManager.stop(originalSloTransformId);
+      await this.transformManager.uninstall(originalSloTransformId);
+    } catch (err) {
+      // Any errors here should not prevent moving forward.
+      // Worst case we keep rolling up data for the previous revision number.
+    }
+
     await this.deleteRollupData(originalSlo.id, originalSlo.revision);
     await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
   }
