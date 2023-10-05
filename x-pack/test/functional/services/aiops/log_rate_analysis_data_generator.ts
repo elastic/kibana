@@ -18,6 +18,7 @@ export interface GeneratedDoc {
   version: string;
   '@timestamp': number;
   should_ignore_this_field: string;
+  message?: string;
 }
 
 const REFERENCE_TS = 1669018354793;
@@ -26,7 +27,16 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-function getArtificialLogsWithDeviation(index: string, deviationType: string) {
+function getMessage(timestamp: number, user: string, url: string, responseCode: string) {
+  const date = new Date(timestamp);
+  return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
+}
+
+function getArtificialLogsWithDeviation(
+  index: string,
+  deviationType: string,
+  includeTextField = false
+) {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
@@ -47,14 +57,19 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
             tsOffset = 0;
             [...Array(100)].forEach(() => {
               tsOffset += Math.round(DAY_MS / 100);
+              const timestamp = ts + tsOffset;
               const doc: GeneratedDoc = {
                 user,
                 response_code: responseCode,
                 url,
                 version: 'v1.0.0',
-                '@timestamp': ts + tsOffset,
+                '@timestamp': timestamp,
                 should_ignore_this_field: 'should_ignore_this_field',
               };
+
+              if (includeTextField) {
+                doc.message = getMessage(timestamp, user, url, responseCode);
+              }
 
               bulkBody.push(action);
               bulkBody.push(doc);
@@ -77,17 +92,24 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
       tsOffset = 0;
       [...Array(docsPerUrl1[url])].forEach(() => {
         tsOffset += Math.round(DAY_MS / docsPerUrl1[url]);
-        bulkBody.push(action);
-        bulkBody.push({
+        const timestamp =
+          (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) + tsOffset;
+
+        const doc: GeneratedDoc = {
           user: 'Peter',
           response_code: responseCode,
           url,
           version: 'v1.0.0',
-          '@timestamp':
-            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
-            tsOffset,
+          '@timestamp': timestamp,
           should_ignore_this_field: 'should_ignore_this_field',
-        });
+        };
+
+        if (includeTextField) {
+          doc.message = getMessage(timestamp, 'Peter', url, responseCode);
+        }
+
+        bulkBody.push(action);
+        bulkBody.push(doc);
       });
     });
   });
@@ -102,17 +124,24 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
       tsOffset = 0;
       [...Array(docsPerUrl2[url] + userIndex)].forEach(() => {
         tsOffset += Math.round(DAY_MS / docsPerUrl2[url]);
-        bulkBody.push(action);
-        bulkBody.push({
+        const timestamp =
+          (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) + tsOffset;
+
+        const doc: GeneratedDoc = {
           user,
           response_code: '500',
           url,
           version: 'v1.0.0',
-          '@timestamp':
-            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
-            tsOffset,
+          '@timestamp': timestamp,
           should_ignore_this_field: 'should_ignore_this_field',
-        });
+        };
+
+        if (includeTextField) {
+          doc.message = 'an unexpected error occured';
+        }
+
+        bulkBody.push(action);
+        bulkBody.push(doc);
       });
     });
   });
@@ -164,8 +193,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
-        case 'artificial_logs_with_spike':
-        case 'artificial_logs_with_dip':
+        case 'artificial_logs_with_spike_notextfield':
+        case 'artificial_logs_with_spike_textfield':
+        case 'artificial_logs_with_dip_notextfield':
+        case 'artificial_logs_with_dip_textfield':
           try {
             await es.indices.delete({
               index: dataGenerator,
@@ -185,16 +216,18 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
                 version: { type: 'keyword' },
                 '@timestamp': { type: 'date' },
                 should_ignore_this_field: { type: 'keyword', doc_values: false, index: false },
+                message: { type: 'text' },
               },
             },
           });
 
+          const dataGeneratorOptions = dataGenerator.split('_');
+          const deviationType = dataGeneratorOptions[3] ?? LOG_RATE_ANALYSIS_TYPE.SPIKE;
+          const textField = dataGeneratorOptions[4] === 'textfield' ?? false;
+
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithDeviation(
-              dataGenerator,
-              dataGenerator.split('_').pop() ?? LOG_RATE_ANALYSIS_TYPE.SPIKE
-            ),
+            body: getArtificialLogsWithDeviation(dataGenerator, deviationType, textField),
           });
           break;
 
@@ -213,8 +246,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           break;
 
-        case 'artificial_logs_with_spike':
-        case 'artificial_logs_with_dip':
+        case 'artificial_logs_with_spike_notextfield':
+        case 'artificial_logs_with_spike_textfield':
+        case 'artificial_logs_with_dip_notextfield':
+        case 'artificial_logs_with_dip_textfield':
           try {
             await es.indices.delete({
               index: dataGenerator,
