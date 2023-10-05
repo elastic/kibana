@@ -7,17 +7,15 @@
 
 import { createTestConfig } from '../../config.base';
 
-const enabledActionTypes = ['.index'];
+const enabledActionTypes = ['.index', '.server-log'];
 
 export default createTestConfig({
-  serverlessProject: 'es',
+  serverlessProject: 'oblt',
   testFiles: [require.resolve('./screenshot_creation')],
   kbnServerArgs: [`--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`],
   junit: {
-    reportName: 'Serverless Search Screenshot Creation',
+    reportName: 'Serverless Observability Screenshot Creation',
   },
 
-  // include settings from project controller
-  // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
   esServerArgs: ['xpack.ml.ad.enabled=false', 'xpack.ml.dfa.enabled=false'],
 });
