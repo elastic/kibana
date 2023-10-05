@@ -78,6 +78,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         login: {
           pathname: '/login',
         },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting'
+        }
       },
       // choose where screenshots should be saved
       screenshots: {
