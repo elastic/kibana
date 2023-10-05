@@ -14,6 +14,7 @@ import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
 import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 import { SvlCommonScreenshotsProvider } from './svl_common_screenshots';
 import { MachineLearningProvider } from './ml';
+import { SvlReportingServiceProvider } from './svl_reporting';
 
 export const services = {
   // deployment agnostic FTR services
@@ -27,4 +28,5 @@ export const services = {
   svlSecNavigation: SvlSecNavigationServiceProvider,
   svlCommonScreenshots: SvlCommonScreenshotsProvider,
   svlMl: MachineLearningProvider,
+  svlReportingApi: SvlReportingServiceProvider,
 };
