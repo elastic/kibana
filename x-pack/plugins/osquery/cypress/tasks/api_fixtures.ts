@@ -18,7 +18,7 @@ import type { PackSavedObject, PackItem } from '../../public/packs/types';
 import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
-import { ServerlessRoleName } from '../../../../test_serverless/shared/lib/security/types';
+import { ServerlessRoleName } from '../support/roles';
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
