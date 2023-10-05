@@ -25,6 +25,7 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import type { LayerAction, StateSetter } from '../../../../types';
 import type { XYState, XYByReferenceAnnotationLayerConfig } from '../../types';
 import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
+import { getAnnotationLayerTitle } from '../../visualization_helpers';
 
 export const getRevertChangesAction = ({
   state,
@@ -50,7 +51,7 @@ export const getRevertChangesAction = ({
           <RevertChangesConfirmModal
             modalTitle={i18n.translate('xpack.lens.modalTitle.revertAnnotationGroupTitle', {
               defaultMessage: 'Revert "{title}" changes?',
-              values: { title: layer.__lastSaved.title },
+              values: { title: getAnnotationLayerTitle(layer) },
             })}
             onCancel={() => modal.close()}
             onConfirm={() => {
@@ -111,7 +112,7 @@ export const revert = ({
   toasts.addSuccess({
     title: i18n.translate('xpack.lens.xyChart.annotations.notificationReverted', {
       defaultMessage: `Reverted "{title}"`,
-      values: { title: layer.__lastSaved.title },
+      values: { title: getAnnotationLayerTitle(layer) },
     }),
     text: i18n.translate('xpack.lens.xyChart.annotations.notificationRevertedExplanation', {
       defaultMessage: 'The most recently saved version of this annotation group has been restored.',
