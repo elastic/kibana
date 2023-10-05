@@ -243,13 +243,14 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       [http.basePath, state.start, state.end, logStreamQuery]
     );
 
-    const viewInDiscoverUrl = useMemo(
-      () =>
-        http.basePath.prepend(
-          `/app/discover#/?_a=(index:'logs-*',query:(language:kuery,query:'data_stream.dataset:elastic_agent%20AND%20elastic_agent.id:${agent.id}'))`
-        ),
-      [http.basePath, agent.id]
-    );
+    const viewInDiscoverUrl = useMemo(() => {
+      const index = 'logs-*';
+      const datasetQuery = 'data_stream.dataset:elastic_agent';
+      const agentIdQuery = `elastic_agent.id:${agent.id}`;
+      return http.basePath.prepend(
+        `/app/discover#/?_a=(index:'${index}',query:(language:kuery,query:'${datasetQuery}%20AND%20${agentIdQuery}'))`
+      );
+    }, [http.basePath, agent.id]);
 
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
     const isLogFeatureAvailable = useMemo(() => {
@@ -356,14 +357,23 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
             <EuiFlexItem grow={false}>
               <RedirectAppLinks application={application}>
                 {isLogsUIAvailable ? (
-                  <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
+                  <EuiButtonEmpty
+                    href={viewInLogsUrl}
+                    iconType="popout"
+                    flush="both"
+                    data-test-subj="viewInLogsBtn"
+                  >
                     <FormattedMessage
                       id="xpack.fleet.agentLogs.openInLogsUiLinkText"
                       defaultMessage="Open in Logs"
                     />
                   </EuiButtonEmpty>
                 ) : (
-                  <EuiButton href={viewInDiscoverUrl} iconType="popout">
+                  <EuiButton
+                    href={viewInDiscoverUrl}
+                    iconType="popout"
+                    data-test-subj="viewInDiscoverBtn"
+                  >
                     <FormattedMessage
                       id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
                       defaultMessage="Open in Discover"
