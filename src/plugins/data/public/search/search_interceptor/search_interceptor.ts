@@ -51,7 +51,7 @@ import {
   IAsyncSearchOptions,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   ISearchOptions,
   ISearchOptionsSerializable,
   pollSearch,
@@ -312,7 +312,7 @@ export class SearchInterceptor {
       tap((response) => {
         id = response.id;
 
-        if (isCompleteResponse(response)) {
+        if (!isRunningResponse(response)) {
           searchTracker?.complete();
         }
       }),
