@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-
-export type FieldTypeKnown = Exclude<
-  DataViewField['timeSeriesMetric'] | DataViewField['type'],
-  undefined
->;
+import { type FieldTypeKnown } from '../types';
 
 /**
  * Field types for which name and description are defined
