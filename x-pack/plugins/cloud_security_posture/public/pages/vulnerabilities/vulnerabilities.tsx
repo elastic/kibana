@@ -290,6 +290,14 @@ const VulnerabilitiesDataGrid = ({
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 
+  const dataTableStyle = {
+    // Change the height of the grid to fit the page
+    // If there are filters, leave space for the filter bar
+    // Todo: Replace this component with EuiAutoSizer
+    height: `calc(100vh - ${urlQuery.filters.length > 0 ? 403 : 363}px)`,
+    minHeight: 400,
+  };
+
   return (
     <>
       <EuiProgress
@@ -299,61 +307,66 @@ const VulnerabilitiesDataGrid = ({
           opacity: isFetching ? 1 : 0,
         }}
       />
-      <EuiDataGrid
-        className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
-        aria-label={VULNERABILITIES}
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        schemaDetectors={[severitySchemaConfig]}
-        rowCount={limitedTotalItemCount}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showDisplaySelector: false,
-          showKeyboardShortcuts: false,
-          showFullScreenSelector: false,
-          additionalControls: {
-            left: {
-              append: (
-                <>
-                  <EuiButtonEmpty size="xs" color="text">
-                    {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
-                      defaultMessage:
-                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                      values: { total: data?.total },
-                    })}
-                  </EuiButtonEmpty>
-                </>
+      <div style={dataTableStyle}>
+        <EuiDataGrid
+          className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
+          aria-label={VULNERABILITIES}
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          schemaDetectors={[severitySchemaConfig]}
+          rowCount={limitedTotalItemCount}
+          toolbarVisibility={{
+            showColumnSelector: false,
+            showDisplaySelector: false,
+            showKeyboardShortcuts: false,
+            showFullScreenSelector: false,
+            additionalControls: {
+              left: {
+                append: (
+                  <>
+                    <EuiButtonEmpty size="xs" color="text">
+                      {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                        defaultMessage:
+                          '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                        values: { total: data?.total },
+                      })}
+                    </EuiButtonEmpty>
+                  </>
+                ),
+              },
+              right: (
+                <EuiFlexItem grow={false} className={styles.groupBySelector}>
+                  <FindingsGroupBySelector
+                    type="default"
+                    pathnameHandler={vulnerabilitiesPathnameHandler}
+                  />
+                </EuiFlexItem>
               ),
             },
-            right: (
-              <EuiFlexItem grow={false} className={styles.groupBySelector}>
-                <FindingsGroupBySelector
-                  type="default"
-                  pathnameHandler={vulnerabilitiesPathnameHandler}
-                />
-              </EuiFlexItem>
-            ),
-          },
-        }}
-        gridStyle={{
-          border: 'horizontal',
-          cellPadding: 'l',
-          stripes: false,
-          rowHover: 'none',
-          header: 'underline',
-        }}
-        renderCellValue={renderCellValue}
-        inMemory={{ level: 'enhancements' }}
-        sorting={{ columns: sort, onSort: onSortHandler }}
-        pagination={{
-          pageIndex,
-          pageSize,
-          pageSizeOptions: [10, 25, 100],
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-      />
-      {isLastLimitedPage && <LimitedResultsBar />}
+          }}
+          gridStyle={{
+            border: 'horizontal',
+            cellPadding: 'l',
+            stripes: false,
+            rowHover: 'none',
+            header: 'underline',
+          }}
+          renderCellValue={renderCellValue}
+          inMemory={{ level: 'enhancements' }}
+          sorting={{ columns: sort, onSort: onSortHandler }}
+          pagination={{
+            pageIndex,
+            pageSize,
+            pageSizeOptions: [10, 25, 100],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+          virtualizationOptions={{
+            overscanRowCount: 20,
+          }}
+        />
+        {isLastLimitedPage && <LimitedResultsBar />}
+      </div>
       {showVulnerabilityFlyout && selectedVulnerability && (
         <VulnerabilityFindingFlyout
           flyoutIndex={selectedVulnerabilityIndex}
