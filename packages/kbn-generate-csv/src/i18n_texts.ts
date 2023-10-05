@@ -38,7 +38,7 @@ export const i18nTexts = {
       values: { expected, received },
     }),
   csvRowCountIndeterminable: ({ received }: { expected?: number; received: number }) =>
-    i18n.translate('generateCsv.incorrectRowCount', {
+    i18n.translate('generateCsv.indeterminableRowCount', {
       defaultMessage:
         'Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received {received}.',
       values: { received },
