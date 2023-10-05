@@ -20,7 +20,7 @@ import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createDisabledRule,
+  createRuleWithoutEnabling,
   expandAdvancedSettings,
   fillCustomInvestigationFields,
   fillDescription,
@@ -122,7 +122,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
-    createDisabledRule();
+    createRuleWithoutEnabling();
 
     cy.get(RULE_NAME_HEADER).should('contain', rule.name);
 

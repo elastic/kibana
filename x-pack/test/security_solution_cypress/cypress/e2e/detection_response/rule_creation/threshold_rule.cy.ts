@@ -51,7 +51,7 @@ import {
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createEnabledRuleGoToRuleDetails,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -59,11 +59,10 @@ import {
 } from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewThresholdRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -86,7 +85,8 @@ describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless
     fillDefineThresholdRuleAndContinue(rule);
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
-    createEnabledRuleGoToRuleDetails();
+    createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

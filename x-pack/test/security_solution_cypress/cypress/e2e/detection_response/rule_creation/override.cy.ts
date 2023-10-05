@@ -50,7 +50,7 @@ import {
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
-  createEnabledRuleGoToRuleDetails,
+  createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -59,11 +59,11 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   getDetails,
-  waitForTheRuleToBeExecuted,
   waitForAlertsToPopulate,
+  waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
-
 import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -84,7 +84,8 @@ describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleWithOverrideAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
-    createEnabledRuleGoToRuleDetails();
+    createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

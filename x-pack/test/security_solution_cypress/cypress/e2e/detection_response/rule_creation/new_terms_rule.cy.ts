@@ -51,7 +51,7 @@ import {
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createEnabledRuleGoToRuleDetails,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineNewTermsRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -59,8 +59,8 @@ import {
 } from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-
 import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -88,7 +88,8 @@ describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless
       fillDefineNewTermsRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      createEnabledRuleGoToRuleDetails();
+      createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

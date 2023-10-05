@@ -15,6 +15,14 @@ export const CANCEL_LABEL: string = i18n.translate('xpack.serverlessSearch.cance
   defaultMessage: 'Cancel',
 });
 
+export const EDIT_LABEL: string = i18n.translate('xpack.serverlessSearch.edit', {
+  defaultMessage: 'Edit',
+});
+
+export const SAVE_LABEL: string = i18n.translate('xpack.serverlessSearch.save', {
+  defaultMessage: 'Save',
+});
+
 export const BACK_LABEL: string = i18n.translate('xpack.serverlessSearch.back', {
   defaultMessage: 'Back',
 });
@@ -45,3 +53,10 @@ export const INVALID_JSON_ERROR: string = i18n.translate(
     defaultMessage: 'Invalid JSON',
   }
 );
+
+export const CONNECTORS_LABEL: string = i18n.translate('xpack.serverlessSearch.connectors', {
+  defaultMessage: 'Connectors',
+});
+export const CONNECTOR_LABEL: string = i18n.translate('xpack.serverlessSearch.connector', {
+  defaultMessage: 'Connector',
+});

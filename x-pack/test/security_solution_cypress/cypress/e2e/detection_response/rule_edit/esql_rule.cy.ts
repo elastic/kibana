@@ -7,7 +7,7 @@
 
 import { getEsqlRule } from '../../../objects/rule';
 
-import { CUSTOM_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../screens/rule_details';
+import { ESQL_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../screens/rule_details';
 
 import { ESQL_QUERY_BAR, ESQL_QUERY_BAR_EXPAND_BTN } from '../../../screens/rule_creation';
 
@@ -26,7 +26,7 @@ import { login } from '../../../tasks/login';
 
 import { editFirstRule } from '../../../tasks/alerts_detection_rules';
 
-import { saveEditedRule, goToAboutStepTab } from '../../../tasks/rule_edit';
+import { goToAboutStepTab, saveEditedRule } from '../../../tasks/rule_edit';
 import { visit } from '../../../tasks/navigation';
 
 const rule = getEsqlRule();
@@ -59,7 +59,7 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
     saveEditedRule();
 
     // ensure updated query is displayed on details page
-    getDetails(CUSTOM_QUERY_DETAILS).should('have.text', expectedValidEsqlQuery);
+    getDetails(ESQL_QUERY_DETAILS).should('have.text', expectedValidEsqlQuery);
   });
 
   it('edits ES|QL rule query and override rule name with new property', () => {

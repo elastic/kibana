@@ -15,6 +15,7 @@
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
       "discover",
       "embeddable",
       "features",
