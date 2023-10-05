@@ -763,6 +763,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       agentPolicy: `${FLEET_DOCS}agent-policy.html`,
       api: `${FLEET_DOCS}fleet-api-docs.html`,
       uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
+      installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
