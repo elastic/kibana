@@ -20,6 +20,8 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
+import { getAlertConfigIdByScopeId } from '../../../common/lib/triggers_actions_ui/register_alerts_table_configuration';
+import type { StartServices } from '../../../types';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
@@ -33,7 +35,13 @@ const NESTED_COLUMN = (field: string) =>
   });
 
 export const createToggleColumnCellActionFactory = createCellActionFactory(
-  ({ store }: { store: SecurityAppStore }): CellActionTemplate<SecurityCellAction> => ({
+  ({
+    store,
+    services,
+  }: {
+    store: SecurityAppStore;
+    services: StartServices;
+  }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.TOGGLE_COLUMN,
     getIconType: () => ICON,
     getDisplayName: () => COLUMN_TOGGLE,
@@ -66,6 +74,35 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
 
       const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
       const { columns } = selector(store.getState(), scopeId) ?? defaults;
+      const alertTableConfigurationId = getAlertConfigIdByScopeId(scopeId);
+      if (alertTableConfigurationId) {
+        const alertsTableConfigurationRegistry =
+          services.triggersActionsUi.alertsTableConfigurationRegistry.get(
+            alertTableConfigurationId
+          );
+        alertsTableConfigurationRegistry?.actions?.toggleColumn(field.name);
+      } else {
+        if (columns.some((c) => c.id === field.name)) {
+          store.dispatch(
+            scopedActions.removeColumn({
+              columnId: field.name,
+              id: scopeId,
+            })
+          );
+        } else {
+          store.dispatch(
+            scopedActions.upsertColumn({
+              column: {
+                columnHeaderType: defaultColumnHeaderType,
+                id: field.name,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              },
+              id: scopeId,
+              index: 1,
+            })
+          );
+        }
+      }
 
       if (columns.some((c) => c.id === field.name)) {
         store.dispatch(

@@ -690,6 +690,9 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  actions?: {
+    toggleColumn: (columnId: string) => void;
+  };
 }
 
 export enum BulkActionsVerbs {

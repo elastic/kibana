@@ -264,6 +264,14 @@ const AlertsTableStateWithQueryProvider = ({
   });
 
   useEffect(() => {
+    Object.assign(alertsTableConfiguration, {
+      actions: { toggleColumn: onToggleColumn },
+    });
+    alertsTableConfigurationRegistry.update(configurationId, alertsTableConfiguration);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onToggleColumn]);
+
+  useEffect(() => {
     if (onUpdate) {
       onUpdate({ isLoading, totalCount: alertsCount, refresh });
     }
