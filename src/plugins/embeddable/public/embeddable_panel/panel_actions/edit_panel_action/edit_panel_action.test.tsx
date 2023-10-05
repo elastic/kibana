@@ -46,12 +46,7 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
 test('redirects to app using state transfer', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
   const testPath = '/test-path';
-  const action = new EditPanelAction(
-    getFactory,
-    applicationMock,
-    stateTransferMock,
-    () => testPath
-  );
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   const embeddable = new EditableEmbeddable(
     {
       id: '123',
@@ -62,6 +57,9 @@ test('redirects to app using state transfer', async () => {
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  embeddable.getAppContext = jest.fn().mockReturnValue({
+    getCurrentPath: () => testPath,
+  });
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',

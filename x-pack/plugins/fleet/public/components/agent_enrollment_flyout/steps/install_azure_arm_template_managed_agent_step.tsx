@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
+import type { AgentPolicy } from '../../../../common';
+
 import { AzureArmTemplateInstructions } from '../azure_arm_template_instructions';
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
@@ -23,12 +25,14 @@ export const InstallAzureArmTemplateManagedAgentStep = ({
   enrollToken,
   isComplete,
   cloudSecurityIntegration,
+  agentPolicy,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   enrollToken?: string;
   isComplete?: boolean;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
+  agentPolicy?: AgentPolicy;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -44,6 +48,7 @@ export const InstallAzureArmTemplateManagedAgentStep = ({
         <AzureArmTemplateInstructions
           cloudSecurityIntegration={cloudSecurityIntegration}
           enrollmentAPIKey={enrollToken}
+          agentPolicy={agentPolicy}
         />
       ) : (
         <React.Fragment />

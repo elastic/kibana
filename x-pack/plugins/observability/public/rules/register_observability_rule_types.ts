@@ -97,6 +97,7 @@ export const registerObservabilityRuleTypes = (
     requiresAppContext: false,
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
+    priority: 100,
   });
 
   if (config.unsafe.thresholdRule.enabled) {
@@ -124,6 +125,7 @@ export const registerObservabilityRuleTypes = (
       alertDetailsAppSection: lazy(
         () => import('../components/custom_threshold/components/alert_details_app_section')
       ),
+      priority: 5,
     });
   }
 };

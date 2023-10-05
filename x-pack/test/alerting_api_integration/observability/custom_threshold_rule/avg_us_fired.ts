@@ -24,6 +24,7 @@ import {
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
+import { ActionDocument } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -160,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (BETA)'
+          'Custom threshold (Technical Preview)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -206,12 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should set correct action parameter: ruleType', async () => {
         const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{
-          ruleType: string;
-          alertDetailsUrl: string;
-          reason: string;
-          value: string;
-        }>({
+        const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
         });

@@ -141,6 +141,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
       connectorsAzureBlobStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-azure-blob.html`,
+      connectorsBox: `${ENTERPRISE_SEARCH_DOCS}connectors-box.html`,
       connectorsClients: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-build`,
       connectorsConfluence: `${ENTERPRISE_SEARCH_DOCS}connectors-confluence.html`,
       connectorsDropbox: `${ENTERPRISE_SEARCH_DOCS}connectors-dropbox.html`,
@@ -157,6 +158,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsNetworkDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-network-drive.html`,
       connectorsOneDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-onedrive.html`,
       connectorsOracle: `${ENTERPRISE_SEARCH_DOCS}connectors-oracle.html`,
+      connectorsOutlook: `${ENTERPRISE_SEARCH_DOCS}connectors-outlook.html`,
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
       connectorsSalesforce: `${ENTERPRISE_SEARCH_DOCS}connectors-salesforce.html`,
@@ -164,7 +166,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsSharepoint: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint.html`,
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsSlack: `${ENTERPRISE_SEARCH_DOCS}connectors-slack.html`,
+      connectorsTeams: `${ENTERPRISE_SEARCH_DOCS}connectors-teams.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}workplace-search-connectors.html`,
+      connectorsZoom: `${ENTERPRISE_SEARCH_DOCS}connectors-zoom.html`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
@@ -413,6 +417,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
       shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
       sortSearch: `${ELASTICSEARCH_DOCS}sort-search-results.html`,
+      tutorialUpdateExistingDataStream: `${ELASTICSEARCH_DOCS}tutorial-manage-existing-data-stream.html`,
       transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
       typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
       setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
@@ -431,6 +436,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {
+      artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
@@ -508,6 +514,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
+      nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -841,6 +848,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+    },
+    esql: {
+      statsBy: `${ELASTICSEARCH_DOCS}esql-stats-by.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
