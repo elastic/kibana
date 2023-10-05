@@ -21,6 +21,9 @@ const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
 const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-7.5.0.zip`);
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
+const CURRENT_BRANCH = loadJsonFile.sync<{ branch: string }>(
+  Path.resolve(REPO_ROOT, 'package.json')
+).branch;
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
@@ -35,6 +38,8 @@ beforeEach(async () => {
 afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 
 it('builds a generated plugin into a viable archive', async () => {
+  const branchSegmentInUrl = CURRENT_BRANCH === 'main' ? 'current' : CURRENT_BRANCH;
+
   const generateProc = await execa(
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
@@ -54,7 +59,7 @@ it('builds a generated plugin into a viable archive', async () => {
   };
 
   expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
-    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/${branchSegmentInUrl}/production.html#openssl-legacy-provider
      succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
@@ -74,7 +79,7 @@ it('builds a generated plugin into a viable archive', async () => {
   );
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
-    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/${branchSegmentInUrl}/production.html#openssl-legacy-provider
      info deleting the build and target directories
      info run bazel and build required artifacts for the optimizer
      succ bazel run successfully and artifacts were created
