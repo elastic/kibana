@@ -16,9 +16,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/166448
-  describe.skip('Configure Case', function () {
+  describe('Configure Case', function () {
     before(async () => {
       await svlCommonPage.login();
 
@@ -51,7 +51,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
+          return await testSubjects.exists('dropdown-connector-no-connector');
+        });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {

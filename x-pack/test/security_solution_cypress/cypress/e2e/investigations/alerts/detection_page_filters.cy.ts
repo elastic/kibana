@@ -24,7 +24,8 @@ import {
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
   closePageFilterPopover,
@@ -107,6 +108,8 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
+// Failing: See https://github.com/elastic/kibana/issues/167914
+// Failing: See https://github.com/elastic/kibana/issues/167915
 describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
@@ -115,7 +118,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
-    visit(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
     resetFilters();
   });
@@ -127,7 +130,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
   context('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlerts();
     });
 
@@ -196,7 +199,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(formatPageFilterSearchParam(NEW_FILTERS)));
-      visit(currURL.toString());
+      visitWithTimeRange(currURL.toString());
       waitForAlerts();
       assertFilterControlsWithFilterObject(NEW_FILTERS);
     });
@@ -217,7 +220,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(pageFilterUrlString));
-      visit(currURL.toString());
+      visitWithTimeRange(currURL.toString());
 
       waitForAlerts();
       cy.get(OPTION_LIST_LABELS).should((sub) => {
@@ -261,21 +264,19 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
   });
 
   it(`URL is updated when filters are updated`, () => {
-    cy.on('url:changed', (urlString) => {
-      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-        return {
-          ...filter,
-          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
-        };
-      });
-      const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
-      expect(urlString).to.contain.text(expectedVal);
-    });
-
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({});
     closePageFilterPopover(1);
+
+    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
+      return {
+        ...filter,
+        selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
+      };
+    });
+    const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
+    cy.url().should('include', expectedVal);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {

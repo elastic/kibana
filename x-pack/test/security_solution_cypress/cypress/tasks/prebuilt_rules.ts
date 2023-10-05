@@ -22,7 +22,7 @@ import {
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
 } from '../screens/alerts_detection_rules';
-import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 
 export const addElasticRulesButtonClick = () => {
@@ -108,7 +108,7 @@ const assertInstallationSuccessOrFailure = (
       cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
     }
   } else {
-    cy.get(BACK_TO_RULES_TABLE).click();
+    cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
     for (const rule of rules) {
       cy.get(RULES_MANAGEMENT_TABLE).contains(rule['security-rule'].name);
     }

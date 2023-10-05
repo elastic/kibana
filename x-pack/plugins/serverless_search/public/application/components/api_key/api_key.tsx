@@ -88,6 +88,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               })}
             </h3>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText size="s">
             {i18n.translate('xpack.serverlessSearch.apiKey.panel.description', {
               defaultMessage:
@@ -96,8 +97,8 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
           </EuiText>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   <span>
                     <EuiButton

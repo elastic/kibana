@@ -11,7 +11,7 @@ import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { getDurationField, getEventType } from '../utils';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getDocumentTypeFilterForTransactions } from '../../../lib/helpers/transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../lib/helpers/transactions';
 
 export const fetchDurationPercentiles = async ({
   chartType,
@@ -36,7 +36,7 @@ export const fetchDurationPercentiles = async ({
   const filteredQuery = searchMetrics
     ? {
         bool: {
-          filter: [query, ...getDocumentTypeFilterForTransactions(true)],
+          filter: [query, ...getBackwardCompatibleDocumentTypeFilter(true)],
         },
       }
     : query;
