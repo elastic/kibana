@@ -211,17 +211,7 @@ export class InfraServerPlugin
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
-    if (this.config.featureFlags.logsUIEnabled) {
-      plugins.features.registerKibanaFeature(LOGS_FEATURE);
-      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-        {
-          sampleObject: null, // indicates that there is no sample object associated with this app link's path
-          getPath: () => `/app/logs`,
-          label: logsSampleDataLinkLabel,
-          icon: 'logsApp',
-        },
-      ]);
-    }
+    plugins.features.registerKibanaFeature(LOGS_FEATURE);
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
@@ -235,6 +225,17 @@ export class InfraServerPlugin
     plugins.logsShared.registerUsageCollectorActions({
       countLogs: () => UsageCollector.countLogs(),
     });
+
+    if (this.config.featureFlags.logsUIEnabled) {
+      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+        {
+          sampleObject: null, // indicates that there is no sample object associated with this app link's path
+          getPath: () => `/app/logs`,
+          label: logsSampleDataLinkLabel,
+          icon: 'logsApp',
+        },
+      ]);
+    }
 
     initInfraServer(this.libs);
     registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
