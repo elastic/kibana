@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   describe('Configure Case', function () {
     before(async () => {
@@ -31,8 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlCommonPage.forceLogout();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/166469
-    describe.skip('Closure options', function () {
+    describe('Closure options', function () {
       before(async () => {
         await common.clickAndValidate('configure-case-button', 'case-configure-title');
       });
@@ -49,10 +49,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/167869
-    describe.skip('Connectors', function () {
+    describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
+          return await testSubjects.exists('dropdown-connector-no-connector');
+        });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {
