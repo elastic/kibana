@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { closeAllToasts } from '../../tasks/toasts';
+import { openResponderFromEndpointAlerts } from '../../tasks/alert_details_actions';
+import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -20,6 +23,9 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
+  openAlertDetails,
+  toggleRuleOffAndOn,
+  visitRuleAlerts,
 } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
@@ -228,64 +234,98 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       }
     });
 
-    it('"get-file --path" - should retrieve a file', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      cy.task('createFileOnEndpoint', {
-        hostname: createdHost.hostname,
-        path: filePath,
-        content: fileContent,
+    describe('From Endpoint list', function () {
+      it('"get-file --path" - should retrieve a file', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        cy.task('createFileOnEndpoint', {
+          hostname: createdHost.hostname,
+          path: filePath,
+          content: fileContent,
+        });
+        openResponseConsoleFromEndpointList();
+        inputConsoleCommand(`get-file --path ${filePath}`);
+        submitCommand();
+        cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+          cy.contains('File retrieved from the host.');
+          cy.contains('(ZIP file passcode: elastic)');
+          cy.contains(
+            'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+          );
+          cy.contains('Click here to download').click();
+          const downloadsFolder = Cypress.config('downloadsFolder');
+          cy.readFile(`${downloadsFolder}/upload.zip`);
+
+          cy.task('uploadFileToEndpoint', {
+            hostname: createdHost.hostname,
+            srcPath: `${downloadsFolder}/upload.zip`,
+            destPath: `${homeFilePath}/upload.zip`,
+          });
+
+          cy.task('readZippedFileContentOnEndpoint', {
+            hostname: createdHost.hostname,
+            path: `${homeFilePath}/upload.zip`,
+            password: 'elastic',
+          }).then((unzippedFileContent) => {
+            expect(unzippedFileContent).to.equal(fileContent);
+          });
+        });
       });
-      openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`get-file --path ${filePath}`);
-      submitCommand();
-      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
-        cy.contains('File retrieved from the host.');
-        cy.contains('(ZIP file passcode: elastic)');
-        cy.contains(
-          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+
+      it('"execute --command" - should execute a command', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        openResponseConsoleFromEndpointList();
+        inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
+        submitCommand();
+        waitForCommandToBeExecuted('execute');
+      });
+
+      it('"upload --file" - should upload a file', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        openResponseConsoleFromEndpointList();
+        inputConsoleCommand(`upload --file`);
+        cy.getByTestSubj('console-arg-file-picker').selectFile(
+          {
+            contents: Cypress.Buffer.from('upload file content here!'),
+            fileName: 'upload_file.txt',
+            lastModified: Date.now(),
+          },
+          { force: true }
         );
-        cy.contains('Click here to download').click();
-        const downloadsFolder = Cypress.config('downloadsFolder');
-        cy.readFile(`${downloadsFolder}/upload.zip`);
-
-        cy.task('uploadFileToEndpoint', {
-          hostname: createdHost.hostname,
-          srcPath: `${downloadsFolder}/upload.zip`,
-          destPath: `${homeFilePath}/upload.zip`,
-        });
-
-        cy.task('readZippedFileContentOnEndpoint', {
-          hostname: createdHost.hostname,
-          path: `${homeFilePath}/upload.zip`,
-          password: 'elastic',
-        }).then((unzippedFileContent) => {
-          expect(unzippedFileContent).to.equal(fileContent);
-        });
+        submitCommand();
+        waitForCommandToBeExecuted('upload');
       });
     });
 
-    it('"execute --command" - should execute a command', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
-      submitCommand();
-      waitForCommandToBeExecuted('execute');
-    });
+    describe('From Alerts', function () {
+      let ruleId: string;
+      let ruleName: string;
 
-    it('"upload --file" - should upload a file', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`upload --file`);
-      cy.getByTestSubj('console-arg-file-picker').selectFile(
-        {
-          contents: Cypress.Buffer.from('upload file content here!'),
-          fileName: 'upload_file.txt',
-          lastModified: Date.now(),
-        },
-        { force: true }
-      );
-      submitCommand();
-      waitForCommandToBeExecuted('upload');
+      before(() => {
+        loadRule(
+          { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+          false
+        ).then((data) => {
+          ruleId = data.id;
+          ruleName = data.name;
+        });
+      });
+
+      after(() => {
+        if (ruleId) {
+          cleanupRule(ruleId);
+        }
+      });
+
+      it('"should open responder', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        toggleRuleOffAndOn(ruleName);
+        visitRuleAlerts(ruleName);
+        closeAllToasts();
+        openAlertDetails();
+
+        openResponderFromEndpointAlerts();
+        cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
+      });
     });
   });
 
