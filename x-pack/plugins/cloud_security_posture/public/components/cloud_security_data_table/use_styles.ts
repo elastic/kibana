@@ -6,16 +6,13 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { css, keyframes } from '@emotion/css';
+import { css } from '@emotion/css';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
-  const highlight = keyframes`
-    0% { background-color: ${euiTheme.colors.warning};}
-    50% { background-color: ${euiTheme.colors.emptyShade};}
-    75% { background-color: ${euiTheme.colors.warning};}
-    100% { background-color: ${euiTheme.colors.emptyShade};}
+  const gridContainer = css`
+    min-height: 400px;
   `;
 
   const gridStyle = css`
@@ -25,55 +22,64 @@ export const useStyles = () => {
     & .euiDataGrid__controls {
       border-bottom: none;
       margin-bottom: ${euiTheme.size.s};
-
+      border-top: none;
       & .euiButtonEmpty {
         font-weight: ${euiTheme.font.weight.bold};
       }
     }
-    & .euiDataGrid__leftControls {
-      > .euiButtonEmpty:hover:not(:disabled),
-      .euiButtonEmpty:focus {
-        text-decoration: none;
-        cursor: default;
-      }
-    }
-    & .euiButtonIcon {
-      color: ${euiTheme.colors.primary};
-    }
-    & .euiDataGridRowCell {
-      font-size: ${euiTheme.size.m};
-    }
-    & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
-      display: none;
+    & .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+      border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.fullShade};
     }
     & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
       padding: 0;
     }
+    & .euiButtonIcon[data-test-subj='docTableExpandToggleColumn'] {
+      color: ${euiTheme.colors.primary};
+    }
 
+    & .euiDataGridRowCell {
+      font-size: ${euiTheme.size.m};
+    }
     & .euiDataGridRowCell__expandFlex {
       align-items: center;
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
       text-align: left;
     }
-  `;
+    & .euiDataGrid__controls {
+      gap: ${euiTheme.size.s};
+    }
+    & .euiDataGrid__leftControls {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    & .cspDataTableTotal {
+      font-size: ${euiTheme.size.m};
+      font-weight: ${euiTheme.font.weight.bold};
+    }
+    & .euiDataGrid__rightControls {
+      display: none;
+    }
 
-  const highlightStyle = css`
-    & [data-test-subj='dataGridColumnSortingButton'] .euiButtonEmpty__text {
-      animation: ${highlight} 1s ease-out infinite;
-      color: ${euiTheme.colors.darkestShade};
+    & [data-test-subj='docTableExpandToggleColumn'] svg {
+      inline-size: 16px;
+      block-size: 16px;
+    }
+
+    & .unifiedDataTable__cellValue {
+      font-family: ${euiTheme.font.family};
     }
   `;
 
   const groupBySelector = css`
     width: 188px;
-    display: inline-block;
-    margin-left: 8px;
+    margin-left: auto;
   `;
 
   return {
-    highlightStyle,
     gridStyle,
     groupBySelector,
+    gridContainer,
   };
 };
