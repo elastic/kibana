@@ -60,3 +60,17 @@ export const CONNECTORS_LABEL: string = i18n.translate('xpack.serverlessSearch.c
 export const CONNECTOR_LABEL: string = i18n.translate('xpack.serverlessSearch.connector', {
   defaultMessage: 'Connector',
 });
+
+export const DELETE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.serverlessSearch.connectors.deleteConnectorLabel',
+  {
+    defaultMessage: 'Delete connector',
+  }
+);
+
+export const COPY_CONNECTOR_ID_LABEL = i18n.translate(
+  'xpack.serverlessSearch.connectors.copyConnectorIdLabel',
+  {
+    defaultMessage: 'Copy connector id',
+  }
+);
