@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await cleanupIndexAlias();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');
-      });      
+      });
     });
   });
 }
