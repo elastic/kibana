@@ -21,7 +21,7 @@ export const kibanaLogsDataViewTestData: TestData = {
   fieldSelectorApplyAvailable: true,
   action: {
     type: 'LogPatternAnalysis',
-    tableRowId: '157690148',
+    tableRowId: '1064853178',
     expected: {
       queryBar:
         'clientip:30.156.16.164 AND host.keyword:elastic-elastic-elastic.org AND ip:30.156.16.163 AND response.keyword:404 AND machine.os.keyword:win xp AND geo.dest:IN AND geo.srcdest:US\\:IN',
@@ -233,9 +233,7 @@ const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): Te
 });
 
 export const logRateAnalysisTestData: TestData[] = [
-  // Temporarily disabling since the data seems out of sync on local dev installs and CI
-  // so it's not possible to compare and update assertions accordingly.
-  // kibanaLogsDataViewTestData,
+  kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
   getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE),
