@@ -72,6 +72,7 @@ export function InstallElasticAgent() {
     await singleDatasetLocator!.navigate({
       integration,
       dataset: enforcedDatasetName,
+      origin: { id: 'application-log-onboarding' },
     });
   }
 

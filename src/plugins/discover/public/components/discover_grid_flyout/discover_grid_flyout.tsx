@@ -34,6 +34,7 @@ export interface DiscoverGridFlyoutProps {
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
+  columnTypes?: Record<string, string>;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -57,6 +58,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
+  columnTypes,
   savedSearchId,
   filters,
   query,
@@ -160,6 +162,7 @@ export function DiscoverGridFlyout({
           <UnifiedDocViewer
             hit={actualHit}
             columns={columns}
+            columnTypes={columnTypes}
             dataView={dataView}
             filter={onFilter}
             onRemoveColumn={(columnName: string) => {
