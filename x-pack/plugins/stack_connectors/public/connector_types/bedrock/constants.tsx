@@ -17,7 +17,7 @@ const assistant = '\n\nAssistant:';
 
 export const DEFAULT_BODY = JSON.stringify({
   prompt: `${human} Hello world! ${assistant}`,
-  max_tokens_to_sample: 300,
+  max_tokens_to_sample: 8191,
   stop_sequences: [human],
 });
 
