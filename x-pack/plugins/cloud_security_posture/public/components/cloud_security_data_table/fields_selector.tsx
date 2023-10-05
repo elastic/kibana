@@ -122,6 +122,9 @@ export const FieldsSelectorTable = ({
     box: {
       incremental: true,
       schema: true,
+      placeholder: i18n.translate('xpack.csp.dataTable.fieldsModalSearch', {
+        defaultMessage: 'Search field name',
+      })
     },
   };
 
