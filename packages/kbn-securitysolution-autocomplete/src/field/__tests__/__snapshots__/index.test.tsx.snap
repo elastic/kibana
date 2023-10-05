@@ -24,27 +24,24 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
-              <div
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                aria-invalid="false"
                 class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  data-test-subj="comboBoxSearchInput"
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
-                <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
-              </div>
+                data-test-subj="comboBoxSearchInput"
+                id="generated-id__eui-combobox-id"
+                role="combobox"
+                style="inline-size: 2px;"
+                value=""
+              />
             </div>
             <div
               class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
@@ -99,27 +96,24 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
-            <div
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
               class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
-            >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                data-test-subj="comboBoxSearchInput"
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
-              <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
-            </div>
+              data-test-subj="comboBoxSearchInput"
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 2px;"
+              value=""
+            />
           </div>
           <div
             class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
@@ -231,28 +225,25 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
-              <div
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                aria-invalid="false"
                 class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  data-test-subj="comboBoxSearchInput"
-                  disabled=""
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
-                <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
-              </div>
+                data-test-subj="comboBoxSearchInput"
+                disabled=""
+                id="generated-id__eui-combobox-id"
+                role="combobox"
+                style="inline-size: 2px;"
+                value=""
+              />
             </div>
           </div>
         </div>
@@ -279,28 +270,25 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
-            <div
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
               class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
-            >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                data-test-subj="comboBoxSearchInput"
-                disabled=""
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
-              <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
-            </div>
+              data-test-subj="comboBoxSearchInput"
+              disabled=""
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 2px;"
+              value=""
+            />
           </div>
         </div>
       </div>
@@ -384,27 +372,24 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
-              <div
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                aria-invalid="false"
                 class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  data-test-subj="comboBoxSearchInput"
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
-                <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
-              </div>
+                data-test-subj="comboBoxSearchInput"
+                id="generated-id__eui-combobox-id"
+                role="combobox"
+                style="inline-size: 2px;"
+                value=""
+              />
             </div>
             <div
               class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
@@ -448,27 +433,24 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
-            <div
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
               class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
-            >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                data-test-subj="comboBoxSearchInput"
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
-              <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
-            </div>
+              data-test-subj="comboBoxSearchInput"
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 2px;"
+              value=""
+            />
           </div>
           <div
             class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
@@ -569,28 +551,25 @@ Object {
                 class="euiComboBoxPill euiComboBoxPill--plainText"
                 data-test-subj="euiComboBoxPill"
               >
-                machine.os.raw
+                <span
+                  class="eui-textTruncate"
+                >
+                  machine.os.raw
+                </span>
               </span>
-              <div
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                aria-invalid="false"
                 class="euiComboBox__input"
-                style="font-size: 14px; display: inline-block;"
-              >
-                <input
-                  aria-autocomplete="list"
-                  aria-controls=""
-                  aria-expanded="false"
-                  aria-invalid="false"
-                  data-test-subj="comboBoxSearchInput"
-                  disabled=""
-                  id="generated-id__eui-combobox-id"
-                  role="combobox"
-                  style="box-sizing: content-box; width: 2px;"
-                  value=""
-                />
-                <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                />
-              </div>
+                data-test-subj="comboBoxSearchInput"
+                disabled=""
+                id="generated-id__eui-combobox-id"
+                role="combobox"
+                style="inline-size: 2px;"
+                value=""
+              />
             </div>
             <div
               class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
@@ -626,28 +605,25 @@ Object {
               class="euiComboBoxPill euiComboBoxPill--plainText"
               data-test-subj="euiComboBoxPill"
             >
-              machine.os.raw
+              <span
+                class="eui-textTruncate"
+              >
+                machine.os.raw
+              </span>
             </span>
-            <div
+            <input
+              aria-autocomplete="list"
+              aria-controls=""
+              aria-expanded="false"
+              aria-invalid="false"
               class="euiComboBox__input"
-              style="font-size: 14px; display: inline-block;"
-            >
-              <input
-                aria-autocomplete="list"
-                aria-controls=""
-                aria-expanded="false"
-                aria-invalid="false"
-                data-test-subj="comboBoxSearchInput"
-                disabled=""
-                id="generated-id__eui-combobox-id"
-                role="combobox"
-                style="box-sizing: content-box; width: 2px;"
-                value=""
-              />
-              <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-              />
-            </div>
+              data-test-subj="comboBoxSearchInput"
+              disabled=""
+              id="generated-id__eui-combobox-id"
+              role="combobox"
+              style="inline-size: 2px;"
+              value=""
+            />
           </div>
           <div
             class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"

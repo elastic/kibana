@@ -30,7 +30,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import {
   SecurityCellActions,
@@ -49,8 +49,7 @@ import { useUserRelatedHosts } from '../../../common/containers/related_entities
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
-import { HOST_RISK_TOOLTIP } from '../../../explore/hosts/components/hosts_table/translations';
+import { ENTITY_RISK_LEVEL } from '../../../explore/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const USER_DETAILS_ID = 'entities-users-details';
@@ -178,20 +177,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: (
-                <EuiToolTip content={HOST_RISK_TOOLTIP}>
-                  <>
-                    {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
-                    <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-                  </>
-                </EuiToolTip>
-              ),
+              name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,
               render: (riskScore: RiskSeverity) => {
                 if (riskScore != null) {
-                  return <RiskScore severity={riskScore} />;
+                  return <RiskScoreLevel severity={riskScore} />;
                 }
                 return getEmptyTagValue();
               },

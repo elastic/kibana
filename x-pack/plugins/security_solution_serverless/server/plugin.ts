@@ -17,6 +17,7 @@ import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
+import { createConfig } from './config';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -52,15 +53,18 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+    this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
+
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
-    // `plugins.forceEnableAllPlugins` flag is enabled).
+    // `plugins.forceEnableAllPlugins` flag is enabled. Should never happen in real scenarios.
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
     if (shouldRegister) {
       const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
       this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
       const appFeaturesConfigurator = getProductAppFeaturesConfigurator(
-        getProductAppFeatures(this.config.productTypes)
+        getProductAppFeatures(this.config.productTypes),
+        this.config
       );
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     }
@@ -97,9 +101,9 @@ export class SecuritySolutionServerlessPlugin
     return {};
   }
 
-  public start(_coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
-    const internalESClient = _coreStart.elasticsearch.client.asInternalUser;
-    const internalSOClient = _coreStart.savedObjects.createInternalRepository();
+  public start(coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
+    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalSOClient = coreStart.savedObjects.createInternalRepository();
 
     this.cloudSecurityUsageReportingTask?.start({
       taskManager: pluginsSetup.taskManager,

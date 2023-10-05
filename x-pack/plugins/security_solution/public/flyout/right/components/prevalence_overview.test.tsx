@@ -9,7 +9,7 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
-import { PREVALENCE_NO_DATA_TEST_ID, PREVALENCE_TEST_ID } from './test_ids';
+import { PREVALENCE_TEST_ID } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -30,6 +30,8 @@ const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(PREVALENCE_TEST_ID);
+
+const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -69,10 +71,10 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId, queryByTestId } = renderPrevalenceOverview();
+    const { getByTestId, queryByText } = renderPrevalenceOverview();
 
     expect(getByTestId(EXPANDABLE_PANEL_LOADING_TEST_ID(PREVALENCE_TEST_ID))).toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should render no-data message', () => {
@@ -82,24 +84,21 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId } = renderPrevalenceOverview();
-
-    expect(getByTestId(PREVALENCE_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(PREVALENCE_NO_DATA_TEST_ID)).toHaveTextContent(
-      'No prevalence data available.'
-    );
+    const { getByText } = renderPrevalenceOverview();
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render only data with prevalence less than 10%', () => {
     const field1 = 'field1';
     const field2 = 'field2';
+    const field3 = 'field3';
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -107,7 +106,15 @@ describe('<PrevalenceOverview />', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2', 'value22'],
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.06,
+          userPrevalence: 0.2,
+        },
+        {
+          field: field3,
+          values: ['value3'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,
@@ -116,7 +123,7 @@ describe('<PrevalenceOverview />', () => {
       ],
     });
 
-    const { queryByTestId, getByTestId } = renderPrevalenceOverview();
+    const { queryByTestId, getByTestId, queryByText } = renderPrevalenceOverview();
 
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
 
@@ -128,10 +135,16 @@ describe('<PrevalenceOverview />', () => {
 
     const iconDataTestSubj2 = `${PREVALENCE_TEST_ID}${field2}Icon`;
     const valueDataTestSubj2 = `${PREVALENCE_TEST_ID}${field2}Value`;
-    expect(queryByTestId(iconDataTestSubj2)).not.toBeInTheDocument();
-    expect(queryByTestId(valueDataTestSubj2)).not.toBeInTheDocument();
+    expect(getByTestId(iconDataTestSubj2)).toBeInTheDocument();
+    expect(getByTestId(valueDataTestSubj2)).toBeInTheDocument();
+    expect(getByTestId(valueDataTestSubj2)).toHaveTextContent('field2, value2,value22 is uncommon');
 
-    expect(queryByTestId(PREVALENCE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    const iconDataTestSubj3 = `${PREVALENCE_TEST_ID}${field3}Icon`;
+    const valueDataTestSubj3 = `${PREVALENCE_TEST_ID}${field3}Value`;
+    expect(queryByTestId(iconDataTestSubj3)).not.toBeInTheDocument();
+    expect(queryByTestId(valueDataTestSubj3)).not.toBeInTheDocument();
+
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
@@ -141,7 +154,7 @@ describe('<PrevalenceOverview />', () => {
       data: [
         {
           field: 'field1',
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
