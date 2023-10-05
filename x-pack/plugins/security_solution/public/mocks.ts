@@ -9,6 +9,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
+import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
 
 const upselling = new UpsellingService();
@@ -23,7 +24,9 @@ export const contractStartServicesMock: ContractStartServices = {
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
+  experimentalFeatures: allowedExperimentalValues, // default values
   setAppLinksSwitcher: jest.fn(),
+  setDeepLinksFormatter: jest.fn(),
   setDataQualityPanelConfig: jest.fn(),
 });
 
