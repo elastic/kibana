@@ -12,6 +12,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedDocViewerStart } from '../plugin';
 
 export interface UnifiedDocViewerServices {
@@ -21,10 +22,12 @@ export interface UnifiedDocViewerServices {
   storage: Storage;
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
+  uiActions: UiActionsStart;
 }
 
 export function useUnifiedDocViewerServices(): UnifiedDocViewerServices {
   const { services } = useKibana<UnifiedDocViewerServices>();
-  const { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer } = services;
-  return { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
+  const { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer, uiActions } =
+    services;
+  return { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer, uiActions };
 }

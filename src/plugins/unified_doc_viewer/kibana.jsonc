@@ -8,6 +8,6 @@
     "server": false,
     "browser": true,
     "requiredBundles": ["kibanaUtils", "kibanaReact"],
-    "requiredPlugins": ["data", "fieldFormats"],
+    "requiredPlugins": ["data", "fieldFormats", "uiActions"],
   }
 }
