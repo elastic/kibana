@@ -46,6 +46,13 @@ import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
+export const policyListErrorMessage = i18n.translate(
+  'xpack.securitySolution.policy.list.errorMessage',
+  {
+    defaultMessage: 'Error while retrieving list of policies',
+  }
+);
+
 export const PolicyList = memo(() => {
   const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
   const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
@@ -369,10 +376,6 @@ export const PolicyList = memo(() => {
       pageSizeOptions,
     };
   }, [totalItemCount, pageSizeOptions, pagination.page, pagination.pageSize]);
-
-  const policyListErrorMessage = i18n.translate('xpack.securitySolution.policy.list.errorMessage', {
-    defaultMessage: 'Error while retrieving list of policies',
-  });
 
   return (
     <AdministrationListPage
