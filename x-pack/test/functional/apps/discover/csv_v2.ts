@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from 'x-pack/test/reporting_api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../../reporting_api_integration/ftr_provider_context';
 
-
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
   const log = getService('log');
 
-  
   const cleanupLogstash = async () => {
     const logstashIndices = await es.indices.get({
       index: 'logstash-*',
@@ -31,7 +28,6 @@ export default ({ getService }: FtrProviderContext) => {
       })
     );
   };
-
 
   describe('CSV Generation from Saved Search ID', () => {
     before(async () => {
@@ -53,6 +49,5 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await kibanaServer.uiSettings.replace({});
     });
-
-})
+  });
 };
