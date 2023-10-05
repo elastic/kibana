@@ -59,9 +59,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
-import { columnActions } from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps, UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import { columnActions, getTextBasedColumnTypes } from '@kbn/unified-data-table';
 import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
@@ -341,6 +340,9 @@ export class SavedSearchEmbeddable
           loading: false,
         });
 
+        searchProps.columnTypes = result.textBasedQueryColumns
+          ? getTextBasedColumnTypes(result.textBasedQueryColumns)
+          : undefined;
         searchProps.rows = result.records;
         searchProps.totalHitCount = result.records.length;
         searchProps.isLoading = false;
