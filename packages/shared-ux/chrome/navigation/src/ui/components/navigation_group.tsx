@@ -11,7 +11,7 @@ import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
-import type { NodeProps, RegisterFunction } from '../types';
+import type { NodeProps, NodePropsEnhanced, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
 import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
@@ -51,12 +51,14 @@ function NavigationGroupInternalComp<
 
   const { children, node } = useMemo(() => {
     const { children: _children, defaultIsCollapsed, ...rest } = props;
+    const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'> = {
+      ...rest,
+      isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
+      isGroup: true,
+    };
     return {
       children: _children,
-      node: {
-        ...rest,
-        isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
-      },
+      node: nodeEnhanced,
     };
   }, [props]);
 

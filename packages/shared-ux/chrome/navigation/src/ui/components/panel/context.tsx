@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
+import { DefaultContent } from './default_content';
+import { ContentProvider, PanelNavNode } from './types';
+
+export interface PanelContext {
+  isOpen: boolean;
+  toggle: () => void;
+  open: (navNode: PanelNavNode) => void;
+  close: () => void;
+  activeNode: PanelNavNode | null;
+  getContent: () => React.ReactNode;
+}
+
+const Context = React.createContext<PanelContext | null>(null);
+
+interface Props {
+  contentProvider?: ContentProvider;
+}
+
+export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeNode, setActiveNode] = useState<PanelNavNode | null>(null);
+
+  const toggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const open = useCallback((navNode: PanelNavNode) => {
+    setActiveNode(navNode);
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setActiveNode(null);
+    setIsOpen(false);
+  }, []);
+
+  const getContent = useCallback(() => {
+    if (!activeNode) {
+      return null;
+    }
+
+    const provided = contentProvider?.(activeNode.id);
+
+    if (!provided) {
+      return <DefaultContent activeNode={activeNode} />;
+    }
+
+    const title: string | ReactNode = provided.title ?? activeNode.title;
+    return provided.content ?? <DefaultContent activeNode={{ ...activeNode, title }} />;
+  }, [activeNode, contentProvider]);
+
+  const ctx: PanelContext = useMemo(
+    () => ({
+      isOpen,
+      toggle,
+      open,
+      close,
+      activeNode,
+      getContent,
+    }),
+    [isOpen, toggle, open, close, activeNode, getContent]
+  );
+
+  return <Context.Provider value={ctx}>{children}</Context.Provider>;
+};
+
+export function usePanel() {
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error(
+      'Panel Context is missing. Ensure your component or React root is wrapped with PanelProvider.'
+    );
+  }
+
+  return context;
+}

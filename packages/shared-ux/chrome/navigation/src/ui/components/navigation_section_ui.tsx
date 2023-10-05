@@ -16,16 +16,28 @@ import {
 } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
-import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
+import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink } from '../../utils';
+import { PanelContext, usePanel } from './panel';
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNode,
-  { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
-): EuiCollapsibleNavSubItemProps => {
+  {
+    navigateToUrl,
+    openPanel,
+    closePanel,
+    isSideNavCollapsed,
+  }: {
+    navigateToUrl: NavigateToUrlFn;
+    openPanel: PanelContext['open'];
+    closePanel: PanelContext['close'];
+    isSideNavCollapsed: boolean;
+  }
+): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
+  const { openPanel: itemOpenPanel = false } = item;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
@@ -34,27 +46,29 @@ const navigationNodeToEuiItem = (
     [`nav-item-isActive`]: isSelected,
   });
 
-  // Note: this can be replaced with an `isGroup` API or whatever you prefer
-  // Could also probably be pulled out to a separate component vs inlined
-  if (item.isGroupTitle) {
-    return {
-      renderItem: () => (
-        <EuiTitle
-          size="xxxs"
-          className="eui-textTruncate"
-          css={({ euiTheme }: any) => ({
-            marginTop: euiTheme.size.base,
-            paddingBlock: euiTheme.size.xs,
-            paddingInline: euiTheme.size.s,
-          })}
-        >
-          <div id={id} data-test-subj={dataTestSubj}>
-            {item.title}
-          </div>
-        </EuiTitle>
-      ),
-    };
-  }
+  const onClick = (e: React.MouseEvent) => {
+    if (href !== undefined || itemOpenPanel) {
+      if (href !== undefined) {
+        e.preventDefault();
+        navigateToUrl(href);
+        closePanel();
+        return;
+      }
+      if (itemOpenPanel) {
+        if (isSideNavCollapsed) {
+          // TEMP logic until we have the EUI 88.5.3 in Kibana
+          // https://github.com/elastic/kibana/pull/167555
+          // eslint-disable-next-line no-console
+          console.log('Side nav is collapsed, not opening panel....');
+          return;
+        }
+        openPanel({ ...item, id });
+      }
+    }
+    if (!itemOpenPanel) {
+      closePanel();
+    }
+  };
 
   return {
     id,
@@ -65,17 +79,18 @@ const navigationNodeToEuiItem = (
       initialIsOpen: true, // FIXME open state is controlled on component mount
     },
     linkProps: { external: isExternal },
-    onClick:
-      href !== undefined
-        ? (event: React.MouseEvent) => {
-            event.preventDefault();
-            navigateToUrl(href);
-          }
-        : undefined,
+    onClick,
     href,
-    items: item.children?.map((_item) =>
-      navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
-    ),
+    items: itemOpenPanel
+      ? undefined // Don't render children if the item opens a panel
+      : item.children?.map((_item) =>
+          navigationNodeToEuiItem(_item, {
+            navigateToUrl,
+            openPanel,
+            closePanel,
+            isSideNavCollapsed,
+          })
+        ),
     ['data-test-subj']: dataTestSubj,
     icon: item.icon,
     iconProps: { size: 's' },
@@ -89,7 +104,8 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const { id, title, icon, isActive } = navNode;
-  const { navigateToUrl, basePath } = useServices();
+  const { navigateToUrl, isSideNavCollapsed } = useServices();
+  const { open: openPanel, close: closePanel } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(!isActive);
   // We want to auto expand the group automatically if the node is active (URL match)
   // but once the user manually expand a group we don't want to close it afterward automatically.
@@ -169,7 +185,12 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
       data-test-subj={`nav-bucket-${id}`}
       {...propsForGroupAsLink}
       items={filteredItems.map((item) =>
-        navigationNodeToEuiItem(item, { navigateToUrl, basePath })
+        navigationNodeToEuiItem(item, {
+          navigateToUrl,
+          isSideNavCollapsed,
+          openPanel,
+          closePanel,
+        })
       )}
     />
   );

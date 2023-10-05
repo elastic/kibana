@@ -7,9 +7,9 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { useState } from '@storybook/addons';
+import { useState as useStateStorybook } from '@storybook/addons';
 import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, PropsWithChildren, MouseEvent } from 'react';
+import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import {
@@ -35,18 +35,50 @@ import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
 import type { GroupDefinition, NonEmptyArray, ProjectNavigationDefinition } from './types';
+import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
 
-const NavigationWrapper: FC<
-  PropsWithChildren<{ clickAction?: EventHandler<MouseEvent>; clickActionText?: string }> &
-    Partial<EuiCollapsibleNavBetaProps>
-> = (props) => {
+interface Props {
+  clickAction?: EventHandler<MouseEvent>;
+  clickActionText?: string;
+  children?: React.ReactNode | (({ isCollapsed }: { isCollapsed: boolean }) => React.ReactNode);
+}
+
+const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (props) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const onCollapseToggle = (nextIsCollapsed: boolean) => {
+    setIsCollapsed(nextIsCollapsed);
+  };
+
+  useEffect(() => {
+    // Set padding to body to avoid unnecessary scrollbars
+    document.body.style.paddingTop = '0px';
+    document.body.style.paddingRight = '0px';
+    document.body.style.paddingBottom = '0px';
+  }, []);
+
   return (
     <>
       <EuiHeader position="fixed">
         <EuiHeaderSection side={props?.side}>
-          <EuiCollapsibleNavBeta {...props} />
+          <EuiCollapsibleNavBeta
+            {...props}
+            children={
+              typeof props.children === 'function'
+                ? props.children({ isCollapsed })
+                : props.children
+            }
+            initialIsCollapsed={isCollapsed}
+            onCollapseToggle={onCollapseToggle}
+            css={
+              props.css ?? {
+                overflow: 'visible',
+                clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)',
+              }
+            }
+          />
         </EuiHeaderSection>
       </EuiHeader>
       <EuiPageTemplate>
@@ -68,7 +100,7 @@ const baseDeeplink: ChromeNavLink = {
   id: 'foo',
   title: 'Title from deep link',
   href: 'https://elastic.co',
-  url: '',
+  url: '/dashboard-mocked',
   baseUrl: '',
 };
 
@@ -83,12 +115,16 @@ const createDeepLink = (id: string, title: string = baseDeeplink.title) => {
 const deepLinks: ChromeNavLink[] = [
   createDeepLink('item1'),
   createDeepLink('item2', 'Foo'),
+  createDeepLink('item3'),
   createDeepLink('group1:item1'),
   createDeepLink('group1:groupA:groupI:item1'),
   createDeepLink('group1:groupA', 'Group title from deep link'),
   createDeepLink('group2', 'Group title from deep link'),
   createDeepLink('group2:item1'),
   createDeepLink('group2:item3'),
+  createDeepLink('group:settings.logs'),
+  createDeepLink('group:settings.signals'),
+  createDeepLink('group:settings.tracing'),
 ];
 
 const simpleNavigationDefinition: ProjectNavigationDefinition = {
@@ -177,15 +213,15 @@ const navigationDefinition: ProjectNavigationDefinition = {
         defaultIsCollapsed: false,
         children: [
           {
-            id: 'item1',
+            link: 'item1',
             title: 'Get started',
           },
           {
-            id: 'item2',
+            link: 'item2',
             title: 'Alerts',
           },
           {
-            id: 'item3',
+            link: 'item3',
             title: 'Some other node',
           },
           {
@@ -193,21 +229,21 @@ const navigationDefinition: ProjectNavigationDefinition = {
             title: 'Settings',
             children: [
               {
-                id: 'logs',
+                link: 'group:settings.logs',
                 title: 'Logs',
               },
               {
-                id: 'signals',
+                link: 'group:settings.signals',
                 title: 'Signals',
               },
               {
-                id: 'tracing',
+                link: 'group:settings.tracing',
                 title: 'Tracing',
               },
             ],
           },
         ],
-      },
+      } as GroupDefinition<any>,
       // Add ml
       {
         type: 'navGroup',
@@ -275,6 +311,323 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
   );
 };
 
+const CustomPanelContent = () => {
+  return <EuiText>This is a custom component to render in the panel.</EuiText>;
+};
+
+const panelContentProvider: ContentProvider = (id: string) => {
+  if (id === 'example_projet.group:openpanel1') {
+    return; // Use default title & content
+  }
+
+  if (id === 'example_projet.group:openpanel2') {
+    // Custom content
+    return {
+      content: <CustomPanelContent />,
+    };
+  }
+
+  if (id === 'example_projet.group:openpanel3') {
+    return {
+      title: <div style={{ backgroundColor: 'yellow', fontWeight: 600 }}>Custom title</div>,
+    };
+  }
+};
+
+const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
+  navigationTree: {
+    body: [
+      // My custom project
+      {
+        type: 'navGroup',
+        id: 'example_projet',
+        title: 'Example project',
+        icon: 'logoObservability',
+        defaultIsCollapsed: false,
+        accordionProps: {
+          arrowProps: { css: { display: 'none' } },
+        },
+        children: [
+          {
+            link: 'item1',
+            title: 'Get started',
+          },
+          {
+            link: 'item2',
+            title: 'Alerts',
+          },
+          {
+            // Panel with default content
+            // Groups with title
+            id: 'group:openpanel1',
+            title: 'Open panel (default 1)',
+            openPanel: true,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                    openInNewTab: true,
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                    withBadge: true, // Default to "Beta" badge
+                  },
+                ],
+              },
+              {
+                id: 'group2',
+                title: 'Group 2',
+                children: [
+                  {
+                    id: 'group2:settings.logs',
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    id: 'group2:settings.signals',
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group2:settings.tracing',
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            // Panel with default content
+            // Groups with **not** title
+            id: 'group:openpanel1b',
+            title: 'Open panel (default 2)',
+            openPanel: true,
+            children: [
+              {
+                id: 'group1',
+                appendHorizontalRule: true, // Add a separator after the group
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                    withBadge: true, // Default to "Beta" badge
+                  },
+                ],
+              },
+              {
+                id: 'group2',
+                children: [
+                  {
+                    id: 'group2:settings.logs',
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    id: 'group2:settings.signals',
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group2:settings.tracing',
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            // Panel with default content
+            // Accordion to wrap groups
+            id: 'group:openpanel1c',
+            title: 'Open panel (default 3)',
+            openPanel: true,
+            children: [
+              {
+                id: 'group1',
+                appendHorizontalRule: true,
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                    withBadge: true, // Default to "Beta" badge
+                  },
+                ],
+              },
+              // Groups with accordion
+              {
+                id: 'group2',
+                title: 'MANAGEMENT',
+                isCollapsible: true,
+                children: [
+                  {
+                    id: 'group2-A',
+                    title: 'Group 1',
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                        withBadge: true, // Default to "Beta" badge
+                      },
+                    ],
+                  },
+                  {
+                    id: 'group2-B',
+                    title: 'Group 2 (marked as collapsible)',
+                    isCollapsible: true,
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        id: 'group2:settings.tracing',
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                      },
+                    ],
+                  },
+                  {
+                    id: 'group2-C',
+                    title: 'Group 3',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        id: 'group2:settings.tracing',
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'group:openpanel2',
+            title: 'Open panel (custom content)',
+            openPanel: true,
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals',
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'Tracing',
+              },
+            ],
+          },
+          {
+            id: 'group:openpanel3',
+            title: 'Open panel (custom title)',
+            openPanel: true,
+            children: [
+              {
+                id: 'root',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Those links',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'are automatically',
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'generated',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <DefaultNavigation
+            {...navigationDefinitionWithPanel}
+            panelContentProvider={panelContentProvider}
+          />
+        </NavigationProvider>
+      )}
+    </NavigationWrapper>
+  );
+};
+
 export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
@@ -290,59 +643,90 @@ export const WithUIComponents = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <Navigation>
-          <Navigation.RecentlyAccessed />
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <Navigation>
+            <Navigation.RecentlyAccessed />
 
-          <Navigation.Group
-            id="example_projet"
-            title="Example project"
-            icon="logoObservability"
-            defaultIsCollapsed={false}
-          >
-            <Navigation.Item<any> id="item1" link="item1" />
-            <Navigation.Item id="item2" title="Alerts">
-              {(navNode) => {
-                return (
-                  <div className="euiSideNavItemButton">
-                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
-                  </div>
-                );
-              }}
-            </Navigation.Item>
-            <Navigation.Item id="item3" title="Title in ReactNode">
-              <div className="euiSideNavItemButton">
-                <EuiLink>Title in ReactNode</EuiLink>
-              </div>
-            </Navigation.Item>
-            <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
-
-            <Navigation.Group id="group:settings" title="Settings">
-              <Navigation.Item id="logs" title="Logs" />
-              <Navigation.Item id="signals" title="Signals" />
-              <Navigation.Item id="tracing" title="Tracing" />
-            </Navigation.Group>
-          </Navigation.Group>
-
-          <Navigation.Group preset="analytics" defaultIsCollapsed={false} />
-          <Navigation.Group preset="ml" />
-
-          <Navigation.Footer>
-            <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
             <Navigation.Group
-              id="project_settings_project_nav"
-              title="Project settings"
-              breadcrumbStatus="hidden"
-              icon="gear"
+              id="example_projet"
+              title="Example project"
+              icon="logoObservability"
+              defaultIsCollapsed={false}
             >
-              <Navigation.Item link="management" title="Management" />
-              <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
-              <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
-              <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              <Navigation.Item<any> id="item1" link="item1" />
+              <Navigation.Item id="item2" title="Alerts">
+                {(navNode) => {
+                  return (
+                    <div className="euiSideNavItemButton">
+                      <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    </div>
+                  );
+                }}
+              </Navigation.Item>
+              <Navigation.Item id="item3" title="Title in ReactNode">
+                <div className="euiSideNavItemButton">
+                  <EuiLink>Title in ReactNode</EuiLink>
+                </div>
+              </Navigation.Item>
+              <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
+
+              <Navigation.Group id="group:settings" title="Open panel" openPanel>
+                <Navigation.Group id="group1">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" appendHorizontalRule title="Group 2">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group title="MANAGEMENT" id="group3" isCollapsible>
+                  <Navigation.Group title="Group A" id="group3-a">
+                    <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                    <Navigation.Item<any>
+                      link="group:settings.signals"
+                      title="Signals"
+                      withBadge
+                      badgeOptions={{ text: 'coolio' }}
+                    />
+                    <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                  </Navigation.Group>
+                  <Navigation.Group title="Group B" id="group3-b">
+                    <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                    <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                    <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                  </Navigation.Group>
+                  <Navigation.Group title="Group C" id="group3-c">
+                    <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                    <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                    <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                  </Navigation.Group>
+                </Navigation.Group>
+              </Navigation.Group>
             </Navigation.Group>
-          </Navigation.Footer>
-        </Navigation>
-      </NavigationProvider>
+
+            <Navigation.Group preset="analytics" defaultIsCollapsed={false} />
+            <Navigation.Group preset="ml" />
+
+            <Navigation.Footer>
+              <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+              <Navigation.Group
+                id="project_settings_project_nav"
+                title="Project settings"
+                breadcrumbStatus="hidden"
+                icon="gear"
+              >
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation.Footer>
+          </Navigation>
+        </NavigationProvider>
+      )}
     </NavigationWrapper>
   );
 };
@@ -397,17 +781,6 @@ export const MinimalUI = (args: NavigationServices) => {
     </NavigationWrapper>
   );
 };
-
-export default {
-  title: 'Chrome/Navigation',
-  description: 'Navigation container to render items for cross-app linking',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
-  component: WithUIComponents,
-} as ComponentMeta<typeof WithUIComponents>;
 
 export const CreativeUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
@@ -602,7 +975,7 @@ export const UpdatingState = (args: NavigationServices) => {
   ];
 
   // use state to track which element of activeNodeSets is active
-  const [activeNodeIndex, setActiveNodeIndex] = useState<number>(0);
+  const [activeNodeIndex, setActiveNodeIndex] = useStateStorybook<number>(0);
   const changeActiveNode = () => {
     const value = (activeNodeIndex + 1) % 2; // toggle between 0 and 1
     setActiveNodeIndex(value);
@@ -632,3 +1005,14 @@ export const UpdatingState = (args: NavigationServices) => {
     </NavigationWrapper>
   );
 };
+
+export default {
+  title: 'Chrome/Navigation',
+  description: 'Navigation container to render items for cross-app linking',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
+  component: WithUIComponents,
+} as ComponentMeta<typeof WithUIComponents>;

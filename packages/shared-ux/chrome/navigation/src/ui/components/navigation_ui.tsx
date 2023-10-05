@@ -9,6 +9,8 @@
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import React, { FC } from 'react';
 
+import { NavigationPanel } from './panel';
+
 interface Props {
   unstyled?: boolean;
   footerChildren?: React.ReactNode;
@@ -22,12 +24,14 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
         <>{children}</>
       ) : (
         <>
-          <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
+          {/* Main navigation content */}
+          <EuiFlyoutBody scrollableTabIndex={-1} data-test-subj={dataTestSubj}>
             {children}
-          </EuiCollapsibleNavBeta.Body>
-          {footerChildren && (
-            <EuiCollapsibleNavBeta.Footer>{footerChildren}</EuiCollapsibleNavBeta.Footer>
-          )}
+          </EuiFlyoutBody>
+          {footerChildren && <EuiFlyoutFooter>{footerChildren}</EuiFlyoutFooter>}
+
+          {/* Right side panel navigation */}
+          <NavigationPanel />
         </>
       )}
     </>
