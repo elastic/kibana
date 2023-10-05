@@ -91,7 +91,7 @@ export class ElasticAssistantPlugin
     // Actions Connector Execute (LLM Wrapper)
     postActionsConnectorExecuteRoute(router, getElserId);
     // Evaluate
-    postEvaluateRoute(router);
+    postEvaluateRoute(router, getElserId);
     return {
       actions: plugins.actions,
     };
