@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
@@ -58,11 +58,16 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
     }
   }, [activeTabId, assetType, metadata, metadataLoading, telemetry]);
 
+  const heightWithOffset = useMemo(
+    () => `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
+    [actionMenuHeight]
+  );
+
   return loading ? (
     <EuiFlexGroup
       direction="column"
       css={css`
-        height: calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px);
+        height: ${heightWithOffset};
       `}
     >
       <InfraLoadingPanel
@@ -80,7 +85,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       offset={0}
       restrictWidth={false}
       style={{
-        minBlockSize: `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
+        minBlockSize: heightWithOffset,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={assetType}
