@@ -244,7 +244,10 @@ export function ChangeDataView({
                         {
                           defaultMessage:
                             "Switching data views removes the current {textBasedLanguage} query. Save this search to ensure you don't lose work.",
-                          values: { textBasedLanguage },
+                          values: {
+                            textBasedLanguage:
+                              getLanguageDisplayName(textBasedLanguage).toUpperCase(),
+                          },
                         }
                       )}
                     >

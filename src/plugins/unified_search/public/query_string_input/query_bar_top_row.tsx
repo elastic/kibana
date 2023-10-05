@@ -84,13 +84,13 @@ const getWrapperWithTooltip = (
 ) => {
   if (enableTooltip && query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
-    const displayName = getLanguageDisplayName(textBasedLanguage);
+    const displayName = getLanguageDisplayName(textBasedLanguage).toUpperCase();
     return (
       <EuiToolTip
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
-            'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
+            'Date range selection for {language} queries requires an @timestamp field in the dataset.',
           values: { language: displayName },
         })}
       >
