@@ -396,6 +396,7 @@ x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
+packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/file_upload @elastic/kibana-gis
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
@@ -881,6 +882,8 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/functional/apps/visualize/ @elastic/kibana-visualizations
 /x-pack/test/functional/apps/graph @elastic/kibana-visualizations
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
+/x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
+/x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
 
 # Global Experience
 
@@ -1418,6 +1421,12 @@ x-pack/plugins/observability_shared/public/components/profiling @elastic/profili
 
 # Shared UX
 packages/react @elastic/appex-sharedux
+
+# OpenAPI spec files
+/x-pack/plugins/fleet/common/openapi          @elastic/platform-docs
+/x-pack/plugins/ml/common/openapi             @elastic/platform-docs
+/packages/core/saved-objects/docs/openapi     @elastic/platform-docs
+/plugins/data_views/docs/openapi              @elastic/platform-docs
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
