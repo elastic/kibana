@@ -56,8 +56,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it(`user sees a job they've created`, async () => {
-      log.debug(`creating a csv report job as 'elastic'`);
-
       const {
         job: { id: jobId },
       } = await reportingAPI.createReportJobInternal(
