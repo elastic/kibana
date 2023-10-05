@@ -57,7 +57,7 @@ describe('useLoadActionTypes', () => {
     await act(async () => {
       const mockHttp = {
         get: jest.fn().mockRejectedValue(new Error('this is an error')),
-      };
+      } as unknown as Props['http'];
       const { waitForNextUpdate } = renderHook(() =>
         useLoadActionTypes({ ...defaultProps, http: mockHttp })
       );
