@@ -43,8 +43,5 @@ export const rulesSettingsMappings: SavedObjectsTypeMappingDefinition = {
         // },
       },
     },
-    queryDelay: {
-      properties: {},
-    },
   },
 };
