@@ -47,12 +47,16 @@ export const getKnowledgeBaseStatusRoute = (
 
         // Get a scoped esClient for finding the status of the Knowledge Base index, pipeline, and documents
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+        const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+        const esStore = new ElasticsearchStore(
+          esClient,
+          KNOWLEDGE_BASE_INDEX_PATTERN,
+          logger,
+          elserId
+        );
 
         const indexExists = await esStore.indexExists();
         const pipelineExists = await esStore.pipelineExists();
-
-        const elserId = await getElser(request, (await context.core).savedObjects.getClient());
         const modelExists = await esStore.isModelInstalled(elserId);
 
         const body: GetKnowledgeBaseStatusResponse = {
