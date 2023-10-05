@@ -29,8 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/166447
-  describe.skip('Case View', () => {
+  describe('Case View', () => {
     before(async () => {
       await svlCommonPage.login();
     });
