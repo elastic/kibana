@@ -61,8 +61,8 @@ export const getRuleExecutor = ({
   async function executor({
     services,
     params,
-    spaceId,
     startedAt,
+    spaceId,
     getTimeRange,
   }): ReturnType<
     ExecutorType<

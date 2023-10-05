@@ -123,10 +123,10 @@ export const createMetricThresholdExecutor = ({
       services,
       params,
       state,
+      startedAt,
       executionId,
       spaceId,
       rule: { id: ruleId },
-      startedAt,
       getTimeRange,
     } = options;
 
@@ -312,7 +312,7 @@ export const createMetricThresholdExecutor = ({
           groupByKeysObjectMapping[group]
         );
         const alertUuid = getAlertUuid(group);
-        const indexedStartedAt = getAlertStartedDate(group) ?? timestamp;
+        const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
@@ -352,6 +352,7 @@ export const createMetricThresholdExecutor = ({
       const alertUuid = getAlertUuid(recoveredAlertId);
       const timestamp = startedAt.toISOString();
       const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
 
@@ -364,7 +365,7 @@ export const createMetricThresholdExecutor = ({
           basePath.publicBaseUrl
         ),
         group: groupByKeysObjectForRecovered[recoveredAlertId],
-        timestamp,
+        timestamp: startedAt.toISOString(),
         ...additionalContext,
       });
     }
