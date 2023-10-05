@@ -124,7 +124,7 @@ export const FieldsSelectorTable = ({
       schema: true,
       placeholder: i18n.translate('xpack.csp.dataTable.fieldsModalSearch', {
         defaultMessage: 'Search field name',
-      })
+      }),
     },
   };
 
