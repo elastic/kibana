@@ -276,6 +276,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={systemPromptSettings}
                     selectedConversation={selectedConversation}
+                    isDisabled={selectedConversation == null}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
                   />

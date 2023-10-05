@@ -220,7 +220,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             compressed
             conversation={selectedConversation}
             isEditing={true}
-            isDisabled={selectedConversation == null}
+            isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
@@ -247,7 +247,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           }
         >
           <ConnectorSelector
-            isDisabled={selectedConversation == null}
+            isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
           />
