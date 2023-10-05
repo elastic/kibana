@@ -1292,7 +1292,10 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
 
+### Cypress - data sources
 /x-pack/test/security_solution_cypress/cypress/e2e/data_sources @elastic/security-detection-engine
+
+### Cypress - tests
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_alerts @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_actions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_creation @elastic/security-detection-engine
@@ -1301,6 +1304,12 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/exceptions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/overview @elastic/security-detection-engine
+
+### Cypress - utils
+x-pack/test/security_solution_cypress/cypress/tasks/rule_edit @elastic/security-detection-engine
+x-pack/test/security_solution_cypress/cypress/tasks/rule_creation @elastic/security-detection-engine
+x-pack/test/security_solution_cypress/cypress/screens/rule_edit.ts @elastic/security-detection-engine
+x-pack/test/security_solution_cypress/cypress/screens/rule_creation @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine

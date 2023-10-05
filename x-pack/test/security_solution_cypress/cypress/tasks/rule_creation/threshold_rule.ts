@@ -14,7 +14,7 @@ import {
   INPUT,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-} from '../../screens/create_new_rule';
+} from '../../screens/rule_creation';
 import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 
 export const selectThresholdRuleType = () => {

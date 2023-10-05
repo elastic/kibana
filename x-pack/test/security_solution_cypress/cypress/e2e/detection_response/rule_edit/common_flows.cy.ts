@@ -6,27 +6,17 @@
  */
 
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getExistingRule, getEditedRule, getMitre2, getMitre1 } from '../../../objects/rule';
+import { getExistingRule, getMitre2, getMitre1 } from '../../../objects/rule';
 
 import {
   ACTIONS_NOTIFY_WHEN_BUTTON,
   ACTIONS_SUMMARY_BUTTON,
 } from '../../../screens/common/rule_actions';
-import {
-  SCHEDULE_INTERVAL_AMOUNT_INPUT,
-  SCHEDULE_INTERVAL_UNITS_INPUT,
-} from '../../../screens/create_new_rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
-import {
-  goToAboutStepTab,
-  goToActionsStepTab,
-  goToScheduleStepTab,
-} from '../../../tasks/rule_creation';
-import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
 import { login } from '../../../tasks/login';
-import { expandAdvancedSettings, fillScheduleRule } from '../../../tasks/rule_creation';
+import { expandAdvancedSettings } from '../../../tasks/rule_creation';
 import {
   confirmRuleDetailsAbout,
   confirmRuleDetailsDefinition,
@@ -47,10 +37,20 @@ import {
   confirmEditDefineStepDetails,
   editRuleIndices,
   editRuleQuery,
+  confirmEditStepSchedule,
+  editScheduleRule,
+  goToScheduleStepTab,
+  goToAboutStepTab,
+  goToActionsStepTab,
+  saveEditedRule,
+  visitEditRulePage,
+  editAuthors,
+  editLicense,
 } from '../../../tasks/rule_edit';
 import { CreateRulePropsRewrites } from '../../../objects/types';
 
 describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
+  const originalRule = getExistingRule({ rule_id: 'rule1', enabled: false });
   const ruleEdits: CreateRulePropsRewrites<QueryRuleCreateProps> = {
     index: ['auditbeat*'],
     query: '*:*',
@@ -67,6 +67,7 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     references: ['http://example.com/', 'https://example.com/'],
     false_positives: ['False1', 'False2'],
     threat: [getMitre1(), getMitre2()],
+    license: 'aLicense',
   };
   const editedRule = getExistingRule(ruleEdits);
 
@@ -74,16 +75,14 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     deleteConnectors();
     deleteAlertsAndRules();
     login();
-    createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
+    createRule(originalRule).then((createdRule) => {
       visitEditRulePage(createdRule.body.id);
     });
   });
 
   it('Allows a rule to be edited', () => {
-    const existingRule = getExistingRule();
-
     cy.log('Checking define step populates');
-    confirmEditDefineStepDetails(existingRule);
+    confirmEditDefineStepDetails(originalRule);
 
     cy.log('Update define step fields');
     editRuleIndices(ruleEdits.index);
@@ -91,7 +90,7 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.log('Checking about step populates');
     goToAboutStepTab();
-    confirmEditAboutStepDetails(existingRule);
+    confirmEditAboutStepDetails(originalRule);
 
     cy.log('Update about step fields');
     editRuleName(ruleEdits.name);
@@ -100,32 +99,26 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     editRiskScore(ruleEdits.risk_score);
     editRuleTags(ruleEdits.tags);
     expandAdvancedSettings();
-    editReferenceUrls(ruleEdits.references);
-    editFalsePositiveExamples(ruleEdits.false_positives);
-    editMitre(ruleEdits.threats);
-    editCustomInvestigationFields(ruleEdits.investigation_fields);
+    editReferenceUrls(ruleEdits.references, false);
+    editFalsePositiveExamples(ruleEdits.false_positives, false);
+    editMitre(ruleEdits.threat);
+    editCustomInvestigationFields(ruleEdits.investigation_fields?.field_names, false);
     editNote(ruleEdits.note);
+    editAuthors(ruleEdits.author, false);
+    editLicense(ruleEdits.license ?? '', false);
 
     cy.log('Checking schedule step populates');
     goToScheduleStepTab();
-    const interval = existingRule.interval;
-    const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);
-    if (intervalParts) {
-      const [amount, unit] = intervalParts;
-      cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
-      cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
-    } else {
-      throw new Error('Cannot assert scheduling info on a rule without an interval');
-    }
+    confirmEditStepSchedule(originalRule.interval);
 
     cy.log('Update schedule step fields');
-    fillScheduleRule(editedRule);
+    editScheduleRule(editedRule.interval, editedRule.from);
 
+    cy.log('Checking actions step populates');
     goToActionsStepTab();
 
     cy.log('Update actions step fields');
     addEmailConnectorAndRuleAction('test@example.com', 'Subject');
-
     cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
     cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
 
@@ -140,11 +133,15 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     cy.wait('@getRule').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
       // ensure that editing rule does not modify max_signals
-      cy.wrap(response?.body.max_signals).should('eql', existingRule.max_signals);
+      cy.wrap(response?.body.max_signals).should('eql', originalRule.max_signals);
     });
 
+    // Not checking withing the above await because confirming that
+    // edits persisted, checking against the response would not catch
+    // if an expected changed value was not persisted.
     confirmRuleDetailsAbout(editedRule);
     confirmRuleDetailsDefinition(editedRule);
     confirmRuleDetailsSchedule(editedRule);
+    // TODO - Check actions details
   });
 });

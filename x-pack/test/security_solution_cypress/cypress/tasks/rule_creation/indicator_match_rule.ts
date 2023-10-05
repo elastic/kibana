@@ -22,7 +22,7 @@ import {
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
-} from '../../screens/create_new_rule';
+} from '../../screens/rule_creation';
 import { getDefineContinueButton } from './common/define_step';
 
 export const selectIndicatorMatchType = () => {

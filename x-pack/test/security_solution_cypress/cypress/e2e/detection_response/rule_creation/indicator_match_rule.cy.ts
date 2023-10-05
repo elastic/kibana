@@ -92,15 +92,14 @@ import {
   getIndicatorMappingComboField,
   getIndicatorOrButton,
   selectIndicatorMatchType,
-  waitForAlertsToPopulate,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import {
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
   SCHEDULE_LOOKBACK_AMOUNT_INPUT,
   SCHEDULE_LOOKBACK_UNITS_INPUT,
-} from '../../../screens/create_new_rule';
-import { goBackToRuleDetails } from '../../../tasks/edit_rule';
+} from '../../../screens/rule_creation';
+import { goBackToRuleDetails } from '../../../tasks/rule_edit';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -108,6 +107,7 @@ import {
   getDetails,
   waitForTheRuleToBeExecuted,
   visitRuleDetailsPage,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';

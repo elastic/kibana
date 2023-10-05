@@ -20,7 +20,7 @@ import { visit } from '../../../tasks/navigation';
 import { addEqlToTimeline } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
+import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/rule_creation';
 import { deleteTimelines } from '../../../tasks/common';
 
 describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {

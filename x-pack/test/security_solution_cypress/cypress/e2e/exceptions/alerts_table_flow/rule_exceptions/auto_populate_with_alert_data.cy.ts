@@ -24,7 +24,11 @@ import {
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
 import { login } from '../../../../tasks/login';
-import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
+import {
+  goToExceptionsTab,
+  visitRuleDetailsPage,
+  waitForAlertsToPopulate,
+} from '../../../../tasks/rule_details';
 
 import { deleteAlertsAndRules } from '../../../../tasks/common';
 import {
@@ -34,7 +38,6 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../../screens/exceptions';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967

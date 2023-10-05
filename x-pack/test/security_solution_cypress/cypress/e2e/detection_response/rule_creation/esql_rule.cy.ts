@@ -19,7 +19,7 @@ import {
   NEW_TERMS_TYPE,
   THRESHOLD_TYPE,
   ESQL_QUERY_BAR,
-} from '../../../screens/create_new_rule';
+} from '../../../screens/rule_creation';
 
 import { getDetails, goBackToRulesTable } from '../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../tasks/alerts_detection_rules';
@@ -31,9 +31,9 @@ import {
   selectEsqlRuleType,
   getDefineContinueButton,
   fillEsqlQueryBar,
-  pressRuleCreateBtn,
+  createDisabledRule,
   fillAboutSpecificEsqlRuleAndContinue,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
@@ -68,7 +68,7 @@ describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      pressRuleCreateBtn();
+      createDisabledRule();
 
       // ensures after rule save ES|QL rule is displayed
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
@@ -91,7 +91,7 @@ describe.skip('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
       fillScheduleRuleAndContinue(rule);
-      pressRuleCreateBtn();
+      createDisabledRule();
 
       // ensure rule name override is displayed on details page
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');

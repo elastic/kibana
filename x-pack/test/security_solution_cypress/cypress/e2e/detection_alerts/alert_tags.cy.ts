@@ -17,7 +17,7 @@ import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/rule_details';
 import {
   ALERTS_TABLE_ROW_LOADER,
   MIXED_ALERT_TAG,

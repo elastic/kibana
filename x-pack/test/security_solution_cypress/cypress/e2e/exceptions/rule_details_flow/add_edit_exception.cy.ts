@@ -25,6 +25,7 @@ import {
   searchForExceptionItem,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 import {
   addExceptionConditions,
@@ -56,7 +57,6 @@ import {
   createExceptionListItem,
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(

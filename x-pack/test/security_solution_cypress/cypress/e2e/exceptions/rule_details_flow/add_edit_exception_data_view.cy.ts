@@ -26,6 +26,7 @@ import {
   removeException,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
@@ -38,7 +39,6 @@ import {
   VALUES_INPUT,
   FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(

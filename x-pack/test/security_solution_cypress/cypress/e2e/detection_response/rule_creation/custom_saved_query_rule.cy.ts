@@ -11,7 +11,7 @@ import {
   DEFINE_CONTINUE_BUTTON,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
   QUERY_BAR,
-} from '../../../screens/create_new_rule';
+} from '../../../screens/rule_creation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import {
   RULE_NAME_HEADER,
@@ -33,8 +33,8 @@ import {
   getCustomQueryInput,
   checkLoadQueryDynamically,
   uncheckLoadQueryDynamically,
-} from '../../../tasks/create_new_rule';
-import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
+} from '../../../tasks/rule_creation';
+import { saveEditedRule, visitEditRulePage } from '../../../tasks/rule_edit';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {

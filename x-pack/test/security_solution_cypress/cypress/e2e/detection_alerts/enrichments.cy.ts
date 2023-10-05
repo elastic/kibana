@@ -18,7 +18,7 @@ import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/rule_details';
 import {
   expandFirstAlert,
   scrollAlertTableColumnIntoView,

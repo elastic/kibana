@@ -16,7 +16,6 @@ import {
 import { login } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
   addExceptionEntryFieldValueValue,
@@ -37,6 +36,7 @@ import {
   goToEndpointExceptionsTab,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539

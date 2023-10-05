@@ -13,7 +13,7 @@ import {
   ESQL_QUERY_BAR_INPUT_AREA,
   ESQL_TYPE,
   RULE_NAME_OVERRIDE_FOR_ESQL,
-} from '../../screens/create_new_rule';
+} from '../../screens/rule_creation';
 import {
   expandAdvancedSettings,
   fillDescription,

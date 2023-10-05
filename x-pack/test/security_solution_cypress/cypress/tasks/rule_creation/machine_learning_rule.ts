@@ -12,7 +12,7 @@ import {
   ANOMALY_THRESHOLD_INPUT,
   MACHINE_LEARNING_DROPDOWN_INPUT,
   MACHINE_LEARNING_TYPE,
-} from '../../screens/create_new_rule';
+} from '../../screens/rule_creation';
 import { getDefineContinueButton } from './common/define_step';
 
 export const selectMachineLearningRuleType = () => {

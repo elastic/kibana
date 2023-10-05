@@ -43,7 +43,11 @@ import {
   NEW_TERMS_FIELDS_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import {
+  getDetails,
+  waitForAlertsToPopulate,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -52,8 +56,7 @@ import {
   fillDefineNewTermsRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectNewTermsRuleType,
-  waitForAlertsToPopulate,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 

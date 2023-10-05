@@ -29,7 +29,6 @@ import {
 import { deleteAlertsAndRules } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
   PackagePolicyWithoutAgentPolicyId,
@@ -43,6 +42,7 @@ import {
   enablesRule,
   visitRuleDetailsPage,
   waitForPageToBeLoaded,
+  waitForAlertsToPopulate,
 } from '../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161540

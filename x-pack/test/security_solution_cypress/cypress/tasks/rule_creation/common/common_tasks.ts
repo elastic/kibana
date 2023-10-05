@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  CREATE_AND_ENABLE_BTN,
-  CREATE_WITHOUT_ENABLING_BTN,
-} from '../../../screens/create_new_rule';
+import { CREATE_AND_ENABLE_BTN, CREATE_WITHOUT_ENABLING_BTN } from '../../../screens/rule_creation';
 import { BACK_TO_RULES_TABLE } from '../../../screens/rule_details';
 
 export const createEnabledRule = () => {

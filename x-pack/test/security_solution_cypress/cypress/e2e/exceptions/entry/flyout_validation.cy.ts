@@ -7,7 +7,7 @@
 
 import { getNewRule } from '../../../objects/rule';
 
-import { RULE_STATUS } from '../../../screens/create_new_rule';
+import { RULE_STATUS } from '../../../screens/rule_details';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login } from '../../../tasks/login';

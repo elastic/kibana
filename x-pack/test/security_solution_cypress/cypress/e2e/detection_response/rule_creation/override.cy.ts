@@ -54,11 +54,14 @@ import {
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
-  waitForAlertsToPopulate,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import {
+  getDetails,
+  waitForTheRuleToBeExecuted,
+  waitForAlertsToPopulate,
+} from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 

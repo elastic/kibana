@@ -33,11 +33,14 @@ import {
   duplicateFirstRule,
   importRules,
 } from '../../../../../tasks/alerts_detection_rules';
-import { goToActionsStepTab } from '../../../../../tasks/create_new_rule';
 import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
-import { saveEditedRule, visitEditRulePage } from '../../../../../tasks/edit_rule';
+import {
+  saveEditedRule,
+  visitEditRulePage,
+  goToActionsStepTab,
+} from '../../../../../tasks/rule_edit';
 import { DISABLED_SNOOZE_BADGE } from '../../../../../screens/rule_snoozing';
 import { TOOLTIP } from '../../../../../screens/common';
 

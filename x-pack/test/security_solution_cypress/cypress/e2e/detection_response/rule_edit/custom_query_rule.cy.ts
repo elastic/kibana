@@ -5,139 +5,136 @@
  * 2.0.
  */
 
-import { getExistingRule, getEditedRule } from '../../../objects/rule';
-
 import {
-  ACTIONS_NOTIFY_WHEN_BUTTON,
-  ACTIONS_SUMMARY_BUTTON,
-} from '../../../screens/common/rule_actions';
-import {
-  CUSTOM_QUERY_INPUT,
-  DEFINE_INDEX_INPUT,
-  DEFAULT_RISK_SCORE_INPUT,
-  RULE_DESCRIPTION_INPUT,
-  RULE_NAME_INPUT,
-  SCHEDULE_INTERVAL_AMOUNT_INPUT,
-  SCHEDULE_INTERVAL_UNITS_INPUT,
-  SEVERITY_DROPDOWN,
-  TAGS_CLEAR_BUTTON,
-  TAGS_FIELD,
-} from '../../../screens/create_new_rule';
-import {
-  ABOUT_DETAILS,
-  ABOUT_INVESTIGATION_NOTES,
-  ABOUT_RULE_DESCRIPTION,
-  CUSTOM_QUERY_DETAILS,
-  DEFINITION_DETAILS,
-  INDEX_PATTERNS_DETAILS,
-  INVESTIGATION_NOTES_TOGGLE,
-  RISK_SCORE_DETAILS,
-  RULE_NAME_HEADER,
-  RULE_TYPE_DETAILS,
-  RUNS_EVERY_DETAILS,
-  SCHEDULE_DETAILS,
-  SEVERITY_DETAILS,
-  TAGS_DETAILS,
-  TIMELINE_TEMPLATE_DETAILS,
-} from '../../../screens/rule_details';
+  AlertSuppression,
+  QueryRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { getDataViewRule, getSimpleCustomQueryRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
-import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
+import { deleteAlertsAndRules, postDataView } from '../../../tasks/common';
 import {
-  fillAboutRule,
+  confirmEditStepSchedule,
+  editAlertSuppression,
+  confirmEditDefineStepDetails,
+  confirmEditAboutStepDetails,
   goToAboutStepTab,
   goToActionsStepTab,
   goToScheduleStepTab,
-} from '../../../tasks/create_new_rule';
-import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
+  editRuleIndices,
+  editRuleQuery,
+  saveEditedRule,
+  visitEditRulePage,
+  editRuleDataViewSelection,
+} from '../../../tasks/rule_edit';
+
 import { login } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import {
+  confirmRuleDetailsAbout,
+  confirmRuleDetailsDefinition,
+  confirmRuleDetailsSchedule,
+} from '../../../tasks/rule_details';
+import { CreateRulePropsRewrites } from '../../../objects/types';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
-  const rule = getEditedRule();
-  const expectedEditedtags = rule.tags?.join('');
-  const expectedEditedIndexPatterns = rule.index;
-
+describe('Edit custom query rule', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    deleteConnectors();
     deleteAlertsAndRules();
+    /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we
+      are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
+      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
+      cleaning in all the other tests. */
+    cy.task('esArchiverResetKibana');
     login();
-    createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
-      visitEditRulePage(createdRule.body.id);
+  });
+
+  describe('rule using index patterns', () => {
+    const originalRule = getSimpleCustomQueryRule();
+
+    beforeEach(() => {
+      createRule(originalRule).then((createdRule) => {
+        visitEditRulePage(createdRule.body.id);
+      });
+    });
+
+    it('Allows a rule to be edited', () => {
+      const alertSuppressionOptions = {
+        group_by: ['agent.name'],
+        missing_fields_strategy: 'doNotSuppress',
+      } as AlertSuppression;
+      // Fill any custom query specific values you want tested,
+      // common values across rules can be tested in ./common_flows.cy.ts
+      const ruleEdits: CreateRulePropsRewrites<QueryRuleCreateProps> = {
+        index: ['auditbeat*'],
+        query: '*:*',
+        alert_suppression: alertSuppressionOptions,
+      };
+      const editedRule = getSimpleCustomQueryRule(ruleEdits);
+
+      cy.log('Checking define step populates');
+      confirmEditDefineStepDetails(originalRule);
+
+      cy.log('Updating define step');
+      editAlertSuppression(alertSuppressionOptions);
+      editRuleIndices(ruleEdits.index);
+      editRuleQuery(ruleEdits.query);
+
+      cy.log('Checking about step populates');
+      goToAboutStepTab();
+      confirmEditAboutStepDetails(originalRule);
+
+      cy.log('Checking schedule step populates');
+      goToScheduleStepTab();
+      confirmEditStepSchedule(originalRule.interval);
+
+      // NOTE: Missing test to confirm actions step is
+      // populated as expected
+      goToActionsStepTab();
+
+      saveEditedRule();
+
+      // Not checking withing the above await because confirming that
+      // edits persisted, checking against the response would not catch
+      // if an expected changed value was not persisted.
+      confirmRuleDetailsAbout(editedRule);
+      confirmRuleDetailsDefinition(editedRule);
+      confirmRuleDetailsSchedule(editedRule);
     });
   });
 
-  it('Allows a rule to be edited', () => {
-    const existingRule = getExistingRule();
-
-    // expect define step to populate
-    cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.query);
-
-    cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.index?.join(''));
-
-    goToAboutStepTab();
-
-    // expect about step to populate
-    cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
-    cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
-    cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
-    cy.get(SEVERITY_DROPDOWN).should('have.text', 'High');
-    cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', `${existingRule.risk_score}`);
-
-    goToScheduleStepTab();
-
-    // expect schedule step to populate
-    const interval = existingRule.interval;
-    const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);
-    if (intervalParts) {
-      const [amount, unit] = intervalParts;
-      cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
-      cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
-    } else {
-      throw new Error('Cannot assert scheduling info on a rule without an interval');
-    }
-
-    goToActionsStepTab();
-
-    addEmailConnectorAndRuleAction('test@example.com', 'Subject');
-
-    cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
-    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
-
-    goToAboutStepTab();
-    cy.get(TAGS_CLEAR_BUTTON).click();
-    fillAboutRule(getEditedRule());
-
-    cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
-
-    saveEditedRule();
-
-    cy.wait('@getRule').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      // ensure that editing rule does not modify max_signals
-      cy.wrap(response?.body.max_signals).should('eql', existingRule.max_signals);
+  describe('rule using data views', () => {
+    const originalRule = getDataViewRule();
+    const editedRule = getDataViewRule({
+      data_view_id: 'security-solution-default',
     });
 
-    cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getEditedRule().description);
-    cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
-      getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
-      getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
-    });
-    cy.get(INVESTIGATION_NOTES_TOGGLE).click();
-    cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);
-    cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', expectedEditedIndexPatterns?.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', getEditedRule().query);
-      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
-      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-    });
-    if (getEditedRule().interval) {
-      cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', getEditedRule().interval);
+    beforeEach(() => {
+      if (originalRule.data_view_id != null) {
+        postDataView(originalRule.data_view_id);
+      }
+      createRule(originalRule).then((createdRule) => {
+        visitEditRulePage(createdRule.body.id);
       });
-    }
+    });
+
+    it('Allows a rule data view to be edited', () => {
+      cy.log('Checking define step populates');
+      confirmEditDefineStepDetails(originalRule);
+
+      cy.log('Updating data view selection');
+      editRuleDataViewSelection('.alerts');
+
+      cy.log('Checking about step populates');
+      goToAboutStepTab();
+      confirmEditAboutStepDetails(originalRule);
+
+      cy.log('Checking schedule step populates');
+      goToScheduleStepTab();
+      confirmEditStepSchedule(originalRule.interval);
+
+      saveEditedRule();
+
+      cy.log('Checking for updated data view');
+      confirmRuleDetailsDefinition(editedRule);
+    });
   });
 });

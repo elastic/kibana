@@ -11,12 +11,7 @@ import {
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
 } from '../../../screens/common/rule_actions';
-import { ACTIONS_EDIT_TAB } from '../../../screens/create_new_rule';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from '../../common/rule_actions';
-
-export const goToActionsStepTab = () => {
-  cy.get(ACTIONS_EDIT_TAB).click({ force: true });
-};
 
 export const fillRuleAction = (actions: Actions) => {
   actions.connectors.forEach((connector) => {

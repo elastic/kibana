@@ -11,6 +11,7 @@ export * from './common/common_tasks';
 export * from './common/define_step';
 export * from './common/schedule_step';
 export * from './eql_rule';
+export * from './esql_rule';
 export * from './indicator_match_rule';
 export * from './machine_learning_rule';
 export * from './new_terms_rule';

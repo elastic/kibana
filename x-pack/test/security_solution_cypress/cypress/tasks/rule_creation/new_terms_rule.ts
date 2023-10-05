@@ -16,7 +16,7 @@ import {
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
   NEW_TERMS_TYPE,
-} from '../../screens/create_new_rule';
+} from '../../screens/rule_creation';
 
 export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });

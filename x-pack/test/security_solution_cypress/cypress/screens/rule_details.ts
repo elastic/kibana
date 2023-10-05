@@ -158,6 +158,8 @@ export const RULE_DETAILS_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-deta
 
 export const AUTHOR_DETAILS = 'Author';
 
+export const LICENSE_DETAILS = 'License';
+
 export const BUILDING_BLOCK_DETAILS = 'Building block';
 
 export const BUILDING_BLOCK_TEXT_DETAILS =
@@ -174,3 +176,5 @@ export const ACTION_DETAILS_CONNECTOR_FREQUENCY =
   '[data-test-subj=ruleActionsDetailsConnectorFrequency]';
 
 export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
+
+export const RULE_STATUS = '[data-test-subj="ruleStatus"]';

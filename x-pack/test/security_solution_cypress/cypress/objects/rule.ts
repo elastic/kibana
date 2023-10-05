@@ -119,21 +119,10 @@ const getSeverityOverride4 = (): SeverityMappingItem => ({
 export const getDataViewRule = (
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
 ): QueryRuleCreateProps => ({
-  type: 'query',
+  ...getSimpleCustomQueryRule(),
   query: 'host.name: *',
   data_view_id: 'auditbeat-2022',
   name: 'New Data View Rule',
-  description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 
@@ -390,14 +379,8 @@ export const getEqlRule = (
   description: 'New EQL rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
   interval: '100m',
   from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 
@@ -458,14 +441,8 @@ export const getEqlSequenceRule = (
   description: 'New EQL rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
   interval: '100m',
   from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 

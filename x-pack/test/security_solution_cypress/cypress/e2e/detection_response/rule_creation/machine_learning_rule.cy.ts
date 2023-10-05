@@ -48,7 +48,7 @@ import {
   fillDefineMachineLearningRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 

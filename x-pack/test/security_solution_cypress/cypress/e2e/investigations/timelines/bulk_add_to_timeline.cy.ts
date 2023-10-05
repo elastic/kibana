@@ -16,7 +16,7 @@ import {
   selectAllEvents,
   selectFirstPageEvents,
 } from '../../../tasks/common/event_table';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login } from '../../../tasks/login';

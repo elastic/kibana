@@ -15,7 +15,6 @@ import { ruleFields } from '../../../data/detection_engine';
 import { COMBO_BOX_INPUT } from '../../../screens/common/controls';
 import {
   ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
@@ -43,14 +42,10 @@ import {
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
   TAGS_INPUT,
-} from '../../../screens/create_new_rule';
+} from '../../../screens/rule_creation';
 
 /** Returns the continue button on the step of about */
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
-
-export const goToAboutStepTab = () => {
-  cy.get(ABOUT_EDIT_TAB).click({ force: true });
-};
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
   cy.get(RULE_NAME_INPUT).type(ruleName, { force: true });
@@ -89,7 +84,7 @@ export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
-export const fillMitre = (mitreAttacks: Threat[]) => {
+export const fillMitre = (mitreAttacks: Threat[] = [ruleFields.threat]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
   mitreAttacks.forEach((mitre, tacticIndex) => {
@@ -171,16 +166,22 @@ export const fillCustomInvestigationFields = (
   fields: string[] = ruleFields.investigationFields.field_names
 ) => {
   fields.forEach((field) => {
-    cy.get(INVESTIGATIONS_INPUT).type(`${field}{enter}`, { force: true });
+    cy.get(INVESTIGATIONS_INPUT).type(`${field}{downArrow}{enter}`, { force: true });
   });
   return fields;
 };
 
-export const fillAuthor = (authors: string[]) => {
+export const fillAuthor = (authors: string[] = ruleFields.author) => {
   authors.forEach((author) => {
     cy.get(AUTHOR_INPUT).type(`${author}{enter}`);
   });
   return authors;
+};
+
+export const fillLicense = (license: string = ruleFields.license) => {
+  cy.get(LICENSE_INPUT).type(`${license}{enter}`);
+
+  return license;
 };
 
 /*
@@ -228,7 +229,7 @@ export const fillAboutRule = (rule: RuleCreateProps) => {
   }
 
   if (rule.license) {
-    cy.get(LICENSE_INPUT).type(`${rule.license}{enter}`);
+    fillLicense(rule.license);
   }
 };
 
@@ -295,6 +296,8 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
 export const fillAboutRuleMinimumAndContinue = (rule: RuleCreateProps) => {
   fillRuleName(rule.name);
   fillDescription(rule.description);
+  fillSeverity(rule.severity);
+  fillRiskScore(rule.risk_score);
   getAboutContinueButton().should('exist').click();
 };
 

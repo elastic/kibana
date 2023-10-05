@@ -10,6 +10,7 @@ import type {
   QueryRuleCreateProps,
   RuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
+import { ruleFields } from '../../../data/detection_engine';
 
 import {
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
@@ -31,7 +32,7 @@ import {
   TIMELINE_TEMPLATE,
   TIMELINE_TEMPLATE_INPUT,
   RULE_INDICES_CLEAR,
-} from '../../../screens/create_new_rule';
+} from '../../../screens/rule_creation';
 import { TIMELINE } from '../../../screens/timelines';
 
 // called after import rule from saved timeline
@@ -57,10 +58,18 @@ export const fillTimelineTemplate = (rule: RuleCreateProps) => {
   cy.get(TIMELINE_TEMPLATE_INPUT).type(`${rule.timeline_title}{enter}`);
 };
 
+export const fillRuleDataView = (dataViewId: string = ruleFields.dataViewId) => {
+  cy.get(DATA_VIEW_OPTION).click();
+  cy.get(DATA_VIEW_COMBO_BOX).type(`${dataViewId}{enter}`);
+};
+
+export const fillRulCustomQuery = (query: string = ruleFields.ruleQuery) => {
+  cy.get(CUSTOM_QUERY_INPUT).first().type(query);
+};
+
 export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
-    cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
+    fillRuleDataView(rule.data_view_id);
   } else {
     cy.get(RULE_INDICES_CLEAR).click();
 
@@ -68,9 +77,7 @@ export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
       cy.get(RULE_INDICES).type(`${ind}{enter}`);
     });
   }
-  cy.get(CUSTOM_QUERY_INPUT)
-    .first()
-    .type(rule.query || '');
+  fillRulCustomQuery(rule.query);
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {

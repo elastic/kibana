@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
+import { ruleFields } from '../../data/detection_engine';
 import {
   DEFINE_CONTINUE_BUTTON,
   EQL_QUERY_INPUT,
@@ -14,17 +15,17 @@ import {
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
   RULES_CREATION_PREVIEW_REFRESH_BUTTON,
-} from '../../screens/create_new_rule';
+} from '../../screens/rule_creation';
 import { TOAST_ERROR } from '../../screens/shared';
 
 export const selectEqlRuleType = () => {
   cy.get(EQL_TYPE).click({ force: true });
 };
 
-export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+export const fillEqlQuery = (query: string = ruleFields.ruleQuery) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click({ force: true });
@@ -37,6 +38,9 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
+};
 
+export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+  fillEqlQuery(rule.query);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };

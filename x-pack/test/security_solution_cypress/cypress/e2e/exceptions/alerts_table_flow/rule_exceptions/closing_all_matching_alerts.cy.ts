@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -12,7 +11,7 @@ import {
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
-import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
+import { visitRuleDetailsPage, waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';

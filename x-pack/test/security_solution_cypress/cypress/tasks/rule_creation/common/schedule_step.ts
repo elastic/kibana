@@ -18,8 +18,7 @@ import {
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
   SCHEDULE_CONTINUE_BUTTON,
-  SCHEDULE_EDIT_TAB,
-} from '../../../screens/create_new_rule';
+} from '../../../screens/rule_creation';
 import { ruleFields } from '../../../data/detection_engine';
 
 export const getHumanReadableLookback = (from: string, interval: string) => {
@@ -29,21 +28,18 @@ export const getHumanReadableLookback = (from: string, interval: string) => {
 
   return [additionalLookbackNumber, additionalLookbackType];
 };
-export const goToScheduleStepTab = () => {
-  cy.get(SCHEDULE_EDIT_TAB).click({ force: true });
-};
 
-export const fillScheduleRule = (rule: RuleCreateProps) => {
-  if (rule.interval) {
-    const intervalNumber = rule.interval.slice(0, rule.interval.length - 1);
-    const intervalType = rule.interval.charAt(rule.interval.length - 1);
+export const fillScheduleRule = (interval: string | undefined, from: string | undefined) => {
+  if (interval) {
+    const intervalNumber = interval.slice(0, interval.length - 1);
+    const intervalType = interval.charAt(interval.length - 1);
     cy.get(RUNS_EVERY_INTERVAL).type('{selectall}');
     cy.get(RUNS_EVERY_INTERVAL).type(intervalNumber);
 
     cy.get(RUNS_EVERY_TIME_TYPE).select(intervalType);
   }
-  if (rule.from) {
-    const lookback = getHumanReadableLookback(rule.from, rule.interval ?? '5m');
+  if (from) {
+    const lookback = getHumanReadableLookback(from, interval ?? '5m');
     const additionalLookbackNumber = lookback[0];
     const additionalLookbackType = lookback[1];
     cy.get(LOOK_BACK_INTERVAL).type('{selectAll}');
@@ -54,7 +50,7 @@ export const fillScheduleRule = (rule: RuleCreateProps) => {
 };
 
 export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
-  fillScheduleRule(rule);
+  fillScheduleRule(rule.interval, rule.from);
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
