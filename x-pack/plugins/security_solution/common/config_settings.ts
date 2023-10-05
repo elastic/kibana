@@ -21,7 +21,7 @@ export interface ConfigSettings {
 }
 
 /**
- * A list of allowed values that can be used in `xpack.securitySolution.settings`.
+ * A list of allowed values that can be override in `xpack.securitySolution.offeringSettings`.
  * This object is then used to validate and parse the value entered.
  */
 export const defaultSettings: ConfigSettings = Object.freeze({
@@ -33,27 +33,27 @@ export const defaultSettings: ConfigSettings = Object.freeze({
 type ConfigSettingsKey = keyof ConfigSettings;
 
 /**
- * Parses the string value used in `xpack.securitySolution.settings` kibana configuration,
+ * Parses the string value used in `xpack.securitySolution.offeringSettings` kibana configuration,
  *
- * @param configSettings
+ * @param offeringSettings
  */
 export const parseConfigSettings = (
-  configSettings: Record<string, boolean>
+  offeringSettings: Record<string, boolean>
 ): { settings: ConfigSettings; invalid: string[] } => {
-  const configSettingsOverride: Partial<ConfigSettings> = {};
+  const configSettings: Partial<ConfigSettings> = {};
   const invalidKeys: string[] = [];
 
-  for (const optionKey in configSettings) {
+  for (const optionKey in offeringSettings) {
     if (defaultSettings[optionKey as ConfigSettingsKey] == null) {
       invalidKeys.push(optionKey);
     } else {
-      configSettingsOverride[optionKey as ConfigSettingsKey] = configSettings[optionKey];
+      configSettings[optionKey as ConfigSettingsKey] = offeringSettings[optionKey];
     }
   }
 
   const settings: ConfigSettings = Object.freeze({
     ...defaultSettings,
-    ...configSettingsOverride,
+    ...configSettings,
   });
 
   return {

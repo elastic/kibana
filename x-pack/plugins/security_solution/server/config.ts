@@ -123,20 +123,21 @@ export const configSchema = schema.object({
     max: 104857600, // 100MB,
   }),
   /**
-   * Defines static settings for the Security Solution app.
+   * Defines the settings for a specific offering of the Security Solution app.
+   * They override the default values.
    * @example
-   * xpack.securitySolution.settings: {
+   * xpack.securitySolution.offeringSettings: {
    *  "ILMEnabled": false,
    * }
    */
-  settings: schema.recordOf(schema.string(), schema.boolean(), {
+  offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
     defaultValue: {},
   }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = Omit<ConfigSchema, 'settings'> & {
+export type ConfigType = Omit<ConfigSchema, 'offeringSettings'> & {
   experimentalFeatures: ExperimentalFeatures;
   settings: ConfigSettings;
 };
@@ -158,10 +159,12 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
-  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(pluginConfig.settings);
+  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(
+    pluginConfig.offeringSettings
+  );
 
   if (invalidConfigSettings.length) {
-    logger.warn(`Unsupported "xpack.securitySolution.settings" values detected.
+    logger.warn(`Unsupported "xpack.securitySolution.offeringSettings" values detected.
 The following configuration values are no longer supported and should be removed from the kibana configuration file:
 ${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
 `);

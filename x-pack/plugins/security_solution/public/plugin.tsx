@@ -94,7 +94,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.experimentalFeatures = parseExperimentalConfigValue(
       this.config.enableExperimental || []
     ).features;
-    this.configSettings = parseConfigSettings(this.config.settings ?? {}).settings;
+    this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
