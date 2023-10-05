@@ -127,6 +127,7 @@ enabled:
   - test/functional/apps/visualize/group5/config.ts
   - test/functional/apps/visualize/group6/config.ts
   - test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
+  - test/functional/apps/reporting/config.ts
   - test/functional/config.ccs.ts
   - test/functional/firefox/console.config.ts
   - test/functional/firefox/dashboard.config.ts

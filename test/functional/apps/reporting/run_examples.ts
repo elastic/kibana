@@ -19,7 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Example app of reporting functionality', async () => {
     it('', async () => {
       await PageObjects.common.navigateToApp('developerExamples');
-      console.log(PageObjects);
       await testSubjects.click('euiFieldSearch');
     });
   });
