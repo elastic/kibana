@@ -6,14 +6,33 @@
  */
 
 import React, { useMemo } from 'react';
-// import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 import type { AgentUpgradeDetails } from '../../../../../../../common/types';
 
-function getUpgradeStartDelay(scheduledAt?: string) {
-  return Math.round((Date.parse(scheduledAt || '') - Date.now()) / 36e5);
+/**
+ * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.
+ */
+export function getUpgradeStartDelay(scheduledAt?: string): string {
+  const timeDiffMillis = Date.parse(scheduledAt || '') - Date.now();
+
+  if (timeDiffMillis < 0) {
+    // The scheduled time should not be in the past, this would indicate an issue.
+    // We choose not to provide a time estimation rather than negative duration.
+    return '';
+  }
+
+  if (timeDiffMillis < 15 * 6e4) {
+    return ' The upgrade will start in less than 15 minutes.';
+  }
+  if (timeDiffMillis < 30 * 6e4) {
+    return ' The upgrade will start in less than 30 minutes.';
+  }
+  if (timeDiffMillis < 60 * 6e4) {
+    return ' The upgrade will start in less than 1 hour.';
+  }
+  return ` The upgrade will start in less than ${Math.ceil(timeDiffMillis / 36e5)} hours.`;
 }
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
@@ -48,9 +67,9 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeScheduled"
-            defaultMessage="The agent has been instructed to upgrade. The upgrade will start in {scheduledAt} hours."
+            defaultMessage="The agent has been instructed to upgrade.{upgradeStartDelay}"
             values={{
-              scheduledAt: getUpgradeStartDelay(agentUpgradeDetails.metadata.scheduled_at),
+              upgradeStartDelay: getUpgradeStartDelay(agentUpgradeDetails.metadata.scheduled_at),
             }}
           />
         ),
@@ -70,7 +89,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
             defaultMessage="Downloading the new agent artifact version ({downloadPercent}%)."
             values={{
-              downloadPercent: agentUpgradeDetails?.metadata.download_percent,
+              downloadPercent: agentUpgradeDetails?.metadata.download_percent || 0,
             }}
           />
         ),
@@ -186,15 +205,27 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
 }
 
 export const AgentUpgradeStatus: React.FC<{
+  isAgentUpgradable: boolean;
   agentUpgradeStartedAt?: string | null;
   agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
-}> = ({ agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
+}> = ({ isAgentUpgradable, agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
   const isAgentUpgrading = useMemo(
     () => agentUpgradeStartedAt && !agentUpgradedAt,
     [agentUpgradeStartedAt, agentUpgradedAt]
   );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
+
+  if (isAgentUpgradable) {
+    return (
+      <EuiBadge color="hollow" iconType="sortUp">
+        <FormattedMessage
+          id="xpack.fleet.agentUpgradeStatusBadge.upgradeAvailable"
+          defaultMessage="Upgrade available"
+        />
+      </EuiBadge>
+    );
+  }
 
   if (agentUpgradeDetails && status) {
     return (

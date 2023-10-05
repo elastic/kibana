@@ -5,11 +5,39 @@
  * 2.0.
  */
 
+import { fireEvent, waitFor } from '@testing-library/dom';
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { AgentUpgradeStatus } from './agent_upgrade_status';
+import { AgentUpgradeStatus, getUpgradeStartDelay } from './agent_upgrade_status';
+
+function getDateString(futureOffsetInMinutes: number): string {
+  return new Date(Date.now() + futureOffsetInMinutes * 6e4).toString();
+}
+
+describe('getUpgradeStartDelay', () => {
+  it('should return a user-friendly time estimation', () => {
+    expect(getUpgradeStartDelay(getDateString(9))).toEqual(
+      ' The upgrade will start in less than 15 minutes.'
+    );
+    expect(getUpgradeStartDelay(getDateString(25))).toEqual(
+      ' The upgrade will start in less than 30 minutes.'
+    );
+    expect(getUpgradeStartDelay(getDateString(55))).toEqual(
+      ' The upgrade will start in less than 1 hour.'
+    );
+    expect(getUpgradeStartDelay(getDateString(61))).toEqual(
+      ' The upgrade will start in less than 2 hours.'
+    );
+    expect(getUpgradeStartDelay(getDateString(119))).toEqual(
+      ' The upgrade will start in less than 2 hours.'
+    );
+    expect(getUpgradeStartDelay(getDateString(121))).toEqual(
+      ' The upgrade will start in less than 3 hours.'
+    );
+  });
+});
 
 describe('AgentUpgradeStatus', () => {
   function render(props: any) {
@@ -36,7 +64,7 @@ describe('AgentUpgradeStatus', () => {
     });
   }
 
-  function expectBadgeLabel(results: any, text: string) {
+  function expectUpgradeStatusBadgeLabel(results: any, text: string) {
     expect(results.queryByText(text)).toBeInTheDocument();
     expectNotInDocument(
       results,
@@ -44,12 +72,19 @@ describe('AgentUpgradeStatus', () => {
     );
   }
 
-  function expectNoBadges(results: any) {
+  function expectNoUpgradeStatusBadges(results: any) {
     expectNotInDocument(results, badgeLabels);
   }
 
+  async function expectTooltip(results: any, text: string) {
+    fireEvent.mouseOver(results.getByText('Info'));
+    await waitFor(() => {
+      expect(results.getByText(text)).toBeInTheDocument();
+    });
+  }
+
   describe('with agent upgrade details', () => {
-    it('should render UPG_REQUESTED state correctly', () => {
+    it('should render UPG_REQUESTED state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -57,24 +92,31 @@ describe('AgentUpgradeStatus', () => {
           state: 'UPG_REQUESTED',
         },
       });
-      expectBadgeLabel(results, 'Upgrade requested');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade requested');
+      await expectTooltip(results, 'The agent has requested an upgrade.');
     });
 
-    it('should render UPG_SCHEDULED state correctly', () => {
+    it('should render UPG_SCHEDULED state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
           action_id: 'xxx',
           state: 'UPG_SCHEDULED',
           metadata: {
-            scheduled_at: '2023-08-09T10:11:12Z',
+            scheduled_at: getDateString(200),
           },
         },
       });
-      expectBadgeLabel(results, 'Upgrade scheduled');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade scheduled');
+      await expectTooltip(
+        results,
+        'The agent has been instructed to upgrade. The upgrade will start in less than 4 hours.'
+      );
     });
 
-    it('should render UPG_DOWNLOADING state correctly', () => {
+    it('should render UPG_DOWNLOADING state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -85,10 +127,12 @@ describe('AgentUpgradeStatus', () => {
           },
         },
       });
-      expectBadgeLabel(results, 'Upgrade downloading');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade downloading');
+      await expectTooltip(results, 'Downloading the new agent artifact version (16.4%).');
     });
 
-    it('should render UPG_EXTRACTING state correctly', () => {
+    it('should render UPG_EXTRACTING state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -96,10 +140,12 @@ describe('AgentUpgradeStatus', () => {
           state: 'UPG_EXTRACTING',
         },
       });
-      expectBadgeLabel(results, 'Upgrade extracting');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade extracting');
+      await expectTooltip(results, 'The new agent artifact is extracting.');
     });
 
-    it('should render UPG_REPLACING state correctly', () => {
+    it('should render UPG_REPLACING state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -107,10 +153,12 @@ describe('AgentUpgradeStatus', () => {
           state: 'UPG_REPLACING',
         },
       });
-      expectBadgeLabel(results, 'Upgrade replacing');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade replacing');
+      await expectTooltip(results, 'Replacing the agent artifact version.');
     });
 
-    it('should render UPG_RESTARTING state correctly', () => {
+    it('should render UPG_RESTARTING state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -118,10 +166,12 @@ describe('AgentUpgradeStatus', () => {
           state: 'UPG_RESTARTING',
         },
       });
-      expectBadgeLabel(results, 'Upgrade restarting');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade restarting');
+      await expectTooltip(results, 'The agent is restarting to apply the update.');
     });
 
-    it('should render UPG_WATCHING state correctly', () => {
+    it('should render UPG_WATCHING state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -129,10 +179,12 @@ describe('AgentUpgradeStatus', () => {
           state: 'UPG_WATCHING',
         },
       });
-      expectBadgeLabel(results, 'Upgrade monitoring');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade monitoring');
+      await expectTooltip(results, 'Monitoring the new agent version for errors.');
     });
 
-    it('should render UPG_ROLLBACK state correctly', () => {
+    it('should render UPG_ROLLBACK state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -140,10 +192,12 @@ describe('AgentUpgradeStatus', () => {
           state: 'UPG_ROLLBACK',
         },
       });
-      expectBadgeLabel(results, 'Upgrade rolled back');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade rolled back');
+      await expectTooltip(results, 'Upgrade unsuccessful. Rolling back to previous version.');
     });
 
-    it('should render UPG_FAILED state correctly', () => {
+    it('should render UPG_FAILED state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
           target_version: 'XXX',
@@ -155,28 +209,44 @@ describe('AgentUpgradeStatus', () => {
           },
         },
       });
-      expectBadgeLabel(results, 'Upgrade failed');
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade failed');
+      await expectTooltip(results, 'Upgrade failed: Something went wrong.');
     });
   });
 
   describe('with no agent upgrade details', () => {
-    it('should render an icon with tooltip if the agent is upgrading', () => {
+    it('should render a badge with no tooltip if the agent is upgradable', () => {
+      const results = render({
+        isAgentUpgradable: true,
+      });
+
+      expectNoUpgradeStatusBadges(results);
+      expect(results.queryByText('Upgrade available')).toBeInTheDocument();
+      expect(results.queryAllByText('Info')).toEqual([]);
+    });
+
+    it('should render an icon with tooltip if the agent is upgrading', async () => {
       const results = render({
         agentUpgradeStartedAt: '2023-10-03T14:34:12Z',
         agentUpgradedAt: null,
       });
-      expectNoBadges(results);
-      expect(
-        results.container.querySelector('[data-euiicon-type="iInCircle"]')
-      ).toBeInTheDocument();
+
+      expectNoUpgradeStatusBadges(results);
+      expect(results.getByText('Info')).toBeInTheDocument();
+
+      await expectTooltip(
+        results,
+        'Detailed upgrade status is available for Elastic Agents on version 8.11 and higher.'
+      );
     });
 
-    it('should not render anything if the agent is not upgrading', () => {
+    it('should not render anything if the agent is neither upgrading nor upgradable', () => {
       const results = render({
         agentUpgradeStartedAt: null,
         agentUpgradedAt: '2023-10-03T14:34:12Z',
       });
-      expectNoBadges(results);
+      expectNoUpgradeStatusBadges(results);
       expect(
         results.container.querySelector('[data-euiicon-type="iInCircle"]')
       ).not.toBeInTheDocument();

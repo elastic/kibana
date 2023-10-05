@@ -293,6 +293,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AgentUpgradeStatus
+                  isAgentUpgradable={
+                    !!(
+                      isAgentSelectable(agent) &&
+                      latestAgentVersion &&
+                      isAgentUpgradeable(agent, latestAgentVersion)
+                    )
+                  }
                   agentUpgradeStartedAt={agent.upgrade_started_at}
                   agentUpgradedAt={agent.upgraded_at}
                   agentUpgradeDetails={agent.upgrade_details}
@@ -300,20 +307,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isAgentSelectable(agent) &&
-          latestAgentVersion &&
-          isAgentUpgradeable(agent, latestAgentVersion) ? (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="warning" color="warning" />
-                &nbsp;
-                <FormattedMessage
-                  id="xpack.fleet.agentList.agentUpgradeLabel"
-                  defaultMessage="Upgrade available"
-                />
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
         </EuiFlexGroup>
       ),
     },
