@@ -20,7 +20,7 @@ export const getVisualizationSavedObjectType = (
   name: CONTENT_ID,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'visualizeApp',
