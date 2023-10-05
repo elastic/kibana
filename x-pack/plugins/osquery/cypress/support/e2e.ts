@@ -35,6 +35,7 @@ import type { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
 import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import { waitUntil } from '../tasks/wait_until';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -85,41 +86,7 @@ Cypress.Commands.add('login', (role) => {
   return login(role);
 });
 
-const waitUntil = (subject, fn) => {
-  const timeout = 90000;
-  const interval = 5000;
-  let attempts = Math.floor(timeout / interval);
-
-  const completeOrRetry = (result) => {
-    if (result) {
-      return result;
-    }
-
-    if (attempts < 1) {
-      throw new Error(`Timed out while retrying, last result was: {${result}}`);
-    }
-
-    cy.wait(interval, { log: false }).then(() => {
-      attempts--;
-
-      return evaluate();
-    });
-  };
-
-  const evaluate = () => {
-    const result = fn(subject);
-
-    if (result && result.then) {
-      return result.then(completeOrRetry);
-    } else {
-      return completeOrRetry(result);
-    }
-  };
-
-  return evaluate();
-};
-
-Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
+Cypress.Commands.add('waitUntil', waitUntil);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

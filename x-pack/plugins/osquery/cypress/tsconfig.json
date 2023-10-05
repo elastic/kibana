@@ -4,7 +4,9 @@
     "**/*",
     "./cypress.config.ts",
     "./serverless_cypress.config.ts",
-    "../../../test_serverless/shared/lib"
+    "../../../test_serverless/shared/lib",
+    // todo check if we can omit doing this
+    "../../../test/security_solution_cypress/cypress/tasks/create_new_rule"
   ],
   "exclude": [
     "target/**/*",
