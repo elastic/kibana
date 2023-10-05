@@ -60,10 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     xit(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
-        CSV_REPORT_TYPE_V2,
-        job
-      );
+      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job);
 
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
