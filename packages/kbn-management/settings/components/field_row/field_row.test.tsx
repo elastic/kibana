@@ -198,7 +198,7 @@ describe('Field', () => {
           wrap(
             <FieldRow
               field={getFieldDefinition({ id, setting })}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -212,7 +212,7 @@ describe('Field', () => {
           wrap(
             <FieldRow
               field={getFieldDefinition({ id, setting })}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -243,7 +243,7 @@ describe('Field', () => {
                 setting,
                 params: { isOverridden: true },
               })}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -265,7 +265,7 @@ describe('Field', () => {
                 id,
                 setting,
               })}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={false}
             />
           )
@@ -288,7 +288,7 @@ describe('Field', () => {
                   userValue: userValues[type] as any,
                 },
               })}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -319,7 +319,7 @@ describe('Field', () => {
                 setting,
                 params: { isCustom: true },
               })}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -341,7 +341,7 @@ describe('Field', () => {
                 type,
                 unsavedValue: userValues[type] as any,
               }}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -373,7 +373,7 @@ describe('Field', () => {
         });
 
         const { getByTestId } = render(
-          wrap(<FieldRow field={field} onChange={handleChange} isSavingEnabled={true} />)
+          wrap(<FieldRow field={field} onFieldChange={handleChange} isSavingEnabled={true} />)
         );
 
         const input = getByTestId(`${DATA_TEST_SUBJ_RESET_PREFIX}-${field.id}`);
@@ -395,7 +395,7 @@ describe('Field', () => {
             <FieldRow
               field={field}
               unsavedChange={{ type, unsavedValue: userValues[type] }}
-              onChange={handleChange}
+              onFieldChange={handleChange}
               isSavingEnabled={true}
             />
           )
@@ -408,12 +408,12 @@ describe('Field', () => {
     });
   });
 
-  it('should fire onChange when input changes', () => {
+  it('should fire onFieldChange when input changes', () => {
     const setting = settings.string;
     const field = getFieldDefinition({ id: setting.name || setting.type, setting });
 
     const { getByTestId } = render(
-      wrap(<FieldRow field={field} onChange={handleChange} isSavingEnabled={true} />)
+      wrap(<FieldRow field={field} onFieldChange={handleChange} isSavingEnabled={true} />)
     );
 
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
@@ -424,12 +424,12 @@ describe('Field', () => {
     });
   });
 
-  it('should fire onChange with an error when input changes with invalid value', () => {
+  it('should fire onFieldChange with an error when input changes with invalid value', () => {
     const setting = settings.color;
     const field = getFieldDefinition({ id: setting.name || setting.type, setting });
 
     const { getByTestId } = render(
-      wrap(<FieldRow field={field} onChange={handleChange} isSavingEnabled={true} />)
+      wrap(<FieldRow field={field} onFieldChange={handleChange} isSavingEnabled={true} />)
     );
 
     const input = getByTestId(`euiColorPickerAnchor ${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
@@ -451,7 +451,7 @@ describe('Field', () => {
       wrap(
         <FieldRow
           field={field}
-          onChange={handleChange}
+          onFieldChange={handleChange}
           isSavingEnabled={true}
           unsavedChange={{
             type: setting.type,
@@ -491,7 +491,11 @@ describe('Field', () => {
 
     const { getByTestId } = render(
       wrap(
-        <FieldRow {...{ field, unsavedChange }} onChange={handleChange} isSavingEnabled={true} />
+        <FieldRow
+          {...{ field, unsavedChange }}
+          onFieldChange={handleChange}
+          isSavingEnabled={true}
+        />
       )
     );
 
@@ -512,7 +516,7 @@ describe('Field', () => {
     });
 
     const { getByTestId, getByAltText } = render(
-      wrap(<FieldRow {...{ field }} onChange={handleChange} isSavingEnabled={true} />)
+      wrap(<FieldRow {...{ field }} onFieldChange={handleChange} isSavingEnabled={true} />)
     );
 
     const link = getByTestId(`${DATA_TEST_SUBJ_CHANGE_LINK_PREFIX}-${field.id}`);
@@ -534,7 +538,7 @@ describe('Field', () => {
       wrap(
         <FieldRow
           {...{ field }}
-          onChange={handleChange}
+          onFieldChange={handleChange}
           unsavedChange={{ type: 'image', unsavedValue: userInputValues.image }}
           isSavingEnabled={true}
         />

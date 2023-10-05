@@ -106,6 +106,7 @@ jest.mock('../../timelines/store/timeline', () => ({
 
 const mockedFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 const mockGetSavedQuery = jest.fn();
+const mockSetHeaderActionMenu = jest.fn();
 
 const dummyFilter: Filter = {
   meta: {
@@ -198,6 +199,7 @@ jest.mock('../../common/lib/kibana', () => {
             savedQueries: { getSavedQuery: mockGetSavedQuery },
           },
         },
+        setHeaderActionMenu: mockSetHeaderActionMenu,
       },
     }),
     KibanaServices: {
@@ -226,7 +228,7 @@ describe('HomePage', () => {
   it('calls useInitializeUrlParam for appQuery, filters and savedQuery', () => {
     render(
       <TestProviders>
-        <HomePage setHeaderActionMenu={jest.fn()}>
+        <HomePage>
           <span />
         </HomePage>
       </TestProviders>
@@ -252,7 +254,7 @@ describe('HomePage', () => {
 
     render(
       <TestProviders>
-        <HomePage setHeaderActionMenu={jest.fn()}>
+        <HomePage>
           <span />
         </HomePage>
       </TestProviders>
@@ -294,7 +296,7 @@ describe('HomePage', () => {
 
     render(
       <TestProviders>
-        <HomePage setHeaderActionMenu={jest.fn()}>
+        <HomePage>
           <span />
         </HomePage>
       </TestProviders>
@@ -326,7 +328,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -361,7 +363,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders store={mockStore}>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -378,7 +380,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -420,7 +422,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -465,7 +467,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -515,7 +517,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -572,7 +574,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -612,7 +614,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -637,7 +639,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={store}>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>
@@ -669,7 +671,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={store}>
-          <HomePage setHeaderActionMenu={jest.fn()}>
+          <HomePage>
             <span />
           </HomePage>
         </TestProviders>

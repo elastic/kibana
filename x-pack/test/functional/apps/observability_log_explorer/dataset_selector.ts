@@ -14,21 +14,30 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
+const expectedDataViews = ['logs-*', 'logstash-*', 'metrics-*'];
+const sortedExpectedDataViews = expectedDataViews.slice().sort();
+
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
 const expectedUncategorized = uncategorized.map((dataset) => dataset.split('-')[1]);
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['common', 'discover', 'observabilityLogExplorer']);
 
   const noIntegrationsTitle = 'No integrations found';
   const noUncategorizedTitle = 'No data streams found';
 
   describe('Dataset Selector', () => {
     before(async () => {
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('as consistent behavior', () => {
@@ -41,14 +50,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.openDatasetSelector();
       });
 
-      it('should always display the Integrations and Uncategorized top level tabs', async () => {
+      it('should always display the Integrations Uncategorized and Data Views top level tabs', async () => {
         const integrationsTab = await PageObjects.observabilityLogExplorer.getIntegrationsTab();
         const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+        const dataViewsTab = await PageObjects.observabilityLogExplorer.getDataViewsTab();
 
         expect(await integrationsTab.isDisplayed()).to.be(true);
         expect(await integrationsTab.getVisibleText()).to.be('Integrations');
         expect(await uncategorizedTab.isDisplayed()).to.be(true);
         expect(await uncategorizedTab.getVisibleText()).to.be('Uncategorized');
+        expect(await dataViewsTab.isDisplayed()).to.be(true);
+        expect(await dataViewsTab.getVisibleText()).to.be('Data Views');
       });
 
       it('should always display the "Show all logs" action', async () => {
@@ -561,6 +573,143 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await PageObjects.observabilityLogExplorer.getDatasetSelectorButton();
 
             expect(await selectorButton.getVisibleText()).to.be(expectedUncategorized[0]);
+          });
+        });
+      });
+
+      describe('when open on the data views tab', () => {
+        before(async () => {
+          await PageObjects.observabilityLogExplorer.navigateTo();
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
+          await PageObjects.observabilityLogExplorer.openDatasetSelector();
+          await PageObjects.observabilityLogExplorer.getDataViewsTab().then((tab) => tab.click());
+        });
+
+        it('should display a list of available data views', async () => {
+          await retry.try(async () => {
+            const [panelTitleNode, menuEntries] = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) =>
+                Promise.all([
+                  PageObjects.observabilityLogExplorer.getPanelTitle(menu),
+                  PageObjects.observabilityLogExplorer.getPanelEntries(menu),
+                ])
+              );
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+          });
+        });
+
+        it('should sort the data views list by the clicked sorting option', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          // Test descending order
+          await PageObjects.observabilityLogExplorer.clickSortButtonBy('desc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+          });
+
+          // Test back ascending order
+          await PageObjects.observabilityLogExplorer.clickSortButtonBy('asc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+          });
+        });
+
+        it('should filter the datasets list by the typed data view name', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+          });
+
+          await PageObjects.observabilityLogExplorer.typeSearchFieldWith('logs');
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(menuEntries.length).to.be(2);
+            expect(await menuEntries[0].getVisibleText()).to.be('logs-*');
+            expect(await menuEntries[1].getVisibleText()).to.be('logstash-*');
+          });
+        });
+
+        it('should navigate to Discover with the clicked data view preselected', async () => {
+          await retry.try(async () => {
+            const panelTitleNode = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelTitle(menu));
+
+            expect(
+              await PageObjects.observabilityLogExplorer.getDataViewsContextMenuTitle(
+                panelTitleNode
+              )
+            ).to.be('Data Views');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.observabilityLogExplorer
+              .getDataViewsContextMenu()
+              .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+            menuEntries[2].click();
+          });
+
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
+              expectedDataViews[2]
+            );
           });
         });
       });

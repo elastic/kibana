@@ -18,7 +18,7 @@ import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
 import type { Benchmark } from '../../../common/types';
 import {
   getBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilter,
+  getBenchmarkFilter,
   isNonNullable,
 } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
@@ -38,7 +38,7 @@ export const getRulesCountForPolicy = async (
 ): Promise<number> => {
   const rules = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    filter: getBenchmarkTypeFilter(benchmarkId),
+    filter: getBenchmarkFilter(benchmarkId),
     perPage: 0,
   });
 

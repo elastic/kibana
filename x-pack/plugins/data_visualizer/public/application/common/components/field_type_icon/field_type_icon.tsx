@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { getFieldTypeName } from '@kbn/discover-utils';
+import { getFieldTypeName } from '@kbn/field-utils';
 import './_index.scss';
 
 interface FieldTypeIconProps {

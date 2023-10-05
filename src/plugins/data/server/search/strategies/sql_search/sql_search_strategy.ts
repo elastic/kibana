@@ -9,7 +9,6 @@
 import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
-import type { DiagnosticResult } from '@elastic/transport';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -49,10 +48,9 @@ export const sqlSearchStrategyProvider = (
       const { keep_cursor: keepCursor, ...params } = request.params ?? {};
       let body: SqlQueryResponse;
       let headers: IncomingHttpHeaders;
-      let meta: DiagnosticResult['meta'];
 
       if (id) {
-        ({ body, headers, meta } = await client.sql.getAsync(
+        ({ body, headers } = await client.sql.getAsync(
           {
             format: params?.format ?? 'json',
             ...getDefaultAsyncGetParams(searchConfig, options),
@@ -61,7 +59,7 @@ export const sqlSearchStrategyProvider = (
           { ...options.transport, signal: options.abortSignal, meta: true }
         ));
       } else {
-        ({ headers, body, meta } = await client.sql.query(
+        ({ headers, body } = await client.sql.query(
           {
             format: params.format ?? 'json',
             ...getDefaultAsyncSubmitParams(searchConfig, options),
@@ -71,7 +69,7 @@ export const sqlSearchStrategyProvider = (
         ));
       }
 
-      if (!body.is_partial && !body.is_running && body.cursor && !keepCursor) {
+      if (!body.is_running && body.cursor && !keepCursor) {
         try {
           await client.sql.clearCursor({ cursor: body.cursor });
         } catch (error) {
@@ -81,7 +79,7 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, meta?.request?.params);
+      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
     };
 
     const cancel = async () => {

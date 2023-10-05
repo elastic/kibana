@@ -7,12 +7,8 @@
  */
 
 import React from 'react';
-import {
-  type DataPublicPluginStart,
-  OpenIncompleteResultsModalButton,
-} from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart, ViewWarningButton } from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SearchResponseInterceptedWarning } from '../types';
 
 /**
@@ -27,28 +23,20 @@ export const getSearchResponseInterceptedWarnings = ({
 }: {
   services: {
     data: DataPublicPluginStart;
-    theme: CoreStart['theme'];
   };
   adapter: RequestAdapter;
 }): SearchResponseInterceptedWarning[] => {
   const interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
-  services.data.search.showWarnings(adapter, (warning, meta) => {
-    const { request, response } = meta;
-
+  services.data.search.showWarnings(adapter, (warning) => {
     interceptedWarnings.push({
       originalWarning: warning,
       action:
         warning.type === 'incomplete' ? (
-          <OpenIncompleteResultsModalButton
-            theme={services.theme}
-            warning={warning}
-            size="s"
-            getRequestMeta={() => ({
-              request,
-              response,
-            })}
+          <ViewWarningButton
             color="primary"
+            size="s"
+            onClick={warning.openInInspector}
             isButtonEmpty={true}
           />
         ) : undefined,
