@@ -194,15 +194,33 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async get(url: string, insertTimestamp: boolean = true) {
+    let actualUrl = url;
     if (insertTimestamp) {
       const urlWithTime = modifyUrl(url, (parsed) => {
         (parsed.query as any)._t = Date.now();
         return void 0;
       });
-
-      return await this.driver.get(urlWithTime);
+      actualUrl = urlWithTime;
     }
-    return await this.driver.get(url);
+
+    // Sometimes WebDriver throws error on loading url, which is client error and session might be alive
+    // If it is the case, we open a new tab and load the url again.
+    try {
+      await this.driver.get(actualUrl);
+    } catch (err) {
+      if (
+        err.name === 'WebDriverError' &&
+        err.message.includes('cannot determine loading status from tab crashed')
+      ) {
+        this.log.error('Tab crashed during page loading, opening new window');
+        await this.driver.switchTo().newWindow('window');
+        this.log.error('Trying to load url again');
+        await this.driver.get(actualUrl);
+      } else {
+        // throw original error
+        throw err;
+      }
+    }
   }
 
   /**
