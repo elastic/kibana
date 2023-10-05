@@ -5,7 +5,7 @@
     "./cypress.config.ts",
     "./serverless_cypress.config.ts",
     "../../../test_serverless/shared/lib",
-    "../../../test/security_solution_cypress/cypress/tasks"
+    "../../../test/security_solution_cypress/cypress"
   ],
   "exclude": [
     "target/**/*",
