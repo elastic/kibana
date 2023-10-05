@@ -37,22 +37,22 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = (
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {columnControl && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControlGroup">
-                  <div className="dscGridToolbarControl">{columnControl}</div>
+                <div className="dscGridToolbarControl dscGridToolbarControl--single">
+                  {columnControl}
                 </div>
               </EuiFlexItem>
             )}
             {columnSortingControl && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControlGroup">
-                  <div className="dscGridToolbarControl">{columnSortingControl}</div>
+                <div className="dscGridToolbarControl dscGridToolbarControl--single">
+                  {columnSortingControl}
                 </div>
               </EuiFlexItem>
             )}
             {additionalControls && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControlGroup">
-                  <div className="dscGridToolbarControl">{additionalControls}</div>
+                <div className="dscGridToolbarControl dscGridToolbarControl--single">
+                  {additionalControls}
                 </div>
               </EuiFlexItem>
             )}

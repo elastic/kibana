@@ -15,9 +15,42 @@
   padding-block-start: $euiSizeXS - $euiBorderWidthThin;
   padding-block-end: $euiSizeXS - $euiBorderWidthThin;
 
+  &--single {
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadiusSmall;
+    padding-inline: $euiSizeXS;
+    transition: transform $euiAnimSpeedNormal ease-in-out;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
   & + & {
     border-inline-start: $euiBorderThin;
     margin-inline-start: $euiSizeXS;
     padding-inline-start: $euiSizeXS;
+  }
+
+  & svg {
+    inline-size: $euiSize;
+    block-size: $euiSize;
+  }
+
+  & .euiDataGrid__controlBtn--active {
+    font-weight: $euiFontWeightMedium;
+  }
+
+  & .euiButtonIcon:hover {
+    background: transparent;
+    transform: none;
+  }
+
+  & .euiButtonEmpty:active {
+    background: transparent;
   }
 }
