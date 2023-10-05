@@ -61,39 +61,27 @@ exports[`renderCustomToolbar should render successfully 1`] = `
         grow={false}
       >
         <div
-          className="dscGridToolbarControlGroup"
+          className="dscGridToolbarControl dscGridToolbarControl--single"
         >
-          <div
-            className="dscGridToolbarControl"
-          >
-            column
-          </div>
+          column
         </div>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
         <div
-          className="dscGridToolbarControlGroup"
+          className="dscGridToolbarControl dscGridToolbarControl--single"
         >
-          <div
-            className="dscGridToolbarControl"
-          >
-            columnSorting
-          </div>
+          columnSorting
         </div>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
         <div
-          className="dscGridToolbarControlGroup"
+          className="dscGridToolbarControl dscGridToolbarControl--single"
         >
-          <div
-            className="dscGridToolbarControl"
-          >
-            additional
-          </div>
+          additional
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
