@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { convertDateToISOString, isExecutionDurationExceededInterval } from './helpers';
+import { convertDateToISOString } from './helpers';
 
 moment.suppressDeprecationWarnings = true;
 
@@ -47,19 +47,5 @@ describe('convertDateToISOString', () => {
     expect(() => {
       convertDateToISOString(date);
     }).toThrowErrorMatchingInlineSnapshot(`"Could not convert string \\"hi mom\\" to ISO string"`);
-  });
-});
-
-describe('isExecutionDurationExceededInterval', () => {
-  it('return false if the execution duration interval not defiend', () => {
-    expect(isExecutionDurationExceededInterval(undefined, 1000)).toEqual(false);
-  });
-
-  it('return false if the execution duration is less than the interval', () => {
-    expect(isExecutionDurationExceededInterval('1m', 59)).toEqual(false);
-  });
-
-  it('return true if the execution duration is greater than the interval', () => {
-    expect(isExecutionDurationExceededInterval('1m', 61)).toEqual(true);
   });
 });
