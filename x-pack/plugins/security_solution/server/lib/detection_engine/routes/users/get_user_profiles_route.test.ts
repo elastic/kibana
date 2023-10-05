@@ -22,14 +22,14 @@ describe('getUserProfilesRoute', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     mockSecurityStart = securityMock.createStart();
-    mockSecurityStart.userProfiles.suggest.mockResolvedValue(getMockUserProfiles());
+    mockSecurityStart.userProfiles.bulkGet.mockResolvedValue(getMockUserProfiles());
   });
 
   const buildRequest = () => {
     return requestMock.create({
       method: 'get',
       path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
-      body: {},
+      body: { userIds: [] },
     });
   };
 
@@ -53,8 +53,8 @@ describe('getUserProfilesRoute', () => {
       expect(response.body).toEqual(expectedBody);
     });
 
-    test('returns 500 if `security.userProfiles.suggest` throws error', async () => {
-      mockSecurityStart.userProfiles.suggest.mockRejectedValue(new Error('something went wrong'));
+    test('returns 500 if `security.userProfiles.bulkGet` throws error', async () => {
+      mockSecurityStart.userProfiles.bulkGet.mockRejectedValue(new Error('something went wrong'));
       const request = buildRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 

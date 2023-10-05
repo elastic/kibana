@@ -32,6 +32,6 @@ export const CASES_FROM_ALERTS_FAILURE = i18n.translate(
 );
 
 export const USER_PROFILES_FAILURE = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.userProfiles.title',
+  'xpack.securitySolution.containers.detectionEngine.users.userProfiles.title',
   { defaultMessage: 'Failed to find users' }
 );

@@ -17,13 +17,14 @@ import {
 } from './mock';
 import {
   fetchQueryAlerts,
-  fetchUserProfiles,
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
   createHostIsolation,
   updateAlertStatusByQuery,
   updateAlertStatusByIds,
+  getUserProfiles,
+  suggestUsers,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -267,25 +268,50 @@ describe('Detections Alerts API', () => {
     });
   });
 
-  describe('fetchUserProfiles', () => {
+  describe('getUserProfiles', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(mockUserProfiles);
     });
 
     test('check parameter url', async () => {
-      await fetchUserProfiles();
+      await getUserProfiles({ userIds: ['user-id-1', 'user-id-2'] });
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/signals/user_profiles',
+        '/api/detection_engine/signals/users',
         expect.objectContaining({
           method: 'GET',
           version: '2023-10-31',
+          body: '{"userIds":["user-id-1","user-id-2"]}',
         })
       );
     });
 
     test('happy path', async () => {
-      const alertsResp = await fetchUserProfiles();
+      const alertsResp = await getUserProfiles({ userIds: ['user-id-1', 'user-id-2'] });
+      expect(alertsResp).toEqual(mockUserProfiles);
+    });
+  });
+
+  describe('suggestUsers', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(mockUserProfiles);
+    });
+
+    test('check parameter url', async () => {
+      await suggestUsers({ searchTerm: 'name1' });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/signals/suggest_users',
+        expect.objectContaining({
+          method: 'GET',
+          version: '2023-10-31',
+          body: '{"searchTerm":"name1"}',
+        })
+      );
+    });
+
+    test('happy path', async () => {
+      const alertsResp = await suggestUsers({ searchTerm: '' });
       expect(alertsResp).toEqual(mockUserProfiles);
     });
   });

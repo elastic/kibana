@@ -36,7 +36,7 @@ import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
-import { useUserProfiles } from '../../containers/detection_engine/alerts/use_user_profiles';
+import { useGetUserProfiles } from '../../containers/detection_engine/alerts/use_get_user_profiles';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -46,7 +46,7 @@ import { useUserProfiles } from '../../containers/detection_engine/alerts/use_us
 export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
   props
 ) => {
-  const { columnId, rowIndex, scopeId, userProfiles } = props;
+  const { columnId, rowIndex, scopeId } = props;
   const isTourAnchor = useMemo(
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
@@ -66,11 +66,14 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     ? parseInt(ecsSuppressionCount, 10)
     : dataSuppressionCount;
 
-  const ecsAssignees = props.ecsData?.kibana?.alert.workflow_assignee_ids;
-  const dataAssignees = find({ field: 'kibana.alert.workflow_assignee_ids' }, props.data) as
-    | string[]
-    | undefined;
-  const actualAssignees = ecsAssignees ?? dataAssignees ?? [];
+  const actualAssignees = useMemo(() => {
+    const ecsAssignees = props.ecsData?.kibana?.alert.workflow_assignee_ids;
+    const dataAssignees = find({ field: 'kibana.alert.workflow_assignee_ids' }, props.data) as
+      | string[]
+      | undefined;
+    return ecsAssignees ?? dataAssignees ?? [];
+  }, [props.data, props.ecsData?.kibana?.alert.workflow_assignee_ids]);
+  const { userProfiles } = useGetUserProfiles(actualAssignees);
   const assignees = userProfiles?.filter((user) => actualAssignees.includes(user.uid)) ?? [];
   if (columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME && assignees.length) {
     return <>{assignees.map((user) => user.user.full_name ?? user.user.username).join(', ')}</>;
@@ -121,8 +124,6 @@ export const getRenderCellValueHook = ({
 
     const columnHeaders =
       viewMode === VIEW_SELECTION.gridView ? getColumns(license) : eventRenderedViewColumns;
-
-    const { userProfiles } = useUserProfiles();
 
     const result = useCallback(
       ({
@@ -189,11 +190,10 @@ export const getRenderCellValueHook = ({
             scopeId={tableId}
             truncate={truncate}
             asPlainText={false}
-            userProfiles={userProfiles}
           />
         );
       },
-      [browserFieldsByName, columnHeaders, browserFields, userProfiles]
+      [browserFieldsByName, columnHeaders, browserFields]
     );
     return result;
   };

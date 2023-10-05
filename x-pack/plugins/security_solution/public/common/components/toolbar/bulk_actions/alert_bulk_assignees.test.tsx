@@ -10,7 +10,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
-import { useUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_user_profiles';
+import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
 
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
@@ -30,7 +30,7 @@ const mockAssigneeItems = [
   },
 ];
 
-(useUserProfiles as jest.Mock).mockReturnValue({ loading: false, userProfiles: mockUserProfiles });
+(useSuggestUsers as jest.Mock).mockReturnValue({ loading: false, userProfiles: mockUserProfiles });
 
 const renderAssigneesMenu = (
   items: TimelineItem[],
@@ -59,7 +59,7 @@ describe('BulkAlertAssigneesPanel', () => {
     const wrapper = renderAssigneesMenu(mockAssigneeItems);
 
     expect(wrapper.getByTestId('alert-assignees-update-button')).toBeInTheDocument();
-    expect(useUserProfiles).toHaveBeenCalled();
+    expect(useSuggestUsers).toHaveBeenCalled();
   });
 
   test('it calls expected functions on submit when nothing has changed', () => {

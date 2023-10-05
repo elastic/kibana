@@ -16,7 +16,7 @@ import type {
 } from './use_bulk_alert_assignees_items';
 import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
-import { useUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_user_profiles';
+import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_user_profiles');
@@ -50,7 +50,7 @@ const renderPanel = (panel: UseBulkAlertAssigneesPanel) => {
 describe('useBulkAlertAssigneesItems', () => {
   beforeEach(() => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
-    (useUserProfiles as jest.Mock).mockReturnValue({
+    (useSuggestUsers as jest.Mock).mockReturnValue({
       loading: false,
       userProfiles: mockUserProfiles,
     });

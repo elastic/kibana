@@ -118,3 +118,11 @@ export interface Privilege {
   is_authenticated: boolean;
   has_encryption_key: boolean;
 }
+
+export interface GetUserProfilesByIdsProps {
+  userIds: string[];
+}
+
+export interface SuggestUsersProps {
+  searchTerm: string;
+}

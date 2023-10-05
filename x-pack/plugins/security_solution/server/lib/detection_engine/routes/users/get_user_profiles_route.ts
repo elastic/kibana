@@ -9,9 +9,13 @@ import type { IKibanaResponse, StartServicesAccessor } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_ALERT_USER_PROFILES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_ALERT_GET_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { StartPlugins } from '../../../../plugin';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+
+import type { GetUserProfilesRequestQueryDecoded } from '../../../../../common/api/detection_engine/users';
+import { getUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 
 export const getUserProfilesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -19,7 +23,7 @@ export const getUserProfilesRoute = (
 ) => {
   router.versioned
     .get({
-      path: DETECTION_ENGINE_ALERT_USER_PROFILES_URL,
+      path: DETECTION_ENGINE_ALERT_GET_USERS_URL,
       access: 'public',
       options: {
         tags: ['access:securitySolution'],
@@ -28,26 +32,27 @@ export const getUserProfilesRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            query: buildRouteValidation<
+              typeof getUserProfilesRequestQuery,
+              GetUserProfilesRequestQueryDecoded
+            >(getUserProfilesRequestQuery),
+          },
+        },
       },
       async (context, request, response): Promise<IKibanaResponse<UserProfileWithAvatar[]>> => {
+        const { userIds } = request.query;
         const siemResponse = buildSiemResponse(response);
         const [_, { security }] = await getStartServices();
-        const securitySolution = await context.securitySolution;
-        const spaceId = securitySolution.getSpaceId();
 
         try {
-          const users = await security.userProfiles.suggest({
-            name: '',
-            dataPath: 'avatar',
-            requiredPrivileges: {
-              spaceId,
-              privileges: {
-                kibana: [security.authz.actions.login],
-              },
-            },
-          });
-
+          const users = userIds
+            ? await security.userProfiles.bulkGet({
+                uids: new Set(userIds),
+                dataPath: 'avatar',
+              })
+            : [];
           return response.ok({ body: users });
         } catch (err) {
           const error = transformError(err);

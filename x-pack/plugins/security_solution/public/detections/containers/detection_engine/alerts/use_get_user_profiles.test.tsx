@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useUserProfiles } from './use_user_profiles';
+import { useGetUserProfiles } from './use_get_user_profiles';
 import * as api from './api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -15,7 +15,7 @@ import { mockUserProfiles } from './mock';
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 
-describe('useUserProfiles hook', () => {
+describe('useGetUserProfiles hook', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,8 +24,8 @@ describe('useUserProfiles hook', () => {
   });
 
   it('returns an array of userProfiles', async () => {
-    const spyOnUserProfiles = jest.spyOn(api, 'fetchUserProfiles');
-    const { result, waitForNextUpdate } = renderHook(() => useUserProfiles());
+    const spyOnUserProfiles = jest.spyOn(api, 'getUserProfiles');
+    const { result, waitForNextUpdate } = renderHook(() => useGetUserProfiles([]));
     await waitForNextUpdate();
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual({

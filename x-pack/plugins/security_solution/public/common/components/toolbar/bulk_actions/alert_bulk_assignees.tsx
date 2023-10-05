@@ -13,7 +13,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
-import { useUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_user_profiles';
+import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
 import * as i18n from './translations';
 import type { SetAlertAssigneesFunc } from './use_set_alert_assignees';
 
@@ -35,7 +35,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
   closePopoverMenu,
   onSubmit,
 }) => {
-  const { loading: isLoadingUsers, userProfiles } = useUserProfiles();
+  const { loading: isLoadingUsers, userProfiles } = useSuggestUsers('');
 
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
 

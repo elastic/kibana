@@ -16,7 +16,8 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_ALERTS_INDEX_URL,
-  DETECTION_ENGINE_ALERT_USER_PROFILES_URL,
+  DETECTION_ENGINE_ALERT_GET_USERS_URL,
+  DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -30,6 +31,8 @@ import type {
   CasesFromAlertsResponse,
   CheckSignalIndex,
   UpdateAlertStatusByIdsProps,
+  GetUserProfilesByIdsProps,
+  SuggestUsersProps,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -260,14 +263,33 @@ export const getHostMetadata = async ({
   );
 
 /**
- * Fetches user profiles
+ * Fetches user profiles by their ids
  */
-export const fetchUserProfiles = async (): Promise<UserProfileWithAvatar[]> => {
+export const getUserProfiles = async ({
+  userIds,
+}: GetUserProfilesByIdsProps): Promise<UserProfileWithAvatar[]> => {
   return KibanaServices.get().http.fetch<UserProfileWithAvatar[]>(
-    DETECTION_ENGINE_ALERT_USER_PROFILES_URL,
+    DETECTION_ENGINE_ALERT_GET_USERS_URL,
     {
       method: 'GET',
       version: '2023-10-31',
+      query: { userIds: userIds.join(',') },
+    }
+  );
+};
+
+/**
+ * Fetches suggested user profiles
+ */
+export const suggestUsers = async ({
+  searchTerm,
+}: SuggestUsersProps): Promise<UserProfileWithAvatar[]> => {
+  return KibanaServices.get().http.fetch<UserProfileWithAvatar[]>(
+    DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
+    {
+      method: 'GET',
+      version: '2023-10-31',
+      query: { searchTerm },
     }
   );
 };

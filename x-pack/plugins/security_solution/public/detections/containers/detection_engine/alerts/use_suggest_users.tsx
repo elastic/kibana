@@ -8,15 +8,15 @@
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useEffect, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { fetchUserProfiles } from './api';
+import { suggestUsers } from './api';
 import { USER_PROFILES_FAILURE } from './translations';
 
-interface UserProfilesStatus {
+interface SuggestUsersReturn {
   loading: boolean;
   userProfiles: UserProfileWithAvatar[];
 }
 
-export const useUserProfiles = (): UserProfilesStatus => {
+export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfileWithAvatar[]>([]);
   const { addError } = useAppToasts();
@@ -27,7 +27,7 @@ export const useUserProfiles = (): UserProfilesStatus => {
     setLoading(true);
     const fetchData = async () => {
       try {
-        const usersResponse = await fetchUserProfiles();
+        const usersResponse = await suggestUsers({ searchTerm });
         if (isMounted) {
           setUsers(usersResponse);
         }
@@ -43,6 +43,6 @@ export const useUserProfiles = (): UserProfilesStatus => {
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError]);
+  }, [addError, searchTerm]);
   return { loading, userProfiles: users };
 };
