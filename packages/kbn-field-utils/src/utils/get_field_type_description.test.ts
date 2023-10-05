@@ -7,9 +7,9 @@
  */
 
 import { getFieldTypeDescription, UNKNOWN_FIELD_TYPE_DESC } from './get_field_type_description';
-import { KNOWN_FIELD_TYPES } from '@kbn/discover-utils';
+import { KNOWN_FIELD_TYPES } from './field_types';
 
-describe('UnifiedFieldList getFieldTypeDescription()', () => {
+describe('FieldUtils getFieldTypeDescription()', () => {
   describe('known field types should be recognized', () => {
     it.each(Object.values(KNOWN_FIELD_TYPES))(
       `'%s' should return a string that does not match '${UNKNOWN_FIELD_TYPE_DESC}'`,
