@@ -13670,7 +13670,6 @@
     "xpack.enterpriseSearch.content.newIndex.types.crawler": "网络爬虫",
     "xpack.enterpriseSearch.content.newIndex.types.elasticsearch": "Elasticsearch 索引",
     "xpack.enterpriseSearch.content.newIndex.types.json": "JSON",
-    "xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink": "查看其他集成",
     "xpack.enterpriseSearch.content.overview.documementExample.generateApiKeyButton.createNew": "创建新 API 密钥",
     "xpack.enterpriseSearch.content.overview.documementExample.generateApiKeyButton.viewAll": "查看所有 API 密钥",
     "xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.dotnet": ".NET",
