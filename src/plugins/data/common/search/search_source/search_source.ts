@@ -458,7 +458,7 @@ export class SearchSource {
     const last$ = s$
       .pipe(
         catchError((e) => {
-          requestResponder?.error({ json: 'getAttributes' in e ? e.getAttributes() : { message: e.message } });
+          requestResponder?.error({ json: 'attributes' in e ? e.attributes : { message: e.message } });
           return EMPTY;
         }),
         last(undefined, null),

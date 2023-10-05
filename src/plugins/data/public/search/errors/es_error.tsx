@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
@@ -27,23 +26,21 @@ export class EsError extends KbnError {
     this.attributes = err.attributes;
   }
 
-  public getAttributes() {
-    return this.attributes;
-  }
+  public getErrorMessage() {
+    if (!this.attributes?.error) {
+      return null;
+    }
 
-  public getErrorMessage(application: ApplicationStart) {
-    const rootCause = getRootCause(this.err)?.reason;
-    const topLevelCause = this.attributes?.reason;
+    const rootCause = getRootCause(this.attributes.error)?.reason;
+    const topLevelCause = this.attributes.error.reason;
     const cause = rootCause ?? topLevelCause;
 
     return (
       <>
         <EuiSpacer size="s" />
-        {cause ? (
-          <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
-            {cause}
-          </EuiCodeBlock>
-        ) : null}
+        <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
+          {cause}
+        </EuiCodeBlock>
       </>
     );
   }
