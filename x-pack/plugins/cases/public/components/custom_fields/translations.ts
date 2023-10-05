@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
 export const TITLE = i18n.translate('xpack.cases.customFields.title', {
-  defaultMessage: 'Custom Fields',
+  defaultMessage: 'Custom fields',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.customFields.description', {
