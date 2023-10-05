@@ -110,9 +110,7 @@ describe('FieldComponent', () => {
     );
     const fieldAutocompleteComboBox = wrapper.getByTestId('comboBoxSearchInput');
     fireEvent.change(fieldAutocompleteComboBox, { target: { value: '_source' } });
-    await waitFor(() =>
-      expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('_source')
-    );
+    expect(fieldAutocompleteComboBox).toHaveValue('_source');
   });
 
   it('it allows custom user input if "acceptsCustomOptions" is "true"', async () => {

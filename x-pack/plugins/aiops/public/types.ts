@@ -17,8 +17,8 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { EmbeddableChangePointChartProps } from './embeddable';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { EmbeddableChangePointChartInput } from './embeddable/embeddable_change_point_chart';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
@@ -44,5 +44,5 @@ export interface AiopsPluginStartDeps {
 
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
-  EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartProps>;
+  EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartInput>;
 }

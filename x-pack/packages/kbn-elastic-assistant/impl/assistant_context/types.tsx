@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
@@ -17,6 +17,7 @@ export interface Message {
   role: ConversationRole;
   content: string;
   timestamp: string;
+  isError?: boolean;
   presentation?: MessagePresentation;
 }
 
