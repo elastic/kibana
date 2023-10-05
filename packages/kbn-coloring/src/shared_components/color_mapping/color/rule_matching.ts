@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../config';
 
 export function ruleMatch(
@@ -41,6 +42,16 @@ export function rangeMatch(rule: ColorMapping.RuleRange, value: number) {
 
 // TODO: move in some data/table related package
 export const SPECIAL_TOKENS_STRING_CONVERTION = new Map([
-  ['__other__', 'Other'],
-  ['', '(empty)'],
+  [
+    '__other__',
+    i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
+      defaultMessage: 'Other',
+    }),
+  ],
+  [
+    '',
+    i18n.translate('fieldFormats.string.emptyLabel', {
+      defaultMessage: '(empty)',
+    }),
+  ],
 ]);
