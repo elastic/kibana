@@ -54,7 +54,7 @@ export const FieldsSelectorTable = ({
 }: FieldsSelectorCommonProps & {
   title: string;
 }) => {
-  const fields = useMemo<Field[]>(() => {
+  const dataViewFields = useMemo<Field[]>(() => {
     return dataView.fields
       .getAll()
       .filter((field) => {
@@ -67,7 +67,23 @@ export const FieldsSelectorTable = ({
       }));
   }, [dataView.fields]);
 
-  const totalFields = fields.length;
+  const [fields, setFields] = useState(dataViewFields);
+
+  let debounceTimeoutId: ReturnType<typeof setTimeout>;
+
+  const onQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
+    clearTimeout(debounceTimeoutId);
+
+    debounceTimeoutId = setTimeout(() => {
+      const filteredItems = dataViewFields.filter((field) => {
+        const normalizedName = `${field.name} ${field.displayName}`.toLowerCase();
+        const normalizedQuery = query?.text.toLowerCase() || '';
+        return normalizedName.indexOf(normalizedQuery) !== -1;
+      });
+
+      setFields(filteredItems);
+    }, 300);
+  };
 
   const [fieldsSelected, setFieldsSelected] = useState<string[]>(columns);
 
@@ -119,34 +135,37 @@ export const FieldsSelectorTable = ({
   }, [dataView]);
 
   const search: EuiSearchBarProps = {
+    onChange: onQueryChange,
     box: {
       incremental: true,
-      schema: true,
       placeholder: i18n.translate('xpack.csp.dataTable.fieldsModalSearch', {
         defaultMessage: 'Search field name',
-      })
+      }),
     },
   };
 
-  const tableHeader = (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText data-test-subj="csp:dataTable:fieldsModal:fieldsShowing" size="xs">
-          <FormattedMessage
-            id="xpack.csp.dataTable.fieldsModalFieldsShowing"
-            defaultMessage="Showing {totalFields} fields"
-            values={{
-              totalFields: (
-                <strong data-test-subj="csp:dataTable:fieldsModal:fieldsCount">
-                  {totalFields}
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const tableHeader = useMemo(() => {
+    const totalFields = fields.length;
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText data-test-subj="csp:dataTable:fieldsModal:fieldsShowing" size="xs">
+            <FormattedMessage
+              id="xpack.csp.dataTable.fieldsModalFieldsShowing"
+              defaultMessage="Showing {totalFields} fields"
+              values={{
+                totalFields: (
+                  <strong data-test-subj="csp:dataTable:fieldsModal:fieldsCount">
+                    {totalFields}
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, [fields.length]);
 
   return (
     <EuiInMemoryTable
@@ -154,7 +173,6 @@ export const FieldsSelectorTable = ({
       items={fields}
       columns={tableColumns}
       search={search}
-      searchFormat="text"
       pagination
       sorting={defaultSorting}
       error={error}
