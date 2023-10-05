@@ -129,36 +129,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
-    label: 'Security Solution Cypress tests, burning changed specs'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic: false
-    soft_fail: true
-
-  - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
-    label: 'Security Solution OpenAPI codegen'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    parallelism: 1
-
-  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 120
-    parallelism: 2
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
@@ -183,6 +153,18 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
+    label: 'Threat Intelligence Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
@@ -196,6 +178,24 @@ steps:
           limit: 1
     artifact_paths:
       - 'target/kibana-osquery/**/*'
+
+  - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
+    label: 'Security Solution Cypress tests, burning changed specs'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic: false
+    soft_fail: true
+
+  - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
+    label: 'Security Solution OpenAPI codegen'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    parallelism: 1
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: 'Osquery Cypress Tests, burning changed specs'
