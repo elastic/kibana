@@ -54,6 +54,9 @@ export const INVALID_JSON_ERROR: string = i18n.translate(
   }
 );
 
+export const CONNECTORS_LABEL: string = i18n.translate('xpack.serverlessSearch.connectors', {
+  defaultMessage: 'Connectors',
+});
 export const CONNECTOR_LABEL: string = i18n.translate('xpack.serverlessSearch.connector', {
   defaultMessage: 'Connector',
 });
