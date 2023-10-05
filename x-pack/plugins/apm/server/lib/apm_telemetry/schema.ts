@@ -1083,6 +1083,25 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       },
     },
   },
+  custom_dashboards: {
+    kuery_fields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of up to 500 unique fields used to create the custom dashboards across all spaces. Example  [service.language.name, service.name] ',
+        },
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of custom dashboards retrived from the saved object across all spaces',
+      },
+    },
+  },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   top_traces: {
     max: {
@@ -1259,6 +1278,17 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           _meta: {
             description:
               'Execution time in milliseconds for the "service_groups" task',
+          },
+        },
+      },
+    },
+    custom_dashboards: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "custom_dashboards" task',
           },
         },
       },

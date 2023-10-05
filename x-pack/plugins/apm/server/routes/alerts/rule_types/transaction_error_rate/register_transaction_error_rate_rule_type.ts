@@ -50,7 +50,7 @@ import {
   asDecimalOrInteger,
   getAlertUrlTransaction,
 } from '../../../../../common/utils/formatters';
-import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -173,7 +173,7 @@ export function registerTransactionErrorRateRuleType({
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForTransactions(
+                  ...getBackwardCompatibleDocumentTypeFilter(
                     searchAggregatedTransactions
                   ),
                   {

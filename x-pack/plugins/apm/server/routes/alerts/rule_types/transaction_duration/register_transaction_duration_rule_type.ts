@@ -50,7 +50,7 @@ import {
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
@@ -176,7 +176,7 @@ export function registerTransactionDurationRuleType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForTransactions(
+                ...getBackwardCompatibleDocumentTypeFilter(
                   searchAggregatedTransactions
                 ),
                 ...termFilterQuery,

@@ -137,6 +137,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
               label: 'North America - US Central',
             },
           ],
+          max_attempts: 2,
           name: 'https://elastic.co',
           namespace: 'default',
           origin: 'ui',

@@ -67,6 +67,8 @@ export const useStyles = () => {
 
   const groupBySelector = css`
     width: 188px;
+    display: inline-block;
+    margin-left: 8px;
   `;
 
   return {

@@ -6,7 +6,7 @@
  */
 
 import { closeAllToasts } from '../tasks/toasts';
-import { login } from '../tasks/login';
+import { login, ROLE } from '../tasks/login';
 import { loadPage } from '../tasks/common';
 
 describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
@@ -18,7 +18,7 @@ describe('When defining a kibana role for Endpoint security access', { tags: '@e
   };
 
   beforeEach(() => {
-    login();
+    login(ROLE.system_indices_superuser);
     loadPage('/app/management/security/roles/edit');
     closeAllToasts();
     cy.getByTestSubj('addSpacePrivilegeButton').click();
