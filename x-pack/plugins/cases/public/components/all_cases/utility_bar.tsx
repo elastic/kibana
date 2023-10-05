@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import * as i18n from './translations';
 import type { CasesUI } from '../../../common/ui/types';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -63,7 +64,10 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
 
     const visibleCases =
       pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
+    
+    const totalCasesDisplayed = totalCases > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : totalCases;
 
+    console.log({visibleCases, totalCases, pagination})
     return (
       <>
         <EuiFlexGroup
@@ -87,7 +91,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             }}
           >
             <EuiText size="xs" color="subdued">
-              {i18n.SHOWING_CASES(totalCases, visibleCases)}
+              {i18n.SHOWING_CASES(totalCasesDisplayed, visibleCases)}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>

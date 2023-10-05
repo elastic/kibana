@@ -24,7 +24,7 @@ import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
@@ -681,6 +681,38 @@ describe('AllCasesListGeneric', () => {
     const alertCounts = await findAllByTestId('case-table-column-alertsCount');
 
     expect(alertCounts.length).toBeGreaterThan(0);
+  });
+
+  describe.only('Pagination', () => {
+    const pageLimits = [10, 25, 50, 100];
+
+    it.each(pageLimits)('should not show next page when cases are more than 10K and last page is displayed pageSize %s', async (item) => {
+      const lastPage = MAX_DOCS_PER_PAGE / item;
+
+      useGetCasesMock.mockReturnValue({
+        ...defaultGetCases,
+        data: {
+          ...defaultGetCases.data,
+          total: MAX_DOCS_PER_PAGE + item,
+        },
+        queryParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          page: lastPage,
+        }
+      });
+
+      appMockRenderer.render(<AllCasesList />);
+
+      expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      expect(screen.queryByTestId(`pagination-button-${lastPage + 1}`)).not.toBeInTheDocument();
+
+      userEvent.click(screen.getByTestId('pagination-button-next'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('pagination-button-next')).toHaveAttribute('disabled');
+      })
+      
+    });
   });
 
   describe('Solutions', () => {

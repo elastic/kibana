@@ -219,7 +219,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
     });
 
-    const totalCases = data.total && data.total >= MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
+    const totalCases = data.total && data.total > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
 
     const pagination = useMemo(
       () => ({
