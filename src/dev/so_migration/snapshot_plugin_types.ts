@@ -24,6 +24,7 @@ import {
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '@kbn/core-test-helpers-kbn-server';
 import { ToolingLog } from '@kbn/tooling-log';
+import { mkdirp } from '../build/lib';
 
 type MigrationInfoRecord = Pick<
   SavedObjectTypeMigrationInfo,
@@ -66,7 +67,7 @@ async function takeSnapshot({ log, outputPath }: { log: ToolingLog; outputPath: 
       return map;
     }, {} as Record<string, MigrationInfoRecord>);
 
-    writeSnapshotFile(snapshotOutputPath, migrationInfoMap);
+    await writeSnapshotFile(snapshotOutputPath, migrationInfoMap);
     log.info('Snapshot taken!');
 
     return migrationInfoMap;
@@ -89,7 +90,7 @@ async function startServers() {
   return { esServer, kibanaRoot, coreStart };
 }
 
-function writeSnapshotFile(
+async function writeSnapshotFile(
   snapshotOutputPath: string,
   hashMap: Record<string, MigrationInfoRecord>
 ) {
@@ -99,6 +100,8 @@ function writeSnapshotFile(
   const prId = process.env.BUILDKITE_MESSAGE?.match(/\(#(\d+)\)/)?.[1];
   const pullRequestUrl = prId ? `https://github.com/elastic/kibana/pulls/${prId}` : null;
   const kibanaCommitHash = process.env.BUILDKITE_COMMIT || getLocalHash();
+
+  await mkdirp(path.dirname(snapshotOutputPath));
 
   fs.writeFileSync(
     snapshotOutputPath,
