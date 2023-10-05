@@ -15,6 +15,6 @@ export interface DashboardBackupServiceType {
   setState: (id: string | undefined, newState: Partial<DashboardContainerInput>) => void;
   getViewMode: () => ViewMode;
   storeViewMode: (viewMode: ViewMode) => void;
-  getDashboardIdsWithUnsavedChanges: () => string[];
+  getDashboardIdsWithUnsavedChanges: (oldDashboardIdsWithUnsavedChanges?: string[]) => string[];
   dashboardHasUnsavedEdits: (id?: string) => boolean;
 }

@@ -7,6 +7,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
+import { isEqual } from 'lodash';
 
 import { set } from '@kbn/safer-lodash-set';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -110,7 +111,12 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public getDashboardIdsWithUnsavedChanges() {
+  /**
+   * Because we are storing these unsaved dashboard IDs in React component state, we only want things to be re-rendered
+   * if the **contents** change, not if the array reference changes; therefore, in order to maintain this reference, this
+   * method needs to take the old array in as an argument.
+   */
+  public getDashboardIdsWithUnsavedChanges(oldDashboardsWithUnsavedChanges: string[] = []) {
     try {
       const dashboardStatesInSpace =
         this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] || {};
@@ -125,7 +131,10 @@ class DashboardBackupService implements DashboardBackupServiceType {
         )
           dashboardsWithUnsavedChanges.push(dashboardId);
       });
-      return dashboardsWithUnsavedChanges;
+
+      return isEqual(oldDashboardsWithUnsavedChanges, dashboardsWithUnsavedChanges)
+        ? oldDashboardsWithUnsavedChanges
+        : dashboardsWithUnsavedChanges;
     } catch (e) {
       this.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsGetError(e.message),

@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const log = getService('log');
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
@@ -136,24 +135,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('retains unsaved panel count after navigating to another app and back', async () => {
-        log.debug('... before nav to other app ...');
-        await PageObjects.dashboard.getSessionStorage(
-          await PageObjects.dashboard.getDashboardIdFromCurrentUrl()
-        );
-
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
-
-        log.debug('... after nav to other app, before nav to dashboard ...');
-        await PageObjects.dashboard.getSessionStorage();
-
         await PageObjects.dashboard.navigateToApp();
 
-        log.debug('... after nav back to dashboard ...');
-        await PageObjects.dashboard.getSessionStorage();
-
-        await testSubjects.missingOrFail('here123');
+        await PageObjects.common.sleep(5000);
+        await testSubjects.existOrFail('unsavedDashboardsCallout');
+        await testSubjects.existOrFail('dshUnsavedListingItem');
+        // await testSubjects.missingOrFail('i-should-be-missing-123');
 
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();

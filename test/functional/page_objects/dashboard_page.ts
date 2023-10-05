@@ -184,7 +184,9 @@ export class DashboardPageObject extends FtrService {
    */
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
-    return await this.listingTable.onListingPage('dashboard');
+    const test = await this.listingTable.onListingPage('dashboard');
+    // await this.testSubjects.missingOrFail('i-should-be-missing-123');
+    return test;
   }
 
   public async expectExistsDashboardLandingPage() {
@@ -219,6 +221,8 @@ export class DashboardPageObject extends FtrService {
         );
       }
     });
+    // await this.testSubjects.missingOrFail('i-should-be-missing-123');
+
     await this.expectExistsDashboardLandingPage();
   }
 
@@ -582,6 +586,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug(`Load Saved Dashboard ${dashboardName}`);
 
     await this.gotoDashboardLandingPage();
+    // await this.testSubjects.missingOrFail('i-should-be-missing-123');
 
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
@@ -590,22 +595,6 @@ export class DashboardPageObject extends FtrService {
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
-
-    await this.getSessionStorage(await this.getDashboardIdFromCurrentUrl());
-  }
-
-  public async getSessionStorage(dashboardId?: string) {
-    const test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
-    if (test) {
-      // const currentDash = await this.getDashboardIdFromCurrentUrl();
-      if (dashboardId) {
-        this.log.debug('Found session storage 1:', JSON.parse(test).default[dashboardId]);
-      } else {
-        this.log.debug('Found session storage 2:', JSON.parse(test));
-      }
-    } else {
-      this.log.debug("Couldn't find session storage???");
-    }
   }
 
   public async getPanelTitles() {

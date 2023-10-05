@@ -29,7 +29,6 @@ export class CommonPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
-  private readonly screenshots = this.ctx.getService('screenshots');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -290,27 +289,8 @@ export class CommonPageObject extends FtrService {
         const alert = await this.browser.getAlert();
         await alert?.accept();
         await this.sleep(700);
-
-        // this.log.debug('... before refresh ...');
-        // let test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
-        // if (test) {
-        //   this.log.debug('--> Found session storage:', JSON.parse(test));
-        // }
-
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
-
-        this.log.debug('... after refresh ...');
-        const test = await this.browser.getSessionStorageItem('dashboardStateManagerPanels');
-        if (test) {
-          const sessionStorage = JSON.parse(test);
-          this.log.debug('--> Found session storage:', sessionStorage);
-          if (sessionStorage.default === {}) {
-            await this.screenshots.takeForFailure('this-is-an-error');
-            throw new Error('SESSION STORAGE WAS CLEARED!!!');
-          }
-        }
-
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();
@@ -362,6 +342,7 @@ export class CommonPageObject extends FtrService {
         await this.sleep(501);
         const currentUrl = await this.browser.getCurrentUrl();
         this.log.debug('in navigateTo url = ' + currentUrl);
+        // await this.testSubjects.missingOrFail('i-should-be-missing-123');
         if (lastUrl !== currentUrl) {
           lastUrl = currentUrl;
           throw new Error('URL changed, waiting for it to settle');

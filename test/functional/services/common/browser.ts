@@ -518,20 +518,7 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async clearSessionStorage(): Promise<void> {
-    this.log.debug('!!!! clear session storage');
     await this.driver.executeScript('return window.sessionStorage.clear();');
-  }
-
-  /**
-   * Get from the "session storage" by key
-   *
-   * @param {string} key
-   * @return {Promise<string>}
-   */
-  public async getSessionStorageItem(key: string): Promise<string | null> {
-    return await this.driver.executeScript<string>(
-      `return window.sessionStorage.getItem("${key}");`
-    );
   }
 
   /**

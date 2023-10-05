@@ -74,34 +74,48 @@ export async function findDashboardById(
   id: string
 ): Promise<FindDashboardsByIdResponse> {
   /** If the dashboard exists in the cache, then return the result from that */
-  const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
-  if (cachedDashboard) {
+  // const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+  // if (cachedDashboard) {
+  //   return {
+  //     id,
+  //     status: 'success',
+  //     attributes: cachedDashboard.item.attributes,
+  //     references: cachedDashboard.item.references,
+  //   };
+  // }
+
+  // let response;
+  /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
+  try {
+    // throw new Error('here');
+    const response = await contentManagement.client.get<
+      DashboardCrudTypes['GetIn'],
+      DashboardCrudTypes['GetOut']
+    >({
+      contentTypeId: DASHBOARD_CONTENT_ID,
+      id,
+    });
+    dashboardContentManagementCache.addDashboard(response);
     return {
       id,
       status: 'success',
-      attributes: cachedDashboard.item.attributes,
-      references: cachedDashboard.item.references,
-    };
+      attributes: response.item.attributes,
+    } as FindDashboardsByIdResponse;
+  } catch (e) {
+    return { status: 'error', error: e.body || e.message, id } as FindDashboardsByIdResponse;
   }
-  /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
-  const response = await contentManagement.client
-    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    })
-    .then((result) => {
-      // try {
-      dashboardContentManagementCache.addDashboard(result);
-      return { id, status: 'success', attributes: result.item.attributes };
+  // try {
+  //   throw new Error('here 2');
 
-      // return { status: 'error', error: { message: 'this is a test' } };
-      // } catch (e) {
-      // swallow - if there was an error adding it to the cache, that's fine.
-      // }
-    })
-    .catch((e) => ({ status: 'error', error: e.body || e.message, id }));
-
-  return response as FindDashboardsByIdResponse;
+  //   dashboardContentManagementCache.addDashboard(response);
+  // } catch (e) {
+  //   // swallow any error thrown here
+  // }
+  // return {
+  //   id,
+  //   status: 'success',
+  //   attributes: response.item.attributes,
+  // } as FindDashboardsByIdResponse;
 }
 
 export async function findDashboardsByIds(
