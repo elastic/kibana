@@ -15,6 +15,7 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   getRule,
