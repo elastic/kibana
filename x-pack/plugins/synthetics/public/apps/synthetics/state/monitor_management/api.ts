@@ -61,10 +61,14 @@ export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<Sy
     SyntheticsMonitorCodec
   );
 
-export const fetchProjectAPIKey = async (): Promise<{
+export const fetchProjectAPIKey = async (
+  accessToElasticManagedLocations: boolean
+): Promise<{
   apiKey: { encoded: string };
 }> => {
-  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY);
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY, {
+    accessToElasticManagedLocations,
+  });
 };
 
 export const deletePackagePolicy = async (

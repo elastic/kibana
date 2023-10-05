@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiText, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiText, EuiLink, EuiEmptyPrompt, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { HelpCommands } from './help_commands';
@@ -26,6 +26,7 @@ export const ProjectAPIKeys = () => {
   } = useEnablement();
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
   const [loadAPIKey, setLoadAPIKey] = useState(false);
+  const [accessToElasticManagedLocations, setAccessToElasticManagedLocations] = useState(true);
 
   const kServices = useKibana<ClientPluginsStart>().services;
   const canSaveIntegrations: boolean =
@@ -33,7 +34,7 @@ export const ProjectAPIKeys = () => {
 
   const { data, loading } = useFetcher(async () => {
     if (loadAPIKey) {
-      return fetchProjectAPIKey();
+      return fetchProjectAPIKey(accessToElasticManagedLocations);
     }
     return null;
   }, [loadAPIKey]);
@@ -68,6 +69,16 @@ export const ProjectAPIKeys = () => {
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>
+              <EuiSpacer />
+              <EuiSwitch
+                label={i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
+                  defaultMessage: 'Elastic managed locations enabled',
+                })}
+                checked={accessToElasticManagedLocations}
+                onChange={() => {
+                  setAccessToElasticManagedLocations(!accessToElasticManagedLocations);
+                }}
+              />
             </>
           ) : (
             <>
