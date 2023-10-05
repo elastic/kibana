@@ -56,6 +56,8 @@ declare global {
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
       login(role?: ServerlessRoleName | 'elastic'): void;
+
+      waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
   }
 }

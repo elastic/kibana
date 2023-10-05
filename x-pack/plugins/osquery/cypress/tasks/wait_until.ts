@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export const waitUntil = (subject: unknown, fn: (subject: unknown) => Promise<unknown>) => {
+export const waitUntil = (fn: () => Cypress.Chainable) => {
   const timeout = 90000;
   const interval = 5000;
   let attempts = Math.floor(timeout / interval);
 
-  const completeOrRetry = (result?: Promise<unknown>) => {
+  const completeOrRetry = (result: Cypress.Chainable) => {
     if (result) {
       return result;
     }
@@ -27,7 +27,7 @@ export const waitUntil = (subject: unknown, fn: (subject: unknown) => Promise<un
   };
 
   const evaluate = () => {
-    const result = fn(subject);
+    const result = fn();
 
     if (result && result.then) {
       return result.then(completeOrRetry);
