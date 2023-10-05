@@ -62,11 +62,11 @@ describe('Search', () => {
       searchBar.simulate('keyup', { target: { value: '?' } });
     });
 
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+
     waitFor(() => {
       expect(component.contains('Unable to parse query')).toBe(true);
     });
-
-    expect(onQueryChange).toHaveBeenCalledTimes(1);
 
     // Send valid query to ensure component can recover from invalid query
     act(() => {

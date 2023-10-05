@@ -22,9 +22,11 @@ import { useSave } from './use_save';
 export interface FormProps {
   /** A list of {@link FieldDefinition} corresponding to settings to be displayed in the form. */
   fields: FieldDefinition[];
-  categoryCounts: { [category: string]: number };
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
+  /** Contains the number of registered settings in each category. */
+  categoryCounts: { [category: string]: number };
+  /** Handler for the "clear search" link. */
   onClearQuery: () => void;
 }
 
@@ -33,7 +35,7 @@ export interface FormProps {
  * @param props The {@link FormProps} for the {@link Form} component.
  */
 export const Form = (props: FormProps) => {
-  const { fields, categoryCounts, isSavingEnabled, onClearQuery } = props;
+  const { fields, isSavingEnabled, categoryCounts, onClearQuery } = props;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}

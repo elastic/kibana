@@ -42,7 +42,7 @@ export const QueryInput = ({ categories: categoryList, query, onQueryChange }: Q
   const box = {
     incremental: true,
     'data-test-subj': DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR,
-    placeholder: i18n.translate('management.settings.searchBarAriaLabel', {
+    placeholder: i18n.translate('management.settings.searchBarPlaceholder', {
       defaultMessage: 'Search advanced settings',
     }),
   };

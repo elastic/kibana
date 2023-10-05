@@ -48,12 +48,6 @@ export const SettingsApplication = () => {
 
   const onQueryChange: QueryInputProps['onQueryChange'] = (newQuery = Query.parse('')) => {
     setQuery(newQuery);
-    if (!newQuery) {
-      setFilteredFields(fields);
-      const search = addQueryParam(window.location.href, 'query', '');
-      addUrlToHistory(search);
-      return;
-    }
 
     const newFields = Query.execute(newQuery, fields);
     setFilteredFields(newFields);
