@@ -35,7 +35,8 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
   closePopoverMenu,
   onSubmit,
 }) => {
-  const { loading: isLoadingUsers, userProfiles } = useSuggestUsers('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const { loading: isLoadingUsers, userProfiles } = useSuggestUsers(searchTerm);
 
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
 
@@ -112,6 +113,9 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
     <div data-test-subj="alert-assignees-selectable-menu">
       <UserProfilesSelectable
         onChange={handleSelectedAssignees}
+        onSearchChange={(term: string) => {
+          setSearchTerm(term);
+        }}
         selectedStatusMessage={selectedStatusMessage}
         options={userProfiles}
         selectedOptions={selectedAssignees}
