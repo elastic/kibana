@@ -188,6 +188,7 @@ export const policyFactoryWithoutPaidFeatures = (
 
   return {
     ...policy,
+    global_manifest_version: 'latest',
     windows: {
       ...policy.windows,
       advanced:
