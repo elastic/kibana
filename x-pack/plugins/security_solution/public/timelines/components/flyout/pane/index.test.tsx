@@ -39,7 +39,7 @@ jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
 });
 
 // FLAKY: https://github.com/elastic/kibana/issues/168026
-describ.skip('Pane', () => {
+describe.skip('Pane', () => {
   test('renders with display block by default', async () => {
     const EmptyComponent = render(
       <TestProviders>
