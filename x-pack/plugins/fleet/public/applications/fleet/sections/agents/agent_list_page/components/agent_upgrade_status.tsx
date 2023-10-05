@@ -21,7 +21,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_REQUESTED':
       return {
         Badge: (
-          <EuiBadge color="accent">
+          <EuiBadge color="accent" iconType="calendar">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeRequested"
               defaultMessage="Upgrade requested"
@@ -38,7 +38,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_SCHEDULED':
       return {
         Badge: (
-          <EuiBadge color="accent">
+          <EuiBadge color="accent" iconType="clock">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeScheduled"
               defaultMessage="Upgrade scheduled"
@@ -58,7 +58,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_DOWNLOADING':
       return {
         Badge: (
-          <EuiBadge color="accent">
+          <EuiBadge color="accent" iconType="download">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeDownloading"
               defaultMessage="Upgrade downloading"
@@ -78,7 +78,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_EXTRACTING':
       return {
         Badge: (
-          <EuiBadge color="accent">
+          <EuiBadge color="accent" iconType="package">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeExtracting"
               defaultMessage="Upgrade extracting"
@@ -95,7 +95,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_REPLACING':
       return {
         Badge: (
-          <EuiBadge color="warning">
+          <EuiBadge color="warning" iconType="copy">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeReplacing"
               defaultMessage="Upgrade replacing"
@@ -112,7 +112,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_RESTARTING':
       return {
         Badge: (
-          <EuiBadge color="warning">
+          <EuiBadge color="warning" iconType="refresh">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeRestarting"
               defaultMessage="Upgrade restarting"
@@ -129,7 +129,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_WATCHING':
       return {
         Badge: (
-          <EuiBadge color="warning">
+          <EuiBadge color="warning" iconType="inspect">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeMonitoring"
               defaultMessage="Upgrade monitoring"
@@ -146,7 +146,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_ROLLBACK':
       return {
         Badge: (
-          <EuiBadge color="danger">
+          <EuiBadge color="danger" iconType="returnKey">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeRolledBack"
               defaultMessage="Upgrade rolled back"
@@ -163,7 +163,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_FAILED':
       return {
         Badge: (
-          <EuiBadge color="danger">
+          <EuiBadge color="danger" iconType="error">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeFailed"
               defaultMessage="Upgrade failed"

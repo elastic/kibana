@@ -285,7 +285,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (version: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiText size="s" className="eui-textNoWrap">
                   {safeMetadata(version)}
