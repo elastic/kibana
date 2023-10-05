@@ -7,6 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
+import { safeDump } from 'js-yaml';
 
 import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
 import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
@@ -18,8 +19,11 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
 } from '../../../../common/types';
+import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
 import { getPackageInfo } from '.';
+
+type Format = 'yml' | 'json';
 
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
 export const templatePackagePolicyToFullInputs = (
@@ -68,7 +72,8 @@ export const templatePackagePolicyToFullInputs = (
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  format: Format
 ) {
   const packageInfoMap = new Map<string, PackageInfo>();
   let packageInfo: PackageInfo;
@@ -82,7 +87,6 @@ export async function getTemplateInputs(
       pkgVersion,
     });
   }
-
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
 
@@ -91,16 +95,28 @@ export async function getTemplateInputs(
     emptyPackagePolicy.vars || {},
     inputsWithStreamIds
   );
-
   const packagePolicyWithInputs: NewPackagePolicy = {
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
-
   const fullAgentPolicyInputs = templatePackagePolicyToFullInputs(
     packagePolicyWithInputs.inputs as PackagePolicyInput[]
   );
-  const inputs = fullAgentPolicyInputs.flatMap((input) => input.streams);
+  // @ts-ignore-next-line The return type is any because in some case we can have compiled_input instead of input.streams
+  // we don't know what it is. An example is integration APM
+  const inputs: any = fullAgentPolicyInputs.flatMap((input) => input?.streams || input);
 
-  return { inputs };
+  if (format === 'json') {
+    return { inputs };
+  } else if (format === 'yml') {
+    const yaml = safeDump(
+      { inputs },
+      {
+        skipInvalid: true,
+        sortKeys: _sortYamlKeys,
+      }
+    );
+    return yaml;
+  }
+  return { inputs: [] };
 }

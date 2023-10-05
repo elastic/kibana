@@ -11,14 +11,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
-import { safeDump } from 'js-yaml';
 
 import { pick } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
-import { _sortYamlKeys } from '../../../common/services/full_agent_policy_to_yaml';
 
 import type {
   GetInfoResponse,
@@ -664,16 +662,12 @@ export const getInputsHandler: FleetRequestHandler<
   try {
     const { pkgName, pkgVersion } = request.params;
     const { format } = request.query;
-    const res = await getTemplateInputs(soClient, pkgName, pkgVersion);
-
     if (format === 'json') {
+      const res = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json');
       return response.ok({ body: res });
     } else if (format === 'yml' || format === 'yaml') {
-      const yaml = safeDump(res, {
-        skipInvalid: true,
-        sortKeys: _sortYamlKeys,
-      });
-      return response.ok({ body: yaml });
+      const res = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml');
+      return response.ok({ body: res });
     } else {
       return response.customError({
         statusCode: 400,
