@@ -34,7 +34,8 @@ const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 // Failing: See https://github.com/elastic/kibana/issues/167186
-describe(
+// TODO: reuse or remove this tests when ESQL tab will be added
+describe.skip(
   'Basic discover search and filter operations',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },

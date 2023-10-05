@@ -60,7 +60,8 @@ const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-describe(
+// TODO: reuse or remove this tests when ESQL tab will be added
+describe.skip(
   'Discover Timeline State Integration',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
