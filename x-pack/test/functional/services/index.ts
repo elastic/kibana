@@ -69,6 +69,7 @@ import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 import { SampleDataServiceProvider } from './sample_data';
 import { DataStreamProvider } from './data_stream';
+import { ReportingAPIProvider } from 'x-pack/test/reporting_api_integration/services'
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -131,4 +132,6 @@ export const services = {
   aiops: AiopsProvider,
   sampleData: SampleDataServiceProvider,
   dataStreams: DataStreamProvider,
+  reportingAPI: ReportingAPIProvider,
+  reportingFunctional: ReportingFunctionalProvider,
 };

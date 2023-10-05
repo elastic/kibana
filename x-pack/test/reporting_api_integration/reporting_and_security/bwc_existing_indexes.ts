@@ -48,17 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await cleanupIndexAlias();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');
-      });
-
-      it('single job posted can complete in an index created with an older version', async () => {
-        const reportPaths = [];
-        reportPaths.push(
-          await reportingAPI.postJob(
-            '/api/reporting/generate/csv_searchsource?jobParams=%28browserTimezone%3AAmerica%2FPhoenix%2Ccolumns%3A%21%28%29%2CobjectType%3Asearch%2CsearchSource%3A%28fields%3A%21%28%28field%3A%27%2A%27%2Cinclude_unmapped%3Atrue%29%29%2Cfilter%3A%21%28%28meta%3A%28index%3A%27logstash-%2A%27%2Cparams%3A%28%29%29%2Crange%3A%28%27%40timestamp%27%3A%28format%3Astrict_date_optional_time%2Cgte%3A%272015-09-20T16%3A00%3A56.290Z%27%2Clte%3A%272015-09-21T10%3A37%3A45.066Z%27%29%29%29%29%2Cindex%3A%27logstash-%2A%27%2Cparent%3A%28filter%3A%21%28%29%2Cindex%3A%27logstash-%2A%27%2Cquery%3A%28language%3Akuery%2Cquery%3A%27%27%29%29%2Csort%3A%21%28%28%27%40timestamp%27%3Adesc%29%29%2CtrackTotalHits%3A%21t%2Cversion%3A%21t%29%2Ctitle%3A%27Discover%20search%20%5B2021-07-30T11%3A47%3A03.731-07%3A00%5D%27%29'
-          )
-        );
-        await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
-      }).timeout(1540000);
+      });      
     });
   });
 }

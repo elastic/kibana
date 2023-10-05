@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['reporting', 'canvas']);
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/reports';
+  const esArchiver = getService('esArchiver');
 
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
@@ -67,6 +68,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'attachment; filename=The%20Very%20Cool%20Workpad%20for%20PDF%20Tests.pdf'
         );
       });
+    });
+  });
+
+  describe('Canvas: Generate PDF', () => {
+    const reportingApi = getService('reportingAPI');
+    const reportingFunctional = getService('reportingFunctional');
+
+    const CANVAS_TITLE = 'The Very Cool Workpad for PDF Tests';
+
+    before('initialize tests', async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/reports');
+    });
+
+    after('teardown tests', async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/reports');
+      await reportingApi.deleteAllReports();
+      await reportingFunctional.initEcommerce();
+    });
+
+    it('does not allow user that does not have reporting_user role', async () => {
+      await reportingFunctional.loginDataAnalyst();
+      await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
+      await reportingFunctional.tryGeneratePdfFail();
+    });
+
+    it('does allow user with reporting_user role', async () => {
+      await reportingFunctional.loginReportingUser();
+      await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
+      await reportingFunctional.tryGeneratePdfSuccess();
     });
   });
 }
