@@ -253,7 +253,7 @@ export const GetInputsRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
-  // query: schema.object({
-  //   format: schema.oneOf([schema.literal('json'), schema.literal('yml')]),
-  // }),
+  query: schema.object({
+    format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')]),
+  }),
 };

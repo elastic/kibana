@@ -1861,7 +1861,7 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
   }
 }
 
-// the option allEnabled is only used to generate integration templates with everything enabled by default
+// the option `allEnabled` is only used to generate inputs integration templates where everything is enabled by default
 // it shouldn't be used in the normal install flow
 export function getInputsWithStreamIds(
   packagePolicy: NewPackagePolicy,

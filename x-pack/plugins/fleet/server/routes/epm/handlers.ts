@@ -11,12 +11,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
+import { safeDump } from 'js-yaml';
 
 import { pick } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
+import { _sortYamlKeys } from '../../../common/services/full_agent_policy_to_yaml';
 
 import type {
   GetInfoResponse,
@@ -68,7 +70,7 @@ import {
   getLimitedPackages,
   getInstallation,
   getBulkAssets,
-  getInputs,
+  getTemplateInputs,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
@@ -654,17 +656,30 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
 
 export const getInputsHandler: FleetRequestHandler<
   TypeOf<typeof GetInputsRequestSchema.params>,
-  undefined, // TypeOf<typeof GetInputsRequestSchema.query>,
+  TypeOf<typeof GetInputsRequestSchema.query>,
   undefined
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
 
   try {
     const { pkgName, pkgVersion } = request.params;
-    const res = await getInputs(soClient, pkgName, pkgVersion);
+    const { format } = request.query;
+    const res = await getTemplateInputs(soClient, pkgName, pkgVersion);
 
-    // handle json/yml format
-    return response.ok({ body: res });
+    if (format === 'json') {
+      return response.ok({ body: res });
+    } else if (format === 'yml' || format === 'yaml') {
+      const yaml = safeDump(res, {
+        skipInvalid: true,
+        sortKeys: _sortYamlKeys,
+      });
+      return response.ok({ body: yaml });
+    } else {
+      return response.customError({
+        statusCode: 400,
+        body: { message: 'Invalid format' },
+      });
+    }
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

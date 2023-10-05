@@ -21,6 +21,7 @@ import type {
 
 import { getPackageInfo } from '.';
 
+// Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
 export const templatePackagePolicyToFullInputs = (
   packagePolicyInputs: PackagePolicyInput[]
 ): FullAgentPolicyInput[] => {
@@ -33,20 +34,19 @@ export const templatePackagePolicyToFullInputs = (
       ...(input.compiled_input || {}),
       ...(input.streams.length
         ? {
-            streams: input.streams
-              .filter((stream) => stream.enabled)
-              .map((stream) => {
-                const fullStream: FullAgentPolicyInputStream = {
-                  id: stream.id,
-                  data_stream: stream.data_stream,
-                  ...stream.compiled_stream,
-                  ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                    acc[key] = value;
-                    return acc;
-                  }, {} as { [k: string]: any }),
-                };
-                return fullStream;
-              }),
+            streams: input.streams.map((stream) => {
+              const fullStream: FullAgentPolicyInputStream = {
+                id: stream.id,
+                type: input.type,
+                data_stream: stream.data_stream,
+                ...stream.compiled_stream,
+                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
+                  acc[key] = value;
+                  return acc;
+                }, {} as { [k: string]: any }),
+              };
+              return fullStream;
+            }),
           }
         : {}),
     };
@@ -65,7 +65,7 @@ export const templatePackagePolicyToFullInputs = (
   return fullInputs;
 };
 
-export async function getInputs(
+export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string
@@ -82,7 +82,7 @@ export async function getInputs(
       pkgVersion,
     });
   }
-  // ensureInstalledPackage ?
+
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
 
@@ -96,8 +96,10 @@ export async function getInputs(
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
-  // TO FIX: ids are missing in streams
-  const fullAgentPolicyInputs = templatePackagePolicyToFullInputs(packagePolicyWithInputs.inputs);
+
+  const fullAgentPolicyInputs = templatePackagePolicyToFullInputs(
+    packagePolicyWithInputs.inputs as PackagePolicyInput[]
+  );
   const inputs = fullAgentPolicyInputs.flatMap((input) => input.streams);
 
   return { inputs };
