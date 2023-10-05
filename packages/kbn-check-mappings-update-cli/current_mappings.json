@@ -2597,6 +2597,28 @@
     "dynamic": false,
     "properties": {}
   },
+  "siem-ui-timeline-note": {
+    "properties": {
+      "eventId": {
+        "type": "keyword"
+      },
+      "note": {
+        "type": "text"
+      },
+      "created": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "text"
+      },
+      "updated": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "text"
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
@@ -2696,28 +2718,6 @@
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
-  },
-  "siem-ui-timeline-note": {
-    "properties": {
-      "eventId": {
-        "type": "keyword"
-      },
-      "note": {
-        "type": "text"
-      },
-      "created": {
-        "type": "date"
-      },
-      "createdBy": {
-        "type": "text"
-      },
-      "updated": {
-        "type": "date"
-      },
-      "updatedBy": {
-        "type": "text"
-      }
-    }
   },
   "siem-ui-timeline-pinned-event": {
     "properties": {
