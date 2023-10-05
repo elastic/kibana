@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm } from '@kbn/ml-agg-utils';
+import type { FieldValuePair, SignificantTerm } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
@@ -26,9 +26,9 @@ import { getQueryWithParams } from './get_query_with_params';
 const isMsearchResponseItem = (arg: unknown): arg is estypes.MsearchMultiSearchItem =>
   isPopulatedObject(arg, ['hits']);
 
-export const getTerm2CategoryCountRequest = (
+const getTerm2CategoryCountRequest = (
   params: AiopsLogRateAnalysisSchema,
-  significantTerm: SignificantTerm,
+  fieldValuePairs: FieldValuePair[],
   categoryFieldName: string,
   category: Category,
   from: number | undefined,
@@ -41,7 +41,9 @@ export const getTerm2CategoryCountRequest = (
   const categoryQuery = getCategoryQuery(categoryFieldName, [category]);
 
   if (Array.isArray(query.bool?.filter)) {
-    query.bool?.filter?.push({ term: { [significantTerm.fieldName]: significantTerm.fieldValue } });
+    for (const fvp of fieldValuePairs) {
+      query.bool?.filter?.push({ term: { [fvp.fieldName]: fvp.fieldValue } });
+    }
     query.bool?.filter?.push(categoryQuery);
     query.bool?.filter?.push({
       range: {
@@ -66,6 +68,7 @@ export async function fetchTerms2CategoriesCounts(
   params: AiopsLogRateAnalysisSchema,
   searchQuery: estypes.QueryDslQueryContainer,
   significantTerms: SignificantTerm[],
+  df: ItemsetResult[],
   significantCategories: SignificantTerm[],
   from: number,
   to: number,
@@ -87,7 +90,7 @@ export async function fetchTerms2CategoriesCounts(
       searches.push(
         getTerm2CategoryCountRequest(
           params,
-          term,
+          [{ fieldName: term.fieldName, fieldValue: term.fieldValue }],
           category.fieldName,
           { key: `${category.key}`, count: category.doc_count, examples: [] },
           from,
@@ -101,6 +104,36 @@ export async function fetchTerms2CategoriesCounts(
         },
         size: 2,
         maxPValue: Math.max(term.pValue ?? 1, category.pValue ?? 1),
+        doc_count: 0,
+        support: 1,
+        total_doc_count: 0,
+      });
+    });
+  });
+
+  df.forEach((isr) => {
+    significantCategories.forEach((category) => {
+      searches.push({ index: params.index });
+      searches.push(
+        getTerm2CategoryCountRequest(
+          params,
+          Object.entries(isr.set).map(([fieldName, fieldValue]) => ({
+            fieldName,
+            fieldValue,
+          })),
+          category.fieldName,
+          { key: `${category.key}`, count: category.doc_count, examples: [] },
+          from,
+          to
+        ) as estypes.MsearchMultisearchBody
+      );
+      results.push({
+        set: {
+          ...isr.set,
+          [category.fieldName]: category.fieldValue,
+        },
+        size: Object.keys(isr.set).length + 1,
+        maxPValue: Math.max(isr.maxPValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
         support: 1,
         total_doc_count: 0,

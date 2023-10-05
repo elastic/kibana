@@ -527,6 +527,7 @@ export const defineLogRateAnalysisRoute = (
                         request.body,
                         JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
                         significantTerms,
+                        df,
                         significantCategories,
                         request.body.deviationMin,
                         request.body.deviationMax,
