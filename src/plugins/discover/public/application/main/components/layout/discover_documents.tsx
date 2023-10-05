@@ -21,7 +21,12 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarnings } from '@kbn/search-response-warnings';
-import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  useColumns,
+  type DataTableColumnTypes,
+  getTextBasedColumnTypes,
+} from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -62,6 +67,8 @@ const containerStyles = css`
 const progressStyle = css`
   z-index: 2;
 `;
+
+const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
@@ -199,14 +206,28 @@ function DiscoverDocumentsComponent({
     [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
   );
 
+  const columnTypes: DataTableColumnTypes | undefined = useMemo(
+    () =>
+      documentState.textBasedQueryColumns
+        ? getTextBasedColumnTypes(documentState.textBasedQueryColumns)
+        : undefined,
+    [documentState.textBasedQueryColumns]
+  );
+
   const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnTypes?: DataTableColumnTypes
+    ) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
+        columnTypes={customColumnTypes}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
@@ -280,7 +301,9 @@ function DiscoverDocumentsComponent({
             >
               <DiscoverGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
+                showColumnTokens
                 columns={currentColumns}
+                columnTypes={columnTypes}
                 expandedDoc={expandedDoc}
                 dataView={dataView}
                 loadingState={
@@ -317,7 +340,7 @@ function DiscoverDocumentsComponent({
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
-                componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
+                componentsTourSteps={TOUR_STEPS}
               />
             </CellActionsProvider>
           </div>

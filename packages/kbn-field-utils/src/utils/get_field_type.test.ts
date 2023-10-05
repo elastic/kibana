@@ -9,7 +9,7 @@
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { getFieldType } from './get_field_type';
 
-describe('UnifiedFieldList getFieldType()', () => {
+describe('FieldUtils getFieldType()', () => {
   it('uses time series metric if set', () => {
     expect(
       getFieldType({
