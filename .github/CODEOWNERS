@@ -396,6 +396,7 @@ x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
+packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/file_upload @elastic/kibana-gis
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux

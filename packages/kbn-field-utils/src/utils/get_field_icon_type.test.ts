@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { getFieldIconType } from './get_field_icon_type';
 
-describe('UnifiedFieldList getFieldIconType()', () => {
+describe('FieldUtils getFieldIconType()', () => {
   it('extracts type for non-string types', () => {
     expect(
       getFieldIconType({

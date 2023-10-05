@@ -8,13 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { KNOWN_FIELD_TYPES } from '@kbn/discover-utils';
+import { KNOWN_FIELD_TYPES } from './field_types';
 
 /**
  * A user-friendly description of an unknown field type
  */
 export const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
-  'unifiedFieldList.fieldNameDescription.unknownField',
+  'fieldUtils.fieldNameDescription.unknownField',
   {
     defaultMessage: 'Unknown field',
   }
@@ -33,110 +33,110 @@ export function getFieldTypeDescription(type?: string) {
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
     case KNOWN_FIELD_TYPES.DOCUMENT:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.recordField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.recordField', {
         defaultMessage: 'Count of records.',
       });
     case KNOWN_FIELD_TYPES.BINARY:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.binaryField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.binaryField', {
         defaultMessage: 'Binary value encoded as a Base64 string.',
       });
     case KNOWN_FIELD_TYPES.BOOLEAN:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.booleanField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.booleanField', {
         defaultMessage: 'True and false values.',
       });
     case KNOWN_FIELD_TYPES.CONFLICT:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.conflictField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.conflictField', {
         defaultMessage: 'Field has values of different types. Resolve in Management > Data Views.',
       });
     case KNOWN_FIELD_TYPES.COUNTER:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.counterField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.counterField', {
         defaultMessage:
           'A number that only increases or resets to 0 (zero). Available only for numeric and aggregate_metric_double fields.',
       });
     case KNOWN_FIELD_TYPES.DATE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.dateField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.dateField', {
         defaultMessage: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
       });
     case KNOWN_FIELD_TYPES.DATE_RANGE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.dateRangeField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.dateRangeField', {
         defaultMessage: 'Range of date values.',
       });
     case KNOWN_FIELD_TYPES.DENSE_VECTOR:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.denseVectorField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.denseVectorField', {
         defaultMessage: 'Records dense vectors of float values.',
       });
     case KNOWN_FIELD_TYPES.GAUGE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.gaugeField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.gaugeField', {
         defaultMessage:
           'A number that can increase or decrease. Available only for numeric and aggregate_metric_double fields.',
       });
     case KNOWN_FIELD_TYPES.GEO_POINT:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.geoPointField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.geoPointField', {
         defaultMessage: 'Latitude and longitude points.',
       });
     case KNOWN_FIELD_TYPES.GEO_SHAPE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.geoShapeField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.geoShapeField', {
         defaultMessage: 'Complex shapes, such as polygons.',
       });
     case KNOWN_FIELD_TYPES.HISTOGRAM:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.histogramField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.histogramField', {
         defaultMessage: 'Pre-aggregated numerical values in the form of a histogram.',
       });
     case KNOWN_FIELD_TYPES.IP:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.ipAddressField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.ipAddressField', {
         defaultMessage: 'IPv4 and IPv6 addresses.',
       });
     case KNOWN_FIELD_TYPES.IP_RANGE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.ipAddressRangeField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.ipAddressRangeField', {
         defaultMessage: 'Range of ip values supporting either IPv4 or IPv6 (or mixed) addresses.',
       });
     case KNOWN_FIELD_TYPES.FLATTENED:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.flattenedField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.flattenedField', {
         defaultMessage: 'An entire JSON object as a single field value.',
       });
     case KNOWN_FIELD_TYPES.MURMUR3:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.murmur3Field', {
+      return i18n.translate('fieldUtils.fieldNameDescription.murmur3Field', {
         defaultMessage: 'Field that computes and stores hashes of values.',
       });
     case KNOWN_FIELD_TYPES.NUMBER:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.numberField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.numberField', {
         defaultMessage: 'Long, integer, short, byte, double, and float values.',
       });
     case KNOWN_FIELD_TYPES.RANK_FEATURE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.rankFeatureField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.rankFeatureField', {
         defaultMessage: 'Records a numeric feature to boost hits at query time.',
       });
     case KNOWN_FIELD_TYPES.RANK_FEATURES:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.rankFeaturesField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.rankFeaturesField', {
         defaultMessage: 'Records numeric features to boost hits at query time.',
       });
     case KNOWN_FIELD_TYPES.POINT:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.pointField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.pointField', {
         defaultMessage: 'Arbitrary cartesian points.',
       });
     case KNOWN_FIELD_TYPES.SHAPE:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.shapeField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.shapeField', {
         defaultMessage: 'Arbitrary cartesian geometries.',
       });
     case KNOWN_FIELD_TYPES.STRING:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.stringField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.stringField', {
         defaultMessage: 'Full text such as the body of an email or a product description.',
       });
     case KNOWN_FIELD_TYPES.TEXT:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.textField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.textField', {
         defaultMessage: 'Full text such as the body of an email or a product description.',
       });
     case KNOWN_FIELD_TYPES.KEYWORD:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.keywordField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.keywordField', {
         defaultMessage:
           'Structured content such as an ID, email address, hostname, status code, or tag.',
       });
     case KNOWN_FIELD_TYPES.NESTED:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.nestedField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.nestedField', {
         defaultMessage: 'JSON object that preserves the relationship between its subfields.',
       });
     case KNOWN_FIELD_TYPES.VERSION:
-      return i18n.translate('unifiedFieldList.fieldNameDescription.versionField', {
+      return i18n.translate('fieldUtils.fieldNameDescription.versionField', {
         defaultMessage: 'Software versions. Supports "Semantic Versioning" precedence rules.',
       });
     default:
