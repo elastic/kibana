@@ -52,7 +52,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
 
       openRiskInformationFlyout();
 
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('How is host risk calculated?');
+      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
     });
   });
 
@@ -91,7 +91,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
 
       openRiskInformationFlyout();
 
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('How is host risk calculated?');
+      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
     });
   });
 });

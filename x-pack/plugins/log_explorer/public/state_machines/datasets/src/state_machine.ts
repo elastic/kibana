@@ -20,7 +20,7 @@ import type {
 export const createPureDatasetsStateMachine = (
   initialContext: DefaultDatasetsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdmUBWEuYCMygJwBmc1YA0IAJ6IATFeUSO3NHewAOZWCrczC7XwBfeM80TBx8IlIGbVQIGig2CEMwEhoAN20Aa2KU7DwCYhIsnLyEMu0AYwwqQxVVXuMdPQMjJFMLO0dbOzC3Tx8EWJIA5WVnayiYuMTkjFr0hqbcinywXFxtXBJNBgwAMwvCEhq0+szso6hWinLO4d7+0aDfTdEagMwIOzTcwkXyrOIebx+RyTZx2NZWNEBRyQgAsVm2IGedQyjXe7CwskkAGEABKCERiCQyeRKNQDXTAwzGcF2ABsgTxqP8c0QVjFJCcvOcYRxvJlvhxOMcBKJ+zeOXJXEkwnponEUlkCgBWg5w25iD5AqsQoR82cOOhjmtdjFGLcmxVuxeJIgYAARtpKO0wFgCLh2gALPKq15sCk8al0oR6pmG1nqQGmkHmhA45w2KxhWE2kW57EkXkhcKRd2xT2pYkNX0BoMhsOR6NexuwNgmWCYdDFVC3Qe4AAUa2UAEo2DGff7AxRg6HUOGo8c58RjSAgWbRuDLDZ7E5XLbRfYK1XpjXonWkoSu2rSc1jgAxVBUBjsGTcPi6xkGiy267tm+4WlCMJwsKiIIAqYQkLE6KYk4uJhIk94UNovrwKMm44SaQygWCiAALS8qWZH1nsrzkNQtD0EwrAQOyhFcmBCBWFKCGODKp6lv4gSVqE14bLECT3nhz4fCxnKgmMCCOIqJCKc60HzL4ziTL4vjCREol2DiVHegcZLMZmrFyeCOK+KWaLwREDoibWWwSY+NHNouy7tuuUB4TJe7EbmkK2GeHEOkEV56c5RndlJeTvp+kD+UR8kGfmJAljBvgurYOnVvphnoUAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgOgFcA7AS1PRNQBsSAvSAYgBkB5AQWQH1k2AVNgMoBRXgIDaABgC6iUAAcA9rBIUFRWSAAeiAGwBmAJx4DAdh0BWPXvMAWAIzn9BgDQgAnogAcdvDYP+dACYdfQk9e08AX0jXNExsXDwqBVQIMigGCDUwPDIANwUAaxy4rBx8ZNT0hHyFAGMMEjVJKRaNRWVVdSQtXUNjM0tre0dDVw8EG09A339PHU8wwMWw6NiMMsTKtKIMsAAnfYV9vDkqDAAzY4BbPFKEipSdqBqiAoaulraejpUm7tA2gQdhBMwkEhMJnMjhseh0Ek8nnGiEC5iM5hBJmm+k8BimwTWIHu5SST3SDGEbAASgBhAAS3D4ghE4mk7SUfzUGiBOhMNjwJnC4Vh8J0eJsyOBnnMxjsFmW5m8JjsnhshOJWzJuwpLCpvEZ-GEom+8g5XW5iAMEiMsL5NnhWMChkCksxeB0NkC4MVCz0nj5OnVGwepNSjEptIZPENLJNIF+5p6QLlEl8ljsCvCEjlC0lXr0sosiNhqokapiRODJO24d1+ujzONbJ+Zv+FuB8LTegz0qzOaR7kQVk8AsFgQM03HJitUQrGvwEDAACMFMQ6mABGBUPs6gALdLzilCan0g2N1kyFudNtJxA2cF4QJ2KbdsKQq0uwfA++zfwihxYgigZzlWiSLiua4bluO77rsh6aLAmDoDkqAXMh+wABR6OCACUDDzng4GrkQ66btue4HqBsBxgmN6An0RimBYVi2A4Th5nCvhyrY8yeOEKoEiB8TVlqUAAGKoCQVCMFSQisBwZ5Ghe7LXlyt7AqCeDgpC0IenCCIDhMXpGNmdhmKiegmIEL56NEFZEAoi7wD084qZyAK9AgAC0OiSj5QbCYkxBkH81B0JAbmJvRkwGAWcr3jYJjWjYGJ2C4X7TFp4LgiqIIToKJgBZsjxVLskV0Z5uL8kEfgpYY-o2BKX5PiZBgYiliWNRIHqzusgUlYuEDlWp0WepK5hOlptjTcs07deWfXFYRy7EaR0EUXBVHDR5QKWamQpWW1VndUErptcY-gGPoyp8osfJFSG2zpBJUkRVe7ntnY3YjsqCJTAYcqovMrpingaIYo4V0pXx912UAA */
   createMachine<DatasetsContext, DatasetsEvent, DatasetsTypestate>(
     {
       context: initialContext,
@@ -43,6 +43,13 @@ export const createPureDatasetsStateMachine = (
               actions: ['storeInCache', 'aggregateAndStoreDatasets', 'storeSearch'],
             },
             onError: 'loadingFailed',
+          },
+          on: {
+            SEARCH_DATASETS: 'debounceSearchingDatasets',
+            SORT_DATASETS: {
+              target: 'loading',
+              actions: 'storeSearch',
+            },
           },
         },
         loaded: {
