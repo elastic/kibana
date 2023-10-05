@@ -9,7 +9,7 @@ import React from 'react';
 import { ConnectorSelector } from '.';
 import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { ActionType } from '@kbn/actions-plugin/common';
+import { mockActionTypes, mockConnectors } from '../../mock/connectors';
 
 const onConnectorSelectionChange = jest.fn();
 const setIsOpen = jest.fn();
@@ -20,50 +20,8 @@ const defaultProps = {
   setIsOpen,
 };
 
-const connectorTwo = {
-  id: 'connectorId2',
-  name: 'Professor Connector',
-  isMissingSecrets: false,
-  actionTypeId: '.gen-ai',
-  config: {
-    apiProvider: 'OpenAI',
-  },
-};
-const mockConnectors = [
-  {
-    id: 'connectorId',
-    name: 'Captain Connector',
-    isMissingSecrets: false,
-    actionTypeId: '.gen-ai',
-    config: {
-      apiProvider: 'OpenAI',
-    },
-  },
-  connectorTwo,
-];
+const connectorTwo = mockConnectors[1];
 
-const actionTypes = [
-  {
-    id: '.gen-ai',
-    name: 'OpenAI',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'basic',
-    isSystemActionType: true,
-    supportedFeatureIds: ['generativeAI'],
-  } as ActionType,
-  {
-    id: '.bedrock',
-    name: 'Bedrock',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'basic',
-    isSystemActionType: true,
-    supportedFeatureIds: ['generativeAI'],
-  } as ActionType,
-];
 const mockRefetchConnectors = jest.fn();
 jest.mock('../use_load_connectors', () => ({
   useLoadConnectors: jest.fn(() => {
@@ -81,7 +39,7 @@ jest.mock('../use_load_connectors', () => ({
 jest.mock('../use_load_action_types', () => ({
   useLoadActionTypes: jest.fn(() => {
     return {
-      data: actionTypes,
+      data: mockActionTypes,
     };
   }),
 }));
