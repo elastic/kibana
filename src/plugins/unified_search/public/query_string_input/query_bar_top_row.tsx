@@ -90,7 +90,7 @@ const getWrapperWithTooltip = (
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
-            'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
+            'Date range selection for {language} queries requires an @timestamp field in the dataset.',
           values: { language: displayName },
         })}
       >
