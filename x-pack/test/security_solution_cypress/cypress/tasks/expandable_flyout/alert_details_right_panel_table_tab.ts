@@ -13,6 +13,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL,
 } from '../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 
 /**
@@ -34,26 +35,26 @@ export const clearFilterTableTabTable = () =>
 /**
  * Filter In action in the first table row under the Table tab in the alert details expandable flyout right section
  */
-export const filterInTableTabTable = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN).first().click();
-  });
-
+export const filterInTableTabTable = () => {
+  cy.get('body').realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN).first().click();
+};
 /**
  * Filter Out action in the first table row under the Table tab in the alert details expandable flyout right section
  */
-export const filterOutTableTabTable = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
-  });
-
+export const filterOutTableTabTable = () => {
+  cy.get('body').realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
+};
 /**
  * Add to timeline action in the first table row under the Table tab in the alert details expandable flyout right section
  */
 export const addToTimelineTableTabTable = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
-  });
+  cy.get('body').realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE).click();
 };
 
@@ -61,9 +62,9 @@ export const addToTimelineTableTabTable = () => {
  * Show Copy to clipboard button in the first table row under the Table tab in the alert details expandable flyout right section
  */
 export const copyToClipboardTableTabTable = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
-  });
+  cy.get('body').realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
 };
 
 /**
