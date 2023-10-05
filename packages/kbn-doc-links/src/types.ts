@@ -493,7 +493,7 @@ export interface DocLinks {
   readonly ingest: Record<string, string>;
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
-    guide: string;
+    // guide: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
@@ -521,6 +521,7 @@ export interface DocLinks {
     agentPolicy: string;
     api: string;
     uninstallAgent: string;
+    installAndUninstallIntegrationAssets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
