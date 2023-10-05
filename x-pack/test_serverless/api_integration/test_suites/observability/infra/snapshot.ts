@@ -40,10 +40,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('8.0.0', () => {
       const { min, max } = DATES.serverlessTestingHost;
       before(() =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/serverless-testing-host')
+        esArchiver.load('x-pack/test/functional/es_archives/infra/serverless_testing_host')
       );
       after(() =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/serverless-testing-host')
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/serverless_testing_host')
       );
 
       it('should work', async () => {

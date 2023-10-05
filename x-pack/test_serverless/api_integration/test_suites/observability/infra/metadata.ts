@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('metadata', () => {
     describe('works', () => {
       describe('host information', () => {
-        const archiveName = 'x-pack/test/functional/es_archives/infra/serverless-testing-host';
+        const archiveName = 'x-pack/test/functional/es_archives/infra/serverless_testing_host';
         before(() => esArchiver.load(archiveName));
         after(() => esArchiver.unload(archiveName));
 

@@ -20,10 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API /metrics/process_list', () => {
     before(() =>
-      esArchiver.load('x-pack/test/functional/es_archives/infra/serverless-testing-host')
+      esArchiver.load('x-pack/test/functional/es_archives/infra/serverless_testing_host')
     );
     after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/serverless-testing-host')
+      esArchiver.unload('x-pack/test/functional/es_archives/infra/serverless_testing_host')
     );
 
     it('works', async () => {
