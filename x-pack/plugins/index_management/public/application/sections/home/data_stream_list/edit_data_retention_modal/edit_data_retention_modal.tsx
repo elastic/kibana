@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -232,7 +233,17 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
               defaultMessage="Edit data retention"
-            />
+            />{' '}
+            <EuiBadge color="hollow">
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.techPreviewLabel',
+                  {
+                    defaultMessage: 'Technical preview',
+                  }
+                )}
+              </EuiText>
+            </EuiBadge>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
