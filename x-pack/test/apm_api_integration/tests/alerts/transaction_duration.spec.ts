@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const supertest = getService('supertest');
   const es = getService('es');
+  const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
