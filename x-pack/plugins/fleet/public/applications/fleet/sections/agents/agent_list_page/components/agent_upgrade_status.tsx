@@ -245,7 +245,7 @@ export const AgentUpgradeStatus: React.FC<{
         content={
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDetailsNotAvailable"
-            defaultMessage="Detailed upgrade status is available for Elastic Agents on version 8.11 and higher."
+            defaultMessage="Detailed upgrade status is available for Elastic Agents on version 8.12 and higher."
           />
         }
         color="subdued"
