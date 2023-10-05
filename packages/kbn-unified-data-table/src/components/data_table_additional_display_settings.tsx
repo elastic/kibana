@@ -7,11 +7,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
-const MAX_ALLOWED_SAMPLE_SIZE = 10000;
+const MAX_ALLOWED_SAMPLE_SIZE = 1000;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   sampleSize: number;
@@ -51,10 +51,9 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
 
   return (
     <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-      <EuiRange
+      <EuiFieldNumber
         compressed
         fullWidth
-        showInput
         min={1}
         max={MAX_ALLOWED_SAMPLE_SIZE}
         step={1}
