@@ -18,8 +18,14 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
     padding: $euiSizeL;
   }
 
-  .kbnSolutionNav__avatar {
+  &__title {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__titleAvatar {
     margin-right: $euiSize;
+    align-self: flex-start;
   }
 }
 
