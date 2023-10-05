@@ -7,10 +7,12 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 
 export const Osquery = () => {
+  const { featureFlags } = usePluginConfig();
   const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
 
   const {
@@ -22,13 +24,16 @@ export const Osquery = () => {
 
   // avoids component rerender when resizing the popover
   const content = useMemo(() => {
+    if (!featureFlags.osqueryEnabled) {
+      return null;
+    }
     // TODO: Add info when Osquery plugin is not available
     if (metadataLoading || !OsqueryAction) {
       return <EuiSkeletonText lines={10} />;
     }
 
     return <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />;
-  }, [OsqueryAction, metadataLoading, metadata]);
+  }, [featureFlags.osqueryEnabled, metadataLoading, OsqueryAction, metadata?.info?.agent?.id]);
 
   return content;
 };

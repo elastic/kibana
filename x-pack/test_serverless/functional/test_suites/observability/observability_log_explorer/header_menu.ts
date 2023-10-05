@@ -18,8 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'observabilityLogExplorer',
     'svlCommonPage',
     'timePicker',
+    'header',
   ]);
 
+  // FLAKY: https://github.com/elastic/kibana/issues/167189
   describe('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -28,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -46,6 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Discover fallback link', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {
@@ -98,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Add data link', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {

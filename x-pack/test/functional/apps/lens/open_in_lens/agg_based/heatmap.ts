@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.os.raw');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.os.raw');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
@@ -114,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await visChart.waitForVisualizationRenderingStabilized();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
@@ -174,7 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await visChart.waitForVisualizationRenderingStabilized();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 

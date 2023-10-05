@@ -122,6 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
+
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
@@ -135,10 +136,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('SearchBar', () => {
       it('add filter', async () => {
-        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
+        // Filter bar uses the field's customLabel in the DataView
+        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
       });
 
       it('remove filter', async () => {
@@ -152,32 +154,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery(ruleName1);
         await queryBar.submitQuery();
 
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(false);
+        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName2)).to.be(false);
 
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
         expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-    });
-
-    describe('Table Filters', () => {
-      it('add cell value filter', async () => {
-        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, false);
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-      });
-
-      it('add negated cell value filter', async () => {
-        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, true);
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1, true, false, true)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(false);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(true);
-
-        await filterBar.removeFilter('rule.name');
       });
     });
 
@@ -195,14 +178,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
         const testCases: TestCase[] = [
-          ['CIS Section', 'asc', sortByAlphabeticalOrder],
-          ['CIS Section', 'desc', sortByAlphabeticalOrder],
-          ['Resource ID', 'asc', compareStringByLexicographicOrder],
-          ['Resource ID', 'desc', compareStringByLexicographicOrder],
-          ['Resource Name', 'asc', sortByAlphabeticalOrder],
-          ['Resource Name', 'desc', sortByAlphabeticalOrder],
-          ['Resource Type', 'asc', sortByAlphabeticalOrder],
-          ['Resource Type', 'desc', sortByAlphabeticalOrder],
+          ['rule.section', 'asc', sortByAlphabeticalOrder],
+          ['rule.section', 'desc', sortByAlphabeticalOrder],
+          ['resource.id', 'asc', compareStringByLexicographicOrder],
+          ['resource.id', 'desc', compareStringByLexicographicOrder],
+          ['resource.name', 'asc', sortByAlphabeticalOrder],
+          ['resource.name', 'desc', sortByAlphabeticalOrder],
+          ['resource.sub_type', 'asc', sortByAlphabeticalOrder],
+          ['resource.sub_type', 'desc', sortByAlphabeticalOrder],
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);

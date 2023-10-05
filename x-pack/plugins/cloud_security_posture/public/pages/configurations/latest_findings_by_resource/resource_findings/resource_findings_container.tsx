@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiSpacer, EuiButtonEmpty, type EuiDescriptionListProps } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButtonEmpty,
+  type EuiDescriptionListProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
@@ -19,11 +25,14 @@ import { LimitedResultsBar, PageTitle, PageTitleText } from '../../layout/findin
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { usePageSlice } from '../../../../common/hooks/use_page_slice';
-import { getFindingsPageSizeInfo, getFilters } from '../../utils/utils';
+import { getFilters } from '../../utils/utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
-import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
+import {
+  CurrentPageOfTotal,
+  FindingsDistributionBar,
+} from '../../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../../../common/types';
 import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
@@ -228,22 +237,31 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       {!error && (
         <>
           {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
-            <FindingsDistributionBar
-              {...{
-                distributionOnClick: handleDistributionClick,
-                type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
-                  defaultMessage: 'Findings',
-                }),
-                total: resourceFindings.data.total,
-                passed: resourceFindings.data.count.passed,
-                failed: resourceFindings.data.count.failed,
-                ...getFindingsPageSizeInfo({
-                  pageIndex: urlQuery.pageIndex,
-                  pageSize,
-                  currentPageSize: slicedPage.length,
-                }),
-              }}
-            />
+            <>
+              <FindingsDistributionBar
+                {...{
+                  distributionOnClick: handleDistributionClick,
+                  type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
+                    defaultMessage: 'Findings',
+                  }),
+                  passed: resourceFindings.data.count.passed,
+                  failed: resourceFindings.data.count.failed,
+                }}
+              />
+              <EuiSpacer size="l" />
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <CurrentPageOfTotal
+                    pageStart={urlQuery.pageIndex * pageSize + 1}
+                    pageEnd={urlQuery.pageIndex * pageSize + slicedPage.length}
+                    total={resourceFindings.data.total}
+                    type={i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
+                      defaultMessage: 'Findings',
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           )}
           <EuiSpacer />
           <ResourceFindingsTable
