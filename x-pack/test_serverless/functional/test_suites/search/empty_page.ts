@@ -25,6 +25,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('should show search specific empty page in discover', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+      await testSubjects.existOrFail('~breadcrumb-deepLinkId-discover');
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
@@ -32,6 +33,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('should show search specific empty page in visualize', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'visualize' });
+      await testSubjects.existOrFail('~breadcrumb-deepLinkId-visualize');
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
@@ -39,6 +41,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('should show search specific empty page in dashboards', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
+      await testSubjects.existOrFail('~breadcrumb-deepLinkId-dashboards');
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
