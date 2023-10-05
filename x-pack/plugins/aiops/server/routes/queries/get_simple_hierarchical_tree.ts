@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
+
 import type { ItemsetResult, SimpleHierarchicalTreeNode } from '../../../common/types';
 
 import { getValueCounts } from './get_value_counts';
@@ -32,6 +34,8 @@ function NewNodeFactory(name: string): SimpleHierarchicalTreeNode {
  * The resulting tree components are non-overlapping subsets of the data.
  * In summary, we start with the most inclusive itemset (highest count), and perform a depth first search in field order.
  *
+ * @param significantTerms
+ * @param fields
  * @param displayParent
  * @param parentDocCount
  * @param parentLabel
@@ -43,6 +47,7 @@ function NewNodeFactory(name: string): SimpleHierarchicalTreeNode {
  * @returns
  */
 function dfDepthFirstSearch(
+  significantTerms: SignificantTerm[],
   fields: string[],
   displayParent: SimpleHierarchicalTreeNode,
   parentDocCount: number,
@@ -73,17 +78,40 @@ function dfDepthFirstSearch(
   let label = `${parentLabel} ${value}`;
 
   let displayNode: SimpleHierarchicalTreeNode;
+
+  const significantTerm = significantTerms.find(
+    (d) => d.fieldName === field && d.fieldValue === value
+  );
+  if (!significantTerm) {
+    return 0;
+  }
+
   if (parentDocCount === docCount && collapseRedundant) {
     // collapse identical paths
     displayParent.name += ` ${value}`;
-    displayParent.set.push({ fieldName: field, fieldValue: value, docCount, pValue });
+
+    displayParent.set.push({
+      key: significantTerm.key,
+      type: significantTerm.type,
+      fieldName: field,
+      fieldValue: value,
+      docCount,
+      pValue,
+    });
     displayParent.docCount = docCount;
     displayParent.pValue = pValue;
     displayNode = displayParent;
   } else {
     displayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
     displayNode.set = [...displayParent.set];
-    displayNode.set.push({ fieldName: field, fieldValue: value, docCount, pValue });
+    displayNode.set.push({
+      key: significantTerm.key,
+      type: significantTerm.type,
+      fieldName: field,
+      fieldValue: value,
+      docCount,
+      pValue,
+    });
     displayNode.docCount = docCount;
     displayNode.pValue = pValue;
     displayParent.addNode(displayNode);
@@ -120,6 +148,7 @@ function dfDepthFirstSearch(
   let subCount = 0;
   for (const nextValue of getValuesDescending(filteredItemSets, nextField)) {
     subCount += dfDepthFirstSearch(
+      significantTerms,
       fields,
       displayNode,
       docCount,
@@ -152,6 +181,7 @@ export function getSimpleHierarchicalTree(
   df: ItemsetResult[],
   collapseRedundant: boolean,
   displayOther: boolean,
+  significantTerms: SignificantTerm[],
   fields: string[] = []
 ) {
   const totalDocCount = Math.max(...df.map((d) => d.total_doc_count));
@@ -161,6 +191,7 @@ export function getSimpleHierarchicalTree(
   for (const field of fields) {
     for (const value of getValuesDescending(df, field)) {
       dfDepthFirstSearch(
+        significantTerms,
         fields,
         newRoot,
         totalDocCount + 1,
