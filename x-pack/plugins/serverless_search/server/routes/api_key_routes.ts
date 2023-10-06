@@ -37,7 +37,7 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
       },
     },
     async (context, request, response) => {
-      const result = await security.authc.apiKeys.create(request, request.body as any);
+      const result = await security.authc.apiKeys.create(request, request.body);
       if (result) {
         const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };
         return response.ok({ body: apiKey });
