@@ -43,7 +43,7 @@ const getDefaultQuery = ({
 });
 
 const defaultColumns: CloudSecurityDefaultColumn[] = [
-  { id: 'result.evaluation' },
+  { id: 'result.evaluation', width: 80 },
   { id: 'resource.id' },
   { id: 'resource.name' },
   { id: 'resource.sub_type' },
@@ -88,7 +88,7 @@ const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.E
   );
 };
 
-const columnsLocalStorageKey = 'cloudSecurityPostureLatestFindingsColumns';
+const columnsLocalStorageKey = 'cloudPosture:latestFindings:columns';
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
   defaultMessage: 'Findings',
@@ -162,7 +162,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               failed={failed}
             />
           )}
-          <EuiSpacer />
+          <EuiSpacer size="xs" />
           <CloudSecurityDataTable
             data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
             dataView={dataView}

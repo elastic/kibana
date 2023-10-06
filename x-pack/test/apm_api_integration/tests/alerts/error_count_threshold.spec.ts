@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const supertest = getService('supertest');
   const es = getService('es');
+  const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -133,9 +134,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteActionConnector({ supertest, es, actionId });
-        await deleteRuleById({ supertest, ruleId });
-        await deleteAlertsByRuleId({ es, ruleId });
+        try {
+          await deleteActionConnector({ supertest, es, actionId });
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule or action connector', e);
+        }
       });
 
       it('checks if rule is active', async () => {
