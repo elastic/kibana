@@ -13,4 +13,4 @@ SNAPSHOT_PATH="${SO_MIGRATIONS_SNAPSHOT_FOLDER}/${BUILDKITE_COMMIT}.json"
 gsutil cp "$1" "gs://$SNAPSHOT_PATH"
 
 buildkite-agent annotate --context so_migration_snapshot --style success \
-  'Snapshot is available at <a href="https://storage.googleapis.com/'"$SNAPSHOT_PATH"'">'"$SNAPSHOT_PATH"'</a>'
+  'Snapshot is available at <a href="https://storage.cloud.google.com/'"$SNAPSHOT_PATH"'">'"$SNAPSHOT_PATH"'</a>'
