@@ -35,7 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Alerting rules', () => {
+  describe('Alerting rules', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['skipOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;

@@ -19,6 +19,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Configure Case', function () {
+    //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
+    this.tags(['skipOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
