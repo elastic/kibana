@@ -38,7 +38,7 @@ export async function cypressTestRunner({
     protocol: config.get('servers.kibana.protocol'),
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.kibana.port'),
-    auth: `${username}:${password}`,
+    auth: `elastic:${password}`,
   });
 
   // Ensure Fleet setup is complete
