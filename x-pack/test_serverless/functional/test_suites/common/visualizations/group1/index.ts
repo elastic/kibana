@@ -53,15 +53,15 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.svlCommonPage.login();
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
+      await PageObjects.svlCommonPage.login();
+      // changing the timepicker default here saves us from having to set it in Discover (~8s)
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
