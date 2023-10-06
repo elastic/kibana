@@ -202,7 +202,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
         <ConversationSelectorSettings
           selectedConversationId={selectedConversation?.id}
-          allSystemPrompts={allSystemPrompts}
           conversations={conversationSettings}
           onConversationDeleted={onConversationDeleted}
           onConversationSelectionChange={onConversationSelectionChange}

@@ -129,7 +129,7 @@ describe('ConnectorSelectorInline', () => {
     expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
     expect(setApiConfig).toHaveBeenCalledWith({
       apiConfig: {
-        connectorId: 'connectorId2',
+        connectorId: connectorTwo.id,
         connectorTypeTitle: 'OpenAI',
         model: undefined,
         provider: 'OpenAI',

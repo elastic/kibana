@@ -46,7 +46,7 @@ export const mockConnectors: ActionConnector[] = [
     },
   },
   {
-    id: 'connectorId2',
+    id: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
     name: 'Professor Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',
