@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'annotationEditor']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
   const log = getService('log');
@@ -175,7 +176,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.annotationEditor.saveGroup();
         });
 
-        it('recovers from missing field in data view', () => {});
+        it('recovers from missing field in data view', async () => {
+          const assertShowingMissingFieldError = async (yes: boolean) => {
+            await retry.try(async () => {
+              const [failureExists, canvasExists] = await Promise.all([
+                testSubjects.exists('embeddable-lens-failure'),
+                find.existsByCssSelector('canvas', 1000),
+              ]);
+              expect(failureExists).to.be(yes);
+              expect(canvasExists).to.be(!yes);
+            });
+          };
+
+          await listingTable.clickItemLink('eventAnnotation', 'Group with additional fields');
+
+          await assertShowingMissingFieldError(false);
+
+          await PageObjects.annotationEditor.editGroupMetadata({
+            dataView: 'Data view without fields',
+          });
+
+          await assertShowingMissingFieldError(true);
+
+          await PageObjects.annotationEditor.editGroupMetadata({
+            dataView: 'logs*',
+          });
+
+          await assertShowingMissingFieldError(false);
+        });
       });
     });
   });
