@@ -533,21 +533,21 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleType.validate.params
     );
 
-    const {
-      actions: rawAlertActions,
-      references,
-      params: updatedParams,
-    } = await extractReferences(
+    const { references, params: updatedParams } = await extractReferences(
       context,
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams
     );
 
-    const ruleAttributes = transformRuleDomainToRuleAttributes(updatedRule, {
-      legacyId: rule.attributes.legacyId,
-      actionsWithRefs: rawAlertActions,
-      paramsWithRefs: updatedParams as RuleAttributes['params'],
+    const ruleAttributes = await transformRuleDomainToRuleAttributes({
+      actions: updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
+      context,
+      rule: updatedRule,
+      params: {
+        legacyId: rule.attributes.legacyId,
+        paramsWithRefs: updatedParams as RuleAttributes['params'],
+      },
     });
 
     const { apiKeyAttributes } = await prepareApiKeys(
@@ -565,7 +565,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleAttributes,
       apiKeyAttributes,
       updatedParams,
-      rawAlertActions,
+      ruleAttributes.actions,
       username
     );
 

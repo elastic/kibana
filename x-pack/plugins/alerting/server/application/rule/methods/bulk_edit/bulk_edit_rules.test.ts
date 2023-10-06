@@ -941,7 +941,7 @@ describe('bulkEdit()', () => {
     });
 
     test('should add system and default actions', async () => {
-      const newAction = {
+      const defaultAction = {
         frequency: {
           notifyWhen: 'onActiveAlert' as const,
           summary: false,
@@ -953,7 +953,7 @@ describe('bulkEdit()', () => {
         type: RuleActionTypes.DEFAULT,
       };
 
-      const newAction2 = {
+      const systemAction = {
         id: 'system_action-id',
         params: {},
         type: RuleActionTypes.SYSTEM,
@@ -967,13 +967,21 @@ describe('bulkEdit()', () => {
               ...existingRule.attributes,
               actions: [
                 {
-                  ...newAction,
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  id: '1',
+                  params: {},
                   actionRef: 'action_0',
                   actionTypeId: 'test-1',
                   uuid: '222',
                 },
                 {
-                  ...newAction2,
+                  id: 'system_action-id',
+                  params: {},
                   actionRef: 'system_action:system_action-id',
                   actionTypeId: 'test-2',
                   uuid: '222',
@@ -1020,7 +1028,7 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [newAction, newAction2],
+            value: [defaultAction, systemAction],
           },
         ],
       });
@@ -1073,8 +1081,8 @@ describe('bulkEdit()', () => {
           lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
         },
         actions: [
-          { ...newAction, actionTypeId: 'test-1', uuid: '222' },
-          { ...newAction2, actionTypeId: 'test-2', uuid: '222' },
+          { ...defaultAction, actionTypeId: 'test-1', uuid: '222' },
+          { ...systemAction, actionTypeId: 'test-2', uuid: '222' },
         ],
         id: existingRule.id,
         snoozeSchedule: [],
@@ -1082,7 +1090,7 @@ describe('bulkEdit()', () => {
     });
 
     test('should construct the refs correctly and not persist the type of the action', async () => {
-      const newAction = {
+      const defaultAction = {
         frequency: {
           notifyWhen: 'onActiveAlert' as const,
           summary: false,
@@ -1094,7 +1102,7 @@ describe('bulkEdit()', () => {
         type: RuleActionTypes.DEFAULT,
       };
 
-      const newAction2 = {
+      const systemAction = {
         id: 'system_action-id',
         params: {},
         type: RuleActionTypes.SYSTEM,
@@ -1108,13 +1116,21 @@ describe('bulkEdit()', () => {
               ...existingRule.attributes,
               actions: [
                 {
-                  ...newAction,
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  id: '1',
+                  params: {},
                   actionRef: 'action_0',
                   actionTypeId: 'test-1',
                   uuid: '222',
                 },
                 {
-                  ...newAction2,
+                  id: 'system_action-id',
+                  params: {},
                   actionRef: 'system_action:system_action-id',
                   actionTypeId: 'test-2',
                   uuid: '222',
@@ -1161,7 +1177,7 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [newAction, newAction2],
+            value: [defaultAction, systemAction],
           },
         ],
       });
@@ -1189,7 +1205,7 @@ describe('bulkEdit()', () => {
     });
 
     test('should add the actions type to the response correctly', async () => {
-      const newAction = {
+      const defaultAction = {
         frequency: {
           notifyWhen: 'onActiveAlert' as const,
           summary: false,
@@ -1201,7 +1217,7 @@ describe('bulkEdit()', () => {
         type: RuleActionTypes.DEFAULT,
       };
 
-      const newAction2 = {
+      const systemAction = {
         id: 'system_action-id',
         params: {},
         type: RuleActionTypes.SYSTEM,
@@ -1215,13 +1231,21 @@ describe('bulkEdit()', () => {
               ...existingRule.attributes,
               actions: [
                 {
-                  ...newAction,
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  id: '1',
+                  params: {},
                   actionRef: 'action_0',
                   actionTypeId: 'test-1',
                   uuid: '222',
                 },
                 {
-                  ...newAction2,
+                  id: 'system_action-id',
+                  params: {},
                   actionRef: 'system_action:system_action-id',
                   actionTypeId: 'test-2',
                   uuid: '222',
@@ -1268,14 +1292,14 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [newAction, newAction2],
+            value: [defaultAction, systemAction],
           },
         ],
       });
 
       expect(result.rules[0].actions).toEqual([
-        { ...newAction, actionTypeId: 'test-1', uuid: '222' },
-        { ...newAction2, actionTypeId: 'test-2', uuid: '222' },
+        { ...defaultAction, actionTypeId: 'test-1', uuid: '222' },
+        { ...systemAction, actionTypeId: 'test-2', uuid: '222' },
       ]);
     });
 
