@@ -339,6 +339,11 @@ export const clearTransforms = async ({
   log: ToolingLog;
 }): Promise<void> => {
   try {
+    await es.transform.stopTransform({
+      transform_id: 'risk_score_latest_transform_default',
+      force: true,
+    });
+
     await es.transform.deleteTransform({
       transform_id: 'risk_score_latest_transform_default',
       force: true,
