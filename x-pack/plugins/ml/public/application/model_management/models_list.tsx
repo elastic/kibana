@@ -43,7 +43,6 @@ import {
   type ModelState,
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { css } from '@emotion/react';
 import { useStorage } from '@kbn/ml-local-storage';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
@@ -485,32 +484,28 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnDescription',
       render: ({ description, recommended }: ModelItem) => {
         if (!description) return null;
-        return (
-          <>
-            {description.replace('(Tech Preview)', '')}
-            {recommended ? (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                    defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                  />
-                }
-              >
-                <b
-                  css={css`
-                    text-wrap: nowrap;
-                  `}
-                >
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                    defaultMessage="(Recommended)"
-                  />
-                </b>
-              </EuiToolTip>
-            ) : null}
-          </>
+        const descriptionText = description.replace('(Tech Preview)', '');
+        return recommended ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+              />
+            }
+          >
+            <>
+              {descriptionText}&nbsp;
+              <b>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                  defaultMessage="(Recommended)"
+                />
+              </b>
+            </>
+          </EuiToolTip>
+        ) : (
+          descriptionText
         );
       },
     },
