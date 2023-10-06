@@ -46,7 +46,6 @@ export const config: PluginConfigDescriptor = {
       disableProxies: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
-      registry: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [

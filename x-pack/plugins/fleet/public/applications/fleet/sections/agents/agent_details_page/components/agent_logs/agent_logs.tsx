@@ -34,7 +34,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useConfig, useLink, useStartServices } from '../../../../../hooks';
+import { useLink, useStartServices } from '../../../../../hooks';
 
 import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
@@ -118,10 +118,9 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, http } = useStartServices();
+    const { data, application, http, cloud } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
-    const config = useConfig();
-    const isLogsUIAvailable = !config.internal?.registry?.capabilities;
+    const isLogsUIAvailable = !cloud?.isServerlessEnabled;
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
