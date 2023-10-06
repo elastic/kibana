@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/167189
   describe('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -58,9 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
-        // Set timerange to specific values to match data and retrieve config
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');

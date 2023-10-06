@@ -6,7 +6,6 @@
  */
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import querystring from 'querystring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -19,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // https://github.com/elastic/kibana/issues/166016
   describe('DatasetSelection initialization and update', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
@@ -45,9 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: azureActivitylogsIndex }),
-          }),
+          },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -60,9 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
         const invalidEncodedIndex = 'invalid-encoded-index';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: invalidEncodedIndex }),
-          }),
+          },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -85,10 +83,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: azureActivitylogsIndex }),
             controlPanels: rison.encode({}),
-          }),
+          },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         const azureDatasetSelectionTitle =

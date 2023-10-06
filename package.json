@@ -432,6 +432,7 @@
     "@kbn/field-formats-example-plugin": "link:examples/field_formats_example",
     "@kbn/field-formats-plugin": "link:src/plugins/field_formats",
     "@kbn/field-types": "link:packages/kbn-field-types",
+    "@kbn/field-utils": "link:packages/kbn-field-utils",
     "@kbn/file-upload-plugin": "link:x-pack/plugins/file_upload",
     "@kbn/files-example-plugin": "link:examples/files_example",
     "@kbn/files-management-plugin": "link:src/plugins/files_management",
