@@ -6,23 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
+import { createValidationFunction } from '@kbn/logs-shared-plugin/common/runtime_types';
+import * as logAnalysisIdFormatsV1 from '../../../common/http_api/log_analysis/v1/id_formats';
+import { InfraBackendLibs } from '../../lib/infra_types';
+import { isMlPrivilegesError } from '../../lib/log_analysis';
+import { resolveIdFormats } from '../../lib/log_analysis/resolve_id_formats';
+import { assertHasInfraMlPlugins } from '../../utils/request_context';
 
-import { logAnalysisResultsV1 } from '../../../../common/http_api';
-import { createValidationFunction } from '../../../../common/runtime_types';
-import type { InfraBackendLibs } from '../../../lib/infra_types';
-import { getLogEntryAnomaliesDatasets } from '../../../lib/log_analysis';
-import { assertHasInfraMlPlugins } from '../../../utils/request_context';
-import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
-
-export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBackendLibs) => {
-  if (!framework.config.featureFlags.logsUIEnabled) {
-    return;
-  }
+export const initGetLogAnalysisIdFormatsRoute = ({ framework }: InfraBackendLibs) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
       method: 'post',
-      path: logAnalysisResultsV1.LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
+      path: logAnalysisIdFormatsV1.LOG_ANALYSIS_GET_ID_FORMATS,
     })
     .addVersion(
       {
@@ -30,37 +26,25 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
         validate: {
           request: {
             body: createValidationFunction(
-              logAnalysisResultsV1.getLogEntryAnomaliesDatasetsRequestPayloadRT
+              logAnalysisIdFormatsV1.getLogAnalysisIdFormatsRequestPayloadRT
             ),
           },
         },
       },
       framework.router.handleLegacyErrors(async (requestContext, request, response) => {
         const {
-          data: {
-            logView,
-            idFormats,
-            timeRange: { startTime, endTime },
-          },
+          data: { logViewId, spaceId },
         } = request.body;
 
         try {
           const infraMlContext = await assertHasInfraMlPlugins(requestContext);
+          const mlAnomalyDetectors = (await infraMlContext.infra).mlAnomalyDetectors;
 
-          const { datasets, timing } = await getLogEntryAnomaliesDatasets(
-            { infra: await infraMlContext.infra },
-            logView,
-            idFormats,
-            startTime,
-            endTime
-          );
+          const idFormatByJobType = await resolveIdFormats(logViewId, spaceId, mlAnomalyDetectors);
 
           return response.ok({
-            body: logAnalysisResultsV1.getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT.encode({
-              data: {
-                datasets,
-              },
-              timing,
+            body: logAnalysisIdFormatsV1.getLogAnalysisIdFormatsSuccessResponsePayloadRT.encode({
+              data: idFormatByJobType,
             }),
           });
         } catch (error) {

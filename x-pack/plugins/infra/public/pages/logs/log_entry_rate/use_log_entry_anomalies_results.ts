@@ -8,6 +8,7 @@
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { IdFormatByJobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
@@ -139,6 +140,7 @@ export const useLogEntryAnomaliesResults = ({
   endTime,
   startTime,
   logViewReference,
+  idFormats,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetLogEntryAnomaliesDatasetsError,
@@ -147,6 +149,7 @@ export const useLogEntryAnomaliesResults = ({
   endTime: number;
   startTime: number;
   logViewReference: PersistedLogViewReference;
+  idFormats: IdFormatByJobType;
   defaultSortOptions: AnomaliesSort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
@@ -185,6 +188,7 @@ export const useLogEntryAnomaliesResults = ({
         return await callGetLogEntryAnomaliesAPI(
           {
             logViewReference,
+            idFormats,
             startTime: queryStartTime,
             endTime: queryEndTime,
             sort: sortOptions,
@@ -218,6 +222,7 @@ export const useLogEntryAnomaliesResults = ({
     },
     [
       logViewReference,
+      idFormats,
       dispatch,
       reducerState.timeRange,
       reducerState.sortOptions,
@@ -295,7 +300,7 @@ export const useLogEntryAnomaliesResults = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryAnomaliesDatasetsAPI(
-          { logViewReference, startTime, endTime },
+          { logViewReference, idFormats, startTime, endTime },
           services.http.fetch
         );
       },
@@ -312,7 +317,7 @@ export const useLogEntryAnomaliesResults = ({
         }
       },
     },
-    [endTime, logViewReference, startTime]
+    [endTime, logViewReference, idFormats, startTime]
   );
 
   const isLoadingDatasets = useMemo(

@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { createHash } from 'crypto';
+import { IdFormat, JobType } from '../http_api/log_analysis/v1/id_formats';
 
 export const bucketSpan = 900000;
 
@@ -13,14 +15,31 @@ export const categoriesMessageField = 'message';
 
 export const partitionField = 'event.dataset';
 
-export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
-  `kibana-logs-ui-${spaceId}-${sourceId}-`;
+export const getJobIdPrefix = (spaceId: string, sourceId: string, idFormat: IdFormat) => {
+  if (idFormat === 'legacy') {
+    return `kibana-logs-ui-${spaceId}-${sourceId}-`;
+  } else {
+    const hash = createHash('sha256')
+      .update(`${spaceId}-${sourceId}`)
+      .digest('hex')
+      .substring(0, 10);
+    return `logs-${hash}-`;
+  }
+};
 
-export const getJobId = (spaceId: string, logViewId: string, jobType: string) =>
-  `${getJobIdPrefix(spaceId, logViewId)}${jobType}`;
+export const getJobId = (
+  spaceId: string,
+  logViewId: string,
+  idFormat: IdFormat,
+  jobType: JobType
+) => `${getJobIdPrefix(spaceId, logViewId, idFormat)}${jobType}`;
 
-export const getDatafeedId = (spaceId: string, logViewId: string, jobType: string) =>
-  `datafeed-${getJobId(spaceId, logViewId, jobType)}`;
+export const getDatafeedId = (
+  spaceId: string,
+  logViewId: string,
+  idFormat: IdFormat,
+  jobType: JobType
+) => `datafeed-${getJobId(spaceId, logViewId, idFormat, jobType)}`;
 
 export const datasetFilterRT = rt.union([
   rt.strict({
