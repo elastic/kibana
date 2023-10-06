@@ -46,7 +46,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
             '--dev',
             '--no-dev-config',
             '--no-dev-credentials',
-            '--elasticsearch.ignoreVersionMismatch=true',
             config.get('serverless')
               ? '--server.versioned.versionResolution=newest'
               : '--server.versioned.versionResolution=oldest',
