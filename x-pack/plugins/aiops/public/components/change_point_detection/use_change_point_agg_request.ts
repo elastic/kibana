@@ -195,7 +195,7 @@ export function useChangePointResults(
         }
 
         const isFetchCompleted = !(
-          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm &&
+          isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm) &&
           pageNumber < totalAggPages
         );
 
