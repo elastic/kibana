@@ -96,19 +96,7 @@ describe('AgentLogsUI', () => {
     expect(result.getByTestId('viewInLogsBtn')).not.toBeNull();
   });
 
-  it('should render Open in Logs UI if capabilities include observability', () => {
-    mockUseConfig.mockReturnValue({
-      internal: {
-        registry: {
-          capabilities: ['apm', 'observability'],
-        },
-      },
-    });
-    const result = renderComponent();
-    expect(result.getByTestId('viewInLogsBtn')).not.toBeNull();
-  });
-
-  it('should render Open in Discover if capabilities do not include observability', () => {
+  it('should render Open in Discover if capabilities set', () => {
     mockUseConfig.mockReturnValue({
       internal: {
         registry: {

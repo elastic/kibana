@@ -121,9 +121,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
     const { data, application, http } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
     const config = useConfig();
-    const isLogsUIAvailable =
-      !config.internal?.registry?.capabilities ||
-      config.internal?.registry?.capabilities?.includes('observability');
+    const isLogsUIAvailable = !config.internal?.registry?.capabilities;
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
