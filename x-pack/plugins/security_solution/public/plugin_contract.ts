@@ -11,6 +11,8 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { DataQualityPanelConfig } from './overview/types';
 import type { AppLinksSwitcher } from './common/links';
+import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
@@ -21,9 +23,10 @@ export class PluginContract {
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
+  public deepLinksFormatter?: DeepLinksFormatter;
   public dataQualityPanelConfig?: DataQualityPanelConfig;
 
-  constructor() {
+  constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.componentsService = new ContractComponentsService();
@@ -44,8 +47,12 @@ export class PluginContract {
   public getSetupContract(): PluginSetup {
     return {
       resolver: lazyResolver,
+      experimentalFeatures: { ...this.experimentalFeatures },
       setAppLinksSwitcher: (appLinksSwitcher) => {
         this.appLinksSwitcher = appLinksSwitcher;
+      },
+      setDeepLinksFormatter: (deepLinksFormatter) => {
+        this.deepLinksFormatter = deepLinksFormatter;
       },
       setDataQualityPanelConfig: (dataQualityPanelConfig) => {
         this.dataQualityPanelConfig = dataQualityPanelConfig;
