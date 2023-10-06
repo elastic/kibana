@@ -212,7 +212,10 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   return (
     <FormikProvider value={formik}>
       <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size="m" ownFocus>
-        <Form onSubmit={formik.handleSubmit}>
+        <Form
+          onSubmit={formik.handleSubmit}
+          style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id={titleId}>{title}</h2>
