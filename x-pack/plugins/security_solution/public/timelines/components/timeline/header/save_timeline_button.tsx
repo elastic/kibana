@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useMemo } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions } from '../../../store/timeline';
-import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { TimelineStatus } from '../../../../../common/api/timeline';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useEditTimelineModal } from './use_edit_timeline_modal';
 import * as timelineTranslations from './translations';
 import * as sharedTranslations from '../../flyout/header/translations';
