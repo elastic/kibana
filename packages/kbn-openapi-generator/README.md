@@ -94,6 +94,7 @@ export const InstallPrebuiltRulesResponse = z.object({
   timelines_updated: z.number().int().min(0),
 });
 ```
+
 ## Programmatic API
 
 Alternatively, you can use the code generator programmatically. You can create a script file and run it with `node` command. This could be useful if you want to set up code generation in your CI pipeline. Here's an example of such script:
@@ -135,26 +136,26 @@ check_for_changed_files "yarn openapi:generate" true
 
 This scripts sets up the minimal environment required fro code generation and runs the code generation script. Then it checks if there are any changes and commits them if there are any using the `check_for_changed_files` function.
 
-Then add the code generation script to your plugin build pipeline. Open your plugin build pipeline, for example `.buildkite/pipelines/pull_request/security_solution.yml`, and add the following command to the steps list adjusting the path to your code generation script:
+Then add the code generation script to your plugin build pipeline. Open your plugin build pipeline, for example `.buildkite/pipelines/pull_request/base.yml`, and add the following command to the steps list adjusting the path to your code generation script:
 
 ```yaml
-  - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
-    label: 'Security Solution OpenAPI codegen'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    parallelism: 1
+- command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
+  label: 'Security Solution OpenAPI codegen'
+  agents:
+    queue: n2-2-spot
+  timeout_in_minutes: 60
+  parallelism: 1
 ```
 
 Now on every pull request the code generation script will run and commit the changes if there are any.
 
 ## OpenAPI Schema
 
-The code generator supports the OpenAPI definitions described in the request, response, and component sections of the document. 
+The code generator supports the OpenAPI definitions described in the request, response, and component sections of the document.
 
 For every API operation (GET, POST, etc) it is required to specify the `operationId` field. This field is used to generate the name of the generated types. For example, if the `operationId` is `InstallPrebuiltRules` then the generated types will be named `InstallPrebuiltRulesResponse` and `InstallPrebuiltRulesRequest`. If the `operationId` is not specified then the code generation will throw an error.
 
-The `x-codegen-enabled` field is used to enable or disable code generation for the operation. If it is not specified then code generation is disabled by default. This field could be also used to disable code generation of common components described in the `components` section of the OpenAPI specification. 
+The `x-codegen-enabled` field is used to enable or disable code generation for the operation. If it is not specified then code generation is disabled by default. This field could be also used to disable code generation of common components described in the `components` section of the OpenAPI specification.
 
 Keep in mind that disabling code generation for common components that are referenced by external OpenAPI specifications could lead to errors during code generation.
 
