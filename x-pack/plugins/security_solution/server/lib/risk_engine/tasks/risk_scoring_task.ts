@@ -30,15 +30,12 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import {
-  buildScopedInternalSavedObjectsClientUnsafe,
-  convertRangeToISO,
-  isExecutionDurationExceededInterval,
-} from './helpers';
+import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
 import { RiskScoreEntity } from '../../../../common/risk_engine/types';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
+  RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
 } from '../../telemetry/event_based/events';
 
 const logFactory =
@@ -257,10 +254,7 @@ export const runTask = async ({
     const telemetryEvent = {
       scoresWritten,
       taskDurationInSeconds,
-      executionDurationExceededInterval: isExecutionDurationExceededInterval(
-        taskInstance?.schedule?.interval,
-        taskDurationInSeconds
-      ),
+      interval: taskInstance?.schedule?.interval,
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
@@ -268,7 +262,9 @@ export const runTask = async ({
 
     if (isCancelled()) {
       log('task was cancelled');
+      telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
+
     log('task run completed');
     log(JSON.stringify(telemetryEvent));
     return {

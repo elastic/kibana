@@ -236,14 +236,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       {
         '@timestamp': now,
         message: {
-          role: MessageRole.System,
-          content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
-          concisely as possible.`,
-        },
-      },
-      {
-        '@timestamp': now,
-        message: {
           content,
           role: MessageRole.User,
         },
