@@ -17,7 +17,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AfterKeys, IdentifierType } from '../../../../common/risk_engine';
 import type { StartPlugins } from '../../../plugin';
@@ -75,14 +74,12 @@ export const registerRiskScoringTask = ({
       // own purposes.  It appears the client is using ILM, and this won't work
       // on serverless, so we hardcode "not using datastreams" here, since that
       // code will have to change someday ...
-      const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: false });
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
         esClient,
         namespace,
         soClient,
-        dataStreamAdapter,
       });
 
       return riskScoreServiceFactory({

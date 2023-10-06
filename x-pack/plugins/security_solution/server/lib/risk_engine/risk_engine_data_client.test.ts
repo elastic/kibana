@@ -8,7 +8,6 @@
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
-  getDataStreamAdapter,
 } from '@kbn/alerting-plugin/server';
 import {
   loggingSystemMock,
@@ -61,9 +60,7 @@ const transformsMock = {
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
-  createOrUpdateIlmPolicy: jest.fn(),
   createOrUpdateIndexTemplate: jest.fn(),
-  getDataStreamAdapter: jest.fn(),
 }));
 
 jest.mock('./utils/create_datastream', () => ({
@@ -101,7 +98,6 @@ describe('RiskEngineDataClient', () => {
           esClient,
           soClient: mockSavedObjectClient,
           namespace: 'default',
-          dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
         };
         riskEngineDataClient = new RiskEngineDataClient(options);
       });
@@ -130,8 +126,6 @@ describe('RiskEngineDataClient', () => {
       describe('initializeResources success', () => {
         it('should initialize risk engine resources', async () => {
           await riskEngineDataClient.initializeResources({ namespace: 'default' });
-
-          expect(getDataStreamAdapter).toHaveBeenCalledWith({ useDataStreamForAlerts });
 
           expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
             expect.objectContaining({
