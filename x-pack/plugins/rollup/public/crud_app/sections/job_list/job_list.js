@@ -15,7 +15,7 @@ import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiPageHeader,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -87,7 +87,7 @@ export class JobListUi extends Component {
       defaultMessage: 'Permission error',
     });
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListNoPermission"
           iconType="warning"
@@ -101,7 +101,7 @@ export class JobListUi extends Component {
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -115,7 +115,7 @@ export class JobListUi extends Component {
     });
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListError"
           iconType="warning"
@@ -126,13 +126,13 @@ export class JobListUi extends Component {
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   renderEmpty() {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
           data-test-subj="jobListEmptyPrompt"
           iconType="indexRollupApp"
@@ -169,20 +169,20 @@ export class JobListUi extends Component {
             </EuiButton>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   renderLoading() {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.rollupJobs.jobList.loadingTitle"
             defaultMessage="Loading rollup jobs…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
