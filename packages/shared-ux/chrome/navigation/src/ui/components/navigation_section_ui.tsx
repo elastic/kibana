@@ -8,7 +8,12 @@
 
 import React, { FC, useEffect, useState } from 'react';
 
-import { EuiCollapsibleNavItem, EuiCollapsibleNavItemProps } from '@elastic/eui';
+import {
+  EuiCollapsibleNavItem,
+  EuiCollapsibleNavItemProps,
+  EuiCollapsibleNavSubItemProps,
+  EuiTitle,
+} from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { NavigateToUrlFn } from '../../../types/internal';
@@ -29,7 +34,7 @@ const navigationNodeToEuiItem = (
     closePanel: PanelContext['close'];
     isSideNavCollapsed: boolean;
   }
-): EuiCollapsibleNavItemProps => {
+): EuiCollapsibleNavSubItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const { openPanel: itemOpenPanel = false } = item;
@@ -40,6 +45,28 @@ const navigationNodeToEuiItem = (
     [`nav-item-id-${item.id}`]: item.id,
     [`nav-item-isActive`]: isSelected,
   });
+
+  // Note: this can be replaced with an `isGroup` API or whatever you prefer
+  // Could also probably be pulled out to a separate component vs inlined
+  if (item.isGroupTitle) {
+    return {
+      renderItem: () => (
+        <EuiTitle
+          size="xxxs"
+          className="eui-textTruncate"
+          css={({ euiTheme }: any) => ({
+            marginTop: euiTheme.size.base,
+            paddingBlock: euiTheme.size.xs,
+            paddingInline: euiTheme.size.s,
+          })}
+        >
+          <div id={id} data-test-subj={dataTestSubj}>
+            {item.title}
+          </div>
+        </EuiTitle>
+      ),
+    };
+  }
 
   const onClick = (e: React.MouseEvent) => {
     if (href !== undefined || itemOpenPanel) {
@@ -67,6 +94,7 @@ const navigationNodeToEuiItem = (
 
   return {
     id,
+    isGroupTitle: item.isGroupTitle,
     title: item.title,
     isSelected,
     accordionProps: {
