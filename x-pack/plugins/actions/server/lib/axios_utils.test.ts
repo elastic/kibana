@@ -288,7 +288,37 @@ describe('request', () => {
 
     expect(axiosMock.mock.calls.length).toBe(2);
     expect(axiosMock.mock.calls[0][1].timeout).toBe(360000);
-    expect(axiosMock.mock.calls[1][1].timeout).toBe(55);
+    expect(axiosMock.mock.calls[1][1].timeout).toBe(360000);
+  });
+
+  test('it uses timeout argument when one is provided that is greater than settings timeout', async () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxySSLSettings: {
+        verificationMode: 'full',
+      },
+      proxyUrl: 'https://elastic.proxy.co',
+      proxyBypassHosts: new Set(['elastic.co']),
+      proxyOnlyHosts: undefined,
+    });
+
+    await request({
+      axios,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+    });
+
+    await request({
+      axios,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      timeout: 360001,
+    });
+
+    expect(axiosMock.mock.calls.length).toBe(2);
+    expect(axiosMock.mock.calls[0][1].timeout).toBe(360000);
+    expect(axiosMock.mock.calls[1][1].timeout).toBe(360001);
   });
 });
 
