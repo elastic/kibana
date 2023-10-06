@@ -38291,7 +38291,6 @@
     "xpack.triggersActionsUI.sections.rulesList.monthsLabel": "个月",
     "xpack.triggersActionsUI.sections.rulesList.multipleTitle": "规则",
     "xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateDescription": "请联系您的系统管理员。",
-    "xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateTitle": "没有创建规则的权限",
     "xpack.triggersActionsUI.sections.rulesList.previousSnooze": "上一步",
     "xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel": "刷新",
     "xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite": "无限期",
