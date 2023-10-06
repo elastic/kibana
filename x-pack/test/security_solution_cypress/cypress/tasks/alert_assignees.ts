@@ -6,7 +6,6 @@
  */
 
 import { ALERT_ASSIGNING_UPDATE_BUTTON } from '../screens/alerts';
-import { refreshPage } from './security_header';
 
 export const waitForAssigneesToPopulatePopover = () => {
   cy.waitUntil(
@@ -22,10 +21,10 @@ export const waitForAssigneesToPopulatePopover = () => {
 };
 
 export const waitForAssigneeToAppearInTable = (userName: string) => {
+  cy.reload();
   cy.waitUntil(
     () => {
       cy.log('Waiting for assignees to appear in the "Assignees" column');
-      refreshPage();
       return cy.root().then(($el) => {
         const assigneesState = $el.find(`.euiDataGridRowCell__truncate:contains('${userName}')`);
         if (assigneesState.length > 0) {
@@ -39,10 +38,10 @@ export const waitForAssigneeToAppearInTable = (userName: string) => {
 };
 
 export const waitForAssigneeToDisappearInTable = (userName: string) => {
+  cy.reload();
   cy.waitUntil(
     () => {
       cy.log('Waiting for assignees to disappear in the "Assignees" column');
-      refreshPage();
       return cy.root().then(($el) => {
         const assigneesState = $el.find(`.euiDataGridRowCell__truncate:contains('${userName}')`);
         if (assigneesState.length > 0) {
