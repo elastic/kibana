@@ -87,7 +87,7 @@ export class JobListUi extends Component {
       defaultMessage: 'Permission error',
     });
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListNoPermission"
           iconType="warning"
@@ -115,7 +115,7 @@ export class JobListUi extends Component {
     });
 
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListError"
           iconType="warning"
@@ -132,7 +132,7 @@ export class JobListUi extends Component {
 
   renderEmpty() {
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <EuiEmptyPrompt
           data-test-subj="jobListEmptyPrompt"
           iconType="indexRollupApp"
@@ -175,7 +175,7 @@ export class JobListUi extends Component {
 
   renderLoading() {
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.rollupJobs.jobList.loadingTitle"

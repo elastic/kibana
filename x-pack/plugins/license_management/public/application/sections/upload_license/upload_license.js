@@ -125,7 +125,7 @@ export class UploadLicense extends React.PureComponent {
     const { currentLicenseType, applying, telemetry, history } = this.props;
 
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <EuiTitle size="m">
           <h1>
             <FormattedMessage

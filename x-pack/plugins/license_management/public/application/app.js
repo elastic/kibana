@@ -33,7 +33,7 @@ export const App = ({
 
   if (permissionsLoading) {
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.licenseMgmt.app.loadingPermissionsDescription"
@@ -48,7 +48,7 @@ export const App = ({
     const error = permissionsError?.data?.message;
 
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <EuiEmptyPrompt
           iconType="warning"
           title={
@@ -67,7 +67,7 @@ export const App = ({
 
   if (!hasPermission) {
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <EuiEmptyPrompt
           iconType="securityApp"
           title={
