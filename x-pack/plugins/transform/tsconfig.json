@@ -40,7 +40,6 @@
     "@kbn/std",
     "@kbn/es-query",
     "@kbn/ml-agg-utils",
-    "@kbn/utility-types",
     "@kbn/ml-string-hash",
     "@kbn/ui-theme",
     "@kbn/field-types",
@@ -69,7 +68,8 @@
     "@kbn/ebt-tools",
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/data-view-editor-plugin"
   ],
   "exclude": [
     "target/**/*",

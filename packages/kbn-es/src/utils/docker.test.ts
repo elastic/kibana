@@ -23,12 +23,13 @@ import {
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
-  SERVERLESS_IMG,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   setupServerlessVolumes,
   stopServerlessCluster,
   teardownServerlessClusterSync,
   verifyDockerInstalled,
   getESp12Volume,
+  ServerlessOptions,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
@@ -155,6 +156,19 @@ describe('resolvePort()', () => {
     `);
   });
 
+  test('should return default port when custom host passed in options', () => {
+    const port = resolvePort({ host: '192.168.25.1' } as ServerlessOptions);
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+        "-p",
+        "192.168.25.1:9200:9200",
+      ]
+    `);
+  });
+
   test('should return custom port when passed in options', () => {
     const port = resolvePort({ port: 9220 });
 
@@ -162,6 +176,21 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "--env",
+        "http.port=9220",
+      ]
+    `);
+  });
+
+  test('should return custom port and host when passed in options', () => {
+    const port = resolvePort({ port: 9220, host: '192.168.25.1' });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+        "-p",
+        "192.168.25.1:9220:9220",
         "--env",
         "http.port=9220",
       ]
@@ -445,13 +474,42 @@ describe('setupServerlessVolumes()', () => {
     expect(volumeCmd).toHaveLength(20);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
+
+  test('should use resource overrides', async () => {
+    mockFs(existingObjectStore);
+    const volumeCmd = await setupServerlessVolumes(log, {
+      basePath: baseEsPath,
+      resources: ['./relative/path/users', '/absolute/path/users_roles'],
+    });
+
+    expect(volumeCmd).toContain(
+      '/absolute/path/users_roles:/usr/share/elasticsearch/config/users_roles'
+    );
+    expect(volumeCmd).toContain(
+      `${process.cwd()}/relative/path/users:/usr/share/elasticsearch/config/users`
+    );
+  });
+
+  test('should throw if an unknown resource override is used', async () => {
+    mockFs(existingObjectStore);
+
+    await expect(async () => {
+      await setupServerlessVolumes(log, {
+        basePath: baseEsPath,
+        resources: ['/absolute/path/invalid'],
+      });
+    }).rejects.toThrow(
+      'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
+        'Valid resources: operator_users.yml | role_mapping.yml | roles.yml | service_tokens | users | users_roles'
+    );
+  });
 });
 
 describe('runServerlessEsNode()', () => {
   const node = {
     params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
     name: 'es01',
-    image: SERVERLESS_IMG,
+    image: ES_SERVERLESS_DEFAULT_IMAGE,
   };
 
   test('should call the correct Docker command', async () => {
@@ -462,7 +520,7 @@ describe('runServerlessEsNode()', () => {
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
-        SERVERLESS_IMG,
+        ES_SERVERLESS_DEFAULT_IMAGE,
         ...node.params,
         '--name',
         node.name,
@@ -530,7 +588,9 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
-    expect(execa.commandSync.mock.calls[0][0]).toEqual(expect.stringContaining(SERVERLESS_IMG));
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+    );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
   });
 

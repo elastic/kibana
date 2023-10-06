@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 
 export interface ElasticsearchAccessorOptions {
-  esClient: ElasticsearchClient;
+  elasticsearchClient: ElasticsearchClient;
 }
 
 export const INDEX_DEFAULTS = {
@@ -68,6 +68,7 @@ export type AssetManagerConfig = TypeOf<typeof configSchema>;
 
 export interface AssetManagerPluginSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
+  metricsDataAccess: MetricsDataPluginSetup;
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;

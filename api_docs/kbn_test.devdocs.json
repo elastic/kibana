@@ -2719,7 +2719,7 @@
             "section": "def-common.EsVersion",
             "text": "EsVersion"
           },
-          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }) => Promise<void>"
+          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; esServerlessImage: string | undefined; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }) => Promise<void>"
         ],
         "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
         "deprecated": false,
@@ -2762,7 +2762,7 @@
                 "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
-              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }"
+              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; esServerlessImage: string | undefined; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }"
             ],
             "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
             "deprecated": false,
@@ -3107,6 +3107,22 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.esServerlessOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "esServerlessOptions",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "ServerlessOptions",
+              ", \"host\" | \"tag\" | \"image\" | \"resources\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,

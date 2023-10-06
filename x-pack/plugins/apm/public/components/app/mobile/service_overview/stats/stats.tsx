@@ -110,10 +110,12 @@ export function MobileStats({
         defaultMessage: 'Crash rate',
       }),
       icon: getIcon('bug'),
-      value: data?.currentPeriod?.crashRate?.value ?? NOT_AVAILABLE_LABEL,
+      value: data?.currentPeriod?.crashRate?.value ?? NaN,
       valueFormatter: (value: number) =>
-        valueFormatter(Number((value * 100).toPrecision(2)), '%'),
-      trend: data?.currentPeriod?.crashRate?.timeseries,
+        Number.isNaN(value)
+          ? NOT_AVAILABLE_LABEL
+          : valueFormatter(Number((value * 100).toPrecision(2)), '%'),
+      trend: data?.currentPeriod?.crashRate?.timeseries ?? [],
       extra: getComparisonValueFormatter(data?.previousPeriod.crashRate?.value),
       trendShape: MetricTrendShape.Area,
     },
@@ -137,8 +139,9 @@ export function MobileStats({
         defaultMessage: 'Sessions',
       }),
       icon: getIcon('timeslider'),
-      value: data?.currentPeriod?.sessions?.value ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value: number) => valueFormatter(value),
+      value: data?.currentPeriod?.sessions?.value ?? NaN,
+      valueFormatter: (value: number) =>
+        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),
       trend: data?.currentPeriod?.sessions?.timeseries,
       extra: getComparisonValueFormatter(data?.previousPeriod.sessions?.value),
       trendShape: MetricTrendShape.Area,
@@ -149,10 +152,11 @@ export function MobileStats({
         defaultMessage: 'HTTP requests',
       }),
       icon: getIcon('kubernetesPod'),
-      value: data?.currentPeriod?.requests?.value ?? NOT_AVAILABLE_LABEL,
       extra: getComparisonValueFormatter(data?.previousPeriod.requests?.value),
-      valueFormatter: (value: number) => valueFormatter(value),
-      trend: data?.currentPeriod?.requests?.timeseries,
+      value: data?.currentPeriod?.requests?.value ?? NaN,
+      valueFormatter: (value: number) =>
+        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),
+      trend: data?.currentPeriod?.requests?.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
   ];

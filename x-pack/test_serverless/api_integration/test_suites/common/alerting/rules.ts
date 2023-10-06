@@ -52,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
+        conflicts: 'proceed',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);

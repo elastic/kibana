@@ -21,13 +21,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `"content": "You are a cyber security analyst using Elastic Security. I would like you to evaluate the event below and format your output neatly in markdown syntax. Add your description, an accuracy rating, and a threat rating."\n` +
     `}]`;
 
-  describe('generative ai connector', function () {
+  describe('OpenAI connector', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('generative ai connector screenshots', async () => {
+    it('OpenAI connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('gen-ai');

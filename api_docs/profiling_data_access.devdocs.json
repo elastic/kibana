@@ -37,7 +37,7 @@
         "label": "ProfilingDataAccessPluginStart",
         "description": [],
         "signature": [
-          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery }: ",
+          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery, useLegacyFlamegraphAPI, }: ",
           "FetchFlamechartParams",
           ") => Promise<",
           {
@@ -47,7 +47,9 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          ">; getStatus: ({ esClient, soClient, spaceId }: HasSetupParams) => Promise<",
+          ">; getStatus: ({ esClient, soClient, spaceId }: ",
+          "HasSetupParams",
+          ") => Promise<",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",

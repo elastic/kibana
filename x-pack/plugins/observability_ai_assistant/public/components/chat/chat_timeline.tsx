@@ -15,6 +15,7 @@ import { ChatWelcomePanel } from './chat_welcome_panel';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
 import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { ChatActionClickHandler } from './types';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -43,6 +44,7 @@ export interface ChatTimelineProps {
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
   onRegenerate: (item: ChatTimelineItem) => void;
   onStopGenerating: () => void;
+  onActionClick: ChatActionClickHandler;
 }
 
 export function ChatTimeline({
@@ -52,6 +54,7 @@ export function ChatTimeline({
   onFeedback,
   onRegenerate,
   onStopGenerating,
+  onActionClick,
 }: ChatTimelineProps) {
   const filteredItems = items.filter((item) => !item.display.hide);
 
@@ -77,6 +80,7 @@ export function ChatTimeline({
               return onEdit(item, message);
             }}
             onStopGeneratingClick={onStopGenerating}
+            onActionClick={onActionClick}
           />
         ))
       )}

@@ -7,8 +7,6 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { useEuiBackgroundColor } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { PanelHeader } from './header';
@@ -60,15 +58,10 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   };
 
   return (
-    <div
-      css={css`
-        height: 100%;
-        background: ${useEuiBackgroundColor('subdued')};
-      `}
-    >
+    <>
       <PanelHeader selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} />
       <PanelContent selectedTabId={selectedTabId} />
-    </div>
+    </>
   );
 });
 
