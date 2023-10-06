@@ -917,7 +917,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
@@ -1145,7 +1145,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'category',
           splitAccessor: 'product',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
