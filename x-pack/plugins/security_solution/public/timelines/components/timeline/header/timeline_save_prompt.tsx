@@ -13,7 +13,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../store/timeline';
 import { getTimelineSaveModalByIdSelector } from './selectors';
-import { EditTimelineModal } from './edit_timeline_modal';
+import { SaveTimelineModal } from './save_timeline_modal';
 
 interface TimelineSavePromptProps {
   timelineId: string;
@@ -29,7 +29,7 @@ export const TimelineSavePrompt = React.memo<TimelineSavePromptProps>(({ timelin
   const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
   const forceShow = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
 
-  const closeEditTimeline = useCallback(() => {
+  const closeSaveTimeline = useCallback(() => {
     dispatch(
       timelineActions.toggleModalSaveTimeline({
         id: TimelineId.active,
@@ -43,8 +43,8 @@ export const TimelineSavePrompt = React.memo<TimelineSavePromptProps>(({ timelin
   } = useUserPrivileges();
 
   return forceShow && hasKibanaCrud ? (
-    <EditTimelineModal
-      closeEditTimeline={closeEditTimeline}
+    <SaveTimelineModal
+      closeSaveTimeline={closeSaveTimeline}
       initialFocus="title"
       timelineId={timelineId}
       showWarning={true}

@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { EditTimelineModal } from './edit_timeline_modal';
+import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
@@ -34,7 +34,7 @@ describe('EditTimelineModal', () => {
   describe('save timeline', () => {
     const props = {
       initialFocus: 'title' as const,
-      closeEditTimeline: jest.fn(),
+      closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
     };
 
@@ -56,14 +56,14 @@ describe('EditTimelineModal', () => {
     });
 
     test('show process bar while saving', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
 
     test('Show correct header for edit timeline modal', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -79,7 +79,7 @@ describe('EditTimelineModal', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -88,28 +88,28 @@ describe('EditTimelineModal', () => {
     });
 
     test('Show name field', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="edit-timeline-title"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="edit-timeline-description"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
     });
 
     test('Show close button', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="close-button"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
@@ -119,7 +119,7 @@ describe('EditTimelineModal', () => {
   describe('update timeline', () => {
     const props = {
       initialFocus: 'title' as const,
-      closeEditTimeline: jest.fn(),
+      closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
     };
 
@@ -141,14 +141,14 @@ describe('EditTimelineModal', () => {
     });
 
     test('show process bar while saving', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
 
     test('Show correct header for save timeline modal', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -164,7 +164,7 @@ describe('EditTimelineModal', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -173,21 +173,21 @@ describe('EditTimelineModal', () => {
     });
 
     test('Show name field', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="edit-timeline-title"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="edit-timeline-description"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
@@ -197,7 +197,7 @@ describe('EditTimelineModal', () => {
   describe('showWarning', () => {
     const props = {
       initialFocus: 'title' as const,
-      closeEditTimeline: jest.fn(),
+      closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
       showWarning: true,
     };
@@ -221,14 +221,14 @@ describe('EditTimelineModal', () => {
     });
 
     test('Show EuiCallOut', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="edit-timeline-callout"]').exists()).toEqual(true);
     });
 
     test('Show discardTimelineButton', () => {
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="close-button"]').at(2).text()).toEqual(
@@ -244,7 +244,7 @@ describe('EditTimelineModal', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = mount(<EditTimelineModal {...props} />, {
+      const component = mount(<SaveTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="close-button"]').at(2).text()).toEqual(
@@ -253,7 +253,7 @@ describe('EditTimelineModal', () => {
     });
 
     test('Show saveButton', () => {
-      const component = mount(<EditTimelineModal {...props} />);
+      const component = mount(<SaveTimelineModal {...props} />);
       expect(component.find('[data-test-subj="save-button"]').at(1).exists()).toEqual(true);
     });
   });

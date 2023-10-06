@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../store/timeline';
@@ -16,6 +17,7 @@ import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useEditTimelineModal } from './use_edit_timeline_modal';
 import * as timelineTranslations from './translations';
+import * as sharedTranslations from '../../flyout/header/translations';
 
 export interface SaveTimelineButtonProps {
   timelineId: string;
@@ -26,36 +28,62 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     timelineId,
   });
   const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
-  const { status: timelineStatus, isSaving } = useDeepEqualSelector((state) =>
-    getTimelineStatus(state, timelineId)
-  );
-  const { startTransaction } = useStartTransaction();
-  const dispatch = useDispatch();
+  const {
+    status: timelineStatus,
+    isSaving,
+    updated,
+  } = useDeepEqualSelector((state) => getTimelineStatus(state, timelineId));
 
-  const isDraft = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
+  const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
+  // const { startTransaction } = useStartTransaction();
+  // const dispatch = useDispatch();
 
-  const onSave = useCallback(() => {
-    if (isDraft) {
-      openEditTimeline();
+  // const isDraft = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
+
+  // const onOpen = useCallback(() => {
+  //   if (isDraft) {
+  //     openEditTimeline();
+  //   } else {
+  //     startTransaction({ name: TIMELINE_ACTIONS.SAVE });
+  //     dispatch(timelineActions.saveTimeline({ id: timelineId }));
+  //   }
+  // }, [startTransaction, timelineId, dispatch, isDraft, openEditTimeline]);
+
+  let tooltipContent: React.ReactNode = null;
+  if (canEditTimeline) {
+    if (isUnsaved) {
+      tooltipContent = sharedTranslations.UNSAVED;
     } else {
-      startTransaction({ name: TIMELINE_ACTIONS.SAVE });
-      dispatch(timelineActions.saveTimeline({ id: timelineId }));
+      tooltipContent = (
+        <>
+          {sharedTranslations.SAVED}{' '}
+          <FormattedRelative
+            data-test-subj="timeline-status"
+            key="timeline-status-autosaved"
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            value={new Date(updated!)}
+          />
+        </>
+      );
     }
-  }, [startTransaction, timelineId, dispatch, isDraft, openEditTimeline]);
-
-  const tooltip = canEditTimeline ? '' : timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
+  } else {
+    tooltipContent = timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
+  }
 
   return (
-    <EuiToolTip content={tooltip} data-test-subj="save-timeline-btn-tooltip">
+    <EuiToolTip content={tooltipContent} data-test-subj="save-timeline-btn-tooltip">
       <>
-        <EuiButtonIcon
-          aria-label={timelineTranslations.SAVE_TIMELINE}
-          display="empty"
-          onClick={onSave}
+        <EuiButton
+          fill
+          color="primary"
+          onClick={openEditTimeline}
           iconType="save"
           isLoading={isSaving}
           disabled={!canEditTimeline}
-        />
+          data-test-subj="save-timeline-btn"
+        >
+          {timelineTranslations.SAVE}
+        </EuiButton>
         {EditModal}
       </>
     </EuiToolTip>

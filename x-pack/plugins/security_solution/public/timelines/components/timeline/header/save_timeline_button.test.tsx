@@ -17,8 +17,8 @@ import { TimelineStatus } from '../../../../../common/api/timeline';
 import * as timelineTranslations from './translations';
 
 const TEST_ID = {
-  EDIT_TIMELINE_MODAL: 'edit-timeline-modal',
-  EDIT_TIMELINE_TOOLTIP: 'save-timeline-btn-tooltip',
+  SAVE_TIMELINE_MODAL: 'save-timeline-modal',
+  SAVE_TIMELINE_TOOLTIP: 'save-timeline-btn-tooltip',
 };
 
 jest.mock('react-redux', () => {
@@ -85,37 +85,37 @@ describe('SaveTimelineButton', () => {
   });
 
   describe('with draft timeline', () => {
-    it('should not show the edit modal if user does not have write access', async () => {
+    it('should not show the save modal if user does not have write access', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: false },
       });
       render(<TestSaveTimelineButton {...props} />);
 
-      expect(screen.queryByTestId(TEST_ID.EDIT_TIMELINE_MODAL)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
 
       const saveTimelineIcon = screen.getByLabelText(timelineTranslations.SAVE_TIMELINE);
 
       fireEvent.click(saveTimelineIcon);
 
       await waitFor(() => {
-        expect(screen.queryAllByTestId(TEST_ID.EDIT_TIMELINE_MODAL)).toHaveLength(0);
+        expect(screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toHaveLength(0);
       });
     });
 
-    it('should show the edit when user has crud privileges', async () => {
+    it('should show the save modal when user has crud privileges', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: true },
       });
       render(<TestSaveTimelineButton {...props} />);
-      expect(screen.queryByTestId(TEST_ID.EDIT_TIMELINE_MODAL)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
 
       const saveTimelineIcon = screen.getByLabelText(timelineTranslations.SAVE_TIMELINE);
 
       fireEvent.click(saveTimelineIcon);
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_ID.EDIT_TIMELINE_TOOLTIP)).not.toBeInTheDocument();
-        expect(screen.getByTestId(TEST_ID.EDIT_TIMELINE_MODAL)).toBeVisible();
+        expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_TOOLTIP)).not.toBeInTheDocument();
+        expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toBeVisible();
       });
     });
   });
@@ -139,7 +139,7 @@ describe('SaveTimelineButton', () => {
       fireEvent.click(saveTimelineIcon);
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_ID.EDIT_TIMELINE_MODAL)).not.toBeInTheDocument();
+        expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
         expect(timelineActions.saveTimeline as unknown as jest.Mock).toHaveBeenCalled();
       });
     });

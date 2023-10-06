@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-import { EditTimelineModal } from './edit_timeline_modal';
+import { SaveTimelineModal } from './save_timeline_modal';
 
 interface UseEditTimelineModalArguments {
   timelineId: string;
@@ -21,7 +21,7 @@ export function useEditTimelineModal({
 }: UseEditTimelineModalArguments) {
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
 
-  const closeEditTimeline = useCallback(() => {
+  const closeSaveTimeline = useCallback(() => {
     setShowEditTimelineOverlay(false);
   }, []);
 
@@ -41,8 +41,8 @@ export function useEditTimelineModal({
   return {
     EditModal:
       showEditTimelineOverlay && hasKibanaCrud ? (
-        <EditTimelineModal
-          closeEditTimeline={closeEditTimeline}
+        <SaveTimelineModal
+          closeSaveTimeline={closeSaveTimeline}
           initialFocus={initialFocus}
           timelineId={timelineId}
           showWarning={false}
@@ -50,6 +50,6 @@ export function useEditTimelineModal({
       ) : null,
     canEditTimeline: hasKibanaCrud,
     openEditTimeline,
-    closeEditTimeline,
+    closeSaveTimeline,
   };
 }

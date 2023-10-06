@@ -18,8 +18,8 @@ import {
   TIMELINE_QUERY,
   TIMELINE_PANEL,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
-  EDIT_TIMELINE_BTN,
-  EDIT_TIMELINE_TOOLTIP,
+  SAVE_TIMELINE_BTN,
+  SAVE_TIMELINE_BTN_TOOLTIP,
 } from '../../../screens/timeline';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
@@ -99,10 +99,10 @@ describe('Timelines', (): void => {
       it('should not be able to create/update timeline ', () => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
-        cy.get(EDIT_TIMELINE_BTN).should('be.disabled');
-        cy.get(EDIT_TIMELINE_BTN).first().realHover();
-        cy.get(EDIT_TIMELINE_TOOLTIP).should('be.visible');
-        cy.get(EDIT_TIMELINE_TOOLTIP).should(
+        cy.get(SAVE_TIMELINE_BTN).should('be.disabled');
+        cy.get(SAVE_TIMELINE_BTN).first().realHover();
+        cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
+        cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should(
           'have.text',
           'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
         );
