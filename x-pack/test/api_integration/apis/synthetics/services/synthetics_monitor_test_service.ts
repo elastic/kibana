@@ -19,7 +19,7 @@ export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private getService: FtrProviderContext['getService'];
   private supertestWithoutAuth: ReturnType<typeof KibanaSupertestProvider>;
-  public apiKey: string = '';
+  public apiKey: string | undefined = '';
 
   constructor(getService: FtrProviderContext['getService']) {
     this.supertest = getService('supertest');
@@ -30,7 +30,7 @@ export class SyntheticsMonitorTestService {
 
   generateProjectAPIKey = async (accessToPublicLocations = true) => {
     const res = await this.supertest
-      .get<ProjectAPIKeyResponse>(
+      .get(
         SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY +
           '?accessToElasticManagedLocations=' +
           accessToPublicLocations
