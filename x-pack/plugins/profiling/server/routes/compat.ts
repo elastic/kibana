@@ -18,3 +18,9 @@ export async function getClient(
 ): Promise<ElasticsearchClient> {
   return (await context.core).elasticsearch.client.asCurrentUser;
 }
+
+export async function getInternalClient(
+  context: ProfilingRequestHandlerContext
+): Promise<ElasticsearchClient> {
+  return (await context.core).elasticsearch.client.asInternalUser;
+}

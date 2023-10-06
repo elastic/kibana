@@ -15,9 +15,9 @@ import {
   removeProfilingFromApmPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
-import { setSecurityRole } from '../lib/setup/security_role';
+import { isSuperuser } from '../lib/setup/is_super_user';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { getClient } from './compat';
+import { getInternalClient, getClient } from './compat';
 
 export function registerSetupRoute({
   router,
@@ -35,7 +35,15 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const esClient = await getClient(context);
+        const hasRequiredRole = dependencies.start.security
+          ? isSuperuser({
+              securityPluginStart: dependencies.start.security,
+              request,
+            })
+          : true;
+
+        // Use internal user to check UP status as viewer users won't be able to do so
+        const esClient = await getInternalClient(context);
         const core = await context.core;
 
         const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
@@ -44,7 +52,7 @@ export function registerSetupRoute({
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
         });
 
-        return response.ok({ body: profilingStatus });
+        return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
       } catch (error) {
         return handleRouteHandlerError({
           error,
@@ -71,6 +79,24 @@ export function registerSetupRoute({
           logger.error(msg);
           return response.custom({
             statusCode: 500,
+            body: {
+              message: msg,
+            },
+          });
+        }
+
+        const hasRequiredRole = dependencies.start.security
+          ? isSuperuser({
+              securityPluginStart: dependencies.start.security,
+              request,
+            })
+          : true;
+
+        if (hasRequiredRole === false) {
+          const msg = `Operation only permitted by users with the superuser role`;
+          logger.error(msg);
+          return response.custom({
+            statusCode: 403,
             body: {
               message: msg,
             },
@@ -107,7 +133,6 @@ export function registerSetupRoute({
 
         const executeAdminFunctions = [
           ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-          ...(setupState.permissions.configured ? [] : [setSecurityRole]),
           ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
         ];
 

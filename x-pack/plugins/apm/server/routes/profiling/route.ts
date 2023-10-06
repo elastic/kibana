@@ -157,7 +157,8 @@ const profilingStatusRoute = createApmServerRoute({
     if (profilingDataAccessStart) {
       try {
         const response = await profilingDataAccessStart?.services.getStatus({
-          esClient: esClient.asCurrentUser,
+          // Use internal user to check UP status as viewer users won't be able to do so
+          esClient: esClient.asInternalUser,
           soClient: (await context.core).savedObjects.client,
           spaceId: (
             await plugins.spaces?.start()

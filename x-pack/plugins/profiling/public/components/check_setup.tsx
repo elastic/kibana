@@ -24,9 +24,9 @@ import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
+import { useProfilingSetupStatus } from './contexts/profiling_setup_status/use_profiling_setup_status';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
-import { useProfilingSetupStatus } from './contexts/profiling_setup_status/use_profiling_setup_status';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
@@ -154,7 +154,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
               button: (
                 <EuiButton
                   data-test-subj="profilingCheckSetupButton"
-                  disabled={postSetupLoading}
+                  disabled={postSetupLoading || data?.has_required_role === false}
                   onClick={(event) => {
                     event.preventDefault();
 
