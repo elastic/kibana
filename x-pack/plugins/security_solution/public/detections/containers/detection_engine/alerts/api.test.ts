@@ -280,7 +280,7 @@ describe('Detections Alerts API', () => {
         expect.objectContaining({
           method: 'GET',
           version: '2023-10-31',
-          body: '{"searchTerm":"name1"}',
+          query: { searchTerm: 'name1' },
         })
       );
     });

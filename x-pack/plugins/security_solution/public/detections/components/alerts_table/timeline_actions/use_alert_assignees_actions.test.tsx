@@ -21,7 +21,7 @@ import { useSuggestUsers } from '../../../containers/detection_engine/alerts/use
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
-jest.mock('../../../containers/detection_engine/alerts/use_user_profiles');
+jest.mock('../../../containers/detection_engine/alerts/use_suggest_users');
 
 const mockUserProfiles: UserProfileWithAvatar[] = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
