@@ -9,6 +9,7 @@ import { loadPage } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
   addAlertToCase,
+  openAlertDetailsView,
   openResponderFromEndpointAlertDetails,
 } from '../../tasks/alert_details_actions';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
@@ -27,7 +28,6 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
-  openAlertDetails,
   openCaseAlertDetails,
   toggleRuleOffAndOn,
   visitRuleAlerts,
@@ -322,12 +322,12 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         }
       });
 
-      it('"should open responder', () => {
+      it('"should open responder from alert details flyout', () => {
         waitForEndpointListPageToBeLoaded(createdHost.hostname);
         toggleRuleOffAndOn(ruleName);
         visitRuleAlerts(ruleName);
         closeAllToasts();
-        openAlertDetails();
+        openAlertDetailsView();
 
         openResponderFromEndpointAlertDetails();
         cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
@@ -368,7 +368,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         toggleRuleOffAndOn(ruleName);
         visitRuleAlerts(ruleName);
         closeAllToasts();
-        openAlertDetails();
+        openAlertDetailsView();
         addAlertToCase(caseId, caseOwner);
 
         // visit case details page

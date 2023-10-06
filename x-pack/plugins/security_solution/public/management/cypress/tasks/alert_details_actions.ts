@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export const openAlertDetailsView = (): void => {
+  cy.getByTestSubj('expand-event').first().click();
+  cy.getByTestSubj('take-action-dropdown-btn').click();
+};
+
 export const openResponderFromEndpointAlertDetails = (): void => {
   cy.getByTestSubj('endpointResponseActions-action-item').click();
 };
