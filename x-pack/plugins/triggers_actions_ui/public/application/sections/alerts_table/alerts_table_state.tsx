@@ -12,7 +12,6 @@ import {
   EuiProgress,
   EuiDataGridSorting,
   EuiEmptyPrompt,
-  EuiFlyoutSize,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
@@ -64,7 +63,6 @@ export type AlertsTableStateProps = {
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
-  flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
@@ -148,7 +146,6 @@ const AlertsTableStateWithQueryProvider = ({
   configurationId,
   id,
   featureIds,
-  flyoutSize,
   query,
   pageSize,
   showExpandToDetails,
@@ -378,7 +375,6 @@ const AlertsTableStateWithQueryProvider = ({
       bulkActions: [],
       deletedEventIds: [],
       disabledCellActions: [],
-      flyoutSize,
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       id,
@@ -409,7 +405,6 @@ const AlertsTableStateWithQueryProvider = ({
       memoizedCases,
       memoizedMaintenanceWindows,
       columns,
-      flyoutSize,
       pagination.pageSize,
       id,
       leadingControlColumns,
