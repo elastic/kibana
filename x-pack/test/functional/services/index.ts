@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ReportingAPIProvider } from '../../reporting_api_integration/services';
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
@@ -69,7 +70,6 @@ import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 import { SampleDataServiceProvider } from './sample_data';
 import { DataStreamProvider } from './data_stream';
-import { ReportingAPIProvider } from 'x-pack/test/reporting_api_integration/services'
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
