@@ -10,7 +10,9 @@ import { closeAllToasts } from '../../tasks/toasts';
 import {
   addAlertToCase,
   openAlertDetailsView,
+  openInvestigateInTimelineView,
   openResponderFromEndpointAlertDetails,
+  verifyResponderIsOpen,
 } from '../../tasks/alert_details_actions';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import type { PolicyData } from '../../../../../common/endpoint/types';
@@ -322,7 +324,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         }
       });
 
-      it('"should open responder from alert details flyout', () => {
+      it('should open responder from alert details flyout', () => {
         waitForEndpointListPageToBeLoaded(createdHost.hostname);
         toggleRuleOffAndOn(ruleName);
         visitRuleAlerts(ruleName);
@@ -331,6 +333,18 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
         openResponderFromEndpointAlertDetails();
         cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
+      });
+
+      it('should open responder from timeline view alert details flyout', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        toggleRuleOffAndOn(ruleName);
+        visitRuleAlerts(ruleName);
+        closeAllToasts();
+
+        openInvestigateInTimelineView();
+        openAlertDetailsView();
+        openResponderFromEndpointAlertDetails();
+        verifyResponderIsOpen();
       });
     });
 
@@ -382,7 +396,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
           closeAllToasts();
           openCaseAlertDetails(caseAlertId);
           openResponderFromEndpointAlertDetails();
-          cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
+          verifyResponderIsOpen();
         });
       });
     });

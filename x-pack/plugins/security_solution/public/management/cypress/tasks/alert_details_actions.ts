@@ -10,6 +10,10 @@ export const openAlertDetailsView = (): void => {
   cy.getByTestSubj('take-action-dropdown-btn').click();
 };
 
+export const openInvestigateInTimelineView = (): void => {
+  cy.getByTestSubj('send-alert-to-timeline-button').first().click();
+};
+
 export const openResponderFromEndpointAlertDetails = (): void => {
   cy.getByTestSubj('endpointResponseActions-action-item').click();
 };
@@ -18,4 +22,8 @@ export const addAlertToCase = (caseId: string, caseOwner: string): void => {
   cy.getByTestSubj('add-to-existing-case-action').click();
   cy.getByTestSubj(`cases-table-row-select-${caseId}`).click();
   cy.contains(`An alert was added to \"Test ${caseOwner} case`);
+};
+
+export const verifyResponderIsOpen = (): void => {
+  cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
 };
