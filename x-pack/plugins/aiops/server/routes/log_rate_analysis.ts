@@ -520,7 +520,7 @@ export const defineLogRateAnalysisRoute = (
                     abortSignal
                   );
 
-                  if (significantCategories.length > 0) {
+                  if (significantCategories.length > 0 && significantTerms.length > 0) {
                     const {
                       fields: significantCategoriesFields,
                       itemSets: significantCategoriesItemSets,
