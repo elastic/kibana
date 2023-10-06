@@ -463,7 +463,7 @@ packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 src/plugins/kibana_overview @elastic/appex-sharedux
 src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
-src/plugins/kibana_utils @elastic/kibana-app-services
+src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 packages/kbn-language-documentation-popover @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/infra-monitoring-ui
