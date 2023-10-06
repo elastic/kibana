@@ -5,10 +5,14 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import type { ProjectAPIKey } from '../../../public/apps/synthetics/state/monitor_management/api';
+import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { generateAPIKey } from '../../synthetics_service/get_api_key';
+import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+
+export interface ProjectAPIKeyResponse {
+  apiKey: SecurityCreateApiKeyResponse | null;
+}
 
 export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -18,14 +22,13 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       accessToElasticManagedLocations: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ request, server }): Promise<ProjectAPIKey> => {
+  handler: async ({ request, server }): Promise<ProjectAPIKeyResponse> => {
     const { accessToElasticManagedLocations } = request.query;
 
-    const apiKey = await generateAPIKey({
+    const apiKey = await generateProjectAPIKey({
       request,
       server,
       accessToElasticManagedLocations,
-      projectAPIKey: true,
     });
 
     return { apiKey };

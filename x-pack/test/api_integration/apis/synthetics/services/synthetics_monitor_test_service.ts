@@ -8,12 +8,10 @@
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  MonitorInspectResponse,
-  ProjectAPIKey,
-} from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
+import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
@@ -39,7 +37,7 @@ export class SyntheticsMonitorTestService {
       )
       .set('kbn-xsrf', 'true')
       .expect(200);
-    const result = res.body as ProjectAPIKey;
+    const result = res.body as ProjectAPIKeyResponse;
     expect(result).to.have.property('apiKey');
     const apiKey = result.apiKey.encoded;
     expect(apiKey).to.not.be.empty();
