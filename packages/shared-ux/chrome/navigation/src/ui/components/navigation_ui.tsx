@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavBeta } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import React, { FC } from 'react';
 
 import { NavigationPanel } from './panel';

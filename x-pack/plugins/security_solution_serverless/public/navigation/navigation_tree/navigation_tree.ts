@@ -46,7 +46,7 @@ export const formatNavigationTree = (
       icon: 'logoSecurity',
       breadcrumbStatus: 'hidden',
       defaultIsCollapsed: false,
-      children: formatNodesFromLinks(projectNavLinks, categories),
+      children: addFirstLevelProps(formatNodesFromLinks(projectNavLinks, categories)),
     },
   ],
   footer: [
@@ -179,4 +179,23 @@ const createNodeFromProjectNavLink = (projectNavLink: ProjectNavigationLink): No
     node.children = formatNodesFromLinks(links, categories);
   }
   return node;
+};
+
+const addFirstLevelProps = (
+  nodes: NonEmptyArray<NodeDefinition> | undefined
+): NonEmptyArray<NodeDefinition> | undefined => {
+  if (!nodes) {
+    return undefined;
+  }
+  return nodes.map((node) => {
+    if (node.children) {
+      return {
+        ...node,
+        id: node.link,
+        link: undefined,
+        openPanel: true,
+      };
+    }
+    return node;
+  }) as NonEmptyArray<NodeDefinition>;
 };

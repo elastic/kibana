@@ -8,12 +8,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 
-import {
-  EuiCollapsibleNavItem,
-  EuiCollapsibleNavItemProps,
-  EuiCollapsibleNavSubItemProps,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCollapsibleNavItem, EuiCollapsibleNavItemProps } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { NavigateToUrlFn } from '../../../types/internal';
@@ -34,7 +29,7 @@ const navigationNodeToEuiItem = (
     closePanel: PanelContext['close'];
     isSideNavCollapsed: boolean;
   }
-): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
+): EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const { openPanel: itemOpenPanel = false } = item;
@@ -58,7 +53,7 @@ const navigationNodeToEuiItem = (
         if (isSideNavCollapsed) {
           // TEMP logic until we have the EUI 88.5.3 in Kibana
           // https://github.com/elastic/kibana/pull/167555
-          // eslint-disable-next-line no-console
+
           console.log('Side nav is collapsed, not opening panel....');
           return;
         }
