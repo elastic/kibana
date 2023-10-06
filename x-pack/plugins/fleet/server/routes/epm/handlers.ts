@@ -662,18 +662,13 @@ export const getInputsHandler: FleetRequestHandler<
   try {
     const { pkgName, pkgVersion } = request.params;
     const { format } = request.query;
+    let body;
     if (format === 'json') {
-      const res = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json');
-      return response.ok({ body: res });
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json');
     } else if (format === 'yml' || format === 'yaml') {
-      const res = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml');
-      return response.ok({ body: res });
-    } else {
-      return response.customError({
-        statusCode: 400,
-        body: { message: 'Invalid format' },
-      });
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml');
     }
+    return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

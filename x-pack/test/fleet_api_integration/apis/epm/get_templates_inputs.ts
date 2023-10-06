@@ -46,6 +46,112 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+    const expectedYml = `inputs:
+  - id: logfile-apache.access
+    type: logfile
+    data_stream:
+      dataset: apache.access
+      type: logs
+    paths:
+      - /var/log/apache2/access.log*
+      - /var/log/apache2/other_vhosts_access.log*
+      - /var/log/httpd/access_log*
+    exclude_files:
+      - .gz$
+    processors:
+      - add_fields:
+          target: ''
+          fields:
+            ecs.version: 1.5.0
+  - id: logfile-apache.error
+    type: logfile
+    data_stream:
+      dataset: apache.error
+      type: logs
+    paths:
+      - /var/log/apache2/error.log*
+      - /var/log/httpd/error_log*
+    exclude_files:
+      - .gz$
+    processors:
+      - add_locale: null
+      - add_fields:
+          target: ''
+          fields:
+            ecs.version: 1.5.0
+  - id: apache/metrics-apache.status
+    type: apache/metrics
+    data_stream:
+      dataset: apache.status
+      type: metrics
+    metricsets:
+      - status
+    hosts:
+      - 'http://127.0.0.1'
+    period: 10s
+    server_status_path: /server-status
+`;
+    const expectedJson = [
+      {
+        id: 'logfile-apache.access',
+        type: 'logfile',
+        data_stream: {
+          type: 'logs',
+          dataset: 'apache.access',
+        },
+        paths: [
+          '/var/log/apache2/access.log*',
+          '/var/log/apache2/other_vhosts_access.log*',
+          '/var/log/httpd/access_log*',
+        ],
+        exclude_files: ['.gz$'],
+        processors: [
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                'ecs.version': '1.5.0',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'logfile-apache.error',
+        type: 'logfile',
+        data_stream: {
+          type: 'logs',
+          dataset: 'apache.error',
+        },
+        paths: ['/var/log/apache2/error.log*', '/var/log/httpd/error_log*'],
+        exclude_files: ['.gz$'],
+        processors: [
+          {
+            add_locale: null,
+          },
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                'ecs.version': '1.5.0',
+              },
+            },
+          },
+        ],
+      },
+      {
+        id: 'apache/metrics-apache.status',
+        type: 'apache/metrics',
+        data_stream: {
+          type: 'metrics',
+          dataset: 'apache.status',
+        },
+        metricsets: ['status'],
+        hosts: ['http://127.0.0.1'],
+        period: '10s',
+        server_status_path: '/server-status',
+      },
+    ];
 
     it('returns inputs template in json format', async function () {
       const res = await supertest
@@ -53,85 +159,22 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       const inputs = res.body.inputs;
 
-      expect(inputs).to.eql([
-        {
-          id: 'logfile-apache.access',
-          type: 'logfile',
-          data_stream: {
-            type: 'logs',
-            dataset: 'apache.access',
-          },
-          paths: [
-            '/var/log/apache2/access.log*',
-            '/var/log/apache2/other_vhosts_access.log*',
-            '/var/log/httpd/access_log*',
-          ],
-          exclude_files: ['.gz$'],
-          processors: [
-            {
-              add_fields: {
-                target: '',
-                fields: {
-                  'ecs.version': '1.5.0',
-                },
-              },
-            },
-          ],
-        },
-        {
-          id: 'logfile-apache.error',
-          type: 'logfile',
-          data_stream: {
-            type: 'logs',
-            dataset: 'apache.error',
-          },
-          paths: ['/var/log/apache2/error.log*', '/var/log/httpd/error_log*'],
-          exclude_files: ['.gz$'],
-          processors: [
-            {
-              add_locale: null,
-            },
-            {
-              add_fields: {
-                target: '',
-                fields: {
-                  'ecs.version': '1.5.0',
-                },
-              },
-            },
-          ],
-        },
-        {
-          id: 'apache/metrics-apache.status',
-          type: 'apache/metrics',
-          data_stream: {
-            type: 'metrics',
-            dataset: 'apache.status',
-          },
-          metricsets: ['status'],
-          hosts: ['http://127.0.0.1'],
-          period: '10s',
-          server_status_path: '/server-status',
-        },
-      ]);
+      expect(inputs).to.eql(expectedJson);
     });
 
     it('returns inputs template in yaml format if format=yaml', async function () {
       const res = await supertest
         .get(`/api/fleet/epm/templates/${testPkgName}/${testPkgVersion}/inputs?format=yaml`)
         .expect(200);
-      expect(res.text).to.eql(
-        "inputs:\n  - id: logfile-apache.access\n    type: logfile\n    data_stream:\n      dataset: apache.access\n      type: logs\n    paths:\n      - /var/log/apache2/access.log*\n      - /var/log/apache2/other_vhosts_access.log*\n      - /var/log/httpd/access_log*\n    exclude_files:\n      - .gz$\n    processors:\n      - add_fields:\n          target: ''\n          fields:\n            ecs.version: 1.5.0\n  - id: logfile-apache.error\n    type: logfile\n    data_stream:\n      dataset: apache.error\n      type: logs\n    paths:\n      - /var/log/apache2/error.log*\n      - /var/log/httpd/error_log*\n    exclude_files:\n      - .gz$\n    processors:\n      - add_locale: null\n      - add_fields:\n          target: ''\n          fields:\n            ecs.version: 1.5.0\n  - id: apache/metrics-apache.status\n    type: apache/metrics\n    data_stream:\n      dataset: apache.status\n      type: metrics\n    metricsets:\n      - status\n    hosts:\n      - 'http://127.0.0.1'\n    period: 10s\n    server_status_path: /server-status\n"
-      );
+
+      expect(res.text).to.eql(expectedYml);
     });
 
     it('returns inputs template in yaml format if format=yml', async function () {
       const res = await supertest
         .get(`/api/fleet/epm/templates/${testPkgName}/${testPkgVersion}/inputs?format=yml`)
         .expect(200);
-      expect(res.text).to.eql(
-        "inputs:\n  - id: logfile-apache.access\n    type: logfile\n    data_stream:\n      dataset: apache.access\n      type: logs\n    paths:\n      - /var/log/apache2/access.log*\n      - /var/log/apache2/other_vhosts_access.log*\n      - /var/log/httpd/access_log*\n    exclude_files:\n      - .gz$\n    processors:\n      - add_fields:\n          target: ''\n          fields:\n            ecs.version: 1.5.0\n  - id: logfile-apache.error\n    type: logfile\n    data_stream:\n      dataset: apache.error\n      type: logs\n    paths:\n      - /var/log/apache2/error.log*\n      - /var/log/httpd/error_log*\n    exclude_files:\n      - .gz$\n    processors:\n      - add_locale: null\n      - add_fields:\n          target: ''\n          fields:\n            ecs.version: 1.5.0\n  - id: apache/metrics-apache.status\n    type: apache/metrics\n    data_stream:\n      dataset: apache.status\n      type: metrics\n    metricsets:\n      - status\n    hosts:\n      - 'http://127.0.0.1'\n    period: 10s\n    server_status_path: /server-status\n"
-      );
+      expect(res.text).to.eql(expectedYml);
     });
 
     it('returns a 404 for a version that does not exists', async function () {
