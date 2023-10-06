@@ -60,7 +60,7 @@ export const request = async <T = unknown>({
     httpsAgent,
     proxy: false,
     maxContentLength,
-    timeout: timeout != null ? timeout : settingsTimeout,
+    timeout: Math.max(settingsTimeout, timeout ?? 0),
   });
 };
 
