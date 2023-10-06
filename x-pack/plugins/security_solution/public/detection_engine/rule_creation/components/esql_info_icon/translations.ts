@@ -19,8 +19,11 @@ export const getTooltipContent = (statsByLink: string, startUsingEsqlLink: strin
     'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent',
     {
       defaultMessage: `
-### Aggregating rule
-Is a rule that uses {statsByLink} grouping commands. So, its result can not be matched with a particular document in ES.
+
+The Elasticsearch Query Language (ES|QL) is a query language that enables the iterative exploration of data. Check out our {startUsingEsqlLink} to get started using ES|QL rules in Security. Or, continue reading below to learn more about common ES|QL Security queries.
+
+### Aggregating query
+Is a query that uses {statsByLink} grouping commands. So, its result can not be matched with a particular document in ES.
 \`\`\`
 FROM logs*
 | STATS count = COUNT(host.name) BY host.name
@@ -28,7 +31,7 @@ FROM logs*
 \`\`\`
 
 
-### Non-aggregating rule
+### Search for events (non-aggregating query)
 Is a rule that does not use {statsByLink} grouping commands. Hence, each row in result can be tracked to a source document in ES. For this type of rule,
 please use operator \`[metadata _id, _index, _version]\` after defining index source. This would allow deduplicate alerts and link them with the source document.
 
@@ -45,7 +48,7 @@ Please, ensure, metadata properties \`id\`, \`_index\`, \`_version\` are carried
       values: {
         statsByLink: `[STATS..BY](${statsByLink})`,
         // Docs team will provide actual link to a new page before release
-        //  startUsingEsqlLink: `[WIP: Get started using ES|QL rules](${startUsingEsqlLink})`,
+        startUsingEsqlLink: `[documentation](${startUsingEsqlLink})`,
       },
     }
   );
