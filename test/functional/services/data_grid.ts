@@ -7,6 +7,7 @@
  */
 
 import { chunk } from 'lodash';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -364,6 +365,21 @@ export class DataGridService extends FtrService {
 
   public async resetRowHeightValue() {
     await this.testSubjects.click('resetDisplaySelector');
+  }
+
+  public async getCurrentSampleSizeValue() {
+    const sampleSizeInput = await this.testSubjects.find('unifiedDataTableSampleSizeInput');
+    return Number(await sampleSizeInput.getAttribute('value'));
+  }
+
+  public async changeSampleSizeValue(newValue: number) {
+    const sampleSizeInput = await this.testSubjects.find('unifiedDataTableSampleSizeInput');
+    await sampleSizeInput.focus();
+    await sampleSizeInput.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      'a',
+    ]);
+    await sampleSizeInput.type(String(newValue));
   }
 
   public async getDetailsRow(): Promise<WebElementWrapper> {

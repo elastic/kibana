@@ -86,8 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
 
-    // TODO: add a test for sampleSize setting
-
     it('should control columns correctly', async () => {
       await addSearchEmbeddableToDashboard();
       await PageObjects.dashboard.switchToEditMode();
