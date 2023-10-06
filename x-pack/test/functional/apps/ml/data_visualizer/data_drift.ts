@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it(`${testData.suiteTitle} hides analyze data drift without saving option if patterns are same`, async () => {
         await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} loads navigates back to data view creation page`
+          `${testData.suiteTitle} navigates back to data view creation page`
         );
         await ml.navigation.navigateToDataDrift();
         await ml.dataDrift.navigateToCreateNewDataViewPage();
@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it(`${nonTimeSeriesTestData.suiteTitle} loads non-time series data`, async () => {
         await ml.testExecution.logTestStep(
-          `${nonTimeSeriesTestData.suiteTitle} loads navigates back to data view creation page`
+          `${nonTimeSeriesTestData.suiteTitle} navigates back to data view creation page`
         );
         await ml.navigation.navigateToDataDrift();
         await ml.jobSourceSelection.selectSourceForDataDrift(

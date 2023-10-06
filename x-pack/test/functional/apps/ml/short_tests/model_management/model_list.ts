@@ -67,6 +67,25 @@ export default function ({ getService }: FtrProviderContext) {
       },
     };
 
+    const modelWithPipelineAndDestIndex = {
+      modelId: 'dfa_regression_model_n_1',
+      description: '',
+      modelTypes: ['regression', 'tree_ensemble'],
+    };
+    const modelWithPipelineAndDestIndexExpectedValues = {
+      dataViewTitle: `user-index_${modelWithPipelineAndDestIndex.modelId}`,
+      index: `user-index_${modelWithPipelineAndDestIndex.modelId}`,
+      name: `ml-inference-${modelWithPipelineAndDestIndex.modelId}`,
+      description: '',
+      inferenceConfig: {
+        regression: {
+          results_field: 'predicted_value',
+          num_top_feature_importance_values: 0,
+        },
+      },
+      fieldMap: {},
+    };
+
     before(async () => {
       for (const model of trainedModels) {
         await ml.api.importTrainedModel(model.id, model.name);
@@ -77,6 +96,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
       await ml.api.assureMlStatsIndexExists();
+
+      // Create ingest pipeline and destination index that's tied to model
+      await ml.api.createIngestPipeline(modelWithPipelineAndDestIndex.modelId);
+      await ml.api.createIndex(modelWithPipelineAndDestIndexExpectedValues.index, undefined, {
+        index: { default_pipeline: `pipeline_${modelWithPipelineAndDestIndex.modelId}` },
+      });
     });
 
     after(async () => {
@@ -87,7 +112,13 @@ export default function ({ getService }: FtrProviderContext) {
         modelWithoutPipelineDataExpectedValues.duplicateName,
         false
       );
+      await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndexExpectedValues.name);
+      await ml.testResources.deleteIndexPatternByTitle(
+        modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
+      );
+
       await ml.api.cleanMlIndices();
+      await ml.api.deleteIndices(`user-index_${modelWithPipelineAndDestIndex.modelId}`);
     });
 
     describe('for ML user with read-only access', () => {
@@ -387,7 +418,41 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
+      it('navigates to data drift', async () => {
+        await ml.testExecution.logTestStep('should display the trained model in the table');
+        await ml.trainedModelsTable.filterWithSearchString(
+          modelWithPipelineAndDestIndex.modelId,
+          1
+        );
+        await ml.testExecution.logTestStep('should show the model map in the expanded row');
+        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineAndDestIndex.modelId);
+        await ml.trainedModelsTable.assertModelsMapTabContent();
+
+        await ml.testExecution.logTestStep(
+          'should navigate to data drift index pattern creation page'
+        );
+
+        await ml.trainedModelsTable.assertAnalyzeDataDriftActionButtonEnabled(
+          modelWithPipelineAndDestIndex.modelId,
+          true
+        );
+        await ml.trainedModelsTable.clickAnalyzeDataDriftActionButton(
+          modelWithPipelineAndDestIndex.modelId
+        );
+
+        await ml.testExecution.logTestStep(`sets index pattern for reference data set`);
+        await ml.dataDrift.setIndexPatternInput('reference', 'user-index_dfa_regression_model_n_1');
+
+        await ml.testExecution.logTestStep(`redirects to data drift page`);
+        await ml.trainedModelsTable.clickAnalyzeDataDriftWithoutSaving();
+        await ml.navigation.navigateToTrainedModels();
+      });
+
       describe('with imported models', function () {
+        before(async () => {
+          await ml.navigation.navigateToTrainedModels();
+        });
+
         for (const model of trainedModels) {
           it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
             await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
