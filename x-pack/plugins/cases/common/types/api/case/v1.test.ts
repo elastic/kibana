@@ -320,6 +320,40 @@ describe('CasePostRequestRt', () => {
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
   });
+
+  it('throws an error when a text customFields is an empty array', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: 'text',
+              value: [],
+            },
+          ],
+        })
+      )
+    ).toContain('The length of the field value is too short. Array must be of length >= 1.');
+  });
+
+  it('throws an error when a text customField is an array with an empty string', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: 'text',
+              value: [''],
+            },
+          ],
+        })
+      )
+    ).toContain('The value field cannot be an empty string.');
+  });
 });
 
 describe('CasesFindRequestRt', () => {

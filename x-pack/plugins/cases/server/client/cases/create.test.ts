@@ -570,6 +570,52 @@ describe('create', () => {
       );
     });
 
+    it('should throw an error when required customFields are null', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: true,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: [
+              {
+                key: 'first_key',
+                type: CustomFieldTypes.TEXT,
+                value: null,
+              },
+              {
+                key: 'second_key',
+                type: CustomFieldTypes.TOGGLE,
+                value: null,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Missing required custom fields: first_key,second_key"`
+      );
+    });
+
     it('throws error when the customFields array is too long', async () => {
       await expect(
         create(

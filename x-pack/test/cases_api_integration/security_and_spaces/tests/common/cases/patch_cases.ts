@@ -1085,6 +1085,54 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
+        it('400s when trying to patch a case with a required custom field with null value', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: [
+              {
+                key: 'test_custom_field',
+                type: CustomFieldTypes.TEXT,
+                value: ['hello'],
+              },
+            ],
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'test_custom_field',
+                      type: CustomFieldTypes.TEXT,
+                      value: null,
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
         it('400s when trying to patch a case with a custom field with the wrong type', async () => {
           await createConfiguration(
             supertest,

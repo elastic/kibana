@@ -44,21 +44,21 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
-const CaseCustomFieldWithValidationValueRt = limitedArraySchema({
+const CaseCustomFieldTextWithValidationValueRt = limitedArraySchema({
   codec: limitedStringSchema({
     fieldName: 'value',
-    min: 0,
+    min: 1,
     max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
   }),
   fieldName: 'value',
-  min: 0,
+  min: 1,
   max: MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
 });
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  value: rt.union([CaseCustomFieldWithValidationValueRt, rt.null]),
+  value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
 });
 
 const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
