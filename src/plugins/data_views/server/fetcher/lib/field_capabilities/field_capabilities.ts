@@ -52,7 +52,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fieldCapsOptions,
     indexFilter,
     fields,
-    expandWildcards,
+    expandWildcard: expandWildcards,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
