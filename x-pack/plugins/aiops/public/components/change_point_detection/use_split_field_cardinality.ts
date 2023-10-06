@@ -12,6 +12,7 @@ import type {
   SearchResponseBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
 
@@ -25,11 +26,20 @@ export function useSplitFieldCardinality(
   query: QueryDslQueryContainer
 ) {
   const prevSplitField = usePrevious(splitField);
+  const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 
   const [cardinality, setCardinality] = useState<number | null>(null);
   const { dataView } = useDataSource();
 
   const requestPayload = useMemo(() => {
+    const optionDefintion = splitFieldsOptions.find((option) => option.name === splitField);
+
+    let runtimeMappings = {};
+    if (optionDefintion?.isRuntimeField) {
+      runtimeMappings = {
+        runtime_mappings: { [optionDefintion.name]: optionDefintion.runtimeField },
+      };
+    }
     return {
       params: {
         index: dataView.getIndexPattern(),
@@ -43,10 +53,11 @@ export function useSplitFieldCardinality(
               },
             },
           },
+          ...runtimeMappings,
         },
       },
     };
-  }, [splitField, dataView, query]);
+  }, [splitField, dataView, query, splitFieldsOptions]);
 
   const { runRequest: getSplitFieldCardinality, cancelRequest } = useCancellableSearch();
 
