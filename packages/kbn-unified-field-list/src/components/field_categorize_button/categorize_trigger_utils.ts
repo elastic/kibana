@@ -9,7 +9,7 @@
 import type { UiActionsStart, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   CATEGORIZE_FIELD_TRIGGER,
-  // CATEGORIZE_FIELD_VALUE_TRIGGER,
+  CATEGORIZE_FIELD_VALUE_TRIGGER,
 } from '@kbn/ui-actions-browser/src/triggers';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
@@ -62,6 +62,8 @@ export async function canCategorize(
 
 export function triggerCategorizeValueActions(
   uiActions: UiActionsStart,
+  setPopoverContents: (el: React.ReactElement | null) => void,
+  onClose: () => void,
   field: DataViewField,
   fieldValue: string,
   originatingApp: string,
@@ -73,6 +75,8 @@ export function triggerCategorizeValueActions(
     field,
     originatingApp,
     fieldValue,
+    setPopoverContents,
+    onClose,
   };
-  uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec(triggerOptions);
+  uiActions.getTrigger(CATEGORIZE_FIELD_VALUE_TRIGGER).exec(triggerOptions);
 }

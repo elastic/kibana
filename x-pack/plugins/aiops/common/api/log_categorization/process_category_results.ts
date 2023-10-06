@@ -42,6 +42,7 @@ export function processCategoryResults(
       key: b.key,
       count: b.doc_count,
       examples: b.hit.hits.hits.map((h) => get(h._source, field)),
+      regex: b.regex,
     };
   });
   return {

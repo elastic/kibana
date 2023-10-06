@@ -46,7 +46,16 @@ export const categorizeFieldValueAction = (coreStart: CoreStart, plugins: AiopsP
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      const { field, dataView } = context;
-      showCategorizeValuePopover(field, dataView, coreStart, plugins);
+      const { field, dataView, fieldValue, originatingApp, setPopoverContents, onClose } = context;
+      showCategorizeValuePopover(
+        field,
+        dataView,
+        coreStart,
+        plugins,
+        originatingApp,
+        fieldValue,
+        setPopoverContents,
+        onClose
+      );
     },
   });

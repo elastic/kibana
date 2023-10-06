@@ -5,56 +5,64 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPopoverTitle,
+  EuiText,
+  EuiLoadingChart,
+  EuiButtonEmpty,
+  EuiPopoverFooter,
+} from '@elastic/eui';
+
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  // EuiTitle,
-  // EuiFlyoutHeader,
-  // EuiFlyoutBody,
-  // EuiFlexGroup,
-  // EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
-
 import { usePageUrlState } from '@kbn/ml-url-state';
-import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { useData } from '../../hooks/use_data';
-import { useSearch } from '../../hooks/use_search';
-import { useCategorizeRequest } from './use_categorize_request';
-import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
-// import { CategoryTable } from './category_table';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-// import { InformationText } from './information_text';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
-// import { SamplingMenu } from './sampling_menu';
-// import { TechnicalPreviewBadge } from './technical_preview_badge';
-// import { LoadingCategorization } from './loading_categorization';
-import { useValidateFieldRequest } from './use_validate_category_field';
+
+import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../application/utils/url_state';
-// import { FieldValidationCallout } from './category_validation_callout';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
+import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
+import { useCategorizeRequest } from './use_categorize_request';
+import type { EventRate } from './use_categorize_request';
+import { useValidateFieldRequest } from './use_validate_category_field';
+import { MiniHistogram } from '../mini_histogram';
+import { createFilter, QueryMode, QUERY_MODE } from './use_discover_links';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
+  fieldValue: string | undefined;
   onClose: () => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
+export const LogCategorizationPopover: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
   selectedField,
+  fieldValue,
   onClose,
+  embeddingOrigin,
 }) => {
+  // console.log(fieldValue);
+
   const {
     notifications: { toasts },
     data: {
@@ -63,9 +71,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
 
-  const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
-    useValidateFieldRequest();
-  const { euiTheme } = useEuiTheme();
+  const { cancelRequest: cancelValidationRequest } = useValidateFieldRequest();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
@@ -83,15 +89,18 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
+  // const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
-  const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
+  // const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
     sparkLines: SparkLinesPerCategory;
   } | null>(null);
-  const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
-    null
-  );
+  // const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
+  //   null
+  // );
+  // const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  // const [filterKey, setFilterKey] = useState<string | null>(null);
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -109,13 +118,29 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     [cancelRequest, mounted]
   );
 
+  const openInDiscover = (mode: QueryMode, category?: Category) => {
+    if (selectedCategory === null) return;
+
+    if (
+      onAddFilter !== undefined &&
+      selectedField !== undefined &&
+      typeof selectedField !== 'string'
+    ) {
+      onAddFilter(
+        createFilter('', selectedField.name, [selectedCategory], mode, category),
+        `Patterns - ${selectedField.name}`
+      );
+      onClose();
+    }
+  };
+
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
     { dataView, savedSearch: selectedSavedSearch },
     stateFromUrl,
     true
   );
 
-  const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
+  const { documentStats, earliest, latest, intervalMs } = useData(
     dataView,
     'log_categorization',
     searchQuery,
@@ -137,35 +162,31 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
     setLoading(true);
     setData(null);
-    setFieldValidationResult(null);
+    // setFieldValidationResult(null);
 
     try {
-      const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(
-          index,
-          selectedField.name,
-          timeField,
-          earliest,
-          latest,
-          searchQuery
-        ),
-        runCategorizeRequest(
-          index,
-          selectedField.name,
-          timeField,
-          earliest,
-          latest,
-          searchQuery,
-          intervalMs
-        ),
-      ]);
-
+      const categorizationResult = await runCategorizeRequest(
+        index,
+        selectedField.name,
+        timeField,
+        earliest,
+        latest,
+        searchQuery,
+        intervalMs
+      );
       if (mounted.current === true) {
-        setFieldValidationResult(validationResult);
+        // setFieldValidationResult(validationResult);
         setData({
           categories: categorizationResult.categories,
           sparkLines: categorizationResult.sparkLinesPerCategory,
         });
+        if (fieldValue) {
+          const category = categorizationResult.categories.find((c) =>
+            new RegExp(c.regex).test(fieldValue)
+          );
+          setSelectedCategory(category ?? null);
+          setLoading(false);
+        }
       }
     } catch (error) {
       toasts.addError(error, {
@@ -182,12 +203,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     dataView,
     selectedField,
     cancelRequest,
-    runValidateFieldRequest,
     earliest,
     latest,
     searchQuery,
     runCategorizeRequest,
     intervalMs,
+    fieldValue,
     toasts,
   ]);
 
@@ -206,6 +227,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
       randomSampler.setDocCount(documentStats.totalCount);
+      randomSampler.setMode('on_automatic');
       setEventRate(
         Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
           key: +key,
@@ -214,6 +236,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       );
       setData(null);
       loadCategories();
+      // setTotalCount(documentStats.totalCount);
     }
   }, [
     documentStats,
@@ -226,63 +249,110 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
-  return <>hello there</>;
-
-  // return (
-  //   <>
-  //     <EuiFlyoutHeader hasBorder>
-  //       <EuiFlexGroup gutterSize="s" alignItems="center">
-  //         <EuiFlexItem grow={false}>
-  //           <EuiTitle size="m">
-  //             <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
-  //               <FormattedMessage
-  //                 id="xpack.aiops.categorizeFlyout.title"
-  //                 defaultMessage="Pattern analysis of {name}"
-  //                 values={{ name: selectedField.name }}
-  //               />
-  //             </h2>
-  //           </EuiTitle>
-  //         </EuiFlexItem>
-  //         <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-  //           <TechnicalPreviewBadge />
-  //         </EuiFlexItem>
-  //         <EuiFlexItem />
-  //         <EuiFlexItem grow={false}>
-  //           <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
-  //         </EuiFlexItem>
-  //       </EuiFlexGroup>
-  //     </EuiFlyoutHeader>
-  //     <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
-  //       <FieldValidationCallout validationResults={fieldValidationResult} />
-
-  //       {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
-
-  //       <InformationText
-  //         loading={loading}
-  //         categoriesLength={data?.categories?.length ?? null}
-  //         eventRateLength={eventRate.length}
-  //         fieldSelected={selectedField !== null}
-  //       />
-
-  //       {loading === false && data !== null && data.categories.length > 0 ? (
-  //         <CategoryTable
-  //           categories={data.categories}
-  //           aiopsListState={stateFromUrl}
-  //           dataViewId={dataView.id!}
-  //           eventRate={eventRate}
-  //           sparkLines={data.sparkLines}
-  //           selectedField={selectedField}
-  //           pinnedCategory={pinnedCategory}
-  //           setPinnedCategory={setPinnedCategory}
-  //           selectedCategory={selectedCategory}
-  //           setSelectedCategory={setSelectedCategory}
-  //           timefilter={timefilter}
-  //           onAddFilter={onAddFilter}
-  //           onClose={onClose}
-  //           enableRowActions={false}
-  //         />
-  //       ) : null}
-  //     </EuiFlyoutBody>
-  //   </>
+  // useEffect(
+  //   function filterCategories() {
+  //     if (!data) {
+  //       return;
+  //     }
+  //     setFilteredCategories(
+  //       filterKey === null ? data.categories : data.categories.filter((c) => c.key === filterKey)
+  //     );
+  //   },
+  //   [data, filterKey]
   // );
+
+  const histogram = eventRate.map(({ key: catKey, docCount }) => {
+    const term =
+      (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
+    const newTerm = term > docCount ? docCount : term;
+    const adjustedDocCount = docCount - newTerm;
+    // console.log(selectedCategory);
+
+    return {
+      doc_count_overall: adjustedDocCount,
+      doc_count_significant_term: newTerm,
+      key: catKey,
+      key_as_string: `${catKey}`,
+    };
+  });
+
+  return (
+    <>
+      <EuiPopoverTitle>
+        <FormattedMessage
+          id="xpack.aiops.categorizeFlyout.title"
+          defaultMessage="Pattern analysis of {name}"
+          values={{ name: selectedField.name }}
+        />
+      </EuiPopoverTitle>
+
+      <div css={{ width: '300px' }}>
+        {eventRate.length && selectedCategory !== null && loading === false ? (
+          <>
+            {/* <EuiSpacer /> */}
+            {/* <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.aiops.categorizeFlyout.title"
+                defaultMessage="Distribution of docs"
+              />
+            </EuiText> */}
+            <MiniHistogram
+              chartData={histogram}
+              isLoading={false}
+              label={''}
+              width={'100%'}
+              height={'50px'}
+            />
+            <EuiSpacer />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.aiops.categorizeFlyout.title"
+                defaultMessage="{count} docs match this pattern"
+                values={{ count: selectedCategory.count }}
+              />
+            </EuiText>
+
+            <EuiPopoverFooter paddingSize="s">
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    // flush="left"
+                    data-test-subj="aiopsLogCategorizationPopoverFilterForPatternButton"
+                    iconSide="left"
+                    size="s"
+                    onClick={() => openInDiscover(QUERY_MODE.INCLUDE, selectedCategory)}
+                    iconType="plusInCircle"
+                  >
+                    Filter for pattern
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    // flush="right"
+                    data-test-subj="aiopsLogCategorizationPopoverFilterForPatternButton"
+                    iconSide="left"
+                    size="s"
+                    onClick={() => openInDiscover(QUERY_MODE.EXCLUDE, selectedCategory)}
+                    iconType="minusInCircle"
+                  >
+                    Filter out pattern
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
+          </>
+        ) : (
+          <>
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="spaceAround">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingChart size="xl" mono />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+          </>
+        )}
+      </div>
+    </>
+  );
 };

@@ -57,7 +57,8 @@ export const TableActions = ({
     defaultMessage: 'Actions',
   });
 
-  const [showPatternAnalysisPopover, setShowPatternAnalysisPopover] = useState(false);
+  const [showPatternAnalysisPopover, setShowPatternAnalysisPopover] =
+    useState<React.ReactElement | null>(null);
 
   // Filters pair
   const filtersPairDisabled = !fieldMapping || !fieldMapping.filterable || ignoredValue;
@@ -197,21 +198,32 @@ export const TableActions = ({
           icon: pinnedIconType,
           onClick: onClickAction(togglePinned),
         },
-        {
-          name: 'Find pattern',
-          'aria-label': pinnedAriaLabel,
-          icon: 'machineLearningApp',
-          onClick: (e: React.MouseEvent) => {
-            if (uiActions && dataView && fieldMapping) {
-              const fieldValue = (flattenedField as string[])[0];
-              triggerCategorizeValueActions(uiActions, fieldMapping, fieldValue, '', dataView);
-            }
-            // return setShowPatternAnalysisPopover(true);
-          },
-        },
       ],
     },
   ];
+
+  if (fieldMapping?.esTypes?.includes('text')) {
+    panels[0].items.push({
+      name: 'Find pattern',
+      'aria-label': pinnedAriaLabel,
+      icon: 'machineLearningApp',
+      onClick: () => {
+        if (uiActions && dataView && fieldMapping) {
+          const fieldValue = (flattenedField as string[])[0];
+          setShowPatternAnalysisPopover(null);
+          triggerCategorizeValueActions(
+            uiActions,
+            setShowPatternAnalysisPopover,
+            () => setShowPatternAnalysisPopover(null),
+            fieldMapping,
+            fieldValue,
+            '',
+            dataView
+          );
+        }
+      },
+    });
+  }
 
   if (mode === 'inline') {
     return (
@@ -223,14 +235,14 @@ export const TableActions = ({
       >
         <EuiPopover
           ownFocus
-          isOpen={showPatternAnalysisPopover}
-          closePopover={() => setShowPatternAnalysisPopover(false)}
+          isOpen={showPatternAnalysisPopover !== null}
+          closePopover={() => setShowPatternAnalysisPopover(null)}
           display="block"
           anchorPosition="leftUp"
           data-test-subj="fieldPopover"
           offset={20}
         >
-          <div>test</div>
+          <div>{showPatternAnalysisPopover}</div>
         </EuiPopover>
         {panels[0].items.map((item) => (
           <EuiFlexItem key={item.icon} grow={false}>
@@ -242,7 +254,7 @@ export const TableActions = ({
                 iconType={item.icon}
                 iconSize="s"
                 disabled={item.disabled}
-                onClick={(e) => item.onClick(e)}
+                onClick={() => item.onClick()}
               />
             </EuiToolTip>
           </EuiFlexItem>

@@ -6,24 +6,18 @@
  */
 
 import React, { FC } from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
-import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  toMountPoint,
-  wrapWithTheme,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
-// import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+import { LogCategorizationPopover } from './log_categorization_for_popover';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
@@ -32,106 +26,31 @@ export async function showCategorizeValuePopover(
   field: DataViewField,
   dataView: DataView,
   coreStart: CoreStart,
-  plugins: AiopsPluginStartDeps
+  plugins: AiopsPluginStartDeps,
+  originatingApp: string,
+  fieldValue?: string,
+  setPopoverContents?: (el: React.ReactElement | null) => void,
+  onClose?: () => void
 ): Promise<void> {
-  const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
+  const { http, theme, application, notifications, uiSettings, i18n } = coreStart;
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      const onFlyoutClose = () => {
-        flyoutSession.close();
-        resolve();
-      };
+  const Contents: FC = () => {
+    const appDependencies = {
+      notifications,
+      uiSettings,
+      http,
+      theme,
+      application,
+      i18n,
+      ...plugins,
+    };
+    const datePickerDeps: DatePickerDependencies = {
+      ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+      i18n,
+      uiSettingsKeys: UI_SETTINGS,
+    };
 
-      const appDependencies = {
-        notifications,
-        uiSettings,
-        http,
-        theme,
-        application,
-        ...plugins,
-      };
-      const datePickerDeps = {
-        ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-        toMountPoint,
-        wrapWithTheme,
-        uiSettingsKeys: UI_SETTINGS,
-      };
-
-      return;
-      const flyoutSession = overlays.openFlyout(
-        toMountPoint(
-          wrapWithTheme(
-            <KibanaContextProvider
-              services={{
-                ...coreStart,
-              }}
-            >
-              <AiopsAppContext.Provider value={appDependencies}>
-                <DatePickerContextProvider {...datePickerDeps}>
-                  <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                    hello
-                    {/* <LogCategorizationFlyout
-                      dataView={dataView}
-                      savedSearch={null}
-                      selectedField={field}
-                      onClose={onFlyoutClose}
-                    /> */}
-                  </StorageContextProvider>
-                </DatePickerContextProvider>
-              </AiopsAppContext.Provider>
-            </KibanaContextProvider>,
-            theme.theme$
-          )
-        ),
-        {
-          'data-test-subj': 'aiopsCategorizeFlyout',
-          ownFocus: true,
-          closeButtonProps: { 'aria-label': 'aiopsCategorizeFlyout' },
-          onClose: onFlyoutClose,
-          size: 'l',
-        }
-      );
-
-      // Close the flyout when user navigates out of the current plugin
-      application.currentAppId$
-        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-        .subscribe(() => {
-          flyoutSession.close();
-        });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-interface Props {
-  field: DataViewField;
-  dataView: DataView;
-  coreStart: CoreStart;
-  plugins: AiopsPluginStartDeps;
-}
-
-export const PopoverContents: FC<Props> = ({ field, dataView, coreStart, plugins }) => {
-  const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
-
-  const appDependencies = {
-    notifications,
-    uiSettings,
-    http,
-    theme,
-    application,
-    ...plugins,
-  };
-  const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
-    uiSettingsKeys: UI_SETTINGS,
-  };
-
-  return (
-    <>
+    return (
       <KibanaContextProvider
         services={{
           ...coreStart,
@@ -140,18 +59,22 @@ export const PopoverContents: FC<Props> = ({ field, dataView, coreStart, plugins
         <AiopsAppContext.Provider value={appDependencies}>
           <DatePickerContextProvider {...datePickerDeps}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              hello popover
-              {/* <LogCategorizationFlyout
-                      dataView={dataView}
-                      savedSearch={null}
-                      selectedField={field}
-                      onClose={onFlyoutClose}
-                    /> */}
+              <LogCategorizationPopover
+                dataView={dataView}
+                savedSearch={null}
+                selectedField={field}
+                onClose={onClose ?? (() => {})}
+                fieldValue={fieldValue}
+                embeddingOrigin={originatingApp}
+              />
             </StorageContextProvider>
           </DatePickerContextProvider>
         </AiopsAppContext.Provider>
       </KibanaContextProvider>
-      ,
-    </>
-  );
-};
+    );
+  };
+
+  if (setPopoverContents !== undefined) {
+    setPopoverContents(<Contents />);
+  }
+}

@@ -12,6 +12,7 @@ export interface Category {
   count: number;
   examples: string[];
   sparkline?: Array<{ doc_count: number; key: number; key_as_string: string }>;
+  regex: string;
 }
 
 export interface CategoriesAgg {
@@ -23,6 +24,7 @@ export interface CategoriesAgg {
       sparkline: {
         buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
       };
+      regex: string;
     }>;
   };
 }

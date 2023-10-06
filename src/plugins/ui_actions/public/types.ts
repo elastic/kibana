@@ -29,6 +29,8 @@ export interface CategorizeFieldContext {
   dataView: DataView;
   fieldValue?: string;
   originatingApp: string;
+  setPopoverContents?: (el: React.ReactElement | null) => void;
+  onClose?: () => void;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
