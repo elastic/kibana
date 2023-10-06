@@ -23,7 +23,7 @@ import {
 import type { DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { matchedIndicesDefault } from './data_drift_index_patterns_editor';
+import { canAppendWildcard, matchedIndicesDefault } from './data_drift_index_patterns_editor';
 
 interface DataViewEditorProps {
   id: string;
@@ -67,6 +67,7 @@ export function DataViewEditor({
     indexPattern === '' || (indexPattern !== '' && matchedIndices.exactMatchedIndices.length === 0)
       ? matchedIndices.allIndices
       : matchedIndices.exactMatchedIndices;
+  const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
   const [pageState, updatePageState] = useState({
     pageIndex: 0,
@@ -137,11 +138,21 @@ export function DataViewEditor({
           <EuiFieldText
             value={indexPattern}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const query = e.target.value;
+              let query = e.target.value;
+              if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
+                query += '*';
+                setAppendedWildcard(true);
+                setTimeout(() => e.target.setSelectionRange(1, 1));
+              } else {
+                if (['', '*'].includes(query) && appendedWildcard) {
+                  query = '';
+                  setAppendedWildcard(false);
+                }
+              }
               setIndexPattern(query);
             }}
             fullWidth
-            data-test-subj={`mlDataDriftIndexPatternTitleInput-${id ?? ''}`}
+            data-test-subj="createIndexPatternTitleInput"
             placeholder="example-pattern*"
           />
         </EuiFormRow>
