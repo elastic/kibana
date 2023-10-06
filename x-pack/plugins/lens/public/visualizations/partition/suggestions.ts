@@ -7,7 +7,6 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   SuggestionRequest,
   TableSuggestionColumn,
@@ -142,7 +141,7 @@ export function suggestions({
                 metrics: metricColumnIds,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+                  ? undefined
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : state.layers[0].colorMapping,
@@ -157,7 +156,7 @@ export function suggestions({
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+                  ? undefined
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : undefined,

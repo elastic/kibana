@@ -18,7 +18,6 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   Datasource,
   DatasourceMap,
@@ -28,6 +27,7 @@ import type {
   InitializationOptions,
   VisualizationMap,
   VisualizeEditorContext,
+  SuggestionRequest,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
@@ -36,6 +36,14 @@ import type { DatasourceStates, VisualizationState } from '../../state_managemen
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
+
+const PREFERRED_PALETTE: SuggestionRequest['mainPalette'] = {
+  type: 'legacyPalette',
+  value: {
+    name: 'default',
+    type: 'palette',
+  },
+};
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
@@ -290,8 +298,8 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
-        // initialize a new visualization always with the new color mapping
-        { type: 'colorMapping', value: { ...DEFAULT_COLOR_MAPPING_CONFIG } },
+        // initialize a new visualization with the color mapping off
+        PREFERRED_PALETTE,
         annotationGroups,
         references
       ) ?? visualizationState.state

@@ -57,7 +57,7 @@ const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
 });
 
-function newLayerState(layerId: string, colorMapping: ColorMapping.Config): PieLayerState {
+function newLayerState(layerId: string, colorMapping?: ColorMapping.Config): PieLayerState {
   return {
     layerId,
     primaryGroups: [],
@@ -168,9 +168,7 @@ export const getPieVisualization = ({
         layers: [
           newLayerState(
             addNewLayer(),
-            mainPalette?.type === 'colorMapping'
-              ? mainPalette.value
-              : { ...DEFAULT_COLOR_MAPPING_CONFIG }
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : undefined
           ),
         ],
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
