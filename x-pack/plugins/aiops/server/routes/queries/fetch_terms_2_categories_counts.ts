@@ -174,6 +174,9 @@ export async function fetchTerms2CategoriesCounts(
         if (isMsearchResponseItem(resp)) {
           result.doc_count = (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
           if (result.total_doc_count > 0) {
+            // Replicates how the `frequent_item_sets` aggregation calculates
+            // the support value by dividing the number of documents containing
+            // the item set by the total number of documents.
             result.support = result.doc_count / result.total_doc_count;
           }
         }
