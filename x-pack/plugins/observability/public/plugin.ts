@@ -62,6 +62,7 @@ import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
+  ASSETS_INVENTORY_PATH,
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
@@ -208,6 +209,13 @@ export class Plugin
         },
       },
     }),
+    {
+      id: 'assets-inventory',
+      title: 'Assets Inventory',
+      navLinkStatus: AppNavLinkStatus.visible,
+      order: 8004,
+      path: ASSETS_INVENTORY_PATH,
+    },
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
