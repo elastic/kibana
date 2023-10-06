@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const esArchiver = getService('esArchiver');
-  const retryOnStale = getService('retryOnStale');
+  const log = getService('log');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -40,18 +40,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   async function findFirstFieldIcons(elementSelector: string) {
-    let firstFieldIcons: string[] = [];
+    log.debug('findFirstFieldIcons');
+    const element = await testSubjects.find(elementSelector);
+    log.debug('found element');
+    const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
+    log.debug('found svgs');
 
-    await retryOnStale(async () => {
-      const element = await testSubjects.find(elementSelector);
-      const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
-
-      firstFieldIcons = await Promise.all(
-        fieldIcons.map((fieldIcon) => fieldIcon.getAttribute('aria-label')).slice(0, 10)
-      );
+    return await Promise.all(
+      fieldIcons.slice(0, 10).map((fieldIcon) => fieldIcon.getAttribute('aria-label'))
+    ).catch((error) => {
+      log.debug(`error: ${error.message}`);
+      return 0;
     });
-
-    return firstFieldIcons;
   }
 
   describe('discover data grid field tokens', function () {
