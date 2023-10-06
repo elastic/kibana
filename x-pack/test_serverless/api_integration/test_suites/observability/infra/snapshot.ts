@@ -13,7 +13,7 @@ import type {
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES } from './constants';
+import { DATES, ARCHIVE_NAME } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -33,15 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
     return response.body;
   };
 
-  describe('snapshot nodes', () => {
-    describe('8.0.0', () => {
+  describe('API /metrics/snapshot', () => {
+    describe('Snapshot nodes', () => {
       const { min, max } = DATES.serverlessTestingHost;
-      before(() =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/serverless_testing_host')
-      );
-      after(() =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/serverless_testing_host')
-      );
+      before(() => esArchiver.load(ARCHIVE_NAME));
+      after(() => esArchiver.unload(ARCHIVE_NAME));
 
       it('should work', async () => {
         const snapshot = await fetchSnapshot({

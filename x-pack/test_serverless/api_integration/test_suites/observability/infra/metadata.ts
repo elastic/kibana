@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   InfraMetadata,
   InfraMetadataRequest,
 } from '@kbn/infra-plugin/common/http_api/metadata_api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES } from './constants';
+import { DATES, ARCHIVE_NAME } from './constants';
 
-const timeRangeWithAws = {
+const timeRange = {
   from: DATES.serverlessTestingHost.min,
   to: DATES.serverlessTestingHost.max,
 };
@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
   const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
+
   const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
     const response = await supertest
       .post('/api/infra/metadata')
@@ -35,29 +36,26 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
     return response.body;
   };
-  describe('metadata', () => {
-    describe('works', () => {
-      describe('host information', () => {
-        const archiveName = 'x-pack/test/functional/es_archives/infra/serverless_testing_host';
-        before(() => esArchiver.load(archiveName));
-        after(() => esArchiver.unload(archiveName));
 
-        it('received data', async () => {
+  describe('API /infra/metadata', () => {
+    describe('works', () => {
+      describe('Host asset type', () => {
+        before(() => esArchiver.load(ARCHIVE_NAME));
+        after(() => esArchiver.unload(ARCHIVE_NAME));
+
+        it('with not existing host', async () => {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'serverless-host',
             nodeType: 'host',
-            timeRange: timeRangeWithAws,
+            timeRange,
           });
+
           if (metadata) {
             expect(metadata.features.length).to.be(4);
             expect(metadata.name).to.equal('serverless-host');
-            expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.above(
-              timeRangeWithAws.from
-            );
-            expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.below(
-              timeRangeWithAws.to
-            );
+            expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.above(timeRange.from);
+            expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.below(timeRange.to);
             expect(metadata.info?.agent).to.eql({
               ephemeral_id: '64624d22-1eeb-4267-ac92-b11a1d09c0ba',
               id: '3ce5be59-af6a-4668-8f6d-90282a3f820e',
@@ -117,12 +115,12 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('Not existing host', async () => {
+        it('with not existing host', async () => {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'some-not-existing-host-name',
             nodeType: 'host',
-            timeRange: timeRangeWithAws,
+            timeRange,
           });
 
           if (metadata) {

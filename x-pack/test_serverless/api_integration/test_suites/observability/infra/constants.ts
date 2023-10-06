@@ -15,3 +15,5 @@ export const DATES = {
     max: '2023-03-28T23:30:00.139Z',
   },
 };
+
+export const ARCHIVE_NAME = 'x-pack/test/functional/es_archives/infra/serverless_testing_host';

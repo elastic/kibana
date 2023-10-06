@@ -12,21 +12,22 @@ import type {
 } from '@kbn/infra-plugin/common/http_api';
 
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES } from './constants';
+import { DATES, ARCHIVE_NAME } from './constants';
 
 const timeRange = {
   from: DATES.serverlessTestingHostDateString.min,
   to: DATES.serverlessTestingHostDateString.max,
 };
-// /api/metrics/infra
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
   const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
-  const fetchInfraNodes = async (
+
+  const fetchInfraHosts = async (
     body: GetInfraMetricsRequestBodyPayload
   ): Promise<GetInfraMetricsResponsePayload | undefined> => {
     const response = await supertest
@@ -38,15 +39,15 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
     return response.body;
   };
-  describe('infra', () => {
+
+  describe('API /metrics/infra', () => {
     describe('works', () => {
-      describe('host information', () => {
-        const archiveName = 'x-pack/test/functional/es_archives/infra/serverless_testing_host';
-        before(() => esArchiver.load(archiveName));
-        after(() => esArchiver.unload(archiveName));
+      describe('with host asset', () => {
+        before(() => esArchiver.load(ARCHIVE_NAME));
+        after(() => esArchiver.unload(ARCHIVE_NAME));
 
         it('received data', async () => {
-          const infraNodes = await fetchInfraNodes({
+          const infraHosts = await fetchInfraHosts({
             type: 'host',
             limit: 100,
             metrics: [
@@ -84,8 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
           });
 
-          if (infraNodes) {
-            const { nodes } = infraNodes;
+          if (infraHosts) {
+            const { nodes } = infraHosts;
             expect(nodes.length).to.equal(1);
             const firstNode = nodes[0];
             expect(firstNode).to.eql({
@@ -132,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'serverless-host',
             });
           } else {
-            throw new Error('Nodes response should not be empty');
+            throw new Error('Hosts response should not be empty');
           }
         });
       });
