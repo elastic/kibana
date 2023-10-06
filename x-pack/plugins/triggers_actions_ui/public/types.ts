@@ -15,7 +15,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   IconType,
-  EuiFlyoutSize,
   RecursivePartial,
   EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
@@ -538,7 +537,6 @@ export type AlertsTableProps = {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
   id?: string;
