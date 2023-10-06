@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { first } from 'lodash';
-
 import type {
   SnapshotNodeResponse,
   SnapshotRequest,
@@ -21,8 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchSnapshot = async (
-    body: SnapshotRequest,
-    expectedStatusCode = 200
+    body: SnapshotRequest
   ): Promise<SnapshotNodeResponse | undefined> => {
     const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
     const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
@@ -32,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       .set('x-elastic-internal-origin', 'foo')
       .auth(username, password)
       .send(body)
-      .expect(expectedStatusCode);
+      .expect(200);
     return response.body;
   };
 
@@ -72,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           const firstNode = nodes[0];
           expect(firstNode).to.have.property('path');
           expect(firstNode.path.length).to.equal(1);
-          expect(first(firstNode.path)).to.eql({
+          expect(firstNode.path[0]).to.eql({
             value: 'serverless-host',
             label: 'serverless-host',
             ip: '192.168.1.79',

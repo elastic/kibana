@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./snapshot'));
     loadTestFile(require.resolve('./processes'));
+    loadTestFile(require.resolve('./infra'));
   });
 }

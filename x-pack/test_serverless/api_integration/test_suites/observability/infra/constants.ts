@@ -10,4 +10,8 @@ export const DATES = {
     min: 1679873400139,
     max: 1680027672003,
   },
+  serverlessTestingHostDateString: {
+    min: '2023-03-26T23:30:00.139Z',
+    max: '2023-03-28T23:30:00.139Z',
+  },
 };
