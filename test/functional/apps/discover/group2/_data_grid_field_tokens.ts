@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
   }
 
-  describe('discover data grid field tokens', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/168115
+  describe.skip('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
