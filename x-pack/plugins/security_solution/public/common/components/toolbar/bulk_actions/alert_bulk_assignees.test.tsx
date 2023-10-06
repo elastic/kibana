@@ -15,7 +15,7 @@ import { useSuggestUsers } from '../../../../detections/containers/detection_eng
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_user_profiles');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
 
 const mockUserProfiles: UserProfileWithAvatar[] = [
   { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },

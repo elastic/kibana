@@ -19,7 +19,7 @@ import { useSetAlertAssignees } from './use_set_alert_assignees';
 import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
 
 jest.mock('./use_set_alert_assignees');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_user_profiles');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_suggest_users');
 
 const mockUserProfiles: UserProfileWithAvatar[] = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
