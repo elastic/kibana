@@ -61,7 +61,6 @@
     "@kbn/rule-data-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/es-ui-shared-plugin",
     "@kbn/es-types",
     "@kbn/analytics",
     "@kbn/rison",
@@ -96,7 +95,15 @@
     "@kbn/unified-field-list",
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/apm-data-access-plugin"
+    "@kbn/apm-data-access-plugin",
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/profiling-utils",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client",
+    "@kbn/monaco",
+    "@kbn/shared-svg",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }

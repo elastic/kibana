@@ -137,8 +137,8 @@ describe('DataView component', () => {
       wrapDataViewComponentInContext(
         {
           ...props,
-          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
-          textBasedLanguage: TextBasedLanguages.SQL,
+          textBasedLanguages: [TextBasedLanguages.ESQL],
+          textBasedLanguage: TextBasedLanguages.ESQL,
         },
         false
       )

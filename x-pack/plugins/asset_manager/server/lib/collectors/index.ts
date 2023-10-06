@@ -6,8 +6,8 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssetManagerConfig } from '../../types';
 import { Asset } from '../../../common/types_api';
 
 export const QUERY_MAX_SIZE = 10000;
@@ -18,7 +18,11 @@ export interface CollectorOptions {
   client: ElasticsearchClient;
   from: string;
   to: string;
-  sourceIndices: AssetManagerConfig['sourceIndices'];
+  sourceIndices?: {
+    apm?: APMIndices;
+    metrics?: string;
+    logs?: string;
+  };
   afterKey?: estypes.SortResults;
   filters?: estypes.QueryDslQueryContainer[];
 }

@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a new metric to an existing dashboard by value', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -188,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a new metric to an existing dashboard by reference', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a existing metric to an existing dashboard by value', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -265,7 +265,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a existing metric to an existing dashboard by reference', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);

@@ -62,7 +62,7 @@ describe('filterEventsAgainstList', () => {
     expect(included.length).toEqual(4);
     expect(excluded.length).toEqual(0);
     expect(ruleExecutionLogger.debug.mock.calls[0][0]).toContain(
-      'no exception items of type list found - returning original search result'
+      'No exception items of type list found - return unfiltered events'
     );
   });
 

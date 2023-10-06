@@ -174,3 +174,28 @@ export const OTHER_CATEGORY_TITLE = i18n.translate(
     defaultMessage: 'OTHER',
   }
 );
+export const MAPS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.projectSettings.maps.title',
+  {
+    defaultMessage: 'Maps',
+  }
+);
+export const MAPS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.projectSettings.maps.description',
+  {
+    defaultMessage: 'Plot geographic data',
+  }
+);
+export const VISUALIZE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.projectSettings.visualize.title',
+  {
+    defaultMessage: 'Visualize library',
+  }
+);
+
+export const VISUALIZE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.projectSettings.visualize.description',
+  {
+    defaultMessage: 'Visualize library page',
+  }
+);

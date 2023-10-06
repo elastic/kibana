@@ -15,8 +15,9 @@ export const createLegacyRuleAction = async (
   connectorId: string
 ): Promise<unknown> =>
   supertest
-    .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}`)
+    .post(UPDATE_OR_CREATE_LEGACY_ACTIONS)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .query({ alert_id: alertId })
     .send({
       name: 'Legacy notification with one action',

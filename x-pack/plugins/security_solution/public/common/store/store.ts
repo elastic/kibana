@@ -69,6 +69,7 @@ export const createStoreFactory = async (
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        version: '2023-10-31',
         method: 'GET',
       });
     }

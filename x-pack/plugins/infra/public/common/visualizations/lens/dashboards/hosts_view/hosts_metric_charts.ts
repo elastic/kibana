@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { hostLensFormulas } from '../../../constants';
+import { hostLensFormulas } from '../../formulas';
 import type { XYChartLayerParams } from '../../../types';
 import { REFERENCE_LINE, XY_OVERRIDES } from '../constants';
 
@@ -83,12 +83,12 @@ export const hostsMetricCharts: Array<
   },
   {
     id: 'diskSpaceUsed',
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceUsed', {
-      defaultMessage: 'Disk Space Usage',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskUsage', {
+      defaultMessage: 'Disk Usage',
     }),
     layers: [
       {
-        data: [hostLensFormulas.diskSpaceUsage],
+        data: [hostLensFormulas.diskUsage],
         options: XY_LAYER_OPTIONS,
         type: 'visualization',
       },

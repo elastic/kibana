@@ -7,6 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
+
 import type { FleetAuthz } from '../../../common';
 
 import {
@@ -78,107 +80,146 @@ export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
 };
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
-      validate: GetCategoriesRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getCategoriesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetCategoriesRequestSchema },
+      },
+      getCategoriesHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.LIST_PATTERN,
-      validate: GetPackagesRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getListHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetPackagesRequestSchema },
+      },
+      getListHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
-      validate: GetInstalledPackagesRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getInstalledListHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInstalledPackagesRequestSchema },
+      },
+      getInstalledListHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
-      validate: false,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getLimitedListHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      getLimitedListHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.STATS_PATTERN,
-      validate: GetStatsRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getStatsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetStatsRequestSchema },
+      },
+      getStatsHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
-      validate: GetFileRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getFileHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetFileRequestSchema },
+      },
+      getFileHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      validate: GetInfoRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
-    },
-    getInfoHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInfoRequestSchema },
+      },
+      getInfoHandler
+    );
 
-  router.put(
-    {
+  router.versioned
+    .put({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      validate: UpdatePackageRequestSchema,
       fleetAuthz: {
         integrations: { upgradePackages: true, writePackageSettings: true },
       },
-    },
-    updatePackageHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: UpdatePackageRequestSchema },
+      },
+      updatePackageHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
-      validate: InstallPackageFromRegistryRequestSchema,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-    },
-    installPackageFromRegistryHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: InstallPackageFromRegistryRequestSchema },
+      },
+      installPackageFromRegistryHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      validate: BulkInstallPackagesFromRegistryRequestSchema,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },
-    },
-    bulkInstallPackagesFromRegistryHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: BulkInstallPackagesFromRegistryRequestSchema },
+      },
+      bulkInstallPackagesFromRegistryHandler
+    );
 
   // Only allow upload for superuser
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
-      validate: InstallPackageByUploadRequestSchema,
       options: {
         body: {
           accepts: ['application/gzip', 'application/zip'],
@@ -189,157 +230,202 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { uploadPackages: true },
       },
-    },
-    installPackageByUploadHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: InstallPackageByUploadRequestSchema },
+      },
+      installPackageByUploadHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.CUSTOM_INTEGRATIONS_PATTERN,
-      validate: CreateCustomIntegrationRequestSchema,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-    },
-    createCustomIntegrationHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: CreateCustomIntegrationRequestSchema },
+      },
+      createCustomIntegrationHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: EPM_API_ROUTES.DELETE_PATTERN,
-      validate: DeletePackageRequestSchema,
       fleetAuthz: {
         integrations: { removePackages: true },
       },
-    },
-    deletePackageHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeletePackageRequestSchema },
+      },
 
-  router.get(
-    {
+      deletePackageHandler
+    );
+
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
-      validate: false,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getVerificationKeyIdHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      getVerificationKeyIdHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
-      validate: GetDataStreamsRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getDataStreamsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetDataStreamsRequestSchema },
+      },
+      getDataStreamsHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
-      validate: GetBulkAssetsRequestSchema,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-    },
-    getBulkAssetsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetBulkAssetsRequestSchema },
+      },
+      getBulkAssetsHandler
+    );
 
   // deprecated since 8.0
-  router.get(
-    {
+  // This endpoint should be marked as internal but the router selects this endpoint over the new GET one
+  // For now keeping it public
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      validate: GetInfoRequestSchemaDeprecated,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
         ).granted,
-    },
-    async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-      const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.item) {
-        // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
-        return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInfoRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+        const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
+          context,
+          newRequest,
+          response
+        );
+        if (resp.payload?.item) {
+          // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
+          return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
 
-  router.put(
-    {
+  router.versioned
+    .put({
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      validate: UpdatePackageRequestSchemaDeprecated,
+
       fleetAuthz: {
         integrations: { upgradePackages: true, writePackageSettings: true },
       },
-    },
-    async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-      const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.item) {
-        return response.ok({ body: { response: resp.payload.item } });
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: UpdatePackageRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+        const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
+          context,
+          newRequest,
+          response
+        );
+        if (resp.payload?.item) {
+          return response.ok({ body: { response: resp.payload.item } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
 
-  router.post(
-    {
+  // This endpoint should be marked as internal but the router selects this endpoint over the new POST
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
-      validate: InstallPackageFromRegistryRequestSchemaDeprecated,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-    },
-    async (context, request, response) => {
-      const newRequest = {
-        ...request,
-        params: splitPkgKey(request.params.pkgkey),
-        query: request.query,
-      } as any;
-      const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.items) {
-        return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = {
+          ...request,
+          params: splitPkgKey(request.params.pkgkey),
+          query: request.query,
+        } as any;
+        const resp: IKibanaResponse<InstallPackageResponse> =
+          await installPackageFromRegistryHandler(context, newRequest, response);
+        if (resp.payload?.items) {
+          return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: EPM_API_ROUTES.DELETE_PATTERN_DEPRECATED,
-      validate: DeletePackageRequestSchemaDeprecated,
+
       fleetAuthz: {
         integrations: { removePackages: true },
       },
-    },
-    async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-      const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.items) {
-        return response.ok({ body: { response: resp.payload.items } });
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: DeletePackageRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+        const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
+          context,
+          newRequest,
+          response
+        );
+        if (resp.payload?.items) {
+          return response.ok({ body: { response: resp.payload.items } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
 
   // Update transforms with es-secondary-authorization headers,
   // append authorized_by to transform's _meta, and start transforms
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
-      validate: ReauthorizeTransformRequestSchema,
       fleetAuthz: {
         ...INSTALL_PACKAGES_AUTHZ,
         packagePrivileges: {
@@ -352,7 +438,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
-    },
-    reauthorizeTransformsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: ReauthorizeTransformRequestSchema },
+      },
+      reauthorizeTransformsHandler
+    );
 };

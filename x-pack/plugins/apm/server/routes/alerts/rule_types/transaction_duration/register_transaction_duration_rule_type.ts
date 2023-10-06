@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
@@ -49,7 +50,7 @@ import {
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
@@ -106,6 +107,7 @@ export function registerTransactionDurationRuleType({
     actionVariables: {
       context: transactionDurationActionVariables,
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -135,7 +137,7 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
-      const termFilterQuery = !ruleParams.searchConfiguration
+      const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
         ? [
             ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
               queryEmptyString: false,
@@ -165,7 +167,7 @@ export function registerTransactionDurationRuleType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForTransactions(
+                ...getBackwardCompatibleDocumentTypeFilter(
                   searchAggregatedTransactions
                 ),
                 ...termFilterQuery,

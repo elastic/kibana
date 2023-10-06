@@ -16,12 +16,15 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { ActionsConfigurationUtilities } from './actions_config';
+import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   isESOCanEncrypt: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   inMemoryConnectors: InMemoryConnector[];
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ExecuteOptions
@@ -30,6 +33,7 @@ export interface ExecuteOptions
   spaceId: string;
   apiKey: string | null;
   executionId: string;
+  actionTypeId: string;
 }
 
 interface ActionTaskParams
@@ -54,12 +58,29 @@ export type BulkExecutionEnqueuer<T> = (
   actionsToExectute: ExecuteOptions[]
 ) => Promise<T>;
 
+export enum ExecutionResponseType {
+  SUCCESS = 'success',
+  QUEUED_ACTIONS_LIMIT_ERROR = 'queuedActionsLimitError',
+}
+
+export interface ExecutionResponse {
+  errors: boolean;
+  items: ExecutionResponseItem[];
+}
+
+export interface ExecutionResponseItem {
+  id: string;
+  actionTypeId: string;
+  response: ExecutionResponseType;
+}
+
 export function createBulkExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   isESOCanEncrypt,
   inMemoryConnectors,
-}: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
+  configurationUtilities,
+}: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<ExecutionResponse> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     actionsToExecute: ExecuteOptions[]
@@ -67,6 +88,19 @@ export function createBulkExecutionEnqueuerFunction({
     if (!isESOCanEncrypt) {
       throw new Error(
         `Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    const { hasReachedLimit, numberOverLimit } = await hasReachedTheQueuedActionsLimit(
+      taskManager,
+      configurationUtilities,
+      actionsToExecute.length
+    );
+    let actionsOverLimit: ExecuteOptions[] = [];
+    if (hasReachedLimit) {
+      actionsOverLimit = actionsToExecute.splice(
+        actionsToExecute.length - numberOverLimit,
+        numberOverLimit
       );
     }
 
@@ -144,6 +178,22 @@ export function createBulkExecutionEnqueuerFunction({
       };
     });
     await taskManager.bulkSchedule(taskInstances);
+    return {
+      errors: actionsOverLimit.length > 0,
+      items: actionsToExecute
+        .map((a) => ({
+          id: a.id,
+          actionTypeId: a.actionTypeId,
+          response: ExecutionResponseType.SUCCESS,
+        }))
+        .concat(
+          actionsOverLimit.map((a) => ({
+            id: a.id,
+            actionTypeId: a.actionTypeId,
+            response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+          }))
+        ),
+    };
   };
 }
 

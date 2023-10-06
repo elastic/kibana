@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type {
+  IndicesCreateRequest,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import { DataViewsCommonService } from '@kbn/data-plugin/server';
-import { CreateDocSourceResp, IndexSourceMappings, BodySettings } from '../../common/types';
+import { CreateDocSourceResp } from '../../common/types';
 import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 
-const DEFAULT_SETTINGS = { number_of_shards: 1 };
 const DEFAULT_META = {
   _meta: {
     created_by: MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
@@ -19,7 +22,7 @@ const DEFAULT_META = {
 
 export async function createDocSource(
   index: string,
-  mappings: IndexSourceMappings,
+  mappings: MappingTypeMapping,
   { asCurrentUser }: IScopedClusterClient,
   indexPatternsService: DataViewsCommonService
 ): Promise<CreateDocSourceResp> {
@@ -41,15 +44,14 @@ export async function createDocSource(
 
 async function createIndex(
   indexName: string,
-  mappings: IndexSourceMappings,
+  mappings: MappingTypeMapping,
   asCurrentUser: ElasticsearchClient
 ) {
-  const body: { mappings: IndexSourceMappings; settings: BodySettings } = {
+  const body: IndicesCreateRequest['body'] = {
     mappings: {
       ...DEFAULT_META,
       ...mappings,
     },
-    settings: DEFAULT_SETTINGS,
   };
 
   await asCurrentUser.indices.create({ index: indexName, body });

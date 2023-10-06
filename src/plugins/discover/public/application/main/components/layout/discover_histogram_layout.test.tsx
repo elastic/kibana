@@ -122,7 +122,7 @@ const mountComponent = async ({
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
-    resizeRef: { current: null },
+    container: null,
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 

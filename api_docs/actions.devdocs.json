@@ -2094,7 +2094,9 @@
             "signature": [
               "(requesterId: string, actionsToExecute: ",
               "ExecuteOptions",
-              "[]) => Promise<void>"
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">"
             ],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
@@ -2967,7 +2969,9 @@
             "signature": [
               "(requesterId: string, actionsToExecute: ",
               "ExecuteOptions",
-              "[]) => Promise<void>"
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">"
             ],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
@@ -3247,11 +3251,11 @@
             "section": "def-common.ActionTypeExecutorResult",
             "text": "ActionTypeExecutorResult"
           },
-          "<unknown>>; enqueueExecution: (options: ",
+          "<unknown>>; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
-          ") => Promise<void>; bulkEnqueueExecution: (options: ",
-          "ExecuteOptions",
-          "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
+          "[]) => Promise<",
+          "ExecutionResponse",
+          ">; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<",
           {
@@ -3261,14 +3265,10 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ListTypesOptions) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionType",
-            "text": "ActionType"
-          },
+          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
+          "ListTypesParams",
+          ") => Promise<",
+          "ConnectorType",
           "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
           {
             "pluginId": "actions",
@@ -3514,6 +3514,38 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.setEnabledConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "setEnabledConnectorTypes",
+          "description": [],
+          "signature": [
+            "(connectorTypes: string[]) => void"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.setEnabledConnectorTypes.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "connectorTypes",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         }
       ],
@@ -5241,13 +5273,13 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GeneralConnectorFeatureId",
+        "id": "def-common.GenerativeAIConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GeneralConnectorFeatureId",
+        "label": "GenerativeAIConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"general\""
+          "\"generativeAI\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5581,10 +5613,10 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GeneralFeature",
+        "id": "def-common.GenerativeAIFeature",
         "type": "Object",
         "tags": [],
-        "label": "GeneralFeature",
+        "label": "GenerativeAIFeature",
         "description": [],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5592,7 +5624,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.id",
+            "id": "def-common.GenerativeAIFeature.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -5603,7 +5635,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.name",
+            "id": "def-common.GenerativeAIFeature.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -5614,7 +5646,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.compatibility",
+            "id": "def-common.GenerativeAIFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

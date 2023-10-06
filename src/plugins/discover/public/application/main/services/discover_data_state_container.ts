@@ -57,7 +57,7 @@ export enum RecordRawType {
    */
   DOCUMENT = 'document',
   /**
-   * Data returned e.g. SQL queries, flat structure
+   * Data returned e.g. ES|QL queries, flat structure
    * */
   PLAIN = 'plain',
 }
@@ -78,6 +78,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
+  textBasedHeaderWarning?: string;
   interceptedWarnings?: SearchResponseInterceptedWarning[]; // warnings (like shard failures)
 }
 

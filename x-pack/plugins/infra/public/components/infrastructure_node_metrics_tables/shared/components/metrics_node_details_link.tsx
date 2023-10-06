@@ -31,11 +31,12 @@ export const MetricsNodeDetailsLink = ({
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const linkProps = useLinkProps(
     getNodeDetailUrl({
-      nodeType,
-      nodeId: id,
+      assetType: nodeType,
+      assetId: id,
       search: {
         from: parse(timerange.from)?.valueOf(),
         to: parse(timerange.to)?.valueOf(),
+        name: id,
       },
     })
   );

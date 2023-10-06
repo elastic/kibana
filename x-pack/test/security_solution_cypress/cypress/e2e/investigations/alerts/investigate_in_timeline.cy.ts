@@ -14,7 +14,8 @@ import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../task
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
@@ -36,7 +37,7 @@ describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
   describe('From alerts table', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -55,7 +56,7 @@ describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });

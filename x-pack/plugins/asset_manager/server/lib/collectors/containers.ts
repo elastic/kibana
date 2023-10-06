@@ -16,9 +16,13 @@ export async function collectContainers({
   sourceIndices,
   afterKey,
 }: CollectorOptions) {
-  const { metrics, logs, traces } = sourceIndices;
+  if (!sourceIndices?.metrics || !sourceIndices?.logs) {
+    throw new Error('missing required metrics/logs indices');
+  }
+
+  const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
-    index: [traces, logs, metrics],
+    index: [metrics, logs],
     size: QUERY_MAX_SIZE,
     collapse: {
       field: 'container.id',

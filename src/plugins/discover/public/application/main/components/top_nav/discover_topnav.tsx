@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_SQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -31,6 +31,7 @@ export interface DiscoverTopNavProps {
   stateContainer: DiscoverStateContainer;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
+  textBasedLanguageModeWarning?: string;
   onFieldEdited: () => Promise<void>;
 }
 
@@ -42,6 +43,7 @@ export const DiscoverTopNav = ({
   updateQuery,
   isPlainRecord,
   textBasedLanguageModeErrors,
+  textBasedLanguageModeWarning,
   onFieldEdited,
 }: DiscoverTopNavProps) => {
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
@@ -112,6 +114,7 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -164,11 +167,22 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
+  const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);
   const supportedTextBasedLanguages = [];
-  if (isSQLModeEnabled) {
-    supportedTextBasedLanguages.push('SQL');
+  if (isESQLModeEnabled) {
+    supportedTextBasedLanguages.push('ESQL');
   }
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
+
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
+  );
+
+  const shouldHideDefaultDataviewPicker =
+    !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
+
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: dataView?.getName() || '',
@@ -199,13 +213,6 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
-  const searchBarCustomization = useDiscoverCustomization('search_bar');
-
-  const SearchBar = useMemo(
-    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
-    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
-  );
-
   return (
     <SearchBar
       appName="discover"
@@ -218,7 +225,9 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
+      saveQueryMenuVisibility={
+        services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+      }
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerOverride={
@@ -227,12 +236,13 @@ export const DiscoverTopNav = ({
         ) : undefined
       }
       dataViewPickerComponentProps={
-        searchBarCustomization?.CustomDataViewPicker ? undefined : dataViewPickerProps
+        shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
       }
       displayStyle="detached"
       textBasedLanguageModeErrors={
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
       }
+      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       prependFilterBar={
         searchBarCustomization?.PrependFilterBar ? (

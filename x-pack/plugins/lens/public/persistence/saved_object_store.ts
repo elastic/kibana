@@ -7,21 +7,12 @@
 
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { SearchQuery } from '@kbn/content-management-plugin/common';
-import { DOC_TYPE } from '../../common/constants';
-import {
-  LensCreateIn,
-  LensCreateOut,
-  LensGetIn,
-  LensGetOut,
-  LensSearchIn,
-  LensSearchOut,
-  LensSearchQuery,
-  LensUpdateIn,
-  LensUpdateOut,
-} from '../../common/content_management';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
+import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
+import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
+import { getLensClient } from './lens_client';
 
 export interface Document {
   savedObjectId?: string;
@@ -55,10 +46,10 @@ export interface DocumentLoader {
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  private client: ContentClient;
+  private client: VisualizationClient<'lens', LensSavedObjectAttributes>;
 
-  constructor(client: ContentClient) {
-    this.client = client;
+  constructor(cm: ContentManagementPublicStart) {
+    this.client = getLensClient(cm);
   }
 
   save = async (vis: Document) => {
@@ -66,8 +57,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     const attributes = rest;
 
     if (savedObjectId) {
-      const result = await this.client.update<LensUpdateIn, LensUpdateOut>({
-        contentTypeId: 'lens',
+      const result = await this.client.update({
         id: savedObjectId,
         data: attributes,
         options: {
@@ -76,8 +66,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       });
       return { ...vis, savedObjectId: result.item.id };
     } else {
-      const result = await this.client.create<LensCreateIn, LensCreateOut>({
-        contentTypeId: 'lens',
+      const result = await this.client.create({
         data: attributes,
         options: {
           references,
@@ -88,10 +77,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   };
 
   async load(savedObjectId: string) {
-    const resolveResult = await this.client.get<LensGetIn, LensGetOut>({
-      contentTypeId: DOC_TYPE,
-      id: savedObjectId,
-    });
+    const resolveResult = await this.client.get(savedObjectId);
 
     if (resolveResult.item.error) {
       throw resolveResult.item.error;
@@ -101,11 +87,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   async search(query: SearchQuery, options: LensSearchQuery) {
-    const result = await this.client.search<LensSearchIn, LensSearchOut>({
-      contentTypeId: DOC_TYPE,
-      query,
-      options,
-    });
+    const result = await this.client.search(query, options);
     return result;
   }
 }

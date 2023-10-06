@@ -6,13 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { STACK_AAD_INDEX_NAME } from '..';
-import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
+import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -21,11 +19,10 @@ import {
   EsQueryRuleParamsSchema,
   EsQueryRuleState,
 } from './rule_type_params';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
-import { ActionGroupId, ES_QUERY_ID } from './constants';
+import { ActionGroupId } from './constants';
 import { executor } from './executor';
-import { isEsQueryRule } from './util';
+import { isSearchSourceRule } from './util';
 
 export function getRuleType(
   core: CoreSetup
@@ -134,6 +131,13 @@ export function getRuleType(
     }
   );
 
+  const actionVariableEsqlQueryLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
+    {
+      defaultMessage: 'ES|QL query field used to fetch data from Elasticsearch.',
+    }
+  );
+
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
     {
@@ -141,18 +145,6 @@ export function getRuleType(
        the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.`,
     }
   );
-
-  const alerts: IRuleTypeAlerts<StackAlert> = {
-    context: STACK_AAD_INDEX_NAME,
-    mappings: {
-      fieldMap: {
-        [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
-        [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
-        [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
-      },
-    },
-    shouldWrite: true,
-  };
 
   return {
     id: ES_QUERY_ID,
@@ -179,25 +171,27 @@ export function getRuleType(
         { name: 'searchConfiguration', description: actionVariableSearchConfigurationLabel },
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
+        { name: 'esqlQuery', description: actionVariableEsqlQueryLabel },
       ],
     },
     useSavedObjectReferences: {
       extractReferences: (params) => {
-        if (isEsQueryRule(params.searchType)) {
-          return { params: params as EsQueryRuleParamsExtractedParams, references: [] };
+        if (isSearchSourceRule(params.searchType)) {
+          const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+          const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
+          return { params: newParams, references };
         }
-        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
-        const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
-        return { params: newParams, references };
+
+        return { params: params as EsQueryRuleParamsExtractedParams, references: [] };
       },
       injectReferences: (params, references) => {
-        if (isEsQueryRule(params.searchType)) {
-          return params;
+        if (isSearchSourceRule(params.searchType)) {
+          return {
+            ...params,
+            searchConfiguration: injectReferences(params.searchConfiguration, references),
+          };
         }
-        return {
-          ...params,
-          searchConfiguration: injectReferences(params.searchConfiguration, references),
-        };
+        return params;
       },
     },
     minimumLicenseRequired: 'basic',
@@ -205,8 +199,9 @@ export function getRuleType(
     executor: async (options: ExecutorOptions<EsQueryRuleParams>) => {
       return await executor(core, options);
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
-    alerts,
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

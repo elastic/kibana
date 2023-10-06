@@ -31,6 +31,8 @@ import {
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { request } from '../tasks/common';
+import { login } from '../tasks/login';
 
 function setupIntegrations() {
   cy.intercept(
@@ -50,30 +52,53 @@ function setupIntegrations() {
   cy.wait('@packages');
 }
 
-it('should install integration without policy', () => {
-  cy.visit('/app/integrations/detail/tomcat/settings');
+// Infinite scroll
+function getAllIntegrations() {
+  const cardItems = new Set<string>();
 
-  cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-  cy.get('.euiCallOut').contains('This action will install 1 assets');
-  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+  for (let i = 0; i < 10; i++) {
+    cy.scrollTo(0, i * 600);
+    cy.wait(50);
+    cy.getBySel(INTEGRATION_LIST)
+      .find('.euiCard')
+      .each((element) => {
+        const attrValue = element.attr('data-test-subj');
+        if (attrValue) {
+          cardItems.add(attrValue);
+        }
+      });
+  }
 
-  cy.getBySel(LOADING_SPINNER).should('not.exist');
-
-  cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-  cy.getBySel(LOADING_SPINNER).should('not.exist');
-  cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
-});
+  return cy.then(() => {
+    return [...cardItems.values()];
+  });
+}
 
 describe('Add Integration - Real API', () => {
   const integration = 'apache';
 
-  after(() => {
+  beforeEach(() => {
+    login();
+
+    cleanupAgentPolicies();
     deleteIntegrations();
   });
 
-  afterEach(() => {
-    cleanupAgentPolicies();
+  afterEach(() => {});
+
+  it('should install integration without policy', () => {
+    cy.visit('/app/integrations/detail/tomcat/settings');
+
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+    cy.get('.euiCallOut').contains('This action will install 1 assets');
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+
+    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
   });
 
   it('should install integration without policy', () => {
@@ -103,7 +128,7 @@ describe('Add Integration - Real API', () => {
 
   it('should add integration to policy', () => {
     const agentPolicyId = 'policy_1';
-    cy.request({
+    request({
       method: 'POST',
       url: `/api/fleet/agent_policies`,
       body: {
@@ -113,10 +138,9 @@ describe('Add Integration - Real API', () => {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
       },
-      headers: { 'kbn-xsrf': 'cypress' },
     });
 
-    cy.request('/api/fleet/agent_policies').then((response: any) => {
+    request({ url: '/api/fleet/agent_policies' }).then((response: any) => {
       cy.visit(`/app/fleet/policies/${agentPolicyId}`);
 
       cy.intercept(
@@ -175,10 +199,15 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 29);
+
+    getAllIntegrations().then((items) => {
+      expect(items).to.have.length.greaterThan(29);
+    });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 3);
+    getAllIntegrations().then((items) => {
+      expect(items).to.have.length.greaterThan(3);
+    });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
   });

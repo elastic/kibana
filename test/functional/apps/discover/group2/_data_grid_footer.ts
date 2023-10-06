@@ -9,7 +9,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const FOOTER_SELECTOR = 'discoverTableFooter';
+const FOOTER_SELECTOR = 'unifiedDataTableFooter';
 const LOAD_MORE_SELECTOR = 'dscGridSampleSizeFetchMoreLink';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

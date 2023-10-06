@@ -545,6 +545,119 @@ describe('Terms Agg Other bucket helper', () => {
 
         expect(agg).toEqual(false);
       });
+
+      test('returns true when nested filter agg has buckets', () => {
+        const aggConfigs = getAggConfigs([
+          {
+            id: '0',
+            type: BUCKET_TYPES.FILTERS,
+            params: [
+              {
+                input: {
+                  language: 'kuery',
+                  query: '',
+                },
+                label: '',
+              },
+            ],
+          },
+          ...nestedTerm.aggs,
+        ]);
+
+        const nestedTermResponseWithRootFilter = wrapResponse({
+          '0': {
+            buckets: {
+              '*': {
+                '1': {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 8325,
+                  buckets: [
+                    {
+                      '2': {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 8325,
+                        buckets: [
+                          { key: 'ios', doc_count: 2850 },
+                          { key: 'win xp', doc_count: 2830 },
+                          { key: '__missing__', doc_count: 1430 },
+                        ],
+                      },
+                      key: 'US-with-dash',
+                      doc_count: 2850,
+                    },
+                    {
+                      '2': {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 8325,
+                        buckets: [
+                          { key: 'ios', doc_count: 1850 },
+                          { key: 'win xp', doc_count: 1830 },
+                          { key: '__missing__', doc_count: 130 },
+                        ],
+                      },
+                      key: 'IN-with-dash',
+                      doc_count: 2830,
+                    },
+                  ],
+                },
+                doc_count: 1148,
+              },
+            },
+          },
+        });
+
+        const otherAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[2] as IBucketAggConfig,
+          enrichResponseWithSampling(nestedTermResponseWithRootFilter)
+        );
+
+        expect(otherAggConfig).toBeDefined();
+        if (otherAggConfig) {
+          const expectedResponse = {
+            'other-filter': {
+              aggs: undefined,
+              filters: {
+                filters: {
+                  [`${SEP}*${SEP}IN-with-dash`]: {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { bool: { filter: [], must: [], must_not: [], should: [] } },
+                        { match_phrase: { 'geo.src': 'IN-with-dash' } },
+                        { exists: { field: 'machine.os.raw' } },
+                      ],
+                      should: [],
+                      must_not: [
+                        { match_phrase: { 'machine.os.raw': 'ios' } },
+                        { match_phrase: { 'machine.os.raw': 'win xp' } },
+                      ],
+                    },
+                  },
+                  [`${SEP}*${SEP}US-with-dash`]: {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { bool: { filter: [], must: [], must_not: [], should: [] } },
+                        { match_phrase: { 'geo.src': 'US-with-dash' } },
+                        { exists: { field: 'machine.os.raw' } },
+                      ],
+                      should: [],
+                      must_not: [
+                        { match_phrase: { 'machine.os.raw': 'ios' } },
+                        { match_phrase: { 'machine.os.raw': 'win xp' } },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          };
+          const resp = otherAggConfig();
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
+          expect(topAgg).toEqual(expectedResponse);
+        }
+      });
     });
 
     describe(`mergeOtherBucketAggResponse${getTitlePostfix()}`, () => {

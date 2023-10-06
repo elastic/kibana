@@ -1,0 +1,357 @@
+{
+  "id": "metricsDataAccess",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.MetricsDataClient",
+        "type": "Class",
+        "tags": [],
+        "label": "MetricsDataClient",
+        "description": [],
+        "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-server.MetricsDataClient.getMetricIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetricIndices",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "metricsDataAccess",
+                "scope": "server",
+                "docId": "kibMetricsDataAccessPluginApi",
+                "section": "def-server.GetMetricIndicesOptions",
+                "text": "GetMetricIndicesOptions"
+              },
+              ") => Promise<string>"
+            ],
+            "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "metricsDataAccess",
+                "id": "def-server.MetricsDataClient.getMetricIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "metricsDataAccess",
+                    "scope": "server",
+                    "docId": "kibMetricsDataAccessPluginApi",
+                    "section": "def-server.GetMetricIndicesOptions",
+                    "text": "GetMetricIndicesOptions"
+                  }
+                ],
+                "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-server.MetricsDataClient.updateMetricIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "updateMetricIndices",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "metricsDataAccess",
+                "scope": "server",
+                "docId": "kibMetricsDataAccessPluginApi",
+                "section": "def-server.UpdateMetricIndicesOptions",
+                "text": "UpdateMetricIndicesOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<{ metricIndices: string; }>>"
+            ],
+            "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "metricsDataAccess",
+                "id": "def-server.MetricsDataClient.updateMetricIndices.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "metricsDataAccess",
+                    "scope": "server",
+                    "docId": "kibMetricsDataAccessPluginApi",
+                    "section": "def-server.UpdateMetricIndicesOptions",
+                    "text": "UpdateMetricIndicesOptions"
+                  }
+                ],
+                "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-server.MetricsDataClient.setDefaultMetricIndicesHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "setDefaultMetricIndicesHandler",
+            "description": [],
+            "signature": [
+              "(handler: ",
+              {
+                "pluginId": "metricsDataAccess",
+                "scope": "server",
+                "docId": "kibMetricsDataAccessPluginApi",
+                "section": "def-server.DefaultMetricIndicesHandler",
+                "text": "DefaultMetricIndicesHandler"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "metricsDataAccess",
+                "id": "def-server.MetricsDataClient.setDefaultMetricIndicesHandler.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "metricsDataAccess",
+                    "scope": "server",
+                    "docId": "kibMetricsDataAccessPluginApi",
+                    "section": "def-server.DefaultMetricIndicesHandler",
+                    "text": "DefaultMetricIndicesHandler"
+                  }
+                ],
+                "path": "x-pack/plugins/metrics_data_access/server/client/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.GetMetricIndicesOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetMetricIndicesOptions",
+        "description": [],
+        "path": "x-pack/plugins/metrics_data_access/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-server.GetMetricIndicesOptions.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
+            ],
+            "path": "x-pack/plugins/metrics_data_access/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.DefaultMetricIndicesHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "DefaultMetricIndicesHandler",
+        "description": [],
+        "signature": [
+          "((options: ",
+          {
+            "pluginId": "metricsDataAccess",
+            "scope": "server",
+            "docId": "kibMetricsDataAccessPluginApi",
+            "section": "def-server.GetMetricIndicesOptions",
+            "text": "GetMetricIndicesOptions"
+          },
+          ") => Promise<string>) | null"
+        ],
+        "path": "x-pack/plugins/metrics_data_access/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.metricsDataSourceSavedObjectName",
+        "type": "string",
+        "tags": [],
+        "label": "metricsDataSourceSavedObjectName",
+        "description": [],
+        "signature": [
+          "\"metrics-data-source\""
+        ],
+        "path": "x-pack/plugins/metrics_data_access/server/saved_objects/metrics_data_source/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.UpdateMetricIndicesOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateMetricIndicesOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "metricsDataAccess",
+            "scope": "server",
+            "docId": "kibMetricsDataAccessPluginApi",
+            "section": "def-server.GetMetricIndicesOptions",
+            "text": "GetMetricIndicesOptions"
+          },
+          " & { metricIndices: string; }"
+        ],
+        "path": "x-pack/plugins/metrics_data_access/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-server.MetricsDataClientMock",
+        "type": "Object",
+        "tags": [],
+        "label": "MetricsDataClientMock",
+        "description": [],
+        "path": "x-pack/plugins/metrics_data_access/server/client_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-server.MetricsDataClientMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "metricsDataAccess",
+                "scope": "server",
+                "docId": "kibMetricsDataAccessPluginApi",
+                "section": "def-server.MetricsDataClient",
+                "text": "MetricsDataClient"
+              }
+            ],
+            "path": "x-pack/plugins/metrics_data_access/server/client_mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "parentPluginId": "metricsDataAccess",
+      "id": "def-server.MetricsDataPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "MetricsDataPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/metrics_data_access/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "metricsDataAccess",
+          "id": "def-server.MetricsDataPluginSetup.client",
+          "type": "Object",
+          "tags": [],
+          "label": "client",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "metricsDataAccess",
+              "scope": "server",
+              "docId": "kibMetricsDataAccessPluginApi",
+              "section": "def-server.MetricsDataClient",
+              "text": "MetricsDataClient"
+            }
+          ],
+          "path": "x-pack/plugins/metrics_data_access/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

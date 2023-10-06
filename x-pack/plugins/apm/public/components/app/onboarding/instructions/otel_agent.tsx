@@ -152,6 +152,7 @@ function ConfigurationValueColumn({
       </EuiText>
       {value && (
         <EuiButtonIcon
+          data-test-subj="apmConfigurationValueColumnButton"
           aria-label={i18n.translate(
             'xpack.apm.onboarding.otel.column.value.copyIconText',
             {

@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import {
@@ -102,14 +103,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc should be false while flapping value for state should be true
       // This is because we write out the alert doc BEFORE calculating the latest flapping state and
       // persisting into task state
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(false);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
 
       // Run the rule 6 more times
@@ -132,12 +133,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc and task state should be true because alert is flapping
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(true);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
       expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
 
       // Run the rule 7 more times
@@ -160,13 +161,13 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc and task state should be false because alert was active for long
       // enough to reset the flapping state
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(false);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
     });
 
@@ -231,14 +232,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc should be false while flapping value for state should be true
       // This is because we write out the alert doc BEFORE calculating the latest flapping state and
       // persisting into task state
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(false);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
 
       // Run the rule 6 more times
@@ -261,12 +262,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc and task state should be true because alert is flapping
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(true);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
       expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
 
       // Run the rule 3 more times
@@ -289,12 +290,69 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc and task state should be true because alert recovered while flapping
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(true);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+    });
+
+    it('Should not fail when an alert is flapping and recovered for a rule with notify_when: onThrottleInterval', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth('superuser', 'superuser')
+        .send({
+          enabled: true,
+          look_back_window: 5,
+          status_change_threshold: 3,
+        })
+        .expect(200);
+
+      const pattern = {
+        alertA: [true, false, true, false, false, false, false, false, false],
+      };
+      const ruleParameters = { pattern };
+      const createdRule = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          // notify_when is not RuleNotifyWhen.CHANGE, so it's not added to activeCurrent
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            // set the schedule long so we can use "runSoon" to specify rule runs
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: ruleParameters,
+            actions: [],
+          })
+        );
+
+      expect(createdRule.status).to.eql(200);
+      const ruleId = createdRule.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // Wait for the rule to run once
+      let run = 1;
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+      // Run the rule 10 more times
+      for (let i = 0; i < 5; i++) {
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(response.status).to.eql(204);
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
+      }
+
+      const alertDocs = await queryForAlertDocs<PatternFiringAlert>();
+      const state = await getRuleState(ruleId);
+
+      expect(alertDocs.length).to.equal(2);
+
+      // Alert is recovered and flapping
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
     });
 
@@ -360,12 +418,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
       // Alert shouldn't be flapping because the status change threshold hasn't been exceeded
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(false);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
 
       // Run the rule 1 more time
@@ -388,14 +446,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc should be false while flapping value for state should be true
       // This is because we write out the alert doc BEFORE calculating the latest flapping state and
       // persisting into task state
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(false);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
 
       // Run the rule 6 more times
@@ -418,14 +476,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc should be true while flapping value for state should be false
       // This is because we write out the alert doc BEFORE calculating the latest flapping state and
       // persisting into task state
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(true);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
       expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
 
       // Run the rule 3 more times
@@ -448,12 +506,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source!.kibana.alert.flapping_history).to.eql(
+      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
         state.alertInstances.alertA.meta.flappingHistory
       );
 
       // Flapping value for alert doc and task state should be true because lookback threshold exceeded
-      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(false);
+      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
       expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
     });
   });

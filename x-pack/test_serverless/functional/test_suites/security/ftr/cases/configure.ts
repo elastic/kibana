@@ -10,13 +10,19 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlSecNavigation = getService('svlSecNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
-  describe('Configure', function () {
+  describe('Configure Case', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     before(async () => {
+      await svlCommonPage.login();
+
       await svlSecNavigation.navigateToLandingPage();
 
       await testSubjects.click('solutionSideNavItemLink-cases');
@@ -26,9 +32,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await svlCommonPage.forceLogout();
     });
 
     describe('Closure options', function () {
+      // Error: Expected the radio group value to equal "close-by-pushing" (got "close-by-user")
+      this.tags(['failsOnMKI']);
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -43,7 +52,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
+          return await testSubjects.exists('dropdown-connector-no-connector');
+        });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {

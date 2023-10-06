@@ -7,7 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+import { ConnectorScheduling } from '@kbn/search-connectors';
+
 import { CrawlerCustomSchedulesServer } from '../../../../../../../common/types/crawler';
 
 import { CrawlerIndex } from '../../../../../../../common/types/indices';

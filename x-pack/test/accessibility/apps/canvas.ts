@@ -12,12 +12,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const { common } = getPageObjects(['common']);
+  const { canvas } = getPageObjects(['canvas']);
 
   describe('Canvas Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
-      await common.navigateToApp('canvas');
+      await canvas.goToListingPage();
     });
 
     it('loads workpads', async function () {

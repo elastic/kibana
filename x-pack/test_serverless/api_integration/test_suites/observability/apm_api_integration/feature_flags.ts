@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { APMFtrContextProvider } from './common/services';
+import { ApmApiClient } from './common/apm_api_supertest';
 
 const fleetMigrationResponse = {
   statusCode: 404,
@@ -48,7 +49,7 @@ const SAMPLE_SOURCEMAP = {
   mappings: 'A,AAAB;;ABCDE;',
 };
 
-async function uploadSourcemap(apmApiClient: any) {
+async function uploadSourcemap(apmApiClient: ApmApiClient) {
   const response = await apmApiClient.slsUser({
     endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
     type: 'form-data',

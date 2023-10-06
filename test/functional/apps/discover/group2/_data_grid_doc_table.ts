@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:rowHeightOption': 0, // single line
   };
   const testSubjects = getService('testSubjects');
   const security = getService('security');
@@ -82,14 +83,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      const docCell = await dataGrid.getCellElement(0, 3);
-      await docCell.click();
-      const expandCellContentButton = await docCell.findByTestSubject(
-        'euiDataGridCellExpandButton'
-      );
-      await expandCellContentButton.click();
-      let expandDocId = '';
 
+      await dataGrid.clickCellExpandButton(0, 3);
+
+      let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
         const text = await monacoEditor.getCodeEditorValue();
         const flyoutJson = JSON.parse(text);
@@ -119,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.saveSearch('expand-cell-search');
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -131,15 +128,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      const docCell = await dataGrid.getCellElement(0, 3);
-      await docCell.click();
-      const expandCellContentButton = await docCell.findByTestSubject(
-        'euiDataGridCellExpandButton'
-      );
-      await expandCellContentButton.click();
+      await dataGrid.clickCellExpandButton(0, 3);
 
       let expandDocId = '';
-
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
         const text = await monacoEditor.getCodeEditorValue();
         return (expandDocId = JSON.parse(text)._id) === 'AU_x3_g4GFA8no6QjkYX';

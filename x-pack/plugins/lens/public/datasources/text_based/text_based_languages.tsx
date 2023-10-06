@@ -10,7 +10,7 @@ import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -371,6 +371,12 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
+      const context = state?.initialContext;
+      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
+        const language = getAggregateQueryMode(context.query);
+        // it will eventually log render_lens_esql_chart
+        return [`${language}_chart`];
+      }
       return [];
     },
 
@@ -598,7 +604,12 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
-    isEqual: () => true,
+    isEqual: (
+      persistableState1: TextBasedPersistedState,
+      references1: SavedObjectReference[],
+      persistableState2: TextBasedPersistedState,
+      references2: SavedObjectReference[]
+    ) => isEqual(persistableState1, persistableState2),
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {

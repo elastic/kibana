@@ -7,7 +7,6 @@
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
   expandFirstAlert,
@@ -24,10 +23,9 @@ import {
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { goToExceptionsTab } from '../../../../tasks/rule_details';
+import { login } from '../../../../tasks/login';
+import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/common';
 import {
   ADD_AND_BTN,
@@ -38,10 +36,11 @@ import {
 } from '../../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Auto populate exception with Alert data',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception Item';
     const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
@@ -52,9 +51,8 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule());
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+
       waitForAlertsToPopulate();
     });
     after(() => {

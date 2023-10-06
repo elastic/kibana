@@ -111,6 +111,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
       cy.getBySel('createAgentPolicyFlyoutBtn').click();
       cy.getBySel('agentPolicyNameLink').contains(policyName).click();
       cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
       cy.getBySel('agentPolicySelect').within(() => {
@@ -197,7 +198,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
 
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
-      cy.waitForReact();
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });

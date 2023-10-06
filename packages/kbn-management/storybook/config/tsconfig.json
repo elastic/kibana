@@ -4,7 +4,10 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [

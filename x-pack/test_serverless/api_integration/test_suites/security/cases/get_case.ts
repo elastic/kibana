@@ -8,30 +8,25 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import {
-  getCase,
-  createCase,
-  deleteCasesByESQuery,
-  getPostCaseRequest,
-  postCaseResp,
-} from './helpers/api';
-import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
-
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
-  const es = getService('es');
+  const svlCases = getService('svlCases');
 
   describe('get_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await svlCases.api.deleteCasesByESQuery();
     });
 
     it('should return a case', async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest());
-      const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
+      const postedCase = await svlCases.api.createCase(
+        svlCases.api.getPostCaseRequest('securitySolution')
+      );
+      const theCase = await svlCases.api.getCase({
+        caseId: postedCase.id,
+        includeComments: true,
+      });
 
-      const data = removeServerGeneratedPropertiesFromCase(theCase);
-      expect(data).to.eql(postCaseResp());
+      const data = svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
+      expect(data).to.eql(svlCases.api.postCaseResp('securitySolution'));
       expect(data.comments?.length).to.eql(0);
     });
   });

@@ -6,7 +6,7 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -61,6 +61,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const eventLogger = eventLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -75,15 +76,19 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
   logger,
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
   eventLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -248,7 +253,7 @@ describe('bulkDisableRules', () => {
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       rules: [returnedDisabledRule1],
@@ -385,7 +390,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1', 'id2']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1', 'id2'], []);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
@@ -448,7 +453,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
@@ -474,7 +479,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
     });
 
     test('should not throw an error if taskManager.bulkDisable throw an error', async () => {
@@ -608,7 +613,7 @@ describe('bulkDisableRules', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenLastCalledWith(
-        "rulesClient.disable('id2') - Could not write recovery events - UPS"
+        "rulesClient.disable('id2') - Could not write untrack events - UPS"
       );
     });
   });

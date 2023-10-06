@@ -56,10 +56,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
           {columnTitles[metadataValue.field as MetadataFields]}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Popover
-            icon="questionInCircle"
-            data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton"
-          >
+          <Popover icon="iInCircle" data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton">
             <EuiText size="xs">
               {metadataValue.tooltipLink ? (
                 <FormattedMessage

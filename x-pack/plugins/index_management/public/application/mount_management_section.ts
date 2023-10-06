@@ -11,6 +11,7 @@ import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { ExtensionsService } from '../services';
@@ -55,8 +56,8 @@ export async function mountManagementSection({
   kibanaVersion,
   enableIndexActions = true,
   enableLegacyTemplates = true,
-  enableIndexDetailsPage = false,
   enableIndexStats = true,
+  cloud,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
@@ -66,8 +67,8 @@ export async function mountManagementSection({
   kibanaVersion: SemVer;
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
-  enableIndexDetailsPage?: boolean;
   enableIndexStats?: boolean;
+  cloud?: CloudSetup;
 }) {
   const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -79,6 +80,7 @@ export async function mountManagementSection({
     uiSettings,
     executionContext,
     settings,
+    http,
   } = core;
 
   const { url } = startDependencies.share;
@@ -98,10 +100,13 @@ export async function mountManagementSection({
       getUrlForApp: application.getUrlForApp,
       executionContext,
       application,
+      http,
     },
     plugins: {
       usageCollection,
       isFleetEnabled,
+      share: startDependencies.share,
+      cloud,
     },
     services: {
       httpService,
@@ -112,7 +117,6 @@ export async function mountManagementSection({
     config: {
       enableIndexActions,
       enableLegacyTemplates,
-      enableIndexDetailsPage,
       enableIndexStats,
     },
     history,

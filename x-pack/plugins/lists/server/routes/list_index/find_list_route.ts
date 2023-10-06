@@ -15,72 +15,79 @@ import { findListRequestQuery, findListResponse } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
 
 export const findListRoute = (router: ListsPluginRouter): void => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       options: {
         tags: ['access:lists-read'],
       },
       path: `${LIST_URL}/_find`,
-      validate: {
-        query: buildRouteValidation(findListRequestQuery),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidation(findListRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const lists = await getListClient(context);
-        const {
-          cursor,
-          filter: filterOrUndefined,
-          page: pageOrUndefined,
-          per_page: perPageOrUndefined,
-          sort_field: sortField,
-          sort_order: sortOrder,
-        } = request.query;
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const lists = await getListClient(context);
+          const {
+            cursor,
+            filter: filterOrUndefined,
+            page: pageOrUndefined,
+            per_page: perPageOrUndefined,
+            sort_field: sortField,
+            sort_order: sortOrder,
+          } = request.query;
 
-        const page = pageOrUndefined ?? 1;
-        const perPage = perPageOrUndefined ?? 20;
-        const filter = filterOrUndefined ?? '';
-        const {
-          isValid,
-          errorMessage,
-          cursor: [currentIndexPosition, searchAfter],
-        } = decodeCursor({
-          cursor,
-          page,
-          perPage,
-          sortField,
-        });
-        if (!isValid) {
-          return siemResponse.error({
-            body: errorMessage,
-            statusCode: 400,
-          });
-        } else {
-          const exceptionList = await lists.findList({
-            currentIndexPosition,
-            filter,
+          const page = pageOrUndefined ?? 1;
+          const perPage = perPageOrUndefined ?? 20;
+          const filter = filterOrUndefined ?? '';
+          const {
+            isValid,
+            errorMessage,
+            cursor: [currentIndexPosition, searchAfter],
+          } = decodeCursor({
+            cursor,
             page,
             perPage,
-            runtimeMappings: undefined,
-            searchAfter,
             sortField,
-            sortOrder,
           });
-          const [validated, errors] = validate(exceptionList, findListResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          if (!isValid) {
+            return siemResponse.error({
+              body: errorMessage,
+              statusCode: 400,
+            });
           } else {
-            return response.ok({ body: validated ?? {} });
+            const exceptionList = await lists.findList({
+              currentIndexPosition,
+              filter,
+              page,
+              perPage,
+              runtimeMappings: undefined,
+              searchAfter,
+              sortField,
+              sortOrder,
+            });
+            const [validated, errors] = validate(exceptionList, findListResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

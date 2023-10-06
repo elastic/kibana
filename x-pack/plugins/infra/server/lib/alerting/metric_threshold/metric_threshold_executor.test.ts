@@ -18,6 +18,7 @@ import {
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import {
   Aggregators,
   Comparator,
@@ -130,7 +131,6 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/155534
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
@@ -1898,8 +1898,11 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   inventory: {
     compositeSize: 2000,
   },
-  logs: {
-    app_target: 'logs-ui',
+  featureFlags: {
+    customThresholdAlertsEnabled: false,
+    logsUIEnabled: true,
+    metricsExplorerEnabled: true,
+    osqueryEnabled: true,
   },
   enabled: true,
   sources,
@@ -1908,6 +1911,9 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
 const mockLibs: any = {
   sources: new InfraSources({
     config: createMockStaticConfiguration({}),
+    metricsClient: {
+      getMetricIndices: jest.fn().mockResolvedValue('metrics-*,metricbeat-*'),
+    } as unknown as MetricsDataClient,
   }),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {

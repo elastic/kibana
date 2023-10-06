@@ -26,7 +26,7 @@ const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
 );
 
 describe('useNodeDetailsRedirect', () => {
-  it('should return the LinkProperties', () => {
+  it('should return the LinkProperties for assetType pod', () => {
     const { result } = renderHook(() => useNodeDetailsRedirect(), { wrapper });
 
     const fromDateStrig = '2019-01-01T11:00:00Z';
@@ -34,8 +34,8 @@ describe('useNodeDetailsRedirect', () => {
 
     expect(
       result.current.getNodeDetailUrl({
-        nodeType: 'host',
-        nodeId: 'example-01',
+        assetType: 'pod',
+        assetId: 'example-01',
         search: {
           from: new Date(fromDateStrig).getTime(),
           to: new Date(toDateStrig).getTime(),
@@ -43,8 +43,37 @@ describe('useNodeDetailsRedirect', () => {
       })
     ).toStrictEqual({
       app: 'metrics',
-      pathname: 'link-to/host-detail/example-01',
+      pathname: 'link-to/pod-detail/example-01',
       search: { from: '1546340400000', to: '1546344000000' },
+      state: {},
+    });
+  });
+
+  it('should return the LinkProperties for assetType host', () => {
+    const { result } = renderHook(() => useNodeDetailsRedirect(), { wrapper });
+
+    const fromDateStrig = '2019-01-01T11:00:00Z';
+    const toDateStrig = '2019-01-01T12:00:00Z';
+
+    expect(
+      result.current.getNodeDetailUrl({
+        assetType: 'host',
+        assetId: 'example-01',
+        search: {
+          from: new Date(fromDateStrig).getTime(),
+          to: new Date(toDateStrig).getTime(),
+          name: 'example-01',
+        },
+      })
+    ).toStrictEqual({
+      app: 'metrics',
+      pathname: 'link-to/host-detail/example-01',
+      search: {
+        from: '1546340400000',
+        to: '1546344000000',
+        assetDetails: '(name:example-01)',
+      },
+      state: {},
     });
   });
 });

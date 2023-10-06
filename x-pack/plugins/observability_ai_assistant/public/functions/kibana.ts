@@ -50,7 +50,7 @@ export function registerKibanaFunction({
             description: 'The body of the request',
           },
         },
-        required: ['method', 'pathname', 'body'] as const,
+        required: ['method', 'pathname'] as const,
       },
     },
     ({ arguments: { method, pathname, body, query } }, signal) => {

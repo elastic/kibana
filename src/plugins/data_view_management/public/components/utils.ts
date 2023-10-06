@@ -37,7 +37,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
     const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;
-    const tags = getTags(idxPattern, isDefault);
+    const tags = getTags(idxPattern, isDefault, dataViewsService.getRollupsEnabled());
     const displayName = name ? name : title;
 
     return {
@@ -68,18 +68,24 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
   );
 }
 
-export const getTags = (indexPattern: DataViewListItem | DataView, isDefault: boolean) => {
+export const getTags = (
+  indexPattern: DataViewListItem | DataView,
+  isDefault: boolean,
+  rollupsEnabled: boolean
+) => {
   const tags = [];
   if (isDefault) {
     tags.push({
       key: 'default',
       name: defaultIndexPatternListName,
+      'data-test-subj': 'default-tag',
     });
   }
-  if (isRollup(indexPattern.type)) {
+  if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
       key: 'rollup',
       name: rollupIndexPatternListName,
+      'data-test-subj': 'rollup-tag',
     });
   }
   return tags;

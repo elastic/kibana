@@ -6,36 +6,18 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LinkAnchor, useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
-const AlertsLinkComponent = () => {
-  const getLinkProps = useGetLinkProps();
-  const onClick = useCallback((e) => {
-    // TODO: telemetry https://github.com/elastic/kibana/issues/163247
-  }, []);
-  const { onClick: onLinkClicked } = getLinkProps({
-    id: SecurityPageName.alerts,
-    onClick,
-  });
-  return (
+const AlertsButtonComponent = () => (
+  <LinkButton id={SecurityPageName.alerts} fill>
     <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.linkText"
-      defaultMessage="Visit the {link} now to confirm your organization is secure!"
-      values={{
-        link: (
-          <LinkAnchor onClick={onLinkClicked} id={SecurityPageName.alerts}>
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.link"
-              defaultMessage="alerts page"
-            />
-          </LinkAnchor>
-        ),
-      }}
+      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
+      defaultMessage="View alerts"
     />
-  );
-};
+  </LinkButton>
+);
 
-export const AlertsLink = React.memo(AlertsLinkComponent);
+export const AlertsButton = React.memo(AlertsButtonComponent);

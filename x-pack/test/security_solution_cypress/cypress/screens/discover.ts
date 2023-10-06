@@ -15,6 +15,7 @@ export const DISCOVER_DATA_VIEW_SWITCHER = {
   INPUT: getDataTestSubjectSelector('indexPattern-switcher--input'),
   GET_DATA_VIEW: (title: string) => `.euiSelectableListItem[role=option][title^="${title}"]`,
   CREATE_NEW: getDataTestSubjectSelector('dataview-create-new'),
+  TEXT_BASE_LANG_SWICTHER: getDataTestSubjectSelector('select-text-based-language-panel'),
 };
 
 export const DISCOVER_DATA_VIEW_EDITOR_FLYOUT = {
@@ -25,9 +26,13 @@ export const DISCOVER_DATA_VIEW_EDITOR_FLYOUT = {
   SAVE_DATA_VIEW_BTN: getDataTestSubjectSelector('saveIndexPatternButton'),
 };
 
-export const DISCOVER_QUERY_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
-  'unifiedQueryInput'
+export const DISCOVER_ESQL_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
+  'kibanaCodeEditor'
 )}`;
+
+export const DISCOVER_ESQL_INPUT_TEXT_CONTAINER = `${DISCOVER_ESQL_INPUT} .view-lines`;
+
+export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea:first`;
 
 export const DISCOVER_ADD_FILTER = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
   'addFilter'
@@ -45,7 +50,7 @@ export const DISCOVER_FIELDS_LOADING = getDataTestSubjectSelector(
 
 export const DISCOVER_DATA_GRID_UPDATING = getDataTestSubjectSelector('discoverDataGridUpdating');
 
-export const DISCOVER_DATA_GRID_LOADING = getDataTestSubjectSelector('discoverDataGridLoading');
+export const UNIFIED_DATA_TABLE_LOADING = getDataTestSubjectSelector('unifiedDataTableLoading');
 
 export const DISCOVER_NO_RESULTS = getDataTestSubjectSelector('discoverNoResults');
 
@@ -54,7 +59,7 @@ export const DISCOVER_TABLE = getDataTestSubjectSelector('docTable');
 export const GET_DISCOVER_DATA_GRID_CELL = (columnId: string, rowIndex: number) => {
   return `${DISCOVER_TABLE} ${getDataTestSubjectSelector(
     'dataGridRowCell'
-  )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .dscDiscoverGrid__cellValue`;
+  )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .unifiedDataTable__cellValue`;
 };
 
 export const GET_DISCOVER_DATA_GRID_CELL_HEADER = (columnId: string) =>

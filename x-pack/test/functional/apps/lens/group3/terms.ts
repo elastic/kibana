@@ -96,62 +96,128 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.closeDimensionEditor();
       });
     });
-    describe('sorting by custom metric', () => {
-      it('should allow sort by custom metric', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
-        await elasticChart.setNewChartUiDebugFlag(true);
-        await PageObjects.lens.goToTimeRange();
+    describe('rank by', () => {
+      describe('reset rank on metric change', () => {
+        it('should reset the ranking when using decimals on percentile', async () => {
+          await PageObjects.visualize.navigateToNewVisualization();
+          await PageObjects.visualize.clickVisType('lens');
 
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        });
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+            operation: 'terms',
+            field: 'geo.src',
+          });
 
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'geo.src',
-          keepOpen: true,
-        });
-        await find.clickByCssSelector(
-          'select[data-test-subj="indexPattern-terms-orderBy"] > option[value="custom"]'
-        );
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'percentile',
+            field: 'bytes',
+            keepOpen: true,
+          });
 
-        const fnTarget = await testSubjects.find('indexPattern-reference-function');
-        await comboBox.openOptionsList(fnTarget);
-        await comboBox.setElement(fnTarget, 'percentile');
+          await retry.try(async () => {
+            const value = '60.5';
+            // Can not use testSubjects because data-test-subj is placed range input and number input
+            const percentileInput = await PageObjects.lens.getNumericFieldReady(
+              'lns-indexPattern-percentile-input'
+            );
+            await percentileInput.clearValueWithKeyboard();
+            await percentileInput.type(value);
 
-        const fieldTarget = await testSubjects.find(
-          'indexPattern-reference-field-selection-row>indexPattern-dimension-field'
-        );
-        await comboBox.openOptionsList(fieldTarget);
-        await comboBox.setElement(fieldTarget, 'bytes');
+            const percentileValue = await percentileInput.getAttribute('value');
+            if (percentileValue !== value) {
+              throw new Error(
+                `[date-test-subj="lns-indexPattern-percentile-input"] not set to ${value}`
+              );
+            }
+          });
 
-        await retry.try(async () => {
-          // Can not use testSubjects because data-test-subj is placed range input and number input
-          const percentileInput = await PageObjects.lens.getNumericFieldReady(
-            'lns-indexPattern-percentile-input'
+          // close the toast about reset ranking
+          // note: this has also the side effect to close the dimension editor
+          await testSubjects.click('toastCloseButton');
+
+          await PageObjects.lens.openDimensionEditor(
+            'lnsXY_yDimensionPanel > lns-dimensionTrigger'
           );
-          await percentileInput.type('60');
 
-          const percentileValue = await percentileInput.getAttribute('value');
-          if (percentileValue !== '60') {
-            throw new Error('layerPanelTopHitsSize not set to 60');
-          }
+          await PageObjects.lens.selectOperation('percentile_rank');
+
+          await retry.try(async () => {
+            const value = '600.5';
+            const percentileRankInput = await testSubjects.find(
+              'lns-indexPattern-percentile_ranks-input'
+            );
+            await percentileRankInput.clearValueWithKeyboard();
+            await percentileRankInput.type(value);
+
+            const percentileRankValue = await percentileRankInput.getAttribute('value');
+            if (percentileRankValue !== value) {
+              throw new Error(
+                `[date-test-subj="lns-indexPattern-percentile_ranks-input"] not set to ${value}`
+              );
+            }
+          });
+          // note: this has also the side effect to close the dimension editor
+          await testSubjects.click('toastCloseButton');
         });
+      });
+      describe('sorting by custom metric', () => {
+        it('should allow sort by custom metric', async () => {
+          await PageObjects.visualize.navigateToNewVisualization();
+          await PageObjects.visualize.clickVisType('lens');
+          await elasticChart.setNewChartUiDebugFlag(true);
+          await PageObjects.lens.goToTimeRange();
 
-        await PageObjects.lens.waitForVisualization('xyVisChart');
-        await PageObjects.lens.closeDimensionEditor();
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'average',
+            field: 'bytes',
+          });
 
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
-          'Top 5 values of geo.src'
-        );
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+            operation: 'terms',
+            field: 'geo.src',
+            keepOpen: true,
+          });
+          await find.clickByCssSelector(
+            'select[data-test-subj="indexPattern-terms-orderBy"] > option[value="custom"]'
+          );
 
-        const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-        expect(data!.bars![0].bars[0].x).to.eql('BN');
-        expect(data!.bars![0].bars[0].y).to.eql(19265);
+          const fnTarget = await testSubjects.find('indexPattern-reference-function');
+          await comboBox.openOptionsList(fnTarget);
+          await comboBox.setElement(fnTarget, 'percentile');
+
+          const fieldTarget = await testSubjects.find(
+            'indexPattern-reference-field-selection-row>indexPattern-dimension-field'
+          );
+          await comboBox.openOptionsList(fieldTarget);
+          await comboBox.setElement(fieldTarget, 'bytes');
+
+          await retry.try(async () => {
+            // Can not use testSubjects because data-test-subj is placed range input and number input
+            const percentileInput = await PageObjects.lens.getNumericFieldReady(
+              'lns-indexPattern-percentile-input'
+            );
+            await percentileInput.type('60');
+
+            const percentileValue = await percentileInput.getAttribute('value');
+            if (percentileValue !== '60') {
+              throw new Error('layerPanelTopHitsSize not set to 60');
+            }
+          });
+
+          await PageObjects.lens.waitForVisualization('xyVisChart');
+          await PageObjects.lens.closeDimensionEditor();
+
+          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
+            'Top 5 values of geo.src'
+          );
+
+          const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+          expect(data!.bars![0].bars[0].x).to.eql('BN');
+          expect(data!.bars![0].bars[0].y).to.eql(19265);
+        });
       });
     });
 

@@ -615,7 +615,7 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 `i18n.locale` {ess-icon}::
 Set this value to change the {kib} interface language.
-Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
+Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]

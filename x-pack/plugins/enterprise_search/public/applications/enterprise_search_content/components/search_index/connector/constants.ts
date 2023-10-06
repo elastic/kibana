@@ -7,7 +7,7 @@
 
 import dedent from 'dedent';
 
-import { CONNECTOR_DEFINITIONS } from '../../../../../../common/connectors/connectors';
+import { CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../shared/doc_links';
 import { CONNECTOR_ICONS } from '../../../../shared/icons/connector_icons';
@@ -21,6 +21,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://learn.microsoft.com/azure/storage/common/authorize-data-access',
     externalDocsUrl: 'https://learn.microsoft.com/azure/storage/blobs/',
     icon: CONNECTOR_ICONS.azure_blob_storage,
+  },
+  box: {
+    docsUrl: docLinks.connectorsBox,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.box,
+    platinumOnly: true,
   },
   confluence: {
     docsUrl: docLinks.connectorsConfluence,
@@ -114,6 +121,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: 'https://docs.oracle.com/database/oracle/oracle-database/',
     icon: CONNECTOR_ICONS.oracle,
   },
+  outlook: {
+    docsUrl: docLinks.connectorsOutlook,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.outlook,
+    platinumOnly: true,
+  },
   postgresql: {
     docsUrl: docLinks.connectorsPostgreSQL,
     externalAuthDocsUrl: 'https://www.postgresql.org/docs/15/auth-methods.html',
@@ -160,6 +174,20 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.slack,
     platinumOnly: true,
   },
+  teams: {
+    docsUrl: docLinks.connectorsTeams,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.teams,
+    platinumOnly: true,
+  },
+  zoom: {
+    docsUrl: docLinks.connectorsZoom,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.zoom,
+    platinumOnly: true,
+  },
 };
 
 export const CONNECTORS = CONNECTOR_DEFINITIONS.map((connector) => ({
@@ -197,6 +225,6 @@ export const getConnectorTemplate = ({
 }
 
   elasticsearch:
-    host: "${host || 'https://locahost:9200'}"
+    host: "${host || 'http://localhost:9200'}"
     api_key: "${apiKeyData?.encoded || ''}"
 `;

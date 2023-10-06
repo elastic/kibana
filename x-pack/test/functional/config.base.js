@@ -168,6 +168,9 @@ export default async function ({ readConfigFile }) {
       observability: {
         pathname: '/app/observability',
       },
+      observabilityLogExplorer: {
+        pathname: '/app/observability-log-explorer',
+      },
       connectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
       },
@@ -556,7 +559,7 @@ export default async function ({ readConfigFile }) {
 
         index_management_user: {
           elasticsearch: {
-            cluster: ['monitor', 'manage_index_templates'],
+            cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
             indices: [
               {
                 names: ['*'],

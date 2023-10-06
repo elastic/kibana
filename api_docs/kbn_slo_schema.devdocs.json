@@ -630,6 +630,36 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.DeleteSLOInstancesInput",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteSLOInstancesInput",
+        "description": [],
+        "signature": [
+          "{ list: { sloId: string; instanceId: string; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.DeleteSLOInstancesParams",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteSLOInstancesParams",
+        "description": [],
+        "signature": [
+          "{ list: { sloId: string; instanceId: string; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.FetchHistoricalSummaryParams",
         "type": "Type",
         "tags": [],
@@ -2075,6 +2105,32 @@
           "; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.deleteSLOInstancesParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "deleteSLOInstancesParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; instanceId: ",
+          "StringC",
+          "; }>>; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

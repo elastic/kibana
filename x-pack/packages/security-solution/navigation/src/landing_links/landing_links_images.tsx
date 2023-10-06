@@ -89,7 +89,7 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
                         </EuiTitle>
                         {isBeta && <BetaBadge text={betaOptions?.text} />}
                       </div>
-                      <EuiText size="s" color="text" css={styles.description}>
+                      <EuiText size="s" css={styles.description}>
                         {description}
                       </EuiText>
                     </EuiFlexItem>

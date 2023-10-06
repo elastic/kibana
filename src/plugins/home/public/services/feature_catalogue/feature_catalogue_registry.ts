@@ -53,6 +53,8 @@ export interface FeatureCatalogueSolution {
   readonly path: string;
   /** An ordinal used to sort solutions relative to one another for display on the home page */
   readonly order: number;
+  /** Optional function to control visibility of this solution. */
+  readonly isVisible?: (capabilities: Capabilities) => boolean;
 }
 
 export class FeatureCatalogueRegistry {
@@ -116,7 +118,10 @@ export class FeatureCatalogueRegistry {
     }
     const capabilities = this.capabilities;
     return [...this.solutions.values()]
-      .filter((solution) => capabilities.catalogue[solution.id] !== false)
+      .filter(
+        (solution) =>
+          solution.isVisible?.(capabilities) ?? capabilities.catalogue[solution.id] !== false
+      )
       .sort(compareByKey('title'));
   }
 

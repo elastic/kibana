@@ -6,11 +6,12 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { esQueryRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const commonScreenshots = getService('commonScreenshots');
-  const find = getService('find');
+  const comboBox = getService('comboBox');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
@@ -55,10 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('queryFormType_esQuery');
       const indexSelector = await testSubjects.find('selectIndexExpression');
       await indexSelector.click();
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.type('kibana_sample_data_logs ');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await testSubjects.click('closePopover');
@@ -106,7 +104,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1500
       );
+      // Create an email connector action
+      await testSubjects.click('.email-alerting-ActionTypeSelectOption');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-query-matched',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await testSubjects.click('messageAddVariableButton');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-variables',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('cancelSaveRuleButton');
+    });
+
+    it('example elasticsearch query rule conditions and actions', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      // Edit the rule that was created as part of startup
+      await testSubjects.setValue('ruleSearchField', esQueryRuleName);
+      await browser.pressKeys(browser.keys.ENTER);
+      const actionPanel = await testSubjects.find('collapsedItemActions');
+      await actionPanel.click();
+      const editRuleMenu = await testSubjects.find('editRule');
+      await editRuleMenu.click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-conditions',
+        screenshotDirectories,
+        1400,
+        1700
+      );
+      /* Reposition so that the details are visible for the first action */
+      await testSubjects.scrollIntoView('alertActionAccordion-0');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-summary',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      /* Reposition so that the details are visible for the second action */
+      await testSubjects.scrollIntoView('alertActionAccordion-1');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-recovery-action',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
+      await cancelEditButton.click();
+      const confirmCancelButton = await testSubjects.find('confirmModalConfirmButton');
+      await confirmCancelButton.click();
     });
   });
 }

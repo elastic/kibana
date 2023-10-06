@@ -6,6 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { debug } from '../../../common/debug_log';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 
@@ -17,7 +18,11 @@ export async function collectServices({
   afterKey,
   filters = [],
 }: CollectorOptions) {
-  const { traces, serviceMetrics, serviceLogs } = sourceIndices;
+  if (!sourceIndices?.apm) {
+    throw new Error('missing required apm indices');
+  }
+
+  const { transaction, error, metric } = sourceIndices.apm;
   const musts: estypes.QueryDslQueryContainer[] = [
     ...filters,
     {
@@ -28,7 +33,7 @@ export async function collectServices({
   ];
 
   const dsl: estypes.SearchRequest = {
-    index: [traces, serviceMetrics, serviceLogs],
+    index: [transaction, error, metric],
     size: 0,
     _source: false,
     query: {
@@ -89,6 +94,8 @@ export async function collectServices({
   if (afterKey) {
     dsl.aggs!.services!.composite!.after = afterKey;
   }
+
+  debug(dsl);
 
   const esResponse = await client.search(dsl);
 

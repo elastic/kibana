@@ -141,6 +141,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -152,6 +153,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     context: 'test',
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
+  validLegacyConsumers: [],
 };
 
 export const mockRunNowResponse = {
@@ -395,13 +397,16 @@ export const generateEnqueueFunctionInput = ({
   isBulk = false,
   isResolved,
   foo,
+  actionTypeId,
 }: {
   id: string;
   isBulk?: boolean;
   isResolved?: boolean;
   foo?: boolean;
+  actionTypeId?: string;
 }) => {
   const input = {
+    actionTypeId: actionTypeId || 'action',
     apiKey: 'MTIzOmFiYw==',
     executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
     id,

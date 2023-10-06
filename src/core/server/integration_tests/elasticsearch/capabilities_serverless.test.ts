@@ -13,9 +13,7 @@ import {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 
-// skipped because test serverless ES nodes are currently using static ports
-// causing parallel jest runners to fail for obvious port conflicts reasons.
-describe.skip('ES capabilities for serverless ES', () => {
+describe('ES capabilities for serverless ES', () => {
   let serverlessES: TestServerlessESUtils;
   let client: ElasticsearchClient;
 

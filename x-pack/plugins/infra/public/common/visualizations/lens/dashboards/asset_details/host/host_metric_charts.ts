@@ -9,19 +9,20 @@ import {
   diskSpaceUsageAvailable,
   diskThroughputReadWrite,
   diskIOReadWrite,
-  diskSpaceUsageByMountPoint,
+  diskUsageByMountPoint,
 } from '../metric_charts/disk';
 import { logRate } from '../metric_charts/log';
 import { memoryUsage, memoryUsageBreakdown } from '../metric_charts/memory';
 import { rxTx } from '../metric_charts/network';
-import type { XYConfig } from '../metric_charts/types';
+import type { XYConfig } from '../../types';
 
-export const hostMetricCharts: XYConfig[] = [
+export const hostMetricFlyoutCharts: XYConfig[] = [
   cpuUsage,
   memoryUsage,
   normalizedLoad1m,
   logRate,
   diskSpaceUsageAvailable,
+  diskUsageByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,
@@ -36,7 +37,7 @@ export const hostMetricChartsFullPage: XYConfig[] = [
   loadBreakdown,
   logRate,
   diskSpaceUsageAvailable,
-  diskSpaceUsageByMountPoint,
+  diskUsageByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,

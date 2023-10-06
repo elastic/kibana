@@ -8,5 +8,4 @@
 export type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
 } from '@kbn/timelines-plugin/common';

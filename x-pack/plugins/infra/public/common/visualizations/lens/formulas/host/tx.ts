@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const tx: FormulaValueConfig = {
-  label: 'Network Outbound (TX)',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.tx', {
+    defaultMessage: 'Network Outbound (TX)',
+  }),
   value:
     "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
   format: {
@@ -17,4 +20,5 @@ export const tx: FormulaValueConfig = {
       decimals: 1,
     },
   },
+  timeScale: 's',
 };

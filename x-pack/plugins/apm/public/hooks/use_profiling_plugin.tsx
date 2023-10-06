@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { useFetcher } from './use_fetcher';
 
 export function useProfilingPlugin() {
   const { plugins, core } = useApmPluginContext();
@@ -15,28 +15,20 @@ export function useProfilingPlugin() {
     apmEnableProfilingIntegration,
     false
   );
-  const [isProfilingPluginInitialized, setIsProfilingPluginInitialized] =
-    useState<boolean | undefined>();
 
-  useEffect(() => {
-    async function fetchIsProfilingSetup() {
-      if (!plugins.profiling) {
-        setIsProfilingPluginInitialized(false);
-        return;
-      }
-      const resp = await plugins.profiling.hasSetup();
-      setIsProfilingPluginInitialized(resp);
-    }
+  const { data } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/profiling/status');
+  }, []);
 
-    fetchIsProfilingSetup();
-  }, [plugins.profiling]);
+  const isProfilingAvailable =
+    isProfilingIntegrationEnabled && data?.initialized;
 
   return {
-    isProfilingPluginInitialized,
-    profilingLocators:
-      isProfilingIntegrationEnabled && isProfilingPluginInitialized
-        ? plugins.profiling?.locators
-        : undefined,
+    profilingLocators: isProfilingAvailable
+      ? plugins.observabilityShared.locators.profiling
+      : undefined,
+    isProfilingPluginInitialized: data?.initialized,
     isProfilingIntegrationEnabled,
+    isProfilingAvailable,
   };
 }

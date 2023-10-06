@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiIcon, IconType } from '@elastic/eui';
+import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useBoolean } from '../../../../hooks/use_boolean';
@@ -13,10 +13,14 @@ import { useBoolean } from '../../../../hooks/use_boolean';
 export const Popover = ({
   children,
   icon,
+  iconColor,
+  iconSize,
   ...props
 }: {
   children: React.ReactNode;
   icon: IconType;
+  iconColor?: IconColor;
+  iconSize?: IconSize;
   'data-test-subj'?: string;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
@@ -27,6 +31,8 @@ export const Popover = ({
         <EuiIcon
           data-test-subj={props['data-test-subj']}
           type={icon}
+          color={iconColor ?? 'text'}
+          size={iconSize ?? 'original'}
           onClick={togglePopover}
           css={css`
             cursor: pointer;

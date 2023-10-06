@@ -4,38 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
-import type {
-  UpsellingService,
-  PageUpsellings,
-  SectionUpsellings,
-  UpsellingSectionId,
-} from '@kbn/security-solution-plugin/public';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type {
   MessageUpsellings,
+  PageUpsellings,
+  SectionUpsellings,
   UpsellingMessageId,
+  UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
-import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
+import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+import {
+  EndpointPolicyProtectionsLazy,
+  RuleDetailsEndpointExceptionsLazy,
+} from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import {
+  EndpointExceptionsDetailsUpsellingLazy,
+  EntityAnalyticsUpsellingLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
-  EntityAnalyticsUpsellingLazy,
 } from './lazy_upselling';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 
 interface UpsellingsConfig {
-  pli: AppFeatureKey;
+  pli: AppFeatureKeyType;
   component: React.ComponentType;
 }
 
 interface UpsellingsMessageConfig {
-  pli: AppFeatureKey;
+  pli: AppFeatureKeyType;
   message: string;
   id: UpsellingMessageId;
 }
@@ -86,7 +90,7 @@ export const registerUpsellings = (
   upselling.setMessages(upsellingMessagesToRegister);
 };
 
-// Upsellings for entire pages, linked to a SecurityPageName
+// Upselling for entire pages, linked to a SecurityPageName
 export const upsellingPages: UpsellingPages = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
@@ -105,9 +109,16 @@ export const upsellingPages: UpsellingPages = [
       <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
     ),
   },
+  {
+    pageName: SecurityPageName.exceptions,
+    pli: AppFeatureKey.endpointExceptions,
+    component: () => (
+      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={AppFeatureKey.endpointExceptions} />
+    ),
+  },
 ];
 
-// Upsellings for sections, linked by arbitrary ids
+// Upselling for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
@@ -124,9 +135,14 @@ export const upsellingSections: UpsellingSections = [
     pli: AppFeatureKey.endpointPolicyProtections,
     component: EndpointPolicyProtectionsLazy,
   },
+  {
+    id: 'ruleDetailsEndpointExceptions',
+    pli: AppFeatureKey.endpointExceptions,
+    component: RuleDetailsEndpointExceptionsLazy,
+  },
 ];
 
-// Upsellings for sections, linked by arbitrary ids
+// Upselling for sections, linked by arbitrary ids
 export const upsellingMessages: UpsellingMessages = [
   {
     id: 'investigation_guide',

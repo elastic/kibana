@@ -10,11 +10,15 @@ import { useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -52,6 +56,29 @@ export interface HistogramProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
+
+const computeTotalHits = (
+  hasLensSuggestions: boolean,
+  adapterTables:
+    | {
+        [key: string]: Datatable;
+      }
+    | undefined,
+  isPlainRecord?: boolean
+) => {
+  if (isPlainRecord && hasLensSuggestions) {
+    return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
+  } else if (isPlainRecord && !hasLensSuggestions) {
+    // ES|QL histogram case
+    let rowsCount = 0;
+    Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
+      rowsCount += r.rows;
+    });
+    return rowsCount;
+  } else {
+    return adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
+  }
+};
 
 export function Histogram({
   services: { data, lens, uiSettings },
@@ -95,7 +122,11 @@ export function Histogram({
   }, [attributes, containerHeight, containerWidth]);
 
   const onLoad = useStableCallback(
-    (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    (
+      isLoading: boolean,
+      adapters: Partial<DefaultInspectorAdapters> | undefined,
+      lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+    ) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
       const json = lensRequest?.response?.json as
@@ -113,10 +144,7 @@ export function Histogram({
       }
 
       const adapterTables = adapters?.tables?.tables;
-      const totalHits =
-        isPlainRecord && hasLensSuggestions
-          ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
-          : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
+      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
@@ -135,7 +163,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ adapters: adapters ?? {} });
+      onChartLoad?.({ adapters: adapters ?? {}, embeddableOutput$: lensEmbeddableOutput$ });
     }
   );
 

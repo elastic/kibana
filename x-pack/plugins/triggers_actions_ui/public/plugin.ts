@@ -26,6 +26,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -161,6 +162,7 @@ interface PluginsStart {
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
 }
@@ -287,6 +289,7 @@ export class Plugin
           alertsTableConfigurationRegistry,
           kibanaFeatures,
           licensing: pluginsStart.licensing,
+          expressions: pluginsStart.expressions,
         });
       },
     });

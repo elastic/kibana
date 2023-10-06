@@ -83,6 +83,11 @@ export const allowedExperimentalValues = Object.freeze({
    **/
   alertsPageFiltersEnabled: true,
 
+  /**
+   * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
+   */
+  assistantModelEvaluation: false,
+
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -92,18 +97,23 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
    */
-  riskScoringPersistence: false,
+  riskScoringPersistence: true,
 
   /**
    * Enables experimental Entity Analytics HTTP endpoints
    */
-  riskScoringRoutesEnabled: false,
+  riskScoringRoutesEnabled: true,
   /*
    *
    * Enables Discover embedded within timeline
    *
    * */
-  discoverInTimeline: false,
+  discoverInTimeline: true,
+
+  /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page

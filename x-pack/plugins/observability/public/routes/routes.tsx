@@ -28,6 +28,7 @@ import {
   LANDING_PATH,
   OVERVIEW_PATH,
   ROOT_PATH,
+  RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
   SLOS_PATH,
@@ -104,6 +105,13 @@ export const routes = {
   [RULES_PATH]: {
     handler: () => {
       return <RulesPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [RULES_LOGS_PATH]: {
+    handler: () => {
+      return <RulesPage activeTab="logs" />;
     },
     params: {},
     exact: true,

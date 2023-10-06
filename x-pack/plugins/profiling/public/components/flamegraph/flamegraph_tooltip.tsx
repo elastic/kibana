@@ -18,12 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   isRoot: boolean;
@@ -57,6 +57,7 @@ export function FlameGraphTooltip({
   onShowMoreClick,
 }: Props) {
   const theme = useEuiTheme();
+  const calculateImpactEstimates = useCalculateImpactEstimate();
 
   const impactEstimates = calculateImpactEstimates({
     countExclusive,
@@ -160,7 +161,12 @@ export function FlameGraphTooltip({
                 style={{ background: theme.euiTheme.border.color }}
               />
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
+                <EuiButtonEmpty
+                  data-test-subj="profilingFlameGraphTooltipButton"
+                  size="s"
+                  iconType="inspect"
+                  onClick={onShowMoreClick}
+                >
                   <EuiText size="xs">
                     {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
                       defaultMessage: `Show more information`,

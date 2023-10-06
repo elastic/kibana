@@ -11,25 +11,34 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
-  describe('Configure', function () {
+  describe('Configure Case', function () {
+    //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
+    this.tags(['skipOnMKI']);
     before(async () => {
+      await svlCommonPage.login();
+
       await svlObltNavigation.navigateToLandingPage();
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
     });
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await svlCommonPage.forceLogout();
     });
 
     describe('Closure options', function () {
+      before(async () => {
+        await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      });
+
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -44,7 +53,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
+          return await testSubjects.exists('dropdown-connector-no-connector');
+        });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {

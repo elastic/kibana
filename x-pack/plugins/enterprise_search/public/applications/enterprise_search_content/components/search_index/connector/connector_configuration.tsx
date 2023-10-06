@@ -26,7 +26,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
+
 import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';

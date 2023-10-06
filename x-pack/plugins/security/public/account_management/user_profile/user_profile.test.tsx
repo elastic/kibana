@@ -266,9 +266,8 @@ describe('useUserProfileForm', () => {
       const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
       expect(themeOptions).toHaveLength(3);
       themeOptions.forEach((option) => {
-        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
-          false
-        );
+        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
+        expect(menuItemEl.className).not.toContain('disabled');
       });
     });
 
@@ -353,9 +352,8 @@ describe('useUserProfileForm', () => {
       const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
       expect(themeOptions).toHaveLength(3);
       themeOptions.forEach((option) => {
-        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
-          true
-        );
+        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
+        expect(menuItemEl.className).toContain('disabled');
       });
     });
 
@@ -391,9 +389,8 @@ describe('useUserProfileForm', () => {
       const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
       expect(themeOptions).toHaveLength(3);
       themeOptions.forEach((option) => {
-        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
-          true
-        );
+        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
+        expect(menuItemEl.className).toContain('disabled');
       });
     });
   });

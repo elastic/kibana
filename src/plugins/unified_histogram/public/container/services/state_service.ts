@@ -7,11 +7,10 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramServices } from '../../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -42,9 +41,13 @@ export interface UnifiedHistogramState {
    */
   lensRequestAdapter: RequestAdapter | undefined;
   /**
-   * The current Lens request table
+   * The current Lens adapters
    */
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  /**
+   * Lens embeddable output observable
+   */
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * The current time interval of the chart
    */
@@ -114,9 +117,12 @@ export interface UnifiedHistogramStateService {
    */
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
   /**
-   * Sets the current Lens tables
+   * Sets the current Lens adapters
    */
-  setLensTablesAdapter: (lensTablesAdapter: Record<string, Datatable> | undefined) => void;
+  setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
+  setLensEmbeddableOutput$: (
+    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+  ) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -190,7 +196,6 @@ export const createStateService = (
     setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
     },
-
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },
@@ -199,8 +204,13 @@ export const createStateService = (
       updateState({ lensRequestAdapter });
     },
 
-    setLensTablesAdapter: (lensTablesAdapter: Record<string, Datatable> | undefined) => {
-      updateState({ lensTablesAdapter });
+    setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
+      updateState({ lensAdapters });
+    },
+    setLensEmbeddableOutput$: (
+      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+    ) => {
+      updateState({ lensEmbeddableOutput$ });
     },
 
     setTotalHits: (totalHits: {

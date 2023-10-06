@@ -15,57 +15,64 @@ import { buildRouteValidation, buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const updateListItemRoute = (router: ListsPluginRouter): void => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
-      validate: {
-        body: buildRouteValidation(updateListItemRequest),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: buildRouteValidation(updateListItemRequest),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const { value, id, meta, _version } = request.body;
-        const lists = await getListClient(context);
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const { value, id, meta, _version } = request.body;
+          const lists = await getListClient(context);
 
-        const dataStreamExists = await lists.getListItemDataStreamExists();
-        // needs to be migrated to data stream if index exists
-        if (!dataStreamExists) {
-          const indexExists = await lists.getListItemIndexExists();
-          if (indexExists) {
-            await lists.migrateListItemIndexToDataStream();
+          const dataStreamExists = await lists.getListItemDataStreamExists();
+          // needs to be migrated to data stream if index exists
+          if (!dataStreamExists) {
+            const indexExists = await lists.getListItemIndexExists();
+            if (indexExists) {
+              await lists.migrateListItemIndexToDataStream();
+            }
           }
-        }
 
-        const listItem = await lists.updateListItem({
-          _version,
-          id,
-          meta,
-          value,
-        });
-        if (listItem == null) {
-          return siemResponse.error({
-            body: `list item id: "${id}" not found`,
-            statusCode: 404,
+          const listItem = await lists.updateListItem({
+            _version,
+            id,
+            meta,
+            value,
           });
-        } else {
-          const [validated, errors] = validate(listItem, updateListItemResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          if (listItem == null) {
+            return siemResponse.error({
+              body: `list item id: "${id}" not found`,
+              statusCode: 404,
+            });
           } else {
-            return response.ok({ body: validated ?? {} });
+            const [validated, errors] = validate(listItem, updateListItemResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

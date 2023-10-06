@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -94,6 +95,7 @@ export function registerErrorCountRuleType({
       actionVariables: {
         context: errorCountActionVariables,
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -117,7 +119,7 @@ export function registerErrorCountRuleType({
 
         const indices = await getApmIndices(savedObjectsClient);
 
-        const termFilterQuery = !ruleParams.searchConfiguration
+        const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
           ? [
               ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                 queryEmptyString: false,

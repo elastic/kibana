@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   getAnalysisType,
   INDEX_CREATED_BY,
@@ -18,23 +18,23 @@ import {
   type AnalyticsMapNodeElement,
   type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
-import { flatten } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { MlFeatures } from '../../../common/constants/app';
+import type { ModelService } from '../model_management/models_provider';
 import { modelsProvider } from '../model_management';
 import {
-  ExtendAnalyticsMapArgs,
-  GetAnalyticsMapArgs,
-  InitialElementsReturnType,
+  type ExtendAnalyticsMapArgs,
+  type GetAnalyticsMapArgs,
+  type InitialElementsReturnType,
+  type NextLinkReturnType,
+  type GetAnalyticsJobIdArg,
+  type GetAnalyticsModelIdArg,
   isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  NextLinkReturnType,
-  GetAnalyticsJobIdArg,
-  GetAnalyticsModelIdArg,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
@@ -42,41 +42,27 @@ import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
-  private _transforms?: TransformGetTransformTransformSummary[];
+  private _modelsProvider: ModelService;
 
-  constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
+  constructor(
+    private readonly _mlClient: MlClient,
+    private readonly _client: IScopedClusterClient,
+    private readonly _enabledFeatures: MlFeatures
+  ) {
+    this._modelsProvider = modelsProvider(this._client);
+  }
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE }),
-      this._mlClient.getDataFrameAnalytics({ size: 1000 }),
+      this._enabledFeatures.nlp || this._enabledFeatures.dfa
+        ? this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE })
+        : { trained_model_configs: [] },
+      this._enabledFeatures.dfa
+        ? this._mlClient.getDataFrameAnalytics({ size: 1000 })
+        : { data_frame_analytics: [] },
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;
-  }
-
-  private async initTransformData() {
-    if (!this._transforms) {
-      try {
-        const body = await this._client.asCurrentUser.transform.getTransform({
-          size: 1000,
-        });
-        this._transforms = body.transforms;
-        return body.transforms;
-      } catch (e) {
-        if (e.meta?.statusCode !== 403) {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
-      }
-    }
-  }
-
-  private getNodeId(
-    elementOriginalId: string,
-    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
-  ): string {
-    return `${elementOriginalId}-${nodeType}`;
   }
 
   private isDuplicateElement(analyticsId: string, elements: MapElements[]): boolean {
@@ -599,8 +585,12 @@ export class AnalyticsManager {
       }
 
       if (modelId && model) {
-        // First, find information about the trained model
-        result.elements.push({
+        const pipelinesAndIndicesResults =
+          await this._modelsProvider.getModelsPipelinesAndIndicesMap(modelId, {
+            withIndices: true,
+          });
+        // Adding information about the trained model
+        pipelinesAndIndicesResults.elements.push({
           data: {
             id: modelNodeId,
             label: modelId,
@@ -608,182 +598,9 @@ export class AnalyticsManager {
             isRoot: true,
           },
         });
-        result.details[modelNodeId] = model;
+        pipelinesAndIndicesResults.details[modelNodeId] = model;
 
-        let pipelinesResponse;
-        let indicesSettings;
-        try {
-          // Then, find the pipelines that have the trained model set as index.default_pipelines
-          pipelinesResponse = await modelsProvider(this._client).getModelsPipelines([modelId]);
-        } catch (e) {
-          // Possible that the user doesn't have permissions to view ingest pipelines
-          // If so, gracefully exit
-          if (e.meta?.statusCode !== 403) {
-            // eslint-disable-next-line no-console
-            console.error(e);
-          }
-
-          return result;
-        }
-
-        const pipelines = pipelinesResponse?.get(modelId);
-
-        if (pipelines) {
-          const pipelineIds = new Set(Object.keys(pipelines));
-          for (const pipelineId of pipelineIds) {
-            const pipelineNodeId = `${pipelineId}-${JOB_MAP_NODE_TYPES.INGEST_PIPELINE}`;
-            result.details[pipelineNodeId] = pipelines[pipelineId];
-
-            result.elements.push({
-              data: {
-                id: pipelineNodeId,
-                label: pipelineId,
-                type: JOB_MAP_NODE_TYPES.INGEST_PIPELINE,
-              },
-            });
-
-            result.elements.push({
-              data: {
-                id: `${modelNodeId}~${pipelineNodeId}`,
-                source: modelNodeId,
-                target: pipelineNodeId,
-              },
-            });
-          }
-          const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
-
-          let indicesPermissions;
-          try {
-            indicesSettings = await this._client.asInternalUser.indices.getSettings();
-            const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
-              index: [
-                {
-                  names: Object.keys(indicesSettings),
-                  privileges: ['read'],
-                },
-              ],
-            });
-            indicesPermissions = hasPrivilegesResponse.index;
-          } catch (e) {
-            // Possible that the user doesn't have permissions to view
-            // If so, gracefully exit
-            if (e.meta?.statusCode !== 403) {
-              // eslint-disable-next-line no-console
-              console.error(e);
-            }
-            return result;
-          }
-
-          for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
-            if (
-              settings?.index?.default_pipeline &&
-              pipelineIds.has(settings.index.default_pipeline) &&
-              indicesPermissions[indexName]?.read === true
-            ) {
-              if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
-                pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
-              } else {
-                pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
-              }
-            }
-          }
-
-          for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
-            const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);
-
-            for (const destinationIndexId of indexIds) {
-              const destinationIndexNodeId = this.getNodeId(
-                destinationIndexId,
-                JOB_MAP_NODE_TYPES.INDEX
-              );
-
-              const destinationIndexDetails = await this.getIndexData(destinationIndexId);
-              result.details[destinationIndexNodeId] = {
-                ...destinationIndexDetails,
-                ml_inference_models: [modelId],
-              };
-
-              result.elements.push({
-                data: {
-                  id: destinationIndexNodeId,
-                  label: destinationIndexId,
-                  type: JOB_MAP_NODE_TYPES.INDEX,
-                },
-              });
-
-              result.elements.push({
-                data: {
-                  id: `${pipelineNodeId}~${destinationIndexNodeId}`,
-                  source: pipelineNodeId,
-                  target: destinationIndexNodeId,
-                },
-              });
-            }
-          }
-
-          const destinationIndices = flatten(Object.values(pipelineIdsToDestinationIndices));
-
-          // From these destination indices, see if there's any transforms that have the indexId as the source destination index
-          if (destinationIndices.length > 0) {
-            const transforms = await this.initTransformData();
-
-            if (!transforms) return result;
-
-            for (const destinationIndex of destinationIndices) {
-              const destinationIndexNodeId = `${destinationIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
-
-              const foundTransform = transforms?.find((t) => {
-                const transformSourceIndex = Array.isArray(t.source.index)
-                  ? t.source.index[0]
-                  : t.source.index;
-                return transformSourceIndex === destinationIndex;
-              });
-              if (foundTransform) {
-                const transformDestIndex = foundTransform.dest.index;
-                const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
-                const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
-
-                const destIndex = await this.getIndexData(transformDestIndex);
-                result.details[transformNodeId] = foundTransform;
-                result.details[transformDestIndexNodeId] = destIndex;
-
-                result.elements.push(
-                  {
-                    data: {
-                      id: transformNodeId,
-                      label: foundTransform.id,
-                      type: JOB_MAP_NODE_TYPES.TRANSFORM,
-                    },
-                  },
-                  {
-                    data: {
-                      id: transformDestIndexNodeId,
-                      label: transformDestIndex,
-                      type: JOB_MAP_NODE_TYPES.INDEX,
-                    },
-                  }
-                );
-
-                result.elements.push(
-                  {
-                    data: {
-                      id: `${destinationIndexNodeId}~${transformNodeId}`,
-                      source: destinationIndexNodeId,
-                      target: transformNodeId,
-                    },
-                  },
-                  {
-                    data: {
-                      id: `${transformNodeId}~${transformDestIndexNodeId}`,
-                      source: transformNodeId,
-                      target: transformDestIndexNodeId,
-                    },
-                  }
-                );
-              }
-            }
-          }
-        }
+        return pipelinesAndIndicesResults;
       }
     } catch (error) {
       result.error = error.message || 'An error occurred fetching map';

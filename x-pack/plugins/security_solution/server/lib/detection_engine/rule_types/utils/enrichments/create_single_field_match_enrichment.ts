@@ -89,7 +89,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     );
     return eventsMapById;
   } catch (error) {
-    logger.error(`Enrichment ${name}: throw error ${error}`);
+    logger.error(`Enrichment ${name} failed: ${error}`);
     return {};
   }
 };

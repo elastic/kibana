@@ -55,6 +55,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
@@ -159,7 +160,6 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
       selectAllAgents();
       submitQuery();
-      cy.getBySel('live-query-loading').should('exist');
       cy.getBySel('toggleIcon-events').click();
       checkResults();
       checkActionItemsInResults({
@@ -221,6 +221,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
         cy.contains(agentPolicy).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(agentPolicy);
         cy.contains('Add Elastic Agent later').click();

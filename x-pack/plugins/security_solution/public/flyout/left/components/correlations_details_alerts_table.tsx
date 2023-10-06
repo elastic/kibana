@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useCallback } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React, { type VFC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../common/types';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import * as i18n from './translations';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
@@ -26,28 +29,70 @@ const dataProviderLimit = 5;
 export const columns = [
   {
     field: '@timestamp',
-    name: i18n.CORRELATIONS_TIMESTAMP_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
+        defaultMessage="Timestamp"
+      />
+    ),
     truncateText: true,
     dataType: 'date' as const,
-    render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
+    render: (value: string) => {
+      const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
+      return (
+        <CellTooltipWrapper tooltip={date}>
+          <span>{date}</span>
+        </CellTooltipWrapper>
+      );
+    },
   },
   {
     field: ALERT_RULE_NAME,
-    name: i18n.CORRELATIONS_RULE_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
+        defaultMessage="Rule"
+      />
+    ),
     truncateText: true,
+    render: (value: string) => (
+      <CellTooltipWrapper tooltip={value}>
+        <span>{value}</span>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: ALERT_REASON,
-    name: i18n.CORRELATIONS_REASON_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
+        defaultMessage="Reason"
+      />
+    ),
     truncateText: true,
+    render: (value: string) => (
+      <CellTooltipWrapper tooltip={value} anchorPosition="left">
+        <span>{value}</span>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: 'kibana.alert.severity',
-    name: i18n.CORRELATIONS_SEVERITY_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
+        defaultMessage="Severity"
+      />
+    ),
     truncateText: true,
     render: (value: string) => {
       const decodedSeverity = Severity.decode(value);
-      return isRight(decodedSeverity) ? <SeverityBadge value={decodedSeverity.right} /> : value;
+      const renderValue = isRight(decodedSeverity) ? (
+        <SeverityBadge value={decodedSeverity.right} />
+      ) : (
+        <p>{value}</p>
+      );
+      return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
     },
   },
 ];
@@ -56,7 +101,7 @@ export interface CorrelationsDetailsAlertsTableProps {
   /**
    * Text to display in the ExpandablePanel title section
    */
-  title: string;
+  title: ReactElement;
   /**
    * Whether the table is loading
    */
@@ -74,6 +119,10 @@ export interface CorrelationsDetailsAlertsTableProps {
    */
   eventId: string;
   /**
+   * No data message to render if the table is empty
+   */
+  noItemsMessage?: ReactNode;
+  /**
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
@@ -82,12 +131,13 @@ export interface CorrelationsDetailsAlertsTableProps {
 /**
  * Renders paginated alert array based on the provided alertIds
  */
-export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTableProps> = ({
+export const CorrelationsDetailsAlertsTable: VFC<CorrelationsDetailsAlertsTableProps> = ({
   title,
   loading,
   alertIds,
   scopeId,
   eventId,
+  noItemsMessage,
   'data-test-subj': dataTestSubj,
 }) => {
   const {
@@ -142,18 +192,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       header={{
         title,
         iconType: 'warning',
-        headerContent: (
-          <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
-            <InvestigateInTimelineButton
-              dataProviders={dataProviders}
-              filters={filters}
-              asEmptyButton
-              iconType="timeline"
-            >
-              {ACTION_INVESTIGATE_IN_TIMELINE}
-            </InvestigateInTimelineButton>
-          </div>
-        ),
+        headerContent:
+          alertIds && alertIds.length && alertIds.length > 0 ? (
+            <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
+              <InvestigateInTimelineButton
+                dataProviders={dataProviders}
+                filters={filters}
+                asEmptyButton
+                iconType="timeline"
+              >
+                {ACTION_INVESTIGATE_IN_TIMELINE}
+              </InvestigateInTimelineButton>
+            </div>
+          ) : null,
       }}
       content={{ error }}
       expand={{
@@ -170,6 +221,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         pagination={paginationConfig}
         sorting={sorting}
         onChange={onTableChange}
+        noItemsMessage={noItemsMessage}
       />
     </ExpandablePanel>
   );
@@ -180,7 +232,12 @@ const getFilters = (alertIds?: string[]) => {
     return [
       {
         meta: {
-          alias: i18n.CORRELATIONS_DETAILS_TABLE_FILTER,
+          alias: i18n.translate(
+            'xpack.securitySolution.flyout.left.insights.correlations.tableFilterLabel',
+            {
+              defaultMessage: 'Correlations Details Table Alert IDs.',
+            }
+          ),
           type: 'phrases',
           key: '_id',
           params: [...alertIds],

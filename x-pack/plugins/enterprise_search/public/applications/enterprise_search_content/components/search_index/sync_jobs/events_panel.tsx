@@ -13,7 +13,8 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { TriggerMethod } from '../../../../../../common/types/connectors';
+import { TriggerMethod } from '@kbn/search-connectors';
+
 import { FormattedDateTime } from '../../../../shared/formatted_date_time';
 
 import { FlyoutPanel } from './flyout_panel';

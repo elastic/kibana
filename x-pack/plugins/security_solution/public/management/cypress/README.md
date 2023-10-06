@@ -29,6 +29,16 @@ If you also want to run the tests against real endpoints as on the CI pipeline, 
 See [running interactive tests on real endpoint with vagrant](#cypress-interactive-with-real-endpoints-using-vagrant)
 for more information.
 
+## Adding new tests - tagging for ESS vs Serverless
+
+Similarly to Security Solution cypress tests, we use tags in order to select which tests we want to execute on which environment:
+
+- `@serverless` includes a test in the Serverless test suite. You need to explicitly add this tag to any test you want to run against a Serverless environment.
+- `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
+- `@brokenInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that a test should run in Serverless, but currently is broken.
+
+Important: if you don't provide any tag, your test won't be executed.
+
 ## Running the tests
 
 There are currently three ways to run the tests, comprised of two execution modes and two target environments, which
@@ -102,14 +112,11 @@ failures locally, etc.
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
 yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
 
-# launch the cypress test runner
-cd x-pack/plugins/security_solution
-yarn cypress:dw:run-as-ci
+# launch the cypress test runner against ESS
+yarn --cwd x-pack/plugins/security_solution cypress:dw:run
 
-# or
-
-# launch without changing directory from kibana/
-yarn --cwd x-pack/plugins/security_solution cypress:dw:run-as-ci
+# or against Serverless
+yarn --cwd x-pack/plugins/security_solution cypress:dw:serverless:run
 ```
 
 #### Cypress
@@ -120,66 +127,11 @@ This is the preferred mode for developing new tests against mocked data
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
 yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
 
-# launch the cypress test runner
-cd x-pack/plugins/security_solution
-yarn cypress:dw:open
-
-# or
-
-# launch without changing directory from kibana/
+# launch the cypress test runner against ESS
 yarn --cwd x-pack/plugins/security_solution cypress:dw:open
-```
 
-For developing/debugging tests against real endpoint please use:
-
-Endpoint tests require [Multipass](https://multipass.run/) to be installed on your machine.
-
-```shell
-# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner with real endpoint
-cd x-pack/plugins/security_solution
-yarn cypress:dw:endpoint:open
-
-# or
-
-# launch without changing directory from kibana/
-yarn --cwd x-pack/plugins/security_solution cypress:dw:endpoint:open
-```
-
-#### Cypress (interactive) with real Endpoints using Vagrant
-
-```shell
-# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner with real endpoint
-cd x-pack/plugins/security_solution
-export CI=true
-yarn cypress:dw:endpoint:open
-````
-
-Note that you can select the browser you want to use on the top right side of the interactive runner.
-
-#### Cypress against REAL Endpoint + Headless (Chrome)
-
-This requires some additional setup as mentioned in the [pre-requisites](#pre-requisites) section.
-
-Endpoint tests require [Multipass](https://multipass.run/) to be installed on your machine.
-
-```shell
-# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner with real endpoint
-cd x-pack/plugins/security_solution
-yarn cypress:dw:endpoint:run
-
-# or
-
-# launch without changing directory from kibana/
-yarn --cwd x-pack/plugins/security_solution cypress:dw:endpoint:run
+# or against Serverless
+yarn --cwd x-pack/plugins/security_solution cypress:dw:serverless:open
 ```
 
 ## Folder Structure
@@ -187,15 +139,6 @@ yarn --cwd x-pack/plugins/security_solution cypress:dw:endpoint:run
 ### e2e/
 
 Contains all the tests. Within it are two sub-folders:
-
-#### cypress/endpoint
-
-Contains all the tests that are executed against real endpoints.
-
-#### cypress/mocked_data
-
-Contains all the tests that are executed against mocked endpoint and run on CI. If you want to add tests that run on CI
-then this is where you should add those.
 
 ### integration/
 
@@ -214,7 +157,6 @@ Directory also holds Cypress Plugins that are then initialized via `setupNodeEve
 ### screens/
 
 Contains the elements we want to interact with within our tests.
-
 Each file inside the screens folder represents a screen in our application.
 
 ### tasks/

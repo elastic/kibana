@@ -16,14 +16,16 @@ import {
   openTab,
   openTableInspectModal,
 } from '../../tasks/inspect';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { postDataView, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
+describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
+    // illegal_argument_exception: unknown setting [index.lifecycle.name]
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
     cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
 
@@ -45,9 +47,11 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
       login();
 
       visit(url, {
-        onLoad: () => {
-          waitForWelcomePanelToBeLoaded();
-          selectDataView(DATA_VIEW);
+        visitOptions: {
+          onLoad: () => {
+            waitForWelcomePanelToBeLoaded();
+            selectDataView(DATA_VIEW);
+          },
         },
       });
 

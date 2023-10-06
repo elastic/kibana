@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,9 +25,7 @@ import {
   XYDataLayer,
   XYReferenceLinesLayer,
 } from '@kbn/lens-embeddable-utils';
-
 import { InfraClientSetupDeps } from '../types';
-import { useLazyRef } from './use_lazy_ref';
 import type { MetricChartLayerParams, XYChartLayerParams } from '../common/visualizations/types';
 
 interface UseLensAttributesBaseParams {
@@ -44,6 +42,7 @@ export interface UseLensAttributesXYChartParams extends UseLensAttributesBasePar
 export interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
   layers: MetricChartLayerParams;
   visualizationType: 'lnsMetric';
+  subtitle?: string;
 }
 
 export type UseLensAttributesParams =
@@ -58,7 +57,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   const { value, error } = useAsync(lens.stateHelperApi, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
-  const attributes = useLazyRef(() => {
+  const attributes = useMemo(() => {
     if (!dataView || !formulaAPI) {
       return null;
     }
@@ -72,19 +71,19 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
     });
 
     return builder.build();
-  });
+  }, [dataView, formulaAPI, params]);
 
   const injectFilters = useCallback(
     ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {
-      if (!attributes.current) {
+      if (!attributes) {
         return null;
       }
       return {
-        ...attributes.current,
+        ...attributes,
         state: {
-          ...attributes.current.state,
+          ...attributes.state,
           query,
-          filters: [...attributes.current.state.filters, ...filters],
+          filters: [...attributes.state.filters, ...filters],
         },
       };
     },
@@ -143,7 +142,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
     return mainFormulaConfig.value;
   };
 
-  return { formula: getFormula(), attributes: attributes.current, getExtraActions, error };
+  return { formula: getFormula(), attributes, getExtraActions, error };
 };
 
 const chartFactory = ({
@@ -198,7 +197,7 @@ const chartFactory = ({
         formulaAPI,
         layers: new MetricLayer({
           data: params.layers.data,
-          options: params.layers.options,
+          options: { ...params.layers.options, subtitle: params.subtitle },
         }),
         title: params.title,
       });

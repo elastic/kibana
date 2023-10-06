@@ -17,7 +17,7 @@ import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
 import { useUpdateEndpointPolicy } from './use_update_endpoint_policy';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 
 const useMutationMock = _useMutation as jest.Mock;
@@ -64,6 +64,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledWith({
       path: packagePolicyRouteService.getUpdatePath(policy.id),
       body: JSON.stringify(getPolicyDataForUpdate(policy)),
+      version: API_VERSIONS.public.v1,
     });
 
     expect(result).toEqual({ item: expect.any(Object) });

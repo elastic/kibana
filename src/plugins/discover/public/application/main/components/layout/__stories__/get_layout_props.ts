@@ -159,7 +159,7 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
     columns: ['name', 'message', 'bytes'],
     sort: [['date', 'desc']],
     query: {
-      sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+      esql: 'FROM "kibana_sample_data_ecommerce"',
     },
     filters: [],
   });

@@ -2572,7 +2572,7 @@
           },
           ") => never"
         ],
-        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2592,7 +2592,7 @@
                 "text": "AggregateQuery"
               }
             ],
-            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2685,6 +2685,39 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getIndexPatternFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => string"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getIndexPatternFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.getIndexPatternFromSQLQuery",
         "type": "Function",
         "tags": [],
@@ -2693,7 +2726,7 @@
         "signature": [
           "(sqlQuery: string | undefined) => string"
         ],
-        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2707,7 +2740,40 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getLanguageDisplayName",
+        "type": "Function",
+        "tags": [],
+        "label": "getLanguageDisplayName",
+        "description": [],
+        "signature": [
+          "(language: string | undefined) => string"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getLanguageDisplayName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -3150,9 +3216,9 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | { [key: string]: any; }) => boolean"
+          " | { [key: string]: any; } | undefined) => boolean"
         ],
-        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3179,12 +3245,12 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | { [key: string]: any; }"
+              " | { [key: string]: any; } | undefined"
             ],
-            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3216,7 +3282,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3245,7 +3311,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

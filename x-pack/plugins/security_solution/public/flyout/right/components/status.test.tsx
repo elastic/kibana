@@ -10,10 +10,10 @@ import { render } from '@testing-library/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { DocumentStatus } from './status';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProviders } from '../../../common/mock';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import { FLYOUT_HEADER_STATUS_BUTTON_TEST_ID } from './test_ids';
+import { STATUS_BUTTON_TEST_ID } from './test_ids';
 
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
 
@@ -53,10 +53,10 @@ describe('<DocumentStatus />', () => {
 
     const { getByTestId, getByText } = renderStatus(contextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByText('open')).toBeInTheDocument();
 
-    getByTestId(FLYOUT_HEADER_STATUS_BUTTON_TEST_ID).click();
+    getByTestId(STATUS_BUTTON_TEST_ID).click();
     expect(getByTestId('data-test-subj')).toBeInTheDocument();
   });
 

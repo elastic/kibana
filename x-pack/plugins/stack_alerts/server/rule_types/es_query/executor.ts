@@ -11,23 +11,29 @@ import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
-import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
   EsQueryRuleActionContext,
   getContextConditionsDescription,
 } from './action_context';
-import { ExecutorOptions, OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import {
+  ExecutorOptions,
+  OnlyEsQueryRuleParams,
+  OnlySearchSourceRuleParams,
+  OnlyEsqlQueryRuleParams,
+} from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { isEsQueryRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { fetchEsqlQuery } from './lib/fetch_esql_query';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
-  const esQueryRule = isEsQueryRule(options.params.searchType);
+  const searchSourceRule = isSearchSourceRule(options.params.searchType);
+  const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
   const {
     rule: { id: ruleId, name },
     services,
@@ -54,21 +60,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-  const { parsedResults, dateStart, dateEnd, link } = esQueryRule
-    ? await fetchEsQuery({
-        ruleId,
-        name,
-        alertLimit,
-        params: params as OnlyEsQueryRuleParams,
-        timestamp: latestTimestamp,
-        publicBaseUrl,
-        spacePrefix,
-        services: {
-          scopedClusterClient,
-          logger,
-        },
-      })
-    : await fetchSearchSourceQuery({
+  const { parsedResults, dateStart, dateEnd, link } = searchSourceRule
+    ? await fetchSearchSourceQuery({
         ruleId,
         alertLimit,
         params: params as OnlySearchSourceRuleParams,
@@ -80,8 +73,34 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           logger,
           dataViews,
         },
+      })
+    : esqlQueryRule
+    ? await fetchEsqlQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlyEsqlQueryRuleParams,
+        spacePrefix,
+        publicBaseUrl,
+        services: {
+          share,
+          scopedClusterClient,
+          logger,
+          dataViews,
+        },
+      })
+    : await fetchEsQuery({
+        ruleId,
+        name,
+        alertLimit,
+        params: params as OnlyEsQueryRuleParams,
+        timestamp: latestTimestamp,
+        publicBaseUrl,
+        spacePrefix,
+        services: {
+          scopedClusterClient,
+          logger,
+        },
       });
-
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
@@ -105,6 +124,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         aggType: params.aggType,
@@ -127,13 +147,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       actionGroup: ActionGroupId,
       state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
-      payload: expandFlattenedAlert({
+      payload: {
         [ALERT_URL]: actionContext.link,
         [ALERT_REASON]: actionContext.message,
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
-        [ALERT_EVALUATION_VALUE]: actionContext.value,
-      }),
+        [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+      },
     });
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
@@ -157,6 +177,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: [],
       link,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         isRecovered: true,
@@ -175,13 +196,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     alertsClient?.setAlertData({
       id: alertId,
       context: recoveryContext,
-      payload: expandFlattenedAlert({
+      payload: {
         [ALERT_URL]: recoveryContext.link,
         [ALERT_REASON]: recoveryContext.message,
         [ALERT_TITLE]: recoveryContext.title,
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
-        [ALERT_EVALUATION_VALUE]: recoveryContext.value,
-      }),
+        [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+      },
     });
   }
   return { state: { latestTimestamp } };

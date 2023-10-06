@@ -95,7 +95,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   ) => {
     const jobLogger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
@@ -111,7 +111,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         const { browserTimezone, layout, title } = job;
         apmGetAssets?.end();
 
-        apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
+        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
         //  make a new function that will call reporting.getScreenshots
         const snapshotFn = () =>
           this.getScreenshots({
@@ -152,7 +152,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
     const stop$ = fromEventPattern(cancellationToken.on);
 
-    apmTrans?.end();
+    apmTrans.end();
     return lastValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('visualizations');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.dashboard.waitForRenderComplete();

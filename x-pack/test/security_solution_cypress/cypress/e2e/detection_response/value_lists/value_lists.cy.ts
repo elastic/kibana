@@ -7,8 +7,9 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
   waitForValueListsModalToBeLoaded,
@@ -22,6 +23,7 @@ import {
   exportValueList,
   waitForListsIndex,
   deleteValueLists,
+  KNOWN_VALUE_LIST_FILES,
 } from '../../../tasks/lists';
 import {
   VALUE_LISTS_TABLE,
@@ -30,17 +32,20 @@ import {
 } from '../../../screens/lists';
 import { refreshIndex } from '../../../tasks/api_calls/elasticsearch';
 
-const TEXT_LIST_FILE_NAME = 'value_list.txt';
-const IPS_LIST_FILE_NAME = 'ip_list.txt';
-const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
-
-describe('value lists', () => {
-  describe('management modal', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+// FLAKY: https://github.com/elastic/kibana/issues/165699
+describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  // TODO: https://github.com/elastic/kibana/issues/161539
+  describe('management modal', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
-      deleteValueLists([TEXT_LIST_FILE_NAME, IPS_LIST_FILE_NAME, CIDRS_LIST_FILE_NAME]);
+      deleteValueLists([
+        KNOWN_VALUE_LIST_FILES.TEXT,
+        KNOWN_VALUE_LIST_FILES.IPs,
+        KNOWN_VALUE_LIST_FILES.CIDRs,
+      ]);
       createListsIndex();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      visit(RULES_MANAGEMENT_URL);
       waitForListsIndex();
       waitForValueListsModalToBeLoaded();
     });
@@ -50,116 +55,122 @@ describe('value lists', () => {
       closeValueListsModal();
     });
 
-    describe('create list types', () => {
+    // TODO: https://github.com/elastic/kibana/issues/161539
+    // Flaky in serverless tests
+    describe('create list types', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         openValueListsModal();
       });
 
       it('creates a "keyword" list from an uploaded file', () => {
         selectValueListType('keyword');
-        selectValueListsFile(TEXT_LIST_FILE_NAME);
+        selectValueListsFile(KNOWN_VALUE_LIST_FILES.TEXT);
         uploadValueList();
 
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).to.contain(TEXT_LIST_FILE_NAME);
+            expect($row.text()).to.contain(KNOWN_VALUE_LIST_FILES.TEXT);
             expect($row.text()).to.contain('Keywords');
           });
       });
 
       it('creates a "text" list from an uploaded file', () => {
         selectValueListType('text');
-        selectValueListsFile(TEXT_LIST_FILE_NAME);
+        selectValueListsFile(KNOWN_VALUE_LIST_FILES.TEXT);
         uploadValueList();
 
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).to.contain(TEXT_LIST_FILE_NAME);
+            expect($row.text()).to.contain(KNOWN_VALUE_LIST_FILES.TEXT);
             expect($row.text()).to.contain('Text');
           });
       });
 
       it('creates a "ip" list from an uploaded file', () => {
         selectValueListType('ip');
-        selectValueListsFile(IPS_LIST_FILE_NAME);
+        selectValueListsFile(KNOWN_VALUE_LIST_FILES.IPs);
         uploadValueList();
 
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).to.contain(IPS_LIST_FILE_NAME);
+            expect($row.text()).to.contain(KNOWN_VALUE_LIST_FILES.IPs);
             expect($row.text()).to.contain('IP addresses');
           });
       });
 
       it('creates a "ip_range" list from an uploaded file', () => {
         selectValueListType('ip_range');
-        selectValueListsFile(CIDRS_LIST_FILE_NAME);
+        selectValueListsFile(KNOWN_VALUE_LIST_FILES.CIDRs);
         uploadValueList();
 
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).to.contain(CIDRS_LIST_FILE_NAME);
+            expect($row.text()).to.contain(KNOWN_VALUE_LIST_FILES.CIDRs);
             expect($row.text()).to.contain('IP ranges');
           });
       });
     });
 
-    describe('delete list types', () => {
+    // TODO: https://github.com/elastic/kibana/issues/161539
+    // Flaky in serverless tests
+    describe('delete list types', { tags: ['@brokenInServerless'] }, () => {
       it('deletes a "keyword" list from an uploaded file', () => {
-        importValueList(TEXT_LIST_FILE_NAME, 'keyword');
+        importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
         openValueListsModal();
-        deleteValueListsFile(TEXT_LIST_FILE_NAME);
+        deleteValueListsFile(KNOWN_VALUE_LIST_FILES.TEXT);
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).not.to.contain(TEXT_LIST_FILE_NAME);
+            expect($row.text()).not.to.contain(KNOWN_VALUE_LIST_FILES.TEXT);
           });
       });
 
       it('deletes a "text" list from an uploaded file', () => {
-        importValueList(TEXT_LIST_FILE_NAME, 'text');
+        importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'text');
         openValueListsModal();
-        deleteValueListsFile(TEXT_LIST_FILE_NAME);
+        deleteValueListsFile(KNOWN_VALUE_LIST_FILES.TEXT);
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).not.to.contain(TEXT_LIST_FILE_NAME);
+            expect($row.text()).not.to.contain(KNOWN_VALUE_LIST_FILES.TEXT);
           });
       });
 
       it('deletes a "ip" from an uploaded file', () => {
-        importValueList(IPS_LIST_FILE_NAME, 'ip');
+        importValueList(KNOWN_VALUE_LIST_FILES.IPs, 'ip');
         openValueListsModal();
-        deleteValueListsFile(IPS_LIST_FILE_NAME);
+        deleteValueListsFile(KNOWN_VALUE_LIST_FILES.IPs);
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).not.to.contain(IPS_LIST_FILE_NAME);
+            expect($row.text()).not.to.contain(KNOWN_VALUE_LIST_FILES.IPs);
           });
       });
 
       it('deletes a "ip_range" from an uploaded file', () => {
-        importValueList(CIDRS_LIST_FILE_NAME, 'ip_range', ['192.168.100.0']);
+        importValueList(KNOWN_VALUE_LIST_FILES.CIDRs, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
-        deleteValueListsFile(CIDRS_LIST_FILE_NAME);
+        deleteValueListsFile(KNOWN_VALUE_LIST_FILES.CIDRs);
         cy.get(VALUE_LISTS_TABLE)
           .find(VALUE_LISTS_ROW)
           .should(($row) => {
-            expect($row.text()).not.to.contain(CIDRS_LIST_FILE_NAME);
+            expect($row.text()).not.to.contain(KNOWN_VALUE_LIST_FILES.CIDRs);
           });
       });
     });
 
-    describe('export list types', () => {
+    // TODO: https://github.com/elastic/kibana/issues/161539
+    // Flaky in serverless tests
+    describe('export list types', { tags: ['@brokenInServerless'] }, () => {
       it('exports a "keyword" list from an uploaded file', () => {
-        cy.intercept('POST', `/api/lists/items/_export?list_id=${TEXT_LIST_FILE_NAME}`).as(
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${KNOWN_VALUE_LIST_FILES.TEXT}`).as(
           'exportList'
         );
-        importValueList(TEXT_LIST_FILE_NAME, 'keyword');
+        importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
 
         // Importing value lists includes bulk creation of list items with refresh=wait_for
         // While it should wait for data update and return after that it's not always a case with bulk operations.
@@ -171,7 +182,7 @@ describe('value lists', () => {
         exportValueList();
 
         cy.wait('@exportList').then(({ response }) => {
-          cy.fixture(TEXT_LIST_FILE_NAME).then((list: string) => {
+          cy.fixture(KNOWN_VALUE_LIST_FILES.TEXT).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
             expect(response?.body).to.contain(lineOne);
             expect(response?.body).to.contain(lineTwo);
@@ -180,10 +191,10 @@ describe('value lists', () => {
       });
 
       it('exports a "text" list from an uploaded file', () => {
-        cy.intercept('POST', `/api/lists/items/_export?list_id=${TEXT_LIST_FILE_NAME}`).as(
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${KNOWN_VALUE_LIST_FILES.TEXT}`).as(
           'exportList'
         );
-        importValueList(TEXT_LIST_FILE_NAME, 'text');
+        importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'text');
 
         // Importing value lists includes bulk creation of list items with refresh=wait_for
         // While it should wait for data update and return after that it's not always a case with bulk operations.
@@ -195,7 +206,7 @@ describe('value lists', () => {
         exportValueList();
 
         cy.wait('@exportList').then(({ response }) => {
-          cy.fixture(TEXT_LIST_FILE_NAME).then((list: string) => {
+          cy.fixture(KNOWN_VALUE_LIST_FILES.TEXT).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
             expect(response?.body).to.contain(lineOne);
             expect(response?.body).to.contain(lineTwo);
@@ -204,10 +215,10 @@ describe('value lists', () => {
       });
 
       it('exports a "ip" list from an uploaded file', () => {
-        cy.intercept('POST', `/api/lists/items/_export?list_id=${IPS_LIST_FILE_NAME}`).as(
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${KNOWN_VALUE_LIST_FILES.IPs}`).as(
           'exportList'
         );
-        importValueList(IPS_LIST_FILE_NAME, 'ip');
+        importValueList(KNOWN_VALUE_LIST_FILES.IPs, 'ip');
 
         // Importing value lists includes bulk creation of list items with refresh=wait_for
         // While it should wait for data update and return after that it's not always a case with bulk operations.
@@ -218,7 +229,7 @@ describe('value lists', () => {
         openValueListsModal();
         exportValueList();
         cy.wait('@exportList').then(({ response }) => {
-          cy.fixture(IPS_LIST_FILE_NAME).then((list: string) => {
+          cy.fixture(KNOWN_VALUE_LIST_FILES.IPs).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
             expect(response?.body).to.contain(lineOne);
             expect(response?.body).to.contain(lineTwo);
@@ -227,10 +238,10 @@ describe('value lists', () => {
       });
 
       it('exports a "ip_range" list from an uploaded file', () => {
-        cy.intercept('POST', `/api/lists/items/_export?list_id=${CIDRS_LIST_FILE_NAME}`).as(
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${KNOWN_VALUE_LIST_FILES.CIDRs}`).as(
           'exportList'
         );
-        importValueList(CIDRS_LIST_FILE_NAME, 'ip_range', ['192.168.100.0']);
+        importValueList(KNOWN_VALUE_LIST_FILES.CIDRs, 'ip_range', ['192.168.100.0']);
 
         // Importing value lists includes bulk creation of list items with refresh=wait_for
         // While it should wait for data update and return after that it's not always a case with bulk operations.
@@ -241,7 +252,7 @@ describe('value lists', () => {
         openValueListsModal();
         exportValueList();
         cy.wait('@exportList').then(({ response }) => {
-          cy.fixture(CIDRS_LIST_FILE_NAME).then((list: string) => {
+          cy.fixture(KNOWN_VALUE_LIST_FILES.CIDRs).then((list: string) => {
             const [lineOne] = list.split('\n');
             expect(response?.body).to.contain(lineOne);
           });
@@ -250,11 +261,17 @@ describe('value lists', () => {
     });
   });
 
-  describe('user with restricted access role', { tags: '@ess' }, () => {
-    it('Does not allow a t1 analyst user to upload a value list', () => {
-      login(ROLES.t1_analyst);
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
-      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
-    });
-  });
+  // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
+  // TODO: https://github.com/elastic/kibana/issues/161539
+  describe(
+    'user with restricted access role',
+    { tags: ['@ess', '@serverless', '@skipInServerless'] },
+    () => {
+      it('Does not allow a t1 analyst user to upload a value list', () => {
+        login(ROLES.t1_analyst);
+        visit(RULES_MANAGEMENT_URL, { role: ROLES.t1_analyst });
+        cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
+      });
+    }
+  );
 });

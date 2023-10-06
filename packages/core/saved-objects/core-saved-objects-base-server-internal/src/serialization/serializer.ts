@@ -116,7 +116,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
       attributes: _source[type],
-      references: references || [],
+      references: references || [], // adds references default
       ...(managed != null ? { managed } : {}),
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),

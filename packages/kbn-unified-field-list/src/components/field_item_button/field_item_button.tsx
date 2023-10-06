@@ -12,8 +12,8 @@ import classnames from 'classnames';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
-import { FieldIcon, getFieldIconProps } from '../field_icon';
 import { fieldNameWildcardMatcher } from '../../utils/field_name_wildcard_matcher';
 import './field_item_button.scss';
 
@@ -105,6 +105,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
+      [`unifiedFieldListItemButton--withDragHandle`]: Boolean(otherProps.dragHandle),
     },
     className
   );

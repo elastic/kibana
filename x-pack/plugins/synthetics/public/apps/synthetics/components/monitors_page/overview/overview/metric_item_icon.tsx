@@ -120,6 +120,7 @@ export const MetricItemIcon = ({
               }}
             >
               <EuiButtonIcon
+                data-test-subj="syntheticsMetricItemIconButton"
                 iconType="warning"
                 color="danger"
                 size="m"
@@ -138,7 +139,11 @@ export const MetricItemIcon = ({
             <EuiFlexGroup>
               <EuiFlexItem grow>{testTime}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="cross" onClick={closePopover} />
+                <EuiButtonIcon
+                  data-test-subj="syntheticsMetricItemIconButton"
+                  iconType="cross"
+                  onClick={closePopover}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPopoverTitle>

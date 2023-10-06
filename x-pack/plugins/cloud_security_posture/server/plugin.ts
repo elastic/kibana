@@ -49,6 +49,7 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
+import { CloudSecurityPostureConfig } from './config';
 
 export class CspPlugin
   implements
@@ -60,6 +61,7 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: CloudSecurityPostureConfig;
   private isCloudEnabled?: boolean;
 
   /**
@@ -69,8 +71,9 @@ export class CspPlugin
    */
   #isInitialized: boolean = false;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<CloudSecurityPostureConfig>) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   public setup(
@@ -203,7 +206,7 @@ export class CspPlugin
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
-    await initializeCspIndices(esClient, this.logger);
+    await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
     this.#isInitialized = true;

@@ -26,6 +26,7 @@ export type {
   LensSearchIn,
   LensSearchOut,
   LensSearchQuery,
+  LensCrudTypes,
 } from './latest';
 
 export * as LensV1 from './v1';

@@ -8,12 +8,14 @@
 import React, { FC, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
-import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
-import { PrivilegesWrapper } from '../../lib/authorization';
+import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
+
 import { Wizard } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
@@ -43,7 +45,14 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
   );
 
   return (
-    <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
+    <CapabilitiesWrapper
+      requiredCapabilities={[
+        'canGetTransform',
+        'canPreviewTransform',
+        'canCreateTransform',
+        'canStartStopTransform',
+      ]}
+    >
       <EuiPageTemplate.Header
         pageTitle={
           <FormattedMessage
@@ -67,6 +76,6 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         )}
         {searchItems !== undefined && <Wizard searchItems={searchItems} />}
       </EuiPageTemplate.Section>
-    </PrivilegesWrapper>
+    </CapabilitiesWrapper>
   );
 };
