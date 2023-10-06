@@ -15,7 +15,7 @@ import type { FieldValuePair, SignificantTerm } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
-import type { ItemsetResult } from '../../../common/types';
+import type { FetchFrequentItemSetsResponse, ItemSet } from '../../../common/types';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../common/api/log_categorization/types';
 
@@ -41,8 +41,8 @@ const getTerm2CategoryCountRequest = (
   const categoryQuery = getCategoryQuery(categoryFieldName, [category]);
 
   if (Array.isArray(query.bool?.filter)) {
-    for (const fvp of fieldValuePairs) {
-      query.bool?.filter?.push({ term: { [fvp.fieldName]: fvp.fieldValue } });
+    for (const { fieldName, fieldValue } of fieldValuePairs) {
+      query.bool?.filter?.push({ term: { [fieldName]: fieldValue } });
     }
     query.bool?.filter?.push(categoryQuery);
     query.bool?.filter?.push({
@@ -68,21 +68,21 @@ export async function fetchTerms2CategoriesCounts(
   params: AiopsLogRateAnalysisSchema,
   searchQuery: estypes.QueryDslQueryContainer,
   significantTerms: SignificantTerm[],
-  df: ItemsetResult[],
+  itemSets: ItemSet[],
   significantCategories: SignificantTerm[],
   from: number,
   to: number,
   logger: Logger,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-) {
+): Promise<FetchFrequentItemSetsResponse> {
   const searches: Array<
     | estypes.MsearchMultisearchBody
     | {
         index: string;
       }
   > = [];
-  const results: ItemsetResult[] = [];
+  const results: ItemSet[] = [];
 
   significantTerms.forEach((term) => {
     significantCategories.forEach((category) => {
@@ -111,13 +111,13 @@ export async function fetchTerms2CategoriesCounts(
     });
   });
 
-  df.forEach((isr) => {
+  itemSets.forEach((itemSet) => {
     significantCategories.forEach((category) => {
       searches.push({ index: params.index });
       searches.push(
         getTerm2CategoryCountRequest(
           params,
-          Object.entries(isr.set).map(([fieldName, fieldValue]) => ({
+          Object.entries(itemSet.set).map(([fieldName, fieldValue]) => ({
             fieldName,
             fieldValue,
           })),
@@ -129,11 +129,11 @@ export async function fetchTerms2CategoriesCounts(
       );
       results.push({
         set: {
-          ...isr.set,
+          ...itemSet.set,
           [category.fieldName]: category.fieldValue,
         },
-        size: Object.keys(isr.set).length + 1,
-        maxPValue: Math.max(isr.maxPValue ?? 1, category.pValue ?? 1),
+        size: Object.keys(itemSet.set).length + 1,
+        maxPValue: Math.max(itemSet.maxPValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
         support: 1,
         total_doc_count: 0,
@@ -160,7 +160,7 @@ export async function fetchTerms2CategoriesCounts(
     }
     return {
       fields: [],
-      df: [],
+      itemSets: [],
       totalDocCount: 0,
     };
   }
@@ -169,7 +169,7 @@ export async function fetchTerms2CategoriesCounts(
 
   return {
     fields: uniq(significantCategories.map((c) => c.fieldName)),
-    df: results
+    itemSets: results
       .map((result, i) => {
         const resp = mSearchResponses[i];
         if (isMsearchResponseItem(resp)) {

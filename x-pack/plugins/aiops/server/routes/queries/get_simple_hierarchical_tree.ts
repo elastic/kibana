@@ -7,7 +7,7 @@
 
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
-import type { ItemsetResult, SimpleHierarchicalTreeNode } from '../../../common/types';
+import type { ItemSet, SimpleHierarchicalTreeNode } from '../../../common/types';
 
 import { getValueCounts } from './get_value_counts';
 import { getValuesDescending } from './get_values_descending';
@@ -54,7 +54,7 @@ function dfDepthFirstSearch(
   parentLabel: string,
   field: string,
   value: string,
-  iss: ItemsetResult[],
+  iss: ItemSet[],
   collapseRedundant: boolean,
   displayOther: boolean
 ) {
@@ -178,7 +178,7 @@ function dfDepthFirstSearch(
  * By default (fields==None), the field search order is dependent on the highest count itemsets.
  */
 export function getSimpleHierarchicalTree(
-  df: ItemsetResult[],
+  df: ItemSet[],
   collapseRedundant: boolean,
   displayOther: boolean,
   significantTerms: SignificantTerm[],
