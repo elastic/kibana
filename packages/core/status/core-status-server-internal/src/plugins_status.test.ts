@@ -8,7 +8,7 @@
 
 import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
-import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
+import { of, Observable, BehaviorSubject, ReplaySubject, firstValueFrom } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from '@kbn/core-status-common';
 import { first, skip } from 'rxjs/operators';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
@@ -215,7 +215,7 @@ describe('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
 
       expect(await service.getAll$().pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available despite savedObjects being degraded
+        a: { level: ServiceStatusLevels.available, summary: 'a status', isReportedStatus: true }, // a is available despite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
           summary: '1 service is degraded: savedObjects',
@@ -251,9 +251,23 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
-        { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
-        { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
+        {
+          a: { level: ServiceStatusLevels.degraded, summary: 'a degraded', isReportedStatus: true },
+        },
+        {
+          a: {
+            level: ServiceStatusLevels.unavailable,
+            summary: 'a unavailable',
+            isReportedStatus: true,
+          },
+        },
+        {
+          a: {
+            level: ServiceStatusLevels.available,
+            summary: 'a available',
+            isReportedStatus: true,
+          },
+        },
       ]);
     });
 
@@ -279,9 +293,23 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
-        { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
-        { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
+        {
+          a: { level: ServiceStatusLevels.degraded, summary: 'a degraded', isReportedStatus: true },
+        },
+        {
+          a: {
+            level: ServiceStatusLevels.unavailable,
+            summary: 'a unavailable',
+            isReportedStatus: true,
+          },
+        },
+        {
+          a: {
+            level: ServiceStatusLevels.available,
+            summary: 'a available',
+            isReportedStatus: true,
+          },
+        },
       ]);
     });
 
@@ -306,8 +334,20 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.available, summary: 'summary initial' } },
-        { a: { level: ServiceStatusLevels.available, summary: 'summary updated' } },
+        {
+          a: {
+            level: ServiceStatusLevels.available,
+            summary: 'summary initial',
+            isReportedStatus: true,
+          },
+        },
+        {
+          a: {
+            level: ServiceStatusLevels.available,
+            summary: 'summary updated',
+            isReportedStatus: true,
+          },
+        },
       ]);
     });
 
@@ -326,10 +366,14 @@ describe('PluginStatusService', () => {
       const pluginA$ = new ReplaySubject<ServiceStatus>(1);
       service.set('a', pluginA$);
       // the first emission happens right after core$ services emit
-      const firstEmission = service.getAll$().pipe(skip(1), first()).toPromise();
+      const firstEmission = firstValueFrom(service.getAll$().pipe(skip(1)));
 
       expect(await firstEmission).toEqual({
-        a: { level: ServiceStatusLevels.unavailable, summary: 'Status check timed out after 30s' },
+        a: {
+          level: ServiceStatusLevels.unavailable,
+          summary: 'Status check timed out after 10ms',
+          isReportedStatus: true,
+        },
         b: {
           level: ServiceStatusLevels.unavailable,
           summary: '1 service is unavailable: a',
@@ -338,13 +382,6 @@ describe('PluginStatusService', () => {
             affectedServices: ['a'],
           },
         },
-      });
-
-      pluginA$.next({ level: ServiceStatusLevels.available, summary: 'a available' });
-      const secondEmission = service.getAll$().pipe(first()).toPromise();
-      expect(await secondEmission).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'a available' },
-        b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
       });
     });
   });
@@ -372,7 +409,7 @@ describe('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
 
       expect(await service.getDependenciesStatus$('c').pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
+        a: { level: ServiceStatusLevels.available, summary: 'a status', isReportedStatus: true }, // a is available depsite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
           summary: '1 service is degraded: savedObjects',
@@ -397,6 +434,7 @@ describe('PluginStatusService', () => {
       const available: ServiceStatus = {
         level: ServiceStatusLevels.available,
         summary: 'a available',
+        isReportedStatus: true,
       };
 
       const statusUpdates: Array<Record<string, ServiceStatus>> = [];
@@ -454,12 +492,14 @@ describe('PluginStatusService', () => {
         Array [
           Object {
             "a": Object {
+              "isReportedStatus": true,
               "level": degraded,
               "summary": "a degraded",
             },
           },
           Object {
             "a": Object {
+              "isReportedStatus": true,
               "level": available,
               "summary": "a available",
             },

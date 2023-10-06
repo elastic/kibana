@@ -7,7 +7,14 @@
  */
 
 import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
-import { map, distinctUntilChanged, filter, debounceTime, timeout } from 'rxjs/operators';
+import {
+  map,
+  distinctUntilChanged,
+  filter,
+  debounceTime,
+  timeout,
+  startWith,
+} from 'rxjs/operators';
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 import type { PluginName } from '@kbn/core-base-common';
@@ -18,8 +25,7 @@ const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 
 const defaultStatus: ServiceStatus = {
   level: ServiceStatusLevels.unavailable,
-  summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
-  isInferredStatus: false,
+  summary: 'Status not yet available',
 };
 
 export interface Deps {
@@ -48,8 +54,8 @@ interface ReportedStatusSubscriptions {
 
 export class PluginsStatusService {
   private coreStatus: CoreStatus = {
-    elasticsearch: { ...defaultStatus, isInferredStatus: false },
-    savedObjects: { ...defaultStatus, isInferredStatus: false },
+    elasticsearch: { ...defaultStatus, isReportedStatus: true },
+    savedObjects: { ...defaultStatus, isReportedStatus: true },
   };
   private pluginData: PluginData;
   private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies
@@ -102,12 +108,21 @@ export class PluginsStatusService {
     this.reportedStatusSubscriptions[plugin] = statusChanged$
       .pipe(
         // Set a timeout for externally-defined status Observables
-        timeout({ first: this.statusTimeoutMs, with: () => statusChanged$ })
+        timeout({
+          first: this.statusTimeoutMs,
+          with: () =>
+            statusChanged$.pipe(
+              startWith({
+                level: ServiceStatusLevels.unavailable,
+                summary: `Status check timed out after ${this.statusTimeoutMs}ms`,
+              })
+            ),
+        })
       )
       .subscribe((status) => {
         const levelChanged = this.updatePluginReportedStatus(plugin, {
           ...status,
-          isInferredStatus: false,
+          isReportedStatus: true,
         });
 
         if (levelChanged) {

@@ -331,7 +331,6 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
-              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -341,7 +340,6 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
-              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -383,7 +381,6 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
-              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -393,7 +390,6 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
-              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -506,7 +502,6 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
-              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -516,7 +511,6 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
-              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -558,7 +552,6 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
-              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -568,7 +561,6 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
-              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },

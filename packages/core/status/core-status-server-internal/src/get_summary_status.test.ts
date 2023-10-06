@@ -102,7 +102,6 @@ describe('getSummaryStatus', () => {
         meta: {
           affectedServices: ['s2'],
         },
-        isInferredStatus: true,
       });
     });
 
@@ -138,7 +137,6 @@ describe('getSummaryStatus', () => {
         meta: {
           affectedServices: ['s2', 's3'],
         },
-        isInferredStatus: true,
       });
     });
 
@@ -163,7 +161,6 @@ describe('getSummaryStatus', () => {
         meta: {
           affectedServices: ['s1', 's3', 's4', 's5', 's7'],
         },
-        isInferredStatus: true,
       });
     });
   });

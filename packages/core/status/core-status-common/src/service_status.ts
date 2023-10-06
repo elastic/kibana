@@ -39,9 +39,9 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
   meta?: Meta;
 
   /**
-   * Whether this status is inferred from the status of other services that this service depends on
+   * Whether this status is reported by the service/plugin itself, or it is inferred from the status of other services that this service depends on
    */
-  isInferredStatus?: boolean;
+  isReportedStatus?: boolean;
 }
 
 /**

@@ -90,7 +90,7 @@ export const getPluginStatusChangesMessages = ({
   // loop through all different status levels, and report services that have changed
   Object.entries(updates).forEach(([currentLevel, pluginStatuses]) => {
     const statusReportingPlugins = pluginStatuses.filter(
-      ({ isInferredStatus }) => !isInferredStatus
+      ({ isReportedStatus }) => isReportedStatus
     );
 
     const inferredCount = pluginStatuses.length - statusReportingPlugins.length;
@@ -99,7 +99,7 @@ export const getPluginStatusChangesMessages = ({
       const reason = getReason(statusReportingPlugins[0]);
       if (inferredCount === 0) {
         messages.push(
-          `'${statusReportingPlugins[0].pluginName}' plugin is now ${currentLevel}: ${reason}`
+          `'${statusReportingPlugins[0].pluginName}' is now ${currentLevel}: ${reason}`
         );
       } else {
         messages.push(
@@ -140,7 +140,7 @@ export const getPluginStatusChangesMessages = ({
               (updatedStatus) => updatedStatus.pluginName === pluginStatus.pluginName
             )
         )
-        .filter(({ isInferredStatus }) => !isInferredStatus);
+        .filter(({ isReportedStatus }) => isReportedStatus);
 
       const inferredCount = pluginStatuses.length - statusReportingPlugins.length;
 

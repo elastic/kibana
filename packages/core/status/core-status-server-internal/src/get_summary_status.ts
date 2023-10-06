@@ -28,7 +28,6 @@ export const getSummaryStatus = (
     return {
       level: ServiceStatusLevels.available,
       summary: allAvailableSummary,
-      isInferredStatus: true, // the summary status is inferred from the provided 'statuses'
     };
   } else {
     const affectedServices = highestStatuses.map(([serviceName]) => serviceName);
@@ -40,7 +39,6 @@ export const getSummaryStatus = (
       meta: {
         affectedServices,
       },
-      isInferredStatus: true, // the summary status is inferred from the provided 'statuses'
     };
   }
 };
