@@ -6,6 +6,7 @@
  */
 
 import { ActionType } from '@kbn/actions-plugin/common';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 export const mockActionTypes = [
   {
@@ -30,12 +31,16 @@ export const mockActionTypes = [
   } as ActionType,
 ];
 
-export const mockConnectors = [
+export const mockConnectors: ActionConnector[] = [
   {
     id: 'connectorId',
     name: 'Captain Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',
+    secrets: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
     config: {
       apiProvider: 'OpenAI',
     },
@@ -45,6 +50,10 @@ export const mockConnectors = [
     name: 'Professor Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',
+    secrets: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
     config: {
       apiProvider: 'OpenAI',
     },

@@ -12,13 +12,13 @@ import { mockConnectors } from '../../mock/connectors';
 const mockConnectorsAndExtras = [
   ...mockConnectors,
   {
-    ...mockConnectors,
+    ...mockConnectors[0],
     id: 'connector-missing-secrets',
     name: 'Connector Missing Secrets',
     isMissingSecrets: true,
   },
   {
-    ...mockConnectors,
+    ...mockConnectors[0],
 
     id: 'connector-wrong-action-type',
     name: 'Connector Wrong Action Type',

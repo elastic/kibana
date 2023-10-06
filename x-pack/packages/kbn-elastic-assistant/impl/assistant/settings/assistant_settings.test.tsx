@@ -59,7 +59,6 @@ const mockValues = {
 };
 
 const setSelectedSettingsTab = jest.fn();
-const setIsSettingsModalVisible = jest.fn();
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
