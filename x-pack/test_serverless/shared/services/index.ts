@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SvlReportingServiceProvider } from '../../functional/services/svl_reporting';
+import { SvlReportingServiceProvider } from './svl_reporting';
 import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 
