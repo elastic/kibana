@@ -6750,6 +6750,10 @@
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -9098,6 +9102,10 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "snapshotRestore",
