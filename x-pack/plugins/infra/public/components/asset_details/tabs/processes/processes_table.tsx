@@ -153,7 +153,7 @@ export const ProcessesTable = ({
             onClick={clearSearchBar}
           >
             <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcessesClearFilters"
+              id="xpack.infra.infra.assetDetails.openAsPage"
               defaultMessage="Clear filters"
             />
           </EuiButton>
@@ -190,7 +190,12 @@ export const ProcessesTable = ({
       >
         {isLoading && <EuiProgress size="xs" color="primary" position="absolute" />}
         {isLoading && currentItems.length === 0 && !error && (
-          <ProcessesTableMessage>loading...</ProcessesTableMessage>
+          <ProcessesTableMessage>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.processes.loading"
+              defaultMessage="Loading..."
+            />
+          </ProcessesTableMessage>
         )}
 
         {error ? (

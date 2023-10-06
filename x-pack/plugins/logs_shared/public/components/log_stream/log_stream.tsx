@@ -12,6 +12,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { noop } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
@@ -67,12 +68,15 @@ interface LogStreamContentProps {
   logView: LogViewReference;
   startTimestamp: number;
   endTimestamp: number;
+  startDateExpression?: string;
+  endDateExpression?: string;
   query?: string | Query | BuiltEsQuery;
   filters?: Filter[];
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
   showFlyoutAction?: boolean;
+  isStreaming?: boolean;
 }
 
 export const LogStream = ({ height = 400, ...contentProps }: LogStreamProps) => {
@@ -94,7 +98,10 @@ export const LogStreamContent = ({
   center,
   highlight,
   columns,
+  startDateExpression = '',
+  endDateExpression = '',
   showFlyoutAction = false,
+  isStreaming = false,
 }: LogStreamProps) => {
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
@@ -153,10 +160,12 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   const {
     entries,
     fetchEntries,
+    fetchNewestEntries,
     fetchNextEntries,
     fetchPreviousEntries,
     hasMoreAfter,
     hasMoreBefore,
+    lastLoadedTime,
     isLoadingMore,
     isReloading: isLoadingEntries,
   } = useLogStream({
@@ -168,28 +177,65 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     columns: customColumns,
   });
 
+  const isReloading = useMemo(
+    () => isLoadingLogView || isLoadingEntries,
+    [isLoadingEntries, isLoadingLogView]
+  );
+
   const columnConfigurations = useMemo(() => {
     return resolvedLogView ? customColumns ?? resolvedLogView.columns : [];
   }, [resolvedLogView, customColumns]);
 
   const streamItems = useMemo(
     () =>
-      entries.map((entry) => ({
-        kind: 'logEntry' as const,
-        logEntry: entry,
-        highlights: [],
-      })),
-    [entries]
+      isReloading
+        ? []
+        : entries.map((entry) => ({
+            kind: 'logEntry' as const,
+            logEntry: entry,
+            highlights: [],
+          })),
+    [entries, isReloading]
   );
+
+  const prevStartTimestamp = usePrevious(startTimestamp);
+  const prevEndTimestamp = usePrevious(endTimestamp);
+  const prevFilterQuery = usePrevious(parsedQuery);
+
+  // Refetch entries if...
+  useEffect(() => {
+    const isFirstLoad = !prevStartTimestamp || !prevEndTimestamp;
+    const hasQueryChanged = parsedQuery !== prevFilterQuery;
+    const hasTimerangeChanged =
+      prevStartTimestamp !== startTimestamp || prevEndTimestamp !== endTimestamp;
+
+    if (isFirstLoad || hasQueryChanged) {
+      fetchEntries();
+    }
+
+    if (hasTimerangeChanged) {
+      if (isStreaming) {
+        fetchNewestEntries();
+      } else {
+        fetchEntries();
+      }
+    }
+  }, [
+    endTimestamp,
+    fetchEntries,
+    fetchNewestEntries,
+    isStreaming,
+    parsedQuery,
+    prevEndTimestamp,
+    prevFilterQuery,
+    prevStartTimestamp,
+    startTimestamp,
+  ]);
 
   // Component lifetime
   useEffect(() => {
     loadLogView();
   }, [loadLogView]);
-
-  useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
 
   // Pagination handler
   const handlePagination = useCallback(
@@ -218,19 +264,20 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
       items={streamItems}
       scale="medium"
       wrap={true}
-      isReloading={isLoadingLogView || isLoadingEntries}
+      isReloading={isReloading}
       isLoadingMore={isLoadingMore}
+      isStreaming={isStreaming}
       hasMoreBeforeStart={hasMoreBefore}
       hasMoreAfterEnd={hasMoreAfter}
-      isStreaming={false}
+      lastLoadedTime={lastLoadedTime}
       jumpToTarget={noop}
       reportVisibleInterval={handlePagination}
       reloadItems={fetchEntries}
       onOpenLogEntryFlyout={showFlyoutAction ? openLogEntryFlyout : undefined}
       highlightedItem={highlight ?? null}
       currentHighlightKey={null}
-      startDateExpression={''}
-      endDateExpression={''}
+      startDateExpression={startDateExpression}
+      endDateExpression={endDateExpression}
       updateDateRange={noop}
       startLiveStreaming={noop}
       hideScrollbar={false}

@@ -19,3 +19,5 @@ export const INTEGRATIONS = {
   [INTEGRATION_NAME.nginx]: ['nginx.stubstatus', 'nginx.access'],
   [INTEGRATION_NAME.kubernetes]: ['kubernetes.node'],
 };
+
+export const DEFAULT_AUTO_REFRESH_INTERVAL = 60 * 1000;

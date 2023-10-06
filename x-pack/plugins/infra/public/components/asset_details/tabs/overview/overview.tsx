@@ -23,7 +23,7 @@ import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 
 export const Overview = () => {
   const { getParsedDateRange } = useDateRangeProviderContext();
-  const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
+  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -50,9 +50,9 @@ export const Overview = () => {
     />
   );
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+    <MetadataSummaryList metadata={metadata} loading={metadataLoading} />
   ) : (
-    <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
+    <MetadataSummaryListCompact metadata={metadata} loading={metadataLoading} />
   );
 
   return (
@@ -67,7 +67,7 @@ export const Overview = () => {
       <EuiFlexItem grow={false}>
         <AlertsSummaryContent
           assetName={asset.name}
-          assetType={assetType}
+          assetType={asset.type}
           dateRange={parsedDateRange}
         />
         <SectionSeparator />

@@ -24,9 +24,9 @@ import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDateRangeProviderContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset, assetType } = useAssetDetailsRenderPropsContext();
+  const { asset } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsProviderContext();
 
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
@@ -50,7 +50,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(assetType).id}: "${asset.name}"`,
+      `${findInventoryFields(asset.type).id}: "${asset.name}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -58,7 +58,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [assetType, asset.name, textQueryDebounced]);
+  }, [asset.type, asset.name, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -71,7 +71,7 @@ export const Logs = () => {
 
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
-      nodeType: assetType,
+      nodeType: asset.type,
       nodeId: asset.name,
       time: startTimestamp,
       filter: textQueryDebounced,
@@ -80,7 +80,7 @@ export const Logs = () => {
   }, [
     locators.nodeLogsLocator,
     asset.name,
-    assetType,
+    asset.type,
     startTimestamp,
     textQueryDebounced,
     logView,
@@ -137,9 +137,12 @@ export const Logs = () => {
             logView={logView}
             startTimestamp={startTimestamp}
             endTimestamp={currentTimestamp}
+            startDateExpression={!autoRefresh?.isPaused ? dateRange.from : undefined}
+            endDateExpression={!autoRefresh?.isPaused ? dateRange.to : undefined}
             query={filter}
             height="60vh"
             showFlyoutAction
+            isStreaming={!autoRefresh?.isPaused}
           />
         )}
       </EuiFlexItem>

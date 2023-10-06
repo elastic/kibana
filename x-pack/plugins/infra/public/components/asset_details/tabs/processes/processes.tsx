@@ -39,8 +39,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 export const Processes = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset, assetType } = useAssetDetailsRenderPropsContext();
-
+  const { asset } = useAssetDetailsRenderPropsContext();
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
@@ -55,9 +54,9 @@ export const Processes = () => {
   });
 
   const hostTerm = useMemo(() => {
-    const field = getFieldByType(assetType) ?? assetType;
+    const field = getFieldByType(asset.type) ?? asset.type;
     return { [field]: asset.name };
-  }, [asset.name, assetType]);
+  }, [asset.name, asset.type]);
 
   const {
     loading,

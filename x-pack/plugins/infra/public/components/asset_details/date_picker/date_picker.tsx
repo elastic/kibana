@@ -5,13 +5,33 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker, type OnTimeChangeProps } from '@elastic/eui';
+import { EuiSuperDatePickerProps } from '@elastic/eui';
+import { EuiSuperDatePicker, type OnTimeChangeProps, type OnRefreshProps } from '@elastic/eui';
+import type {
+  OnRefreshChangeProps,
+  DurationRange,
+} from '@elastic/eui/src/components/date_picker/types';
 import React, { useCallback } from 'react';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 
+const COMMONLY_USED_RANGES: DurationRange[] = [
+  { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+  { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+  { start: 'now-1h', end: 'now', label: 'Last 3 hours' },
+  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+];
+
 export const DatePicker = () => {
-  const { dateRange, setDateRange } = useDateRangeProviderContext();
-  const onTimeChange = useCallback(
+  const { dateRange, autoRefresh, setDateRange, setAutoRefresh } = useDateRangeProviderContext();
+
+  const handleRefresh = useCallback(
+    ({ start, end }: OnRefreshProps) => {
+      setDateRange({ from: start, to: end });
+    },
+    [setDateRange]
+  );
+  const handleTimeChange = useCallback(
     ({ start, end, isInvalid }: OnTimeChangeProps) => {
       if (!isInvalid) {
         setDateRange({ from: start, to: end });
@@ -20,13 +40,32 @@ export const DatePicker = () => {
     [setDateRange]
   );
 
+  const handleAutoRefreshChange = useCallback(
+    ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+      setAutoRefresh({
+        isPaused,
+        interval: refreshInterval,
+      });
+    },
+    [setAutoRefresh]
+  );
+
   return (
-    <EuiSuperDatePicker
+    <MemoEuiSuperDatePicker
+      commonlyUsedRanges={COMMONLY_USED_RANGES}
       start={dateRange.from}
       end={dateRange.to}
-      updateButtonProps={{ iconOnly: true }}
-      onTimeChange={onTimeChange}
+      isPaused={autoRefresh && autoRefresh.isPaused}
+      onTimeChange={handleTimeChange}
+      onRefresh={autoRefresh && handleRefresh}
+      onRefreshChange={autoRefresh && handleAutoRefreshChange}
+      refreshInterval={autoRefresh && autoRefresh.interval}
       width="full"
     />
   );
 };
+
+// Memo EuiSuperDatePicker to prevent re-renders from resetting the auto-refresh cycle
+const MemoEuiSuperDatePicker = React.memo((props: EuiSuperDatePickerProps) => (
+  <EuiSuperDatePicker {...props} updateButtonProps={{ iconOnly: true }} />
+));

@@ -47,9 +47,7 @@ export const AssetDetailPage = () => {
       }}
     >
       <AssetDetails
-        asset={{
-          id: nodeId,
-        }}
+        assetId={nodeId}
         assetType={nodeType}
         tabs={commonFlyoutTabs}
         links={['apmServices']}

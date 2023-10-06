@@ -13,15 +13,15 @@ import { AssetDetailsProps } from '../types';
 import { useDateRangeProviderContext } from './use_date_range';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
-export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetType'>;
+export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;
 
-export function useMetadataProvider({ asset, assetType }: UseMetadataProviderProps) {
+export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderProps) {
   const [, setUrlState] = useAssetDetailsUrlState();
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const { sourceId } = useSourceContext();
 
   const { loading, error, metadata, reload } = useMetadata({
-    assetId: asset.id,
+    assetId,
     assetType,
     sourceId,
     timeRange: getDateRangeInTimestamp(),

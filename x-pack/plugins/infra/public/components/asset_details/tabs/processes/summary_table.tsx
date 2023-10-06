@@ -46,7 +46,7 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
         {Object.entries(summary).map(([field, value]) => (
           <EuiFlexItem key={field}>
             <EuiDescriptionList

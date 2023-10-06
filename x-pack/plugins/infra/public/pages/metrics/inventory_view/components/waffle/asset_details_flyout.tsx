@@ -18,11 +18,10 @@ interface Props {
   assetName: string;
   assetType: InventoryItemType;
   closeFlyout: () => void;
-  currentTime: number;
-  options?: InfraWaffleMapOptions;
+  options?: Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>;
+  isAutoReloading?: boolean;
+  refreshInterval?: number;
 }
-
-const ONE_HOUR = 60 * 60 * 1000;
 
 const flyoutTabs = [
   ...commonFlyoutTabs,
@@ -34,18 +33,22 @@ const flyoutTabs = [
   },
 ];
 
+const AUTO_REFRESH_INTERVAL = 60 * 1000;
+
 export const AssetDetailsFlyout = ({
   assetName,
   assetType,
   closeFlyout,
-  currentTime,
   options,
+  isAutoReloading = false,
+  refreshInterval = AUTO_REFRESH_INTERVAL,
 }: Props) => {
   const { source } = useSourceContext();
 
   return source ? (
     <AssetDetails
-      asset={{ id: assetName, name: assetName }}
+      assetId={assetName}
+      assetName={assetName}
       assetType={assetType}
       overrides={{
         metadata: {
@@ -63,8 +66,12 @@ export const AssetDetailsFlyout = ({
       }}
       metricAlias={source.configuration.metricAlias}
       dateRange={{
-        from: new Date(currentTime - ONE_HOUR).toISOString(),
-        to: new Date(currentTime).toISOString(),
+        from: 'now-1h',
+        to: 'now',
+      }}
+      autoRefresh={{
+        isPaused: !isAutoReloading,
+        interval: refreshInterval,
       }}
     />
   ) : null;
