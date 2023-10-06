@@ -558,6 +558,7 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
     },
     {
+      width: '150px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
