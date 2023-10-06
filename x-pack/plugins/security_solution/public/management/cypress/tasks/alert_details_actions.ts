@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const openResponderFromEndpointAlerts = (): void => {
+export const openResponderFromEndpointAlertDetails = (): void => {
   cy.getByTestSubj('endpointResponseActions-action-item').click();
 };
 

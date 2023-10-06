@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { loadPage } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
-import { openResponderFromEndpointAlerts } from '../../tasks/alert_details_actions';
-import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
+import {
+  addAlertToCase,
+  openResponderFromEndpointAlertDetails,
+} from '../../tasks/alert_details_actions';
+import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -24,6 +28,7 @@ import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
   openAlertDetails,
+  openCaseAlertDetails,
   toggleRuleOffAndOn,
   visitRuleAlerts,
 } from '../../tasks/isolate';
@@ -32,6 +37,7 @@ import { login } from '../../tasks/login';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { APP_CASES_PATH } from '../../../../../common/constants';
 
 describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
@@ -323,8 +329,61 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         closeAllToasts();
         openAlertDetails();
 
-        openResponderFromEndpointAlerts();
+        openResponderFromEndpointAlertDetails();
         cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
+      });
+    });
+
+    describe('From Cases', () => {
+      let ruleId: string;
+      let ruleName: string;
+      let caseId: string;
+
+      const caseOwner = 'securitySolution';
+
+      before(() => {
+        loadRule(
+          { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+          false
+        ).then((data) => {
+          ruleId = data.id;
+          ruleName = data.name;
+        });
+        loadCase(caseOwner).then((data) => {
+          caseId = data.id;
+        });
+      });
+
+      after(() => {
+        if (ruleId) {
+          cleanupRule(ruleId);
+        }
+        if (caseId) {
+          cleanupCase(caseId);
+        }
+      });
+
+      it('should open responder', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        toggleRuleOffAndOn(ruleName);
+        visitRuleAlerts(ruleName);
+        closeAllToasts();
+        openAlertDetails();
+        addAlertToCase(caseId, caseOwner);
+
+        // visit case details page
+        cy.intercept('GET', `/api/cases/${caseId}/user_actions/_find*`).as('case');
+        loadPage(`${APP_CASES_PATH}/${caseId}`);
+        openCaseAlertDetails(caseId);
+
+        cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
+          const caseAlertId = res?.body.userActions[1].id;
+
+          closeAllToasts();
+          openCaseAlertDetails(caseAlertId);
+          openResponderFromEndpointAlertDetails();
+          cy.getByTestSubj('consolePageOverlay-layout-titleHolder').should('exist');
+        });
       });
     });
   });
