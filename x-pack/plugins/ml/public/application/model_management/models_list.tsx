@@ -455,7 +455,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      width: '15%',
+      width: '215px',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
@@ -476,7 +476,7 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
-      width: '35%',
+      width: '300px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
@@ -529,6 +529,7 @@ export const ModelsList: FC<Props> = ({
         </EuiFlexGroup>
       ),
       'data-test-subj': 'mlModelsTableColumnType',
+      width: '130px',
     },
     {
       field: 'state',
@@ -546,6 +547,7 @@ export const ModelsList: FC<Props> = ({
         ) : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
+      width: '130px',
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -556,6 +558,7 @@ export const ModelsList: FC<Props> = ({
       render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
+      width: '210px',
     },
     {
       width: '150px',
@@ -692,12 +695,13 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
+          css={{ overflowX: 'auto' }}
+          isSelectable={true}
+          isExpandable={true}
+          hasActions={true}
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
-          isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
           items={items}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
