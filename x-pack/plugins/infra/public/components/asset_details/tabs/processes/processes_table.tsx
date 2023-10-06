@@ -110,8 +110,6 @@ export const ProcessesTable = ({
     [processList]
   );
 
-  // if (isLoading) return <LoadingPlaceholder />;
-
   if (!isLoading && currentItems.length === 0)
     return (
       <EuiEmptyPrompt
@@ -153,7 +151,7 @@ export const ProcessesTable = ({
             onClick={clearSearchBar}
           >
             <FormattedMessage
-              id="xpack.infra.infra.assetDetails.openAsPage"
+              id="xpack.infra.metrics.nodeDetails.noProcessesClearFilters"
               defaultMessage="Clear filters"
             />
           </EuiButton>

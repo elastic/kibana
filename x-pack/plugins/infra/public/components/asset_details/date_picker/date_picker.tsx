@@ -11,15 +11,46 @@ import type {
   OnRefreshChangeProps,
   DurationRange,
 } from '@elastic/eui/src/components/date_picker/types';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 
 const COMMONLY_USED_RANGES: DurationRange[] = [
-  { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
-  { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-  { start: 'now-1h', end: 'now', label: 'Last 3 hours' },
-  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+  {
+    start: 'now-15m',
+    end: 'now',
+    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last15Minutes', {
+      defaultMessage: 'Last 15 minutes',
+    }),
+  },
+  {
+    start: 'now-1h',
+    end: 'now',
+    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last1Hour', {
+      defaultMessage: 'Last 1 hour',
+    }),
+  },
+  {
+    start: 'now-1h',
+    end: 'now',
+    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last3Hours', {
+      defaultMessage: 'Last 3 hours',
+    }),
+  },
+  {
+    start: 'now-24h',
+    end: 'now',
+    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last24Hours', {
+      defaultMessage: 'Last 24 hours',
+    }),
+  },
+  {
+    start: 'now-7d',
+    end: 'now',
+    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last7Days', {
+      defaultMessage: 'Last 7 days',
+    }),
+  },
 ];
 
 export const DatePicker = () => {

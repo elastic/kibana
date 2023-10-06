@@ -202,18 +202,22 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   const prevEndTimestamp = usePrevious(endTimestamp);
   const prevFilterQuery = usePrevious(parsedQuery);
 
-  // Refetch entries if...
+  // Component lifetime
+  useEffect(() => {
+    loadLogView();
+  }, [loadLogView]);
+
   useEffect(() => {
     const isFirstLoad = !prevStartTimestamp || !prevEndTimestamp;
     const hasQueryChanged = parsedQuery !== prevFilterQuery;
-    const hasTimerangeChanged =
+    const timerangeChanged =
       prevStartTimestamp !== startTimestamp || prevEndTimestamp !== endTimestamp;
 
     if (isFirstLoad || hasQueryChanged) {
       fetchEntries();
     }
 
-    if (hasTimerangeChanged) {
+    if (timerangeChanged) {
       if (isStreaming) {
         fetchNewestEntries();
       } else {
@@ -231,11 +235,6 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     prevStartTimestamp,
     startTimestamp,
   ]);
-
-  // Component lifetime
-  useEffect(() => {
-    loadLogView();
-  }, [loadLogView]);
 
   // Pagination handler
   const handlePagination = useCallback(
