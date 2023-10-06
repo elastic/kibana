@@ -85,6 +85,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getAliasesDetailsContent: () => string;
       dataStreamDetailsExist: () => boolean;
       getDataStreamDetailsContent: () => string;
+      reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
       extensionSummaryExists: (index: number) => boolean;
     };
@@ -160,6 +161,12 @@ export const setup = async ({
     },
     getDataStreamDetailsContent: () => {
       return find('indexDetailsDataStream').text();
+    },
+    reloadDataStreamDetails: async () => {
+      await act(async () => {
+        find('indexDetailsDataStreamReload').simulate('click');
+      });
+      component.update();
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');

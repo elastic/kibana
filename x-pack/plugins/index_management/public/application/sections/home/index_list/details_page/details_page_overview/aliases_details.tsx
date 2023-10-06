@@ -102,7 +102,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
           <EuiFlyoutBody>
             <EuiListGroup>
               {aliases.map((alias) => (
-                <EuiListGroupItem label={alias} />
+                <EuiListGroupItem key={alias} label={alias} />
               ))}
             </EuiListGroup>
           </EuiFlyoutBody>

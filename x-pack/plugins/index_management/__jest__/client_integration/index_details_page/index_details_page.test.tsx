@@ -326,15 +326,48 @@ describe('<IndexDetailsPage />', () => {
         });
         testBed.component.update();
 
-        const aliasesExist = testBed.actions.overview.dataStreamDetailsExist();
-        expect(aliasesExist).toBe(true);
+        const dataStreamDetailsExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(dataStreamDetailsExist).toBe(true);
 
-        const aliasesContent = testBed.actions.overview.getDataStreamDetailsContent();
-        expect(aliasesContent).toBe(
+        const dataStreamContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(dataStreamContent).toBe(
           `Data stream${
             dataStreamDetails.generation
           }GenerationsSee templateLast update${humanizeTimeStamp(dataStreamDetails.maxTimeStamp!)}`
         );
+      });
+
+      it('renders error message if the request fails', async () => {
+        const dataStreamName = 'test_data_stream';
+        const testWithDataStream: Index = {
+          ...testIndexMock,
+          data_stream: dataStreamName,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWithDataStream);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamName, undefined, {
+          statusCode: 400,
+          message: `Unable to load data stream details`,
+        });
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const dataStreamDetailsExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(dataStreamDetailsExist).toBe(true);
+
+        const dataStreamContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(dataStreamContent).toBe(
+          `Data streamUnable to load data stream detailsReloadLast update`
+        );
+
+        // already sent 3 requests while setting up the component
+        const numberOfRequests = 3;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        await testBed.actions.overview.reloadDataStreamDetails();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
     });
 

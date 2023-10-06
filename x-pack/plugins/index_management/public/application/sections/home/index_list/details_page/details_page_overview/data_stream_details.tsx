@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getTemplateDetailsLink } from '../../../../../..';
 import { useLoadDataStream } from '../../../../../services/api';
 import { useAppContext } from '../../../../../app_context';
@@ -21,13 +23,68 @@ import { OverviewCard } from './overview_card';
 export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = ({
   dataStreamName,
 }) => {
-  const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
+  const { error, data: dataStream, isLoading, resendRequest } = useLoadDataStream(dataStreamName);
   const { history } = useAppContext();
+  const hasError = !isLoading && (error || !dataStream);
+  let contentLeft: ReactNode = (
+    <EuiFlexGroup gutterSize="xs" alignItems="baseline">
+      <EuiFlexItem grow={false}>
+        <EuiText
+          css={css`
+            font-size: ${euiThemeVars.euiFontSizeL};
+          `}
+        >
+          {dataStream?.generation}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTextColor color="subdued">
+          {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.generationLabel', {
+            defaultMessage: '{generations, plural, one {Generation} other {Generations}}',
+            values: { generations: dataStream?.generation },
+          })}
+        </EuiTextColor>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+  let contentRight: ReactNode = (
+    <EuiButton
+      size="s"
+      {...reactRouterNavigate(history, getTemplateDetailsLink(dataStream?.indexTemplateName ?? ''))}
+    >
+      {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.templateLinkLabel', {
+        defaultMessage: 'See template',
+      })}
+    </EuiButton>
+  );
+
   if (isLoading) {
-    return <span>loading...</span>;
+    contentLeft = (
+      <SectionLoading inline={true}>
+        <FormattedMessage
+          id="xpack.idxMgmt.indexDetails.overviewTab.dataStream.loadingDescription"
+          defaultMessage="Loading data stream details…"
+        />
+      </SectionLoading>
+    );
+    contentRight = null;
   }
-  if (error || !dataStream) {
-    return <span>error</span>;
+  if (hasError) {
+    contentLeft = (
+      <EuiText grow={false}>
+        <EuiTextColor color="warning">
+          <FormattedMessage
+            id="console.loadingError.message"
+            defaultMessage="Unable to load data stream details"
+          />
+        </EuiTextColor>
+      </EuiText>
+    );
+    contentRight = (
+      <EuiButton color="warning" onClick={resendRequest} data-test-subj="indexDetailsDataStreamReload">
+        <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload" />
+      </EuiButton>
+    );
   }
   return (
     <OverviewCard
@@ -36,40 +93,8 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
         defaultMessage: 'Data stream',
       })}
       content={{
-        left: (
-          <EuiFlexGroup gutterSize="xs" alignItems="baseline">
-            <EuiFlexItem grow={false}>
-              <EuiText
-                css={css`
-                  font-size: ${euiThemeVars.euiFontSizeL};
-                `}
-              >
-                {dataStream.generation}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTextColor color="subdued">
-                {i18n.translate(
-                  'xpack.idxMgmt.indexDetails.overviewTab.dataStream.generationLabel',
-                  {
-                    defaultMessage: '{generations, plural, one {Generation} other {Generations}}',
-                    values: { generations: dataStream.generation },
-                  }
-                )}
-              </EuiTextColor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        right: (
-          <EuiButton
-            size="s"
-            {...reactRouterNavigate(history, getTemplateDetailsLink(dataStream.indexTemplateName))}
-          >
-            {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.templateLinkLabel', {
-              defaultMessage: 'See template',
-            })}
-          </EuiButton>
-        ),
+        left: contentLeft,
+        right: contentRight,
       }}
       footer={{
         left: (
@@ -82,18 +107,20 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
                 defaultMessage: 'Last update',
               })}
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTextColor color="subdued">
-                {dataStream.maxTimeStamp
-                  ? humanizeTimeStamp(dataStream.maxTimeStamp)
-                  : i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.dataStream.maxTimeStampNoneMessage',
-                      {
-                        defaultMessage: `Never`,
-                      }
-                    )}
-              </EuiTextColor>
-            </EuiFlexItem>
+            {!isLoading && !hasError && (
+              <EuiFlexItem>
+                <EuiTextColor color="subdued">
+                  {dataStream?.maxTimeStamp
+                    ? humanizeTimeStamp(dataStream.maxTimeStamp)
+                    : i18n.translate(
+                        'xpack.idxMgmt.indexDetails.overviewTab.dataStream.maxTimeStampNoneMessage',
+                        {
+                          defaultMessage: `Never`,
+                        }
+                      )}
+                </EuiTextColor>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
       }}
