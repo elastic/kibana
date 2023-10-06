@@ -13,10 +13,12 @@ import type { Filter, Query } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana, useNavigateTo } from '../../common/lib/kibana';
 import { APP_UI_ID } from '../../../common';
 import { useSecurityTags } from '../context/dashboard_context';
-import { DASHBOARDS_PATH } from '../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -50,13 +52,39 @@ const DashboardRendererComponent = ({
   const dispatch = useDispatch();
 
   const securityTags = useSecurityTags();
+  const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const firstSecurityTagId = securityTags?.[0]?.id;
 
   const isCreateDashboard = !savedObjectId;
 
+  const getSecuritySolutionDashboardUrl = useCallback(
+    ({ dashboardId }) => {
+      return getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: dashboardId,
+      });
+    },
+    [getSecuritySolutionUrl]
+  );
+
+  const goToDashboard = useCallback(
+    async (params) => {
+      track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
+      navigateTo({
+        url: getSecuritySolutionDashboardUrl(params),
+      });
+    },
+    [getSecuritySolutionDashboardUrl, navigateTo]
+  );
+
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(
     () =>
       Promise.resolve({
+        locator: {
+          navigate: goToDashboard,
+          getRedirectUrl: getSecuritySolutionDashboardUrl,
+        },
         useSessionStorageIntegration: true,
         useControlGroupIntegration: true,
         getInitialInput: () => ({
@@ -73,7 +101,15 @@ const DashboardRendererComponent = ({
           currentAppId: APP_UI_ID,
         }),
       }),
-    [embeddable, filters, query, timeRange, viewMode]
+    [
+      embeddable,
+      filters,
+      query,
+      timeRange,
+      viewMode,
+      goToDashboard,
+      getSecuritySolutionDashboardUrl,
+    ]
   );
 
   const refetchByForceRefresh = useCallback(() => {

@@ -31,10 +31,6 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import {
-  getDefaultControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
@@ -112,7 +108,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
-  public locator?: LocatorPublic<DashboardAppLocatorParams>;
+  public locator?: Pick<LocatorPublic<DashboardAppLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;

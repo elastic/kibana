@@ -23,7 +23,6 @@ import { LINKS_VERTICAL_LAYOUT, LinksLayoutType, Link } from '../../../common/co
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { useLinks } from '../../embeddable/links_embeddable';
 import { fetchDashboard } from './dashboard_link_tools';
-import { dashboardServices } from '../../services/kibana_services';
 
 export const DashboardLinkComponent = ({
   link,
@@ -105,7 +104,7 @@ export const DashboardLinkComponent = ({
       ...getEmbeddableParams(linksEmbeddable, linkOptions),
     };
 
-    const locator = dashboardServices.locator;
+    const locator = dashboardContainer.locator;
     if (!locator) return;
 
     const href = locator.getRedirectUrl(params);

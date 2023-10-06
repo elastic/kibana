@@ -18,7 +18,6 @@ import {
   EmbeddablePackageState,
   EmbeddableAppContext,
 } from '@kbn/embeddable-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -29,6 +28,7 @@ import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { createInject, createExtract, DashboardContainerInput } from '../../../common';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
+import { DashboardAppLocatorParams } from '../../dashboard_app/locator/locator';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -63,7 +63,7 @@ export interface DashboardCreationOptions {
   isEmbeddedExternally?: boolean;
 
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
-  locator?: LocatorPublic<SerializableRecord>; // TODO: Should this be a string and the `get` happens in the link embeddable?
+  locator?: Pick<LocatorPublic<DashboardAppLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 }
 
 export class DashboardContainerFactoryDefinition
