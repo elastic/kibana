@@ -81,13 +81,17 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       })
     ),
     featureFlags: schema.object({
-      metricsExplorerEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
       customThresholdAlertsEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: false }),
         serverless: schema.boolean({ defaultValue: true }),
+      }),
+      logsUIEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      metricsExplorerEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
       }),
       osqueryEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
@@ -222,14 +226,16 @@ export class InfraServerPlugin
       countLogs: () => UsageCollector.countLogs(),
     });
 
-    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-      {
-        sampleObject: null, // indicates that there is no sample object associated with this app link's path
-        getPath: () => `/app/logs`,
-        label: logsSampleDataLinkLabel,
-        icon: 'logsApp',
-      },
-    ]);
+    if (this.config.featureFlags.logsUIEnabled) {
+      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+        {
+          sampleObject: null, // indicates that there is no sample object associated with this app link's path
+          getPath: () => `/app/logs`,
+          label: logsSampleDataLinkLabel,
+          icon: 'logsApp',
+        },
+      ]);
+    }
 
     initInfraServer(this.libs);
     registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
