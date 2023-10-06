@@ -21,7 +21,10 @@ interface QueryParams {
   params: AiopsLogRateAnalysisSchema;
   termFilters?: FieldValuePair[];
 }
-export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
+export const getQueryWithParams = ({
+  params,
+  termFilters,
+}: QueryParams): estypes.QueryDslQueryContainer => {
   const searchQuery = JSON.parse(params.searchQuery) as estypes.QueryDslQueryContainer;
   return {
     bool: {

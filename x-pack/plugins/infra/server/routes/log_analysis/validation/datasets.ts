@@ -17,6 +17,9 @@ export const initValidateLogAnalysisDatasetsRoute = ({
   framework,
   logEntries,
 }: InfraBackendLibs) => {
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
   framework
     .registerVersionedRoute({
       access: 'internal',
