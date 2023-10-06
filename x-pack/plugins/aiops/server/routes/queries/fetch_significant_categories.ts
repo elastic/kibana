@@ -14,7 +14,7 @@ import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 
 import type { Category } from '../../../common/api/log_categorization/types';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
-import { LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD } from '../../../common/constants';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../common/constants';
 
 import { fetchCategories } from './fetch_categories';
 import { fetchCategoryCounts } from './fetch_category_counts';
@@ -119,7 +119,7 @@ export const fetchSignificantCategories = async (
       const pValue = criticalTableLookup(chiSquared, 1);
       const score = Math.log(pValue);
 
-      if (pValue <= LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD && observed > expected) {
+      if (pValue <= LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD && observed > expected) {
         significantCategories.push({
           key,
           fieldName,

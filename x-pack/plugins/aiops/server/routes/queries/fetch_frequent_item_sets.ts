@@ -15,7 +15,7 @@ import type { Logger } from '@kbn/logging';
 import { type SignificantTerm } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import { RANDOM_SAMPLER_SEED } from '../../../common/constants';
+import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../../../common/constants';
 import type {
   SignificantTermDuplicateGroup,
   ItemSet,
@@ -107,7 +107,7 @@ export async function fetchFrequentItemSets(
       frequent_item_sets: {
         minimum_set_size: 2,
         size: 200,
-        minimum_support: 0.001,
+        minimum_support: LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT,
         fields: getFrequentItemSetsAggFields(sortedSignificantTerms),
       },
     },

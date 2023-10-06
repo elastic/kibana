@@ -18,6 +18,7 @@ import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_an
 import type { FetchFrequentItemSetsResponse, ItemSet } from '../../../common/types';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../common/api/log_categorization/types';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../common/constants';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
@@ -178,7 +179,11 @@ export async function fetchTerms2CategoriesCounts(
         }
         return result;
       })
-      .filter((d) => d.doc_count > 0 && d.support > 0.001),
+      .filter(
+        (d) =>
+          d.doc_count > 0 &&
+          d.support > LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT
+      ),
     totalDocCount: 0,
   };
 }
