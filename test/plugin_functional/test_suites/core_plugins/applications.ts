@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   };
 
   const getKibanaUrl = (pathname?: string, search?: string) => {
-    console.log('PATHNAME', pathname);
     return url.format({
       protocol: 'http:',
       hostname: process.env.TEST_KIBANA_HOST || 'localhost',
