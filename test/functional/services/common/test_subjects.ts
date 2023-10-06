@@ -41,7 +41,7 @@ export class TestSubjects extends FtrService {
    * `retry.waitFor()` loops.
    *
    * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
-   * the timeout. The default value for that config is currently 2.5 seconds.
+   * the timeout. The default value for that config is currently 2.5 seconds (in ms).
    *
    * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
    * is set to `true`.
