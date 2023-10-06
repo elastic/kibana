@@ -26,35 +26,6 @@ import { getRenderCellValueHook } from '../../../detections/configurations/secur
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
-type PickKey<T, K extends keyof T> = Extract<keyof T, K>;
-type KeysAlertTableId = PickKey<
-  typeof TableId,
-  'alertsOnAlertsPage' | 'alertsOnRuleDetailsPage' | 'alertsOnCasePage' | 'alertsRiskInputs'
->;
-
-type ValuesAlertTableId = typeof TableId[KeysAlertTableId];
-
-type KeysAlertTableConfiguration = keyof typeof ALERTS_TABLE_REGISTRY_CONFIG_IDS;
-type ValuesAlertTableConfiguration =
-  typeof ALERTS_TABLE_REGISTRY_CONFIG_IDS[KeysAlertTableConfiguration];
-
-const ScopeIdLinkToAlertTableConfiguration: Record<
-  ValuesAlertTableId,
-  ValuesAlertTableConfiguration
-> = {
-  [TableId.alertsOnAlertsPage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE,
-  [TableId.alertsOnRuleDetailsPage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS,
-  [TableId.alertsOnCasePage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
-  [TableId.alertsRiskInputs]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS,
-};
-
-export const getAlertConfigIdByScopeId = (scopeId: string) => {
-  if (ScopeIdLinkToAlertTableConfiguration[scopeId as ValuesAlertTableId]) {
-    return ScopeIdLinkToAlertTableConfiguration[scopeId as ValuesAlertTableId];
-  }
-  return undefined;
-};
-
 const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract,
   storage: Storage

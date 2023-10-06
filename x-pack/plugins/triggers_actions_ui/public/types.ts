@@ -690,7 +690,11 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
-  actions?: {
+}
+
+export interface AlertsTableConfigurationRegistryWithActions
+  extends AlertsTableConfigurationRegistry {
+  actions: {
     toggleColumn: (columnId: string) => void;
   };
 }

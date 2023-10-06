@@ -20,8 +20,8 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
-import { getAlertConfigIdByScopeId } from '../../../common/lib/triggers_actions_ui/register_alerts_table_configuration';
 import type { StartServices } from '../../../types';
+import { getAlertConfigIdByScopeId } from '../../../common/lib/triggers_actions_ui/alert_table_scope_config';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
@@ -68,41 +68,20 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
         return;
       }
 
+      const alertTableConfigurationId = getAlertConfigIdByScopeId(scopeId);
+      if (alertTableConfigurationId) {
+        services.triggersActionsUi.alertsTableConfigurationRegistry
+          .getActions(alertTableConfigurationId)
+          .toggleColumn(field.name);
+        return;
+      }
+
       const selector = isTimelineScope(scopeId)
         ? timelineSelectors.getTimelineByIdSelector()
         : dataTableSelectors.getTableByIdSelector();
 
       const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
       const { columns } = selector(store.getState(), scopeId) ?? defaults;
-      const alertTableConfigurationId = getAlertConfigIdByScopeId(scopeId);
-      if (alertTableConfigurationId) {
-        const alertsTableConfigurationRegistry =
-          services.triggersActionsUi.alertsTableConfigurationRegistry.get(
-            alertTableConfigurationId
-          );
-        alertsTableConfigurationRegistry?.actions?.toggleColumn(field.name);
-      } else {
-        if (columns.some((c) => c.id === field.name)) {
-          store.dispatch(
-            scopedActions.removeColumn({
-              columnId: field.name,
-              id: scopeId,
-            })
-          );
-        } else {
-          store.dispatch(
-            scopedActions.upsertColumn({
-              column: {
-                columnHeaderType: defaultColumnHeaderType,
-                id: field.name,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              },
-              id: scopeId,
-              index: 1,
-            })
-          );
-        }
-      }
 
       if (columns.some((c) => c.id === field.name)) {
         store.dispatch(
