@@ -15,7 +15,7 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
       await svlCommonPage.login();
     });
 
-    before(async () => {
+    after(async () => {
       await svlCommonPage.forceLogout();
     });
 
