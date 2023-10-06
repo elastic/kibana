@@ -15,6 +15,10 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
       await svlCommonPage.login();
     });
 
+    before(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     loadTestFile(require.resolve('./open_in_lens/agg_based'));
   });
 };
