@@ -94,7 +94,7 @@ export function PaletteColors({
               position="bottom"
               content={i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsTooltip', {
                 defaultMessage:
-                  'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes',
+                  'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
               })}
             >
               <EuiIcon tabIndex={0} type="questionInCircle" />

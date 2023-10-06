@@ -104,7 +104,7 @@ describe('ElasticsearchStore', () => {
             inference: {
               field_map: { text: 'text_field' },
               inference_config: { text_expansion: { results_field: 'tokens' } },
-              model_id: '.elser_model_1',
+              model_id: '.elser_model_2',
               target_field: 'vector',
             },
           },
@@ -130,12 +130,12 @@ describe('ElasticsearchStore', () => {
         trained_model_configs: [{ fully_defined: true }],
       } as MlGetTrainedModelsResponse);
 
-      const isInstalled = await esStore.isModelInstalled('.elser_model_1');
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
 
       expect(isInstalled).toBe(true);
       expect(mockEsClient.ml.getTrainedModels).toHaveBeenCalledWith({
         include: 'definition_status',
-        model_id: '.elser_model_1',
+        model_id: '.elser_model_2',
       });
     });
   });
@@ -217,7 +217,7 @@ describe('ElasticsearchStore', () => {
                 },
                 vector: {
                   tokens: {},
-                  model_id: '.elser_model_1',
+                  model_id: '.elser_model_2',
                 },
                 text: 'documents',
               },
@@ -242,7 +242,7 @@ describe('ElasticsearchStore', () => {
               {
                 text_expansion: {
                   'vector.tokens': {
-                    model_id: '.elser_model_1',
+                    model_id: '.elser_model_2',
                     model_text: query,
                   },
                 },
