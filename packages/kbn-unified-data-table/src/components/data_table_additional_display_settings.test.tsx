@@ -10,7 +10,10 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+import {
+  UnifiedDataTableAdditionalDisplaySettings,
+  MAX_ALLOWED_SAMPLE_SIZE,
+} from './data_table_additional_display_settings';
 import lodash from 'lodash';
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
@@ -44,6 +47,37 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       component.update();
 
       expect(findTestSubject(component, 'unifiedDataTableSampleSizeRange').prop('value')).toBe(100);
+    });
+
+    it('should not execute the callback for an invalid input', async () => {
+      const invalidValue = MAX_ALLOWED_SAMPLE_SIZE + 1;
+      const onChangeSampleSizeMock = jest.fn();
+
+      const component = mountWithIntl(
+        <UnifiedDataTableAdditionalDisplaySettings
+          sampleSize={5}
+          onChangeSampleSize={onChangeSampleSizeMock}
+        />
+      );
+      const input = findTestSubject(component, 'unifiedDataTableSampleSizeRange');
+      expect(input.prop('value')).toBe(5);
+
+      await act(async () => {
+        input.simulate('change', {
+          target: {
+            value: invalidValue,
+          },
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      component.update();
+
+      expect(findTestSubject(component, 'unifiedDataTableSampleSizeRange').prop('value')).toBe(
+        invalidValue
+      );
+
+      expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
 
     it('should render value changes correctly', async () => {

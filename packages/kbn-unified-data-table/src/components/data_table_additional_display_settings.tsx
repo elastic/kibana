@@ -11,7 +11,7 @@ import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
-const MAX_ALLOWED_SAMPLE_SIZE = 1000;
+export const MAX_ALLOWED_SAMPLE_SIZE = 1000;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   sampleSize: number;
