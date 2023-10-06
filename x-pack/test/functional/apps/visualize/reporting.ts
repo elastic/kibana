@@ -10,6 +10,7 @@ import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
+const VIS_TITLE = 'e-commerce pie chart';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
@@ -19,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
+  const reportingFunctional = getService('reportingFunctional');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -144,6 +146,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(percentDiff).to.be.lessThan(0.01);
+      });
+    });
+
+    describe('Visualize Editor: Generate Screenshot', () => {
+      it('does not allow user that does not have reporting_user role', async () => {
+        await reportingFunctional.loginDataAnalyst();
+        await reportingFunctional.openSavedVisualization(VIS_TITLE);
+        await reportingFunctional.tryGeneratePdfFail();
+      });
+
+      it('does allow user with reporting_user role', async () => {
+        await reportingFunctional.loginReportingUser();
+        await reportingFunctional.openSavedVisualization(VIS_TITLE);
+        await reportingFunctional.tryGeneratePdfSuccess();
       });
     });
   });
