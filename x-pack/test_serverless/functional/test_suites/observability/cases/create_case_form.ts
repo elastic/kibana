@@ -16,6 +16,8 @@ const owner = OBSERVABILITY_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
