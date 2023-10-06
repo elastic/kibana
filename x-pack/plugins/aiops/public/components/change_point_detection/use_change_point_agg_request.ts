@@ -42,7 +42,8 @@ interface RequestOptions {
 
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
-  query: QueryDslQueryContainer
+  query: QueryDslQueryContainer,
+  runtimeMappings: MappingRuntimeFields
 ): SearchRequest {
   const timeSeriesAgg = {
     over_time: {
@@ -107,6 +108,7 @@ function getChangePointDetectionRequestBody(
     size: 0,
     body: {
       ...(query ? { query } : {}),
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       aggregations,
     },
   } as SearchRequest;
@@ -155,6 +157,22 @@ export function useChangePointResults(
           return;
         }
 
+        const metricFieldDV = metricFieldOptions.find(
+          (option) => option.name === fieldConfig.metricField
+        );
+        const splitFieldDV = splitFieldsOptions.find(
+          (option) => option.name === fieldConfig.splitField
+        );
+
+        const runtimeMappings = {
+          ...(metricFieldDV?.isRuntimeField
+            ? { [metricFieldDV.name]: metricFieldDV.runtimeField! }
+            : {}),
+          ...(splitFieldDV?.isRuntimeField
+            ? { [splitFieldDV.name]: splitFieldDV.runtimeField! }
+            : {}),
+        } as MappingRuntimeFields;
+
         const requestPayload: SearchRequest = getChangePointDetectionRequestBody(
           {
             index: dataView.getIndexPattern(),
@@ -165,24 +183,9 @@ export function useChangePointResults(
             splitField: fieldConfig.splitField,
             afterKey,
           },
-          query
+          query,
+          runtimeMappings
         );
-
-        const metricFieldDV = metricFieldOptions.find(
-          (option) => option.name === fieldConfig.metricField
-        );
-        const splitFieldDV = splitFieldsOptions.find(
-          (option) => option.name === fieldConfig.splitField
-        );
-
-        requestPayload.body!.runtime_mappings = {
-          ...(metricFieldDV?.isRuntimeField
-            ? { [metricFieldDV.name]: metricFieldDV.runtimeField! }
-            : {}),
-          ...(splitFieldDV?.isRuntimeField
-            ? { [splitFieldDV.name]: splitFieldDV.runtimeField! }
-            : {}),
-        } as MappingRuntimeFields;
 
         const result = await runRequest<
           { params: SearchRequest },
