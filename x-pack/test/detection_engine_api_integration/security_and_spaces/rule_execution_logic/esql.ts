@@ -116,9 +116,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.space_ids': ['default'],
         'kibana.alert.rule.tags': [],
         'agent.name': 'test-1',
-        'agent.type': null,
-        'agent.version': null,
-        'host.name': null,
         id,
         'event.kind': 'signal',
         'kibana.alert.original_time': expect.any(String),
@@ -155,8 +152,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_tags': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
-        'kibana.alert.original_event.created': null,
-        'kibana.alert.original_event.ingested': null,
       });
     });
 
@@ -827,6 +822,164 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_level', 'Low');
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_score_norm', 1);
+      });
+    });
+
+    describe('ECS fields validation', () => {
+      it('creates alert if ECS field has multifields', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' }, 'observer.os.full': 'full test os' };
+        const doc2 = { agent: { name: 'test-2' } };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1, doc2],
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty(['observer.os.full'], 'full test os');
+        // *.text is multifield define in mappings for observer.os.full
+        expect(previewAlerts[0]._source).not.toHaveProperty(['observer.os.full.text']);
+      });
+      // https://github.com/elastic/security-team/issues/7741
+      it('creates alert if ECS field has multifields and is not in ruleRegistry ECS map', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = {
+          agent: { name: 'test-1' },
+          // this field is mapped in alerts index, but not in ruleRegistry ECS map
+          'process.entry_leader.name': 'test_process_name',
+        };
+        const doc2 = { agent: { name: 'test-2' } };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1, doc2],
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty(
+          ['process.entry_leader.name'],
+          'test_process_name'
+        );
+        expect(previewAlerts[0]._source).not.toHaveProperty(['process.entry_leader.name.text']);
+        expect(previewAlerts[0]._source).not.toHaveProperty(['process.entry_leader.name.caseless']);
+      });
+
+      describe('non-ecs', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+          );
+        });
+
+        const { indexEnhancedDocuments: indexEnhancedDocumentsToNonEcs } = dataGeneratorFactory({
+          es,
+          index: 'ecs_non_compliant',
+          log,
+        });
+
+        it('creates alert if non ECS field has multifields', async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const doc1 = {
+            'random.entry_leader.name': 'random non-ecs field',
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_non_compliant [metadata _id] ${internalIdPipe(id)}`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocumentsToNonEcs({
+            documents: [doc1],
+            interval,
+            id,
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts.length).toBe(1);
+          // all multifields have been indexed, which is expected, seen we don't know original mappings
+          expect(previewAlerts[0]._source).toHaveProperty(
+            ['random.entry_leader.name'],
+            'random non-ecs field'
+          );
+          expect(previewAlerts[0]._source).toHaveProperty(
+            ['random.entry_leader.name.text'],
+            'random non-ecs field'
+          );
+          expect(previewAlerts[0]._source).toHaveProperty(
+            ['random.entry_leader.name.caseless'],
+            'random non-ecs field'
+          );
+        });
       });
     });
   });
