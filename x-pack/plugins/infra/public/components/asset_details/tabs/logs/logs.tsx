@@ -137,12 +137,12 @@ export const Logs = () => {
             logView={logView}
             startTimestamp={startTimestamp}
             endTimestamp={currentTimestamp}
-            startDateExpression={!autoRefresh?.isPaused ? dateRange.from : undefined}
-            endDateExpression={!autoRefresh?.isPaused ? dateRange.to : undefined}
+            startDateExpression={autoRefresh && !autoRefresh.isPaused ? dateRange.from : undefined}
+            endDateExpression={autoRefresh && !autoRefresh.isPaused ? dateRange.to : undefined}
             query={filter}
             height="60vh"
             showFlyoutAction
-            isStreaming={!autoRefresh?.isPaused}
+            isStreaming={autoRefresh && !autoRefresh.isPaused}
           />
         )}
       </EuiFlexItem>

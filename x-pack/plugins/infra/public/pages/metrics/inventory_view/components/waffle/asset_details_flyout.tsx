@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { ContentTabIds } from '../../../../../components/asset_details/types';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
@@ -18,6 +18,7 @@ interface Props {
   assetName: string;
   assetType: InventoryItemType;
   closeFlyout: () => void;
+  currentTime: number;
   options?: Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>;
   isAutoReloading?: boolean;
   refreshInterval?: number;
@@ -34,16 +35,31 @@ const flyoutTabs = [
 ];
 
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
 
 export const AssetDetailsFlyout = ({
   assetName,
   assetType,
   closeFlyout,
+  currentTime,
   options,
   isAutoReloading = false,
   refreshInterval = AUTO_REFRESH_INTERVAL,
 }: Props) => {
   const { source } = useSourceContext();
+
+  const dateRange = useMemo(() => {
+    // forces relative dates when auto-refresh is active
+    return isAutoReloading
+      ? {
+          from: 'now-1h',
+          to: 'now',
+        }
+      : {
+          from: new Date(currentTime - ONE_HOUR).toISOString(),
+          to: new Date(currentTime).toISOString(),
+        };
+  }, [currentTime, isAutoReloading]);
 
   return source ? (
     <AssetDetails
@@ -65,10 +81,7 @@ export const AssetDetailsFlyout = ({
         closeFlyout,
       }}
       metricAlias={source.configuration.metricAlias}
-      dateRange={{
-        from: 'now-1h',
-        to: 'now',
-      }}
+      dateRange={dateRange}
       autoRefresh={{
         isPaused: !isAutoReloading,
         interval: refreshInterval,

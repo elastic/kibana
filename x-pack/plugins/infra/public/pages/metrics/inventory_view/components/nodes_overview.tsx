@@ -145,11 +145,12 @@ export const NodesOverview = ({
       />
       {nodeType === 'host' && detailsItemId && (
         <AssetDetailsFlyout
-          closeFlyout={closeFlyout}
           assetName={detailsItemId}
           assetType={nodeType}
-          options={options}
+          closeFlyout={closeFlyout}
+          currentTime={currentTime}
           isAutoReloading={isAutoReloading}
+          options={options}
           refreshInterval={refreshInterval}
         />
       )}
