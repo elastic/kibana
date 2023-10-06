@@ -82,6 +82,7 @@ module.exports = (_, argv) => {
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
         '@emotion/cache',
+        '@emotion/css',
         '@emotion/react',
         '@hello-pangea/dnd/dist/dnd.js',
         '@reduxjs/toolkit',
