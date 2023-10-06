@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.visualize.selectAnnotationsTab();
+      await listingTable.waitUntilTableIsLoaded();
     });
 
     after(async function () {
