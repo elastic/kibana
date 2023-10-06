@@ -128,7 +128,7 @@ function DiscoverDocumentsComponent({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
+  const defaultSampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -338,7 +338,7 @@ function DiscoverDocumentsComponent({
                 isPlainRecord={isTextBasedQuery}
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
-                sampleSizeState={sampleSizeState || sampleSize}
+                sampleSizeState={sampleSizeState || defaultSampleSize}
                 onUpdateSampleSize={!isTextBasedQuery ? onUpdateSampleSize : undefined}
                 onFieldEdited={onFieldEdited}
                 configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
