@@ -405,54 +405,6 @@ describe('validators', () => {
       );
     });
 
-    it('throws if required custom fields have empty string value', () => {
-      const requestCustomFields: CaseCustomFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          value: [''],
-        },
-      ];
-      const customFieldsConfiguration: CustomFieldsConfiguration = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          label: 'foo',
-          required: true,
-        },
-      ];
-      expect(() =>
-        validateRequiredCustomFields({
-          requestCustomFields,
-          customFieldsConfiguration,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
-    });
-
-    it('throws if required custom fields have empty string array', () => {
-      const requestCustomFields: CaseCustomFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          value: [],
-        },
-      ];
-      const customFieldsConfiguration: CustomFieldsConfiguration = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          label: 'foo',
-          required: true,
-        },
-      ];
-      expect(() =>
-        validateRequiredCustomFields({
-          requestCustomFields,
-          customFieldsConfiguration,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
-    });
-
     it('throws if configuration is missing and request has custom fields', () => {
       const requestCustomFields: CaseCustomFields = [
         {

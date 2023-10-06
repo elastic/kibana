@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { differenceWith, intersectionWith, isEmpty } from 'lodash';
+import { differenceWith, intersectionWith } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CaseRequestCustomFields } from '../../../common/types/api';
@@ -122,15 +122,8 @@ export const validateRequiredCustomFields = ({
       (requestField) => requestField.key === requiredField.key
     );
 
-    if (found) {
-      if (found.value === null) {
-        missingRequiredCustomFields.push(found.key);
-      } else if (
-        Array.isArray(found.value) &&
-        (isEmpty(found.value) || found.value.indexOf('') !== -1)
-      ) {
-        missingRequiredCustomFields.push(found.key);
-      }
+    if (found && found.value === null) {
+      missingRequiredCustomFields.push(found.key);
     }
   });
 
