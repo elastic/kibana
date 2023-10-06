@@ -154,7 +154,7 @@ describe('getPluginsStatusChanges', () => {
     });
   });
 
-  it.only('emits if any plugin status changes', () => {
+  it('emits if any plugin status changes', () => {
     getTestScheduler().run(({ expectObservable, hot }) => {
       const statusesA = createPluginsStatuses({
         pluginA: ServiceStatusLevels.available,
