@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.openDatasetSelector();
       });
 
-      it('should always display the Integrations Uncategorized and Data Views top level tabs', async () => {
+      it('should always display the Integrations, Uncategorized and Data Views top level tabs', async () => {
         const integrationsTab = await PageObjects.observabilityLogExplorer.getIntegrationsTab();
         const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
         const dataViewsTab = await PageObjects.observabilityLogExplorer.getDataViewsTab();
