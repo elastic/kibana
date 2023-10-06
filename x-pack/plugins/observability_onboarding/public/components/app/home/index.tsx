@@ -258,7 +258,7 @@ export function Home() {
                         'xpack.observability_onboarding.card.k8s.description',
                         {
                           defaultMessage:
-                            'Collect logs and metrics from Kubernetes clusters with Elastic agent.',
+                            'Collect logs and metrics from Kubernetes clusters with Elastic Agent.',
                         }
                       )}
                     </p>
@@ -392,5 +392,5 @@ const getStartedLabel = i18n.translate(
 
 const elasticAgentLabel = i18n.translate(
   'xpack.observability_onboarding.card.elasticAgent',
-  { defaultMessage: 'Elastic agent' }
+  { defaultMessage: 'Elastic Agent' }
 );
