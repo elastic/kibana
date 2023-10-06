@@ -19,7 +19,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/archive_so_migration_snapshot.sh
+  - command: .buildkite/scripts/steps/archive_so_migration_snapshot.sh target/plugin_so_types_snapshot.json
     label: 'Extract Saved Object migration plugin types'
     depends_on: build
     agents:
