@@ -111,6 +111,11 @@ export const allowedExperimentalValues = Object.freeze({
   discoverInTimeline: true,
 
   /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
+
+  /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
