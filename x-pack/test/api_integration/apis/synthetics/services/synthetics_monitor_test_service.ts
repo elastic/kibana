@@ -30,7 +30,7 @@ export class SyntheticsMonitorTestService {
 
   generateProjectAPIKey = async (accessToPublicLocations = true) => {
     const res = await this.supertest
-      .get<ProjectAPIKey>(
+      .get<ProjectAPIKeyResponse>(
         SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY +
           '?accessToElasticManagedLocations=' +
           accessToPublicLocations
@@ -39,7 +39,7 @@ export class SyntheticsMonitorTestService {
       .expect(200);
     const result = res.body as ProjectAPIKeyResponse;
     expect(result).to.have.property('apiKey');
-    const apiKey = result.apiKey.encoded;
+    const apiKey = result.apiKey?.encoded;
     expect(apiKey).to.not.be.empty();
     this.apiKey = apiKey;
     return apiKey;
