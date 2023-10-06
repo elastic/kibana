@@ -11,6 +11,17 @@ import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
+  KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
+  FAREQUOTE_WITH_SPIKE: 'farequote_with_spike',
+  ARTIFICIAL_LOGS_WITH_SPIKE_NOTEXTFIELD: 'artificial_logs_with_spike_notextfield',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
+  ARTIFICIAL_LOGS_WITH_DIP_NOTEXTFIELD: 'artificial_logs_with_dip_notextfield',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+} as const;
+export type LogRateAnalysisDataGenerator =
+  typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
+
 export interface GeneratedDoc {
   user: string;
   response_code: string;
@@ -155,7 +166,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
   const log = getService('log');
 
   return new (class DataGenerator {
-    public async generateData(dataGenerator: string) {
+    public async generateData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           // will be added via UI
@@ -236,7 +247,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
       }
     }
 
-    public async removeGeneratedData(dataGenerator: string) {
+    public async removeGeneratedData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           // do not remove

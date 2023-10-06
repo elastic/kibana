@@ -74,14 +74,14 @@ export const logRateAnalysisTestData: TestData[] = [
     },
   },
   {
-    testName: 'artificial_logs_with_spike',
-    dataGenerator: 'artificial_logs_with_spike',
+    testName: 'artificial_logs_with_spike_notextfield',
+    dataGenerator: 'artificial_logs_with_spike_notextfield',
     requestBody: {
       start: 1668760018793,
       end: 1668931954793,
       searchQuery: '{"match_all":{}}',
       timeFieldName: '@timestamp',
-      index: 'artificial_logs_with_spike',
+      index: 'artificial_logs_with_spike_notextfield',
       baselineMin: 1668769200000,
       baselineMax: 1668837600000,
       deviationMin: 1668855600000,
