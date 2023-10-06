@@ -42,18 +42,39 @@ export const fetchSignificantCategories = async (
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) => {
-  // To make sure we have the same categories for both baseline and deviation,
-  // we do an initial query that spans across baseline start and deviation end.
-  // We could update this to query the exact baseline AND deviation range, but
-  // wanted to avoid the refactor here and it should be good enough for a start.
+  // Filter that includes docs from both the baseline and deviation time range.
+  const baselineOrDeviationFilter = {
+    bool: {
+      should: [
+        {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.baselineMin,
+              lte: params.baselineMax,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.deviationMin,
+              lte: params.deviationMax,
+              format: 'epoch_millis',
+            },
+          },
+        },
+      ],
+    },
+  };
+
   const categoriesOverall = await fetchCategories(
     esClient,
     params,
     fieldNames,
-    // For analysing dips, the baseline and deviation will be swapped around,
-    // so to get the full range correctly we have to pick the right start/end.
-    Math.min(params.baselineMin, params.deviationMax),
-    Math.max(params.baselineMin, params.deviationMax),
+    undefined,
+    undefined,
+    baselineOrDeviationFilter,
     logger,
     sampleProbability,
     emitError,
