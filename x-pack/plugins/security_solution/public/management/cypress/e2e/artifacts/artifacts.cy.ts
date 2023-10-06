@@ -36,8 +36,7 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
 
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-// Failing: See https://github.com/elastic/kibana/issues/168272
-describe.skip('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
