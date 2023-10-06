@@ -23,7 +23,9 @@ import {
   // TODO: how to resolve this? Where to place this script?
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '@kbn/core-test-helpers-kbn-server';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+
 import { mkdirp } from '../build/lib';
 
 type MigrationInfoRecord = Pick<
@@ -45,7 +47,7 @@ async function takeSnapshot({ log, outputPath }: { log: ToolingLog; outputPath: 
 
   const snapshotOutputPath = path.isAbsolute(outputPath)
     ? outputPath
-    : path.resolve(getGitRoot(), outputPath);
+    : path.resolve(REPO_ROOT, outputPath);
 
   try {
     serverHandles = await startServers();
@@ -54,8 +56,6 @@ async function takeSnapshot({ log, outputPath }: { log: ToolingLog; outputPath: 
     const allTypes = typeRegistry.getAllTypes();
 
     const migrationInfoMap = allTypes.reduce((map, type) => {
-      // TODO: we don't need to distill the hash here, we can keep more information about the types,
-      //  if we can use that for more insights
       const migrationInfo = extractMigrationInfo(type);
       map[type.name] = {
         name: migrationInfo.name,
@@ -101,25 +101,19 @@ async function writeSnapshotFile(
   const pullRequestUrl = prId ? `https://github.com/elastic/kibana/pulls/${prId}` : null;
   const kibanaCommitHash = process.env.BUILDKITE_COMMIT || getLocalHash();
 
-  await mkdirp(path.dirname(snapshotOutputPath));
+  const payload = {
+    meta: {
+      timestamp,
+      date,
+      kibanaCommitHash,
+      buildUrl,
+      pullRequestUrl,
+    },
+    typeHashes: hashMap,
+  };
 
-  fs.writeFileSync(
-    snapshotOutputPath,
-    JSON.stringify(
-      {
-        meta: {
-          timestamp,
-          date,
-          kibanaCommitHash,
-          buildUrl,
-          pullRequestUrl,
-        },
-        typeHashes: hashMap,
-      },
-      null,
-      2
-    )
-  );
+  await mkdirp(path.dirname(snapshotOutputPath));
+  fs.writeFileSync(snapshotOutputPath, JSON.stringify(payload, null, 2));
 }
 
 async function shutdown(log: ToolingLog, serverHandles: ServerHandles) {
@@ -152,15 +146,6 @@ function getLocalHash() {
     return stdout.toString().trim();
   } catch (e) {
     return null;
-  }
-}
-
-function getGitRoot() {
-  try {
-    const stdout = cp.execSync('git rev-parse --show-toplevel');
-    return stdout.toString().trim();
-  } catch (e) {
-    return '.';
   }
 }
 
