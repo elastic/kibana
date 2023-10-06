@@ -81,7 +81,11 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       </EuiText>
     );
     contentRight = (
-      <EuiButton color="warning" onClick={resendRequest} data-test-subj="indexDetailsDataStreamReload">
+      <EuiButton
+        color="warning"
+        onClick={resendRequest}
+        data-test-subj="indexDetailsDataStreamReload"
+      >
         <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload" />
       </EuiButton>
     );
