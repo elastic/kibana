@@ -18,7 +18,6 @@ export default function ({ getService }: FtrProviderContext) {
   const synthtrace = getService('apmSynthtraceEsClient');
 
   describe('GET /assets/services', () => {
-
     beforeEach(async () => {
       await synthtrace.clean();
     });
