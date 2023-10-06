@@ -31,6 +31,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const deployment = getService('deployment');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
@@ -47,7 +48,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   const getInjectedMetadata = () =>
     browser.execute(() => {
-      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!);
+      const injectedMetadata = document.querySelector('kbn-injected-metadata');
+      // null/hasAttribute check and explicit error for better future troublehsooting
+      // (see https://github.com/elastic/kibana/issues/167142)
+      // The 'kbn-injected-metadata' tag that we're relying on here gets removed
+      // some time after navigation (e.g. to /render/core). It appears that
+      // occasionally this test fails to read the tag before it is removed.
+      if (!injectedMetadata?.hasAttribute('data')) {
+        throw new Error(`'kbn-injected-metadata.data' not found.`);
+      }
+      return JSON.parse(injectedMetadata.getAttribute('data')!);
     });
   const getUserSettings = () =>
     browser.execute(() => {
@@ -63,8 +73,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
-      await navigateTo('/render/core');
-      const injectedMetadata = await getInjectedMetadata();
+      // This retry loop to get the injectedMetadata is to overcome flakiness
+      // (see comment in getInjectedMetadata)
+      let injectedMetadata: Partial<{ uiPlugins: any }> = { uiPlugins: undefined };
+      await retry.waitFor('injectedMetadata', async () => {
+        await navigateTo('/render/core');
+        injectedMetadata = await getInjectedMetadata();
+        return !!injectedMetadata;
+      });
+
       expect(injectedMetadata).to.not.be.empty();
       expect(injectedMetadata.uiPlugins).to.not.be.empty();
 
@@ -219,12 +236,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // abundantly clear when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
       const extra = _.difference(actualExposedConfigKeys, expectedExposedConfigKeys).sort();
       const missing = _.difference(expectedExposedConfigKeys, actualExposedConfigKeys).sort();
+
       expect({ extra, missing }).to.eql({ extra: [], missing: [] }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
     it('exposes plugin config settings to unauthenticated users', async () => {
-      await navigateTo('/render/core?isAnonymousPage=true');
-      const injectedMetadata = await getInjectedMetadata();
+      // This retry loop to get the injectedMetadata is to overcome flakiness
+      // (see comment in getInjectedMetadata)
+      let injectedMetadata: Partial<{ uiPlugins: any }> = { uiPlugins: undefined };
+      await retry.waitFor('injectedMetadata', async () => {
+        await navigateTo('/render/core?isAnonymousPage=true');
+        injectedMetadata = await getInjectedMetadata();
+        return !!injectedMetadata;
+      });
       expect(injectedMetadata).to.not.be.empty();
       expect(injectedMetadata.uiPlugins).to.not.be.empty();
 
