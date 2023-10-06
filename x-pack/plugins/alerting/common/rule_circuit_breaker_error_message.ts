@@ -28,7 +28,7 @@ const getUpdateRuleErrorSummary = (name: string) => {
 };
 
 const getEnableRuleErrorSummary = (name: string) => {
-  return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.updateSummary', {
+  return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.enableSummary', {
     defaultMessage: `Rule '{name}' cannot be enabled. The maximum number of runs per minute would be exceeded.`,
     values: {
       name,

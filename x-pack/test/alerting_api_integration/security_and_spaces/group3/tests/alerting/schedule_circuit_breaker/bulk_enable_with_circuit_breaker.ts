@@ -59,7 +59,7 @@ export default function bulkEnableWithCircuitBreakerTests({ getService }: FtrPro
 
       expect(body.errors.length).eql(2);
       expect(body.errors[0].message).eql(
-        'Error validating circuit breaker - Rules cannot be bulk enabled. The maximum number of runs per minute would be exceeded. - The rule has 9 runs per minute; there are only 4 runs per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.'
+        'Error validating circuit breaker - Rules cannot be bulk enabled. The maximum number of runs per minute would be exceeded. - The rules have 9 runs per minute; there are only 4 runs per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.'
       );
     });
   });

@@ -62,7 +62,7 @@ export default function bulkEditWithCircuitBreakerTests({ getService }: FtrProvi
 
       expect(body.errors.length).eql(2);
       expect(body.errors[0].message).eql(
-        'Error validating circuit breaker - Rules cannot be bulk edited. The maximum number of runs per minute would be exceeded. - The rule has 12 runs per minute; there is only 1 run per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.'
+        'Error validating circuit breaker - Rules cannot be bulk edited. The maximum number of runs per minute would be exceeded. - The rules have 12 runs per minute; there is only 1 run per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.'
       );
     });
 
