@@ -1,12 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-subdued"
 >
   <div
-    class="euiPageContentBody"
+    class="emotion-euiPageSection__content-l-center"
   >
     <h1
       class="euiTitle emotion-euiTitle-m"
@@ -111,16 +110,15 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
 
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-subdued"
 >
   <div
-    class="euiPageContentBody"
+    class="emotion-euiPageSection__content-l-center"
   >
     <h1
       class="euiTitle emotion-euiTitle-m"
@@ -251,16 +249,15 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
 
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-subdued"
 >
   <div
-    class="euiPageContentBody"
+    class="emotion-euiPageSection__content-l-center"
   >
     <h1
       class="euiTitle emotion-euiTitle-m"
@@ -391,16 +388,15 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
 
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-subdued"
 >
   <div
-    class="euiPageContentBody"
+    class="emotion-euiPageSection__content-l-center"
   >
     <h1
       class="euiTitle emotion-euiTitle-m"
@@ -531,16 +527,15 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
 
 exports[`UploadLicense should display error when ES returns error 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-subdued"
 >
   <div
-    class="euiPageContentBody"
+    class="emotion-euiPageSection__content-l-center"
   >
     <h1
       class="euiTitle emotion-euiTitle-m"
@@ -671,5 +666,5 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
