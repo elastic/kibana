@@ -77,8 +77,14 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isWarningDisplayed: () => boolean;
     };
     overview: {
-      indexStatsContentExists: () => boolean;
-      indexDetailsContentExists: () => boolean;
+      storageDetailsExist: () => boolean;
+      getStorageDetailsContent: () => string;
+      statusDetailsExist: () => boolean;
+      getStatusDetailsContent: () => string;
+      aliasesDetailsExist: () => boolean;
+      getAliasesDetailsContent: () => string;
+      dataStreamDetailsExist: () => boolean;
+      getDataStreamDetailsContent: () => string;
       addDocCodeBlockExists: () => boolean;
       extensionSummaryExists: (index: number) => boolean;
     };
@@ -131,11 +137,29 @@ export const setup = async ({
   };
 
   const overview = {
-    indexStatsContentExists: () => {
-      return exists('overviewTabIndexStats');
+    storageDetailsExist: () => {
+      return exists('indexDetailsStorage');
     },
-    indexDetailsContentExists: () => {
-      return exists('overviewTabIndexDetails');
+    getStorageDetailsContent: () => {
+      return find('indexDetailsStorage').text();
+    },
+    statusDetailsExist: () => {
+      return exists('indexDetailsStatus');
+    },
+    getStatusDetailsContent: () => {
+      return find('indexDetailsStatus').text();
+    },
+    aliasesDetailsExist: () => {
+      return exists('indexDetailsAliases');
+    },
+    getAliasesDetailsContent: () => {
+      return find('indexDetailsAliases').text();
+    },
+    dataStreamDetailsExist: () => {
+      return exists('indexDetailsDataStream');
+    },
+    getDataStreamDetailsContent: () => {
+      return find('indexDetailsDataStream').text();
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');

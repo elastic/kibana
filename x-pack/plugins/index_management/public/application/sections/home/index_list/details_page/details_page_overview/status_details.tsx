@@ -45,7 +45,7 @@ export const StatusDetails: FunctionComponent<{
   } else if (health === 'red' || health === 'RED') {
     healthBadge = (
       <EuiBadge color="danger">
-        {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.health.yellowLabel', {
+        {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.health.redLabel', {
           defaultMessage: 'Critical',
         })}
       </EuiBadge>
@@ -55,6 +55,7 @@ export const StatusDetails: FunctionComponent<{
   return (
     <EuiFlexItem>
       <OverviewCard
+        data-test-subj="indexDetailsStatus"
         title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.status.cardTitle', {
           defaultMessage: 'Status',
         })}
@@ -85,17 +86,14 @@ export const StatusDetails: FunctionComponent<{
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTextColor color="subdued">
-                  {i18n.translate(
-                    'xpack.idxMgmt.indexDetails.overviewTab.storage.primariesReplicasLabel',
-                    {
-                      defaultMessage:
-                        '{documents, plural, one {# Document} other {# Documents}} / {documentsDeleted} Deleted',
-                      values: {
-                        documents,
-                        documentsDeleted,
-                      },
-                    }
-                  )}
+                  {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.status.documentsLabel', {
+                    defaultMessage:
+                      '{documents, plural, one {# Document} other {# Documents}} / {documentsDeleted} Deleted',
+                    values: {
+                      documents,
+                      documentsDeleted,
+                    },
+                  })}
                 </EuiTextColor>
               </EuiFlexItem>
             </EuiFlexGroup>

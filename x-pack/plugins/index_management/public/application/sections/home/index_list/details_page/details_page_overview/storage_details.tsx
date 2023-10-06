@@ -28,6 +28,7 @@ export const StorageDetails: FunctionComponent<{
   return (
     <EuiFlexItem>
       <OverviewCard
+        data-test-subj="indexDetailsStorage"
         title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.cardTitle', {
           defaultMessage: 'Storage',
         })}

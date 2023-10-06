@@ -20,15 +20,17 @@ interface Props {
     left?: ReactNode;
     right?: ReactNode;
   };
+  'data-test-subj'?: string;
 }
 
 export const OverviewCard: FunctionComponent<Props> = ({
   title,
   content: { left: contentLeft, right: contentRight },
   footer: { left: footerLeft, right: footerRight } = {},
+  'data-test-subj': dataTestSubj,
 }) => {
   return (
-    <EuiSplitPanel.Outer grow hasBorder={true}>
+    <EuiSplitPanel.Outer grow hasBorder={true} data-test-subj={dataTestSubj}>
       <EuiSplitPanel.Inner>
         <EuiTitle size="xxxs">
           <h4>{title}</h4>

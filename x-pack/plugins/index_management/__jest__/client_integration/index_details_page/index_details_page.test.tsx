@@ -11,11 +11,13 @@ import { act } from 'react-dom/test-utils';
 
 import React from 'react';
 import { IndexDetailsSection } from '../../../common/constants';
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+import { humanizeTimeStamp } from '../../../public/application/sections/home/data_stream_list/humanize_time_stamp';
+import { createDataStreamPayload } from '../home/data_streams_tab.helpers';
 import {
   testIndexEditableSettings,
   testIndexMappings,
@@ -229,13 +231,114 @@ describe('<IndexDetailsPage />', () => {
       );
     });
 
-    it('renders index details', () => {
-      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
-      expect(testBed.actions.overview.indexStatsContentExists()).toBe(true);
-      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
+    it('renders storage details', () => {
+      const storageDetails = testBed.actions.overview.getStorageDetailsContent();
+      expect(storageDetails).toBe(
+        `Storage${testIndexMock.primary_size}Primary${testIndexMock.size}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
+      );
     });
 
-    it('hides index stats from detail panels if enableIndexStats===false', async () => {
+    it('renders status details', () => {
+      const statusDetails = testBed.actions.overview.getStatusDetailsContent();
+      expect(statusDetails).toBe(
+        `Status${'Open'}${'Healthy'}${testIndexMock.documents} Document / ${
+          testIndexMock.documents_deleted
+        } Deleted`
+      );
+    });
+
+    describe('aliases', () => {
+      it('not rendered when no aliases', async () => {
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(false);
+      });
+
+      it('renders less than 3 aliases', async () => {
+        const aliases = ['test_alias1', 'test_alias2'];
+        const testWith2Aliases = {
+          ...testIndexMock,
+          aliases,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWith2Aliases);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getAliasesDetailsContent();
+        expect(aliasesContent).toBe(
+          `Aliases${aliases.length}AliasesView all aliases${aliases.join('')}`
+        );
+      });
+
+      it('renders more than 3 aliases', async () => {
+        const aliases = ['test_alias1', 'test_alias2', 'test_alias3', 'test_alias4', 'test_alias5'];
+        const testWith5Aliases = {
+          ...testIndexMock,
+          aliases,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWith5Aliases);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getAliasesDetailsContent();
+        expect(aliasesContent).toBe(
+          `Aliases${aliases.length}AliasesView all aliases${aliases.slice(0, 3).join('')}+${2}`
+        );
+      });
+    });
+
+    describe('data stream', () => {
+      it('not rendered when no data stream', async () => {
+        const aliasesExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(aliasesExist).toBe(false);
+      });
+
+      it('renders data stream details', async () => {
+        const dataStreamName = 'test_data_stream';
+        const testWithDataStream: Index = {
+          ...testIndexMock,
+          data_stream: dataStreamName,
+        };
+        const dataStreamDetails = createDataStreamPayload({
+          name: dataStreamName,
+          generation: 5,
+          maxTimeStamp: 1696600607689,
+        });
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWithDataStream);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamName, dataStreamDetails);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(aliasesContent).toBe(
+          `Data stream${
+            dataStreamDetails.generation
+          }GenerationsSee templateLast update${humanizeTimeStamp(dataStreamDetails.maxTimeStamp!)}`
+        );
+      });
+    });
+
+    it('hides storage and status details if enableIndexStats===false', async () => {
       await act(async () => {
         testBed = await setup({
           httpSetup,
@@ -246,8 +349,12 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
-      expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
+      expect(testBed.actions.overview.statusDetailsExist()).toBe(false);
+      expect(testBed.actions.overview.storageDetailsExist()).toBe(false);
+    });
+
+    it('renders code block', () => {
+      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
     });
 
     describe('extension service summary', () => {

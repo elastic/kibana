@@ -38,6 +38,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
     <>
       <EuiFlexItem>
         <OverviewCard
+          data-test-subj="indexDetailsAliases"
           title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.aliases.cardTitle', {
             defaultMessage: 'Aliases',
           })}

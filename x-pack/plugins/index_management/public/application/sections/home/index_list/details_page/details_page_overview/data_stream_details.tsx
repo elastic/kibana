@@ -31,6 +31,7 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
   }
   return (
     <OverviewCard
+      data-test-subj="indexDetailsDataStream"
       title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.cardTitle', {
         defaultMessage: 'Data stream',
       })}
