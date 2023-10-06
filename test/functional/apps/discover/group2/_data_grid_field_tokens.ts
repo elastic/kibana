@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   async function findFirstFieldIcons(elementSelector: string) {
-    let firstFieldIcons: string[] = [];
+    let firstFieldIcons: string[] | undefined;
 
     await retry.waitFor('field tokens', async () => {
       const element = await testSubjects.find(elementSelector);
@@ -51,10 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldIcons.slice(0, 10).map((fieldIcon) => fieldIcon.getAttribute('aria-label'))
       ).catch((error) => {
         log.debug(`error in findFirstFieldIcons: ${error.message}`);
-        return [];
+        return undefined;
       });
 
-      return firstFieldIcons.length > 0;
+      return typeof firstFieldIcons !== 'undefined';
     });
 
     return firstFieldIcons;
