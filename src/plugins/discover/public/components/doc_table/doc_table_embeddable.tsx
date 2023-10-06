@@ -23,6 +23,7 @@ import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embedda
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount?: number;
   rowsPerPageState?: number;
+  sampleSizeState?: number;
   interceptedWarnings?: SearchResponseInterceptedWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
@@ -84,8 +85,8 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   const sampleSize = useMemo(() => {
-    return services.uiSettings.get(SAMPLE_SIZE_SETTING, 500);
-  }, [services]);
+    return props.sampleSizeState || services.uiSettings.get(SAMPLE_SIZE_SETTING, 500);
+  }, [services, props.sampleSizeState]);
 
   const renderDocTable = useCallback(
     (renderProps: DocTableRenderProps) => {
