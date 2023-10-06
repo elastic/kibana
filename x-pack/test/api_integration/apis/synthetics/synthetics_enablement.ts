@@ -44,8 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await esSupertest.get(`/_security/api_key`).query({ with_limited_by: true });
       const apiKeys = body.api_keys || [];
       return apiKeys.filter(
-        (apiKey: any) =>
-          apiKey.name.includes('(required for Synthetics App)') && apiKey.invalidated === false
+        (apiKey: any) => apiKey.name.includes('synthetics-api-key') && apiKey.invalidated === false
       );
     };
 
@@ -145,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
             isValidApiKey: true,
           });
           const validApiKeys = await getApiKeys();
-          expect(validApiKeys.length).eql(1);
+          expect(validApiKeys.length).equal(1);
           expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
         } finally {
           await security.user.delete(username);
