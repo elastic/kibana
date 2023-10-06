@@ -16,6 +16,9 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { validateSystemActions } from '../../../../lib/validate_system_actions';
+import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../../../common';
+import { isSystemAction } from '../../../../../common/system_actions/is_system_action';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
 import {
@@ -32,7 +35,6 @@ import {
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
-  injectReferencesIntoActions,
   getBulkSnooze,
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
@@ -78,6 +80,7 @@ import {
   transformRuleDomainToRule,
 } from '../../transforms';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { bulkEditOperationsSchema } from './schemas';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -115,8 +118,15 @@ export async function bulkEditRules<Params extends RuleParams>(
   context: RulesClientContext,
   options: BulkEditOptions<Params>
 ): Promise<BulkEditResult<Params>> {
+  try {
+    bulkEditOperationsSchema.validate(options.operations);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+  }
+
   const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
   const ids = (options as BulkEditOptionsIds<Params>).ids;
+  const actionsClient = await context.getActionsClient();
 
   if (ids && queryFilter) {
     throw Boom.badRequest(
@@ -231,13 +241,17 @@ export async function bulkEditRules<Params extends RuleParams>(
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
     // when we are doing the bulk create and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
-      id,
-      logger: context.logger,
-      ruleType,
-      references,
-      omitGeneratedValues: false,
-    });
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
     try {
       ruleDomainSchema.validate(ruleDomain);
     } catch (e) {
@@ -458,12 +472,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       rule.references = migratedActions.resultedReferences;
     }
 
-    const ruleActions = injectReferencesIntoActions(
-      rule.id,
-      rule.attributes.actions || [],
-      rule.references || []
-    );
-
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
       rule.attributes,
       {
@@ -471,7 +479,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         logger: context.logger,
         ruleType: context.ruleTypeRegistry.get(rule.attributes.alertTypeId),
         references: rule.references,
-      }
+      },
+      context.isSystemAction
     );
 
     const {
@@ -483,7 +492,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       context,
       operations,
       rule: ruleDomain,
-      ruleActions,
+      ruleActions: ruleDomain.actions,
       ruleType,
     });
 
@@ -617,6 +626,8 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
   ruleActions: RuleDomain['actions'];
   ruleType: RuleType;
 }) {
+  const actionsClient = await context.getActionsClient();
+
   let updatedRule = cloneDeep(rule);
   let updatedRuleActions = ruleActions;
   let hasUpdateApiKeyOperation = false;
@@ -633,6 +644,16 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           ...operation,
           value: addGeneratedActionValues(operation.value),
         };
+
+        const systemActions = operation.value.filter(
+          (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+        );
+
+        await validateSystemActions({
+          actionsClient,
+          connectorAdapterRegistry: context.connectorAdapterRegistry,
+          systemActions,
+        });
 
         try {
           await validateActions(context, ruleType, {
@@ -662,6 +683,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
 
         break;
       }
+
       case 'snoozeSchedule': {
         // Silently skip adding snooze or snooze schedules on security
         // rules until we implement snoozing of their rules
@@ -672,22 +694,26 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           isAttributesUpdateSkipped = false;
           break;
         }
+
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnooze<Params>(
             updatedRule,
             operation.value as RuleSnoozeSchedule
           );
+
           try {
             verifySnoozeScheduleLimit(snoozeAttributes.snoozeSchedule);
           } catch (error) {
             throw Error(`Error updating rule: could not add snooze - ${error.message}`);
           }
+
           updatedRule = {
             ...updatedRule,
             muteAll: snoozeAttributes.muteAll,
             snoozeSchedule: snoozeAttributes.snoozeSchedule as RuleDomain['snoozeSchedule'],
           };
         }
+
         if (operation.operation === 'delete') {
           const idsToDelete = operation.value && [...operation.value];
           if (idsToDelete?.length === 0) {
@@ -704,18 +730,22 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
             snoozeSchedule: snoozeAttributes.snoozeSchedule as RuleDomain['snoozeSchedule'],
           };
         }
+
         isAttributesUpdateSkipped = false;
         break;
       }
+
       case 'apiKey': {
         hasUpdateApiKeyOperation = true;
         isAttributesUpdateSkipped = false;
         break;
       }
+
       default: {
         if (operation.field === 'schedule') {
           validateScheduleOperation(operation.value, updatedRule.actions, rule.id);
         }
+
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
           operation,
           updatedRule
@@ -780,8 +810,11 @@ function validateScheduleOperation(
 ): void {
   const scheduleInterval = parseDuration(schedule.interval);
   const actionsWithInvalidThrottles = [];
+  const actionsWithoutSystemActions = actions.filter(
+    (action): action is RuleDefaultAction => !isSystemAction(action)
+  );
 
-  for (const action of actions) {
+  for (const action of actionsWithoutSystemActions) {
     // check for actions throttled shorter than the rule schedule
     if (
       action.frequency?.notifyWhen === ruleNotifyWhen.THROTTLE &&

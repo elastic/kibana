@@ -20,6 +20,7 @@ import { Rule } from '../../../../application/rule/types';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformOperationsV1 } from './transforms';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -39,15 +40,19 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;
+          const actionsClient = (await context.actions).getActionsClient();
 
+          const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;
           const { filter, operations, ids } = bulkEditData;
 
           try {
             const bulkEditResults = await rulesClient.bulkEdit<RuleParamsV1>({
               filter,
               ids,
-              operations,
+              operations: transformOperationsV1({
+                operations,
+                isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+              }),
             });
 
             const resultBody: BulkEditRulesResponseV1<RuleParamsV1> = {
