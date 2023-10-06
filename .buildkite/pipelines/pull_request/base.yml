@@ -44,7 +44,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    if: build.branch != "main"
+    if: build.pull_request.base_branch != "main"
     label: 'Pick Test Group Run Order'
     agents:
       queue: kibana-default
