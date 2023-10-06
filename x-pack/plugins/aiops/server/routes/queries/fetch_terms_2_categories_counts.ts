@@ -84,8 +84,8 @@ export async function fetchTerms2CategoriesCounts(
   > = [];
   const results: ItemSet[] = [];
 
-  significantTerms.forEach((term) => {
-    significantCategories.forEach((category) => {
+  significantCategories.forEach((category) => {
+    significantTerms.forEach((term) => {
       searches.push({ index: params.index });
       searches.push(
         getTerm2CategoryCountRequest(
@@ -105,14 +105,12 @@ export async function fetchTerms2CategoriesCounts(
         size: 2,
         maxPValue: Math.max(term.pValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
-        support: 1,
-        total_doc_count: 0,
+        support: 0,
+        total_doc_count: Math.max(term.total_doc_count, category.total_doc_count),
       });
     });
-  });
 
-  itemSets.forEach((itemSet) => {
-    significantCategories.forEach((category) => {
+    itemSets.forEach((itemSet) => {
       searches.push({ index: params.index });
       searches.push(
         getTerm2CategoryCountRequest(
@@ -135,8 +133,8 @@ export async function fetchTerms2CategoriesCounts(
         size: Object.keys(itemSet.set).length + 1,
         maxPValue: Math.max(itemSet.maxPValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
-        support: 1,
-        total_doc_count: 0,
+        support: 0,
+        total_doc_count: Math.max(itemSet.total_doc_count, category.total_doc_count),
       });
     });
   });
@@ -174,10 +172,13 @@ export async function fetchTerms2CategoriesCounts(
         const resp = mSearchResponses[i];
         if (isMsearchResponseItem(resp)) {
           result.doc_count = (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
+          if (result.total_doc_count > 0) {
+            result.support = result.doc_count / result.total_doc_count;
+          }
         }
         return result;
       })
-      .filter((d) => d.doc_count > 0),
+      .filter((d) => d.doc_count > 0 && d.support > 0.001),
     totalDocCount: 0,
   };
 }
