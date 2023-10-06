@@ -92,6 +92,11 @@ export interface ChromeNavLinks {
   getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
+   * Get an observable for the state of a navlink.
+   */
+  getNavLink$(id: string): Observable<ChromeNavLink | undefined>;
+
+  /**
    * Get the state of a navlink at this point in time.
    * @param id
    */

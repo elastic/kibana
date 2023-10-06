@@ -100,6 +100,22 @@ describe('NavLinksService', () => {
     });
   });
 
+  describe('#getNavLink$()', () => {
+    it('emits if exists', async () => {
+      expect((await start.getNavLink$('app2').pipe(take(1)).toPromise())?.title).toBe('App 2');
+    });
+
+    it('emits undefined if it does not exist', async () => {
+      expect(await start.getNavLink$('phony').pipe(take(1)).toPromise()).toBeUndefined();
+    });
+
+    it('completes when service is stopped', async () => {
+      const last$ = start.getNavLink$('app2').pipe(takeLast(1)).toPromise();
+      service.stop();
+      await expect(last$).resolves.toBeInstanceOf(Object);
+    });
+  });
+
   describe('#get()', () => {
     it('returns link if exists', () => {
       expect(start.get('app2')!.title).toEqual('App 2');

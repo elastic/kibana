@@ -8,13 +8,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import { CustomAssetsAccordion } from './components/custom_assets_accordion';
 import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 import { useStartServices } from './hooks';
 import type { PackageAssetsComponent } from './types';
 
 export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
-  const { http } = useStartServices();
+  const { http, chrome } = useStartServices();
+
+  const logsAvailable = !!useObservable(chrome.navLinks.getNavLink$('logs'));
+  if (!logsAvailable) {
+    return null;
+  }
+
   const logStreamUrl = http.basePath.prepend('/app/logs/stream');
 
   const views: CustomAssetsAccordionProps['views'] = [

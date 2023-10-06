@@ -53,6 +53,13 @@ export class NavLinksService {
         return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
       },
 
+      getNavLink$: (id: string) => {
+        return navLinks$.pipe(
+          map((navLinks) => navLinks.get(id)?.properties),
+          takeUntil(this.stop$)
+        );
+      },
+
       get(id: string) {
         const link = navLinks$.value.get(id);
         return link && link.properties;
