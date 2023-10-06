@@ -107,18 +107,21 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.stopAllTrainedModelDeploymentsES();
       await ml.api.deleteAllTrainedModelsES();
+
+      await ml.api.cleanMlIndices();
+      await ml.api.deleteIndices(modelWithPipelineAndDestIndexExpectedValues.index);
+
       await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
       await ml.api.deleteIngestPipeline(
         modelWithoutPipelineDataExpectedValues.duplicateName,
         false
       );
-      await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndexExpectedValues.name);
+
+      // // Need to delete index before ingest pipeline, else it will give error
+      await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndex.modelId);
       await ml.testResources.deleteIndexPatternByTitle(
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
       );
-
-      await ml.api.cleanMlIndices();
-      await ml.api.deleteIndices(`user-index_${modelWithPipelineAndDestIndex.modelId}`);
     });
 
     describe('for ML user with read-only access', () => {
@@ -438,7 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(`sets index pattern for reference data set`);
         await ml.dataDrift.setIndexPatternInput(
           'reference',
-          modelWithPipelineAndDestIndexExpectedValues.index
+          `${modelWithPipelineAndDestIndexExpectedValues.index}*`
         );
         await ml.dataDrift.assertIndexPatternInput(
           'comparison',

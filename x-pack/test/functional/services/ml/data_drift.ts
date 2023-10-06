@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+type SubjectId = 'reference' | 'comparison';
+
 export function MachineLearningDataDriftProvider({
   getService,
   getPageObjects,
@@ -30,11 +32,27 @@ export function MachineLearningDataDriftProvider({
       return `${testSubject}-${id}`;
     },
 
+    async assertDataViewTitle(expectedTitle: string) {
+      const selector = 'mlDataDriftPageDataViewTitle';
+      await testSubjects.existOrFail(selector);
+      await retry.tryForTime(5000, async () => {
+        const title = await testSubjects.getVisibleText(selector);
+        expect(title).to.eql(
+          expectedTitle,
+          `Expected data drift page's data view title to be '${expectedTitle}' (got '${title}')`
+        );
+      });
+    },
+
     async assertTimeRangeSelectorSectionExists() {
       await testSubjects.existOrFail('dataComparisonTimeRangeSelectorSection');
     },
 
-    async assertTotalDocumentCount(selector: string, expectedFormattedTotalDocCount: string) {
+    async assertTotalDocumentCount(
+      id: 'Reference' | 'Comparison',
+      expectedFormattedTotalDocCount: string
+    ) {
+      const selector = `dataVisualizerTotalDocCount-${id}`;
       await retry.tryForTime(5000, async () => {
         const docCount = await testSubjects.getVisibleText(selector);
         expect(docCount).to.eql(
@@ -218,7 +236,7 @@ export function MachineLearningDataDriftProvider({
       });
     },
 
-    async assertIndexPatternNotEmptyFormErrorExists(id: 'reference' | 'comparison') {
+    async assertIndexPatternNotEmptyFormErrorExists(id: SubjectId) {
       const subj = `mlDataDriftIndexPatternFormRow-${id ?? ''}`;
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(subj);
@@ -228,7 +246,7 @@ export function MachineLearningDataDriftProvider({
       });
     },
 
-    async assertIndexPatternInput(id: 'reference' | 'comparison', expectedText: string) {
+    async assertIndexPatternInput(id: SubjectId, expectedText: string) {
       const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
 
       await retry.tryForTime(5000, async () => {
@@ -241,13 +259,31 @@ export function MachineLearningDataDriftProvider({
       });
     },
 
-    async setIndexPatternInput(id: 'reference' | 'comparison', pattern: string) {
+    async setIndexPatternInput(id: SubjectId, pattern: string) {
       const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
 
-      await retry.tryForTime(5000, async () => {
-        const field = await testSubjects.find(inputSelector);
-        await field.clearValue();
-        await field.type(pattern);
+      // The input for index pattern automatically appends "*" at the end of the string
+      // So here we just omit that * at the end to avoid double characters
+
+      await retry.tryForTime(10 * 1000, async () => {
+        const hasWildCard = pattern.endsWith('*');
+        const trimmedPattern = hasWildCard ? pattern.substring(0, pattern.length - 1) : pattern;
+
+        const input = await testSubjects.find(inputSelector);
+        await input.clearValue();
+
+        await testSubjects.setValue(inputSelector, trimmedPattern, {
+          clearWithKeyboard: true,
+          typeCharByChar: true,
+        });
+
+        if (!hasWildCard) {
+          // If original pattern does not have wildcard, make to delete the wildcard
+          await input.focus();
+          await browser.pressKeys(browser.keys.DELETE);
+        }
+
+        await this.assertIndexPatternInput(id, pattern);
       });
     },
 

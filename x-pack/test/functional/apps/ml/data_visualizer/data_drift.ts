@@ -7,20 +7,37 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export interface TestData {
-  suiteTitle: string;
-  dateTimeField: string;
-  isSavedSearch?: boolean;
-  sourceIndexOrSavedSearch: string;
-  chartClickCoordinates: [number, number];
-}
-export const farequoteKQLFiltersSearchTestData: TestData = {
+export const farequoteKQLFiltersSearchTestData = {
   suiteTitle: 'KQL saved search and filters',
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
-  chartClickCoordinates: [0, 0],
+  chartClickCoordinates: [0, 0] as [number, number],
+  dataViewName: 'ft_farequote',
+  totalDocCount: '5,674',
 };
+
+const dataViewCreationTestData = {
+  suiteTitle: 'from data view creation mode',
+  isSavedSearch: true,
+  dateTimeField: '@timestamp',
+  chartClickCoordinates: [0, 0] as [number, number],
+  totalDocCount: '86,274',
+};
+
+const nonTimeSeriesTestData = {
+  suiteTitle: 'from data view creation mode',
+  isSavedSearch: false,
+  dateTimeField: '@timestamp',
+  sourceIndexOrSavedSearch: 'ft_ihp_outlier',
+  chartClickCoordinates: [0, 0] as [number, number],
+  dataViewName: 'ft_ihp_outlier',
+};
+
+type TestData =
+  | typeof farequoteKQLFiltersSearchTestData
+  | typeof dataViewCreationTestData
+  | typeof nonTimeSeriesTestData;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
@@ -29,6 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   async function assertDataDriftPageContent(testData: TestData) {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
     await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
     await ml.dataDrift.assertTimeRangeSelectorSectionExists();
 
@@ -52,11 +71,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
     await ml.dataDrift.assertNoWindowParametersEmptyPromptExists();
 
-    await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
-    await ml.dataDrift.clickDocumentCountChart(
-      'dataDriftDocCountChart-Reference',
-      testData.chartClickCoordinates
-    );
+    if (testData.chartClickCoordinates) {
+      await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
+      await ml.dataDrift.clickDocumentCountChart(
+        'dataDriftDocCountChart-Reference',
+        testData.chartClickCoordinates
+      );
+    }
     await ml.dataDrift.runAnalysis();
   }
 
@@ -75,9 +96,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_fare*');
-      await ml.testResources.deleteIndexPatternByTitle('ft_fare*,ft_fareq*');
-      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+      await Promise.all([
+        ml.testResources.deleteIndexPatternByTitle('ft_fare*'),
+        ml.testResources.deleteIndexPatternByTitle('ft_fare*,ft_fareq*'),
+        ml.testResources.deleteIndexPatternByTitle('ft_farequote'),
+        ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier'),
+      ]);
     });
 
     describe('with ft_farequote_filter_and_kuery from index selection page', async function () {
@@ -104,85 +128,105 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           farequoteKQLFiltersSearchTestData.sourceIndexOrSavedSearch
         );
         await assertDataDriftPageContent(farequoteKQLFiltersSearchTestData);
+
+        if (farequoteKQLFiltersSearchTestData.dataViewName !== undefined) {
+          await ml.dataDrift.assertDataViewTitle(farequoteKQLFiltersSearchTestData.dataViewName);
+        }
+
+        await ml.dataDrift.assertTotalDocumentCount(
+          'Reference',
+          farequoteKQLFiltersSearchTestData.totalDocCount
+        );
+        await ml.dataDrift.assertTotalDocumentCount(
+          'Comparison',
+          farequoteKQLFiltersSearchTestData.totalDocCount
+        );
       });
     });
 
-    const testData: TestData = {
-      suiteTitle: 'from data view creation mode',
-      isSavedSearch: true,
-      dateTimeField: '@timestamp',
-      sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
-      chartClickCoordinates: [0, 0],
-    };
-
-    describe(testData.suiteTitle, function () {
-      it(`${testData.suiteTitle} loads the ml page`, async () => {
+    describe(dataViewCreationTestData.suiteTitle, function () {
+      beforeEach(`${dataViewCreationTestData.suiteTitle} loads the ml page`, async () => {
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
         await elasticChart.setNewChartUiDebugFlag(true);
-      });
-
-      it(`${testData.suiteTitle} allows analyzing data drift without saving`, async () => {
         await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} loads the saved search selection page`
+          `${dataViewCreationTestData.suiteTitle} loads the saved search selection page`
         );
         await ml.navigation.navigateToDataDrift();
+      });
 
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} creates new data view`);
+      it(`${dataViewCreationTestData.suiteTitle} allows analyzing data drift without saving`, async () => {
+        await ml.testExecution.logTestStep(
+          `${dataViewCreationTestData.suiteTitle} creates new data view`
+        );
         await ml.dataDrift.navigateToCreateNewDataViewPage();
         await ml.dataDrift.assertIndexPatternNotEmptyFormErrorExists('reference');
         await ml.dataDrift.assertIndexPatternNotEmptyFormErrorExists('comparison');
         await ml.dataDrift.assertAnalyzeWithoutSavingButtonState(true);
         await ml.dataDrift.assertAnalyzeDataDriftButtonState(true);
 
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} sets index patterns`);
+        await ml.testExecution.logTestStep(
+          `${dataViewCreationTestData.suiteTitle} sets index patterns`
+        );
         await ml.dataDrift.setIndexPatternInput('reference', 'ft_fare*');
         await ml.dataDrift.setIndexPatternInput('comparison', 'ft_fareq*');
 
-        await ml.dataDrift.selectTimeField(testData.dateTimeField);
+        await ml.dataDrift.selectTimeField(dataViewCreationTestData.dateTimeField);
 
         await ml.dataDrift.assertAnalyzeWithoutSavingButtonState(false);
         await ml.dataDrift.assertAnalyzeDataDriftButtonState(false);
 
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} redirects to data drift page`);
+        await ml.testExecution.logTestStep(
+          `${dataViewCreationTestData.suiteTitle} redirects to data drift page`
+        );
         await ml.dataDrift.clickAnalyzeWithoutSavingButton();
-        await assertDataDriftPageContent(testData);
+        await assertDataDriftPageContent(dataViewCreationTestData);
+        await ml.dataDrift.assertDataViewTitle('ft_fare*,ft_fareq*');
+        await ml.dataDrift.assertTotalDocumentCount(
+          'Reference',
+          dataViewCreationTestData.totalDocCount
+        );
+        await ml.dataDrift.assertTotalDocumentCount(
+          'Comparison',
+          dataViewCreationTestData.totalDocCount
+        );
       });
 
-      it(`${testData.suiteTitle} hides analyze data drift without saving option if patterns are same`, async () => {
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} navigates back to data view creation page`
-        );
-        await ml.navigation.navigateToDataDrift();
+      it(`${dataViewCreationTestData.suiteTitle} hides analyze data drift without saving option if patterns are same`, async () => {
         await ml.dataDrift.navigateToCreateNewDataViewPage();
         await ml.dataDrift.assertAnalyzeWithoutSavingButtonState(true);
         await ml.dataDrift.assertAnalyzeDataDriftButtonState(true);
 
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} sets index patterns`);
+        await ml.testExecution.logTestStep(
+          `${dataViewCreationTestData.suiteTitle} sets index patterns`
+        );
         await ml.dataDrift.setIndexPatternInput('reference', 'ft_fare*');
         await ml.dataDrift.setIndexPatternInput('comparison', 'ft_fare*');
 
         await ml.dataDrift.assertAnalyzeWithoutSavingButtonMissing();
         await ml.dataDrift.assertAnalyzeDataDriftButtonState(false);
 
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} redirects to data drift page`);
+        await ml.testExecution.logTestStep(
+          `${dataViewCreationTestData.suiteTitle} redirects to data drift page`
+        );
         await ml.dataDrift.clickAnalyzeDataDrift();
-        await assertDataDriftPageContent(testData);
+        await assertDataDriftPageContent(dataViewCreationTestData);
+
+        await ml.testExecution.logTestStep(
+          `${dataViewCreationTestData.suiteTitle} does not create new data view, and uses available one with matching index pattern`
+        );
+        await ml.dataDrift.assertDataViewTitle('ft_farequote');
+        await ml.dataDrift.assertTotalDocumentCount(
+          'Reference',
+          dataViewCreationTestData.totalDocCount
+        );
+        await ml.dataDrift.assertTotalDocumentCount(
+          'Comparison',
+          dataViewCreationTestData.totalDocCount
+        );
       });
 
-      const nonTimeSeriesTestData: TestData = {
-        suiteTitle: 'from data view creation mode',
-        isSavedSearch: false,
-        dateTimeField: '@timestamp',
-        sourceIndexOrSavedSearch: 'ft_ihp_outlier',
-        chartClickCoordinates: [0, 0],
-      };
-
       it(`${nonTimeSeriesTestData.suiteTitle} loads non-time series data`, async () => {
-        await ml.testExecution.logTestStep(
-          `${nonTimeSeriesTestData.suiteTitle} navigates back to data view creation page`
-        );
-        await ml.navigation.navigateToDataDrift();
         await ml.jobSourceSelection.selectSourceForDataDrift(
           nonTimeSeriesTestData.sourceIndexOrSavedSearch
         );

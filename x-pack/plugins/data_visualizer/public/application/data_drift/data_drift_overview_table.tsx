@@ -112,6 +112,9 @@ export const DataDriftOverviewTable = ({
 
         return (
           <EuiButtonIcon
+            data-test-subj={`dataDriftToggleDetails-${
+              itemIdToExpandedRowMapValues[item.featureName] ? 'expanded' : 'collapsed'
+            }`}
             onClick={() => toggleDetails(item)}
             aria-label={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
             iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'arrowDown' : 'arrowRight'}

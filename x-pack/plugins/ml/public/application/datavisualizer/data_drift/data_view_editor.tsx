@@ -152,7 +152,7 @@ export function DataViewEditor({
               setIndexPattern(query);
             }}
             fullWidth
-            data-test-subj="createIndexPatternTitleInput"
+            data-test-subj={`mlDataDriftIndexPatternTitleInput-${id ?? ''}`}
             placeholder="example-pattern*"
           />
         </EuiFormRow>
