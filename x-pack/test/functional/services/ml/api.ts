@@ -1552,5 +1552,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('Module set up');
       return module;
     },
+
+    async getModule(moduleId: string) {
+      log.debug(`Get module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .get(`/internal/ml/modules/get_module/${moduleId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
+      return module;
+    },
   };
 }
