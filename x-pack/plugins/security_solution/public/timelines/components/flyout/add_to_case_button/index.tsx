@@ -27,6 +27,130 @@ interface Props {
   timelineId: string;
 }
 
+export const useTimelineAddToCaseAction = ({ timelineId }: { timelineId: string }) => {
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const {
+    cases,
+    application: { navigateToApp },
+  } = useKibana().services;
+  const dispatch = useDispatch();
+  const {
+    graphEventId,
+    savedObjectId,
+    status: timelineStatus,
+    title: timelineTitle,
+    timelineType,
+  } = useDeepEqualSelector((state) =>
+    pick(
+      ['graphEventId', 'savedObjectId', 'status', 'title', 'timelineType'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
+  );
+  const [isPopoverOpen, setPopover] = useState(false);
+  const [isCaseModalOpen, openCaseModal] = useState(false);
+
+  const onRowClick = useCallback(
+    async (theCase?: CaseUI) => {
+      openCaseModal(false);
+      await navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
+      });
+      dispatch(
+        setInsertTimeline({
+          graphEventId,
+          timelineId,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle,
+        })
+      );
+    },
+    [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
+  );
+
+  const userCasesPermissions = useGetUserCasesPermissions();
+
+  const handleButtonClick = useCallback(() => {
+    setPopover((currentIsOpen) => !currentIsOpen);
+  }, []);
+
+  const handlePopoverClose = useCallback(() => setPopover(false), []);
+
+  const handleNewCaseClick = useCallback(() => {
+    handlePopoverClose();
+
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.case,
+      path: getCreateCaseUrl(),
+    }).then(() => {
+      dispatch(
+        setInsertTimeline({
+          graphEventId,
+          timelineId,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        })
+      );
+      dispatch(showTimeline({ id: TimelineId.active, show: false }));
+    });
+  }, [
+    dispatch,
+    graphEventId,
+    navigateToApp,
+    handlePopoverClose,
+    savedObjectId,
+    timelineId,
+    timelineTitle,
+  ]);
+
+  const handleExistingCaseClick = useCallback(() => {
+    handlePopoverClose();
+    openCaseModal(true);
+  }, [openCaseModal, handlePopoverClose]);
+
+  const onCaseModalClose = useCallback(() => {
+    openCaseModal(false);
+  }, [openCaseModal]);
+
+  const closePopover = useCallback(() => {
+    setPopover(false);
+  }, []);
+
+  const button = useMemo(
+    () => (
+      <EuiButton
+        fill
+        size="m"
+        data-test-subj="attach-timeline-case-button"
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={handleButtonClick}
+        disabled={timelineStatus === TimelineStatus.draft || timelineType !== TimelineType.default}
+      >
+        {i18n.ATTACH_TO_CASE}
+      </EuiButton>
+    ),
+    [handleButtonClick, timelineStatus, timelineType]
+  );
+
+  const casesModal = useMemo(() => {
+    return isCaseModalOpen
+      ? cases.ui.getAllCasesSelectorModal({
+          onRowClick,
+          onClose: onCaseModalClose,
+          owner: [APP_ID],
+          permissions: userCasesPermissions,
+        })
+      : null;
+  }, [onRowClick, isCaseModalOpen, userCasesPermissions, onCaseModalClose, cases.ui]);
+
+  return {
+    handleNewCaseClick,
+    handleExistingCaseClick,
+    casesModal,
+  };
+};
+
 const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {

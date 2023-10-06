@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiSuperSelectOption, EuiFormRowProps } from '@elastic/eui';
-import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow, EuiButton } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import type { sourcererModel } from '../../store/sourcerer';
@@ -23,10 +23,10 @@ export const StyledFormRow = styled(EuiFormRow)`
   max-width: none;
 `;
 
-export const StyledButton = styled(EuiButtonEmpty)`
+export const StyledButton = styled(EuiButton)`
   &:enabled:focus,
   &:focus {
-    background-color: transparent;
+    /* background-color: transparent; */
   }
 `;
 

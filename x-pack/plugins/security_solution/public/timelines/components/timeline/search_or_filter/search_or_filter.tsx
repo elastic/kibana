@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/timeline/model';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import type { KueryFilterQuery } from '../../../../../common/types/timeline';
 import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
-import { EuiSuperSelect } from './super_select';
-import { options } from './helpers';
-import * as i18n from './translations';
+import { TimelineDatePickerLock } from '../date_picker_lock';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { Sourcerer } from '../../../../common/components/sourcerer';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -38,6 +40,10 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
       width: ${searchOrFilterPopoverWidth} !important;
     }
   }
+`;
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
 `;
 
 interface Props {
@@ -101,22 +107,29 @@ export const SearchOrFilter = React.memo<Props>(
     return (
       <>
         <SearchOrFilterContainer>
-          <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
-            <ModeFlexItem grow={false}>
-              <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
-                <EuiSuperSelect
-                  data-test-subj="timeline-select-search-or-filter"
-                  hasDividers={true}
-                  itemLayoutAlign="top"
-                  itemClassName={timelineSelectModeItemsClassName}
-                  onChange={handleChange}
-                  options={options}
-                  popoverProps={{ className: searchOrFilterPopoverClassName }}
-                  valueOfSelected={kqlMode}
-                />
-              </EuiToolTip>
-            </ModeFlexItem>
-            <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
+          <EuiFlexGroup
+            data-test-subj="timeline-search-or-filter"
+            gutterSize="xs"
+            alignItems="center"
+          >
+            {/* <ModeFlexItem grow={false}> */}
+            {/*   <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}> */}
+            {/*     <EuiSuperSelect */}
+            {/*       data-test-subj="timeline-select-search-or-filter" */}
+            {/*       hasDividers={true} */}
+            {/*       itemLayoutAlign="top" */}
+            {/*       itemClassName={timelineSelectModeItemsClassName} */}
+            {/*       onChange={handleChange} */}
+            {/*       options={options} */}
+            {/*       popoverProps={{ className: searchOrFilterPopoverClassName }} */}
+            {/*       valueOfSelected={kqlMode} */}
+            {/*     /> */}
+            {/*   </EuiToolTip> */}
+            {/* </ModeFlexItem> */}
+            <EuiFlexItem grow={false}>
+              <Sourcerer scope={SourcererScopeName.timeline} />
+            </EuiFlexItem>
+            <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>
               <QueryBarTimeline
                 dataProviders={dataProviders}
                 filters={filters}
@@ -135,6 +148,18 @@ export const SearchOrFilter = React.memo<Props>(
                 toStr={toStr}
                 updateReduxTime={updateReduxTime}
               />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <SuperDatePicker
+                width="auto"
+                id={InputsModelId.timeline}
+                timelineId={timelineId}
+                disabled={false}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TimelineDatePickerLock />
             </EuiFlexItem>
           </EuiFlexGroup>
         </SearchOrFilterContainer>

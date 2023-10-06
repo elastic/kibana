@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
@@ -32,6 +32,8 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   timelineId,
 }) => (
   <>
+    <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
+    <EuiSpacer size="xs" />
     {showCallOutUnauthorizedMsg && (
       <EuiCallOut
         data-test-subj="timelineCallOutUnauthorized"
@@ -50,9 +52,10 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    {show && <DataProviders timelineId={timelineId} />}
 
-    <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
+    <EuiSpacer size="xs" />
+
+    {show && <DataProviders timelineId={timelineId} />}
   </>
 );
 

@@ -23,6 +23,53 @@ export interface EditTimelineComponentProps {
   toolTip?: string;
 }
 
+export interface UseEditTimelineArgs {
+  initialFocus?: 'title' | 'description';
+  timelineId: string;
+}
+
+export const useEditTimelineOperation = ({
+  timelineId,
+  initialFocus = 'title',
+}: UseEditTimelineArgs) => {
+  const dispatch = useDispatch();
+  const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
+  const show = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
+  const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
+
+  const openEditTimeline = useCallback(() => {
+    setShowEditTimelineOverlay(true);
+  }, [setShowEditTimelineOverlay]);
+
+  const closeEditTimeline = useCallback(() => {
+    setShowEditTimelineOverlay(false);
+    if (show) {
+      dispatch(
+        timelineActions.toggleModalSaveTimeline({
+          id: TimelineId.active,
+          showModalSaveTimeline: false,
+        })
+      );
+    }
+  }, [dispatch, setShowEditTimelineOverlay, show]);
+
+  const editTimelineModal = useMemo(() => {
+    return (initialFocus === 'title' && show) || showEditTimelineOverlay ? (
+      <EditTimelineModal
+        closeEditTimeline={closeEditTimeline}
+        initialFocus={initialFocus}
+        timelineId={timelineId}
+        showWarning={initialFocus === 'title' && show}
+      />
+    ) : null;
+  }, [closeEditTimeline, initialFocus, show, timelineId, showEditTimelineOverlay]);
+
+  return {
+    openEditTimeline,
+    editTimelineModal,
+  };
+};
+
 export const EditTimelineButton = React.memo<EditTimelineComponentProps>(
   ({ initialFocus, timelineId, toolTip }) => {
     const dispatch = useDispatch();

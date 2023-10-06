@@ -46,7 +46,6 @@ import type {
 } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
-import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -55,18 +54,16 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../store/timeline/model';
-import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 const TimelineHeaderContainer = styled.div`
-  margin-top: 6px;
+  /* margin-top: 6px; */
   width: 100%;
 `;
 
@@ -80,7 +77,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
 
   &.euiFlyoutHeader {
     ${({ theme }) =>
-      `padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
+      `padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
   }
 `;
 
@@ -361,22 +358,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <EuiFlexItem grow={10}>
-                <SuperDatePicker
-                  width="auto"
-                  id={InputsModelId.timeline}
-                  timelineId={timelineId}
-                  disabled={isDatePickerDisabled}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TimelineDatePickerLock />
-              </EuiFlexItem>
-              <SourcererFlex grow={1}>
-                {activeTab === TimelineTabs.query && (
-                  <Sourcerer scope={SourcererScopeName.timeline} />
-                )}
-              </SourcererFlex>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader
