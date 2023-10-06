@@ -88,8 +88,6 @@ const GraphTab = tabWithSuspense(lazy(() => import('../graph_tab_content')));
 const NotesTab = tabWithSuspense(lazy(() => import('../notes_tab_content')));
 const PinnedTab = tabWithSuspense(lazy(() => import('../pinned_tab_content')));
 const SessionTab = tabWithSuspense(lazy(() => import('../session_tab_content')));
-const DiscoverTab = tabWithSuspense(lazy(() => import('../discover_tab_content')));
-
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -134,7 +132,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
-    const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -229,14 +226,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
                 }
               />
             )}
-          </HideShowContainer>
-        )}
-        {isDiscoverInTimelineEnabled && (
-          <HideShowContainer
-            $isVisible={TimelineTabs.discover === activeTimelineTab}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
-          >
-            <DiscoverTab timelineId={timelineId} />
           </HideShowContainer>
         )}
       </>
