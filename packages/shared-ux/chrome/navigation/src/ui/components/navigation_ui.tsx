@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import React, { FC } from 'react';
 
 interface Props {
@@ -22,10 +22,12 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
         <>{children}</>
       ) : (
         <>
-          <EuiFlyoutBody scrollableTabIndex={-1} data-test-subj={dataTestSubj}>
+          <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
             {children}
-          </EuiFlyoutBody>
-          {footerChildren && <EuiFlyoutFooter>{footerChildren}</EuiFlyoutFooter>}
+          </EuiCollapsibleNavBeta.Body>
+          {footerChildren && (
+            <EuiCollapsibleNavBeta.Footer>{footerChildren}</EuiCollapsibleNavBeta.Footer>
+          )}
         </>
       )}
     </>
