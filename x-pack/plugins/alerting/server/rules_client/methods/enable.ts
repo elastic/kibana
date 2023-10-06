@@ -15,6 +15,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
 import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -48,13 +49,20 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     references = alert.references;
   }
 
-  try {
-    await validateScheduleLimit({
-      context,
-      updatedInterval: attributes.schedule.interval,
-    });
-  } catch (error) {
-    throw Boom.badRequest(`Error validating enable rule data - ${error.message}`);
+  const validationPayload = await validateScheduleLimit({
+    context,
+    updatedInterval: attributes.schedule.interval,
+  });
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: attributes.name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'enable',
+      })
+    );
   }
 
   try {

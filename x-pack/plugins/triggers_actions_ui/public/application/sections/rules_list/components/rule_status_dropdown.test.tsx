@@ -12,6 +12,19 @@ import { RuleStatusDropdown, ComponentOpts } from './rule_status_dropdown';
 const NOW_STRING = '2020-03-01T00:00:00.000Z';
 const SNOOZE_UNTIL = new Date('2020-03-04T00:00:00.000Z');
 
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addDanger: jest.fn(),
+        },
+      },
+    },
+  }),
+}));
+
 describe('RuleStatusDropdown', () => {
   const enableRule = jest.fn();
   const disableRule = jest.fn();

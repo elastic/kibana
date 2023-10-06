@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../../common/lib';
 
@@ -26,11 +27,17 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(200);
       objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
 
-      await supertest
+      const {
+        body: { message },
+      } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
         .expect(400);
+
+      expect(message).eql(
+        `Error validating circuit breaker - Rule 'abc' cannot be created. The maximum number of runs per minute would be exceeded. - The rule has 6 runs per minute; there are only 4 runs per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.`
+      );
     });
 
     it('should prevent rules from being created across spaces', async () => {
@@ -41,11 +48,17 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(200);
       objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
 
-      await supertest
+      const {
+        body: { message },
+      } = await supertest
         .post(`${getUrlPrefix('space2')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
         .expect(400);
+
+      expect(message).eql(
+        `Error validating circuit breaker - Rule 'abc' cannot be created. The maximum number of runs per minute would be exceeded. - The rule has 6 runs per minute; there are only 4 runs per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.`
+      );
     });
 
     it('should allow disabled rules to go over the circuit breaker', async () => {

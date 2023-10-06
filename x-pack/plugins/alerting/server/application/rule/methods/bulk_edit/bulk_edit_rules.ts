@@ -25,7 +25,7 @@ import {
   convertRuleIdsToKueryNode,
 } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -77,7 +77,7 @@ import {
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
-import { validateScheduleLimit } from '../get_schedule_frequency';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -326,15 +326,16 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     .map((rule) => rule.attributes.schedule?.interval)
     .filter(isValidInterval);
 
-  try {
-    if (operations.some((operation) => operation.field === 'schedule')) {
-      await validateScheduleLimit({
-        context,
-        prevInterval,
-        updatedInterval,
-      });
-    }
-  } catch (error) {
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (operations.some((operation) => operation.field === 'schedule')) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval,
+      updatedInterval,
+    });
+  }
+
+  if (validationPayload) {
     return {
       apiKeysToInvalidate: Array.from(apiKeysMap.values())
         .filter((value) => value.newApiKey)
@@ -342,7 +343,13 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
       resultSavedObjects: [],
       rules: [],
       errors: rules.map((rule) => ({
-        message: `Failed to bulk edit rule - ${error.message}`,
+        message: getRuleCircuitBreakerErrorMessage({
+          name: rule.attributes.name || 'n/a',
+          interval: validationPayload!.interval,
+          intervalAvailable: validationPayload!.intervalAvailable,
+          action: 'bulkEdit',
+          rules: updatedInterval.length,
+        }),
         rule: {
           id: rule.id,
           name: rule.attributes.name || 'n/a',
