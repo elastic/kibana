@@ -76,8 +76,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
-      await clearKibanaApmEventLog(es);
+      try {
+        await synthtraceEsClient.clean();
+        await clearKibanaApmEventLog(es);
+      } catch (e) {
+        logger.info('Could not clean up apm event log', e);
+      }
     });
 
     describe('create rule without kql query', () => {
@@ -250,8 +254,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteRuleById({ supertest, ruleId });
-        await deleteAlertsByRuleId({ es, ruleId });
+        try {
+          await deleteRuleById({ supertest, ruleId });
+          await deleteAlertsByRuleId({ es, ruleId });
+        } catch (e) {
+          logger.info('Could not delete rule', e);
+        }
       });
 
       it('indexes alert document with all group-by fields', async () => {
