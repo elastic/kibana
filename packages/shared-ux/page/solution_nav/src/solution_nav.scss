@@ -24,7 +24,7 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
   }
 
   &__titleAvatar {
-    margin-right: $euiSize;
+    margin-right: $euiSizeM;
     align-self: flex-start;
   }
 }
