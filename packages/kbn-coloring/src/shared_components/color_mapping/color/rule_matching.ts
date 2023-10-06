@@ -44,13 +44,13 @@ export function rangeMatch(rule: ColorMapping.RuleRange, value: number) {
 export const SPECIAL_TOKENS_STRING_CONVERTION = new Map([
   [
     '__other__',
-    i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
+    i18n.translate('coloring.colorMapping.terms.otherBucketLabel', {
       defaultMessage: 'Other',
     }),
   ],
   [
     '',
-    i18n.translate('fieldFormats.string.emptyLabel', {
+    i18n.translate('coloring.colorMapping.terms.emptyLabel', {
       defaultMessage: '(empty)',
     }),
   ],
