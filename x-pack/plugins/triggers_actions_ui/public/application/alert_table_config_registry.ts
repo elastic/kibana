@@ -63,16 +63,6 @@ export class AlertTableConfigRegistry {
   }
 
   public getActions(id: string): AlertsTableConfigurationRegistryWithActions['actions'] {
-    if (!this.has(id)) {
-      throw new Error(
-        i18n.translate('xpack.triggersActionsUI.typeRegistry.get.missingActionTypeErrorMessage', {
-          defaultMessage: 'Object type "{id}" is not registered.',
-          values: {
-            id,
-          },
-        })
-      );
-    }
     return (
       (this.objectTypes.get(id) as AlertsTableConfigurationRegistryWithActions)?.actions ?? {
         toggleColumn: noop,
@@ -88,9 +78,17 @@ export class AlertTableConfigRegistry {
    * Returns an object type, throw error if not registered
    */
   public update(id: string, objectType: AlertsTableConfigurationRegistryWithActions) {
-    if (this.has(id)) {
-      this.objectTypes.set(id, objectType);
+    if (!this.has(id)) {
+      throw new Error(
+        i18n.translate('xpack.triggersActionsUI.typeRegistry.get.missingActionTypeErrorMessage', {
+          defaultMessage: 'Object type "{id}" is not registered.',
+          values: {
+            id,
+          },
+        })
+      );
     }
+    this.objectTypes.set(id, objectType);
     return this.objectTypes.get(id)!;
   }
 }

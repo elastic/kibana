@@ -61,14 +61,4 @@ export class TypeRegistry<T extends BaseObjectType> {
   public list() {
     return Array.from(this.objectTypes).map(([id, objectType]) => objectType);
   }
-
-  /**
-   * Returns an object type, throw error if not registered
-   */
-  public update(id: string, objectType: T): T {
-    if (this.has(id)) {
-      this.objectTypes.set(id, objectType);
-    }
-    return this.objectTypes.get(id)!;
-  }
 }

@@ -45,7 +45,6 @@ import {
   TableUpdateHandlerArgs,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
-import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
@@ -53,6 +52,7 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -60,7 +60,7 @@ const DefaultPagination = {
 };
 
 export type AlertsTableStateProps = {
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
@@ -264,10 +264,10 @@ const AlertsTableStateWithQueryProvider = ({
   });
 
   useEffect(() => {
-    Object.assign(alertsTableConfiguration, {
+    alertsTableConfigurationRegistry.update(configurationId, {
+      ...alertsTableConfiguration,
       actions: { toggleColumn: onToggleColumn },
     });
-    alertsTableConfigurationRegistry.update(configurationId, alertsTableConfiguration);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onToggleColumn]);
 
