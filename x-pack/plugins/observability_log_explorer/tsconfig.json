@@ -23,13 +23,16 @@
     "@kbn/core-chrome-browser",
     "@kbn/config-schema",
     "@kbn/kibana-utils-plugin",
-    "@kbn/core-application-browser",
     "@kbn/discover-plugin",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
     "@kbn/share-plugin",
     "@kbn/io-ts-utils",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/xstate-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*"
