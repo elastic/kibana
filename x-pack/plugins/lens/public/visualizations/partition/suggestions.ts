@@ -18,6 +18,7 @@ import {
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
+  getColorMappingDefaults,
 } from '../../../common/constants';
 import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
@@ -141,7 +142,7 @@ export function suggestions({
                 metrics: metricColumnIds,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? undefined
+                  ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : state.layers[0].colorMapping,
@@ -156,7 +157,7 @@ export function suggestions({
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? undefined
+                  ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : undefined,

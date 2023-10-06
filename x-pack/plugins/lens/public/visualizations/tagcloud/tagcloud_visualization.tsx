@@ -20,6 +20,7 @@ import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import { getColorMappingDefaults } from '../../../common/constants';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
@@ -108,7 +109,8 @@ export const getTagcloudVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         ...DEFAULT_STATE,
-        colorMapping: mainPalette?.type === 'colorMapping' ? mainPalette.value : undefined,
+        colorMapping:
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
       }
     );
   },

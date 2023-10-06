@@ -43,6 +43,7 @@ import {
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
+  getColorMappingDefaults,
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
@@ -168,7 +169,7 @@ export const getPieVisualization = ({
         layers: [
           newLayerState(
             addNewLayer(),
-            mainPalette?.type === 'colorMapping' ? mainPalette.value : undefined
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
           ),
         ],
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,

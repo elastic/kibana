@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { getColorMappingDefaults } from '../../../common/constants';
 import type {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -555,7 +556,7 @@ function buildSuggestion({
         : undefined,
     layerType: LayerTypes.DATA,
     colorMapping: !mainPalette
-      ? undefined
+      ? getColorMappingDefaults()
       : mainPalette?.type === 'colorMapping'
       ? mainPalette.value
       : undefined,

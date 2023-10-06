@@ -11,6 +11,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -18,6 +19,8 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
+
 import type {
   Datasource,
   DatasourceMap,
@@ -37,13 +40,15 @@ import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
 
-const PREFERRED_PALETTE: SuggestionRequest['mainPalette'] = {
-  type: 'legacyPalette',
-  value: {
-    name: 'default',
-    type: 'palette',
-  },
-};
+const COLOR_MAPPING: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_DEFAULT
+  ? {
+      type: 'legacyPalette',
+      value: {
+        name: 'default',
+        type: 'palette',
+      },
+    }
+  : { type: 'colorMapping', value: { ...DEFAULT_COLOR_MAPPING_CONFIG } };
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
@@ -299,7 +304,7 @@ export function initializeVisualization({
         () => '',
         visualizationState.state,
         // initialize a new visualization with the color mapping off
-        PREFERRED_PALETTE,
+        COLOR_MAPPING,
         annotationGroups,
         references
       ) ?? visualizationState.state

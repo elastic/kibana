@@ -27,6 +27,7 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
+import { getColorMappingDefaults } from '../../../common/constants';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -280,7 +281,8 @@ export const getXyVisualization = ({
             showGridlines: false,
             layerType: LayerTypes.DATA,
             palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-            colorMapping: mainPalette?.type === 'colorMapping' ? mainPalette.value : undefined,
+            colorMapping:
+              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
           },
         ],
       }
