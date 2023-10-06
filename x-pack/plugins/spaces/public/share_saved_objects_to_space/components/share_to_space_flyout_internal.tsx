@@ -354,7 +354,9 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           makeCopy={() => setShowMakeCopy(true)}
           enableCreateNewSpaceLink={enableCreateNewSpaceLink}
           enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
-          prohibitedSpaces={prohibitedSpaces}
+          // TODO revert this change once https://github.com/elastic/kibana/issues/168049 is fixed
+          // prohibitedSpaces={prohibitedSpaces}
+          prohibitedSpaces={new Set()}
         />
       );
     }
