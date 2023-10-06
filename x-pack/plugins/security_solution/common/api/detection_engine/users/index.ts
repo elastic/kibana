@@ -6,4 +6,3 @@
  */
 
 export * from './suggest_user_profiles/suggest_user_profiles_route';
-export * from './get_user_profiles/get_user_profiles_route';

@@ -23,7 +23,6 @@ import {
   createHostIsolation,
   updateAlertStatusByQuery,
   updateAlertStatusByIds,
-  getUserProfiles,
   suggestUsers,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -265,30 +264,6 @@ describe('Detections Alerts API', () => {
         caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
       });
       expect(hostIsolationResponse).toEqual(mockHostIsolation);
-    });
-  });
-
-  describe('getUserProfiles', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockUserProfiles);
-    });
-
-    test('check parameter url', async () => {
-      await getUserProfiles({ userIds: ['user-id-1', 'user-id-2'] });
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/signals/users',
-        expect.objectContaining({
-          method: 'GET',
-          version: '2023-10-31',
-          body: '{"userIds":["user-id-1","user-id-2"]}',
-        })
-      );
-    });
-
-    test('happy path', async () => {
-      const alertsResp = await getUserProfiles({ userIds: ['user-id-1', 'user-id-2'] });
-      expect(alertsResp).toEqual(mockUserProfiles);
     });
   });
 

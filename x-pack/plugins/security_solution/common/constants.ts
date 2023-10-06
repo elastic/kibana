@@ -320,8 +320,6 @@ export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
 export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/suggest_users` as const;
-export const DETECTION_ENGINE_ALERT_GET_USERS_URL =
-  `${DETECTION_ENGINE_SIGNALS_URL}/user_profiles` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;

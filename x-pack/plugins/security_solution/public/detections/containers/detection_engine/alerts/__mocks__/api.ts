@@ -44,12 +44,6 @@ export const getCaseIdsFromAlertId = async ({
   alertId: string;
 }): Promise<CasesFromAlertsResponse> => Promise.resolve(mockCaseIdsFromAlertId);
 
-export const getUserProfiles = async ({
-  userIds,
-}: {
-  userIds: string[];
-}): Promise<UserProfileWithAvatar[]> => Promise.resolve(mockUserProfiles);
-
 export const suggestUsers = async ({
   searchTerm,
 }: {

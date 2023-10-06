@@ -16,7 +16,6 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_ALERTS_INDEX_URL,
-  DETECTION_ENGINE_ALERT_GET_USERS_URL,
   DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
@@ -31,7 +30,6 @@ import type {
   CasesFromAlertsResponse,
   CheckSignalIndex,
   UpdateAlertStatusByIdsProps,
-  GetUserProfilesByIdsProps,
   SuggestUsersProps,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
@@ -261,22 +259,6 @@ export const getHostMetadata = async ({
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
     { method: 'GET', signal, version: '2023-10-31' }
   );
-
-/**
- * Fetches user profiles by their ids
- */
-export const getUserProfiles = async ({
-  userIds,
-}: GetUserProfilesByIdsProps): Promise<UserProfileWithAvatar[]> => {
-  return KibanaServices.get().http.fetch<UserProfileWithAvatar[]>(
-    DETECTION_ENGINE_ALERT_GET_USERS_URL,
-    {
-      method: 'GET',
-      version: '2023-10-31',
-      query: { userIds: userIds.join(',') },
-    }
-  );
-};
 
 /**
  * Fetches suggested user profiles

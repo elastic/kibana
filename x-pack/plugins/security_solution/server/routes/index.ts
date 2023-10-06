@@ -84,7 +84,6 @@ import {
 } from '../lib/risk_engine/routes';
 import { riskScoreCalculationRoute } from '../lib/risk_engine/routes/risk_score_calculation_route';
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
-import { getUserProfilesRoute } from '../lib/detection_engine/routes/users/get_user_profiles_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -153,7 +152,6 @@ export const initRoutes = (
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, ruleDataService, security);
   deleteSignalsMigrationRoute(router, security);
-  getUserProfilesRoute(router, getStartServices);
   suggestUserProfilesRoute(router, getStartServices);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index

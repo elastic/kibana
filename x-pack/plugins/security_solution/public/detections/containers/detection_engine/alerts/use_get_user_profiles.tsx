@@ -7,8 +7,8 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useEffect, useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { getUserProfiles } from './api';
 import { USER_PROFILES_FAILURE } from './translations';
 
 interface GetUserProfilesReturn {
@@ -20,6 +20,7 @@ export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => 
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfileWithAvatar[]>([]);
   const { addError } = useAppToasts();
+  const userProfiles = useKibana().services.security.userProfiles;
 
   useEffect(() => {
     // isMounted tracks if a component is mounted before changing state
@@ -27,9 +28,15 @@ export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => 
     setLoading(true);
     const fetchData = async () => {
       try {
-        const usersResponse = userIds.length > 0 ? await getUserProfiles({ userIds }) : [];
+        const profiles =
+          userIds.length > 0
+            ? await userProfiles.bulkGet({
+                uids: new Set(userIds),
+                dataPath: 'avatar',
+              })
+            : [];
         if (isMounted) {
-          setUsers(usersResponse);
+          setUsers(profiles);
         }
       } catch (error) {
         addError(error.message, { title: USER_PROFILES_FAILURE });
@@ -43,6 +50,6 @@ export const useGetUserProfiles = (userIds: string[]): GetUserProfilesReturn => 
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError, userIds]);
+  }, [addError, userProfiles, userIds]);
   return { loading, userProfiles: users };
 };
