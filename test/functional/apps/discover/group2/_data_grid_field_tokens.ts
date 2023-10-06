@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
+  const retryOnStale = getService('retryOnStale');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -42,17 +42,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   async function findFirstFieldIcons(elementSelector: string) {
     let firstFieldIcons: string[] = [];
 
-    await retry.try(async () => {
-      const element = await testSubjects.find(elementSelector);
-      const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
+    await retryOnStale(async () => {
+      const fieldIcons = await element.findAllByCssSelector(`${elementSelector} .kbnFieldIcon svg`);
 
-      try {
-        firstFieldIcons = await Promise.all(
-          fieldIcons.map((fieldIcon) => fieldIcon.getAttribute('aria-label')).slice(0, 10)
-        );
-      } catch {
-        throw new Error('stale references to elements');
-      }
+      firstFieldIcons = await Promise.all(
+        fieldIcons.map((fieldIcon) => fieldIcon.getAttribute('aria-label')).slice(0, 10)
+      );
     });
 
     return firstFieldIcons;
