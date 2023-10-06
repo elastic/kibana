@@ -53,6 +53,20 @@ export const policyListErrorMessage = i18n.translate(
   }
 );
 
+const policyListErrorToastTitle = i18n.translate(
+  'xpack.securitySolution.policy.list.errorMessage.toast.title',
+  {
+    defaultMessage: 'Failed to retrieve policy list',
+  }
+);
+
+const policyListErrorToastText = i18n.translate(
+  'xpack.securitySolution.policyList.packageVersionError',
+  {
+    defaultMessage: 'Error retrieving the endpoint package version',
+  }
+);
+
 export const PolicyList = memo(() => {
   const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
   const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
@@ -70,6 +84,9 @@ export const PolicyList = memo(() => {
   } = useGetEndpointSpecificPolicies({
     page: pagination.page,
     perPage: pagination.pageSize,
+    onError: (err) => {
+      toasts.addDanger({ title: policyListErrorToastTitle, text: err.message });
+    },
   });
 
   const { data: outdatedManifestsCountResponse, isLoading: isOutdatedManifestsCountLoading } =
@@ -80,11 +97,10 @@ export const PolicyList = memo(() => {
     useGetEndpointSecurityPackage({
       customQueryOptions: {
         onError: (err) => {
-          toasts.addDanger(
-            i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
-              defaultMessage: 'Error retrieving the endpoint package version',
-            })
-          );
+          toasts.addDanger({
+            title: policyListErrorToastText,
+            text: err.message,
+          });
         },
       },
     });
