@@ -6,30 +6,51 @@
  * Side Public License, v 1.
  */
 
-import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { of, BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevels, CoreStatus } from '@kbn/core-status-common';
-import { InternalStatusServiceSetup } from './types';
-import { StatusService, StatusServiceSetupDeps } from './status_service';
+import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { first, take, toArray } from 'rxjs/operators';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+
+import {
+  getOverallStatusChangesMock,
+  getPluginsStatusChangesMock,
+  getPluginStatusChangesMessagesMock,
+} from './status_service.test.mocks';
+import { StatusService, type StatusServiceSetupDeps } from './status_service';
+import { PluginsByStatus, PluginStatusChanges, ServiceStatusWithName } from './log_plugins_status';
+import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
+import type { InternalStatusServiceSetup } from './types';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('StatusService', () => {
   let service: StatusService;
+  let logger: jest.Mocked<ILoggingSystem>;
 
   beforeEach(() => {
-    service = new StatusService(mockCoreContext.create());
+    logger = loggingSystemMock.create();
+    // logger = loggerFactory.get('status') as MockedLogger;
+    service = new StatusService(mockCoreContext.create({ logger }));
+
+    getOverallStatusChangesMock.mockReturnValue({ subscribe: jest.fn() });
+    getPluginsStatusChangesMock.mockReturnValue({ subscribe: jest.fn() });
+  });
+
+  afterEach(() => {
+    getOverallStatusChangesMock.mockReset();
+    getPluginsStatusChangesMock.mockReset();
+    getPluginStatusChangesMessagesMock.mockReset();
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -47,7 +68,30 @@ describe('StatusService', () => {
     summary: 'This is critical!',
   };
 
-  const setupDeps = (overrides: Partial<StatusServiceSetupDeps>): StatusServiceSetupDeps => {
+  const emptyStatus: PluginsByStatus = {
+    available: [],
+    critical: [],
+    degraded: [],
+    unavailable: [],
+  };
+
+  const pluginStatusA: ServiceStatusWithName = {
+    pluginName: 'pluginA',
+    level: ServiceStatusLevels.available,
+    summary: 'bootstrapped correctly!',
+  };
+  const pluginStatusB: ServiceStatusWithName = {
+    pluginName: 'pluginB',
+    level: ServiceStatusLevels.available,
+    summary: 'bootstrapped correctly!',
+  };
+  const pluginStatusC: ServiceStatusWithName = {
+    pluginName: 'pluginC',
+    level: ServiceStatusLevels.available,
+    summary: 'bootstrapped correctly!',
+  };
+
+  const setupDeps = (overrides: Partial<StatusServiceSetupDeps> = {}): StatusServiceSetupDeps => {
     return {
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       elasticsearch: {
@@ -287,6 +331,7 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
+              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -296,6 +341,7 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
+              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -337,6 +383,7 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
+              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -346,6 +393,7 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
+              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -458,6 +506,7 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
+              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -467,6 +516,7 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
+              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -508,6 +558,7 @@ describe('StatusService', () => {
           Array [
             Object {
               "detail": "See the status page for more information",
+              "isInferredStatus": true,
               "level": degraded,
               "meta": Object {
                 "affectedServices": Array [
@@ -517,6 +568,7 @@ describe('StatusService', () => {
               "summary": "1 service is degraded: savedObjects",
             },
             Object {
+              "isInferredStatus": true,
               "level": available,
               "summary": "All services are available",
             },
@@ -568,6 +620,84 @@ describe('StatusService', () => {
           ]
         `);
       });
+    });
+  });
+
+  describe('#start', () => {
+    it('logs a message everytime the getOverallStatusChangesMock observable emits', async () => {
+      const subject = new Subject<string>();
+      getOverallStatusChangesMock.mockReturnValue(subject);
+
+      await service.setup(setupDeps());
+      await service.start();
+
+      subject.next('some message');
+      subject.next('another message');
+
+      const { info } = loggingSystemMock.collect(logger);
+      expect(info[0][0]).toEqual('some message');
+      expect(info[1][0]).toEqual('another message');
+    });
+
+    it('calls getPluginStatusChangesMessages and subscribe to the returned observable', async () => {
+      const mockSubscribe = jest.fn();
+      getPluginsStatusChangesMock.mockReturnValue({
+        subscribe: mockSubscribe,
+      });
+
+      await service.setup(setupDeps());
+      await service.start();
+
+      expect(getPluginsStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(mockSubscribe).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs messages everytime the getPluginsStatusChangesMock observable emits', async () => {
+      const subject = new Subject<PluginStatusChanges>();
+      getPluginsStatusChangesMock.mockReturnValue(subject);
+
+      getPluginStatusChangesMessagesMock.mockImplementation(
+        ({ updates, updated, total }: PluginStatusChanges) => {
+          return [
+            `Updated ${updated} services out of ${total}: ${updates.available.map(
+              ({ pluginName }) => pluginName
+            )}`,
+          ];
+        }
+      );
+
+      await service.setup(setupDeps());
+      await service.start();
+
+      subject.next({
+        status: {
+          ...emptyStatus,
+          unavailable: [pluginStatusB, pluginStatusC],
+          available: [pluginStatusA],
+        },
+        updates: {
+          ...emptyStatus,
+          available: [pluginStatusA],
+        },
+        updated: 1,
+        total: 3,
+      });
+      subject.next({
+        status: {
+          ...emptyStatus,
+          available: [pluginStatusA, pluginStatusB, pluginStatusC],
+        },
+        updates: {
+          ...emptyStatus,
+          available: [pluginStatusB, pluginStatusC],
+        },
+        updated: 2,
+        total: 3,
+      });
+
+      const { info } = loggingSystemMock.collect(logger);
+      expect(info[0][0]).toEqual('Updated 1 services out of 3: pluginA');
+      expect(info[1][0]).toEqual('Updated 2 services out of 3: pluginB,pluginC');
     });
   });
 });

@@ -35,11 +35,12 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
 import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
 
-import { statusConfig as config, StatusConfigType } from './status_config';
+import { statusConfig as config, type StatusConfigType } from './status_config';
 import type { InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './cached_plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
+import { getPluginsStatusChanges, getPluginStatusChangesMessages } from './log_plugins_status';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
@@ -183,6 +184,12 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
       this.logger.info(message);
+    });
+
+    getPluginsStatusChanges(this.pluginsStatus.getAll$(), this.stop$).subscribe((statusChanges) => {
+      getPluginStatusChangesMessages(statusChanges).forEach((message) => {
+        this.logger.info(message);
+      });
     });
   }
 

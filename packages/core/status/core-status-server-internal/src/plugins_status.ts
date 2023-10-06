@@ -7,14 +7,7 @@
  */
 
 import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
-import {
-  map,
-  distinctUntilChanged,
-  filter,
-  debounceTime,
-  timeoutWith,
-  startWith,
-} from 'rxjs/operators';
+import { map, distinctUntilChanged, filter, debounceTime, timeout } from 'rxjs/operators';
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 import type { PluginName } from '@kbn/core-base-common';
@@ -26,6 +19,7 @@ const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 const defaultStatus: ServiceStatus = {
   level: ServiceStatusLevels.unavailable,
   summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
+  isInferredStatus: false,
 };
 
 export interface Deps {
@@ -53,7 +47,10 @@ interface ReportedStatusSubscriptions {
 }
 
 export class PluginsStatusService {
-  private coreStatus: CoreStatus = { elasticsearch: defaultStatus, savedObjects: defaultStatus };
+  private coreStatus: CoreStatus = {
+    elasticsearch: { ...defaultStatus, isInferredStatus: false },
+    savedObjects: { ...defaultStatus, isInferredStatus: false },
+  };
   private pluginData: PluginData;
   private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies
   private orderedPluginNames: PluginName[];
@@ -100,14 +97,18 @@ export class PluginsStatusService {
     // delete any derived statuses calculated before the custom status Observable was registered
     delete this.pluginStatus[plugin];
 
-    this.reportedStatusSubscriptions[plugin] = status$
-      // Set a timeout for externally-defined status Observables
+    const statusChanged$ = status$.pipe(distinctUntilChanged());
+
+    this.reportedStatusSubscriptions[plugin] = statusChanged$
       .pipe(
-        timeoutWith(this.statusTimeoutMs, status$.pipe(startWith(defaultStatus))),
-        distinctUntilChanged()
+        // Set a timeout for externally-defined status Observables
+        timeout({ first: this.statusTimeoutMs, with: () => statusChanged$ })
       )
       .subscribe((status) => {
-        const levelChanged = this.updatePluginReportedStatus(plugin, status);
+        const levelChanged = this.updatePluginReportedStatus(plugin, {
+          ...status,
+          isInferredStatus: false,
+        });
 
         if (levelChanged) {
           this.updateDependantStatuses([plugin]);
@@ -337,7 +338,7 @@ export class PluginsStatusService {
   }
 
   /**
-   * Updates the reported status for the given plugin, along with the status of its dependencies tree.
+   * Updates the reported status for the given plugin.
    * @param {PluginName} plugin The name of the plugin whose reported status must be updated
    * @param {ServiceStatus} reportedStatus The newly reported status for that plugin
    * @return {boolean} true if the level of the reported status changed
