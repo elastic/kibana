@@ -419,11 +419,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('navigates to data drift', async () => {
-        await ml.testExecution.logTestStep('should display the trained model in the table');
-        await ml.trainedModelsTable.filterWithSearchString(
-          modelWithPipelineAndDestIndex.modelId,
-          1
-        );
         await ml.testExecution.logTestStep('should show the model map in the expanded row');
         await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineAndDestIndex.modelId);
         await ml.trainedModelsTable.assertModelsMapTabContent();
@@ -441,7 +436,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         await ml.testExecution.logTestStep(`sets index pattern for reference data set`);
-        await ml.dataDrift.setIndexPatternInput('reference', 'user-index_dfa_regression_model_n_1');
+        await ml.dataDrift.setIndexPatternInput(
+          'reference',
+          modelWithPipelineAndDestIndexExpectedValues.index
+        );
+        await ml.dataDrift.assertIndexPatternInput(
+          'comparison',
+          modelWithPipelineAndDestIndexExpectedValues.index
+        );
 
         await ml.testExecution.logTestStep(`redirects to data drift page`);
         await ml.trainedModelsTable.clickAnalyzeDataDriftWithoutSaving();

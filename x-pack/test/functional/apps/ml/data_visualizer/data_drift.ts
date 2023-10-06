@@ -62,10 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('data drift', async function () {
     before(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_fare*');
-      await ml.testResources.deleteIndexPatternByTitle('ft_fare*,ft_fareq*');
-      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
-
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
 

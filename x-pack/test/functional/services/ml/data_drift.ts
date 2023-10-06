@@ -228,12 +228,26 @@ export function MachineLearningDataDriftProvider({
       });
     },
 
-    async setIndexPatternInput(id: 'reference' | 'comparison', text: string) {
+    async assertIndexPatternInput(id: 'reference' | 'comparison', expectedText: string) {
       const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
 
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(inputSelector);
-        await testSubjects.setValue(inputSelector, text);
+        const input = await testSubjects.find(inputSelector);
+        const text = await input.getAttribute('value');
+        expect(text).eql(
+          expectedText,
+          `Expected ${inputSelector} to have text ${expectedText} (got ${text})`
+        );
+      });
+    },
+
+    async setIndexPatternInput(id: 'reference' | 'comparison', pattern: string) {
+      const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
+
+      await retry.tryForTime(5000, async () => {
+        const field = await testSubjects.find(inputSelector);
+        await field.clearValue();
+        await field.type(pattern);
       });
     },
 
