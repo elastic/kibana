@@ -482,7 +482,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
 
-        it('400s when trying to create case without a required custom field', async () => {
+        it('400s when creating a case with a missing required custom field', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
