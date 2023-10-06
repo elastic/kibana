@@ -40,7 +40,9 @@ export const ProjectAPIKeys = () => {
   }, [loadAPIKey]);
 
   useEffect(() => {
-    setApiKey(data?.apiKey.encoded);
+    if (data?.apiKey) {
+      setApiKey(data?.apiKey.encoded);
+    }
   }, [data]);
 
   const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
