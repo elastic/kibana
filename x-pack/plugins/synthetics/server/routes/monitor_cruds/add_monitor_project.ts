@@ -38,12 +38,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
 
-    const permissionError = await validatePermissions(routeContext, monitors);
-
-    if (permissionError) {
-      return response.forbidden({ body: { message: permissionError } });
-    }
-
     if (monitors.length > 250) {
       return response.badRequest({
         body: {
@@ -56,6 +50,12 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
       };
+
+      const permissionError = await validatePermissions(routeContext, monitors);
+
+      if (permissionError) {
+        return response.forbidden({ body: { message: permissionError } });
+      }
 
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
