@@ -28,7 +28,11 @@ import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-u
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames, type ButtonAddFieldVariant } from '../../types';
+import {
+  FieldsGroupNames,
+  type StickyHeadersOptions,
+  type ButtonAddFieldVariant,
+} from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
@@ -68,6 +72,11 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Compressed view
    */
   compressed?: boolean;
+
+  /**
+   * Custom sticky headers options
+   */
+  stickyHeaders?: StickyHeadersOptions;
 
   /**
    * Custom logic for determining which field is selected
@@ -151,6 +160,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   showFieldList = true,
   compressed = true,
   fullWidth,
+  stickyHeaders,
   isAffectedByGlobalFilter,
   prepend,
   onAddFieldToWorkspace,
@@ -390,6 +400,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
+                stickyHeaders={stickyHeaders}
               />
             ) : (
               <EuiFlexItem grow />

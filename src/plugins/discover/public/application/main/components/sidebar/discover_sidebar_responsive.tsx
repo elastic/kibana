@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -17,6 +17,7 @@ import {
   type UnifiedFieldListSidebarContainerApi,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
@@ -373,6 +374,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveField]
   );
 
+  const [stickyHeaders] = useState(() => ({
+    enabled: true,
+    backgroundColor: euiThemeVars.euiColorEmptyShade,
+  }));
+
   if (!selectedDataView) {
     return null;
   }
@@ -389,6 +395,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       showFieldList={showFieldList}
       workspaceSelectedFieldNames={columns}
       fullWidth
+      stickyHeaders={stickyHeaders}
       onAddFieldToWorkspace={onAddFieldToWorkspace}
       onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
       onAddFilter={onAddFilter}

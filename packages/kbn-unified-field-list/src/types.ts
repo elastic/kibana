@@ -199,3 +199,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
 export interface UnifiedFieldListSidebarContainerStateService {
   creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
 }
+
+/**
+ * Options used for field list sticky headers
+ */
+export interface StickyHeadersOptions {
+  enabled: boolean;
+  backgroundColor: string;
+}

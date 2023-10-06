@@ -7,7 +7,7 @@
 
 import './datapanel.scss';
 import { uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,6 +28,7 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type {
   DatasourceDataPanelProps,
   FramePublicAPI,
@@ -392,6 +393,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ]
   );
 
+  const [stickyHeaders] = useState(() => ({
+    enabled: true,
+    backgroundColor: euiThemeVars.euiColorLightestShade,
+  }));
+
   return (
     <FieldList
       className="lnsInnerIndexPatternDataPanel"
@@ -403,6 +409,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         renderFieldItem={renderFieldItem}
         data-test-subj="lnsIndexPattern"
         localStorageKeyPrefix="lens"
+        stickyHeaders={stickyHeaders}
       />
     </FieldList>
   );

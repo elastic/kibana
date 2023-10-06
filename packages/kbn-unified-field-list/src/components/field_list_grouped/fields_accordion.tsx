@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, Fragment } from 'react';
+import React, { useMemo, Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -18,7 +18,14 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  type FieldListItem,
+  FieldsGroupNames,
+  type RenderFieldItemParams,
+  type StickyHeadersOptions,
+} from '../../types';
 import './fields_accordion.scss';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
@@ -39,6 +46,7 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
+  stickyHeaders?: StickyHeadersOptions;
 }
 
 function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
@@ -59,6 +67,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   renderCallout,
   showExistenceFetchError,
   showExistenceFetchTimeout,
+  stickyHeaders,
 }: FieldsAccordionProps<T>) {
   const renderButton = useMemo(() => {
     const titleClassname = classNames({
@@ -133,6 +142,8 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
     return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
   }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
 
+  const accordionCss = useAccordionCss(stickyHeaders);
+
   return (
     <EuiAccordion
       initialIsOpen={initialIsOpen}
@@ -141,6 +152,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       id={id}
       buttonContent={renderButton}
       extraAction={extraAction}
+      css={accordionCss}
     >
       <EuiSpacer size="s" />
       {hasLoaded &&
@@ -171,3 +183,45 @@ export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerF
 
 export const getFieldKey = (field: FieldListItem): string =>
   `${field.name}-${field.displayName}-${field.type}`;
+
+const useAccordionCss = (stickyHeaders?: StickyHeadersOptions) => {
+  const [baseStyles] = useState(() => {
+    return css`
+      .euiAccordion__triggerWrapper {
+        padding-top: ${euiThemeVars.euiSizeS};
+      }
+    `;
+  });
+
+  return useMemo(() => {
+    if (!stickyHeaders?.enabled) {
+      return baseStyles;
+    }
+
+    const stickyHeaderStyles = css`
+      .euiAccordion__triggerWrapper {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: ${stickyHeaders.backgroundColor};
+
+        &:after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          width: 100%;
+          height: 7.5px;
+          background-image: linear-gradient(
+            0,
+            rgba(0, 0, 0, 0) 0,
+            ${stickyHeaders.backgroundColor} 7.5px,
+            ${stickyHeaders.backgroundColor} calc(100% - 7.5px),
+            rgba(0, 0, 0, 0)
+          );
+        }
+      }
+    `;
+
+    return [baseStyles, stickyHeaderStyles];
+  }, [baseStyles, stickyHeaders?.backgroundColor, stickyHeaders?.enabled]);
+};
