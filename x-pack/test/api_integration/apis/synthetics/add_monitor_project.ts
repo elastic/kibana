@@ -132,6 +132,20 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
+    it('project monitors - returns forbidden if no access to public locations', async () => {
+      const project = `test-project-${uuidv4()}`;
+
+      await monitorTestService.generateProjectAPIKey(false);
+      const response = await monitorTestService.addProjectMonitors(
+        project,
+        projectMonitors.monitors
+      );
+      expect(response.status).to.eql(403);
+      expect(response.body.message).to.eql(
+        "You don't have permission to use Elastic managed global locations"
+      );
+    });
+
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
       const project = `test-project-${uuidv4()}`;

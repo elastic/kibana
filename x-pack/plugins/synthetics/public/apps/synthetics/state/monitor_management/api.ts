@@ -60,12 +60,12 @@ export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<Sy
     },
     SyntheticsMonitorCodec
   );
-
+export interface ProjectAPIKey {
+  apiKey: { encoded: string };
+}
 export const fetchProjectAPIKey = async (
   accessToElasticManagedLocations: boolean
-): Promise<{
-  apiKey: { encoded: string };
-}> => {
+): Promise<ProjectAPIKey> => {
   return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY, {
     accessToElasticManagedLocations,
   });

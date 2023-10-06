@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import type { ProjectAPIKey } from '../../../public/apps/synthetics/state/monitor_management/api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { generateAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -17,7 +18,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       accessToElasticManagedLocations: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ request, server }): Promise<any> => {
+  handler: async ({ request, server }): Promise<ProjectAPIKey> => {
     const { accessToElasticManagedLocations } = request.query;
 
     const apiKey = await generateAPIKey({
