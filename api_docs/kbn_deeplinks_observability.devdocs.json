@@ -232,6 +232,51 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.ObservabilityLogExplorerLocationState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityLogExplorerLocationState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ObservabilityLogExplorerLocationState",
+            "text": "ObservabilityLogExplorerLocationState"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.ObservabilityLogExplorerLocationState.origin",
+            "type": "Object",
+            "tags": [],
+            "label": "origin",
+            "description": [],
+            "signature": [
+              "{ id: \"application-log-onboarding\"; } | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.ObservabilityOnboardingLocatorParams",
         "type": "Interface",
         "tags": [],
@@ -297,8 +342,8 @@
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.LogExplorerNavigationParams",
-            "text": "LogExplorerNavigationParams"
+            "section": "def-common.DatasetLocatorParams",
+            "text": "DatasetLocatorParams"
           }
         ],
         "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
@@ -369,6 +414,14 @@
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.LogExplorerNavigationParams",
             "text": "LogExplorerNavigationParams"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ObservabilityLogExplorerLocationState",
+            "text": "ObservabilityLogExplorerLocationState"
           }
         ],
         "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
@@ -405,6 +458,14 @@
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.LogExplorerNavigationParams",
             "text": "LogExplorerNavigationParams"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ObservabilityLogExplorerLocationState",
+            "text": "ObservabilityLogExplorerLocationState"
           }
         ],
         "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
