@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiAccordion, useEuiTheme } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
@@ -44,6 +45,8 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
@@ -171,14 +174,7 @@ export function LensEditConfigurationFlyout({
         updateSuggestion?.(attrs);
       }
     },
-    [
-      // datasourceId,
-      datasourceMap,
-      startDependencies,
-      updateSuggestion,
-      visualizationMap,
-      setCurrentAttributes,
-    ]
+    [datasourceMap, startDependencies, updateSuggestion, visualizationMap, setCurrentAttributes]
   );
 
   const framePublicAPI = useLensSelector((state) => {
@@ -218,6 +214,9 @@ export function LensEditConfigurationFlyout({
     );
   }
 
+  // needed for text based languages mode which works ONLY with adHoc dataviews
+  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
+
   return (
     <>
       <FlyoutWrapper
@@ -235,17 +234,17 @@ export function LensEditConfigurationFlyout({
             <TextBasedLangEditor
               query={attributes.state.query}
               onTextLangQueryChange={(q) => {
-                // setQueryTextBased(q);
-                // prevQuery.current = q;
+                setQuery(q);
+                prevQuery.current = q;
               }}
               expandCodeEditor={(status: boolean) => {}}
               isCodeEditorExpanded
-              // detectTimestamp={Boolean(dataView?.timeFieldName)}
+              detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
               // errors={errors}
               hideMinimizeButton
               editorIsInline
               hideRunQueryText
-              // disableSubmitAction={isEqual(queryTextBased, prevQuery.current)}
+              disableSubmitAction={isEqual(query, prevQuery.current)}
               onTextLangQuerySubmit={(q) => {
                 if (q) {
                   runQuery(q);

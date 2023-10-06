@@ -37,10 +37,13 @@ export const getSuggestions = async (
     //       })
     //     : dataView;
 
-    // pass dataViews from embeddable
+    // pass dataViews from attributes (otherwise we will create adhoc dataviews all the time)
     const dataView = await deps.dataViews.create({
       title: indexPattern,
     });
+    if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+      dataView.timeFieldName = '@timestamp';
+    }
     // fetch only columns for ES|QL for performance with limit 0
     const performantQuery = { ...query };
     if ('esql' in performantQuery && performantQuery.esql) {
