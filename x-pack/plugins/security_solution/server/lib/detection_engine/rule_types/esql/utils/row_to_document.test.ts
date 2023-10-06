@@ -19,7 +19,6 @@ describe('rowToDocument', () => {
     const row = ['abcd', null, '8.8.1', 'packetbeat'];
     expect(rowToDocument(columns, row)).toEqual({
       _id: 'abcd',
-      'agent.name': null,
       'agent.version': '8.8.1',
       'agent.type': 'packetbeat',
     });

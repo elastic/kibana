@@ -13,6 +13,6 @@ export function useGetFilteredRuleTypes() {
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
   return useMemo(() => {
-    return [...observabilityRuleTypeRegistry.list(), ES_QUERY_ID];
+    return [ES_QUERY_ID, ...observabilityRuleTypeRegistry.list()];
   }, [observabilityRuleTypeRegistry]);
 }

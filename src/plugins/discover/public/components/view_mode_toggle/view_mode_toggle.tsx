@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiTabs, useEuiPaddingSize, useEuiTheme } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
@@ -25,8 +25,7 @@ export const DocumentViewModeToggle = ({
   const { uiSettings } = useDiscoverServices();
 
   const tabsCss = css`
-    padding: 0 ${useEuiPaddingSize('s')};
-    border-bottom: ${viewMode === VIEW_MODE.AGGREGATED_LEVEL ? euiTheme.border.thin : 'none'};
+    padding: 0 ${euiTheme.size.s};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -36,7 +35,7 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
+    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}

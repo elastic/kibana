@@ -8,7 +8,8 @@
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { enumFromString } from '../../../../utils/enum_from_string';
 import { assertUnreachable } from '../../../../utility_types';
-import { RuleExecutionStatus } from './execution_status';
+import type { RuleExecutionStatus } from './execution_status.gen';
+import { RuleExecutionStatusEnum } from './execution_status.gen';
 
 export enum LogLevel {
   'trace' = 'trace',
@@ -67,13 +68,13 @@ export const logLevelFromString = enumFromString(LogLevel);
 
 export const logLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLevel => {
   switch (status) {
-    case RuleExecutionStatus['going to run']:
-    case RuleExecutionStatus.running:
-    case RuleExecutionStatus.succeeded:
+    case RuleExecutionStatusEnum['going to run']:
+    case RuleExecutionStatusEnum.running:
+    case RuleExecutionStatusEnum.succeeded:
       return LogLevel.info;
-    case RuleExecutionStatus['partial failure']:
+    case RuleExecutionStatusEnum['partial failure']:
       return LogLevel.warn;
-    case RuleExecutionStatus.failed:
+    case RuleExecutionStatusEnum.failed:
       return LogLevel.error;
     default:
       assertUnreachable(status);

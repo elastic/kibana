@@ -444,6 +444,35 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             retry: false,
           });
         });
+
+        it('should return an error when error happens', async () => {
+          const DEFAULT_BODY = {
+            prompt: `Hello world!`,
+            max_tokens_to_sample: 300,
+            stop_sequences: ['\n\nHuman:'],
+          };
+          const { body } = await supertest
+            .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                subAction: 'test',
+                subActionParams: {
+                  body: JSON.stringify(DEFAULT_BODY),
+                },
+              },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            status: 'error',
+            connector_id: bedrockActionId,
+            message: 'an error occurred while running the action',
+            retry: true,
+            service_message:
+              'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
+          });
+        });
       });
     });
   });
