@@ -29,15 +29,23 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     return (await wrapper.getSize()).height;
   };
 
-  const getKibanaUrl = (pathname?: string, search?: string) =>
-    url.format({
+  const getKibanaUrl = (pathname?: string, search?: string) => {
+    console.log('PATHNAME', pathname);
+    return url.format({
       protocol: 'http:',
       hostname: process.env.TEST_KIBANA_HOST || 'localhost',
       port: process.env.TEST_KIBANA_PORT || '5620',
       pathname,
       search,
     });
+  };
 
+  const waitForUrlToBeWithTimeout = async (pathname?: string, search?: string, time?: number) => {
+    const expectedUrl = getKibanaUrl(pathname, search);
+    return await retry.waitForWithTimeout('navigates to app root', time ?? 3000, async () => {
+      return (await browser.getCurrentUrl()) === expectedUrl;
+    });
+  };
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
@@ -49,8 +57,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
-  // Failing: See https://github.com/elastic/kibana/issues/166677
-  describe.skip('ui applications', function describeIndexTests() {
+  describe('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
@@ -93,8 +100,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('navigates to app root when navlink is clicked', async () => {
       await appsMenu.clickLink('Foo');
-      await waitForUrlToBe('/app/foo/home');
-      // await loadingScreenNotShown();
+
+      await waitForUrlToBeWithTimeout('/app/foo/home'); // fix https://github.com/elastic/kibana/issues/166677 timeout failure
       await testSubjects.existOrFail('fooAppHome');
     });
 
