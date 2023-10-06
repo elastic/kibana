@@ -222,27 +222,7 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "colorMapping": Object {
-                "assignmentMode": "auto",
-                "assignments": Array [],
-                "colorMode": Object {
-                  "type": "categorical",
-                },
-                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
-                "specialAssignments": Array [
-                  Object {
-                    "color": Object {
-                      "colorIndex": 1,
-                      "paletteId": "neutral",
-                      "type": "categorical",
-                    },
-                    "rule": Object {
-                      "type": "other",
-                    },
-                    "touched": false,
-                  },
-                ],
-              },
+              "colorMapping": undefined,
               "layerId": "l1",
               "layerType": "data",
               "palette": undefined,
