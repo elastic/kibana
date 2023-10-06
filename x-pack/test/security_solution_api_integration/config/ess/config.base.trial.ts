@@ -7,7 +7,6 @@
 
 import { createTestConfig } from './config.base';
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig({
   license: 'trial',
   ssl: true,
