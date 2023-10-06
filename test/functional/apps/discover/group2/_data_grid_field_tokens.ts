@@ -43,7 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let firstFieldIcons: string[] = [];
 
     await retryOnStale(async () => {
-      const fieldIcons = await element.findAllByCssSelector(`${elementSelector} .kbnFieldIcon svg`);
+      const element = await testSubjects.find(elementSelector);
+      const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
 
       firstFieldIcons = await Promise.all(
         fieldIcons.map((fieldIcon) => fieldIcon.getAttribute('aria-label')).slice(0, 10)
