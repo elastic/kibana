@@ -27,14 +27,16 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
-import { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quick_prompt_settings';
-import { SystemPromptSettings } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_settings';
-import { KnowledgeBaseSettings } from '../../knowledge_base/knowledge_base_settings';
-import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 import { TEST_IDS } from '../constants';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
+import {
+  AnonymizationSettings,
+  ConversationSettings,
+  EvaluationSettings,
+  KnowledgeBaseSettings,
+  QuickPromptSettings,
+  SystemPromptSettings,
+} from './settings';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -172,6 +174,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 label={i18n.CONVERSATIONS_MENU_ITEM}
                 isSelected={selectedSettingsTab === CONVERSATIONS_TAB}
                 onClick={() => setSelectedSettingsTab(CONVERSATIONS_TAB)}
+                data-test-subj={`${CONVERSATIONS_TAB}-button`}
               >
                 <>
                   <EuiIcon
@@ -334,11 +337,17 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     padding: 4px;
                   `}
                 >
-                  <EuiButtonEmpty size="s" onClick={onClose}>
+                  <EuiButtonEmpty size="s" data-test-subj="cancel-button" onClick={onClose}>
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
 
-                  <EuiButton size="s" type="submit" onClick={handleSave} fill>
+                  <EuiButton
+                    size="s"
+                    type="submit"
+                    data-test-subj="save-button"
+                    onClick={handleSave}
+                    fill
+                  >
                     {i18n.SAVE}
                   </EuiButton>
                 </EuiModalFooter>

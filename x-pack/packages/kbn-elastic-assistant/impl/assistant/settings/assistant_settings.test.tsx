@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { alertConvo, welcomeConvo } from '../../mock/conversation';
-import { Prompt } from '../../..';
-import { mockSystemPrompt } from '../../mock/system_prompt';
+import { alertConvo, customConvo, welcomeConvo } from '../../mock/conversation';
+import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render } from '@testing-library/react';
 import {
-  ANONYMIZATION_TAB,
   AssistantSettings,
+  ANONYMIZATION_TAB,
+  CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
   QUICK_PROMPTS_TAB,
@@ -25,37 +25,11 @@ const mockConversations = {
   [alertConvo.id]: alertConvo,
   [welcomeConvo.id]: welcomeConvo,
 };
-
-const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
-const mockQuickPrompts = MOCK_QUICK_PROMPTS;
-
-const initialDefaultAllow = ['allow1'];
-const initialDefaultAllowReplacement = ['replacement1'];
-
-const setAllQuickPromptsMock = jest.fn();
-const setAllSystemPromptsMock = jest.fn();
-const setConversationsMock = jest.fn();
-const setDefaultAllowMock = jest.fn();
-const setDefaultAllowReplacementMock = jest.fn();
-const setKnowledgeBaseMock = jest.fn();
+const saveSettings = jest.fn();
 
 const mockValues = {
   conversationSettings: mockConversations,
-  systemPromptSettings: mockSystemPrompts,
-  quickPromptSettings: mockQuickPrompts,
-  defaultAllow: initialDefaultAllow,
-  defaultAllowReplacement: initialDefaultAllowReplacement,
-  knowledgeBase: {
-    assistantLangChain: true,
-  },
-  saveSettings: jest.fn(),
-  resetSettings: jest.fn(),
-  setUpdatedAllQuickPrompts: setAllQuickPromptsMock,
-  setUpdatedConversations: setConversationsMock,
-  setUpdatedAllSystemPrompts: setAllSystemPromptsMock,
-  setUpdatedDefaultAllow: setDefaultAllowMock,
-  setUpdatedDefaultAllowReplacement: setDefaultAllowReplacementMock,
-  setUpdatedKnowledgeBase: setKnowledgeBaseMock,
+  saveSettings,
 };
 
 const setSelectedSettingsTab = jest.fn();
@@ -78,12 +52,16 @@ const testProps = {
   onSave,
   setSelectedConversationId,
 };
+jest.mock('../../assistant_context');
 
-jest.mock('../../assistant_context', () => {
-  const original = jest.requireActual('../../assistant_context');
+jest.mock('./settings', () => {
   return {
-    ...original,
-    useAssistantContext: jest.fn().mockImplementation(() => mockContext),
+    AnonymizationSettings: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
+    ConversationSettings: () => <span data-test-subj={`CONVERSATION_TAB-tab`} />,
+    EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
+    KnowledgeBaseSettings: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
+    QuickPromptSettings: () => <span data-test-subj="QUICK_PROMPTS_TAB-tab" />,
+    SystemPromptSettings: () => <span data-test-subj="SYSTEM_PROMPTS_TAB-tab" />,
   };
 });
 
@@ -98,17 +76,58 @@ jest.mock('./use_settings_updater/use_settings_updater', () => {
 describe('AssistantSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAssistantContext as jest.Mock).mockImplementation(() => mockContext);
   });
 
-  it.each([
+  it('saves changes', () => {
+    const { getByTestId } = render(<AssistantSettings {...testProps} />);
+    // fireEvent.click(getByTestId(`${EVALUATION_TAB}-button`));
+    fireEvent.click(getByTestId('save-button'));
+    expect(onSave).toHaveBeenCalled();
+    expect(saveSettings).toHaveBeenCalled();
+  });
+
+  it('saves changes and updates selected conversation when selected conversation has been deleted', () => {
+    const { getByTestId } = render(
+      <AssistantSettings {...testProps} selectedConversation={customConvo} />
+    );
+    // fireEvent.click(getByTestId(`${EVALUATION_TAB}-button`));
+    fireEvent.click(getByTestId('save-button'));
+    expect(onSave).toHaveBeenCalled();
+    expect(setSelectedConversationId).toHaveBeenCalled();
+    expect(saveSettings).toHaveBeenCalled();
+  });
+
+  it('on close is called when settings modal closes', () => {
+    const { getByTestId } = render(<AssistantSettings {...testProps} />);
+    fireEvent.click(getByTestId('cancel-button'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  describe.each([
+    ANONYMIZATION_TAB,
+    CONVERSATIONS_TAB,
     EVALUATION_TAB,
     KNOWLEDGE_BASE_TAB,
-    ANONYMIZATION_TAB,
-    SYSTEM_PROMPTS_TAB,
     QUICK_PROMPTS_TAB,
-  ])('Opens %s tab on button click', (tab) => {
-    const { getByTestId } = render(<AssistantSettings {...testProps} />);
-    fireEvent.click(getByTestId(`${tab}-button`));
-    expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
+    SYSTEM_PROMPTS_TAB,
+  ])('%s', (tab) => {
+    it('Opens the tab on button click', () => {
+      (useAssistantContext as jest.Mock).mockImplementation(() => ({
+        ...mockContext,
+        selectedSettingsTab: tab === CONVERSATIONS_TAB ? ANONYMIZATION_TAB : CONVERSATIONS_TAB,
+      }));
+      const { getByTestId } = render(<AssistantSettings {...testProps} />);
+      fireEvent.click(getByTestId(`${tab}-button`));
+      expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
+    });
+    it('renders with the correct tab open', () => {
+      (useAssistantContext as jest.Mock).mockImplementation(() => ({
+        ...mockContext,
+        selectedSettingsTab: tab,
+      }));
+      const { getByTestId } = render(<AssistantSettings {...testProps} />);
+      expect(getByTestId(`${tab}-tab`)).toBeInTheDocument();
+    });
   });
 });
