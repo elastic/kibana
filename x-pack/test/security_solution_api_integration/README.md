@@ -1,7 +1,6 @@
 # security_solution_api_integration
 
-This directory
- serves as a centralized location to place the security solution tests that run in Serverless and ESS environments.
+This directory serves as a centralized location to place the security solution tests that run in Serverless and ESS environments.
 
 ## Subdirectories
 
