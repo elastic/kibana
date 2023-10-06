@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167405
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
