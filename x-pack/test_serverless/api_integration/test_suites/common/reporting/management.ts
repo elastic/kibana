@@ -36,7 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Deletion', () => {
       const DELETE_REPORT_ID = 'krazcyw4156m0763b503j7f9';
 
-      it(`user can delete a report they've created`, async () => {
+      // archived data uses the test user but functionality for specific users is not possible yet for svl
+      xit(`user can delete a report they've created`, async () => {
         const response = await supertest
           .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
           .auth(TEST_USERNAME, TEST_USER_PASSWORD)
