@@ -10,6 +10,7 @@
 // that also the jest unit tests use mocks that are not outdated.
 import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
 import { finalSignificantTermGroups as artificialLogsSignificantTermGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups';
+import { finalSignificantTermGroupsTextfield as artificialLogsSignificantTermGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups_textfield';
 
 import type { TestData } from './types';
 
@@ -102,6 +103,53 @@ export const logRateAnalysisTestData: TestData[] = [
       errorFilter: 'add_error',
       significantTerms: artificialLogSignificantTerms,
       groups: artificialLogsSignificantTermGroups,
+      histogramLength: 20,
+    },
+  },
+  {
+    testName: 'artificial_logs_with_spike_textfield',
+    dataGenerator: 'artificial_logs_with_spike_textfield',
+    requestBody: {
+      start: 1668760018793,
+      end: 1668931954793,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'artificial_logs_with_spike_textfield',
+      baselineMin: 1668769200000,
+      baselineMax: 1668837600000,
+      deviationMin: 1668855600000,
+      deviationMax: 1668924000000,
+      grouping: true,
+    },
+    expected: {
+      chunksLength: 30,
+      chunksLengthGroupOnly: 11,
+      actionsLength: 29,
+      actionsLengthGroupOnly: 10,
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      significantTermFilter: 'add_significant_terms',
+      groupFilter: 'add_significant_terms_group',
+      groupHistogramFilter: 'add_significant_terms_group_histogram',
+      histogramFilter: 'add_significant_terms_histogram',
+      errorFilter: 'add_error',
+      significantTerms: [
+        ...artificialLogSignificantTerms,
+        {
+          bg_count: 0,
+          doc_count: 1266,
+          fieldName: 'message',
+          fieldValue: 'an unexpected error occured',
+          key: 'an unexpected error occured',
+          normalizedScore: 0,
+          pValue: 0.000001,
+          score: -13.815510557964274,
+          total_bg_count: 1975,
+          total_doc_count: 4669,
+          type: 'log_pattern',
+        },
+      ],
+      groups: artificialLogsSignificantTermGroupsTextfield,
       histogramLength: 20,
     },
   },

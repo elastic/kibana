@@ -760,7 +760,11 @@ export const defineLogRateAnalysisRoute = (
               }
 
               // histograms for text field patterns
-              if (overallTimeSeries !== undefined && significantCategories.length > 0) {
+              if (
+                overallTimeSeries !== undefined &&
+                significantCategories.length > 0 &&
+                !request.body.overrides?.regroupOnly
+              ) {
                 const significantCategoriesHistogramQueries = significantCategories.map((d) => {
                   const histogramQuery = getHistogramQuery(request.body);
                   const categoryQuery = getCategoryQuery(d.fieldName, [
