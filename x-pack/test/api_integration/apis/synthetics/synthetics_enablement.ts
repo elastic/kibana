@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
             isValidApiKey: true,
           });
           const validApiKeys = await getApiKeys();
-          expect(validApiKeys.length).equal(1);
+          expect(validApiKeys.length).eql(1);
           expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
         } finally {
           await security.user.delete(username);
