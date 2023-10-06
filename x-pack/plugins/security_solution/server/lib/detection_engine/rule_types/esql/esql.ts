@@ -100,7 +100,7 @@ export const esqlExecutor = async ({
       });
 
       const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
-      result.searchAfterTimes = [esqlSearchDuration];
+      result.searchAfterTimes.push(esqlSearchDuration);
 
       ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
 
