@@ -86,6 +86,25 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # Serverless tests only run on main
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/common_configs/config.group1.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -402,23 +421,6 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
-  - x-pack/test_serverless/api_integration/test_suites/search/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/search/common_configs/config.group1.ts
-  - x-pack/test_serverless/api_integration/test_suites/security/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
-  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts
