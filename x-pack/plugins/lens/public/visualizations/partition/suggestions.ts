@@ -18,12 +18,12 @@ import {
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  getColorMappingDefaults,
 } from '../../../common/constants';
 import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { layerTypes } from '../..';
+import { getColorMappingDefaults } from '../../utils';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');

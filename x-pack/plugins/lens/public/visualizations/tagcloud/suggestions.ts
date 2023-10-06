@@ -7,10 +7,10 @@
 
 import { partition } from 'lodash';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import { getColorMappingDefaults } from '../../../common/constants';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { getColorMappingDefaults } from '../../utils';
 
 export function getSuggestions({
   table,

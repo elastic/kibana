@@ -8,7 +8,6 @@
 import rison from '@kbn/rison';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { Filter } from '@kbn/es-query';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
@@ -90,10 +89,3 @@ export function getFullPath(id?: string) {
 }
 
 export const COLOR_MAPPING_OFF_BY_DEFAULT = true;
-
-export const getColorMappingDefaults = () => {
-  if (COLOR_MAPPING_OFF_BY_DEFAULT) {
-    return undefined;
-  }
-  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
-};

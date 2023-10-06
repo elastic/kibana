@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { getColorMappingDefaults } from '../../../common/constants';
 import type {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -17,6 +16,7 @@ import type {
   TableSuggestion,
   TableChangeType,
 } from '../../types';
+import { getColorMappingDefaults } from '../../utils';
 import {
   State,
   XYState,

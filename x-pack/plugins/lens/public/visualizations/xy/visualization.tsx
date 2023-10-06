@@ -27,7 +27,6 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
-import { getColorMappingDefaults } from '../../../common/constants';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -35,6 +34,7 @@ import {
   isOperationFromTheSameGroup,
   nonNullable,
   renewIDs,
+  getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';

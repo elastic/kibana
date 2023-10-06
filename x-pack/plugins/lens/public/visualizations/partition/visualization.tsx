@@ -43,7 +43,6 @@ import {
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  getColorMappingDefaults,
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
@@ -52,7 +51,7 @@ import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
-import { nonNullable } from '../../utils';
+import { nonNullable, getColorMappingDefaults } from '../../utils';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
