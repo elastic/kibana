@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ActionType } from '@kbn/actions-plugin/common';
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form';
+import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
   ActionConnector,
   ActionTypeRegistryContract,
