@@ -150,12 +150,9 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Extract saved object references for this rule
-  const {
-    references,
-    params: updatedParams,
-    actions,
-  } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, data.actions, validatedAlertTypeParams)
+  const { references, params: updatedParams } = await withSpan(
+    { name: 'extractReferences', type: 'rules' },
+    () => extractReferences(context, ruleType, data.actions, validatedAlertTypeParams)
   );
 
   const createTime = Date.now();
@@ -165,8 +162,10 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   // Convert domain rule object to ES rule attributes
-  const ruleAttributes = transformRuleDomainToRuleAttributes(
-    {
+  const ruleAttributes = await transformRuleDomainToRuleAttributes({
+    actions: data.actions,
+    context,
+    rule: {
       ...data,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
@@ -186,12 +185,11 @@ export async function createRule<Params extends RuleParams = never>(
       revision: 0,
       running: false,
     },
-    {
+    params: {
       legacyId,
-      actionsWithRefs: actions,
       paramsWithRefs: updatedParams,
-    }
-  );
+    },
+  });
 
   const createdRuleSavedObject: SavedObject<RuleAttributes> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },

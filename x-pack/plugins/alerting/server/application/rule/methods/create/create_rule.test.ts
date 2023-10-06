@@ -88,6 +88,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  connectorAdapterRegistry,
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -1029,10 +1031,10 @@ describe('create()', () => {
         isSystemAction: false,
       },
     ]);
+
     actionsClient.isPreconfigured.mockReset();
-    actionsClient.isPreconfigured.mockReturnValueOnce(false);
-    actionsClient.isPreconfigured.mockReturnValueOnce(true);
-    actionsClient.isPreconfigured.mockReturnValueOnce(false);
+    actionsClient.isPreconfigured.mockImplementation((id) => id === 'preconfigured');
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1222,7 +1224,7 @@ describe('create()', () => {
         ],
       }
     );
-    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(6);
   });
 
   test('creates a disabled alert', async () => {
@@ -1333,6 +1335,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1341,6 +1344,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1523,6 +1527,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -2352,6 +2358,8 @@ describe('create()', () => {
           name: 'Default',
         },
       ],
+      category: 'test',
+      validLegacyConsumers: [],
       defaultActionGroupId: 'default',
       recoveryActionGroup: RecoveredActionGroup,
       validate: {
@@ -2837,6 +2845,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2910,6 +2920,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2948,6 +2960,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3044,6 +3058,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3094,6 +3110,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3158,6 +3176,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3241,6 +3261,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3449,6 +3471,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3507,6 +3531,8 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

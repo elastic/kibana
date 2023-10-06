@@ -26,7 +26,7 @@ export const transformRawActionsToDomainActions = ({
   references,
   omitGeneratedValues = true,
   isSystemAction,
-}: Args) => {
+}: Args): RuleDomain['actions'] => {
   const actionsWithInjectedRefs = actions
     ? injectReferencesIntoActions(ruleId, actions, references || [])
     : [];

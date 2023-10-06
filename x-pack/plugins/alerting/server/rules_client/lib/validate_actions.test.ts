@@ -7,8 +7,14 @@
 
 import { validateActions, ValidateActionsData } from './validate_actions';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { AlertsFilter, RecoveredActionGroup, RuleNotifyWhen } from '../../../common';
-import { RulesClientContext } from '..';
+import {
+  AlertsFilter,
+  RecoveredActionGroup,
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleNotifyWhen,
+} from '../../../common';
+import { NormalizedAlertAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();
@@ -22,7 +28,6 @@ describe('validateActions', () => {
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
-    category: 'test',
     producer: 'alerts',
     cancelAlertsOnRuleTimeout: true,
     ruleTaskTimeout: '5m',
@@ -33,28 +38,35 @@ describe('validateActions', () => {
       context: 'context',
       mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
     },
-    validLegacyConsumers: [],
+  };
+
+  const defaultAction: NormalizedAlertAction = {
+    uuid: '111',
+    group: 'default',
+    id: '1',
+    params: {},
+    frequency: {
+      summary: false,
+      notifyWhen: RuleNotifyWhen.ACTIVE,
+      throttle: null,
+    },
+    alertsFilter: {
+      query: { kql: 'test:1', filters: [] },
+      timeframe: { days: [1], hours: { start: '10:00', end: '17:00' }, timezone: 'UTC' },
+    },
+    type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction: NormalizedAlertAction = {
+    uuid: '111',
+    id: '1',
+    params: {},
+    type: RuleActionTypes.SYSTEM,
   };
 
   const data = {
     schedule: { interval: '1m' },
-    actions: [
-      {
-        uuid: '111',
-        group: 'default',
-        id: '1',
-        params: {},
-        frequency: {
-          summary: false,
-          notifyWhen: RuleNotifyWhen.ACTIVE,
-          throttle: null,
-        },
-        alertsFilter: {
-          query: { kql: 'test:1', filters: [] },
-          timeframe: { days: [1], hours: { start: '10:00', end: '17:00' }, timezone: 'UTC' },
-        },
-      },
-    ],
+    actions: [defaultAction],
   } as unknown as ValidateActionsData;
 
   const context = {
@@ -91,6 +103,22 @@ describe('validateActions', () => {
     );
   });
 
+  it('should return error message if actions have duplicated uuid and there is a system action', async () => {
+    await expect(
+      validateActions(
+        context as unknown as RulesClientContext,
+        ruleType,
+        {
+          ...data,
+          actions: [defaultAction, systemAction],
+        },
+        false
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: Actions have duplicated UUIDs"'
+    );
+  });
+
   it('should return error message if any action have isMissingSecrets', async () => {
     getBulkMock.mockResolvedValue([{ isMissingSecrets: true, name: 'test name' }]);
     await expect(
@@ -105,7 +133,7 @@ describe('validateActions', () => {
       validateActions(
         context as unknown as RulesClientContext,
         ruleType,
-        { ...data, actions: [{ ...data.actions[0], group: 'invalid' }] },
+        { ...data, actions: [{ ...data.actions[0], group: 'invalid' } as RuleDefaultAction] },
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -144,7 +172,7 @@ describe('validateActions', () => {
       validateActions(
         context as unknown as RulesClientContext,
         ruleType,
-        { ...data, actions: [{ ...data.actions[0], frequency: undefined }] },
+        { ...data, actions: [{ ...data.actions[0], frequency: undefined } as RuleDefaultAction] },
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -163,7 +191,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1s' },
-            },
+            } as RuleDefaultAction,
           ],
         },
         false
@@ -184,7 +212,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               alertsFilter: {} as AlertsFilter,
-            },
+            } as RuleDefaultAction,
           ],
         },
         false
@@ -208,7 +236,7 @@ describe('validateActions', () => {
                 query: { kql: 'test:1', filters: [] },
                 timeframe: { days: [1], hours: { start: '30:00', end: '17:00' }, timezone: 'UTC' },
               },
-            },
+            } as NormalizedAlertAction,
           ],
         },
         false
@@ -255,6 +283,7 @@ describe('validateActions', () => {
       '"Failed to validate actions due to the following error: Action\'s alertsFilter timeframe has missing fields: days, hours or timezone: 111"'
     );
   });
+
   it('should return error message if any action has alertsFilter timeframe has invalid days', async () => {
     await expect(
       validateActions(
@@ -282,5 +311,19 @@ describe('validateActions', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Failed to validate actions due to the following error: Action\'s alertsFilter days has invalid values: (111:[0,8]) "'
     );
+  });
+
+  it('should not throw an error on system actions that do not contain properties like frequency or group', async () => {
+    const res = await validateActions(
+      context as unknown as RulesClientContext,
+      ruleType,
+      {
+        ...data,
+        actions: [systemAction],
+      },
+      false
+    );
+
+    expect(res).toBe(undefined);
   });
 });

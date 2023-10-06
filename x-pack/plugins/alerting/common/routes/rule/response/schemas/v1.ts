@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
@@ -72,7 +71,7 @@ const actionAlertsFilterSchema = schema.object({
 
 const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   connector_type_id: schema.string(),
   params: actionParamsSchema,
@@ -181,9 +180,48 @@ export const monitoringSchema = schema.object({
   }),
 });
 
+export const rRuleSchema = schema.object({
+  dtstart: schema.string(),
+  tzid: schema.string(),
+  freq: schema.maybe(
+    schema.oneOf([
+      schema.literal(0),
+      schema.literal(1),
+      schema.literal(2),
+      schema.literal(3),
+      schema.literal(4),
+      schema.literal(5),
+      schema.literal(6),
+    ])
+  ),
+  until: schema.maybe(schema.string()),
+  count: schema.maybe(schema.number()),
+  interval: schema.maybe(schema.number()),
+  wkst: schema.maybe(
+    schema.oneOf([
+      schema.literal('MO'),
+      schema.literal('TU'),
+      schema.literal('WE'),
+      schema.literal('TH'),
+      schema.literal('FR'),
+      schema.literal('SA'),
+      schema.literal('SU'),
+    ])
+  ),
+  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+  bymonth: schema.maybe(schema.arrayOf(schema.number())),
+  bysetpos: schema.maybe(schema.arrayOf(schema.number())),
+  bymonthday: schema.arrayOf(schema.number()),
+  byyearday: schema.arrayOf(schema.number()),
+  byweekno: schema.arrayOf(schema.number()),
+  byhour: schema.arrayOf(schema.number()),
+  byminute: schema.arrayOf(schema.number()),
+  bysecond: schema.arrayOf(schema.number()),
+});
+
 export const ruleSnoozeScheduleSchema = schema.object({
   duration: schema.number(),
-  rRule: rRuleResponseSchemaV1,
+  rRule: rRuleSchema,
   id: schema.maybe(schema.string()),
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });

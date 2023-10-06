@@ -5,34 +5,8 @@
  * 2.0.
  */
 
-import { RecoveredActionGroup } from '../../../../common';
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { RuleActionAttributes } from '../../../data/rule/types';
 import { transformRawActionsToDomainActions } from './transform_raw_actions_to_domain_actions';
-
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
-  id: 'test.rule-type',
-  name: 'My test rule',
-  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
-  defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic',
-  isExportable: true,
-  recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
-  producer: 'alerts',
-  cancelAlertsOnRuleTimeout: true,
-  ruleTaskTimeout: '5m',
-  autoRecoverAlerts: true,
-  doesSetRecoveryContext: true,
-  validate: {
-    params: { validate: (params) => params },
-  },
-  alerts: {
-    context: 'test',
-    mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    shouldWrite: true,
-  },
-};
 
 const defaultAction: RuleActionAttributes = {
   group: 'default',

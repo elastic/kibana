@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { DistributiveOmit } from '@elastic/eui';
 import { SavedObjectReference } from '@kbn/core/server';
-import { RawRule } from '../../types';
 import {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from '../common/constants';
 import { NormalizedAlertActionWithGeneratedValues, RulesClientContext } from '../types';
 
+type DenormalizedAction = DistributiveOmit<NormalizedAlertActionWithGeneratedValues, 'id'> & {
+  actionRef: string;
+  actionTypeId: string;
+};
+
 export async function denormalizeActions(
   context: RulesClientContext,
   alertActions: NormalizedAlertActionWithGeneratedValues[]
-): Promise<{ actions: RawRule['actions']; references: SavedObjectReference[] }> {
+): Promise<{ actions: DenormalizedAction[]; references: SavedObjectReference[] }> {
   const references: SavedObjectReference[] = [];
-  const actions: RawRule['actions'] = [];
+  const actions: DenormalizedAction[] = [];
+
   if (alertActions.length) {
     const actionsClient = await context.getActionsClient();
     const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
@@ -29,12 +35,15 @@ export async function denormalizeActions(
     });
 
     const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
+
     actionTypeIds.forEach((id) => {
       // Notify action type usage via "isActionTypeEnabled" function
       actionsClient.isActionTypeEnabled(id, { notifyUsage: true });
     });
+
     alertActions.forEach(({ id, ...alertAction }, i) => {
       const actionResultValue = actionResults.find((action) => action.id === id);
+
       if (actionResultValue) {
         if (actionsClient.isPreconfigured(id)) {
           actions.push({
@@ -50,11 +59,13 @@ export async function denormalizeActions(
           });
         } else {
           const actionRef = `action_${i}`;
+
           references.push({
             id,
             name: actionRef,
             type: 'action',
           });
+
           actions.push({
             ...alertAction,
             actionRef,
