@@ -18,6 +18,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Configure Case', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
@@ -34,6 +36,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      // Error: Expected the radio group value to equal "close-by-pushing" (got "close-by-user")
+      this.tags(['failsOnMKI']);
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
