@@ -11,5 +11,6 @@ import { PluginFunctionalProviderContext } from '../../../../test/plugin_functio
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('reporting examples', function () {
     loadTestFile(require.resolve('./capture_test'));
+    loadTestFile(require.resolve('./error_codes_test'));
   });
 }
