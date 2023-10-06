@@ -4,80 +4,140 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { Filter, Query } from '@kbn/es-query';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../../common/types';
-import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useLatestFindings } from './use_latest_findings';
-import type { FindingsGroupByNoneQuery } from './use_latest_findings';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { getFindingsPageSizeInfo, getFilters } from '../utils/utils';
-import { LimitedResultsBar } from '../layout/findings_layout';
-import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
-import { usePageSlice } from '../../../common/hooks/use_page_slice';
+import { getFilters } from '../utils/utils';
 import { ErrorCallout } from '../layout/error_callout';
-import { useLimitProperties } from '../../../common/utils/get_limit_properties';
-import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
+import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
-import { getPaginationTableParams } from '../../../common/hooks/use_cloud_posture_table/utils';
+import {
+  CloudSecurityDataTable,
+  CloudSecurityDefaultColumn,
+} from '../../../components/cloud_security_data_table';
+import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 
-export const getDefaultQuery = ({
+const getDefaultQuery = ({
   query,
   filters,
-}: FindingsBaseURLQuery): FindingsBaseURLQuery &
-  FindingsGroupByNoneQuery & { findingIndex: number } => ({
+}: {
+  query: Query;
+  filters: Filter[];
+}): FindingsBaseURLQuery & {
+  sort: string[][];
+} => ({
   query,
   filters,
-  sort: { field: '@timestamp', direction: 'desc' },
-  pageIndex: 0,
-  findingIndex: -1,
+  sort: [['@timestamp', 'desc']],
+});
+
+const defaultColumns: CloudSecurityDefaultColumn[] = [
+  { id: 'result.evaluation', width: 80 },
+  { id: 'resource.id' },
+  { id: 'resource.name' },
+  { id: 'resource.sub_type' },
+  { id: 'rule.benchmark.rule_number' },
+  { id: 'rule.name' },
+  { id: 'rule.section' },
+  { id: '@timestamp' },
+];
+
+/**
+ * Type Guard for checking if the given source is a CspFinding
+ */
+const isCspFinding = (source: Record<string, any> | undefined): source is CspFinding => {
+  return source?.result?.evaluation !== undefined;
+};
+
+/**
+ * This Wrapper component renders the children if the given row is a CspFinding
+ * it uses React's Render Props pattern
+ */
+const CspFindingRenderer = ({
+  row,
+  children,
+}: {
+  row: DataTableRecord;
+  children: ({ finding }: { finding: CspFinding }) => JSX.Element;
+}) => {
+  const source = row.raw._source;
+  const finding = isCspFinding(source) && (source as CspFinding);
+  if (!finding) return <></>;
+  return children({ finding });
+};
+
+/**
+ * Flyout component for the latest findings table
+ */
+const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+  return (
+    <CspFindingRenderer row={row}>
+      {({ finding }) => <FindingsRuleFlyout findings={finding} onClose={onCloseFlyout} />}
+    </CspFindingRenderer>
+  );
+};
+
+const columnsLocalStorageKey = 'cloudPosture:latestFindings:columns';
+
+const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+  defaultMessage: 'Findings',
+});
+
+const customCellRenderer = (rows: DataTableRecord[]) => ({
+  'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <CspEvaluationBadge type={finding.result.evaluation} />}
+    </CspFindingRenderer>
+  ),
+  '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <TimestampTableCell timestamp={finding['@timestamp']} />}
+    </CspFindingRenderer>
+  ),
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const {
-    pageIndex,
-    query,
-    sort,
-    queryError,
-    pageSize,
-    setTableOptions,
-    urlQuery,
-    setUrlQuery,
-    filters,
-    onResetFilters,
-  } = useCloudPostureTable({
+  const cloudPostureTable = useCloudPostureTable({
     dataView,
+    paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+    columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
   });
 
-  /**
-   * Page ES query result
-   */
-  const findingsGroupByNone = useLatestFindings({
+  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureTable;
+
+  const {
+    data,
+    error: fetchError,
+    isFetching,
+    fetchNextPage,
+  } = useLatestFindings({
     query,
     sort,
     enabled: !queryError,
   });
 
-  const slicedPage = usePageSlice(findingsGroupByNone.data?.page, pageIndex, pageSize);
+  const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);
 
-  const error = findingsGroupByNone.error || queryError;
+  const error = fetchError || queryError;
 
-  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
-    total: findingsGroupByNone.data?.total,
-    pageIndex,
-    pageSize,
-  });
+  const passed = data?.pages[0].count.passed || 0;
+  const failed = data?.pages[0].count.failed || 0;
+  const total = data?.pages[0].total || 0;
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
-      pageIndex: 0,
       filters: getFilters({
         filters,
         dataView,
@@ -88,117 +148,36 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     });
   };
 
-  const flyoutFindingIndex = urlQuery?.findingIndex;
-
-  const pagination = getPaginationTableParams({
-    pageSize,
-    pageIndex,
-    totalItemCount: limitedTotalItemCount,
-  });
-
-  const onOpenFlyout = useCallback(
-    (flyoutFinding: CspFinding) => {
-      setUrlQuery({
-        findingIndex: slicedPage.findIndex(
-          (finding) =>
-            finding.resource.id === flyoutFinding?.resource.id &&
-            finding.rule.id === flyoutFinding?.rule.id
-        ),
-      });
-    },
-    [slicedPage, setUrlQuery]
-  );
-
-  const onCloseFlyout = () =>
-    setUrlQuery({
-      findingIndex: -1,
-    });
-
-  const onPaginateFlyout = useCallback(
-    (nextFindingIndex: number) => {
-      // the index of the finding in the current page
-      const newFindingIndex = nextFindingIndex % pageSize;
-
-      // if the finding is not in the current page, we need to change the page
-      const flyoutPageIndex = Math.floor(nextFindingIndex / pageSize);
-
-      setUrlQuery({
-        pageIndex: flyoutPageIndex,
-        findingIndex: newFindingIndex,
-      });
-    },
-    [pageSize, setUrlQuery]
-  );
-
   return (
-    <div data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
-      <FindingsSearchBar
-        dataView={dataView!}
-        setQuery={(newQuery) => {
-          setUrlQuery({ ...newQuery, pageIndex: 0 });
-        }}
-        loading={findingsGroupByNone.isFetching}
-      />
+    <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
+      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
-      {!error && (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false} style={{ width: 188 }}>
-            <FindingsGroupBySelector type="default" />
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
-          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
+          {total > 0 && (
             <FindingsDistributionBar
-              {...{
-                distributionOnClick: handleDistributionClick,
-                type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
-                  defaultMessage: 'Findings',
-                }),
-                total: findingsGroupByNone.data.total,
-                passed: findingsGroupByNone.data.count.passed,
-                failed: findingsGroupByNone.data.count.failed,
-                ...getFindingsPageSizeInfo({
-                  pageIndex,
-                  pageSize,
-                  currentPageSize: slicedPage.length,
-                }),
-              }}
+              distributionOnClick={handleDistributionClick}
+              passed={passed}
+              failed={failed}
             />
           )}
-          <EuiSpacer />
-          <FindingsTable
-            onResetFilters={onResetFilters}
-            onCloseFlyout={onCloseFlyout}
-            onPaginateFlyout={onPaginateFlyout}
-            onOpenFlyout={onOpenFlyout}
-            flyoutFindingIndex={flyoutFindingIndex}
-            loading={findingsGroupByNone.isFetching}
-            items={slicedPage}
-            pagination={pagination}
-            sorting={{
-              sort: { field: sort.field, direction: sort.direction },
-            }}
-            setTableOptions={setTableOptions}
-            onAddFilter={(field, value, negate) =>
-              setUrlQuery({
-                pageIndex: 0,
-                filters: getFilters({
-                  filters,
-                  dataView,
-                  field,
-                  value,
-                  negate,
-                }),
-              })
-            }
+          <EuiSpacer size="xs" />
+          <CloudSecurityDataTable
+            data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
+            dataView={dataView}
+            isLoading={isFetching}
+            defaultColumns={defaultColumns}
+            rows={rows}
+            total={total}
+            flyoutComponent={flyoutComponent}
+            cloudPostureTable={cloudPostureTable}
+            loadMore={fetchNextPage}
+            title={title}
+            customCellRenderer={customCellRenderer}
           />
         </>
       )}
-      {isLastLimitedPage && <LimitedResultsBar />}
-    </div>
+    </EuiFlexItem>
   );
 };
