@@ -42,7 +42,6 @@ import { ApiKeyBadge, ApiKeyStatus, TimeToolTip, UsernameWithIcon } from './api_
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import { FormField } from '../../../components/form_field';
-import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormRow } from '../../../components/form_row';
 import { useCurrentUser } from '../../../components/use_current_user';
 import { useHtmlId } from '../../../components/use_html_id';
@@ -70,7 +69,7 @@ export interface ApiKeyFormValues {
 
 interface CommonApiKeyFlyoutProps {
   initialValues?: ApiKeyFormValues;
-  onCancel: FormFlyoutProps['onCancel'];
+  onCancel(): void;
   canManageCrossClusterApiKeys?: boolean;
   readOnly?: boolean;
 }
