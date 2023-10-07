@@ -10,11 +10,12 @@ import { getNewRule } from '../../../objects/rule';
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
   openEditException,
+  visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
@@ -46,7 +47,6 @@ import {
   FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules, reload } from '../../../tasks/common';
 import {
   createExceptionList,
@@ -94,7 +94,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
             },
           ],
         })
-      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')))
+      ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }))
     );
     cy.get(RULE_STATUS).should('have.text', '—');
   });
@@ -125,7 +125,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
     cy.get(CONFIRM_BTN).should('be.disabled');
 
     // add value again and button should be enabled again
-    addExceptionEntryFieldMatchAnyValue('test', 0);
+    addExceptionEntryFieldMatchAnyValue(['test'], 0);
     cy.get(CONFIRM_BTN).should('be.enabled');
   });
 

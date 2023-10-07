@@ -8,8 +8,11 @@
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { openExceptionFlyoutFromEmptyViewerPrompt } from '../../../tasks/rule_details';
+import { login } from '../../../tasks/login';
+import {
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
+} from '../../../tasks/rule_details';
 import {
   addExceptionFlyoutItemName,
   addTwoAndedConditions,
@@ -22,7 +25,6 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
 
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -44,7 +46,7 @@ describe(
         index: ['exceptions*'],
         exceptions_list: [],
         rule_id: '2',
-      }).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+      }).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
 
     after(() => {

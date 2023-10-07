@@ -11,7 +11,8 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../authorizatio
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { recoverRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -43,8 +44,6 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     references = alert.references;
   }
 
-  await recoverRuleAlerts(context, id, attributes);
-
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -62,6 +61,8 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     );
     throw error;
   }
+
+  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
 
   context.auditLogger?.log(
     ruleAuditEvent({
@@ -102,6 +103,9 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
           : {}),
       }
     );
+    const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
+      attributes.alertTypeId
+    );
 
     // If the scheduledTaskId does not match the rule id, we should
     // remove the task, otherwise mark the task as disabled
@@ -109,7 +113,10 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       if (attributes.scheduledTaskId !== id) {
         await context.taskManager.removeIfExists(attributes.scheduledTaskId);
       } else {
-        await context.taskManager.bulkDisable([attributes.scheduledTaskId]);
+        await context.taskManager.bulkDisable(
+          [attributes.scheduledTaskId],
+          Boolean(isLifecycleAlert)
+        );
       }
     }
   }

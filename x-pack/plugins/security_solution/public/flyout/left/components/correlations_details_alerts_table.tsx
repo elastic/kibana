@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import React, { type FC, useMemo, useCallback } from 'react';
+import React, { type VFC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
@@ -14,6 +14,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../common/types';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
@@ -36,7 +37,14 @@ export const columns = [
     ),
     truncateText: true,
     dataType: 'date' as const,
-    render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
+    render: (value: string) => {
+      const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
+      return (
+        <CellTooltipWrapper tooltip={date}>
+          <span>{date}</span>
+        </CellTooltipWrapper>
+      );
+    },
   },
   {
     field: ALERT_RULE_NAME,
@@ -47,6 +55,11 @@ export const columns = [
       />
     ),
     truncateText: true,
+    render: (value: string) => (
+      <CellTooltipWrapper tooltip={value}>
+        <span>{value}</span>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: ALERT_REASON,
@@ -57,6 +70,11 @@ export const columns = [
       />
     ),
     truncateText: true,
+    render: (value: string) => (
+      <CellTooltipWrapper tooltip={value} anchorPosition="left">
+        <span>{value}</span>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: 'kibana.alert.severity',
@@ -69,7 +87,12 @@ export const columns = [
     truncateText: true,
     render: (value: string) => {
       const decodedSeverity = Severity.decode(value);
-      return isRight(decodedSeverity) ? <SeverityBadge value={decodedSeverity.right} /> : value;
+      const renderValue = isRight(decodedSeverity) ? (
+        <SeverityBadge value={decodedSeverity.right} />
+      ) : (
+        <p>{value}</p>
+      );
+      return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
     },
   },
 ];
@@ -108,7 +131,7 @@ export interface CorrelationsDetailsAlertsTableProps {
 /**
  * Renders paginated alert array based on the provided alertIds
  */
-export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTableProps> = ({
+export const CorrelationsDetailsAlertsTable: VFC<CorrelationsDetailsAlertsTableProps> = ({
   title,
   loading,
   alertIds,

@@ -34,8 +34,7 @@
       "guidedOnboarding",
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "cloudChat"
+      "kibanaReact"
     ]
   }
 }

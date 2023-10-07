@@ -9,12 +9,9 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import {
-  FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID,
-  FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID,
-} from './test_ids';
+import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { RiskScore } from './risk_score';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
 const renderRiskScore = (contextValue: RightPanelContext) =>
   render(
@@ -33,8 +30,8 @@ describe('<RiskScore />', () => {
 
     const { getByTestId } = renderRiskScore(contextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID)).toBeInTheDocument();
-    const riskScore = getByTestId(FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID);
+    expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toBeInTheDocument();
+    const riskScore = getByTestId(RISK_SCORE_VALUE_TEST_ID);
     expect(riskScore).toBeInTheDocument();
     expect(riskScore).toHaveTextContent('0');
   });

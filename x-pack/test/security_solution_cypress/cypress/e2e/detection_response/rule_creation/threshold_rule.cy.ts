@@ -54,12 +54,12 @@ import {
   selectThresholdRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewThresholdRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -74,7 +74,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    visitWithoutDateRange(RULE_CREATION);
+    visit(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new threshold rule', () => {
@@ -83,6 +83,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

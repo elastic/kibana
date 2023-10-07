@@ -15,7 +15,7 @@ export const generateDatastreamEntries = (
     const { name, type } = dataset;
     return {
       type,
-      dataset: `${packageName}.${name}`,
+      dataset: `${name}`,
       title: `Data stream for the ${packageName} custom integration, and ${name} dataset.`,
       package: packageName,
       path: name,

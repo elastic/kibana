@@ -46,11 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.click();
-      await indexComboBox.type('kibana_sample_data_logs ');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await commonScreenshots.takeScreenshot(
