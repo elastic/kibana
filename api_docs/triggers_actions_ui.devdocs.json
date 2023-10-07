@@ -6065,7 +6065,7 @@
           },
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
-          "[]; deletedEventIds: string[]; disabledCellActions: string[]; flyoutSize?: \"m\" | \"s\" | \"l\" | undefined; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
+          "[]; deletedEventIds: string[]; disabledCellActions: string[]; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
           "EuiDataGridControlColumn",
           "[]; showExpandToDetails: boolean; showAlertStatusWithFlapping?: boolean | undefined; trailingControlColumns: ",
           "EuiDataGridControlColumn",
