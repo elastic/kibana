@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { Connector, ConnectorWithExtraFindData } from './connector';
-export type { ConnectorType } from './connector_type';
+import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { RawAction } from '../../../types';
+
+export type GetConnectorSoResult = SavedObject<RawAction>;

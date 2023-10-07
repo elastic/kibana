@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export type { Connector, ConnectorWithExtraFindData } from './connector';
-export type { ConnectorType } from './connector_type';
+import { ActionsClientContext } from '../../../../../actions_client';
+
+export interface GetParams {
+  context: ActionsClientContext;
+  id: string;
+  throwIfSystemAction?: boolean;
+}

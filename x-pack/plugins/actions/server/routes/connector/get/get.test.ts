@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getActionRoute } from './get';
+import { getConnectorRoute } from './get';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { actionsClientMock } from '../actions_client/actions_client.mock';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
 
-jest.mock('./verify_access_and_context', () => ({
+jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -21,12 +21,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('getActionRoute', () => {
+describe('getConnectorRoute', () => {
   it('gets an action with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getActionRoute(router, licenseState);
+    getConnectorRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -90,7 +90,7 @@ describe('getActionRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getActionRoute(router, licenseState);
+    getConnectorRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -126,7 +126,7 @@ describe('getActionRoute', () => {
       throw new Error('OMG');
     });
 
-    getActionRoute(router, licenseState);
+    getConnectorRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
