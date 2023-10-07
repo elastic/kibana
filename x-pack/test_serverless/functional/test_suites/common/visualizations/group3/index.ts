@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Visualizations', function () {
+  describe('Visualizations - Group 3', function () {
     before(async () => {
       await svlCommonPage.login();
     });
 
-    loadTestFile(require.resolve('./group1'));
-    loadTestFile(require.resolve('./open_in_lens/agg_based'));
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     loadTestFile(require.resolve('./open_in_lens/tsvb'));
   });
 };
