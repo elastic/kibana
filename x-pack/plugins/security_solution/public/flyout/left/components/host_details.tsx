@@ -141,8 +141,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                 value: user,
               }}
               mode={CellActionsMode.HOVER_RIGHT}
-              triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
-              visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+              triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+              visibleCellActions={6}
               sourcererScopeId={getSourcererScopeId(scopeId)}
               metadata={{ scopeId }}
               showActionTooltips
