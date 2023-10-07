@@ -8,6 +8,7 @@
 import { EuiCode, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo, type FC } from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
@@ -127,7 +128,12 @@ export const SessionPreview: FC = () => {
   }, [command, workdir]);
 
   return (
-    <div data-test-subj={SESSION_PREVIEW_TEST_ID}>
+    <div
+      css={css`
+        line-height: 1.5;
+      `}
+      data-test-subj={SESSION_PREVIEW_TEST_ID}
+    >
       <ValueContainer>
         <EuiIcon type="user" />
         &nbsp;

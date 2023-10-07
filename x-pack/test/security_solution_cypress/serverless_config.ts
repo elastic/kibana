@@ -27,10 +27,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...svlSharedConfig.get('kbnTestServer'),
       serverArgs: [
         ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
-        '--csp.warnLegacyBrowsers=false',
         '--serverless=security',
         '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['esqlRulesDisabled'])}`,
         `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },

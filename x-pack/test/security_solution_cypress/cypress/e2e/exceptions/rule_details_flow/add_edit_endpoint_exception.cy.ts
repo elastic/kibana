@@ -8,11 +8,12 @@
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
   searchForExceptionItem,
+  visitRuleDetailsPage,
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
 } from '../../../tasks/rule_details';
 import {
@@ -25,7 +26,6 @@ import {
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -86,9 +86,7 @@ describe(
               rule_id: '2',
               enabled: false,
             })
-          ).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'))
-          );
+          ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'endpoint_exceptions' }));
         });
       });
 
@@ -170,7 +168,7 @@ describe(
               enabled: false,
             })
           ).then((rule) => {
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'));
+            visitRuleDetailsPage(rule.body.id, { tab: 'endpoint_exceptions' });
             waitForRuleDetailsPageToBeLoaded('Rule with exceptions');
           });
         });

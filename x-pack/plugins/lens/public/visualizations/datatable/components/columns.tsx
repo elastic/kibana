@@ -175,8 +175,8 @@ export const createGridColumns = (
         columnId,
       });
 
-      const copyActionText = i18n.translate('xpack.lens.table.triggerAction.copyToClipboard', {
-        defaultMessage: 'Copy to clipboard',
+      const copyActionText = i18n.translate('xpack.lens.table.triggerAction.copyCellValueButton', {
+        defaultMessage: 'Copy value',
       });
 
       if (!contentsIsDefined) {
@@ -194,19 +194,23 @@ export const createGridColumns = (
         },
       };
 
+      const handleCopyButton = () => {
+        {
+          try {
+            copyToClipboard(cellContent);
+            toasts.addInfo(toastTitle.copyToClipboard.success);
+            closeCellPopover?.();
+          } catch (e) {
+            toasts.add(toastTitle.copyToClipboard.error);
+          }
+        }
+      };
+
       return (
         <Component
           aria-label={copyActionText}
           data-test-subj="lensDatatableCopyToClipboard"
-          onClick={() => {
-            try {
-              copyToClipboard(cellContent);
-              toasts.addInfo(toastTitle.copyToClipboard.success);
-              closeCellPopover?.();
-            } catch (e) {
-              toasts.add(toastTitle.copyToClipboard.error);
-            }
-          }}
+          onClick={() => handleCopyButton()}
           iconType="copyClipboard"
         >
           {copyActionText}
@@ -321,7 +325,6 @@ export const createGridColumns = (
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
-      visibleCellActions: 5,
       display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
       actions: {

@@ -12,7 +12,7 @@ import {
   FleetAllIntegrReadUser,
   deleteUsersAndRoles,
 } from '../tasks/privileges';
-import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { navigateToTab, createAgentPolicy } from '../tasks/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { getIntegrationCard } from '../screens/integrations';
@@ -32,6 +32,7 @@ const usersToCreate = [FleetAllIntegrReadUser];
 
 describe('When the user has All privilege for Fleet but Read for integrations', () => {
   before(() => {
+    login();
     createUsersAndRoles(usersToCreate, rolesToCreate);
   });
 

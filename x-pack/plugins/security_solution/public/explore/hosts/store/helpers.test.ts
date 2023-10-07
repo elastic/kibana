@@ -9,7 +9,8 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/
 import type { HostsModel } from './model';
 import { HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
-import { Direction, HostsFields, RiskScoreFields } from '../../../../common/search_strategy';
+import { Direction, RiskScoreFields } from '../../../../common/search_strategy';
+import { HostsFields } from '../../../../common/api/search_strategy/hosts/model/sort';
 
 export const mockHostsState: HostsModel = {
   page: {

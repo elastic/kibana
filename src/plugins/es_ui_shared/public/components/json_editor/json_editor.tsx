@@ -31,6 +31,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   defaultValue,
   codeEditorProps,
   error: propsError,
+  ...rest
 }: Props<T>) {
   const {
     content,
@@ -82,6 +83,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
       isInvalid={typeof error === 'string'}
       error={error}
       fullWidth
+      {...rest}
     >
       <CodeEditor
         languageId="json"
