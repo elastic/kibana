@@ -9,6 +9,12 @@ export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
+export const NEW_TERMS_INPUT_TOGGLE =
+  '[data-test-subj="newTermsInput"] [data-test-subj="comboBoxToggleListButton"]';
+
+export const NEW_TERMS_INPUT_CLEAR =
+  '[data-test-subj="newTermsInput"] [data-test-subj="comboBoxClearButton"]';
+
 export const NEW_TERMS_HISTORY_SIZE =
   '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
 

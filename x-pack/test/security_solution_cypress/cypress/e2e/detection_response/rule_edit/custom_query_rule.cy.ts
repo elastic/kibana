@@ -31,7 +31,7 @@ import {
 import { login } from '../../../tasks/login';
 import {
   confirmRuleDetailsAbout,
-  confirmRuleDetailsDefinition,
+  confirmCustomQueryRuleDetailsDefinition,
   confirmRuleDetailsSchedule,
 } from '../../../tasks/rule_details';
 import { CreateRulePropsRewrites } from '../../../objects/types';
@@ -96,7 +96,7 @@ describe('Edit custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       // edits persisted, checking against the response would not catch
       // if an expected changed value was not persisted.
       confirmRuleDetailsAbout(editedRule);
-      confirmRuleDetailsDefinition(editedRule);
+      confirmCustomQueryRuleDetailsDefinition(editedRule);
       confirmRuleDetailsSchedule(editedRule);
     });
   });
@@ -134,7 +134,7 @@ describe('Edit custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       saveEditedRule();
 
       cy.log('Checking for updated data view');
-      confirmRuleDetailsDefinition(editedRule);
+      confirmCustomQueryRuleDetailsDefinition(editedRule);
     });
   });
 });

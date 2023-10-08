@@ -7,6 +7,8 @@
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
+  RiskScoreMapping,
+  SeverityMapping,
   Threat,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -233,13 +235,15 @@ export const fillAboutRule = (rule: RuleCreateProps) => {
   }
 };
 
-export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
-  fillRuleName(rule.name);
-  fillDescription(rule.description);
-
-  cy.get(SEVERITY_MAPPING_OVERRIDE_OPTION).click();
-  if (rule.severity_mapping) {
-    rule.severity_mapping.forEach((severity, i) => {
+export const fillSeverityOverride = (
+  severityMapping: SeverityMapping | undefined,
+  check: boolean = true
+) => {
+  if (severityMapping) {
+    if (check) {
+      cy.get(SEVERITY_MAPPING_OVERRIDE_OPTION).click();
+    }
+    severityMapping.forEach((severity, i) => {
       cy.get(SEVERITY_OVERRIDE_ROW)
         .eq(i)
         .within(() => {
@@ -248,20 +252,48 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
         });
     });
   }
+};
 
-  if (rule.severity) {
-    fillSeverity(rule.severity);
-  }
-
-  cy.get(RISK_MAPPING_OVERRIDE_OPTION).click();
-  if (rule.risk_score_mapping) {
-    const field = rule.risk_score_mapping[0].field;
+export const fillRiskOverride = (
+  riskMapping: RiskScoreMapping | undefined,
+  check: boolean = true
+) => {
+  if (riskMapping) {
+    if (check) {
+      cy.get(RISK_MAPPING_OVERRIDE_OPTION).click();
+    }
+    const field = riskMapping[0].field;
     cy.get(RISK_OVERRIDE).within(() => {
       cy.get(COMBO_BOX_INPUT).type(`${field}{enter}`);
     });
   }
+};
 
-  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.risk_score}`, { force: true });
+export const fillRuleNameOverride = (ruleNameOverride: string | undefined) => {
+  if (ruleNameOverride) {
+    cy.get(RULE_NAME_OVERRIDE).within(() => {
+      cy.get(COMBO_BOX_INPUT).type(`${ruleNameOverride}{downArrow}{enter}`);
+    });
+  }
+};
+
+export const fillTimestampOverride = (timestampOverride: string | undefined) => {
+  if (timestampOverride) {
+    cy.get(RULE_TIMESTAMP_OVERRIDE).within(() => {
+      cy.get(COMBO_BOX_INPUT).type(`${timestampOverride}{enter}`);
+    });
+  }
+};
+
+export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
+  fillRuleName(rule.name);
+  fillDescription(rule.description);
+
+  fillSeverity(rule.severity);
+  fillSeverityOverride(rule.severity_mapping);
+
+  fillRiskScore(rule.risk_score);
+  fillRiskOverride(rule.risk_score_mapping);
 
   if (rule.tags) {
     fillRuleTags(rule.tags);
@@ -282,13 +314,8 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
     fillNote(rule.note);
   }
 
-  cy.get(RULE_NAME_OVERRIDE).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${rule.rule_name_override}{enter}`);
-  });
-
-  cy.get(RULE_TIMESTAMP_OVERRIDE).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${rule.timestamp_override}{enter}`);
-  });
+  fillRuleNameOverride(rule.rule_name_override);
+  fillTimestampOverride(rule.timestamp_override);
 
   getAboutContinueButton().should('exist').click({ force: true });
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { has } from 'lodash/fp';
+
 import { deleteRuleFromDetailsPage } from '../../../tasks/alerts_detection_rules';
 import {
   CUSTOM_RULES_BTN,
@@ -142,7 +144,9 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
           checkRuleDetailsRuleLicense(rule.body.license);
 
           cy.log('Checking definition section details');
-          checkRuleDetailsRuleIndex(rule.body.index);
+          if (has('body.index', rule)) {
+            checkRuleDetailsRuleIndex(rule.body.index);
+          }
           checkQueryDetails(rule.body.query);
           checkTimelineTemplateDetails(rule.body.timeline_title);
 

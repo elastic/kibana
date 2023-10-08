@@ -7,10 +7,15 @@
 
 import {
   EqlRuleCreateProps,
+  NewTermsRuleCreateProps,
   QueryRuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  RiskScoreMapping,
+  SeverityMapping,
+  Threat,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
@@ -27,13 +32,13 @@ import {
   RISK_SCORE_OVERRIDE_DETAILS,
   RULE_DETAILS_TOGGLE,
   SEVERITY_DETAILS,
-  SEVERITY_OVERRIDE_DETAILS,
   TAGS_DETAILS,
   THREAT_SUBTECHNIQUE,
   THREAT_TACTIC,
   THREAT_TECHNIQUE,
   TIMESTAMP_OVERRIDE_DETAILS,
   LICENSE_DETAILS,
+  RULE_NAME_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 import { getDetails } from '.';
 import { ruleFields } from '../../data/detection_engine';
@@ -70,13 +75,17 @@ export const checkRuleDetailsRuleSeverity = (severity: string) => {
   });
 };
 
-export const checkRuleDetailsRuleSeverityOverride = (severityMapping: any) => {
-  cy.get(ABOUT_DETAILS).within(() => {
-    getDetails(SEVERITY_OVERRIDE_DETAILS).should(
-      'have.text',
-      `${severityMapping[0].field}${severityMapping[0].severity}`
-    );
-  });
+export const checkRuleDetailsRuleSeverityOverride = (
+  severityMapping: SeverityMapping | undefined
+) => {
+  if (severityMapping) {
+    severityMapping.forEach((mapping) => {
+      cy.get(`[data-test-subj="severityOverrideDetails-${mapping.severity}"`).contains(
+        `${mapping.field}:${mapping.value}${mapping.severity}`,
+        { matchCase: false }
+      );
+    });
+  }
 };
 
 export const checkRuleDetailsRuleRiskScore = (riskScore: number) => {
@@ -85,13 +94,17 @@ export const checkRuleDetailsRuleRiskScore = (riskScore: number) => {
   });
 };
 
-export const checkRuleDetailsRuleRiskScoreOverride = (riskScoreMapping: any) => {
-  cy.get(ABOUT_DETAILS).within(() => {
-    getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
-      'have.text',
-      `${riskScoreMapping[0].field}kibana.alert.risk_score`
-    );
-  });
+export const checkRuleDetailsRuleRiskScoreOverride = (
+  riskScoreMapping: RiskScoreMapping | undefined
+) => {
+  if (riskScoreMapping) {
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
+        'have.text',
+        `${riskScoreMapping[0].field}kibana.alert.risk_score`
+      );
+    });
+  }
 };
 
 export const checkRuleDetailsBuildingBlockType = (buildingBlockType: string | undefined) => {
@@ -128,10 +141,20 @@ export const checkRuleDetailsRuleInvestigationFields = (
   });
 };
 
-export const checkRuleDetailsRuleTimestampOverride = (timestampOverride: string) => {
-  cy.get(ABOUT_DETAILS).within(() => {
-    getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', timestampOverride);
-  });
+export const checkRuleDetailsRuleTimestampOverride = (timestampOverride: string | undefined) => {
+  if (timestampOverride) {
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', timestampOverride);
+    });
+  }
+};
+
+export const checkRuleDetailsRuleNameOverride = (nameOverride: string | undefined) => {
+  if (nameOverride) {
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', nameOverride);
+    });
+  }
 };
 
 export const checkRuleDetailsRuleTags = (tags: string[]) => {
@@ -167,19 +190,15 @@ export const checkRuleDetailsRuleMitre = (threats: Threat[] = [ruleFields.threat
 };
 
 export const confirmRuleDetailsAbout = (
-  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps
+  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps | NewTermsRuleCreateProps
 ) => {
   checkRuleDetailsRuleDescription(rule.description);
+
   checkRuleDetailsRuleSeverity(rule.severity);
+  checkRuleDetailsRuleSeverityOverride(rule.severity_mapping);
+
   checkRuleDetailsRuleRiskScore(rule.risk_score);
-
-  if (rule.severity_mapping && rule.severity_mapping.length) {
-    checkRuleDetailsRuleSeverityOverride(rule.severity_mapping);
-  }
-
-  if (rule.risk_score_mapping && rule.risk_score_mapping.length) {
-    checkRuleDetailsRuleRiskScoreOverride(rule.risk_score_mapping);
-  }
+  checkRuleDetailsRuleRiskScoreOverride(rule.risk_score_mapping);
 
   if (rule.tags && rule.tags.length) {
     checkRuleDetailsRuleTags(rule.tags);
@@ -201,9 +220,8 @@ export const confirmRuleDetailsAbout = (
     checkRuleDetailsRuleNote(rule.note);
   }
 
-  if (rule.timestamp_override) {
-    checkRuleDetailsRuleTimestampOverride(rule.timestamp_override);
-  }
+  checkRuleDetailsRuleTimestampOverride(rule.timestamp_override);
+  checkRuleDetailsRuleNameOverride(rule.rule_name_override);
 
   if (rule.author && rule.author.length) {
     checkRuleDetailsRuleAuthor(rule.author);

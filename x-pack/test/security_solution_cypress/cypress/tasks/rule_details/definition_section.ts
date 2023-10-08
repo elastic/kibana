@@ -8,6 +8,7 @@
 import {
   AlertSuppression,
   EqlRuleCreateProps,
+  NewTermsRuleCreateProps,
   QueryRuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -17,7 +18,6 @@ import {
   DATA_VIEW_DETAILS,
   DEFINITION_DETAILS,
   INDEX_PATTERNS_DETAILS,
-  RULE_TYPE_DETAILS,
   SUPPRESS_ALERTS_BY,
   SUPPRESS_ALERTS_FOR,
   SUPPRESS_ALERTS_MISSING,
@@ -63,17 +63,6 @@ export const confirmAlertSuppressionDetails = (suppression: AlertSuppression) =>
   });
 };
 
-const RULE_TYPE = {
-  query: 'Query',
-  eql: 'Event Correlation',
-  esql: 'ES|QL',
-  threat_match: 'Indicator match',
-  saved_query: 'Saved query',
-  threshold: 'Threshold',
-  machine_learning: 'Machine Learning',
-  new_terms: 'New Terms',
-};
-
 export const checkDataViewDetails = (dataViewId: string = ruleFields.dataViewId) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(DATA_VIEW_DETAILS).should('have.text', dataViewId);
@@ -83,12 +72,6 @@ export const checkDataViewDetails = (dataViewId: string = ruleFields.dataViewId)
 export const checkQueryDetails = (query: string = ruleFields.ruleQuery) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(CUSTOM_QUERY_DETAILS).should('have.text', query);
-  });
-};
-
-export const checkRuleTypeDetails = (ruleType: string = 'query') => {
-  cy.get(DEFINITION_DETAILS).within(() => {
-    getDetails(RULE_TYPE_DETAILS).should('have.text', RULE_TYPE[ruleType]);
   });
 };
 
@@ -102,18 +85,8 @@ export const checkTimelineTemplateDetails = (timelineTitle: string | undefined) 
   });
 };
 
-export const confirmRuleDetailsDefinition = (
-  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps
+export const confirmCommonRuleDetailsDefinition = (
+  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps | NewTermsRuleCreateProps
 ) => {
-  if (rule.data_view_id) {
-    checkDataViewDetails(rule.data_view_id);
-  } else {
-    checkRuleDetailsRuleIndex(rule.index);
-  }
-  checkQueryDetails(rule.query);
-  checkRuleTypeDetails(rule.type);
   checkTimelineTemplateDetails(rule.timeline_title);
-  if (rule.alert_suppression) {
-    confirmAlertSuppressionDetails(rule.alert_suppression);
-  }
 };

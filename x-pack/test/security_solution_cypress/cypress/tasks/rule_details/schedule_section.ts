@@ -7,6 +7,7 @@
 
 import {
   EqlRuleCreateProps,
+  NewTermsRuleCreateProps,
   QueryRuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -15,18 +16,19 @@ import {
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
 } from '../../screens/rule_details';
-import { getHumanReadableLookback } from '../rule_creation';
 import { getDetails } from '.';
+import { ruleFields } from '../../data/detection_engine';
+import { getHumanizedDuration } from '../../helpers/rules';
 
 export const confirmRuleDetailsSchedule = (
-  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps
+  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps | NewTermsRuleCreateProps
 ) => {
-  const lookbackTime = getHumanReadableLookback(rule.from, rule.interval);
+  const lookbackTime = getHumanizedDuration(
+    (rule.from = ruleFields.ruleIntervalFrom),
+    (rule.interval = ruleFields.ruleInterval)
+  );
   cy.get(SCHEDULE_DETAILS).within(() => {
     getDetails(RUNS_EVERY_DETAILS).should('have.text', rule.interval);
-    getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-      'have.text',
-      `${lookbackTime[0]}${lookbackTime[1]}`
-    );
+    getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', lookbackTime);
   });
 };

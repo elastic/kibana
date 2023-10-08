@@ -7,9 +7,7 @@
 
 import type { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
 import { convertHistoryStartToSize } from '../../helpers/rules';
-import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 import {
-  CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   INPUT,
   NEW_TERMS_HISTORY_SIZE,
@@ -17,26 +15,31 @@ import {
   NEW_TERMS_INPUT_AREA,
   NEW_TERMS_TYPE,
 } from '../../screens/rule_creation';
+import { fillRulCustomQuery } from './common/define_step';
 
 export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
-export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
-  cy.get(CUSTOM_QUERY_INPUT)
-    .first()
-    .type(rule.query || '');
-  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
-  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(rule.new_terms_fields[0], { delay: 35 });
+export const fillNewTermsFields = (newTermsFields: string[]) => {
+  newTermsFields.forEach((term) => {
+    cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
+    cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${term}{downArrow}{enter}`, { delay: 35 });
+  });
+};
 
-  cy.get(EUI_FILTER_SELECT_ITEM).click();
-  // eslint-disable-next-line cypress/unsafe-to-chain-command
-  cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
-  const historySize = convertHistoryStartToSize(rule.history_window_start);
+export const fillNewTermsHistoryWindowSize = (historyWindow: string) => {
+  const historySize = convertHistoryStartToSize(historyWindow);
   const historySizeNumber = historySize.slice(0, historySize.length - 1);
   const historySizeType = historySize.charAt(historySize.length - 1);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type('{selectAll}');
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
+};
+
+export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
+  fillRulCustomQuery(rule.query);
+  fillNewTermsFields(rule.new_terms_fields);
+  fillNewTermsHistoryWindowSize(rule.history_window_start);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };

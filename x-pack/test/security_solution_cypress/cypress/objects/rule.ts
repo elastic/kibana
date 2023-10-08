@@ -88,28 +88,28 @@ export const getMitre2 = (): Threat => ({
   ],
 });
 
-const getSeverityOverride1 = (): SeverityMappingItem => ({
+export const getSeverityOverride1 = (): SeverityMappingItem => ({
   field: 'host.name',
   value: 'host',
   operator: 'equals',
   severity: 'low',
 });
 
-const getSeverityOverride2 = (): SeverityMappingItem => ({
+export const getSeverityOverride2 = (): SeverityMappingItem => ({
   field: '@timestamp',
   value: '10/02/2020',
   operator: 'equals',
   severity: 'medium',
 });
 
-const getSeverityOverride3 = (): SeverityMappingItem => ({
+export const getSeverityOverride3 = (): SeverityMappingItem => ({
   field: 'host.geo.name',
   value: 'atack',
   operator: 'equals',
   severity: 'high',
 });
 
-const getSeverityOverride4 = (): SeverityMappingItem => ({
+export const getSeverityOverride4 = (): SeverityMappingItem => ({
   field: 'agent.type',
   value: 'auditbeat',
   operator: 'equals',
@@ -275,11 +275,6 @@ export const getNewOverrideRule = (
   description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
   severity_mapping: [
     getSeverityOverride1(),
     getSeverityOverride2(),
@@ -291,9 +286,6 @@ export const getNewOverrideRule = (
   ],
   rule_name_override: 'agent.type',
   timestamp_override: '@timestamp',
-  interval: '100m',
-  from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 
@@ -339,8 +331,8 @@ export const getNewTermsRule = (
   note: '# test markdown',
   new_terms_fields: ['host.name'],
   history_window_start: 'now-51000h',
-  interval: '100m',
-  from: 'now-50000h',
+  interval: '10m',
+  from: 'now-50h',
   max_signals: 100,
   ...rewrites,
 });

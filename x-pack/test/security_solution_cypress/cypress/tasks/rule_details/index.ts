@@ -11,3 +11,6 @@ export * from './actions_section';
 export * from './common_tasks';
 export * from './schedule_section';
 export * from './exceptions';
+export * from './eql_rule';
+export * from './custom_query_rule';
+export * from './new_terms_rule';

@@ -26,7 +26,7 @@ import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detectio
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createEnabledRuleGoToRuleDetails,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectAndLoadSavedQuery,

@@ -43,7 +43,7 @@ import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { visit } from '../../../tasks/navigation';
 import {
   confirmRuleDetailsAbout,
-  confirmRuleDetailsDefinition,
+  confirmCustomQueryRuleDetailsDefinition,
   confirmRuleDetailsSchedule,
 } from '../../../tasks/rule_details';
 import { getMitre1, getMitre2, getNewRule } from '../../../objects/rule';
@@ -127,7 +127,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(RULE_NAME_HEADER).should('contain', rule.name);
 
     confirmRuleDetailsAbout(rule);
-    confirmRuleDetailsDefinition(rule);
+    confirmCustomQueryRuleDetailsDefinition(rule);
     confirmRuleDetailsSchedule(rule);
   });
 });

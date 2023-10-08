@@ -11,3 +11,4 @@ export * from './common/schedule_step';
 export * from './common/actions_step';
 export * from './common/common_tasks';
 export * from './eql_rule';
+export * from './new_terms_rule';

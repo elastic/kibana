@@ -54,7 +54,6 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
 
   const fromDuration = moment.duration(intervalValue.diff(fromValue));
-
   // Basing calculations off floored seconds count as moment durations weren't precise
   const intervalDuration = Math.floor(fromDuration.asSeconds());
   // For consistency of display value

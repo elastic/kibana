@@ -80,21 +80,24 @@ interface SeverityMappingItemProps {
 }
 
 const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s">
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    data-test-subj={`severityOverrideDetails-${severityMappingItem.severity}`}
+  >
     <OverrideColumn>
-      <EuiToolTip
-        content={severityMappingItem.field}
-        data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
-      >
-        <>{`${severityMappingItem.field}:`}</>
+      <EuiToolTip content={severityMappingItem.field}>
+        <EuiText
+          size="s"
+          data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
+        >{`${severityMappingItem.field}:`}</EuiText>
       </EuiToolTip>
     </OverrideColumn>
     <OverrideValueColumn>
-      <EuiToolTip
-        content={severityMappingItem.value}
-        data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
-      >
-        {defaultToEmptyTag(severityMappingItem.value)}
+      <EuiToolTip content={severityMappingItem.value}>
+        <EuiText size="s" data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}>
+          {defaultToEmptyTag(severityMappingItem.value)}
+        </EuiText>
       </EuiToolTip>
     </OverrideValueColumn>
     <EuiFlexItem grow={false}>
@@ -272,7 +275,7 @@ const prepareAboutSectionListItems = (
         .filter((severityMappingItem) => severityMappingItem.field !== '')
         .map((severityMappingItem, index) => {
           return {
-            title: index === 0 ? i18n.SEVERITY_MAPPING_FIELD_LABEL : '',
+            title: index === 0 ? 'BLOB' : '',
             description: <SeverityMappingItem severityMappingItem={severityMappingItem} />,
           };
         })

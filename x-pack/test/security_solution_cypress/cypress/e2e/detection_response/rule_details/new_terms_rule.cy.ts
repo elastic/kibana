@@ -5,43 +5,40 @@
  * 2.0.
  */
 
-import { getEqlRule, getEqlSequenceRule } from '../../../objects/rule';
+import { getNewTermsRule } from '../../../objects/rule';
 import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 
-import { checkEQLQueryDetails, checkEQLRuleTypeDetails } from '../../../tasks/rule_details';
+import {
+  checkNewTermsRuleFieldDetails,
+  checkNewTermsRuleHistoryWindowDetails,
+  checkNewTermsRuleTypeDetails,
+  checkQueryDetails,
+} from '../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
-describe('EQL rule details', { tags: ['@ess', '@serverless'] }, () => {
+describe('New Terms rule details', { tags: ['@ess', '@serverless'] }, () => {
+  const rule = getNewTermsRule();
+
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
   });
 
-  it('Displays correct details for EQL rule', function () {
-    createRule(getEqlRule()).then((createdRule) => {
+  it('Displays correct details for new terms rule', function () {
+    createRule(rule).then((createdRule) => {
       visit(ruleDetailsUrl(createdRule.body.id));
 
       cy.get(RULE_NAME_HEADER).should('contain', `${createdRule.body.name}`);
 
       // Not using rule details utils here to be explicit about what fields we are testing for this rule type
-      checkEQLQueryDetails(createdRule.body.query);
-      checkEQLRuleTypeDetails();
-    });
-  });
-
-  it('Displays correct details for EQL sequence rule', function () {
-    createRule(getEqlSequenceRule()).then((createdRule) => {
-      visit(ruleDetailsUrl(createdRule.body.id));
-
-      cy.get(RULE_NAME_HEADER).should('contain', `${createdRule.body.name}`);
-
-      // Not using rule details utils here to be explicit about what fields we are testing for this rule type
-      checkEQLQueryDetails(createdRule.body.query);
-      checkEQLRuleTypeDetails();
+      checkNewTermsRuleTypeDetails();
+      checkQueryDetails(createdRule.body.query);
+      checkNewTermsRuleFieldDetails(createdRule.body.new_terms_fields);
+      checkNewTermsRuleHistoryWindowDetails(createdRule.body.history_window_start);
     });
   });
 });

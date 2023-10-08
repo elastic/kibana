@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  RiskScoreMapping,
+  SeverityMapping,
+  Threat,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
@@ -20,6 +24,7 @@ import {
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   SEVERITY_DROPDOWN,
+  SEVERITY_OVERRIDE_ROW,
   TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
 } from '../../../screens/rule_creation';
@@ -32,13 +37,18 @@ import {
   fillMitre,
   fillNote,
   fillReferenceUrls,
+  fillRiskOverride,
   fillRiskScore,
   fillRuleName,
+  fillRuleNameOverride,
   fillRuleTags,
   fillSeverity,
+  fillSeverityOverride,
+  fillTimestampOverride,
 } from '../../rule_creation';
 import { ruleFields } from '../../../data/detection_engine';
 import { ABOUT_EDIT_TAB } from '../../../screens/rule_edit';
+import { COMBO_BOX_INPUT } from '../../../screens/common/controls';
 
 export const goToAboutStepTab = () => {
   cy.get(ABOUT_EDIT_TAB).click({ force: true });
@@ -143,6 +153,32 @@ export const editLicense = (license: string, clear: boolean = true) => {
 
   fillLicense(license);
   return license;
+};
+
+export const editSeverityOverride = (severityMapping: SeverityMapping | undefined) => {
+  if (severityMapping) {
+    [1, 2, 3, 4].forEach((_, i) => {
+      cy.get(SEVERITY_OVERRIDE_ROW)
+        .eq(i)
+        .within(() => {
+          cy.get(COMBO_BOX_INPUT).eq(0).type('{backspace}');
+          cy.get(COMBO_BOX_INPUT).eq(1).type('{backspace}');
+        });
+    });
+    fillSeverityOverride(severityMapping, false);
+  }
+};
+
+export const editRiskOverride = (riskMapping: RiskScoreMapping) => {
+  fillRiskOverride(riskMapping, false);
+};
+
+export const editRuleNameOverride = (ruleNameOverride: string) => {
+  fillRuleNameOverride(ruleNameOverride);
+};
+
+export const editTimestampOverride = (timestampOverride: string) => {
+  fillTimestampOverride(timestampOverride);
 };
 
 export const confirmEditAboutStepDetails = (rule) => {

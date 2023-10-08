@@ -15,7 +15,7 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   fillAboutRuleMinimumAndContinue,
-  createEnabledRule,
+  createAndEnableRule,
   fillDefineCustomRule,
   fillScheduleRuleAndContinue,
   fillAlertSuppression,
@@ -24,7 +24,7 @@ import {
 } from '../../../tasks/rule_creation';
 import {
   confirmRuleDetailsAbout,
-  confirmRuleDetailsDefinition,
+  confirmCustomQueryRuleDetailsDefinition,
   confirmRuleDetailsSchedule,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
@@ -73,7 +73,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
     cy.log('Filling schedule section');
     fillScheduleRuleAndContinue(rule);
 
-    createEnabledRule();
+    createAndEnableRule();
 
     cy.get(RULE_NAME_HEADER).should('contain', rule.name);
 
@@ -87,7 +87,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ALERT_GRID_CELL).contains(rule.name);
 
     confirmRuleDetailsAbout(rule);
-    confirmRuleDetailsDefinition(rule);
+    confirmCustomQueryRuleDetailsDefinition(rule);
     confirmRuleDetailsSchedule(rule);
   });
 
@@ -123,7 +123,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       cy.log('Filling schedule section');
       fillScheduleRuleAndContinue(rule);
 
-      createEnabledRule();
+      createAndEnableRule();
 
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);
 
@@ -137,7 +137,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(ALERT_GRID_CELL).contains(rule.name);
 
       confirmRuleDetailsAbout(rule);
-      confirmRuleDetailsDefinition(rule);
+      confirmCustomQueryRuleDetailsDefinition(rule);
       confirmRuleDetailsSchedule(rule);
     });
   });

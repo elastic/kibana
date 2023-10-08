@@ -14,12 +14,12 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
   confirmRuleDetailsAbout,
-  confirmRuleDetailsDefinition,
+  confirmEQLRuleDetailsDefinition,
   confirmRuleDetailsSchedule,
 } from '../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createEnabledRule,
+  createAndEnableRule,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
   fillAboutRuleMinimumAndContinue,
@@ -51,7 +51,7 @@ describe('Create EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.log('Filling schedule section');
       fillScheduleRuleAndContinue(rule);
 
-      createEnabledRule();
+      createAndEnableRule();
 
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);
 
@@ -70,7 +70,7 @@ describe('Create EQL rules', { tags: ['@ess', '@serverless'] }, () => {
           expect(text).contains(rule.risk_score);
         });
       confirmRuleDetailsAbout(rule);
-      confirmRuleDetailsDefinition(rule);
+      confirmEQLRuleDetailsDefinition(rule);
       confirmRuleDetailsSchedule(rule);
     });
   });
@@ -98,7 +98,7 @@ describe('Create EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.log('Filling schedule section');
       fillScheduleRuleAndContinue(rule);
 
-      createEnabledRule();
+      createAndEnableRule();
 
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);
 
@@ -115,7 +115,7 @@ describe('Create EQL rules', { tags: ['@ess', '@serverless'] }, () => {
         });
 
       confirmRuleDetailsAbout(rule);
-      confirmRuleDetailsDefinition(rule);
+      confirmEQLRuleDetailsDefinition(rule);
       confirmRuleDetailsSchedule(rule);
     });
   });

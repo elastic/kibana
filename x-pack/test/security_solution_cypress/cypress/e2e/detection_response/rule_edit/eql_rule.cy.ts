@@ -11,7 +11,7 @@ import { getEqlRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
-import { checkQueryDetails } from '../../../tasks/rule_details';
+import { checkEQLQueryDetails } from '../../../tasks/rule_details';
 import { editEQLRuleQuery, saveEditedRule, visitEditRulePage } from '../../../tasks/rule_edit';
 import { CreateRulePropsRewrites } from '../../../objects/types';
 
@@ -34,6 +34,6 @@ describe('EQL rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     editEQLRuleQuery(ruleEdits.query);
     saveEditedRule();
 
-    checkQueryDetails(editedRule.query);
+    checkEQLQueryDetails(editedRule.query);
   });
 });
