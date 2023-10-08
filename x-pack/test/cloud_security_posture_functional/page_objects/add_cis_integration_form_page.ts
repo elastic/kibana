@@ -9,16 +9,13 @@ import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-const GCP_ORG_CLOUD_SHELL_FIELDS = ['Project_ID','Organization ID']
-const GCP_ORG_MANUAL_FIELDS = ['Project_ID','Organization ID','Credential']
-const GCP_SINGLE_CLOUD_SHELL_FIELDS = ['Project_ID']
-const GCP_SINGLE_MANUAL_FIELDS = ['Project_ID','Credential']
-
-export function AddCisIntegrationFormPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function AddCisIntegrationFormPageProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
-  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -36,65 +33,104 @@ export function AddCisIntegrationFormPageProvider({ getService, getPageObjects }
       log.debug('CSP plugin is initialized');
     });
 
-    const cisGcp = {
-        getIntegrationFormEntirePage: () => testSubjects.find('dataCollectionSetupStep'),
+  const cisGcp = {
+    getIntegrationFormEntirePage: () => testSubjects.find('dataCollectionSetupStep'),
 
-        clickOptionButton: async (text: string) => {
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            const tabs = await cisGcp.getIntegrationFormEntirePage();
-            const optionToBeClicked = await tabs.findByXpath(`//label[text()="${text}"]`);
-            await optionToBeClicked.click();
-        },
+    getIntegrationPolicyTable: () => testSubjects.find('integrationPolicyTable'),
 
-        clickSaveButton: async () => {
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            const tabs = await cisGcp.getIntegrationFormEntirePage();
-            const optionToBeClicked = await tabs.findByXpath(`//*[text()="Save and continue"]`);
-            await optionToBeClicked.click();
-        },
+    getIntegrationFormEditPage: () => testSubjects.find('editPackagePolicy_page'),
 
-        getPostInstallModal: async() => {
-            return await testSubjects.find('confirmModalTitleText');
-        },
+    clickOptionButton: async (text: string) => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const tabs = await cisGcp.getIntegrationFormEntirePage();
+      const optionToBeClicked = await tabs.findByXpath(`//label[text()="${text}"]`);
+      await optionToBeClicked.click();
+    },
 
-        getPostInstallGoogleCloudShellModal: async(isOrg: boolean, orgID?: string, prjID?: string) => {
-            const googleCloudShellModal = await testSubjects.find('postInstallGoogleCloudShellModal');
-            const googleCloudShellModalVisibleText = await googleCloudShellModal.getVisibleText()
-            const stringProjectId = `cloud config set project ${prjID ? `${prjID}` : '<PROJECT_ID>'}`
-            const stringOrganizationId = orgID ? `ORG_ID=${orgID}` : 'ORG_ID=<ORGANIZATION_ID>';
-            const orgIdExist = googleCloudShellModalVisibleText.includes(stringOrganizationId);
-            const prjIdExist = googleCloudShellModalVisibleText.includes(stringProjectId);
-            if(isOrg){
-                return orgIdExist === true && prjIdExist === true;
-            }
-            else{
-                return orgIdExist === false && prjIdExist === true;
-            }
-        },
+    getOptionButtonEdit: async (text: string) => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const tabs = await cisGcp.getIntegrationFormEditPage();
+      const optionToBeClicked = await tabs.findAllByXpath(`//*[text()="${text}"]`);
+      return await optionToBeClicked.length;
+    },
 
-        checkGcpFieldExist: async(text: string) => {
-            const page = await testSubjects.find('project_id_test_id');
-            const field = await page.findAllByXpath(`//label[text()="${text}"]`);
-            return await field.length;
-        },
+    clickOptionButtonEdit: async (text: string) => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const tabs = await cisGcp.getIntegrationFormEditPage();
+      const optionToBeClicked = await tabs.findByXpath(`//label[text()="${text}"]`);
+      await optionToBeClicked.click();
+    },
 
-        fillInTextField: async(selector: string, text: string) => {
-            const test = await testSubjects.find(selector);
-            await test.type(text)
-        }
-    };
-    
-    const navigateToAddIntegrationCspmPage = async () => {
-        await PageObjects.common.navigateToUrl(
-          'fleet', // Defined in Security Solution plugin
-          'integrations/cloud_security_posture-1.6.0-preview13/add-integration/cspm',
-          { shouldUseHashForSubUrl: false }
-        );
-      };
+    clickSaveButton: async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const tabs = await cisGcp.getIntegrationFormEntirePage();
+      const optionToBeClicked = await tabs.findByXpath(`//*[text()="Save and continue"]`);
+      await optionToBeClicked.click();
+    },
+
+    clickSaveButtonEdit: async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const page = await cisGcp.getIntegrationFormEditPage();
+      const optionToBeClicked = await page.findByXpath(`//*[text()="Save integration"]`);
+      await optionToBeClicked.click();
+    },
+
+    getPostInstallModal: async () => {
+      return await testSubjects.find('confirmModalTitleText');
+    },
+
+    clickPolicyToBeEdited: async (name: string) => {
+      const table = await cisGcp.getIntegrationPolicyTable();
+      const policyToBeClicked = await table.findByXpath(`//*[text()="${name}"]`);
+      await policyToBeClicked.click();
+    },
+
+    getPostInstallGoogleCloudShellModal: async (isOrg: boolean, orgID?: string, prjID?: string) => {
+      const googleCloudShellModal = await testSubjects.find('postInstallGoogleCloudShellModal');
+      const googleCloudShellModalVisibleText = await googleCloudShellModal.getVisibleText();
+      const stringProjectId = `cloud config set project ${prjID ? `${prjID}` : '<PROJECT_ID>'}`;
+      const stringOrganizationId = orgID ? `ORG_ID=${orgID}` : 'ORG_ID=<ORGANIZATION_ID>';
+      const orgIdExist = googleCloudShellModalVisibleText.includes(stringOrganizationId);
+      const prjIdExist = googleCloudShellModalVisibleText.includes(stringProjectId);
+
+      if (isOrg) {
+        return orgIdExist === true && prjIdExist === true;
+      } else {
+        return orgIdExist === false && prjIdExist === true;
+      }
+    },
+
+    checkGcpFieldExist: async (text: string) => {
+      const page = await testSubjects.find('project_id_test_id');
+      const field = await page.findAllByXpath(`//label[text()="${text}"]`);
+      return await field.length;
+    },
+
+    fillInTextField: async (selector: string, text: string) => {
+      const test = await testSubjects.find(selector);
+      await test.type(text);
+    },
+  };
+
+  const navigateToAddIntegrationCspmPage = async () => {
+    await PageObjects.common.navigateToUrl(
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture-1.6.0/add-integration/cspm',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
+  const navigateToAddIntegrationCspList = async () => {
+    await PageObjects.common.navigateToActualUrl(
+      'integrations', // Defined in Security Solution plugin
+      '/detail/cloud_security_posture-1.6.0/policies'
+    );
+  };
 
   return {
     cisGcp,
     navigateToAddIntegrationCspmPage,
     waitForPluginInitialized,
+    navigateToAddIntegrationCspList,
   };
 }

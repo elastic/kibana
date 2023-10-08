@@ -107,6 +107,33 @@ export default function (providerContext: FtrProviderContext) {
           )) === true
         ).to.be(true);
       });
+
+      it('Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up', async () => {
+        await cisIntegrationGcp.clickOptionButton('GCP');
+        await cisIntegrationGcp.clickOptionButton('Single Account');
+        await cisIntegrationGcp.clickOptionButton('Google Cloud Shell');
+
+        await cisIntegrationGcp.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await cisIntegrationGcp.getPostInstallGoogleCloudShellModal(false)) === true).to.be(
+          true
+        );
+      });
+
+      it('Users should be to Edit the Integration (change account type from Single to Organization in this case)', async () => {
+        await cisIntegration.navigateToAddIntegrationCspList();
+        await cisIntegrationGcp.clickPolicyToBeEdited('cspm-3');
+        await cisIntegrationGcp.getOptionButtonEdit('Organization ID');
+        expect((await cisIntegrationGcp.getOptionButtonEdit('Organization ID')) === 0);
+        await cisIntegrationGcp.clickOptionButtonEdit('GCP Organization');
+        await cisIntegrationGcp.clickOptionButtonEdit('Google Cloud Shell');
+        await cisIntegrationGcp.clickSaveButtonEdit();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegrationGcp.clickPolicyToBeEdited('cspm-1');
+        expect((await cisIntegrationGcp.getOptionButtonEdit('Organization ID')) === 1);
+
+        await new Promise((r) => setTimeout(r, 80000));
+      });
     });
   });
 }
