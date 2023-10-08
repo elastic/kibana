@@ -29,8 +29,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/166447
-  describe.skip('Case View', () => {
+  describe('Case View', function () {
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
     });
