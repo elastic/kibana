@@ -63,16 +63,8 @@ export const getCypressBaseConfig = (
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           dataLoaders(on, config);
-
-          // skip dataLoadersForRealEndpoints() if running in serverless
-          // https://github.com/elastic/security-team/issues/7467
-          // Once we are able to run Fleet server in serverless mode (see: https://github.com/elastic/kibana/pull/166183)
-          // this `if()` statement needs to be removed and `dataLoadersForRealEndpoints()` should
-          // just be called without having any checks around it.
-          if (!config.env.IS_SERVERLESS) {
-            // Data loaders specific to "real" Endpoint testing
-            dataLoadersForRealEndpoints(on, config);
-          }
+          // Data loaders specific to "real" Endpoint testing
+          dataLoadersForRealEndpoints(on, config);
 
           responseActionTasks(on, config);
 

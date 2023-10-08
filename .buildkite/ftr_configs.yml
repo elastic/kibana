@@ -27,8 +27,7 @@ disabled:
   - x-pack/test/functional_enterprise_search/cypress.config.ts
   - x-pack/test/defend_workflows_cypress/cli_config.ts
   - x-pack/test/defend_workflows_cypress/config.ts
-  - x-pack/test/defend_workflows_cypress/endpoint_config.ts
-  - x-pack/test/defend_workflows_cypress/endpoint_serverless_config.ts
+  - x-pack/test/defend_workflows_cypress/serverless_config.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config_open.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config.ts
@@ -70,7 +69,6 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_with_assets_source.ts
 
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
@@ -175,7 +173,7 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_with_signals_source.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
@@ -187,6 +185,7 @@ enabled:
   - x-pack/test/api_integration/apis/logs_ui/config.ts
   - x-pack/test/api_integration/apis/logstash/config.ts
   - x-pack/test/api_integration/apis/management/config.ts
+  - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/maps/config.ts
   - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
@@ -412,13 +411,23 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group4.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts

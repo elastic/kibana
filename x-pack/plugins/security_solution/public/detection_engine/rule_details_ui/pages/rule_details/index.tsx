@@ -472,7 +472,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
-          flyoutSize="m"
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
           tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
