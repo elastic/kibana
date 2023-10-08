@@ -154,6 +154,8 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       created_at: { type: 'date' },
       agent_count: { type: 'long' },
       account_type: { type: 'keyword' },
+      is_setup_automatic: { type: 'boolean' },
+      setup_access_option: { type: 'keyword' },
     },
   },
   alerts_stats: {
@@ -165,6 +167,30 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       alerts_open_count: { type: 'long' },
       alerts_closed_count: { type: 'long' },
       alerts_acknowledged_count: { type: 'long' },
+    },
+  },
+  cloud_account_stats: {
+    type: 'array',
+    items: {
+      account_id: { type: 'keyword' },
+      cloud_provider: { type: 'keyword' },
+      product: { type: 'keyword' },
+      package_policy_id: { type: 'keyword' },
+      latest_doc_count: { type: 'long' },
+      latest_doc_updated_timestamp: { type: 'date' },
+      posture_management_stats: {
+        posture_score: { type: 'long' },
+        benchmark_name: { type: 'keyword' },
+        benchmark_version: { type: 'keyword' },
+        passed_findings_count: { type: 'long' },
+        failed_findings_count: { type: 'long' },
+      },
+      kspm_stats: {
+        kubernetes_version: { type: 'keyword' },
+        agents_count: { type: 'short' },
+        nodes_count: { type: 'short' },
+        pods_count: { type: 'short' },
+      },
     },
   },
 };

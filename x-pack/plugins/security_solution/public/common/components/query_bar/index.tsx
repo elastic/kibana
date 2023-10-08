@@ -167,6 +167,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         savedQuery={savedQuery}
         displayStyle={displayStyle}
         isDisabled={isDisabled}
+        hideTextBasedRunQueryLabel
       />
     );
   }

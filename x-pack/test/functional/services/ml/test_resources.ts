@@ -641,5 +641,11 @@ export function MachineLearningTestResourcesProvider(
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
     },
+
+    async assertModuleExists(moduleId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await mlApi.getModule(moduleId);
+      });
+    },
   };
 }
