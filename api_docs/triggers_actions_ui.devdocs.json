@@ -5623,13 +5623,23 @@
             "label": "alertsTableConfigurationRegistry",
             "description": [],
             "signature": [
-              "{ get: (id: string) => ",
+              "{ update: (id: string, objectType: ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ") => ",
               "AlertsTableConfigurationRegistry",
-              "; list: () => ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; get: (id: string) => ",
               "AlertsTableConfigurationRegistry",
-              "[]; register: (objectType: ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; list: () => (",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; }"
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ")[]; register: (objectType: ",
+              "AlertsTableConfigurationRegistry",
+              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6030,13 +6040,23 @@
         "label": "AlertsTableConfigurationRegistryContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => ",
+          "{ update: (id: string, objectType: ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ") => ",
           "AlertsTableConfigurationRegistry",
-          "; list: () => ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; get: (id: string) => ",
           "AlertsTableConfigurationRegistry",
-          "[]; register: (objectType: ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; list: () => (",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; }"
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ")[]; register: (objectType: ",
+          "AlertsTableConfigurationRegistry",
+          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -7359,10 +7379,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -7437,10 +7454,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
