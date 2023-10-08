@@ -40,10 +40,20 @@ export function AddCisIntegrationFormPageProvider({
 
     getIntegrationFormEditPage: () => testSubjects.find('editPackagePolicy_page'),
 
-    clickOptionButton: async (text: string) => {
+    findOptionInPage: async (page: 'add' | 'edit', text: string) => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const tabs = await cisGcp.getIntegrationFormEntirePage();
-      const optionToBeClicked = await tabs.findByXpath(`//label[text()="${text}"]`);
+      let tabs;
+      if (page === 'add') {
+        tabs = await cisGcp.getIntegrationFormEntirePage();
+      } else {
+        tabs = await cisGcp.getIntegrationFormEditPage();
+      }
+      const optionToBeClicked = await tabs.findByXpath(`//*[text()="${text}"]`);
+      return await optionToBeClicked;
+    },
+
+    clickOptionButton: async (text: string) => {
+      const optionToBeClicked = await cisGcp.findOptionInPage('add', text);
       await optionToBeClicked.click();
     },
 
@@ -51,27 +61,21 @@ export function AddCisIntegrationFormPageProvider({
       await PageObjects.header.waitUntilLoadingHasFinished();
       const tabs = await cisGcp.getIntegrationFormEditPage();
       const optionToBeClicked = await tabs.findAllByXpath(`//*[text()="${text}"]`);
-      return await optionToBeClicked.length;
+      return optionToBeClicked.length;
     },
 
     clickOptionButtonEdit: async (text: string) => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const tabs = await cisGcp.getIntegrationFormEditPage();
-      const optionToBeClicked = await tabs.findByXpath(`//label[text()="${text}"]`);
+      const optionToBeClicked = await cisGcp.findOptionInPage('edit', text);
       await optionToBeClicked.click();
     },
 
     clickSaveButton: async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const tabs = await cisGcp.getIntegrationFormEntirePage();
-      const optionToBeClicked = await tabs.findByXpath(`//*[text()="Save and continue"]`);
+      const optionToBeClicked = await cisGcp.findOptionInPage('add', 'Save and continue');
       await optionToBeClicked.click();
     },
 
     clickSaveButtonEdit: async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const page = await cisGcp.getIntegrationFormEditPage();
-      const optionToBeClicked = await page.findByXpath(`//*[text()="Save integration"]`);
+      const optionToBeClicked = await cisGcp.findOptionInPage('edit', 'Save integration');
       await optionToBeClicked.click();
     },
 
