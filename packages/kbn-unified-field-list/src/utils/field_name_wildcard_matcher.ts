@@ -38,8 +38,6 @@ export const fieldNameWildcardMatcher = (
     return false;
   }
 
-  return (
-    (!!field.displayName && makeRegEx(fieldSearchHighlight).test(field.displayName)) ||
-    makeRegEx(fieldSearchHighlight).test(field.name)
-  );
+  const regExp = makeRegEx(fieldSearchHighlight);
+  return (!!field.displayName && regExp.test(field.displayName)) || regExp.test(field.name);
 };
