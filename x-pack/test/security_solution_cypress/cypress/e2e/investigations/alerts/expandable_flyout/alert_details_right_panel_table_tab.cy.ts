@@ -10,19 +10,20 @@ import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_f
 import { closeTimeline, openActiveTimeline } from '../../../../tasks/timeline';
 import { PROVIDER_BADGE } from '../../../../screens/timeline';
 import { removeKqlFilter } from '../../../../tasks/search_bar';
-import { FILTER_BADGE } from '../../../../screens/alerts';
+import { COLUMN_HEADER, FILTER_BADGE, TIMESTAMP_COLUMN } from '../../../../screens/alerts';
 import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 import {
   addToTimelineTableTabTable,
   clearFilterTableTabTable,
-  copyToClipboardTableTabTable,
   filterInTableTabTable,
   filterOutTableTabTable,
   filterTableTabTable,
+  toggleColumnTableTabTable,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
 import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
@@ -76,8 +77,20 @@ describe(
 
       cy.log('cell actions copy to clipboard');
 
-      copyToClipboardTableTabTable();
+      cy.get('body').realHover();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
       cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD).should('be.visible');
+
+      cy.log('cell actions toggle column');
+
+      const timestampColumn = '@timestamp';
+      cy.get(TIMESTAMP_COLUMN).should('be.visible');
+      cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
+      toggleColumnTableTabTable();
+      cy.get(COLUMN_HEADER).should('not.contain.text', timestampColumn);
+      toggleColumnTableTabTable();
+      cy.get(TIMESTAMP_COLUMN).should('be.visible');
+      cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
     });
   }
 );
