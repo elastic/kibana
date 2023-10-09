@@ -54,7 +54,7 @@ const testProps = {
 };
 jest.mock('../../assistant_context');
 
-jest.mock('./settings', () => {
+jest.mock('.', () => {
   return {
     AnonymizationSettings: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
     ConversationSettings: () => <span data-test-subj={`CONVERSATION_TAB-tab`} />,
@@ -81,7 +81,6 @@ describe('AssistantSettings', () => {
 
   it('saves changes', () => {
     const { getByTestId } = render(<AssistantSettings {...testProps} />);
-    // fireEvent.click(getByTestId(`${EVALUATION_TAB}-button`));
     fireEvent.click(getByTestId('save-button'));
     expect(onSave).toHaveBeenCalled();
     expect(saveSettings).toHaveBeenCalled();
@@ -91,7 +90,6 @@ describe('AssistantSettings', () => {
     const { getByTestId } = render(
       <AssistantSettings {...testProps} selectedConversation={customConvo} />
     );
-    // fireEvent.click(getByTestId(`${EVALUATION_TAB}-button`));
     fireEvent.click(getByTestId('save-button'));
     expect(onSave).toHaveBeenCalled();
     expect(setSelectedConversationId).toHaveBeenCalled();

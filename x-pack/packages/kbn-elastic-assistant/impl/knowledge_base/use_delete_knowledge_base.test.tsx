@@ -49,7 +49,7 @@ describe('useDeleteKnowledgeBase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('should call api to post knowledge base setup', async () => {
+  it('should call api to delete knowledge base', async () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
       await waitForNextUpdate();
@@ -63,7 +63,7 @@ describe('useDeleteKnowledgeBase', () => {
       expect(toasts.addError).not.toHaveBeenCalled();
     });
   });
-  it('should call api to post knowledge base setup with resource arg', async () => {
+  it('should call api to delete knowledge base with resource arg', async () => {
     useMutationMock.mockImplementation(async (queryKey, fn, opts) => {
       try {
         const res = await fn('something');
@@ -85,7 +85,7 @@ describe('useDeleteKnowledgeBase', () => {
     });
   });
 
-  it('should return setup response', async () => {
+  it('should return delete response', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
       await waitForNextUpdate();

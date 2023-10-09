@@ -110,7 +110,7 @@ describe('usePerformEvaluation', () => {
     });
   });
 
-  it('should return setup response', async () => {
+  it('should return evaluation response', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
       await waitForNextUpdate();

@@ -36,7 +36,7 @@ import {
   KnowledgeBaseSettings,
   QuickPromptSettings,
   SystemPromptSettings,
-} from './settings';
+} from '.';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;

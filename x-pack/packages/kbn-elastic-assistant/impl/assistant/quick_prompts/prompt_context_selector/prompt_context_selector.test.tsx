@@ -21,7 +21,7 @@ describe('PromptContextSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Selects an existing prompt context adds it to the previous selection', () => {
+  it('Selects an existing prompt context and adds it to the previous selection', () => {
     const { getByTestId } = render(<PromptContextSelector {...testProps} />);
     expect(getByTestId('euiComboBoxPill')).toHaveTextContent(mockPromptContexts[0].description);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
@@ -29,7 +29,7 @@ describe('PromptContextSelector', () => {
     expect(onPromptContextSelectionChange).toHaveBeenCalledWith(mockPromptContexts);
   });
 
-  it('Selects existing prompt context from the search  input', () => {
+  it('Selects existing prompt context from the search input', () => {
     const { getByTestId } = render(<PromptContextSelector {...testProps} />);
     fireEvent.change(getByTestId('comboBoxSearchInput'), {
       target: { value: mockPromptContexts[1].description },

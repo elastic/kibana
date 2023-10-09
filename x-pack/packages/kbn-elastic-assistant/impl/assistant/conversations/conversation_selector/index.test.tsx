@@ -201,7 +201,7 @@ describe('Conversation selector', () => {
     expect(onConversationSelected).toHaveBeenCalledWith(welcomeConvo.id);
   });
 
-  it('Left arrow selects previous conversation', () => {
+  it('Left arrow selects first conversation', () => {
     const { getByTestId } = render(
       <TestProviders
         providerContext={{
@@ -225,7 +225,7 @@ describe('Conversation selector', () => {
     expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id);
   });
 
-  it('Right arrow selects next conversation', () => {
+  it('Right arrow selects last conversation', () => {
     const { getByTestId } = render(
       <TestProviders
         providerContext={{
