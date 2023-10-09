@@ -144,7 +144,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                 'xpack.observability_onboarding.installElasticAgent.configStep.manual.description',
                 {
                   defaultMessage:
-                    'Add the following configuration to {configPath} on the host where you installed the Elastic agent.',
+                    'Add the following configuration to {configPath} on the host where you installed the Elastic Agent.',
                   values: {
                     configPath,
                   },
@@ -157,7 +157,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
         isLoading={false}
         contentAriaLabel={i18n.translate(
           'xpack.observability_onboarding.installElasticAgent.configStep.yamlCodeBlockdescription',
-          { defaultMessage: 'Elastic agent yaml configuration' }
+          { defaultMessage: 'Elastic Agent yaml configuration' }
         )}
         width="100%"
         height={300}
@@ -326,7 +326,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           'data-test-subj': 'obltOnboardingConfigureElasticAgentStep',
           title: i18n.translate(
             'xpack.observability_onboarding.installElasticAgent.configureStep.title',
-            { defaultMessage: 'Configure the Elastic agent' }
+            { defaultMessage: 'Configure the Elastic Agent' }
           ),
           status: disableSteps ? 'disabled' : configureAgentStatus,
           children: disableSteps ? <></> : configureStep,
