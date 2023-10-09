@@ -28,7 +28,7 @@ import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
   data:
@@ -84,11 +84,11 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleAvailable)
-      : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleAvailable)
+      ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
+      : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
     : undefined;
   const factoryQueryType =
     riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
@@ -207,5 +207,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
     }
   }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
 
-  return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+  const result = { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+
+  return result;
 };

@@ -23,7 +23,7 @@ const { argv } = yargs(process.argv.slice(2))
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
   .option('pauseOnError', {
-    default: false,
+    default: !Boolean(process.env.CI),
     type: 'boolean',
     description: 'Pause the Synthetics Test Runner on error',
   })
@@ -33,7 +33,7 @@ const { argv } = yargs(process.argv.slice(2))
     description: 'Path to the Kibana install directory',
   })
   .option('headless', {
-    default: true,
+    default: Boolean(process.env.CI),
     type: 'boolean',
     description: 'Start in headless mode',
   })

@@ -26,7 +26,7 @@ import { validateGetClusterHealthRequest } from './get_cluster_health_request';
 /**
  * Get health overview of the whole cluster. Scope: all detection rules in all Kibana spaces.
  * Returns:
- * - health stats at the moment of the API call
+ * - health state at the moment of the API call
  * - health stats over a specified period of time ("health interval")
  * - health stats history within the same interval in the form of a histogram
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
@@ -111,8 +111,6 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
     const responseBody: GetClusterHealthResponse = {
-      // TODO: https://github.com/elastic/kibana/issues/125642 Implement the endpoint and remove the `message` property
-      message: 'Not implemented',
       timings: calculateHealthTimings(params.requestReceivedAt),
       parameters: clusterHealthParameters,
       health: {

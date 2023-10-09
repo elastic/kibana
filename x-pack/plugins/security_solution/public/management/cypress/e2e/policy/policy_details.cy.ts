@@ -19,7 +19,7 @@ import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/c
 describe(
   'Policy Details',
   {
-    tags: '@ess',
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
@@ -38,9 +38,6 @@ describe(
         beforeEach(() => {
           login();
           disableExpandableFlyoutAdvancedSettings();
-        });
-
-        before(() => {
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -49,7 +46,7 @@ describe(
           });
         });
 
-        after(() => {
+        afterEach(() => {
           if (indexedPolicy) {
             cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
           }
@@ -57,10 +54,10 @@ describe(
 
         it('should render the protection updates tab content', () => {
           loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protection-updates-warning-callout');
           cy.getByTestSubj('protection-updates-automatic-updates-enabled');
           cy.getByTestSubj('protection-updates-manifest-switch');
           cy.getByTestSubj('protection-updates-manifest-name-title');
-          cy.getByTestSubj('protection-updates-manifest-name');
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
 
           cy.getByTestSubj('protection-updates-manifest-switch').click();
@@ -108,24 +105,21 @@ describe(
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
 
-        const twoMonthsAgo = moment.utc().subtract(2, 'months').format('YYYY-MM-DD');
+        const oneWeekAgo = moment.utc().subtract(1, 'weeks').format('YYYY-MM-DD');
 
         beforeEach(() => {
           login();
           disableExpandableFlyoutAdvancedSettings();
-        });
-
-        before(() => {
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
               policy = indexedPolicy.integrationPolicies[0];
-              setCustomProtectionUpdatesManifestVersion(policy.id, twoMonthsAgo);
+              setCustomProtectionUpdatesManifestVersion(policy.id, oneWeekAgo);
             });
           });
         });
 
-        after(() => {
+        afterEach(() => {
           if (indexedPolicy) {
             cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
           }
@@ -133,7 +127,6 @@ describe(
 
         it('should update manifest version to latest when enabling automatic updates', () => {
           loadProtectionUpdatesUrl(policy.id);
-          cy.getByTestSubj('protection-updates-manifest-outdated');
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
 
           cy.getByTestSubj('protection-updates-manifest-switch').click();
@@ -157,25 +150,22 @@ describe(
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
 
-        const twoMonthsAgo = moment.utc().subtract(2, 'months').format('YYYY-MM-DD');
+        const oneWeekAgo = moment.utc().subtract(1, 'weeks').format('YYYY-MM-DD');
 
         beforeEach(() => {
           login();
           disableExpandableFlyoutAdvancedSettings();
-        });
-
-        before(() => {
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
               policy = indexedPolicy.integrationPolicies[0];
-              setCustomProtectionUpdatesManifestVersion(policy.id, twoMonthsAgo);
+              setCustomProtectionUpdatesManifestVersion(policy.id, oneWeekAgo);
               setCustomProtectionUpdatesNote(policy.id, testNote);
             });
           });
         });
 
-        after(() => {
+        afterEach(() => {
           if (indexedPolicy) {
             cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
           }
@@ -200,34 +190,31 @@ describe(
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
           cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+
+          loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
         });
       });
 
       describe('Renders read only protection updates for user without write permissions', () => {
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
-        const twoMonthsAgo = moment.utc().subtract(2, 'months');
+        const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
         beforeEach(() => {
           login(ROLE.endpoint_security_policy_management_read);
           disableExpandableFlyoutAdvancedSettings();
-        });
-
-        before(() => {
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
               policy = indexedPolicy.integrationPolicies[0];
-              setCustomProtectionUpdatesManifestVersion(
-                policy.id,
-                twoMonthsAgo.format('YYYY-MM-DD')
-              );
+              setCustomProtectionUpdatesManifestVersion(policy.id, oneWeekAgo.format('YYYY-MM-DD'));
               setCustomProtectionUpdatesNote(policy.id, testNote);
             });
           });
         });
 
-        after(() => {
+        afterEach(() => {
           if (indexedPolicy) {
             cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
           }
@@ -238,11 +225,10 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-switch').should('not.exist');
           cy.getByTestSubj('protection-updates-state-view-mode');
           cy.getByTestSubj('protection-updates-manifest-name-title');
-          cy.getByTestSubj('protection-updates-manifest-name');
 
           cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
           cy.getByTestSubj('protection-updates-deployed-version').contains(
-            twoMonthsAgo.format('MMMM DD, YYYY')
+            oneWeekAgo.format('MMMM DD, YYYY')
           );
           cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
           cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');

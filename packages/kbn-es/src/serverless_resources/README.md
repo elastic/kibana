@@ -27,6 +27,7 @@ The "service_tokens" file contains this line:
 
 ```
 elastic/kibana/kibana-dev:$2a$10$mY2RuGROhk56vLNh.Mgwue98BnkdQPlTR.yGh38ao5jhPJobvuBCq
+elastic/fleet-server/fleet-server-dev:$2a$10$tgMX7U09G/EVTP8F/O4zHewhA3DXdv7iM5F2vny9TC6zw77RrutyG
 ```
 
 That line defines a single service token
@@ -50,3 +51,16 @@ curl -H "Authorization: Bearer AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVT
 ```
 
 The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed a serverless cluster with this token.
+<<<<<<< HEAD
+=======
+
+## Overriding resources
+
+The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `yarn es serverless` command.
+Assuming a customized `users` and `users_roles` are located in `/tmp/my_es/` directory and executing the below command from the root of Kibana, here is an example:
+
+```shell
+yarn es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
+```
+
+> > > > > > > upstream/main

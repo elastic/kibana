@@ -6,55 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
-import { EuiCollapsibleNav, EuiCollapsibleNavProps } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-const SIZE_EXPANDED = 248;
-const SIZE_COLLAPSED = 0;
+const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
 
-export interface ProjectNavigationProps {
-  isOpen: boolean;
-  closeNav: () => void;
-  button: EuiCollapsibleNavProps['button'];
-}
-
-export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
-  children,
-  isOpen,
-  closeNav,
-  button,
-}) => {
-  const collabsibleNavCSS = css`
-    border-inline-end-width: 1,
-    display: flex,
-    flex-direction: row,
-  `;
-
-  const DOCKED_BREAKPOINT = 's' as const;
-  const isVisible = isOpen;
+export const ProjectNavigation: React.FC = ({ children }) => {
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
+  const onCollapseToggle = (nextIsCollapsed: boolean) => {
+    setIsCollapsed(nextIsCollapsed);
+  };
 
   return (
-    <>
-      {
-        /* must render the tree to initialize the navigation, even if it shouldn't be visible */
-        !isOpen && <div hidden>{children}</div>
-      }
-      <EuiCollapsibleNav
-        className="projectLayoutSideNav"
-        css={collabsibleNavCSS}
-        isOpen={isVisible /* only affects docked state */}
-        showButtonIfDocked={true}
-        onClose={closeNav}
-        isDocked={true}
-        size={isVisible ? SIZE_EXPANDED : SIZE_COLLAPSED}
-        hideCloseButton={false}
-        dockedBreakpoint={DOCKED_BREAKPOINT}
-        ownFocus={false}
-        button={button}
-      >
-        {isOpen && children}
-      </EuiCollapsibleNav>
-    </>
+    <EuiCollapsibleNavBeta
+      data-test-subj="projectLayoutSideNav"
+      initialIsCollapsed={isCollapsed}
+      onCollapseToggle={onCollapseToggle}
+      css={isCollapsed ? { display: 'none;' } : {}}
+    >
+      {children}
+    </EuiCollapsibleNavBeta>
   );
 };

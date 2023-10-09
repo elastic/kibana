@@ -7,7 +7,6 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
@@ -36,7 +35,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import {
   PageLoading,
   PageError,
@@ -44,7 +42,7 @@ import {
   attemptToURIDecode,
 } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { getDataStreamDetailsLink } from '../../../../services/routing';
+import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -283,7 +281,7 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { openDetailPanel, filterChanged, history } = this.props;
+    const { filterChanged, history } = this.props;
 
     if (fieldName === 'health') {
       return <DataHealth health={value} />;
@@ -292,10 +290,7 @@ export class IndexTable extends Component {
         <Fragment>
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
-            onClick={() => {
-              appServices.uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
-              openDetailPanel(value);
-            }}
+            onClick={() => history.push(getIndexDetailsLink(value))}
           >
             {value}
           </EuiLink>
@@ -382,13 +377,13 @@ export class IndexTable extends Component {
   }
 
   buildRows(appServices, config) {
-    const { indices = [], detailPanelIndexName } = this.props;
+    const { indices = [] } = this.props;
     return indices.map((index) => {
       const { name } = index;
       return (
         <EuiTableRow
           data-test-subj="indexTableRow"
-          isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
+          isSelected={this.isItemSelected(name)}
           isSelectable
           key={`${name}-row`}
         >
