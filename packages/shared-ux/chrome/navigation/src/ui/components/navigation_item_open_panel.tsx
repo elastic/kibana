@@ -23,6 +23,7 @@ import {
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { usePanel } from './panel';
+import { getUniqueNodeId } from '../../utils';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {
@@ -49,7 +50,8 @@ interface Props {
 export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, activeNode } = usePanel();
-  const { id, title, deepLink, isActive } = item;
+  const { title, deepLink, isActive } = item;
+  const id = getUniqueNodeId(item);
   const href = deepLink?.url ?? item.href;
 
   const itemClassNames = classNames(
@@ -71,7 +73,6 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   );
 
   const onIconClick = useCallback(() => {
-    console.log('Open panel', item);
     openPanel(item);
   }, [openPanel, item]);
 
@@ -93,7 +94,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonIcon
-          display={activeNode?.id === id ? 'base' : 'empty'}
+          display={getUniqueNodeId(activeNode) === id ? 'base' : 'empty'}
           size="s"
           color="text"
           onClick={onIconClick}

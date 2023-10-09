@@ -18,7 +18,7 @@ import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { isAbsoluteLink } from '../../utils';
+import { getUniqueNodeId, isAbsoluteLink } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
@@ -37,7 +37,7 @@ const navigationNodeToEuiItem = (
   }
 ): EuiCollapsibleNavSubItemProps => {
   const href = item.deepLink?.url ?? item.href;
-  const id = item.path ? item.path.join('.') : item.id;
+  const id = getUniqueNodeId(item);
   const { openPanel: itemOpenPanel = false } = item;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;

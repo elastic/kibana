@@ -7,6 +7,8 @@
  */
 
 import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
+
+import { getUniqueNodeId } from '../../../utils';
 import { DefaultContent } from './default_content';
 import { ContentProvider, PanelNavNode } from './types';
 
@@ -48,7 +50,7 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
       return null;
     }
 
-    const provided = contentProvider?.(activeNode.id);
+    const provided = contentProvider?.(getUniqueNodeId(activeNode));
 
     if (!provided) {
       return <DefaultContent activeNode={activeNode} />;

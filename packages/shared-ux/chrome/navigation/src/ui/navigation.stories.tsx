@@ -362,6 +362,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             id: 'group:openpanel1',
             title: 'Open panel (default 1)',
             openPanel: true,
+            link: 'item1',
             children: [
               {
                 id: 'group1',
@@ -412,6 +413,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             id: 'group:openpanel1b',
             title: 'Open panel (default 2)',
             openPanel: true,
+            link: 'item1',
             children: [
               {
                 id: 'group1',
@@ -460,6 +462,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             id: 'group:openpanel1c',
             title: 'Open panel (default 3)',
             openPanel: true,
+            link: 'item1',
             children: [
               {
                 id: 'group1',
@@ -556,6 +559,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             id: 'group:openpanel2',
             title: 'Open panel (custom content)',
             openPanel: true,
+            link: 'item1',
             children: [
               {
                 link: 'group:settings.logs',
@@ -575,6 +579,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             id: 'group:openpanel3',
             title: 'Open panel (custom title)',
             openPanel: true,
+            link: 'item1',
             children: [
               {
                 id: 'root',
@@ -671,7 +676,7 @@ export const WithUIComponents = (args: NavigationServices) => {
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
-              <Navigation.Group id="group:settings" title="Open panel" openPanel>
+              <Navigation.Group id="group:settings" link="apm" title="Open panel" openPanel>
                 <Navigation.Group id="group1">
                   <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
