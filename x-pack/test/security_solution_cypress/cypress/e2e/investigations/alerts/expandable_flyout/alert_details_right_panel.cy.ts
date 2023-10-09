@@ -68,7 +68,8 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 
-describe('Alert details expandable flyout right panel', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/168317
+describe.skip('Alert details expandable flyout right panel', () => {
   const rule = getNewRule();
 
   beforeEach(() => {
