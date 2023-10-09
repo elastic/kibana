@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { render } from '@testing-library/react';
 
 import { useStartServices } from '../../../../../hooks';
@@ -52,7 +53,29 @@ jest.mock('../../../../../hooks', () => {
   };
 });
 
+const mockGetNavLink$ = jest.fn(() => of(true));
 const mockUseStartServices = useStartServices as jest.Mock;
+mockUseStartServices.mockReturnValue({
+  application: {},
+  data: {
+    query: {
+      timefilter: {
+        timefilter: {
+          calculateBounds: jest.fn().mockReturnValue({
+            min: '2023-10-04T13:08:53.340Z',
+            max: '2023-10-05T13:08:53.340Z',
+          }),
+        },
+      },
+    },
+  },
+  http: {
+    basePath: {
+      prepend: (url: string) => 'http://localhost:5620' + url,
+    },
+  },
+  chrome: { navLinks: { getNavLink$: () => mockGetNavLink$() } },
+});
 
 describe('AgentLogsUI', () => {
   const renderComponent = () => {
@@ -68,40 +91,14 @@ describe('AgentLogsUI', () => {
     return render(<AgentLogsUI agent={agent} state={state} />);
   };
 
-  const mockStartServices = (isServerlessEnabled?: boolean) => {
-    mockUseStartServices.mockReturnValue({
-      application: {},
-      data: {
-        query: {
-          timefilter: {
-            timefilter: {
-              calculateBounds: jest.fn().mockReturnValue({
-                min: '2023-10-04T13:08:53.340Z',
-                max: '2023-10-05T13:08:53.340Z',
-              }),
-            },
-          },
-        },
-      },
-      http: {
-        basePath: {
-          prepend: (url: string) => 'http://localhost:5620' + url,
-        },
-      },
-      cloud: {
-        isServerlessEnabled,
-      },
-    });
-  };
-
   it('should render Open in Logs UI if capabilities not set', () => {
-    mockStartServices();
     const result = renderComponent();
     expect(result.getByTestId('viewInLogsBtn')).not.toBeNull();
   });
 
-  it('should render Open in Discover if serverless enabled', () => {
-    mockStartServices(true);
+  it('should render Open in Discover if logs app disabled', () => {
+    mockGetNavLink$.mockReturnValue(of(false));
+
     const result = renderComponent();
     const viewInDiscover = result.getByTestId('viewInDiscoverBtn');
     expect(viewInDiscover).toHaveAttribute(
