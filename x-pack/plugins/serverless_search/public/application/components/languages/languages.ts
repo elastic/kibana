@@ -8,7 +8,9 @@
 import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { curlDefinition } from './curl';
+import { dotnetDefinition } from './dotnet';
 import { goDefinition } from './go';
+import { javaDefinition } from './java';
 import { javascriptDefinition } from './javascript';
 import { phpDefinition } from './php';
 import { pythonDefinition } from './python';
@@ -17,8 +19,10 @@ import { rubyDefinition } from './ruby';
 const languageDefinitionRecords: Partial<Record<Languages, LanguageDefinition>> = {
   [Languages.CURL]: curlDefinition,
   [Languages.PYTHON]: pythonDefinition,
+  [Languages.DOTNET]: dotnetDefinition,
   [Languages.JAVASCRIPT]: javascriptDefinition,
   [Languages.PHP]: phpDefinition,
+  [Languages.JAVA]: javaDefinition,
   [Languages.GO]: goDefinition,
   [Languages.RUBY]: rubyDefinition,
 };
