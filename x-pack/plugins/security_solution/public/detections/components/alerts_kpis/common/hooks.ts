@@ -105,10 +105,10 @@ export const useStackByFields = (useLensCompatibleFields?: boolean) => {
       return getAggregatableFields(getAllFieldsByName(browserFields), useLensCompatibleFields);
     } catch (err) {
       addError(err, {
-        title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+        title: i18n.translate('xpack.securitySolution.useStackByFields.error.title', {
           defaultMessage: 'Error fetching fields',
         }),
-        toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+        toastMessage: i18n.translate('xpack.securitySolution.useStackByFields.error.toastMessage', {
           defaultMessage: 'This error indicates an exceedingly large number of fields in an index',
         }),
       });
