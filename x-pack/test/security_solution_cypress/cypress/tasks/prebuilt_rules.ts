@@ -56,7 +56,7 @@ export const assertUpgradeRequestIsComplete = (rules: Array<typeof SAMPLE_PREBUI
 };
 
 /**
- * Assert that when the rule installation succeeds, the toast is shown with the right message 
+ * Assert that when the rule installation succeeds, the toast is shown with the right message
  * -confirming the succesful install- and subsequently check that the rules available for installation
  * are not present in the Add Elastic Rules table anymore
  */
@@ -72,9 +72,8 @@ export const assertInstallationSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RU
   }
 };
 
-
 /**
- * Assert that when the rule installation fails, the toast is shown with the right message 
+ * Assert that when the rule installation fails, the toast is shown with the right message
  * -notifying that the installation failed- and subsequently check that the rules available for installation
  * are still present in the Rule Update table
  */
@@ -103,7 +102,7 @@ export const interceptInstallationRequestToFail = (rules: Array<typeof SAMPLE_PR
 };
 
 /**
- * Assert that when the rule version upgrade succeeds, the toast is shown with the right message 
+ * Assert that when the rule version upgrade succeeds, the toast is shown with the right message
  * -confirming the succesful upgrade- and subsequently check that the rules available for upgrade
  * are not present in the Rule Update table anymore
  */
@@ -117,7 +116,7 @@ export const assertUpgradeSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) 
 };
 
 /**
- * Assert that when the rule version upgrade fails, the toast is shown with the right message 
+ * Assert that when the rule version upgrade fails, the toast is shown with the right message
  * -notifying that the upgrade failed- and subsequently check that the rules available for upgrade
  * are still present in the Rule Update table
  */

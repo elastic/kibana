@@ -184,7 +184,7 @@ describe(
 
         // Navigate to Rule Upgrade table
         ruleUpdatesTabClick();
-        
+
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         assertUpgradeFailure([OUTDATED_RULE_1, OUTDATED_RULE_2]);

@@ -32,7 +32,7 @@ import {
   RULE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
-import { cleanKibana, reload } from '../../../tasks/common';
+import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 
 // Rule to test update
