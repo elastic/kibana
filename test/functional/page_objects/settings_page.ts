@@ -497,7 +497,6 @@ export class SettingsPageObject extends FtrService {
       }
 
       if (allowHidden) {
-        await this.testSubjects.click('showHiddenIndicesToggle');
         await this.allowHiddenClick();
       }
 
