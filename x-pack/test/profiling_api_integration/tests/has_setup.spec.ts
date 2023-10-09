@@ -23,7 +23,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const logger = getService('log');
   const es = getService('es');
 
-  registry.when('Profiling status check', { config: 'cloud' }, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/167076
+  registry.when.skip('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
       before(async () => {
         await cleanUpProfilingData({ es, logger, bettertest });

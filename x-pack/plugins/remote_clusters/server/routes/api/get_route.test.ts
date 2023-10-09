@@ -119,6 +119,7 @@ describe('GET remote clusters', () => {
           skipUnavailable: false,
           isConfiguredByNode: false,
           mode: 'sniff',
+          securityModel: 'certificate',
         },
       ]);
 
