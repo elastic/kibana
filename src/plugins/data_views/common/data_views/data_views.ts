@@ -296,7 +296,7 @@ export interface DataViewsServicePublicMethods {
   ) => Promise<DataView | void | Error>;
 
   /**
-   * Returns boolean based on the existence of a default data view.
+   * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
 }
@@ -1212,6 +1212,9 @@ export class DataViewsService {
     return defaultId;
   }
 
+  /**
+   * Returns whether a default data view exists.
+   */
   async defaultDataViewExists() {
     return !!(await this.getDefaultDataViewId());
   }
