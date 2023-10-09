@@ -75,6 +75,7 @@ const setUpModule = async (
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
     {
+      description: `Logs UI (${spaceId}/${sourceId}): Detects anomalies in the log entry ingestion rate`,
       job_id: logEntryRateJobType,
       analysis_config: {
         bucket_span: `${bucketSpan}ms`,

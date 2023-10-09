@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { createHash } from 'crypto';
+import { v5 } from 'uuid';
 import { IdFormat, JobType } from '../http_api/log_analysis/v1/id_formats';
 
 export const bucketSpan = 900000;
@@ -15,15 +15,14 @@ export const categoriesMessageField = 'message';
 
 export const partitionField = 'event.dataset';
 
+const ID_NAMESPACE = 'f91b78c0-fdd3-425d-a4ba-4c028fe57e0f';
+
 export const getJobIdPrefix = (spaceId: string, sourceId: string, idFormat: IdFormat) => {
   if (idFormat === 'legacy') {
     return `kibana-logs-ui-${spaceId}-${sourceId}-`;
   } else {
-    const hash = createHash('sha256')
-      .update(`${spaceId}-${sourceId}`)
-      .digest('hex')
-      .substring(0, 10);
-    return `logs-${hash}-`;
+    const uuid = v5(`${spaceId}-${sourceId}`, ID_NAMESPACE).replaceAll('-', '');
+    return `logs-${uuid}-`;
   }
 };
 
