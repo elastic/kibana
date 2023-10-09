@@ -33,6 +33,8 @@
   flex-grow: 1;
   z-index: 0; // This effectively puts every high z-index inside the scope of this wrapper to it doesn't interfere with the header and/or overlay mask
   position: relative; // This is temporary for apps that relied on this being present on `.application`
+
+  --euiFixedHeadersOffset: calc(var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight));
 }
 
 .kbnBody {
@@ -41,9 +43,11 @@
 
 // Conditionally override :root CSS fixed header variable. Updating `--euiFixedHeadersOffset`
 // on the body will cause all child EUI components to automatically update their offsets
-
 .kbnBody--hasHeaderBanner {
   --euiFixedHeadersOffset: var(--kbnHeaderOffsetWithBanner);
+  .kbnAppWrapper {
+    --euiFixedHeadersOffset: calc(var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight));
+  }
 
   // Offset fixed EuiHeaders by the top banner
   .euiHeader[data-fixed-header] {
@@ -58,7 +62,13 @@
 }
 .kbnBody--chromeHidden {
   --euiFixedHeadersOffset: 0;
+  .kbnAppWrapper {
+    --euiFixedHeadersOffset: 0;
+  }
 }
 .kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
   --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
+  .kbnAppWrapper {
+    --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
+  }
 }
