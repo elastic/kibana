@@ -19,23 +19,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, type RenderResult } from '@testing-library/react';
-import { type Observable, of, BehaviorSubject } from 'rxjs';
-import type {
-  ChromeNavLink,
-  ChromeProjectNavigation,
-  ChromeProjectNavigationNode,
-} from '@kbn/core-chrome-browser';
+import { type Observable, of } from 'rxjs';
+import type { ChromeNavLink, ChromeProjectNavigation } from '@kbn/core-chrome-browser';
 
 import { getServicesMock } from '../mocks/src/jest';
 import { navLinksMock } from '../mocks/src/navlinks';
 import { NavigationProvider } from '../src/services';
 import { DefaultNavigation } from '../src/ui/default_navigation';
 import { Navigation } from '../src/ui/components/navigation';
-import type {
-  NavigationTreeDefinition,
-  ProjectNavigationTreeDefinition,
-  RootNavigationItemDefinition,
-} from '../src/ui/types';
+import type { NavigationTreeDefinition, RootNavigationItemDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
 
 // There is a 100ms debounce to update project navigation tree
