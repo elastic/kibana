@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { render } from '@testing-library/react';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,9 +21,11 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   },
 }));
 
+const mockGetNavLink$ = jest.fn(() => of(true));
 jest.mock('../../../../hooks', () => {
   return {
     useStartServices: jest.fn().mockReturnValue({
+      chrome: { navLinks: { getNavLink$: () => mockGetNavLink$() } },
       http: {
         basePath: {
           prepend: jest.fn().mockImplementation((str) => 'http://localhost' + str),
@@ -33,6 +36,11 @@ jest.mock('../../../../hooks', () => {
 });
 
 describe('ViewErrors', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetNavLink$.mockReturnValue(of(true));
+  });
+
   const renderComponent = (action: ActionStatus) => {
     return render(
       <I18nProvider>
@@ -60,5 +68,22 @@ describe('ViewErrors', () => {
     expect(viewErrorBtn.getAttribute('href')).toEqual(
       `http://localhost/app/logs/stream?logPosition=(position%3A(time%3A1678114284709)%2CstreamLive%3A!f)&logFilter=(expression%3A'elastic_agent.id%3Aagent1%20and%20(data_stream.dataset%3Aelastic_agent)%20and%20(log.level%3Aerror)'%2Ckind%3Akuery)`
     );
+  });
+
+  it('should not render link to logs if logs app is disabled', () => {
+    mockGetNavLink$.mockReturnValue(of(false));
+
+    const result = renderComponent({
+      actionId: 'action1',
+      latestErrors: [
+        {
+          agentId: 'agent1',
+          error: 'Agent agent1 is not upgradeable',
+          timestamp: '2023-03-06T14:51:24.709Z',
+        },
+      ],
+    } as any);
+
+    expect(result.queryByTestId('viewLogsBtn')).not.toBeInTheDocument();
   });
 });

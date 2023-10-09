@@ -8,7 +8,7 @@
 import { stringify } from 'querystring';
 
 import styled from 'styled-components';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { EuiButton, EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
@@ -16,6 +16,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { i18n } from '@kbn/i18n';
+
+import useObservable from 'react-use/lib/useObservable';
 
 import type { ActionErrorResult } from '../../../../../../../common/types';
 
@@ -30,80 +32,88 @@ const TruncatedEuiText = styled(EuiText)`
   text-overflow: ellipsis;
 `;
 
+const logStreamQuery = (agentId: string) =>
+  buildQuery({
+    agentId,
+    datasets: ['elastic_agent'],
+    logLevels: ['error'],
+    userQuery: '',
+  });
+
+const getErrorLogsQueryParams = (agentId: string, timestamp: string) => {
+  return stringify({
+    logPosition: encode({
+      position: { time: Date.parse(timestamp) },
+      streamLive: false,
+    }),
+    logFilter: encode({
+      expression: logStreamQuery(agentId),
+      kind: 'kuery',
+    }),
+  });
+};
+
+const defaultColumns: EuiBasicTableProps<ActionErrorResult>['columns'] = [
+  {
+    field: 'hostname',
+    name: i18n.translate('xpack.fleet.agentList.viewErrors.hostnameColumnTitle', {
+      defaultMessage: 'Host Name',
+    }),
+    render: (hostname: string) => (
+      <EuiText size="s" data-test-subj="hostText">
+        {hostname}
+      </EuiText>
+    ),
+  },
+  {
+    field: 'error',
+    name: i18n.translate('xpack.fleet.agentList.viewErrors.errorColumnTitle', {
+      defaultMessage: 'Error Message',
+    }),
+    render: (error: string) => (
+      <EuiToolTip content={error}>
+        <TruncatedEuiText size="s" color="red" data-test-subj="errorText">
+          {error}
+        </TruncatedEuiText>
+      </EuiToolTip>
+    ),
+  },
+];
+
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
+  const logsAvailable = !!useObservable(coreStart.chrome.navLinks.getNavLink$('logs'));
 
-  const logStreamQuery = (agentId: string) =>
-    buildQuery({
-      agentId,
-      datasets: ['elastic_agent'],
-      logLevels: ['error'],
-      userQuery: '',
-    });
-
-  const getErrorLogsUrl = (agentId: string, timestamp: string) => {
-    const queryParams = stringify({
-      logPosition: encode({
-        position: { time: Date.parse(timestamp) },
-        streamLive: false,
-      }),
-      logFilter: encode({
-        expression: logStreamQuery(agentId),
-        kind: 'kuery',
-      }),
-    });
-    return coreStart.http.basePath.prepend(`/app/logs/stream?${queryParams}`);
-  };
-
-  const columns: EuiBasicTableProps<ActionErrorResult>['columns'] = [
-    {
-      field: 'hostname',
-      name: i18n.translate('xpack.fleet.agentList.viewErrors.hostnameColumnTitle', {
-        defaultMessage: 'Host Name',
-      }),
-      render: (hostname: string) => (
-        <EuiText size="s" data-test-subj="hostText">
-          {hostname}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'error',
-      name: i18n.translate('xpack.fleet.agentList.viewErrors.errorColumnTitle', {
-        defaultMessage: 'Error Message',
-      }),
-      render: (error: string) => (
-        <EuiToolTip content={error}>
-          <TruncatedEuiText size="s" color="red" data-test-subj="errorText">
-            {error}
-          </TruncatedEuiText>
-        </EuiToolTip>
-      ),
-    },
-    {
-      field: 'agentId',
-      name: i18n.translate('xpack.fleet.agentList.viewErrors.actionColumnTitle', {
-        defaultMessage: 'Action',
-      }),
-      render: (agentId: string) => {
-        const errorItem = (action.latestErrors ?? []).find((item) => item.agentId === agentId);
-        return (
-          <RedirectAppLinks coreStart={coreStart}>
-            <EuiButton
-              href={getErrorLogsUrl(agentId, errorItem!.timestamp)}
-              color="danger"
-              data-test-subj="viewLogsBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"
-                defaultMessage="Review error logs"
-              />
-            </EuiButton>
-          </RedirectAppLinks>
-        );
+  const columnsWithLogsButton: EuiBasicTableProps<ActionErrorResult>['columns'] = useMemo(
+    () => [
+      ...defaultColumns,
+      {
+        field: 'agentId',
+        name: i18n.translate('xpack.fleet.agentList.viewErrors.actionColumnTitle', {
+          defaultMessage: 'Action',
+        }),
+        render: (agentId: string) => {
+          const errorItem = (action.latestErrors ?? []).find((item) => item.agentId === agentId);
+          const href = coreStart.http.basePath.prepend(
+            `/app/logs/stream?${getErrorLogsQueryParams(agentId, errorItem!.timestamp)}`
+          );
+          return (
+            <RedirectAppLinks coreStart={coreStart}>
+              <EuiButton href={href} color="danger" data-test-subj="viewLogsBtn">
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"
+                  defaultMessage="Review error logs"
+                />
+              </EuiButton>
+            </RedirectAppLinks>
+          );
+        },
       },
-    },
-  ];
+    ],
+    [coreStart, action]
+  );
+
+  const columns = logsAvailable ? columnsWithLogsButton : defaultColumns;
 
   return (
     <>

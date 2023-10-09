@@ -32,6 +32,8 @@ import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
 
@@ -117,7 +119,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, http } = useStartServices();
+    const { data, application, http, chrome } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
@@ -216,6 +218,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       [agent.id, state.datasets, state.logLevels, state.query]
     );
 
+    const logsAvailable = !!useObservable(chrome.navLinks.getNavLink$('logs'));
     // Generate URL to pass page state to Logs UI
     const viewInLogsUrl = useMemo(
       () =>
@@ -340,16 +343,18 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                 }}
               />
             </DatePickerFlexItem>
-            <EuiFlexItem grow={false}>
-              <RedirectAppLinks application={application}>
-                <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                    defaultMessage="Open in Logs"
-                  />
-                </EuiButtonEmpty>
-              </RedirectAppLinks>
-            </EuiFlexItem>
+            {logsAvailable && (
+              <EuiFlexItem grow={false}>
+                <RedirectAppLinks application={application}>
+                  <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
+                    <FormattedMessage
+                      id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+                      defaultMessage="Open in Logs"
+                    />
+                  </EuiButtonEmpty>
+                </RedirectAppLinks>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>

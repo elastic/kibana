@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -19,21 +19,21 @@ export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
   const { http, chrome } = useStartServices();
 
   const logsAvailable = !!useObservable(chrome.navLinks.getNavLink$('logs'));
-  if (!logsAvailable) {
-    return null;
-  }
 
-  const logStreamUrl = http.basePath.prepend('/app/logs/stream');
-
-  const views: CustomAssetsAccordionProps['views'] = [
-    {
-      name: i18n.translate('xpack.fleet.assets.customLogs.name', { defaultMessage: 'Logs' }),
-      url: logStreamUrl,
-      description: i18n.translate('xpack.fleet.assets.customLogs.description', {
-        defaultMessage: 'View Custom logs data in Logs app',
-      }),
-    },
-  ];
+  const views = useMemo(() => {
+    const assetsAccordionViews: CustomAssetsAccordionProps['views'] = [];
+    if (logsAvailable) {
+      const logStreamUrl = http.basePath.prepend('/app/logs/stream');
+      assetsAccordionViews.push({
+        name: i18n.translate('xpack.fleet.assets.customLogs.name', { defaultMessage: 'Logs' }),
+        url: logStreamUrl,
+        description: i18n.translate('xpack.fleet.assets.customLogs.description', {
+          defaultMessage: 'View Custom logs data in Logs app',
+        }),
+      });
+    }
+    return assetsAccordionViews;
+  }, [http.basePath, logsAvailable]);
 
   return <CustomAssetsAccordion views={views} initialIsOpen />;
 };
