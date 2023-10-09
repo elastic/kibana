@@ -275,7 +275,7 @@ const prepareAboutSectionListItems = (
         .filter((severityMappingItem) => severityMappingItem.field !== '')
         .map((severityMappingItem, index) => {
           return {
-            title: index === 0 ? 'BLOB' : '',
+            title: index === 0 ? i18n.SEVERITY_MAPPING_FIELD_LABEL : '',
             description: <SeverityMappingItem severityMappingItem={severityMappingItem} />,
           };
         })

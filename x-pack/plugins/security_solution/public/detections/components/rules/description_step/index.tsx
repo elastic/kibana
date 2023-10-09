@@ -113,9 +113,6 @@ export const StepRuleDescriptionComponent = <T,>({
       return [...acc, buildActionsDescription(get(key, data), get([key, 'label'], schema))];
     }
 
-    if (key === 'severity') {
-      console.log(get(key, data));
-    }
     return [
       ...acc,
       ...buildListItems(data, pick(key, schema), filterManager, license, indexPatterns),

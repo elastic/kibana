@@ -28,7 +28,7 @@ import {
 } from '../../../tasks/rule_details';
 
 describe('Rule overrides rule details', { tags: ['@ess', '@serverless'] }, () => {
-  // Fill any custom query specific values you want tested,
+  // Fill any override specific values you want tested,
   // common values across rules can be tested in ./common_flows.cy.ts
   const rule = getSimpleCustomQueryRule({
     severity_mapping: [

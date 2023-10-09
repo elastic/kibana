@@ -17,7 +17,7 @@ import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../tasks/rule_details';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
   ALERTS_TABLE_ROW_LOADER,
   MIXED_ALERT_TAG,
@@ -26,7 +26,7 @@ import {
 } from '../../screens/alerts';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');
