@@ -187,29 +187,29 @@ export class EnterpriseSearchPlugin implements Plugin {
         hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
       return {
-        catalogue: {
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
-          enterpriseSearchElasticsearch: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
-          searchExperiences: showEnterpriseSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-        },
         navLinks: {
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
-          enterpriseSearchElasticsearch: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchAISearch: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
-          searchExperiences: showEnterpriseSearch,
+          enterpriseSearchElasticsearch: showEnterpriseSearch,
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+          searchExperiences: showEnterpriseSearch,
+        },
+        catalogue: {
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
+          enterpriseSearchAnalytics: showEnterpriseSearch,
+          enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchAISearch: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
+          enterpriseSearchElasticsearch: showEnterpriseSearch,
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+          searchExperiences: showEnterpriseSearch,
         },
       };
     });
