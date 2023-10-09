@@ -66,3 +66,12 @@ export interface LoadUserAndRoleCyTaskOptions {
 export interface CreateUserAndRoleCyTaskOptions {
   role: Role;
 }
+
+export interface UninstallAgentFromHostTaskOptions {
+  hostname: string;
+  uninstallToken: string;
+}
+
+export interface IsAgentAndEndpointUninstalledFromHostTaskOptions {
+  hostname: string;
+}

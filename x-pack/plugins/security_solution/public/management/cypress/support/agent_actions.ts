@@ -8,28 +8,10 @@
 // / <reference types="cypress" />
 import type { ExecaReturnValue } from 'execa';
 import execa from 'execa';
-import { agentRouteService } from '@kbn/fleet-plugin/common/services';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
-import type { GetOneAgentResponse } from '@kbn/fleet-plugin/common/types';
 
 import { VAGRANT_CWD } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 
-export const agentActions = (
-  on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions
-): void => {
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    esUsername: config.env.ELASTICSEARCH_USERNAME,
-    esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
-  });
-
+export const agentActions = (on: Cypress.PluginEvents): void => {
   on('task', {
     uninstallAgentFromHost: async ({
       hostname,
@@ -74,7 +56,7 @@ export const agentActions = (
       return result.stdout;
     },
 
-    ensureAgentAndEndpointHasBeenUninstalledFromHost: async ({
+    isAgentAndEndpointUninstalledFromHost: async ({
       hostname,
     }: {
       hostname: string;
@@ -103,30 +85,6 @@ export const agentActions = (
       }
 
       return false;
-    },
-
-    ensureAgentHasBeenUnenrolled: async ({ agentId }: { agentId: string }): Promise<boolean> => {
-      const { kbnClient } = await stackServicesPromise;
-
-      let isAgentUnenrolled = false;
-
-      while (!isAgentUnenrolled) {
-        const { data } = await kbnClient.request<GetOneAgentResponse>({
-          method: 'GET',
-          path: agentRouteService.getInfoPath(agentId),
-          headers: {
-            'elastic-api-version': API_VERSIONS.public.v1,
-          },
-        });
-        if (data.item.status !== 'unenrolled' || data.item.active) {
-          // sleep and check again
-          await new Promise((r) => setTimeout(r, 2000));
-        } else {
-          isAgentUnenrolled = true;
-        }
-      }
-
-      return isAgentUnenrolled;
     },
   });
 };

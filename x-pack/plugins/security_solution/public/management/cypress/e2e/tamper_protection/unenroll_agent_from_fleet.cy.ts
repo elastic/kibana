@@ -9,51 +9,79 @@ import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { getEndpointIntegrationVersion, createAgentPolicyTask } from '../../tasks/fleet';
+import {
+  getEndpointIntegrationVersion,
+  createAgentPolicyTask,
+  enableAgentTamperProtectionFeatureFlagInPolicy,
+  unenrollAgent,
+  changeAgentPolicy,
+} from '../../tasks/fleet';
 
 import { login } from '../../tasks/login';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
-import {
-  enableAgentTamperProtectionFeatureFlagInPolicy,
-  ensureAgentIsUnenrolled,
-  unenrollAgent,
-} from '../../tasks/agent_policy';
 
 describe('Unenroll agent from fleet', { tags: ['@ess'] }, () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let indexedPolicyWithAgentTamperEnabled: IndexedFleetEndpointPolicyResponse;
+  let policyWithAgentTamperProtectionEnabled: PolicyData;
+  let secondIndexedPolicyWithAgentTamperEnabled: IndexedFleetEndpointPolicyResponse;
+  let secondPolicyWithAgentTamperProtectionEnabled: PolicyData;
+
+  before(() => {
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version).then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+        return enableAllPolicyProtections(policy.id);
+      });
+      createAgentPolicyTask(version).then((dataForProtectedPolicy) => {
+        indexedPolicyWithAgentTamperEnabled = dataForProtectedPolicy;
+        policyWithAgentTamperProtectionEnabled =
+          indexedPolicyWithAgentTamperEnabled.integrationPolicies[0];
+
+        return enableAgentTamperProtectionFeatureFlagInPolicy(
+          indexedPolicyWithAgentTamperEnabled.agentPolicies[0].id
+        );
+      });
+      createAgentPolicyTask(version).then((dataForProtectedPolicy) => {
+        secondIndexedPolicyWithAgentTamperEnabled = dataForProtectedPolicy;
+        secondPolicyWithAgentTamperProtectionEnabled =
+          secondIndexedPolicyWithAgentTamperEnabled.integrationPolicies[0];
+
+        return enableAgentTamperProtectionFeatureFlagInPolicy(
+          secondIndexedPolicyWithAgentTamperEnabled.agentPolicies[0].id
+        );
+      });
+    });
+  });
   beforeEach(() => {
     login();
   });
 
+  after(() => {
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicyWithAgentTamperEnabled);
+      cy.task('deleteIndexedFleetEndpointPolicies', secondIndexedPolicyWithAgentTamperEnabled);
+    }
+  });
+
   describe('When agent tamper protection is disabled', () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
     before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
-
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
-          });
-        })
-      );
+      // Create and enroll a new Endpoint host
+      return createEndpointHost(policy.policy_id).then((host) => {
+        createdHost = host as CreateAndEnrollEndpointHostResponse;
+      });
     });
 
     after(() => {
       if (createdHost) {
         cy.task('destroyEndpointHost', createdHost);
-      }
-
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
       }
 
       if (createdHost) {
@@ -63,46 +91,119 @@ describe('Unenroll agent from fleet', { tags: ['@ess'] }, () => {
 
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      unenrollAgent(createdHost.agentId).then(() => {
-        ensureAgentIsUnenrolled(createdHost.agentId).then((isUnenrolled) => {
+      unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
+        expect(isUnenrolled).to.eql(true);
+      });
+    });
+  });
+
+  describe('When agent tamper protection is enabled', () => {
+    let createdHost: CreateAndEnrollEndpointHostResponse;
+
+    before(() => {
+      // Create and enroll a new Endpoint host
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
+        createdHost = host as CreateAndEnrollEndpointHostResponse;
+      });
+    });
+
+    after(() => {
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      }
+    });
+
+    it('should unenroll from fleet without issues', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
+        expect(isUnenrolled).to.eql(true);
+      });
+    });
+  });
+
+  describe('When agent tamper protection is disabled but then is switched to a policy with it enabled', () => {
+    let createdHost: CreateAndEnrollEndpointHostResponse;
+
+    before(() => {
+      // Create and enroll a new Endpoint host
+      return createEndpointHost(policy.policy_id).then((host) => {
+        createdHost = host as CreateAndEnrollEndpointHostResponse;
+      });
+    });
+
+    after(() => {
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      }
+    });
+
+    it('should unenroll from fleet without issues', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      // Change agent policy and wait for action to be completed
+      changeAgentPolicy(createdHost.agentId, policyWithAgentTamperProtectionEnabled.policy_id).then(
+        (hasChanged) => {
+          expect(hasChanged).to.eql(true);
+          unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
+            expect(isUnenrolled).to.eql(true);
+          });
+        }
+      );
+    });
+  });
+
+  describe('When agent tamper protection is enabled but then is switched to a policy with it disabled', () => {
+    let createdHost: CreateAndEnrollEndpointHostResponse;
+
+    before(() => {
+      // Create and enroll a new Endpoint host
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
+        createdHost = host as CreateAndEnrollEndpointHostResponse;
+      });
+    });
+
+    after(() => {
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      }
+    });
+
+    it('should unenroll from fleet without issues', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      // Change agent policy and wait for action to be completed
+      changeAgentPolicy(createdHost.agentId, policy.policy_id).then((hasChanged) => {
+        expect(hasChanged).to.eql(true);
+        unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
           expect(isUnenrolled).to.eql(true);
         });
       });
     });
   });
 
-  describe('When agent tamper protection is enabled', () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
+  describe('When agent tamper protection is enabled but then is switched to a policy with it also enabled', () => {
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
     before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
-
-          return enableAllPolicyProtections(policy.id).then(() => {
-            return enableAgentTamperProtectionFeatureFlagInPolicy(
-              indexedPolicy.agentPolicies[0].id
-            ).then(() => {
-              // Create and enroll a new Endpoint host
-              return createEndpointHost(policy.policy_id).then((host) => {
-                createdHost = host as CreateAndEnrollEndpointHostResponse;
-              });
-            });
-          });
-        })
-      );
+      // Create and enroll a new Endpoint host
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
+        createdHost = host as CreateAndEnrollEndpointHostResponse;
+      });
     });
 
     after(() => {
       if (createdHost) {
         cy.task('destroyEndpointHost', createdHost);
-      }
-
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
       }
 
       if (createdHost) {
@@ -112,8 +213,13 @@ describe('Unenroll agent from fleet', { tags: ['@ess'] }, () => {
 
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      unenrollAgent(createdHost.agentId).then(() => {
-        ensureAgentIsUnenrolled(createdHost.agentId).then((isUnenrolled) => {
+      // Change agent policy and wait for action to be completed
+      changeAgentPolicy(
+        createdHost.agentId,
+        secondPolicyWithAgentTamperProtectionEnabled.policy_id
+      ).then((hasChanged) => {
+        expect(hasChanged).to.eql(true);
+        unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
           expect(isUnenrolled).to.eql(true);
         });
       });

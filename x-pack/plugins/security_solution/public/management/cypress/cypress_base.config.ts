@@ -67,7 +67,7 @@ export const getCypressBaseConfig = (
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
 
-          agentActions(on, config);
+          agentActions(on);
 
           responseActionTasks(on, config);
 
