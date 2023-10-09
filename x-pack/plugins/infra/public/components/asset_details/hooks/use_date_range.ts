@@ -27,10 +27,13 @@ export function useDateRangeProvider({
   const [refreshTs, setRefreshTs] = useState(Date.now());
 
   useEffectOnce(() => {
-    // stores date range in URL state upon mouting.
     setUrlState({
-      dateRange,
-      autoRefresh,
+      ...(!urlState?.dateRange
+        ? {
+            dateRange,
+          }
+        : undefined),
+      ...(!urlState?.autoRefresh ? { autoRefresh } : undefined),
     });
   });
 

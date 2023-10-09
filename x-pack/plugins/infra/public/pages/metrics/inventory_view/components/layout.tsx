@@ -78,7 +78,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
     false
   );
   const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
-  const AUTO_REFRESH_INTERVAL = 30 * 1000;
+  const AUTO_REFRESH_INTERVAL = 5 * 1000;
 
   const options = {
     formatter: InfraFormatterType.percent,

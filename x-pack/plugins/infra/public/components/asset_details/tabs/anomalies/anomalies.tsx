@@ -19,7 +19,6 @@ export const Anomalies = () => {
 
   return (
     <AnomaliesTable
-      key={`${parsedDateRange.from}-${parsedDateRange.to}`}
       closeFlyout={onClose}
       hostName={asset.name}
       dateRange={parsedDateRange}

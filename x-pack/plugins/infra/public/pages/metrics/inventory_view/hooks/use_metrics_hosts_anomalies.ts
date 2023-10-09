@@ -134,6 +134,27 @@ const STATE_DEFAULTS: ReducerStateDefaults = {
   hasNextPage: false,
 };
 
+const initStateReducer =
+  (
+    endTime: number,
+    startTime: number,
+    defaultSortOptions: Sort,
+    defaultPaginationOptions: Pick<Pagination, 'pageSize'>,
+    filteredDatasets?: string[]
+  ) =>
+  (stateDefaults: ReducerStateDefaults): ReducerState => {
+    return {
+      ...stateDefaults,
+      paginationOptions: defaultPaginationOptions,
+      sortOptions: defaultSortOptions,
+      filteredDatasets,
+      timeRange: {
+        start: startTime,
+        end: endTime,
+      },
+    };
+  };
+
 export const useMetricsHostsAnomaliesResults = ({
   endTime,
   startTime,
@@ -154,20 +175,18 @@ export const useMetricsHostsAnomaliesResults = ({
   filteredDatasets?: string[];
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
-    return {
-      ...stateDefaults,
-      paginationOptions: defaultPaginationOptions,
-      sortOptions: defaultSortOptions,
-      filteredDatasets,
-      timeRange: {
-        start: startTime,
-        end: endTime,
-      },
-    };
-  };
 
-  const [reducerState, dispatch] = useReducer(stateReducer, STATE_DEFAULTS, initStateReducer);
+  const [reducerState, dispatch] = useReducer(
+    stateReducer,
+    STATE_DEFAULTS,
+    initStateReducer(
+      endTime,
+      startTime,
+      defaultSortOptions,
+      defaultPaginationOptions,
+      filteredDatasets
+    )
+  );
 
   const [metricsHostsAnomalies, setMetricsHostsAnomalies] = useState<MetricsHostsAnomalies>([]);
 
