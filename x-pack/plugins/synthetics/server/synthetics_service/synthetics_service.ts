@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Logger, SavedObject, ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskInstance,
@@ -15,8 +15,6 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { concatMap, Subject } from 'rxjs';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { registerCleanUpTask } from './private_location/clean_up_task';
@@ -31,7 +29,6 @@ import { ServiceAPIClient, ServiceData } from './service_api_client';
 
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
@@ -371,6 +368,9 @@ export class SyntheticsService {
   }
 
   async pushConfigs() {
+    if (!this.config.manifestUrl) {
+      return;
+    }
     const license = await this.getLicense();
     const service = this;
     const subject = new Subject<MonitorFields[]>();
@@ -381,7 +381,7 @@ export class SyntheticsService {
       .pipe(
         concatMap(async (monitors) => {
           try {
-            if (monitors.length === 0 || !this.config.manifestUrl) {
+            if (monitors.length === 0) {
               return;
             }
 
@@ -520,14 +520,17 @@ export class SyntheticsService {
 
     const paramsBySpace = await this.getSyntheticsParams();
 
-    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
-      type: syntheticsMonitorType,
-      perPage: 100,
-      namespaces: [ALL_SPACES_ID],
-    });
+    const finder =
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+        {
+          type: syntheticsMonitorType,
+          perPage: 100,
+          namespaces: [ALL_SPACES_ID],
+        }
+      );
 
     for await (const result of finder.find()) {
-      const monitors = await this.decryptMonitors(result.saved_objects, encryptedClient);
+      const monitors = result.saved_objects.filter(({ error }) => !error);
 
       const configDataList: ConfigData[] = (monitors ?? []).map((monitor) => {
         const attributes = monitor.attributes as unknown as MonitorFields;
@@ -549,55 +552,6 @@ export class SyntheticsService {
     }
 
     await finder.close();
-  }
-
-  async decryptMonitors(
-    monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
-    encryptedClient: EncryptedSavedObjectsClient
-  ) {
-    const start = performance.now();
-
-    const decryptedMonitors = await pMap(
-      monitors,
-      (monitor) =>
-        new Promise((resolve) => {
-          encryptedClient
-            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-              syntheticsMonitorType,
-              monitor.id,
-              {
-                namespace: monitor.namespaces?.[0],
-              }
-            )
-            .then((decryptedMonitor) => resolve(decryptedMonitor))
-            .catch((e) => {
-              this.logger.error(e);
-              sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
-                reason: 'Failed to decrypt monitor',
-                message: e?.message,
-                type: 'runTaskError',
-                code: e?.code,
-                status: e.status,
-                stackVersion: this.server.stackVersion,
-              });
-              resolve(null);
-            });
-        })
-    );
-
-    const end = performance.now();
-    const duration = end - start;
-
-    this.logger.debug(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
-      event: {
-        duration,
-      },
-      monitors: monitors.length,
-    });
-
-    return decryptedMonitors.filter((monitor) => monitor !== null) as Array<
-      SavedObject<SyntheticsMonitorWithSecretsAttributes>
-    >;
   }
 
   async getSyntheticsParams({

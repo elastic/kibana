@@ -418,4 +418,45 @@ describe('SyntheticsService', () => {
       });
     });
   });
+
+  describe('pagination', () => {
+    it('paginates the results', async () => {
+      const { service, locations } = getMockedService();
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      const payload = getFakePayload(locations);
+
+      await service.addConfigs({ monitor: payload } as any);
+
+      expect(axios).toHaveBeenCalledTimes(2);
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ locations: [locations[0]] }),
+        })
+      );
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ locations: [locations[1]] }),
+        })
+      );
+    });
+
+    it('does not paginate when there is only one location', async () => {
+      const { service, locations } = getMockedService();
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      const payload = getFakePayload([locations[0]]);
+
+      await service.addConfigs({ monitor: payload } as any);
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ locations: [locations[0]] }),
+        })
+      );
+    });
+  });
 });
