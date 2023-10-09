@@ -30,7 +30,7 @@ import { mkdirp } from '../build/lib';
 
 type MigrationInfoRecord = Pick<
   SavedObjectTypeMigrationInfo,
-  'name' | 'migrationVersions' | 'schemaVersions' | 'modelVersions'
+  'name' | 'migrationVersions' | 'schemaVersions' | 'modelVersions' | 'mappings'
 > & {
   hash: string;
 };
@@ -63,6 +63,7 @@ async function takeSnapshot({ log, outputPath }: { log: ToolingLog; outputPath: 
         hash: getMigrationHash(type),
         modelVersions: migrationInfo.modelVersions,
         schemaVersions: migrationInfo.schemaVersions,
+        mappings: migrationInfo.mappings,
       };
       return map;
     }, {} as Record<string, MigrationInfoRecord>);
@@ -92,7 +93,7 @@ async function startServers() {
 
 async function writeSnapshotFile(
   snapshotOutputPath: string,
-  hashMap: Record<string, MigrationInfoRecord>
+  typeDefinitions: Record<string, MigrationInfoRecord>
 ) {
   const timestamp = Date.now();
   const date = new Date().toISOString();
@@ -109,7 +110,7 @@ async function writeSnapshotFile(
       buildUrl,
       pullRequestUrl,
     },
-    typeHashes: hashMap,
+    typeDefinitions,
   };
 
   await mkdirp(path.dirname(snapshotOutputPath));
