@@ -32,12 +32,11 @@ export function useSplitFieldCardinality(
   const { dataView } = useDataSource();
 
   const requestPayload = useMemo(() => {
-    const optionDefintion = splitFieldsOptions.find((option) => option.name === splitField);
-
+    const optionDefinition = splitFieldsOptions.find((option) => option.name === splitField);
     let runtimeMappings = {};
-    if (optionDefintion?.isRuntimeField) {
+    if (optionDefinition?.isRuntimeField) {
       runtimeMappings = {
-        runtime_mappings: { [optionDefintion.name]: optionDefintion.runtimeField },
+        runtime_mappings: { [optionDefinition.name]: optionDefinition.runtimeField },
       };
     }
     return {
