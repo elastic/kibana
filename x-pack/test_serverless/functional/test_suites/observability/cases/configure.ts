@@ -20,7 +20,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Configure Case', function () {
     //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
-    this.tags(['skipOnMKI']);
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
