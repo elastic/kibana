@@ -78,7 +78,7 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
-  screenshotting: ScreenshottingStart;
+  screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
@@ -408,7 +408,7 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
+        return screenshotting!.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>
             typeof url === 'string'
