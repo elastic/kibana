@@ -7,18 +7,57 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
 
+import { isGroupNode, isItemNode } from '../../../utils';
 import { PanelGroup } from './panel_group';
 import type { PanelNavNode } from './types';
+
+/**
+ * All the children of a panel must be wrapped into groups. This means that when there is only a single
+ * group with 3 links it forces the consumer to add an extra wrapper group. To simplify that we automatically
+ * wrap all the children into a single group when we detect that all are items.
+ *
+ * @param node The current active node
+ * @returns The children serialized
+ */
+function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | undefined {
+  if (!node.children) return undefined;
+
+  const allChildrenAreItems = node.children.every(isItemNode);
+
+  if (allChildrenAreItems) {
+    // Automatically wrap all the children into top level "root" group.
+    return [
+      {
+        id: 'root',
+        title: '',
+        path: [...node.path, 'root'],
+        children: [...node.children],
+      },
+    ];
+  }
+
+  const allChildrenAreGroups = node.children.every(isGroupNode);
+
+  if (!allChildrenAreGroups) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${node.id}]. Children must either all be "groups" or all "items" but not a mix of both.`
+    );
+  }
+
+  return node.children;
+}
 
 interface Props {
   activeNode: PanelNavNode;
 }
 
 export const DefaultContent: FC<Props> = ({ activeNode }) => {
-  const totalChildren = activeNode.children?.length ?? 0;
-  const firstGroupTitle = activeNode.children?.[0]?.title;
+  const children = serializeChildren(activeNode);
+  const totalChildren = children?.length ?? 0;
+  const firstGroupTitle = children?.[0]?.title;
   const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
 
   return (
@@ -37,11 +76,11 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
         <>
           {firstGroupHasTitle && <EuiSpacer size="l" />}
 
-          {activeNode.children && (
+          {children && (
             <>
-              {activeNode.children.map((child, i) => {
+              {children.map((child, i) => {
                 const hasHorizontalRuleBefore =
-                  i === 0 ? false : !!activeNode.children?.[i - 1]?.appendHorizontalRule;
+                  i === 0 ? false : !!children?.[i - 1]?.appendHorizontalRule;
 
                 return (
                   <Fragment key={child.id}>

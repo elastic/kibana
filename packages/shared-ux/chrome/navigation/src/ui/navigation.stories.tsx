@@ -580,9 +580,6 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             title: 'Open panel (custom title)',
             openPanel: true,
             link: 'item1',
-            children: [
-              {
-                id: 'root',
                 children: [
                   {
                     link: 'group:settings.logs',
@@ -602,8 +599,6 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           },
         ],
       },
-    ],
-  },
 };
 
 export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
@@ -676,7 +671,7 @@ export const WithUIComponents = (args: NavigationServices) => {
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
-              <Navigation.Group id="group:settings" link="apm" title="Open panel" openPanel>
+              <Navigation.Group<any> id="group:openPanel" link="item1" title="Open panel" openPanel>
                 <Navigation.Group id="group1">
                   <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />

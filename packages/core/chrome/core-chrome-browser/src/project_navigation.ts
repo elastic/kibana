@@ -83,6 +83,12 @@ interface NodeDefinitionBase {
    */
   getIsActive?: GetIsActiveFn;
   /**
+   * Node type is automatically detected by checking if the node has children or not.
+   * A node without children is considered an "item" node.
+   * If you want to force a node to be a "group" node you can use this property.
+   */
+  nodeType?: 'group' | 'item';
+  /**
    * ----------------------------------------------------------------------------------------------
    * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------
    * ----------------------------------------------------------------------------------------------
