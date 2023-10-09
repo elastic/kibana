@@ -90,13 +90,21 @@ export const getLensAttributes = ({
   suggestion,
   dataView,
   references,
+  adHocDataViews,
 }: {
   filters: Filter[];
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
   references?: SavedObjectReference[];
+  adHocDataViews?: Record<string, DataViewSpec>;
 }) => {
+  let adHocDataViewsObj = adHocDataViews;
+  if (!adHocDataViews && dataView && dataView.id && !dataView.isPersisted()) {
+    adHocDataViewsObj = {
+      [dataView.id]: dataView.toSpec(false),
+    };
+  }
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -128,13 +136,9 @@ export const getLensAttributes = ({
       filters,
       query,
       visualization,
-      ...(dataView &&
-        dataView.id &&
-        !dataView.isPersisted() && {
-          adHocDataViews: {
-            [dataView.id]: dataView.toSpec(false),
-          },
-        }),
+      ...(adHocDataViewsObj && {
+        adHocDataViews: adHocDataViewsObj,
+      }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];

@@ -320,6 +320,7 @@ export function LensEditConfigurationFlyout({
                   query: attributes.state.query,
                   suggestion,
                   references: attributes.references,
+                  adHocDataViews: attributes.state.adHocDataViews,
                 });
                 updateSuggestion?.(attrs);
                 setCurrentAttributes?.(attrs);
