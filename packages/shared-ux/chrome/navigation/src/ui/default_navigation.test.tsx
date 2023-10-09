@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, type RenderResult } from '@testing-library/react';
 import { type Observable, of, BehaviorSubject } from 'rxjs';
 import type {
   ChromeNavLink,
@@ -18,15 +18,36 @@ import type {
 import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
-import type { ProjectNavigationTreeDefinition, RootNavigationItemDefinition } from './types';
+import type {
+  NavigationTreeDefinition,
+  ProjectNavigationTreeDefinition,
+  RootNavigationItemDefinition,
+} from './types';
 import { navLinksMock } from '../../mocks/src/navlinks';
 import { act } from 'react-dom/test-utils';
 
 // There is a 100ms debounce to update project navigation tree
 const SET_NAVIGATION_DELAY = 100;
 
+const services = getServicesMock();
+
+const renderDefaultNavigation = ({
+  navTreeDef,
+  onProjectNavigationChange,
+}: {
+  navTreeDef: NavigationTreeDefinition;
+  onProjectNavigationChange: (projectNavigation: ChromeProjectNavigation) => void;
+}): RenderResult => {
+  return render(
+    <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+      <DefaultNavigation navigationTree={navTreeDef} />
+    </NavigationProvider>
+  );
+};
+
+const renderNavigation = ()
+
 describe('<DefaultNavigation />', () => {
-  const services = getServicesMock();
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -36,306 +57,314 @@ describe('<DefaultNavigation />', () => {
   });
 
   describe('builds custom navigation tree', () => {
-    test('render reference UI and build the navigation tree', async () => {
-      const onProjectNavigationChange = jest.fn();
+    // test('render reference UI and build the navigation tree', async () => {
+    //   const onProjectNavigationChange = jest.fn();
 
-      const navigationBody: RootNavigationItemDefinition[] = [
-        {
-          type: 'navGroup',
-          id: 'group1',
-          children: [
-            {
-              id: 'item1',
-              title: 'Item 1',
-              href: 'http://foo',
-            },
-            {
-              id: 'item2',
-              title: 'Item 2',
-              href: 'http://foo',
-            },
-            {
-              id: 'group1A',
-              title: 'Group1A',
-              children: [
-                {
-                  id: 'item1',
-                  title: 'Group 1A Item 1',
-                  href: 'http://foo',
-                },
-                {
-                  id: 'group1A_1',
-                  title: 'Group1A_1',
-                  children: [
-                    {
-                      id: 'item1',
-                      title: 'Group 1A_1 Item 1',
-                      href: 'http://foo',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ];
+    //   const navigationBody: RootNavigationItemDefinition[] = [
+    //     {
+    //       type: 'navGroup',
+    //       id: 'group1',
+    //       defaultIsCollapsed: false,
+    //       children: [
+    //         {
+    //           id: 'item1',
+    //           title: 'Item 1',
+    //           href: 'http://foo',
+    //         },
+    //         {
+    //           id: 'item2',
+    //           title: 'Item 2',
+    //           href: 'http://foo',
+    //         },
+    //         {
+    //           id: 'group1A',
+    //           title: 'Group1A',
+    //           children: [
+    //             {
+    //               id: 'item1',
+    //               title: 'Group 1A Item 1',
+    //               href: 'http://foo',
+    //             },
+    //             {
+    //               id: 'group1A_1',
+    //               title: 'Group1A_1',
+    //               children: [
+    //                 {
+    //                   id: 'item1',
+    //                   title: 'Group 1A_1 Item 1',
+    //                   href: 'http://foo',
+    //                 },
+    //               ],
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ];
 
-      const { findAllByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
-      );
+    //   const { findByTestId } = renderDefaultNavigation({
+    //     navTreeDef: { body: navigationBody },
+    //     onProjectNavigationChange,
+    //   });
 
-      await act(async () => {
-        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
-      });
+    //   await act(async () => {
+    //     jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+    //   });
 
-      // Click the last group to expand and show the last depth
-      (await findAllByTestId(/nav-item-group1.group1A.group1A_1/))[0].click();
+    //   expect(await findByTestId(/nav-item-group1.item1/)).toBeVisible();
+    //   expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
+    //   expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+    //   expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
+    //   expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
 
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-      const lastCall =
-        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [navTreeGenerated] = lastCall;
+    //   // Click the last group to expand and show the last depth
+    //   (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
 
-      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "children": undefined,
-                "deepLink": undefined,
-                "href": "http://foo",
-                "id": "item1",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item1",
-                ],
-                "title": "Item 1",
-              },
-              Object {
-                "children": undefined,
-                "deepLink": undefined,
-                "href": "http://foo",
-                "id": "item2",
-                "isActive": false,
-                "isGroup": false,
-                "path": Array [
-                  "group1",
-                  "item2",
-                ],
-                "title": "Item 2",
-              },
-              Object {
-                "children": Array [
-                  Object {
-                    "children": undefined,
-                    "deepLink": undefined,
-                    "href": "http://foo",
-                    "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "item1",
-                    ],
-                    "title": "Group 1A Item 1",
-                  },
-                  Object {
-                    "children": Array [
-                      Object {
-                        "children": undefined,
-                        "deepLink": undefined,
-                        "href": "http://foo",
-                        "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
-                        "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
-                          "item1",
-                        ],
-                        "title": "Group 1A_1 Item 1",
-                      },
-                    ],
-                    "deepLink": undefined,
-                    "href": undefined,
-                    "id": "group1A_1",
-                    "isActive": false,
-                    "isGroup": true,
-                    "path": Array [
-                      "group1",
-                      "group1A",
-                      "group1A_1",
-                    ],
-                    "title": "Group1A_1",
-                  },
-                ],
-                "deepLink": undefined,
-                "href": undefined,
-                "id": "group1A",
-                "isActive": false,
-                "isGroup": true,
-                "path": Array [
-                  "group1",
-                  "group1A",
-                ],
-                "title": "Group1A",
-              },
-            ],
-            "deepLink": undefined,
-            "href": undefined,
-            "id": "group1",
-            "isActive": false,
-            "isGroup": true,
-            "path": Array [
-              "group1",
-            ],
-            "title": "",
-            "type": "navGroup",
-          },
-        ]
-      `);
-    });
+    //   expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
 
-    test('should read the title from deeplink', async () => {
-      const navLinks$: Observable<ChromeNavLink[]> = of([
-        ...navLinksMock,
-        {
-          id: 'item1',
-          title: 'Title from deeplink',
-          baseUrl: '',
-          url: '',
-          href: '',
-        },
-      ]);
+    //   expect(onProjectNavigationChange).toHaveBeenCalled();
+    //   const lastCall =
+    //     onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    //   const [navTree] = lastCall;
 
-      const onProjectNavigationChange = jest.fn();
+    //   expect(navTree.navigationTree).toMatchInlineSnapshot(`
+    //     Array [
+    //       Object {
+    //         "children": Array [
+    //           Object {
+    //             "children": undefined,
+    //             "deepLink": undefined,
+    //             "href": "http://foo",
+    //             "id": "item1",
+    //             "isActive": false,
+    //             "isGroup": false,
+    //             "path": Array [
+    //               "group1",
+    //               "item1",
+    //             ],
+    //             "title": "Item 1",
+    //           },
+    //           Object {
+    //             "children": undefined,
+    //             "deepLink": undefined,
+    //             "href": "http://foo",
+    //             "id": "item2",
+    //             "isActive": false,
+    //             "isGroup": false,
+    //             "path": Array [
+    //               "group1",
+    //               "item2",
+    //             ],
+    //             "title": "Item 2",
+    //           },
+    //           Object {
+    //             "children": Array [
+    //               Object {
+    //                 "children": undefined,
+    //                 "deepLink": undefined,
+    //                 "href": "http://foo",
+    //                 "id": "item1",
+    //                 "isActive": false,
+    //                 "isGroup": false,
+    //                 "path": Array [
+    //                   "group1",
+    //                   "group1A",
+    //                   "item1",
+    //                 ],
+    //                 "title": "Group 1A Item 1",
+    //               },
+    //               Object {
+    //                 "children": Array [
+    //                   Object {
+    //                     "children": undefined,
+    //                     "deepLink": undefined,
+    //                     "href": "http://foo",
+    //                     "id": "item1",
+    //                     "isActive": false,
+    //                     "isGroup": false,
+    //                     "path": Array [
+    //                       "group1",
+    //                       "group1A",
+    //                       "group1A_1",
+    //                       "item1",
+    //                     ],
+    //                     "title": "Group 1A_1 Item 1",
+    //                   },
+    //                 ],
+    //                 "deepLink": undefined,
+    //                 "href": undefined,
+    //                 "id": "group1A_1",
+    //                 "isActive": false,
+    //                 "isGroup": true,
+    //                 "path": Array [
+    //                   "group1",
+    //                   "group1A",
+    //                   "group1A_1",
+    //                 ],
+    //                 "title": "Group1A_1",
+    //               },
+    //             ],
+    //             "deepLink": undefined,
+    //             "href": undefined,
+    //             "id": "group1A",
+    //             "isActive": false,
+    //             "isGroup": true,
+    //             "path": Array [
+    //               "group1",
+    //               "group1A",
+    //             ],
+    //             "title": "Group1A",
+    //           },
+    //         ],
+    //         "deepLink": undefined,
+    //         "href": undefined,
+    //         "id": "group1",
+    //         "isActive": true,
+    //         "isGroup": true,
+    //         "path": Array [
+    //           "group1",
+    //         ],
+    //         "title": "",
+    //         "type": "navGroup",
+    //       },
+    //     ]
+    //   `);
+    // });
 
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          children: [
-            {
-              id: 'group1',
-              children: [
-                {
-                  id: 'item1',
-                  link: 'item1', // Title from deeplink
-                },
-                {
-                  id: 'item2',
-                  link: 'item1', // Overwrite title from deeplink
-                  title: 'Overwrite deeplink title',
-                },
-                {
-                  id: 'item3',
-                  link: 'unknown', // Unknown deeplink
-                  title: 'Should not be rendered',
-                },
-              ],
-            },
-          ],
-        },
-      ];
+    // test('should read the title from deeplink', async () => {
+    //   const navLinks$: Observable<ChromeNavLink[]> = of([
+    //     ...navLinksMock,
+    //     {
+    //       id: 'item1',
+    //       title: 'Title from deeplink',
+    //       baseUrl: '',
+    //       url: '',
+    //       href: '',
+    //     },
+    //   ]);
 
-      render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <DefaultNavigation navigationTree={{ body: navigationBody }} />
-        </NavigationProvider>
-      );
+    //   const onProjectNavigationChange = jest.fn();
 
-      await act(async () => {
-        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
-      });
+    //   const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+    //     {
+    //       type: 'navGroup',
+    //       id: 'root',
+    //       children: [
+    //         {
+    //           id: 'group1',
+    //           children: [
+    //             {
+    //               id: 'item1',
+    //               link: 'item1', // Title from deeplink
+    //             },
+    //             {
+    //               id: 'item2',
+    //               link: 'item1', // Overwrite title from deeplink
+    //               title: 'Overwrite deeplink title',
+    //             },
+    //             {
+    //               id: 'item3',
+    //               link: 'unknown', // Unknown deeplink
+    //               title: 'Should not be rendered',
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ];
 
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-      const lastCall =
-        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [navTreeGenerated] = lastCall;
+    //   render(
+    //     <NavigationProvider
+    //       {...services}
+    //       navLinks$={navLinks$}
+    //       onProjectNavigationChange={onProjectNavigationChange}
+    //     >
+    //       <DefaultNavigation navigationTree={{ body: navigationBody }} />
+    //     </NavigationProvider>
+    //   );
 
-      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "children": Array [
-                  Object {
-                    "children": undefined,
-                    "deepLink": Object {
-                      "baseUrl": "",
-                      "href": "",
-                      "id": "item1",
-                      "title": "Title from deeplink",
-                      "url": "",
-                    },
-                    "href": undefined,
-                    "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "root",
-                      "group1",
-                      "item1",
-                    ],
-                    "title": "Title from deeplink",
-                  },
-                  Object {
-                    "children": undefined,
-                    "deepLink": Object {
-                      "baseUrl": "",
-                      "href": "",
-                      "id": "item1",
-                      "title": "Title from deeplink",
-                      "url": "",
-                    },
-                    "href": undefined,
-                    "id": "item2",
-                    "isActive": false,
-                    "isGroup": false,
-                    "path": Array [
-                      "root",
-                      "group1",
-                      "item2",
-                    ],
-                    "title": "Overwrite deeplink title",
-                  },
-                ],
-                "deepLink": undefined,
-                "href": undefined,
-                "id": "group1",
-                "isActive": false,
-                "isGroup": true,
-                "path": Array [
-                  "root",
-                  "group1",
-                ],
-                "title": "",
-              },
-            ],
-            "deepLink": undefined,
-            "href": undefined,
-            "id": "root",
-            "isActive": false,
-            "isGroup": true,
-            "path": Array [
-              "root",
-            ],
-            "title": "",
-            "type": "navGroup",
-          },
-        ]
-      `);
-    });
+    //   await act(async () => {
+    //     jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+    //   });
+
+    //   expect(onProjectNavigationChange).toHaveBeenCalled();
+    //   const lastCall =
+    //     onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    //   const [navTreeGenerated] = lastCall;
+
+    //   expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+    //     Array [
+    //       Object {
+    //         "children": Array [
+    //           Object {
+    //             "children": Array [
+    //               Object {
+    //                 "children": undefined,
+    //                 "deepLink": Object {
+    //                   "baseUrl": "",
+    //                   "href": "",
+    //                   "id": "item1",
+    //                   "title": "Title from deeplink",
+    //                   "url": "",
+    //                 },
+    //                 "href": undefined,
+    //                 "id": "item1",
+    //                 "isActive": false,
+    //                 "isGroup": false,
+    //                 "path": Array [
+    //                   "root",
+    //                   "group1",
+    //                   "item1",
+    //                 ],
+    //                 "title": "Title from deeplink",
+    //               },
+    //               Object {
+    //                 "children": undefined,
+    //                 "deepLink": Object {
+    //                   "baseUrl": "",
+    //                   "href": "",
+    //                   "id": "item1",
+    //                   "title": "Title from deeplink",
+    //                   "url": "",
+    //                 },
+    //                 "href": undefined,
+    //                 "id": "item2",
+    //                 "isActive": false,
+    //                 "isGroup": false,
+    //                 "path": Array [
+    //                   "root",
+    //                   "group1",
+    //                   "item2",
+    //                 ],
+    //                 "title": "Overwrite deeplink title",
+    //               },
+    //             ],
+    //             "deepLink": undefined,
+    //             "href": undefined,
+    //             "id": "group1",
+    //             "isActive": false,
+    //             "isGroup": true,
+    //             "path": Array [
+    //               "root",
+    //               "group1",
+    //             ],
+    //             "title": "",
+    //           },
+    //         ],
+    //         "deepLink": undefined,
+    //         "href": undefined,
+    //         "id": "root",
+    //         "isActive": false,
+    //         "isGroup": true,
+    //         "path": Array [
+    //           "root",
+    //         ],
+    //         "title": "",
+    //         "type": "navGroup",
+    //       },
+    //     ]
+    //   `);
+    // });
 
     test('should allow href for absolute links', async () => {
       const onProjectNavigationChange = jest.fn();

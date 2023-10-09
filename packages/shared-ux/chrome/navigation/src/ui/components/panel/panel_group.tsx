@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, useCallback } from 'react';
+import React, { FC, Fragment, useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
@@ -65,10 +65,10 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
 
     return children.map((item, i) =>
       item.children ? (
-        <>
-          <PanelGroup key={item.id} navNode={item} />
+        <Fragment key={item.id}>
+          <PanelGroup navNode={item} />
           {i < totalChildren - 1 && <EuiSpacer />}
-        </>
+        </Fragment>
       ) : (
         <PanelNavItem key={item.id} item={item} />
       )
