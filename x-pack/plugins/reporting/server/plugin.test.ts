@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import nodeCrypto from '@elastic/node-crypto';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { CancellationToken, setFieldFormats } from '@kbn/reporting-common';
 import {
   PNG_REPORT_TYPE_V2,
   PDF_REPORT_TYPE_V2,
@@ -14,6 +17,9 @@ import {
   CSV_REPORT_TYPE,
   CSV_REPORT_TYPE_V2,
 } from '@kbn/reporting-common/report_types';
+import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
+import { Writable } from 'stream';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
@@ -146,6 +152,94 @@ describe('Reporting Plugin', () => {
       expect(registerSpy).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: PNG_REPORT_TYPE_V2 })
       );
+    });
+  });
+  // Requires field formats which is set on the plugin level to render for csv types
+  describe('CsvSearchSource export type functionality', () => {
+    // create the mock csv search source export type
+    jest.mock('@kbn/generate-csv', () => ({
+      CsvGenerator: class CsvGeneratorMock {
+        generateData() {
+          return {
+            size: 123,
+            content_type: 'text/csv',
+          };
+        }
+      },
+    }));
+
+    let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
+
+    const mockLogger = loggingSystemMock.createLogger();
+    const encryptionKey = 'tetkey';
+    const headers = { sid: 'cooltestheaders' };
+    let encryptedHeaders: string;
+    let stream: jest.Mocked<Writable>;
+
+    beforeAll(async () => {
+      const crypto = nodeCrypto({ encryptionKey });
+
+      encryptedHeaders = await crypto.encrypt(headers);
+      const configType = createMockConfigSchema({
+        encryptionKey,
+        csv: {
+          checkForFormulas: true,
+          escapeFormulaValues: true,
+          maxSizeBytes: 180000,
+          scroll: { size: 500, duration: '30s' },
+        },
+      });
+      const mockCoreSetup = coreMock.createSetup();
+      const mockCoreStart = coreMock.createStart();
+      const context = coreMock.createPluginInitializerContext(configType);
+
+      mockCsvSearchSourceExportType = new CsvSearchSourceExportType(
+        mockCoreSetup,
+        configType,
+        mockLogger,
+        context
+      );
+
+      mockCsvSearchSourceExportType.setup({
+        basePath: { set: jest.fn() },
+      });
+
+      mockCsvSearchSourceExportType.start({
+        esClient: elasticsearchServiceMock.createClusterClient(),
+        savedObjects: mockCoreStart.savedObjects,
+        uiSettings: mockCoreStart.uiSettings,
+        discover: discoverPluginMock.createStartContract(),
+        data: dataPluginMock.createStartContract(),
+        screenshotting: createMockScreenshottingStart(),
+      });
+    });
+
+    beforeEach(async () => {
+      stream = {} as typeof stream;
+      setFieldFormats(pluginStart.fieldFormats);
+    });
+
+    xtest('gets the csv content from job parameters', async () => {
+      const payload = await mockCsvSearchSourceExportType.runTask(
+        'cool-job-id',
+        {
+          headers: encryptedHeaders,
+          browserTimezone: 'US/Alaska',
+          searchSource: {},
+          objectType: 'search',
+          title: 'Test Search',
+          version: '7.13.0',
+        },
+        new CancellationToken(),
+        stream
+      );
+
+      expect(payload).toMatchInlineSnapshot(`
+              Object {
+                "content_type": "text/csv",
+                "size": 123,
+              }
+            `);
     });
   });
 });

@@ -12,9 +12,8 @@ import { ManagementLinkFn } from '@kbn/reporting-common/url';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { buildKibanaPath, BaseParams, JobId } from '@kbn/reporting-common';
+import { buildKibanaPath, BaseParams, JobId, getRedirectAppPath } from '@kbn/reporting-common';
 import {
-  getRedirectAppPath,
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
