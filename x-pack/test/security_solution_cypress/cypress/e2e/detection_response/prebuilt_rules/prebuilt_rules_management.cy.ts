@@ -51,8 +51,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
