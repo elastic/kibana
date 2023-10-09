@@ -16,6 +16,11 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  // Replace with the corresponding logs alert rule feature flag
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
+
   framework
     .registerVersionedRoute({
       access: 'internal',

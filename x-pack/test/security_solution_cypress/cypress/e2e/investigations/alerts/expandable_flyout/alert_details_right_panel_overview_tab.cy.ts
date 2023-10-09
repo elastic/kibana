@@ -134,7 +134,8 @@ describe(
       });
     });
 
-    describe('visualizations section', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168222
+    describe.skip('visualizations section', () => {
       it('should display analyzer and session previews', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabVisualizationsSection();
