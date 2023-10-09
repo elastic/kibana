@@ -79,7 +79,7 @@ export const ProjectAPIKeys = () => {
                 label={i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
                   defaultMessage: 'Elastic managed locations enabled',
                 })}
-                checked={accessToElasticManagedLocations && canUsePublicLocations}
+                checked={accessToElasticManagedLocations && Boolean(canUsePublicLocations)}
                 onChange={() => {
                   setAccessToElasticManagedLocations(!accessToElasticManagedLocations);
                 }}
