@@ -36,7 +36,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
+describe('Upgrade risk scores', () => {
   before(() => {
     cleanKibana();
     login();
@@ -44,7 +44,7 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     createRule(getNewRule({ rule_id: 'rule1' }));
   });
 
-  describe('show upgrade risk button', () => {
+  describe('show upgrade risk button', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
@@ -70,19 +70,16 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('upgrade risk engine', () => {
-    before(() => {
+  describe('upgrade risk engine', { tags: ['@ess', '@brokenInserverless'] }, () => {
+    beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       cy.task('esArchiverLoad', { archiveName: 'risk_users' });
-    });
-
-    beforeEach(() => {
       login();
       installRiskScoreModule();
       visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', 'risk_hosts');
       cy.task('esArchiverUnload', 'risk_users');
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
