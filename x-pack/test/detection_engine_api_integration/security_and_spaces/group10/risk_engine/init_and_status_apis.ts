@@ -47,7 +47,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('init api', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168376
+    describe.skip('init api', () => {
       it('should return response with success status', async () => {
         const response = await riskEngineRoutes.init();
         expect(response.body).to.eql({
