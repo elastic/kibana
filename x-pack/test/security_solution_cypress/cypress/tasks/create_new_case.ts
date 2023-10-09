@@ -57,7 +57,6 @@ export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
 };
 
 export const attachTimeline = (newCase: TestCase) => {
-  cy.pause();
   cy.waitUntil(
     () => {
       cy.log('Waiting for timeline to appear');
