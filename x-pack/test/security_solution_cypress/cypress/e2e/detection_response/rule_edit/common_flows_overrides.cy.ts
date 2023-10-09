@@ -6,7 +6,7 @@
  */
 
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getNewOverrideRule, getSeverityOverride4 } from '../../../objects/rule';
+import { getNewOverrideRule } from '../../../objects/rule';
 
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { expandAdvancedSettings } from '../../../tasks/rule_creation';
