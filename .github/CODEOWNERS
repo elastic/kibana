@@ -396,6 +396,7 @@ x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
+packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/file_upload @elastic/kibana-gis
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
@@ -1273,7 +1274,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/api/detection_engine/signals_migration @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/cti @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
-/x-pack/plugins/security_solution/common/risk_engine @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
@@ -1364,6 +1364,17 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-securit
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
+## Security Solution sub teams - Entity Analytics
+x-pack/plugins/security_solution/common/risk_engine @elastic/security-entity-analytics @elastic/security-entity-analytics
+x-pack/plugins/security_solution/common/search_strategy/security_solution/risk_score @elastic/security-entity-analytics
+x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
+x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics
+x-pack/plugins/security_solution/public/overview/pages/entity_analytics.tsx @elastic/security-entity-analytics
+x-pack/plugins/security_solution/public/overview/components/entity_analytics
+x-pack/plugins/security_solution/server/lib/risk_engine @elastic/security-entity-analytics
+x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
+x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_engine @elastic/security-entity-analytics
+
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
@@ -1420,6 +1431,12 @@ x-pack/plugins/observability_shared/public/components/profiling @elastic/profili
 
 # Shared UX
 packages/react @elastic/appex-sharedux
+
+# OpenAPI spec files
+/x-pack/plugins/fleet/common/openapi          @elastic/platform-docs
+/x-pack/plugins/ml/common/openapi             @elastic/platform-docs
+/packages/core/saved-objects/docs/openapi     @elastic/platform-docs
+/plugins/data_views/docs/openapi              @elastic/platform-docs
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

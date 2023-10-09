@@ -7,10 +7,11 @@
  */
 
 import { CategorizedFields, FieldDefinition } from '@kbn/management-settings-types';
+import { CATEGORY_ORDER } from './const';
 
 export const categorizeFields = (fields: FieldDefinition[]): CategorizedFields => {
   // Group settings by category
-  return fields.reduce((grouped: CategorizedFields, field) => {
+  const groups = fields.reduce((grouped: CategorizedFields, field) => {
     const category = field.categories[0];
     const group = grouped[category] || { count: 0, fields: [] };
     group.fields = [...group.fields, field];
@@ -19,4 +20,13 @@ export const categorizeFields = (fields: FieldDefinition[]): CategorizedFields =
 
     return grouped;
   }, {});
+
+  const orderedGroups: CategorizedFields = {};
+  for (const category of CATEGORY_ORDER) {
+    if (groups[category]) {
+      orderedGroups[category] = groups[category];
+    }
+  }
+
+  return { ...orderedGroups, ...groups };
 };
