@@ -57,6 +57,7 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-const
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
 import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
+import * as moment from 'moment';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -74,6 +75,9 @@ describe('ingest_integration tests ', () => {
   });
   const Gold = licenseMock.createLicense({
     license: { type: 'gold', mode: 'gold', uid: 'updated-uid' },
+  });
+  const Enterprise = licenseMock.createLicense({
+    license: { type: 'enterprise', uid: 'updated-uid' },
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
@@ -401,7 +405,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() =>
         callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-      ).rejects.toThrow('Requires Platinum license');
+      ).rejects.toThrow('Gold license does not support this action. Please upgrade your license.');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
@@ -429,12 +433,12 @@ describe('ingest_integration tests ', () => {
     });
   });
 
-  describe('package policy update callback (when the license is at least platinum)', () => {
+  describe('package policy update callback (when the license is at least enterprise)', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     beforeEach(() => {
-      licenseEmitter.next(Platinum); // set license level to platinum
+      licenseEmitter.next(Enterprise); // set license level to enterprise
     });
 
     it.each([
@@ -454,6 +458,69 @@ describe('ingest_integration tests ', () => {
       {
         date: '2100-10-01',
         message: 'Global manifest version cannot be in the future. UTC time.',
+      },
+      {
+        date: 'latest',
+      },
+      {
+        date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
+      },
+    ])(
+      'should return bad request for invalid endpoint package policy global manifest values',
+      async ({ date, message }) => {
+        const mockPolicy = policyFactory(); // defaults with paid features on
+        const logger = loggingSystemMock.create().get('ingest_integration.test');
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextMock.featureUsageService,
+          endpointAppContextMock.endpointMetadataService,
+          cloudService,
+          esClient,
+          appFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = {
+          ...mockPolicy,
+          global_manifest_version: date,
+        };
+        if (!message) {
+          const updatedPolicyConfig = await callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+          expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual({
+            ...mockPolicy,
+            global_manifest_version: date,
+          });
+        } else {
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(message);
+        }
+      }
+    );
+  });
+
+  describe('package policy update callback (when the license is at least platinum)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    beforeEach(() => {
+      licenseEmitter.next(Platinum); // set license level to platinum
+    });
+
+    it.each([
+      {
+        date: '2100-10-01',
+        message: 'Platinum license does not support this action. Please upgrade your license.',
+      },
+      {
+        date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
+        message: 'Platinum license does not support this action. Please upgrade your license.',
       },
       {
         date: 'latest',
