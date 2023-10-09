@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export interface DataQualityPanelConfig {
-  isILMAvailable: boolean;
+import { ActionsClientContext } from '../../../../../actions_client';
+
+export interface GetParams {
+  context: ActionsClientContext;
+  id: string;
+  throwIfSystemAction?: boolean;
 }
