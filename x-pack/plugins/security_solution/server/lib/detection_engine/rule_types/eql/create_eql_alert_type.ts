@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { EqlRuleParams } from '../../rule_schema';
@@ -59,6 +60,7 @@ export const createEqlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {

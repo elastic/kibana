@@ -40,6 +40,7 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
+        securityModel: 'certificate',
       });
     });
 
@@ -71,6 +72,7 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
         serverName: 'my_server_name',
+        securityModel: 'certificate',
       });
     });
 
@@ -92,6 +94,7 @@ describe('cluster_serialization', () => {
         maxConnectionsPerCluster: 3,
         initialConnectTimeout: '30s',
         skipUnavailable: false,
+        securityModel: 'certificate',
       });
     });
 
@@ -125,6 +128,7 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
+        securityModel: 'certificate',
       });
     });
 
@@ -160,6 +164,7 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
         serverName: 'localhost',
+        securityModel: 'certificate',
       });
     });
 
@@ -181,6 +186,38 @@ describe('cluster_serialization', () => {
         connectedNodesCount: 1,
         initialConnectTimeout: '30s',
         transportCompress: false,
+        securityModel: 'certificate',
+      });
+    });
+
+    it('should deserialize a cluster object with API key based security model', () => {
+      expect(
+        deserializeCluster('test_cluster', {
+          seeds: ['localhost:9300'],
+          connected: true,
+          mode: 'sniff',
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+          transport: {
+            ping_schedule: '-1',
+            compress: false,
+          },
+          cluster_credentials: '::es_redacted::',
+        })
+      ).toEqual({
+        name: 'test_cluster',
+        mode: 'sniff',
+        seeds: ['localhost:9300'],
+        isConnected: true,
+        connectedNodesCount: 1,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+        transportPingSchedule: '-1',
+        transportCompress: false,
+        securityModel: 'api_key',
       });
     });
   });

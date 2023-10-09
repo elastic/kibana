@@ -8,6 +8,7 @@
 import { significantTermGroups } from '../../../common/__mocks__/farequote/significant_term_groups';
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
@@ -24,6 +25,8 @@ describe('markDuplicates', () => {
         id: 'group-1',
         group: [
           {
+            key: 'custom_field.keyword:deviation',
+            type: 'keyword',
             fieldName: 'custom_field.keyword',
             fieldValue: 'deviation',
             docCount: 101,
@@ -31,6 +34,8 @@ describe('markDuplicates', () => {
             pValue: 0.01,
           },
           {
+            key: 'airline:UAL',
+            type: 'keyword',
             fieldName: 'airline',
             fieldValue: 'UAL',
             docCount: 101,
@@ -45,6 +50,8 @@ describe('markDuplicates', () => {
         id: 'group-2',
         group: [
           {
+            key: 'custom_field.keyword:deviation',
+            type: 'keyword',
             fieldName: 'custom_field.keyword',
             fieldValue: 'deviation',
             docCount: 49,
@@ -52,6 +59,8 @@ describe('markDuplicates', () => {
             pValue: 0.001,
           },
           {
+            key: 'airline:AAL',
+            type: 'keyword',
             fieldName: 'airline',
             fieldValue: 'AAL',
             docCount: 49,
@@ -70,6 +79,7 @@ describe('markDuplicates', () => {
       filteredFrequentItemSets,
       true,
       false,
+      significantTerms,
       fields
     );
     const leaves = getSimpleHierarchicalTreeLeaves(simpleHierarchicalTree.root, []);
@@ -78,9 +88,11 @@ describe('markDuplicates', () => {
 
     expect(markedDuplicates).toEqual([
       {
-        id: '40215074',
+        id: '3189595908',
         group: [
           {
+            key: 'response_code:500',
+            type: 'keyword',
             fieldName: 'response_code',
             fieldValue: '500',
             docCount: 792,
@@ -88,6 +100,8 @@ describe('markDuplicates', () => {
             pValue: 0.010770456205312423,
           },
           {
+            key: 'url:home.php',
+            type: 'keyword',
             fieldName: 'url',
             fieldValue: 'home.php',
             docCount: 792,
@@ -99,9 +113,11 @@ describe('markDuplicates', () => {
         pValue: 0.010770456205312423,
       },
       {
-        id: '47022118',
+        id: '715957062',
         group: [
           {
+            key: 'url:home.php',
+            type: 'keyword',
             fieldName: 'url',
             fieldValue: 'home.php',
             docCount: 792,
@@ -109,6 +125,8 @@ describe('markDuplicates', () => {
             pValue: 0.010770456205312423,
           },
           {
+            key: 'user:Peter',
+            type: 'keyword',
             fieldName: 'user',
             fieldValue: 'Peter',
             docCount: 634,

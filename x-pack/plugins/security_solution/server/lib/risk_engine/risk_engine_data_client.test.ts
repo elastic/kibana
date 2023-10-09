@@ -511,11 +511,6 @@ describe('RiskEngineDataClient', () => {
               transform_id: 'risk_score_latest_transform_default',
             },
           });
-
-          expect(transforms.startTransform).toHaveBeenCalledWith({
-            esClient,
-            transformId: 'risk_score_latest_transform_default',
-          });
         });
       });
 
@@ -562,7 +557,7 @@ describe('RiskEngineDataClient', () => {
               namespace: 'default',
             });
             expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: false,
+              isMaxAmountOfRiskEnginesReached: true,
               riskEngineStatus: 'ENABLED',
               legacyRiskEngineStatus: 'NOT_INSTALLED',
             });

@@ -12,6 +12,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -43,8 +44,6 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     references = alert.references;
   }
 
-  await untrackRuleAlerts(context, id, attributes);
-
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -62,6 +61,8 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     );
     throw error;
   }
+
+  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
 
   context.auditLogger?.log(
     ruleAuditEvent({

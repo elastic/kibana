@@ -15,7 +15,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   IconType,
-  EuiFlyoutSize,
   RecursivePartial,
   EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
@@ -94,6 +93,7 @@ import { RulesListVisibleColumns } from './application/sections/rules_list/compo
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -157,9 +157,7 @@ export type ActionTypeRegistryContract<
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
-export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
-  TypeRegistry<AlertsTableConfigurationRegistry>
->;
+export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<AlertTableConfigRegistry>;
 
 export interface ConnectorValidationError {
   message: ReactNode;
@@ -453,6 +451,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
+  hideGrouping?: boolean;
   hideInterval?: boolean;
   onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
@@ -537,7 +536,6 @@ export type AlertsTableProps = {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
   id?: string;
@@ -689,6 +687,13 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+}
+
+export interface AlertsTableConfigurationRegistryWithActions
+  extends AlertsTableConfigurationRegistry {
+  actions: {
+    toggleColumn: (columnId: string) => void;
+  };
 }
 
 export enum BulkActionsVerbs {
