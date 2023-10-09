@@ -114,7 +114,11 @@ export class PluginsStatusService {
             statusChanged$.pipe(
               startWith({
                 level: ServiceStatusLevels.unavailable,
-                summary: `Status check timed out after ${this.statusTimeoutMs}ms`,
+                summary: `Status check timed out after ${
+                  this.statusTimeoutMs < 1000
+                    ? `${this.statusTimeoutMs}ms`
+                    : `${this.statusTimeoutMs / 1000}s`
+                }`,
               })
             ),
         })
