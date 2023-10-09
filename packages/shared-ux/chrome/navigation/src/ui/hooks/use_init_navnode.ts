@@ -110,6 +110,7 @@ function validateNodeProps<
   Id extends string = string,
   ChildrenId extends string = Id
 >({
+  id,
   link,
   href,
   cloudLink,
@@ -118,16 +119,24 @@ function validateNodeProps<
   isGroup,
 }: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>) {
   if (link && cloudLink) {
-    throw new Error(`Only one of "link" or "cloudLink" can be provided.`);
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. Only one of "link" or "cloudLink" can be provided.`
+    );
   }
   if (href && cloudLink) {
-    throw new Error(`Only one of "href" or "cloudLink" can be provided.`);
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
+    );
   }
-  if ((href || link) && openPanel) {
-    throw new Error(`If "openPanel" is provided, "href" and "link" must not be provided.`);
+  if (openPanel && !link) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. If "openPanel" is provided, a "link" must also be provided.`
+    );
   }
   if (appendHorizontalRule && !isGroup) {
-    throw new Error(`"appendHorizontalRule" can only be added for group with children.`);
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. "appendHorizontalRule" can only be added for group with children.`
+    );
   }
 }
 

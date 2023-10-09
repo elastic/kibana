@@ -20,6 +20,7 @@ import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink } from '../../utils';
 import { PanelContext, usePanel } from './panel';
+import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNode,
@@ -68,6 +69,12 @@ const navigationNodeToEuiItem = (
     };
   }
 
+  if (itemOpenPanel) {
+    return {
+      renderItem: () => <NavigationItemOpenPanel item={item} navigateToUrl={navigateToUrl} />,
+    };
+  }
+
   const onClick = (e: React.MouseEvent) => {
     if (href !== undefined || itemOpenPanel) {
       if (href !== undefined) {
@@ -94,7 +101,6 @@ const navigationNodeToEuiItem = (
 
   return {
     id,
-    isGroupTitle: item.isGroupTitle,
     title: item.title,
     isSelected,
     accordionProps: {
