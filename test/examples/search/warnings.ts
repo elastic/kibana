@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
@@ -102,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
-      // toasts
       let toasts: WebElementWrapper[] = [];
 
       await retry.try(async () => {
@@ -115,21 +113,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await t.getVisibleText()).to.eql(expects[index]);
       });
 
-      await retry.try(async () => {
-        response = await getTestJson('responseTab', 'responseCodeBlock');
-        expect(response).not.to.eql({});
-      });
-
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openIncompleteResultsModalBtn');
       await openShardModalButton.click();
-
-      // wait for response - toasts appear before the response is rendered
-      let response: estypes.SearchResponse | undefined;
-      await retry.try(async () => {
-        response = await getTestJson('responseTab', 'responseCodeBlock');
-        expect(response).not.to.eql({});
-      });
 
       // request
       await testSubjects.click('showRequestButton');
@@ -142,6 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('closeIncompleteResultsModal');
 
+      const response = await getTestJson('responseTab', 'responseCodeBlock');
+      expect(response).not.to.eql({});
       // response tab
       assert(response && response._shards.failures);
       expect(response._shards.total).to.be(4);
