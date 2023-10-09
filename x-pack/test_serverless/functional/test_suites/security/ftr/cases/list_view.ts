@@ -17,7 +17,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Cases List', () => {
+  describe('Cases List', function () {
+    // multiple errors in after hook due to delete permission
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
@@ -47,6 +49,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('bulk actions', () => {
+      // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
+      // action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       describe('delete', () => {
         createNCasesBeforeDeleteAllAfter(8, getPageObject, getService);
 
@@ -148,6 +152,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('severity filtering', () => {
+      // Error: retry.tryForTime timeout: Error: expected 10 to equal 5
       before(async () => {
         await testSubjects.click('solutionSideNavItemLink-cases');
 
@@ -196,6 +201,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('pagination', () => {
+      // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 
       it('paginates cases correctly', async () => {

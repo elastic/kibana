@@ -7,7 +7,7 @@
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
+import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
@@ -23,10 +23,9 @@ import {
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       login();
@@ -111,7 +110,7 @@ describe(
           rules: [UPDATED_RULE_1, UPDATED_RULE_2],
           installToKibana: false,
         });
-        reload();
+        cy.reload();
       });
 
       it('upgrading prebuilt rules one by one', () => {
