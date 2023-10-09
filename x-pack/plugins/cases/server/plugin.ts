@@ -43,6 +43,7 @@ import {
   createCaseSavedObjectType,
   createCaseUserActionSavedObjectType,
   casesTelemetrySavedObjectType,
+  casesOracleSavedObjectType,
 } from './saved_object_types';
 
 import type { CasesClient } from './client';
@@ -146,6 +147,7 @@ export class CasePlugin {
     );
 
     core.savedObjects.registerType(casesTelemetrySavedObjectType);
+    core.savedObjects.registerType(casesOracleSavedObjectType);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,

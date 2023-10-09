@@ -11,3 +11,4 @@ export { createCaseCommentSavedObjectType } from './comments';
 export { createCaseUserActionSavedObjectType } from './user_actions';
 export { caseConnectorMappingsSavedObjectType } from './connector_mappings';
 export { casesTelemetrySavedObjectType } from './telemetry';
+export { casesOracleSavedObjectType } from './cases_oracle';
