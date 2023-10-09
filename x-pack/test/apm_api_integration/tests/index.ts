@@ -25,7 +25,7 @@ function getGlobPattern() {
 
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
-  
+
   describe('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
