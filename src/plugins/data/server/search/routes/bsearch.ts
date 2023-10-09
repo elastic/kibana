@@ -46,10 +46,12 @@ export function registerBsearchRoute(
                 throw {
                   message: err.message,
                   statusCode: err.statusCode,
-                  attributes: {
-                    error: err.errBody?.error,
-                    rawResponse: err.errBody?.response,
-                  }
+                  attributes: err.errBody
+                    ? {
+                        error: err.errBody.error,
+                        rawResponse: err.errBody.response,
+                      }
+                    : undefined
                 };
               })
             )

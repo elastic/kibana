@@ -49,10 +49,12 @@ export function reportSearchError(res: KibanaResponseFactory, err: KbnSearchErro
     statusCode: err.statusCode ?? 500,
     body: {
       message: err.message,
-      attributes: {
-        error: err.errBody?.error,
-        rawResponse: err.errBody?.response,
-      }
+      attributes: err.errBody
+        ? {
+            error: err.errBody.error,
+            rawResponse: err.errBody.response,
+          }
+        : undefined,
     },
   });
 }
