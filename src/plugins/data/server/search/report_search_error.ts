@@ -15,7 +15,7 @@ import { KbnError } from '@kbn/kibana-utils-plugin/common';
 // Search errors need to surface additional information
 // such as rawResponse and sanitized requestParams.
 // KbnServerError and reportServerError are used widely throughtout Kibana.
-// KbnSearchError and reportSearchError exist to avoid polluting 
+// KbnSearchError and reportSearchError exist to avoid polluting
 // non-search usages of KbnServerError and reportServerError with extra information.
 export class KbnSearchError extends KbnError {
   public errBody?: Record<string, any>;
