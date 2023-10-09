@@ -881,6 +881,7 @@ export interface SuggestionRequest<T = unknown> {
   subVisualizationId?: string;
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
+  datasourceId?: string;
 }
 
 /**

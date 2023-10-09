@@ -47,10 +47,11 @@ export function LensEditConfigurationFlyout({
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+  const [errors, setErrors] = useState<Error[] | undefined>();
+  const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
-  const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
@@ -165,16 +166,33 @@ export function LensEditConfigurationFlyout({
     datasourceMap,
   ]);
 
+  // needed for text based languages mode which works ONLY with adHoc dataviews
+  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
+
   const runQuery = useCallback(
     async (q) => {
-      const attrs = await getSuggestions(q, startDependencies, datasourceMap, visualizationMap);
+      const attrs = await getSuggestions(
+        q,
+        startDependencies,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        setErrors
+      );
       if (attrs) {
         setCurrentAttributes?.(attrs);
-        // setErrors([]);
+        setErrors([]);
         updateSuggestion?.(attrs);
       }
     },
-    [datasourceMap, startDependencies, updateSuggestion, visualizationMap, setCurrentAttributes]
+    [
+      startDependencies,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      setCurrentAttributes,
+      updateSuggestion,
+    ]
   );
 
   const framePublicAPI = useLensSelector((state) => {
@@ -214,9 +232,6 @@ export function LensEditConfigurationFlyout({
     );
   }
 
-  // needed for text based languages mode which works ONLY with adHoc dataviews
-  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
-
   return (
     <>
       <FlyoutWrapper
@@ -240,7 +255,7 @@ export function LensEditConfigurationFlyout({
               expandCodeEditor={(status: boolean) => {}}
               isCodeEditorExpanded
               detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
-              // errors={errors}
+              errors={errors}
               hideMinimizeButton
               editorIsInline
               hideRunQueryText

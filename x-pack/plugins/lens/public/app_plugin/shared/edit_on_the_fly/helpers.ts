@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -20,7 +20,9 @@ export const getSuggestions = async (
   query: AggregateQuery,
   deps: LensPluginStartDependencies,
   datasourceMap: DatasourceMap,
-  visualizationMap: VisualizationMap
+  visualizationMap: VisualizationMap,
+  adHocDataViews: DataViewSpec[],
+  setErrors: (errors: Error[]) => void
 ) => {
   try {
     let indexPattern = '';
@@ -30,21 +32,19 @@ export const getSuggestions = async (
     if ('esql' in query) {
       indexPattern = getIndexPatternFromESQLQuery(query.esql);
     }
-    // const dv =
-    //   indexPattern && indexPattern !== dataView.name
-    //     ? await deps.dataViews.create({
-    //         title: indexPattern,
-    //       })
-    //     : dataView;
-
-    // pass dataViews from attributes (otherwise we will create adhoc dataviews all the time)
-    const dataView = await deps.dataViews.create({
-      title: indexPattern,
+    const dataViewSpec = adHocDataViews.find((adHoc) => {
+      return adHoc.name === indexPattern;
     });
-    if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+
+    const dataView = await deps.dataViews.create(
+      dataViewSpec ?? {
+        title: indexPattern,
+      }
+    );
+    if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
-    // fetch only columns for ES|QL for performance with limit 0
+    // fetch only columns for ES|QL for performance reasons with limit 0
     const performantQuery = { ...query };
     if ('esql' in performantQuery && performantQuery.esql) {
       performantQuery.esql = `${performantQuery.esql} | limit 0`;
@@ -79,7 +79,7 @@ export const getSuggestions = async (
     });
     return attrs;
   } catch (e) {
-    // setErrors([e]);
+    setErrors([e]);
   }
   return undefined;
 };
