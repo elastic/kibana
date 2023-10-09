@@ -18,91 +18,89 @@ viewer:
   cluster: []
   indices:
     - names:
-        - "*"
+        - '*'
       privileges:
         - read
     - names:
-        - "/~(([.]|ilm-history-).*)/"
+        - '/~(([.]|ilm-history-).*)/'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
-        - ".siem-signals*"
-        - ".lists-*"
-        - ".items-*"
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
-        - ".alerts*"
-        - ".preview.alerts*"
+        - '.alerts*'
+        - '.preview.alerts*'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
-        - "read"
+        - 'read'
       resources:
-        - "*"
+        - '*'
   run_as: []
 editor:
   cluster: []
   indices:
     - names:
-        - "/~(([.]|ilm-history-).*)/"
+        - '/~(([.]|ilm-history-).*)/'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
-        - "observability-annotations"
+        - 'observability-annotations'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
       allow_restricted_indices: false
     - names:
-        - ".siem-signals*"
-        - ".lists-*"
-        - ".items-*"
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
-        - "maintenance"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
       allow_restricted_indices: false
     - names:
-        - ".internal.alerts*"
-        - ".alerts*"
-        - ".internal.preview.alerts*"
-        - ".preview.alerts*"
+        - '.internal.alerts*'
+        - '.alerts*'
+        - '.internal.preview.alerts*'
+        - '.preview.alerts*'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
-        - "maintenance"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
       allow_restricted_indices: false
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
-        - "all"
+        - 'all'
       resources:
-        - "*"
+        - '*'
   run_as: []
 
-# -----
-# Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
-# -----
+# source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
 t1_analyst:
   cluster:
   indices:
     - names:
-        - ".alerts-security*"
-        - ".siem-signals-*"
+        - '.alerts-security*'
+        - '.siem-signals-*'
       privileges:
         - read
         - write
@@ -117,42 +115,23 @@ t1_analyst:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
-        - ".fleet-agents*"
-        - ".fleet-actions*"
+        - '.fleet-agents*'
+        - '.fleet-actions*'
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - read
-        - read_alerts
-        - endpoint_list_read
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - read
-      resources: "*"
-    - application: actions
-      privileges:
-        - read
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - read
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - read
-        - run_saved_queries
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.read
+        - feature_siem.read_alerts
+        - feature_siem.endpoint_list_read
+        - feature_securitySolutionCases.read
+        - feature_actions.read
+        - feature_builtInAlerts.read
+        - feature_osquery.read
+        - feature_osquery.run_saved_queries
+      resources: '*'
 
 t2_analyst:
   cluster:
@@ -181,37 +160,18 @@ t2_analyst:
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - read
-        - read_alerts
-        - endpoint_list_read
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - read
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - read
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - read
-        - run_saved_queries
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.read
+        - feature_siem.read_alerts
+        - feature_siem.endpoint_list_read
+        - feature_securitySolutionCases.all
+        - feature_actions.read
+        - feature_builtInAlerts.read
+        - feature_osquery.read
+        - feature_osquery.run_saved_queries
+      resources: '*'
 
 t3_analyst:
   cluster:
@@ -247,46 +207,27 @@ t3_analyst:
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - crud_alerts
-        - endpoint_list_all
-        - trusted_applications_all
-        - event_filters_all
-        - host_isolation_exceptions_all
-        - blocklist_all
-        - policy_management_read # Elastic Defend Policy Management
-        - host_isolation_all
-        - process_operations_all
-        - actions_log_management_all # Response actions history
-        - file_operations_all
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - read
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.crud_alerts
+        - feature_siem.endpoint_list_all
+        - feature_siem.trusted_applications_all
+        - feature_siem.event_filters_all
+        - feature_siem.host_isolation_exceptions_all
+        - feature_siem.blocklist_all
+        - feature_siem.policy_management_read # Elastic Defend Policy Management
+        - feature_siem.host_isolation_all
+        - feature_siem.process_operations_all
+        - feature_siem.actions_log_management_all # Response actions history
+        - feature_siem.file_operations_all
+        - feature_securitySolutionCases.all
+        - feature_actions.read
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+      resources: '*'
 
 threat_intelligence_analyst:
   cluster:
@@ -318,37 +259,18 @@ threat_intelligence_analyst:
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - read
-        - read_alerts
-        - endpoint_list_read
-        - blocklist_all
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - read
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - read
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.read
+        - feature_siem.read_alerts
+        - feature_siem.endpoint_list_read
+        - feature_siem.blocklist_all
+        - feature_securitySolutionCases.all
+        - feature_actions.read
+        - feature_builtInAlerts.read
+        - feature_osquery.all
+      resources: '*'
 
 rule_author:
   cluster:
@@ -388,39 +310,24 @@ rule_author:
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - crud_alerts
-        - policy_management_all
-        - endpoint_list_all
-        - trusted_applications_all
-        - event_filters_all
-        - host_isolation_exceptions_read
-        - blocklist_all
-        - actions_log_management_read
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - read
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.crud_alerts
+        - feature_siem.policy_management_all
+        - feature_siem.endpoint_list_all
+        - feature_siem.trusted_applications_all
+        - feature_siem.event_filters_all
+        - feature_siem.host_isolation_exceptions_read
+        - feature_siem.blocklist_all # Elastic Defend Policy Management
+        - feature_siem.actions_log_management_read
+        - feature_securitySolutionCases.all
+        - feature_actions.read
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+      resources: '*'
 
 soc_manager:
   cluster:
@@ -459,51 +366,28 @@ soc_manager:
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - crud_alerts
-        - policy_management_all
-        - endpoint_list_all
-        - trusted_applications_all
-        - event_filters_all
-        - host_isolation_exceptions_all
-        - blocklist_all
-        - host_isolation_all
-        - process_operations_all
-        - actions_log_management_all
-        - file_operations_all
-        - execute_operations_all
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - all
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - all
-      resources: "*"
-    - application: savedObjectsManagement
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.crud_alerts
+        - feature_siem.policy_management_all
+        - feature_siem.endpoint_list_all
+        - feature_siem.trusted_applications_all
+        - feature_siem.event_filters_all
+        - feature_siem.host_isolation_exceptions_all
+        - feature_siem.blocklist_all
+        - feature_siem.host_isolation_all
+        - feature_siem.process_operations_all
+        - feature_siem.actions_log_management_all
+        - feature_siem.file_operations_all
+        - feature_siem.execute_operations_all
+        - feature_securitySolutionCases.all
+        - feature_actions.all
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+      resources: '*'
 
 detections_admin:
   cluster:
@@ -534,36 +418,17 @@ detections_admin:
       privileges:
         - read
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - all
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - crud_alerts
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - read
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: dev_tools
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.all
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.crud_alerts
+        - feature_securitySolutionCases.all
+        - feature_actions.all
+        - feature_builtInAlerts.all
+        - feature_dev_tools.all
+      resources: '*'
 
 platform_engineer:
   cluster:
@@ -587,51 +452,26 @@ platform_engineer:
       privileges:
         - all
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - all
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - crud_alerts
-        - policy_management_all
-        - endpoint_list_all
-        - trusted_applications_all
-        - event_filters_all
-        - host_isolation_exceptions_all
-        - blocklist_all
-        - actions_log_management_read
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - all
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: fleet
-      privileges:
-        - all
-      resources: "*"
-    - application: fleetv2
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.all
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.crud_alerts
+        - feature_siem.policy_management_all
+        - feature_siem.endpoint_list_all
+        - feature_siem.trusted_applications_all
+        - feature_siem.event_filters_all
+        - feature_siem.host_isolation_exceptions_all
+        - feature_siem.blocklist_all # Elastic Defend Policy Management
+        - feature_siem.actions_log_management_read
+        - feature_securitySolutionCases.all
+        - feature_actions.all
+        - feature_builtInAlerts.all
+        - feature_fleet.all
+        - feature_fleetv2.all
+        - feature_osquery.all
+      resources: '*'
 
 endpoint_operations_analyst:
   cluster:
@@ -664,54 +504,29 @@ endpoint_operations_analyst:
         - read
         - write
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - policy_management_all
-        - endpoint_list_all
-        - trusted_applications_all
-        - event_filters_all
-        - host_isolation_exceptions_all
-        - blocklist_all
-        - host_isolation_all
-        - process_operations_all
-        - actions_log_management_all # Response History
-        - file_operations_all
-        - execute_operations_all # Execute
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - all
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - all
-      resources: "*"
-    - application: fleet
-      privileges:
-        - all
-      resources: "*"
-    - application: fleetv2
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.read
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.policy_management_all
+        - feature_siem.endpoint_list_all
+        - feature_siem.trusted_applications_all
+        - feature_siem.event_filters_all
+        - feature_siem.host_isolation_exceptions_all
+        - feature_siem.blocklist_all
+        - feature_siem.host_isolation_all
+        - feature_siem.process_operations_all
+        - feature_siem.actions_log_management_all # Response History
+        - feature_siem.file_operations_all
+        - feature_siem.execute_operations_all # Execute
+        - feature_securitySolutionCases.all
+        - feature_actions.all
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+        - feature_fleet.all
+        - feature_fleetv2.all
+      resources: '*'
 
 endpoint_policy_manager:
   cluster:
@@ -745,47 +560,22 @@ endpoint_policy_manager:
         - write
         - manage
   applications:
-    - application: ml
+    - application: 'kibana-.kibana'
       privileges:
-        - read
-      resources: "*"
-    - application: siem
-      privileges:
-        - all
-        - read_alerts
-        - crud_alerts
-        - policy_management_all
-        - trusted_applications_all
-        - event_filters_all
-        - host_isolation_exceptions_all
-        - blocklist_all
-        - endpoint_list_all
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: actions
-      privileges:
-        - all
-      resources: "*"
-    - application: builtInAlerts
-      privileges:
-        - all
-      resources: "*"
-    - application: osquery
-      privileges:
-        - all
-      resources: "*"
-    - application: fleet
-      privileges:
-        - all
-      resources: "*"
-    - application: fleetv2
-      privileges:
-        - all
-      resources: "*"
-    - application: spaces
-      privileges:
-        - all
-      resources: "*"
+        - feature_ml.all
+        - feature_siem.all
+        - feature_siem.read_alerts
+        - feature_siem.crud_alerts
+        - feature_siem.policy_management_all
+        - feature_siem.endpoint_list_all
+        - feature_siem.trusted_applications_all
+        - feature_siem.event_filters_all
+        - feature_siem.host_isolation_exceptions_all
+        - feature_siem.blocklist_all # Elastic Defend Policy Management
+        - feature_securitySolutionCases.all
+        - feature_actions.all
+        - feature_builtInAlerts.all
+        - feature_osquery.all
+        - feature_fleet.all
+        - feature_fleetv2.all
+      resources: '*'
