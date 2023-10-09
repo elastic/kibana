@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 
-import type { EuiFlyoutSize } from '@elastic/eui';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
@@ -47,7 +46,6 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: configId,
     id: `case-details-alerts-${caseData.owner}`,
-    flyoutSize: (alertFeatureIds?.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
     featureIds: alertFeatureIds ?? [],
     query: alertIdsQuery,
     showExpandToDetails: Boolean(alertFeatureIds?.includes('siem')),
