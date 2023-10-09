@@ -130,7 +130,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChanges');
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleChanges').should(({ request }) => {
+    cy.wait('@saveRuleChanges').then(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,
@@ -163,7 +163,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Days of uptime');
     });
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleChanges').should(({ request }) => {
+    cy.wait('@saveRuleChanges').then(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,
