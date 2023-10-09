@@ -47,7 +47,10 @@ const runtimeFieldError = {
                   script: "emit(Integer.parseInt('hello'))",
                   lang: 'painless',
                   position: { offset: 12, start: 0, end: 31 },
-                  caused_by: { type: 'number_format_exception', reason: 'For input string: "hello"' },
+                  caused_by: {
+                    type: 'number_format_exception',
+                    reason: 'For input string: "hello"',
+                  },
                 },
               },
             ],

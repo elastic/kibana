@@ -14,9 +14,7 @@ function getFailedShardCause(error: estypes.ErrorCause): estypes.ErrorCause | un
 }
 
 function getNestedCause(error: estypes.ErrorCause): estypes.ErrorCause {
-  return error.caused_by
-    ? getNestedCause(error.caused_by)
-    : error;
+  return error.caused_by ? getNestedCause(error.caused_by) : error;
 }
 
 export function getRootCause(error?: estypes.ErrorCause): estypes.ErrorCause | undefined {

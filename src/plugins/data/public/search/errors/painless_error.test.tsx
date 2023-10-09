@@ -24,7 +24,7 @@ describe('PainlessError', () => {
       statusCode: 400,
       message: 'search_phase_execution_exception',
       attributes: {
-        error: searchPhaseException.error
+        error: searchPhaseException.error,
       },
     });
     const component = mount(e.getErrorMessage(startMock.application));

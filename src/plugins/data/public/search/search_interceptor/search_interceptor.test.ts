@@ -153,7 +153,7 @@ describe('SearchInterceptor', () => {
           statusCode: 400,
           message: 'search_phase_execution_exception',
           attributes: {
-            error: searchPhaseException.error
+            error: searchPhaseException.error,
           },
         })
       );
@@ -1459,7 +1459,7 @@ describe('SearchInterceptor', () => {
           statusCode: 400,
           message: 'search_phase_execution_exception',
           attributes: {
-            error: searchPhaseException.error
+            error: searchPhaseException.error,
           },
         };
         fetchMock.mockRejectedValueOnce(mockResponse);
@@ -1475,7 +1475,7 @@ describe('SearchInterceptor', () => {
           statusCode: 400,
           message: 'resource_not_found_exception',
           attributes: {
-            error: resourceNotFoundException.error
+            error: resourceNotFoundException.error,
           },
         };
         fetchMock.mockRejectedValueOnce(mockResponse);
