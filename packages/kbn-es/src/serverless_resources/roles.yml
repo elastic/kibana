@@ -1,14 +1,14 @@
 system_indices_superuser:
-  cluster: ['all']
+  cluster: ["all"]
   indices:
-    - names: ['*']
-      privileges: ['all']
+    - names: ["*"]
+      privileges: ["all"]
       allow_restricted_indices: true
   applications:
-    - application: '*'
-      privileges: ['*']
-      resources: ['*']
-  run_as: ['*']
+    - application: "*"
+      privileges: ["*"]
+      resources: ["*"]
+  run_as: ["*"]
 
 # -----
 # Source: https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/roles.yml
@@ -18,80 +18,80 @@ viewer:
   cluster: []
   indices:
     - names:
-        - '*'
+        - "*"
       privileges:
         - read
     - names:
-        - '/~(([.]|ilm-history-).*)/'
+        - "/~(([.]|ilm-history-).*)/"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
+        - "read"
+        - "view_index_metadata"
       allow_restricted_indices: false
     - names:
-        - '.siem-signals*'
-        - '.lists-*'
-        - '.items-*'
+        - ".siem-signals*"
+        - ".lists-*"
+        - ".items-*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
+        - "read"
+        - "view_index_metadata"
       allow_restricted_indices: false
     - names:
-        - '.alerts*'
-        - '.preview.alerts*'
+        - ".alerts*"
+        - ".preview.alerts*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
+        - "read"
+        - "view_index_metadata"
       allow_restricted_indices: false
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
-        - 'read'
+        - "read"
       resources:
-        - '*'
+        - "*"
   run_as: []
 editor:
   cluster: []
   indices:
     - names:
-        - '/~(([.]|ilm-history-).*)/'
+        - "/~(([.]|ilm-history-).*)/"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
+        - "read"
+        - "view_index_metadata"
       allow_restricted_indices: false
     - names:
-        - 'observability-annotations'
+        - "observability-annotations"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
-        - 'write'
+        - "read"
+        - "view_index_metadata"
+        - "write"
       allow_restricted_indices: false
     - names:
-        - '.siem-signals*'
-        - '.lists-*'
-        - '.items-*'
+        - ".siem-signals*"
+        - ".lists-*"
+        - ".items-*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
-        - 'write'
-        - 'maintenance'
+        - "read"
+        - "view_index_metadata"
+        - "write"
+        - "maintenance"
       allow_restricted_indices: false
     - names:
-        - '.internal.alerts*'
-        - '.alerts*'
-        - '.internal.preview.alerts*'
-        - '.preview.alerts*'
+        - ".internal.alerts*"
+        - ".alerts*"
+        - ".internal.preview.alerts*"
+        - ".preview.alerts*"
       privileges:
-        - 'read'
-        - 'view_index_metadata'
-        - 'write'
-        - 'maintenance'
+        - "read"
+        - "view_index_metadata"
+        - "write"
+        - "maintenance"
       allow_restricted_indices: false
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
-        - 'all'
+        - "all"
       resources:
-        - '*'
+        - "*"
   run_as: []
 
 # source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
@@ -99,8 +99,8 @@ t1_analyst:
   cluster:
   indices:
     - names:
-        - '.alerts-security*'
-        - '.siem-signals-*'
+        - ".alerts-security*"
+        - ".siem-signals-*"
       privileges:
         - read
         - write
@@ -115,12 +115,12 @@ t1_analyst:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
-        - '.fleet-agents*'
-        - '.fleet-actions*'
+        - ".fleet-agents*"
+        - ".fleet-actions*"
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.read
@@ -131,7 +131,7 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-      resources: '*'
+      resources: "*"
 
 t2_analyst:
   cluster:
@@ -160,7 +160,7 @@ t2_analyst:
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.read
@@ -171,7 +171,7 @@ t2_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-      resources: '*'
+      resources: "*"
 
 t3_analyst:
   cluster:
@@ -207,7 +207,7 @@ t3_analyst:
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -227,7 +227,7 @@ t3_analyst:
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
-      resources: '*'
+      resources: "*"
 
 threat_intelligence_analyst:
   cluster:
@@ -259,7 +259,7 @@ threat_intelligence_analyst:
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.read
@@ -270,7 +270,7 @@ threat_intelligence_analyst:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
-      resources: '*'
+      resources: "*"
 
 rule_author:
   cluster:
@@ -310,7 +310,7 @@ rule_author:
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -327,7 +327,7 @@ rule_author:
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
-      resources: '*'
+      resources: "*"
 
 soc_manager:
   cluster:
@@ -366,7 +366,7 @@ soc_manager:
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -387,7 +387,7 @@ soc_manager:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
-      resources: '*'
+      resources: "*"
 
 detections_admin:
   cluster:
@@ -418,7 +418,7 @@ detections_admin:
       privileges:
         - read
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -428,7 +428,7 @@ detections_admin:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
-      resources: '*'
+      resources: "*"
 
 platform_engineer:
   cluster:
@@ -452,7 +452,7 @@ platform_engineer:
       privileges:
         - all
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -471,7 +471,7 @@ platform_engineer:
         - feature_fleet.all
         - feature_fleetv2.all
         - feature_osquery.all
-      resources: '*'
+      resources: "*"
 
 endpoint_operations_analyst:
   cluster:
@@ -504,7 +504,7 @@ endpoint_operations_analyst:
         - read
         - write
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -526,7 +526,7 @@ endpoint_operations_analyst:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
-      resources: '*'
+      resources: "*"
 
 endpoint_policy_manager:
   cluster:
@@ -560,7 +560,7 @@ endpoint_policy_manager:
         - write
         - manage
   applications:
-    - application: 'kibana-.kibana'
+    - application: "kibana-.kibana"
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -578,4 +578,4 @@ endpoint_policy_manager:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
-      resources: '*'
+      resources: "*"

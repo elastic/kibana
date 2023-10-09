@@ -51,8 +51,6 @@ curl -H "Authorization: Bearer AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVT
 ```
 
 The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed a serverless cluster with this token.
-<<<<<<< HEAD
-=======
 
 ## Overriding resources
 
@@ -62,5 +60,3 @@ Assuming a customized `users` and `users_roles` are located in `/tmp/my_es/` dir
 ```shell
 yarn es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
 ```
-
-> > > > > > > upstream/main
