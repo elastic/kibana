@@ -110,9 +110,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const searchResults = await svlTriggersActionsUI.getRulesList();
 
       expect(searchResults.length).toEqual(3);
-      expect(searchResults[0].name).toEqual(`aAnomaly`);
-      expect(searchResults[1].name).toEqual(`bAnomaly`);
-      expect(searchResults[2].name).toEqual(`cAnomaly`);
+      expect(searchResults[0].name).toEqual(`aAPM Anomaly`);
+      expect(searchResults[1].name).toEqual(`bAPM Anomaly`);
+      expect(searchResults[2].name).toEqual(`cAPM Anomaly`);
     });
 
     it('should search for rule', async () => {
@@ -130,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlTriggersActionsUI.searchRules(rule1.name);
 
       expect(searchResults.length).toEqual(1);
-      expect(searchResults[0].name).toEqual(`${rule1.name}Anomaly`);
+      expect(searchResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
       expect(searchResults[0].interval).toEqual('1 min');
       expect(searchResults[0].tags).toEqual('2');
       expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -159,7 +159,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const searchResults = await svlTriggersActionsUI.getRulesList();
         expect(searchResults.length).toEqual(1);
-        expect(searchResults[0].name).toEqual(`${rule1.name}Anomaly`);
+        expect(searchResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(searchResults[0].interval).toEqual('1 min');
         expect(searchResults[0].tags).toEqual('2');
         expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -174,11 +174,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const searchResultsAfterClear = await svlTriggersActionsUI.getRulesList();
         expect(searchResultsAfterClear.length).toEqual(2);
-        expect(searchResultsAfterClear[0].name).toEqual(`${rule1.name}Anomaly`);
+        expect(searchResultsAfterClear[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(searchResultsAfterClear[0].interval).toEqual('1 min');
         expect(searchResultsAfterClear[0].tags).toEqual('2');
         expect(searchResultsAfterClear[0].duration).toMatch(/\d{2,}:\d{2}/);
-        expect(searchResultsAfterClear[1].name).toEqual(`${rule2.name}Anomaly`);
+        expect(searchResultsAfterClear[1].name).toEqual(`${rule2.name}APM Anomaly`);
         expect(searchResultsAfterClear[1].interval).toEqual('1 min');
         expect(searchResultsAfterClear[1].tags).toEqual('');
         expect(searchResultsAfterClear[1].duration).toMatch(/\d{2,}:\d{2}/);
@@ -202,7 +202,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const searchResults = await svlTriggersActionsUI.getRulesList();
 
       expect(searchResults.length).toEqual(1);
-      expect(searchResults[0].name).toEqual(`${rule1.name}Anomaly`);
+      expect(searchResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
       expect(searchResults[0].interval).toEqual('1 min');
       expect(searchResults[0].tags).toEqual('3');
       expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -459,7 +459,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const filterErrorOnlyResults = await svlTriggersActionsUI.getRulesListWithStatus();
         expect(filterErrorOnlyResults.length).toEqual(1);
-        expect(filterErrorOnlyResults[0].name).toEqual(`${failedRule.name}Anomaly`);
+        expect(filterErrorOnlyResults[0].name).toEqual(`${failedRule.name}APM Anomaly`);
         expect(filterErrorOnlyResults[0].interval).toEqual('1 min');
         expect(filterErrorOnlyResults[0].status).toEqual('Failed');
         expect(filterErrorOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -480,7 +480,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
 
         expect(refreshResults.length).toEqual(1);
-        expect(refreshResults[0].name).toEqual(`${rule1.name}Anomaly`);
+        expect(refreshResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(refreshResults[0].interval).toEqual('1 min');
         expect(refreshResults[0].status).toEqual('Succeeded');
         expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -539,7 +539,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await refreshRulesList();
         const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
         expect(refreshResults.length).toEqual(1);
-        expect(refreshResults[0].name).toEqual(`${rule1.name}Anomaly`);
+        expect(refreshResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(refreshResults[0].interval).toEqual('1 min');
         expect(refreshResults[0].status).toEqual('Succeeded');
         expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -606,7 +606,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const filterInventoryRuleOnlyResults = await svlTriggersActionsUI.getRulesList();
         expect(filterInventoryRuleOnlyResults.length).toEqual(1);
-        expect(filterInventoryRuleOnlyResults[0].name).toEqual(`${rule1.name}Anomaly`);
+        expect(filterInventoryRuleOnlyResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(filterInventoryRuleOnlyResults[0].interval).toEqual('1 min');
         expect(filterInventoryRuleOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
       });

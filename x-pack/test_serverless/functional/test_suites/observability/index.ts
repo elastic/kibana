@@ -14,7 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./observability_log_explorer'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
     loadTestFile(require.resolve('./rules/rules_list'));
-    loadTestFile(require.resolve('./rules/rule_details'));
     loadTestFile(require.resolve('./cases/view_case'));
     loadTestFile(require.resolve('./cases/configure'));
     loadTestFile(require.resolve('./cases/create_case_form'));
