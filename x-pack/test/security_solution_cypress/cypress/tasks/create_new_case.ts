@@ -13,6 +13,7 @@ import type {
   TestCaseWithoutTimeline,
 } from '../objects/case';
 import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
+import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
 
 import {
   BACK_TO_CASES_BTN,
@@ -38,6 +39,7 @@ import {
   SELECT_SN,
   SELECT_URGENCY,
 } from '../screens/edit_connector';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const backToCases = () => {
   cy.get(BACK_TO_CASES_BTN).click({ force: true });
@@ -62,6 +64,10 @@ export const attachTimeline = (newCase: TestCase) => {
       cy.log('Waiting for timeline to appear');
       cy.get('body').type('{esc}');
       cy.get(INSERT_TIMELINE_BTN).click();
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      cy.get(TIMELINE_SEARCHBOX).should('exist');
+      cy.get(TIMELINE_SEARCHBOX).should('be.visible');
+
       return cy.root().then(($el) => {
         const emptyTimelineState = $el.find(EMPTY_TIMELINE);
         if (emptyTimelineState.length > 0) {
