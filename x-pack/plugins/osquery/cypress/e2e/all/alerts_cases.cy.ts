@@ -77,12 +77,8 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
       cy.get('[aria-label="Add to Case"]').first().click();
       cy.getBySel('cases-table-add-case-filter-bar').click();
       cy.getBySel('create-case-flyout').should('be.visible');
-      cy.getBySel('caseTitle').within(() => {
-        cy.getBySel('input').type(caseName);
-      });
-      cy.getBySel('caseDescription').within(() => {
-        cy.getBySel('euiMarkdownEditorTextArea').type(caseDescription);
-      });
+      cy.get('input[aria-describedby="caseTitle"]').type(caseName);
+      cy.get('textarea[aria-label="caseDescription"]').type(caseDescription);
       cy.getBySel('create-case-submit').click();
       cy.contains(`An alert was added to "${caseName}"`);
     });
