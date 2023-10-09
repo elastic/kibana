@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       expect(response.status).to.eql(403);
       expect(response.body.message).to.eql(
-        "You don't have permission to use Elastic managed global locations"
+        "You don't have permission to use Elastic managed global locations."
       );
     });
 
