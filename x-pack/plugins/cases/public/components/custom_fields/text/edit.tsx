@@ -162,7 +162,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
         direction="column"
       >
         {!isCustomFieldValueDefined && !isEdit && (
-          <p data-test-subj="no-tags">{NO_CUSTOM_FIELD_SET(customFieldConfiguration.label)}</p>
+          <p data-test-subj="no-custom-field-value">{NO_CUSTOM_FIELD_SET}</p>
         )}
         {!isEdit && isCustomFieldValueDefined && (
           <EuiFlexItem>
