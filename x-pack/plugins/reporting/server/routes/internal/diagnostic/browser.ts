@@ -54,7 +54,7 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
       const logsToHelpMap = logsToHelpMapFactory(docLinks);
       try {
         const { screenshotting } = await reporting.getPluginStartDeps();
-        const logs = await lastValueFrom(screenshotting.diagnose());
+        const logs = await lastValueFrom(screenshotting!.diagnose());
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
         const boundSuccessfully = logs.includes(`DevTools listening on`);
