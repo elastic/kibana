@@ -28,7 +28,7 @@ export const removeAllArtifacts = () => {
 
 export const removeAllArtifactsPromise = () =>
   Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then((result) =>
-    result.reduce((acc: number, val) => (val ? acc + 1 : acc), 0)
+    result.filter(Boolean).length
   );
 
 export const removeExceptionsList = (listId: string) => {
