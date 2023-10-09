@@ -44,7 +44,10 @@ export function useMetadata({
       sourceId,
       timeRange,
     }),
-    decodeResponse
+    decodeResponse,
+    undefined,
+    undefined,
+    true
   );
 
   useEffect(() => {

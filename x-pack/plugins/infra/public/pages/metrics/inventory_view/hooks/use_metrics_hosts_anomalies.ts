@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { useMemo, useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
@@ -176,6 +176,7 @@ export const useMetricsHostsAnomaliesResults = ({
 }) => {
   const { services } = useKibanaContextForPlugin();
 
+  const abortController = useRef(new AbortController());
   const [reducerState, dispatch] = useReducer(
     stateReducer,
     STATE_DEFAULTS,
@@ -190,6 +191,13 @@ export const useMetricsHostsAnomaliesResults = ({
 
   const [metricsHostsAnomalies, setMetricsHostsAnomalies] = useState<MetricsHostsAnomalies>([]);
 
+  useEffect(() => {
+    const current = abortController?.current;
+    return () => {
+      current.abort();
+    };
+  }, []);
+
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
@@ -200,6 +208,9 @@ export const useMetricsHostsAnomaliesResults = ({
           paginationOptions,
           paginationCursor,
         } = reducerState;
+
+        abortController.current.abort();
+        abortController.current = new AbortController();
 
         return await callGetMetricHostsAnomaliesAPI(
           {
@@ -216,7 +227,8 @@ export const useMetricsHostsAnomaliesResults = ({
             },
             hostName,
           },
-          services.http.fetch
+          services.http.fetch,
+          abortController.current.signal
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -337,7 +349,8 @@ interface RequestArgs {
 
 export const callGetMetricHostsAnomaliesAPI = async (
   requestArgs: RequestArgs,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  signal?: AbortSignal | null
 ) => {
   const {
     sourceId,
@@ -369,6 +382,7 @@ export const callGetMetricHostsAnomaliesAPI = async (
         },
       })
     ),
+    signal,
   });
 
   return decodeOrThrow(getMetricsHostsAnomaliesSuccessReponsePayloadRT)(response);

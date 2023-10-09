@@ -6,7 +6,7 @@
  */
 
 import { EuiSkeletonText } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
@@ -14,7 +14,6 @@ import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state'
 export const Osquery = () => {
   const { featureFlags } = usePluginConfig();
   const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
-  const metadataLoadedOnce = useRef(false);
 
   const {
     services: { osquery },
@@ -22,12 +21,6 @@ export const Osquery = () => {
 
   // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
-
-  useEffect(() => {
-    if (!metadataLoadedOnce.current && !metadataLoading) {
-      metadataLoadedOnce.current = true;
-    }
-  }, [metadataLoading, OsqueryAction]);
 
   // avoids component rerender when resizing the popover
   const content = useMemo(() => {
@@ -37,9 +30,6 @@ export const Osquery = () => {
     return <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />;
   }, [OsqueryAction, featureFlags.osqueryEnabled, metadata?.info?.agent?.id]);
 
-  return (!metadataLoadedOnce.current || !OsqueryAction) && featureFlags.osqueryEnabled ? (
-    <EuiSkeletonText lines={10} />
-  ) : (
-    content
-  );
+  const isLoading = metadataLoading && (!metadata || !OsqueryAction);
+  return isLoading && featureFlags.osqueryEnabled ? <EuiSkeletonText lines={10} /> : content;
 };
