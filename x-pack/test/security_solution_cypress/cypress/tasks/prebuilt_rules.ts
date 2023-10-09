@@ -49,12 +49,17 @@ export const assertUpgradeRequestIsComplete = (rules: Array<typeof SAMPLE_PREBUI
     );
   }
   for (const rule of rules) {
-    cy.get(getInstallSingleRuleLoadingSpinnerByRuleId(rule['security-rule'].rule_id)).should(
+    cy.get(getUpgradeSingleRuleLoadingSpinnerByRuleId(rule['security-rule'].rule_id)).should(
       'not.exist'
     );
   }
 };
 
+/**
+ * Assert that when the rule installation succeeds, the toast is shown with the right message 
+ * -confirming the succesful install- and subsequently check that the rules available for installation
+ * are not present in the Add Elastic Rules table anymore
+ */
 export const assertInstallationSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
   const toastMessage = `${rules.length} ${rulesString} installed successfully.`;
@@ -68,11 +73,17 @@ export const assertInstallationSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RU
 };
 
 
-
+/**
+ * Assert that when the rule installation fails, the toast is shown with the right message 
+ * -notifying that the installation failed- and subsequently check that the rules available for installation
+ * are still present in the Rule Update table
+ */
 export const assertInstallationFailure = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
   const toastMessage = `${rules.length} ${rulesString} failed to install.`;
   cy.get(TOASTER).should('be.visible').should('have.text', toastMessage);
+
+  // Check rules are still available for install
   for (const rule of rules) {
     cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
   }
@@ -87,10 +98,15 @@ export const interceptInstallationRequestToFail = (rules: Array<typeof SAMPLE_PR
         failed: rules.length,
       },
     },
-    delay: 500,
+    delay: 500, // Add delay to give Cypress time to find the loading spinner
   }).as('installPrebuiltRules');
 };
 
+/**
+ * Assert that when the rule version upgrade succeeds, the toast is shown with the right message 
+ * -confirming the succesful upgrade- and subsequently check that the rules available for upgrade
+ * are not present in the Rule Update table anymore
+ */
 export const assertUpgradeSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
   const toastMessage = `${rules.length} ${rulesString} updated successfully.`;
@@ -100,6 +116,11 @@ export const assertUpgradeSuccess = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) 
   }
 };
 
+/**
+ * Assert that when the rule version upgrade fails, the toast is shown with the right message 
+ * -notifying that the upgrade failed- and subsequently check that the rules available for upgrade
+ * are still present in the Rule Update table
+ */
 export const assertUpgradeFailure = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
   const toastMessage = `${rules.length} ${rulesString} failed to update.`;
@@ -119,5 +140,6 @@ export const interceptUpgradeRequestToFail = (rules: Array<typeof SAMPLE_PREBUIL
         failed: rules.length,
       },
     },
+    delay: 500, // Add delay to give Cypress time to find the loading spinner
   }).as('updatePrebuiltRules');
 };

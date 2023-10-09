@@ -32,7 +32,8 @@ import {
   RULE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
-import { cleanKibana } from '../../../tasks/common';
+import { cleanKibana, reload } from '../../../tasks/common';
+import { login } from '../../../tasks/login';
 
 // Rule to test update
 const RULE_1_ID = 'rule_1';
@@ -56,10 +57,12 @@ const RULE_2 = createRuleAssetSavedObject({
 });
 
 const loadPageAsReadOnlyUser = (url: string) => {
+  login(ROLES.reader);
   visit(url, { role: ROLES.reader });
 };
 
-const loginPageAsFullPrivilegesUser = (url: string) => {
+const loginPageAsWriteAuthorizedUser = (url: string) => {
+  login(ROLES.hunter);
   visit(url);
 };
 
@@ -72,23 +75,16 @@ describe(
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
       cleanKibana();
-
-      // Install one prebuilt rule asset to assert that user can't install it
-      installPrebuiltRuleAssets([RULE_2]);
-
-      // Install one prebuilt rule asset to assert that user can't upgrade it
-      createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1]);
-      // Create a new version of the rule to make it available for upgrade
-      installPrebuiltRuleAssets([UPDATED_RULE_1]);
     });
 
     describe('User with read privileges on Security Solution', () => {
-      beforeEach(() => {
+      it('should not be able to install prebuilt rules', () => {
+        // Install one prebuilt rule asset to assert that user can't install it
+        installPrebuiltRuleAssets([RULE_2]);
+
         // Now login with read-only user in preparation for test
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
-      });
 
-      it('should not be able to install prebuilt rules', () => {
         // Check that Add Elastic Rules button is disabled
         cy.get(ADD_ELASTIC_RULES_BTN).should('be.disabled');
 
@@ -104,6 +100,14 @@ describe(
       });
 
       it('should not be able to upgrade prebuilt rules', () => {
+        // Install one prebuilt rule asset to assert that user can't upgrade it
+        createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1]);
+        // Create a new version of the rule to make it available for upgrade
+        installPrebuiltRuleAssets([UPDATED_RULE_1]);
+
+        // Now login with read-only user in preparation for test
+        loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
+
         // Check that Rule Update tab is not shown
         cy.get(RULES_UPDATES_TAB).should('not.exist');
 
@@ -121,12 +125,12 @@ describe(
       });
     });
 
-    describe('User with full privileges on Security Solution', () => {
-      beforeEach(() => {
-        loginPageAsFullPrivilegesUser(RULES_MANAGEMENT_URL);
-      });
-
+    describe('User with write privileges on Security Solution', () => {
       it('should be able to install prebuilt rules', () => {
+        // Install one prebuilt rule asset to assert that user can install it
+        installPrebuiltRuleAssets([RULE_2]);
+        loginPageAsWriteAuthorizedUser(RULES_MANAGEMENT_URL);
+
         // Check that Add Elastic Rules button is enabled
         cy.get(ADD_ELASTIC_RULES_BTN).should('not.be.disabled');
 
@@ -151,6 +155,12 @@ describe(
       });
 
       it('should be able to upgrade prebuilt rules', () => {
+        // Install one prebuilt rule asset to assert that user can upgrade it
+        createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1]);
+        // Create a new version of the rule to make it available for upgrade
+        installPrebuiltRuleAssets([UPDATED_RULE_1]);
+        loginPageAsWriteAuthorizedUser(RULES_MANAGEMENT_URL);
+
         // Check that Rule Update tab is shown
         cy.get(RULES_UPDATES_TAB).should('exist');
 

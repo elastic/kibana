@@ -21,7 +21,7 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../tasks/common';
+import { cleanKibana, reload } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
@@ -58,14 +58,14 @@ describe(
       });
 
       beforeEach(() => {
-        cleanKibana();
         // Make two mock rules available for installation
         installPrebuiltRuleAssets([RULE_1, RULE_2]);
-        // Navigate to install Elastic rules page
-        addElasticRulesButtonClick();
       });
 
       it('installing prebuilt rules one by one', () => {
+        // Navigate to install Elastic rules page
+        addElasticRulesButtonClick();
+
         // Intercept and force the installation request to fail
         interceptInstallationRequestToFail([RULE_1]);
 
@@ -78,6 +78,8 @@ describe(
       });
 
       it('installing multiple selected prebuilt rules by selecting them individually', () => {
+        addElasticRulesButtonClick();
+
         interceptInstallationRequestToFail([RULE_1, RULE_2]);
         selectRulesByName([RULE_1['security-rule'].name, RULE_2['security-rule'].name]);
         cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
@@ -86,6 +88,7 @@ describe(
       });
 
       it('installing multiple selected prebuilt rules by selecting all in page', () => {
+        addElasticRulesButtonClick();
         interceptInstallationRequestToFail([RULE_1, RULE_2]);
         cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
         cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
@@ -94,6 +97,7 @@ describe(
       });
 
       it('installing all available rules at once', () => {
+        addElasticRulesButtonClick();
         interceptInstallationRequestToFail([RULE_1, RULE_2]);
         cy.get(INSTALL_ALL_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
@@ -126,20 +130,18 @@ describe(
       });
 
       beforeEach(() => {
-        cleanKibana();
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         /* Create a second version of the rule, making it available for update */
         installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
-        login();
-        visitRulesManagementTable();
-
-        // Navigate to Rule Upgrade table
-        ruleUpdatesTabClick();
+        reload();
       });
 
       it('upgrading prebuilt rules one by one', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1]);
+
+        // Navigate to Rule Upgrade table
+        ruleUpdatesTabClick();
 
         // Attempt to upgrade rule
         cy.get(
@@ -153,6 +155,10 @@ describe(
 
       it('upgrading multiple selected prebuilt rules by selecting them individually', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+
+        // Navigate to Rule Upgrade table
+        ruleUpdatesTabClick();
+
         selectRulesByName([
           OUTDATED_RULE_1['security-rule'].name,
           OUTDATED_RULE_2['security-rule'].name,
@@ -164,6 +170,9 @@ describe(
 
       it('upgrading multiple selected prebuilt rules by selecting all in page', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+
+        // Navigate to Rule Upgrade table
+        ruleUpdatesTabClick();
         cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
@@ -172,6 +181,10 @@ describe(
 
       it('upgrading all rules with available upgrades at once', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+
+        // Navigate to Rule Upgrade table
+        ruleUpdatesTabClick();
+        
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         assertUpgradeFailure([OUTDATED_RULE_1, OUTDATED_RULE_2]);
