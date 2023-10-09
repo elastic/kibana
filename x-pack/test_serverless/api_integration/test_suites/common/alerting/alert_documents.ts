@@ -49,7 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe('Alert documents', () => {
+  describe('Alert documents', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['skipOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
