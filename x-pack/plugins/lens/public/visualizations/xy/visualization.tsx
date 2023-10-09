@@ -85,6 +85,7 @@ import {
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
+  getAnnotationLayerTitle,
   getAnnotationsLayers,
   getAxisName,
   getDataLayers,
@@ -334,7 +335,7 @@ export const getXyVisualization = ({
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     if (layer && isByReferenceAnnotationsLayer(layer)) {
-      return { title: `Delete "${layer.__lastSaved.title}"` };
+      return { title: `Delete "${getAnnotationLayerTitle(layer)}"` };
     }
   },
 
@@ -1149,7 +1150,10 @@ function getNotifiableFeatures(
   fieldFormats: FieldFormatsStart
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
-    (layer) => layer.ignoreGlobalFilters
+    (layer) =>
+      layer.ignoreGlobalFilters &&
+      // If all annotations are manual, do not report it
+      layer.annotations.some((annotation) => annotation.type !== 'manual')
   );
   if (!annotationsWithIgnoreFlag.length) {
     return [];

@@ -36,6 +36,7 @@ import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '
 import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
+import { untrackRuleAlerts } from '../../../../rules_client/lib';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -175,6 +176,10 @@ const bulkDeleteWithOCC = async (
       await rulesFinder.close();
     }
   );
+
+  for (const { id, attributes } of rulesToDelete) {
+    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  }
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },

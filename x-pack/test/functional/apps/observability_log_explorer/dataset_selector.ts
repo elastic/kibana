@@ -14,7 +14,7 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const expectedDataViews = ['logstash-*', 'logs-*', 'metrics-*'];
+const expectedDataViews = ['logs-*', 'logstash-*', 'metrics-*'];
 const sortedExpectedDataViews = expectedDataViews.slice().sort();
 
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];

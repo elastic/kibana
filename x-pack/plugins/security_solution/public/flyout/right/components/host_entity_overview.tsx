@@ -13,14 +13,12 @@ import {
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
-  EuiIconTip,
   EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
@@ -32,7 +30,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
@@ -40,7 +38,7 @@ import { useHostDetails } from '../../../explore/hosts/containers/hosts/details'
 import {
   FAMILY,
   LAST_SEEN,
-  HOST_RISK_CLASSIFICATION,
+  HOST_RISK_LEVEL,
 } from '../../../overview/components/host_overview/translations';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
@@ -50,22 +48,22 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { RiskScoreDocTooltip } from '../../../overview/components/common';
 
 const HOST_ICON = 'storage';
 const CONTEXT_ID = `flyout-host-entity-overview`;
 
 export interface HostEntityOverviewProps {
   /**
-   * Host name for looking up host related ip addresses and risk classification
+   * Host name for looking up host related ip addresses and risk level
    */
   hostName: string;
 }
 
 /**
- * Host preview content for the entities preview in right flyout. It contains ip addresses and risk classification
+ * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
@@ -158,35 +156,17 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     return [
       {
         title: (
-          <>
-            {HOST_RISK_CLASSIFICATION}
-            <EuiIconTip
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.entities.hostTechnicalPreviewButtonLabel"
-                  defaultMessage="Technical preview"
-                />
-              }
-              size="m"
-              type="iInCircle"
-              content={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.entities.hostTechnicalPreviewTooltip"
-                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                />
-              }
-              position="bottom"
-              iconProps={{
-                className: 'eui-alignTop',
-              }}
-              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
-            />
-          </>
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
         description: (
           <>
             {hostRiskData ? (
-              <RiskScore severity={hostRiskData.host.risk.calculated_level} />
+              <RiskScoreLevel severity={hostRiskData.host.risk.calculated_level} />
             ) : (
               getEmptyTagValue()
             )}

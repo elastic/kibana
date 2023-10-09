@@ -150,8 +150,7 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            // TODO (http-versioning) Remove casts when untrackRuleAlerts has been converted
-            await untrackRuleAlerts(context, rule.id, rule.attributes as RawRule);
+            await untrackRuleAlerts(context, rule.id, rule.attributes);
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
