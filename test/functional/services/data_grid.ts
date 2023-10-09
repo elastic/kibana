@@ -367,14 +367,21 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('resetDisplaySelector');
   }
 
+  private async findSampleSizeInput() {
+    return await this.find.byCssSelector(
+      'input[type="number"][data-test-subj="unifiedDataTableSampleSizeInput"]'
+    );
+  }
+
   public async getCurrentSampleSizeValue() {
-    const sampleSizeInput = await this.testSubjects.find('unifiedDataTableSampleSizeInput');
+    const sampleSizeInput = await this.findSampleSizeInput();
     return Number(await sampleSizeInput.getAttribute('value'));
   }
 
   public async changeSampleSizeValue(newValue: number) {
-    const sampleSizeInput = await this.testSubjects.find('unifiedDataTableSampleSizeInput');
+    const sampleSizeInput = await this.findSampleSizeInput();
     await sampleSizeInput.focus();
+    // replacing the input values with a new one
     await sampleSizeInput.pressKeys([
       Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
       'a',

@@ -29,8 +29,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           onChangeSampleSize={onChangeSampleSizeMock}
         />
       );
-      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput');
-      expect(input.exists()).toBe(true);
+      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
       expect(input.prop('value')).toBe(10);
 
       await act(async () => {
@@ -46,21 +45,23 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       await new Promise((resolve) => setTimeout(resolve, 0));
       component.update();
 
-      expect(findTestSubject(component, 'unifiedDataTableSampleSizeInput').prop('value')).toBe(100);
+      expect(
+        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
+      ).toBe(100);
     });
 
     it('should not execute the callback for an invalid input', async () => {
-      const invalidValue = MAX_ALLOWED_SAMPLE_SIZE + 1;
+      const invalidValue = MAX_ALLOWED_SAMPLE_SIZE + 10;
       const onChangeSampleSizeMock = jest.fn();
 
       const component = mountWithIntl(
         <UnifiedDataTableAdditionalDisplaySettings
-          sampleSize={5}
+          sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
         />
       );
-      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput');
-      expect(input.prop('value')).toBe(5);
+      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(50);
 
       await act(async () => {
         input.simulate('change', {
@@ -73,9 +74,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       await new Promise((resolve) => setTimeout(resolve, 0));
       component.update();
 
-      expect(findTestSubject(component, 'unifiedDataTableSampleSizeInput').prop('value')).toBe(
-        invalidValue
-      );
+      expect(
+        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
+      ).toBe(invalidValue);
 
       expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
@@ -90,7 +91,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         />
       );
 
-      expect(findTestSubject(component, 'unifiedDataTableSampleSizeInput').prop('value')).toBe(200);
+      expect(
+        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
+      ).toBe(200);
 
       component.setProps({
         sampleSize: 500,
@@ -100,7 +103,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       await new Promise((resolve) => setTimeout(resolve, 0));
       component.update();
 
-      expect(findTestSubject(component, 'unifiedDataTableSampleSizeInput').prop('value')).toBe(500);
+      expect(
+        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
+      ).toBe(500);
 
       expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
