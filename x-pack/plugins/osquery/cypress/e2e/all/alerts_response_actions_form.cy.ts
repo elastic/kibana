@@ -128,9 +128,9 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChanges');
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+    cy.wait('@saveRuleChanges').should(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,
@@ -162,10 +162,8 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
-
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleMultiQuery').should(({ request }) => {
+    cy.wait('@saveRuleChanges').should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,
