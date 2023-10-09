@@ -179,31 +179,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('recovers from missing field in data view', async () => {
           const assertShowingMissingFieldError = async (yes: boolean) => {
-            await retry.try(async () => {
-              const [failureExists, canvasExists] = await Promise.all([
-                testSubjects.exists('embeddable-lens-failure'),
-                find.existsByCssSelector('canvas', 1000),
-              ]);
-              expect(failureExists).to.be(yes);
-              expect(canvasExists).to.be(!yes);
-            });
+            const [failureExists, canvasExists] = await Promise.all([
+              testSubjects.exists('embeddable-lens-failure'),
+              find.existsByCssSelector('canvas', 1000),
+            ]);
+            expect(failureExists).to.be(yes);
+            expect(canvasExists).to.be(!yes);
           };
 
           await listingTable.clickItemLink('eventAnnotation', 'Group with additional fields');
 
           await assertShowingMissingFieldError(false);
 
-          await PageObjects.annotationEditor.editGroupMetadata({
-            dataView: 'Data view without fields',
+          await retry.try(async () => {
+            await PageObjects.annotationEditor.editGroupMetadata({
+              dataView: 'Data view without fields',
+            });
+
+            await assertShowingMissingFieldError(true);
           });
 
-          await assertShowingMissingFieldError(true);
+          await retry.try(async () => {
+            await PageObjects.annotationEditor.editGroupMetadata({
+              dataView: 'logs*',
+            });
 
-          await PageObjects.annotationEditor.editGroupMetadata({
-            dataView: 'logs*',
+            await assertShowingMissingFieldError(false);
           });
-
-          await assertShowingMissingFieldError(false);
         });
       });
     });
