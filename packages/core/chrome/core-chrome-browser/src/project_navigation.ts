@@ -49,6 +49,8 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+type NonEmptyArray<T> = [T, ...T[]];
+
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -58,6 +60,10 @@ export type GetIsActiveFn = (params: {
   prepend: (path: string) => string;
 }) => boolean;
 
+/**
+ * Base definition of navigation nodes. A node can either be a "group" or an "item".
+ * Each have commmon properties and specific properties.
+ */
 interface NodeDefinitionBase {
   /**
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
@@ -68,55 +74,77 @@ interface NodeDefinitionBase {
    */
   href?: string;
   /**
-   * Optional flag to indicate if the node must be treated as a group title.
-   * Can not be used with `children`
-   */
-  isGroupTitle?: boolean;
-  /**
-   * Optional flag to indicate if the node is collapsible in an accordion.
-   * Default :false
-   */
-  isCollapsible?: boolean;
-  /**
-   * Flag to indicate if the node opens a panel when clicking on it.
-   * Note: Can't be used with a `link` or `href` value.
-   */
-  openPanel?: boolean;
-  /**
    * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
-  accordionProps?: Partial<EuiAccordionProps>;
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: GetIsActiveFn;
   /**
-   * Optional flag to indicate if a badge should be rendered next to the text.
+   * ----------------------------------------------------------------------------------------------
+   * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------
+   * ----------------------------------------------------------------------------------------------
+   */
+  /**
+   * ["group" nodes only] Optional flag to indicate if the node must be treated as a group title.
+   * Can not be used with `children`
+   */
+  isGroupTitle?: boolean;
+  /**
+   * ["group" nodes only] Optional flag to indicate if the group node is collapsible in an accordion.
+   * Default :false
+   */
+  isCollapsible?: boolean;
+  /**
+   * ["group" nodes only] Flag to indicate if the node opens a panel when clicking on it.
+   * Note: Can't be used with a `link` or `href` value.
+   */
+  openPanel?: boolean;
+  /**
+   * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
+   * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation
+   * panel opening on the right of the side nav.
+   */
+  appendHorizontalRule?: boolean;
+  /**
+   * ["group" nodes only] Temp prop. Will be removed once the new navigation is fully implemented.
+   */
+  accordionProps?: Partial<EuiAccordionProps>;
+  /**
+   * ----------------------------------------------------------------------------------------------
+   * -------------------------------- ITEM NODES ONLY PROPS ---------------------------------------
+   * ----------------------------------------------------------------------------------------------
+   */
+  /**
+   * ["item" nodes only] Optional flag to indicate if the target page should be opened in a new Browser tab.
+   * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
+   */
+  openInNewTab?: boolean;
+  /**
+   * ["group" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
    * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
    */
   withBadge?: boolean;
   /**
-   * If `withBadge` is true, this object can be used to customize the badge.
+   * ["group" nodes only] If `withBadge` is true, this object can be used to customize the badge.
    */
   badgeOptions?: {
     /** The text of the badge. Default: "Beta" */
     text?: string;
   };
-  /**
-   * Optional flag to indicate if the target page should be opened in a new Browser tab.
-   * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
-   */
-  openInNewTab?: boolean;
-  /**
-   * Optional flag to indicate if a horizontal rule should be rendered after the node.
-   * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation panel opening on the right of the side nav.
-   */
-  appendHorizontalRule?: boolean;
 }
 
 /** @public */
+/**
+ * Chrome project navigation node. This is the tree definition stored in the Chrome service
+ * that is generated based on the NodeDefinition below.
+ * Some of the process that occurs between the 2 are:
+ * - "link" prop get converted to existing ChromNavLink
+ * - "path" is added to each node based on where it is located in the tree
+ * - "isActive" state is added to each node based on the current location
+ */
 export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
@@ -126,9 +154,11 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   path: string[];
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
-  /** Optional children of the navigation node */
+  /**
+   * Optional children of the navigation node. Once a node has "children" defined it is
+   * considered a "group" node.
+   */
   children?: ChromeProjectNavigationNode[];
-
   /**
    * Flag to indicate if the node is currently active.
    */
@@ -159,7 +189,8 @@ export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
 
-type NonEmptyArray<T> = [T, ...T[]];
+// --- NOTE: The following types are the ones that the consumer uses to configure their navigation.
+// ---       They are converted to the ChromeProjectNavigationNode type above.
 
 /**
  * @public
@@ -182,7 +213,6 @@ export interface NodeDefinition<
   link?: LinkId;
   /** Cloud link id */
   cloudLink?: CloudLinkId;
-
   /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
