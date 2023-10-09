@@ -209,9 +209,14 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_dip_notextfield':
         case 'artificial_logs_with_dip_textfield':
           try {
-            await es.indices.delete({
+            const indexExists = await es.indices.exists({
               index: dataGenerator,
             });
+            if (indexExists) {
+              await es.indices.delete({
+                index: dataGenerator,
+              });
+            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
