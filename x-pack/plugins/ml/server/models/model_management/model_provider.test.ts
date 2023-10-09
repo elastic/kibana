@@ -57,15 +57,14 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           default: true,
-          description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2',
           name: '.elser_model_2',
           version: 2,
         },
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
-          description:
-            'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
           name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           recommended: true,
@@ -109,15 +108,14 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           recommended: true,
-          description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2',
           name: '.elser_model_2',
           version: 2,
         },
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
-          description:
-            'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
           name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           version: 2,

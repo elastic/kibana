@@ -256,8 +256,9 @@ export const runTask = async ({
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
     };
-
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
+
+    riskScoreService.scheduleLatestTransformNow();
 
     if (isCancelled()) {
       log('task was cancelled');
