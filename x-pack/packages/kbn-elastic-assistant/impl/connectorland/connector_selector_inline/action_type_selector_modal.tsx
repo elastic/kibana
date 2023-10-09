@@ -34,7 +34,7 @@ export const ActionTypeSelectorModal = ({
   onSelect,
 }: Props) =>
   actionTypes && actionTypes.length > 0 ? (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -44,11 +44,12 @@ export const ActionTypeSelectorModal = ({
           {actionTypes.map((actionType: ActionType) => {
             const fullAction = actionTypeRegistry.get(actionType.id);
             return (
-              <EuiFlexItem key={actionType.id} grow={false}>
+              <EuiFlexItem data-test-subj="action-option" key={actionType.id} grow={false}>
                 <EuiKeyPadMenuItem
                   key={actionType.id}
                   isDisabled={!actionType.enabled}
                   label={actionType.name}
+                  data-test-subj={`action-option-${actionType.name}`}
                   onClick={() => onSelect(actionType)}
                 >
                   <EuiIcon size="xl" type={fullAction.iconClass} />
