@@ -453,7 +453,7 @@ describe('ingest_integration tests ', () => {
       {
         date: '2020-10-31',
         message:
-          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.',
+          'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.',
       },
       {
         date: '2100-10-01',
