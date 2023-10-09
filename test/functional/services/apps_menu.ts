@@ -120,10 +120,13 @@ export class AppsMenuService extends FtrService {
       await this.openCollapsibleNav();
       let nav;
       if (typeof category === 'string') {
+        console.log('finding a category');
         nav = await this.testSubjects.find(`collapsibleNavGroup-${category}`);
       } else {
+        console.log('finding something else');
         nav = await this.testSubjects.find('collapsibleNav');
       }
+      console.log('now finding the nav link click for name:', name);
       const link = await nav.findByPartialLinkText(name);
       await link.click();
 

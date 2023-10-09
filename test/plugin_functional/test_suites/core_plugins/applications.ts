@@ -29,22 +29,30 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     return (await wrapper.getSize()).height;
   };
 
-  const getKibanaUrl = (pathname?: string, search?: string) => {
-    return url.format({
+  const getKibanaUrl = (pathname?: string, search?: string) =>
+    url.format({
       protocol: 'http:',
       hostname: process.env.TEST_KIBANA_HOST || 'localhost',
       port: process.env.TEST_KIBANA_PORT || '5620',
       pathname,
       search,
     });
-  };
+  // const getKibanaUrl = (pathname?: string, search?: string) => {
+  //   return url.format({
+  //     protocol: 'http:',
+  //     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
+  //     port: process.env.TEST_KIBANA_PORT || '5620',
+  //     pathname,
+  //     search,
+  //   });
+  // };
 
-  const waitForUrlToBeWithTimeout = async (pathname?: string, search?: string, time?: number) => {
-    const expectedUrl = getKibanaUrl(pathname, search);
-    return await retry.waitForWithTimeout('navigates to app root', time ?? 3000, async () => {
-      return (await browser.getCurrentUrl()) === expectedUrl;
-    });
-  };
+  // const waitForUrlToBeWithTimeout = async (pathname?: string, search?: string, time?: number) => {
+  //   const expectedUrl = getKibanaUrl(pathname, search);
+  //   return await retry.waitForWithTimeout('navigates to app root', time ?? 3000, async () => {
+  //     return (await browser.getCurrentUrl()) === expectedUrl;
+  //   });
+  // };
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
@@ -57,6 +65,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
   describe('ui applications', function describeIndexTests() {
+    debugger;
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
@@ -64,6 +73,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('starts on home page', async () => {
+      debugger;
       await testSubjects.existOrFail('fooAppHome');
     });
 
@@ -98,9 +108,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('navigates to app root when navlink is clicked', async () => {
+      debugger;
       await appsMenu.clickLink('Foo');
 
-      await waitForUrlToBeWithTimeout('/app/foo/home'); // fix https://github.com/elastic/kibana/issues/166677 timeout failure
+      // await waitForUrlToBeWithTimeout('/app/foo/home'); // fix https://github.com/elastic/kibana/issues/166677 timeout failure
+      await waitForUrlToBe('/app/foo/home');
+      await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
