@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -126,5 +126,55 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
       });
     });
+
+    describe('customFields', () => {
+      it('creates a case with custom fields', async () => {
+        const customFields = [
+          {
+            key: 'valid_key_1',
+            label: 'Summary',
+            type: CustomFieldTypes.TEXT,
+            required: true,
+          },
+          {
+            key: 'valid_key_2',
+            label: 'Sync',
+            type: CustomFieldTypes.TOGGLE,
+            required: true,
+          },
+        ];
+
+        await cases.api.createConfigWithCustomFields({customFields, owner: 'cases'});
+
+        const caseTitle = 'test-' + uuidv4();
+        await cases.create.openCreateCasePage();
+
+        // verify custom fields on create case page
+        await testSubjects.existOrFail('create-case-custom-fields');
+
+        await cases.create.setTitle(caseTitle);
+        await cases.create.setDescription('this is a test description');
+
+        // set custom field values
+        const textCustomField = await find.byCssSelector(`[data-test-subj*="text-create-custom-field"]`);
+        await textCustomField.type('This is a sample text for summary!');
+
+        const toggleCustomField = await find.byCssSelector('[data-test-subj*="toggle-create-custom-field"]');
+        await toggleCustomField.click();
+
+        await cases.create.submitCase();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('case-view-title');
+  
+        // validate custom fields
+        const summary = await find.byCssSelector(`[data-test-subj="case-text-custom-field-${customFields[0].key}"]`);
+        expect(await summary.getVisibleText()).equal('This is a sample text for summary!');
+
+        const sync = await find.byCssSelector(`[data-test-subj="case-toggle-custom-field-form-field-${customFields[1].key}"]`);
+        expect(await sync.getAttribute('aria-checked')).equal('true');
+      });
+    })
   });
 };
