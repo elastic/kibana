@@ -264,8 +264,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         });
 
-        await PageObjects.settings.clickAddNewIndexPatternButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        // await PageObjects.settings.clickAddNewIndexPatternButton();
+        // await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.createIndexPattern(
           'logstash-2015.09.21',
           undefined,
