@@ -11,6 +11,7 @@ import {
   checkResults,
   inputQueryInFlyout,
   loadRuleAlerts,
+  selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
@@ -67,6 +68,7 @@ describe(
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');
+      selectAllAgents();
       inputQueryInFlyout('select * from uptime;');
       submitQuery();
       checkResults();
