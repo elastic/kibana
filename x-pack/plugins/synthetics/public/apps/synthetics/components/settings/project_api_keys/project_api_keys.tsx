@@ -47,6 +47,9 @@ export const ProjectAPIKeys = () => {
 
   const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
+  const canUsePublicLocations =
+    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+
   if (enablementLoading) {
     return <LoadingState />;
   }
@@ -76,10 +79,11 @@ export const ProjectAPIKeys = () => {
                 label={i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
                   defaultMessage: 'Elastic managed locations enabled',
                 })}
-                checked={accessToElasticManagedLocations}
+                checked={accessToElasticManagedLocations && canUsePublicLocations}
                 onChange={() => {
                   setAccessToElasticManagedLocations(!accessToElasticManagedLocations);
                 }}
+                disabled={!canUsePublicLocations}
               />
             </>
           ) : (
