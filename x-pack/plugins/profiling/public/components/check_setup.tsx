@@ -91,6 +91,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     !!error;
 
   if (displaySetupScreen) {
+    const isButtonDisabled = postSetupLoading || data?.has_required_role === false;
     return (
       <ProfilingAppPageTemplate
         tabs={[]}
@@ -154,7 +155,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
               button: (
                 <EuiButton
                   data-test-subj="profilingCheckSetupButton"
-                  disabled={postSetupLoading || data?.has_required_role === false}
+                  disabled={isButtonDisabled}
                   onClick={(event) => {
                     event.preventDefault();
 
