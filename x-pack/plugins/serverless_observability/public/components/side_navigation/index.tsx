@@ -125,6 +125,29 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
+          id: 'metrics',
+          title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
+            defaultMessage: 'Infrastructure',
+          }),
+          accordionProps: {
+            arrowProps: { css: { display: 'none' } },
+          },
+          children: [
+            {
+              link: 'metrics:inventory',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+              },
+            },
+            {
+              link: 'metrics:hosts',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+              },
+            },
+          ],
+        },
+        {
           id: 'groups-spacer-2',
           isGroupTitle: true,
         },
