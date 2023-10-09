@@ -55,6 +55,7 @@ jobs:
       - name: Post Slack success message
         if: success()
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
           payload: |
             {
