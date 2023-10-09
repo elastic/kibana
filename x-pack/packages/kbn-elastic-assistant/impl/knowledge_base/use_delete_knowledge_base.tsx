@@ -6,37 +6,36 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { postKnowledgeBase } from '../../assistant/api';
-import { useInvalidateKnowledgeBaseStatus } from '../use_knowledge_base_status/use_knowledge_base_status';
+import { deleteKnowledgeBase } from '../assistant/api';
+import { useInvalidateKnowledgeBaseStatus } from './use_knowledge_base_status';
 
-const SETUP_KNOWLEDGE_BASE_MUTATION_KEY = ['elastic-assistant', 'post-knowledge-base'];
+const DELETE_KNOWLEDGE_BASE_MUTATION_KEY = ['elastic-assistant', 'delete-knowledge-base'];
 
-export interface UseSetupKnowledgeBaseParams {
+export interface UseDeleteKnowledgeBaseParams {
   http: HttpSetup;
   toasts?: IToasts;
 }
 
 /**
- * Hook for setting up the Knowledge Base. Provide a resource name to set
- * up a specific part of the KB.
+ * Hook for deleting the Knowledge Base. Provide a resource name to delete a
+ * specific resource within KB.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
  * @param {IToasts} [options.toasts] - IToasts
  *
- * @returns {useMutation} mutation hook for setting up the Knowledge Base
+ * @returns {useMutation} hook for deleting the Knowledge Base
  */
-export const useSetupKnowledgeBase = ({ http, toasts }: UseSetupKnowledgeBaseParams) => {
+export const useDeleteKnowledgeBase = ({ http, toasts }: UseDeleteKnowledgeBaseParams) => {
   const invalidateKnowledgeBaseStatus = useInvalidateKnowledgeBaseStatus();
-
   return useMutation(
-    SETUP_KNOWLEDGE_BASE_MUTATION_KEY,
+    DELETE_KNOWLEDGE_BASE_MUTATION_KEY,
     (resource?: string | void) => {
       // Optional params workaround: see: https://github.com/TanStack/query/issues/1077#issuecomment-1431247266
-      return postKnowledgeBase({ http, resource: resource ?? undefined });
+      return deleteKnowledgeBase({ http, resource: resource ?? undefined });
     },
     {
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
@@ -44,8 +43,8 @@ export const useSetupKnowledgeBase = ({ http, toasts }: UseSetupKnowledgeBasePar
           toasts?.addError(
             error.body && error.body.message ? new Error(error.body.message) : error,
             {
-              title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
-                defaultMessage: 'Error setting up Knowledge Base',
+              title: i18n.translate('xpack.elasticAssistant.knowledgeBase.deleteError', {
+                defaultMessage: 'Error deleting Knowledge Base',
               }),
             }
           );

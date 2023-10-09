@@ -11,7 +11,7 @@ import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-ht
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import { getKnowledgeBaseStatus } from '../../assistant/api';
+import { getKnowledgeBaseStatus } from '../assistant/api';
 
 const KNOWLEDGE_BASE_STATUS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-status'];
 
