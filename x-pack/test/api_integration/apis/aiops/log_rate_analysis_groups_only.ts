@@ -194,7 +194,12 @@ export default ({ getService }: FtrProviderContext) => {
             }
 
             // If streaming works correctly we should receive more than one chunk.
-            expect(chunkCounter).to.be.greaterThan(1);
+            expect(chunkCounter).to.be.greaterThan(
+              1,
+              `Expected 'chunkCounter' to be greater than 1, got ${chunkCounter} with the following data: ${JSON.stringify(
+                data
+              )}.`
+            );
 
             await assertAnalysisResult(data);
           }
