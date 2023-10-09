@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const getTestJson = async (tabTestSubj: string, codeTestSubj: string) => {
       log.info(`switch to ${tabTestSubj} tab...`);
       await testSubjects.click(tabTestSubj);
-      await new Promise((r) => setTimeout(r, 200));
       const block = await testSubjects.find(codeTestSubj);
       const testText = (await block.getVisibleText()).trim();
       return testText && JSON.parse(testText);
@@ -103,6 +102,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
+      // toasts
+      let toasts: WebElementWrapper[] = [];
+
+      await retry.try(async () => {
+        toasts = await find.allByCssSelector(toastsSelector);
+        expect(toasts.length).to.be(2);
+      });
+
+      const expects = ['The data might be incomplete or wrong.', 'Query result'];
+      await asyncForEach(toasts, async (t, index) => {
+        expect(await t.getVisibleText()).to.eql(expects[index]);
+      });
+
+      await retry.try(async () => {
+        response = await getTestJson('responseTab', 'responseCodeBlock');
+        expect(response).not.to.eql({});
+      });
+
+      // click "see full error" button in the toast
+      const [openShardModalButton] = await testSubjects.findAll('openIncompleteResultsModalBtn');
+      await openShardModalButton.click();
 
       // wait for response - toasts appear before the response is rendered
       let response: estypes.SearchResponse | undefined;
@@ -110,21 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         response = await getTestJson('responseTab', 'responseCodeBlock');
         expect(response).not.to.eql({});
       });
-
-      // toasts
-      let toasts: WebElementWrapper[] = [];
-      await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
-        const expects = ['The data might be incomplete or wrong.', 'Query result'];
-        await asyncForEach(toasts, async (t, index) => {
-          expect(await t.getVisibleText()).to.eql(expects[index]);
-        });
-      });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openIncompleteResultsModalBtn');
-      await openShardModalButton.click();
 
       // request
       await testSubjects.click('showRequestButton');
