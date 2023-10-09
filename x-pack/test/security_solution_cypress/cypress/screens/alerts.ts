@@ -214,3 +214,6 @@ export const ALERT_ASSIGNING_SELECTABLE_MENU_ITEM =
 export const ALERT_ASSIGNING_CONTEXT_MENU = '[data-test-subj="alert-assignees-selectable-menu"]';
 
 export const ALERT_ASSIGNING_UPDATE_BUTTON = '[data-test-subj="alert-assignees-update-button"]';
+
+export const ALERT_ASSIGNING_USER_AVATAR = (assignee: string) =>
+  `[data-test-subj="alertTableAssigneeAvatar"][title='${assignee}']`;

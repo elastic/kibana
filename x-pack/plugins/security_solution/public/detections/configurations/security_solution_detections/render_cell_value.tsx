@@ -6,13 +6,21 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { UserAvatar } from '@kbn/user-profile-components';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -73,10 +81,40 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
       | undefined;
     return ecsAssignees ?? dataAssignees ?? [];
   }, [props.data, props.ecsData?.kibana?.alert.workflow_assignee_ids]);
-  const { userProfiles } = useGetUserProfiles(actualAssignees);
+  const { loading: isLoadingProfiles, userProfiles } = useGetUserProfiles(actualAssignees);
   const assignees = userProfiles?.filter((user) => actualAssignees.includes(user.uid)) ?? [];
-  if (columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME && assignees.length) {
-    return <>{assignees.map((user) => user.user.full_name ?? user.user.username).join(', ')}</>;
+  if (
+    columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME &&
+    (actualAssignees.length || isLoadingProfiles)
+  ) {
+    // Show spinner if loading profiles or if there are no fetched profiles yet
+    if (isLoadingProfiles || !assignees.length) {
+      return <EuiLoadingSpinner size="s" />;
+    }
+    return (
+      <span>
+        {assignees.length > 2 ? (
+          <EuiToolTip
+            position="top"
+            content={assignees.map((user) => (
+              <div>{user.user.email ?? user.user.username}</div>
+            ))}
+            repositionOnScroll={true}
+          >
+            <EuiNotificationBadge>{assignees.length}</EuiNotificationBadge>
+          </EuiToolTip>
+        ) : (
+          assignees.map((user) => (
+            <UserAvatar
+              user={user.user}
+              avatar={user.data.avatar}
+              size={'s'}
+              data-test-subj="alertTableAssigneeAvatar"
+            />
+          ))
+        )}
+      </span>
+    );
   }
 
   const component = (
