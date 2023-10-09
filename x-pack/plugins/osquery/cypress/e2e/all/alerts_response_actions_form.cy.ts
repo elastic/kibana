@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InterceptedRequest } from '../../screens/types';
 import {
   cleanupPack,
   cleanupRule,
@@ -27,6 +26,21 @@ import {
   typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
+
+interface ITestRuleBody {
+  response_actions: [
+    {
+      params: {
+        queries: Array<{
+          interval?: number;
+          query: string;
+          platform: string;
+          id: string;
+        }>;
+      };
+    }
+  ];
+}
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;
@@ -133,16 +147,18 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel('ruleEditSubmitButton').click();
 
     cy.wait('@saveRuleChangesOne');
-    cy.get<{ request: InterceptedRequest }>('@saveRuleChangesOne').should(({ request }) => {
-      const oneQuery = [
-        {
-          interval: 3600,
-          query: 'select * from uptime;',
-          id: Object.keys(packData.queries)[0],
-        },
-      ];
-      expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
-    });
+    cy.get<{ request: { url: string; body: ITestRuleBody } }>('@saveRuleChangesOne').should(
+      ({ request }) => {
+        const oneQuery = [
+          {
+            interval: 3600,
+            query: 'select * from uptime;',
+            id: Object.keys(packData.queries)[0],
+          },
+        ];
+        expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+      }
+    );
 
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
@@ -169,26 +185,28 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
 
     cy.contains('Save changes').click();
     cy.wait('@saveRuleChangesTwo');
-    cy.get<{ request: InterceptedRequest }>('@saveRuleChangesTwo').should(({ request }) => {
-      const threeQueries = [
-        {
-          interval: 3600,
-          query: 'SELECT * FROM memory_info;',
-          platform: 'linux',
-          id: Object.keys(multiQueryPackData.queries)[0],
-        },
-        {
-          interval: 3600,
-          query: 'SELECT * FROM system_info;',
-          id: Object.keys(multiQueryPackData.queries)[1],
-        },
-        {
-          interval: 10,
-          query: 'select opera_extensions.* from users join opera_extensions using (uid);',
-          id: Object.keys(multiQueryPackData.queries)[2],
-        },
-      ];
-      expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
-    });
+    cy.get<{ request: { url: string; body: ITestRuleBody } }>('@saveRuleChangesTwo').should(
+      ({ request }) => {
+        const threeQueries = [
+          {
+            interval: 3600,
+            query: 'SELECT * FROM memory_info;',
+            platform: 'linux',
+            id: Object.keys(multiQueryPackData.queries)[0],
+          },
+          {
+            interval: 3600,
+            query: 'SELECT * FROM system_info;',
+            id: Object.keys(multiQueryPackData.queries)[1],
+          },
+          {
+            interval: 10,
+            query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+            id: Object.keys(multiQueryPackData.queries)[2],
+          },
+        ];
+        expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
+      }
+    );
   });
 });
