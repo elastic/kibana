@@ -572,9 +572,9 @@ describe('getPluginStatusChangesMessages', () => {
     ).toMatchInlineSnapshot(`
       Array [
         "'newlyAvailablePlugin' (and 2 more) are now available: summary",
-        "The following plugins are now degraded: newlyDegradedPlugin, anotherNewlyDegradedPlugin (and 2 more)",
-        "- 'newlyDegradedPlugin' is now degraded: summary",
-        "- 'anotherNewlyDegradedPlugin' is now degraded: summary",
+        "The following plugins are now degraded: newlyDegradedPlugin, anotherNewlyDegradedPlugin (and 2 more)
+       - 'newlyDegradedPlugin' is now degraded: summary
+       - 'anotherNewlyDegradedPlugin' is now degraded: summary",
         "'alreadyCriticalPlugin' plugin (and some others that depend on it) are critical: summary",
         "'alreadyDegradedPlugin' plugin (and some others that depend on it) are degraded: summary",
       ]

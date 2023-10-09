@@ -85,8 +85,6 @@ export const getPluginStatusChangesMessages = ({
 }: PluginStatusChanges): string[] => {
   const messages: string[] = [];
 
-  // console.log('FOO', JSON.stringify({ status, updates, total }));
-
   // loop through all different status levels, and report services that have changed
   Object.entries(updates).forEach(([currentLevel, pluginStatuses]) => {
     const statusReportingPlugins = pluginStatuses.filter(
@@ -97,18 +95,22 @@ export const getPluginStatusChangesMessages = ({
 
     if (statusReportingPlugins.length === 1) {
       const reason = getReason(statusReportingPlugins[0]);
+      const allAvailableSuffix =
+        status.available.length === total ? ` (all ${total} plugins are now available)` : '';
+
       if (inferredCount === 0) {
         messages.push(
-          `'${statusReportingPlugins[0].pluginName}' is now ${currentLevel}: ${reason}`
+          `'${statusReportingPlugins[0].pluginName}' is now ${currentLevel}: ${reason}${allAvailableSuffix}`
         );
       } else {
         messages.push(
-          `'${statusReportingPlugins[0].pluginName}' (and ${inferredCount} more) are now ${currentLevel}: ${reason}`
+          `'${statusReportingPlugins[0].pluginName}' (and ${inferredCount} more) are now ${currentLevel}: ${reason}${allAvailableSuffix}`
         );
       }
     } else if (statusReportingPlugins.length > 1) {
+      const multilineStatus = [];
       if (inferredCount === 0) {
-        messages.push(
+        multilineStatus.push(
           `${
             statusReportingPlugins.length
           } plugins are now ${currentLevel}: ${statusReportingPlugins
@@ -116,7 +118,7 @@ export const getPluginStatusChangesMessages = ({
             .join(', ')}`
         );
       } else {
-        messages.push(
+        multilineStatus.push(
           `The following plugins are now ${currentLevel}: ${statusReportingPlugins
             .map(({ pluginName }) => pluginName)
             .join(', ')} (and ${inferredCount} more)`
@@ -124,8 +126,12 @@ export const getPluginStatusChangesMessages = ({
       }
 
       statusReportingPlugins.forEach(({ pluginName, ...pluginStatus }) =>
-        messages.push(`- '${pluginName}' is now ${currentLevel}: ${getReason(pluginStatus)}`)
+        multilineStatus.push(
+          ` - '${pluginName}' is now ${currentLevel}: ${getReason(pluginStatus)}`
+        )
       );
+
+      messages.push(multilineStatus.join('\n'));
     }
   });
 
@@ -173,10 +179,6 @@ export const getPluginStatusChangesMessages = ({
         );
       }
     });
-
-  if (status.available.length === total) {
-    messages.push(`All ${total} plugins are now available`);
-  }
 
   return messages;
 };
