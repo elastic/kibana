@@ -461,9 +461,8 @@ describe('Risk Scoring Task', () => {
             telemetry: mockTelemetry,
           });
 
-          expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
           expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
-            executionDurationExceededInterval: false,
+            interval: '1h',
             scoresWritten: 10,
             taskDurationInSeconds: 0,
           });
@@ -490,6 +489,27 @@ describe('Risk Scoring Task', () => {
               {}
             );
           }
+        });
+
+        it('sends a cancellation telemetry event if the task was cancelled', async () => {
+          mockIsCancelled.mockReturnValue(true);
+
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+            'risk_score_execution_cancellation',
+            {
+              interval: '1h',
+              scoresWritten: 0,
+              taskDurationInSeconds: 0,
+            }
+          );
         });
       });
     });
