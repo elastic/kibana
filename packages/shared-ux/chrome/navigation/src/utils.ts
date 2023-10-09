@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+
+let uniqueId = 0;
+
+export function generateUniqueNodeId() {
+  const id = `node-${uniqueId++}`;
+  return id;
+}
 
 export function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');

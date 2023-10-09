@@ -17,7 +17,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { CloudLinks } from '../../cloud_links';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import { isAbsoluteLink } from '../../utils';
+import { generateUniqueNodeId, isAbsoluteLink } from '../../utils';
 import { useNavigation } from '../components/navigation';
 import { NodeProps, NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
@@ -26,14 +26,8 @@ function getIdFromNavigationNode<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
->({ id: _id, link, title }: NodeProps<LinkId, Id, ChildrenId>): string {
-  const id = _id ?? link;
-
-  if (!id) {
-    throw new Error(`Id or link prop missing for navigation item [${title}]`);
-  }
-
-  return id;
+>({ id }: NodeProps<LinkId, Id, ChildrenId>): string {
+  return id ?? generateUniqueNodeId();
 }
 
 /**
