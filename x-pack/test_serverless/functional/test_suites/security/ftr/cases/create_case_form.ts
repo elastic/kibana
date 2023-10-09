@@ -16,6 +16,7 @@ const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
+    this.tags(['failsOnMKI']);
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
