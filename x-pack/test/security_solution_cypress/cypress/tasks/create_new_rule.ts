@@ -738,7 +738,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
       return cy.root().then(($el) => {
-        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
+        const emptyTimelines = $el.find(EMPTY_ALERT_TABLE);
         if (emptyTableState.length > 0) {
           cy.log('Table is empty', emptyTableState.length);
           return false;
