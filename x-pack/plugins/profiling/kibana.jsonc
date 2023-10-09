@@ -9,7 +9,8 @@
     "configPath": ["xpack", "profiling"],
     "optionalPlugins": [
       "spaces", 
-      "usageCollection"
+      "usageCollection",
+      "security"
     ],
     "requiredPlugins": [
       "charts",

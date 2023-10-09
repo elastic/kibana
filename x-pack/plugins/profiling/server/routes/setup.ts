@@ -15,9 +15,9 @@ import {
   removeProfilingFromApmPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
-import { setSecurityRole } from '../lib/setup/security_role';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { isSuperuser } from '../lib/setup/is_super_user';
 
 export function registerSetupRoute({
   router,
@@ -35,6 +35,13 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        const hasRequiredRole = dependencies.start.security
+          ? isSuperuser({
+              securityPluginStart: dependencies.start.security,
+              request,
+            })
+          : true;
+
         const esClient = await getClient(context);
         const core = await context.core;
 
@@ -44,7 +51,7 @@ export function registerSetupRoute({
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
         });
 
-        return response.ok({ body: profilingStatus });
+        return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
       } catch (error) {
         return handleRouteHandlerError({
           error,
@@ -77,6 +84,24 @@ export function registerSetupRoute({
           });
         }
 
+        // const hasRequiredRole = dependencies.start.security
+        //   ? isSuperuser({
+        //       securityPluginStart: dependencies.start.security,
+        //       request,
+        //     })
+        //   : true;
+
+        // if (hasRequiredRole === false) {
+        //   const msg = `Operation only permitted by users with the superuser role`;
+        //   logger.error(msg);
+        //   return response.custom({
+        //     statusCode: 403,
+        //     body: {
+        //       message: msg,
+        //     },
+        //   });
+        // }
+
         const esClient = await getClient(context);
         const core = await context.core;
         const clientWithDefaultAuth = createProfilingEsClient({
@@ -107,7 +132,6 @@ export function registerSetupRoute({
 
         const executeAdminFunctions = [
           ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-          ...(setupState.permissions.configured ? [] : [setSecurityRole]),
           ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
         ];
 

@@ -16,7 +16,6 @@ import {
 } from '../../../common/fleet_policies';
 import { hasProfilingData } from '../../../common/has_profiling_data';
 import { ProfilingESClient } from '../../../common/profiling_es_client';
-import { validateSecurityRole } from '../../../common/security_role';
 import {
   ProfilingSetupOptions,
   createDefaultSetupState,
@@ -34,7 +33,6 @@ export async function getSetupState(
   const verifyFunctions = [
     validateMaximumBuckets,
     validateResourceManagement,
-    validateSecurityRole,
     validateCollectorPackagePolicy,
     validateSymbolizerPackagePolicy,
     validateProfilingInApmPackagePolicy,

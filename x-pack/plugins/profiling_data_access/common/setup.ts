@@ -27,9 +27,6 @@ export interface SetupState {
   data: {
     available: boolean;
   };
-  permissions: {
-    configured: boolean;
-  };
   policies: {
     collector: {
       installed: boolean;
@@ -64,9 +61,6 @@ export function createDefaultSetupState(): SetupState {
     data: {
       available: false,
     },
-    permissions: {
-      configured: false,
-    },
     policies: {
       collector: {
         installed: false,
@@ -98,7 +92,6 @@ export function areResourcesSetup(state: SetupState): boolean {
     !state.policies.apm.profilingEnabled &&
     state.resource_management.enabled &&
     state.resources.created &&
-    state.permissions.configured &&
     state.settings.configured
   );
 }
