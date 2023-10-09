@@ -75,7 +75,10 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
       onFilterField:
         fieldSearchHighlight?.length || selectedFieldTypes.length > 0
           ? (field: T) => {
-              if (fieldSearchHighlight && !fieldNameWildcardMatcher(field, fieldSearchHighlight)) {
+              if (
+                fieldSearchHighlight?.trim() &&
+                !fieldNameWildcardMatcher(field, fieldSearchHighlight)
+              ) {
                 return false;
               }
               if (selectedFieldTypes.length > 0) {
