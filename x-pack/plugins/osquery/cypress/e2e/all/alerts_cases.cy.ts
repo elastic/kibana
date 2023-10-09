@@ -26,27 +26,22 @@ import { generateRandomStringName, interceptCaseId } from '../../tasks/integrati
 
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
-  let ruleName: string;
   let packId: string;
   let packName: string;
   const packData = packFixture();
 
-  before(() => {
+  beforeEach(() => {
     loadPack(packData).then((data) => {
       packId = data.saved_object_id;
       packName = data.name;
     });
     loadRule(true).then((data) => {
       ruleId = data.id;
-      ruleName = data.name;
+      loadRuleAlerts(data.name);
     });
   });
 
-  beforeEach(() => {
-    loadRuleAlerts(ruleName);
-  });
-
-  after(() => {
+  afterEach(() => {
     cleanupPack(packId);
     cleanupRule(ruleId);
   });
