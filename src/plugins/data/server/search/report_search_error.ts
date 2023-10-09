@@ -32,7 +32,7 @@ export class KbnSearchError extends KbnError {
  */
 export function getKbnSearchError(e: Error) {
   if (e instanceof KbnSearchError) return e;
-  return new getKbnSearchError(
+  return new KbnSearchError(
     e.message ?? 'Unknown error',
     e instanceof errors.ResponseError ? e.statusCode! : 500,
     e instanceof errors.ResponseError ? e.body : undefined

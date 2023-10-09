@@ -52,6 +52,7 @@ export const esqlSearchStrategyProvider = (
           warning: headers?.warning,
         };
       } catch (e) {
+        console.log(JSON.stringify(e, null, ' '));
         throw getKbnServerError(e);
       }
     };

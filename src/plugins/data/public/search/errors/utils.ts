@@ -9,7 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 
 function getFailedShardCause(error: estypes.ErrorCause): estypes.ErrorCause | undefined {
-  const failedShards = error?.failed_shards || error?.caused_by?.failed_shards;
+  const failedShards = error.failed_shards || error.caused_by?.failed_shards;
   return failedShards ? failedShards[0]?.reason : undefined;
 }
 
@@ -19,7 +19,9 @@ function getNestedCause(error: estypes.ErrorCause): estypes.ErrorCause {
     : error;
 }
 
-export function getRootCause(error: estypes.ErrorCause): estypes.ErrorCause | undefined {
-  // Give shard failures priority, then try to get the error navigating nested objects
-  return getFailedShardCause(error) || getNestedCause(error);
+export function getRootCause(error?: estypes.ErrorCause): estypes.ErrorCause | undefined {
+  return error
+    ? // Give shard failures priority, then try to get the error navigating nested objects
+      getFailedShardCause(error) || getNestedCause(error)
+    : undefined;
 }

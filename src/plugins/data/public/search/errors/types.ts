@@ -10,8 +10,8 @@ import { estypes } from '@elastic/elasticsearch';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 interface IEsErrorAttributes {
-  rawResponse: estypes.SearchResponseBody;
-  error: estypes.ErrorCause;
+  rawResponse?: estypes.SearchResponseBody;
+  error?: estypes.ErrorCause;
 }
 
 export type IEsError = KibanaServerError<IEsErrorAttributes>;

@@ -31,7 +31,7 @@ export class PainlessError extends EsError {
       });
     }
 
-    const rootCause = getRootCause(this.err);
+    const rootCause = getRootCause(this.err.attributes?.error);
     const scriptFromStackTrace = rootCause?.script_stack
       ? rootCause?.script_stack?.slice(-2).join('\n')
       : undefined;
@@ -78,7 +78,7 @@ export class PainlessError extends EsError {
 export function isPainlessError(err: Error | IEsError) {
   if (!isEsError(err)) return false;
 
-  const rootCause = getRootCause(err as IEsError);
+  const rootCause = getRootCause((err as IEsError).attributes?.error);
   if (!rootCause) return false;
 
   const { lang } = rootCause;
