@@ -7,7 +7,12 @@
 
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
-import { inputQueryInFlyout, loadRuleAlerts, submitQuery } from '../../tasks/live_query';
+import {
+  checkResults,
+  inputQueryInFlyout,
+  loadRuleAlerts,
+  submitQuery,
+} from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
@@ -20,19 +25,16 @@ describe(
     let ruleId: string;
     let ruleName: string;
 
-    before(() => {
+    beforeEach(() => {
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
+        loadRuleAlerts(data.name);
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupRule(ruleId);
-    });
-
-    beforeEach(() => {
-      loadRuleAlerts(ruleName);
     });
 
     it('should be able to add investigation guides to response actions', () => {
@@ -67,7 +69,7 @@ describe(
       cy.contains('1 agent selected.');
       inputQueryInFlyout('select * from uptime;');
       submitQuery();
-      cy.contains('Results');
+      checkResults();
       cy.contains('Add to timeline investigation');
       cy.contains('Save for later').click();
       cy.contains('Save query');
