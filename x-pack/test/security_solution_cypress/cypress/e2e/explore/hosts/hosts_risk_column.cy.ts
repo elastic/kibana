@@ -15,7 +15,7 @@ import { kqlSearch } from '../../../tasks/security_header';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { enableRiskEngine } from '../../../tasks/entity_analytics';
 
-describe('All hosts table', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
       cleanKibana();
@@ -41,7 +41,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless', '@brokenInServerless
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@ess', '@brokenInServerless'] }, () => {
     before(() => {
       cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.name]
