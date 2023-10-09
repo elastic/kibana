@@ -546,9 +546,7 @@ describe('validateKuery validates real kueries', () => {
         true
       );
       expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toContain(
-        `KQLSyntaxError: The key is empty and needs to be wrapped by a saved object type like ingest-agent-policies`
-      );
+      expect(validationObj?.error).toContain(`KQLSyntaxError: Invalid key`);
     });
 
     it('Kuery with non existent parameter wrapped by SO', async () => {
@@ -564,7 +562,7 @@ describe('validateKuery validates real kueries', () => {
       );
     });
 
-    it('Kuery with non existent parameter', async () => {
+    it('Invalid search by non existent parameter', async () => {
       const validationObj = validateKuery(
         `non_existent_parameter: 'test_id'`,
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
@@ -698,6 +696,29 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(true);
     });
+
+    it('Search by activity', async () => {
+      const validationObj = validateKuery(`active: true`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by agent.id', async () => {
+      const validationObj = validateKuery(`agent.id: id1`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Invalid search by non existent parameter', async () => {
+      const validationObj = validateKuery(
+        `non_existent_parameter: 'test_id'`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toContain(
+        `KQLSyntaxError: This type 'non_existent_parameter' is not allowed`
+      );
+    });
   });
 
   describe('Package policies', () => {
@@ -798,6 +819,17 @@ describe('validateKuery validates real kueries', () => {
         true
       );
       expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Invalid search by non existent parameter', async () => {
+      const validationObj = validateKuery(
+        `policyId1`,
+        [FLEET_ENROLLMENT_API_PREFIX],
+        ENROLLMENT_API_KEY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toEqual(`KQLSyntaxError: Invalid key`);
     });
   });
 });

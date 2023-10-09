@@ -131,9 +131,8 @@ export const hasFilterKeyError = (
   indexMapping: IndexMapping,
   skipNormalization?: boolean
 ): string | null => {
-  if (key == null) {
-    // TODO: update this error message
-    return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
+  if (!key) {
+    return `Invalid key`;
   }
   if (!key.includes('.')) {
     if (allowedTerms.some((term) => term === key) || fieldDefined(indexMapping, key)) {
