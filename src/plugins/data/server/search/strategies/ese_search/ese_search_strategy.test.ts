@@ -7,6 +7,7 @@
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
@@ -460,7 +461,7 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnSearchError | undefined;
+      let err: KbnServerError | undefined;
       try {
         await esSearch.cancel!(id, {}, mockDeps);
       } catch (e) {
@@ -468,7 +469,7 @@ describe('ES search strategy', () => {
       }
 
       expect(mockDeleteCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnSearchError);
+      expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(xContentParseException);
@@ -506,7 +507,7 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnSearchError | undefined;
+      let err: KbnServerError | undefined;
       try {
         await esSearch.extend!(id, keepAlive, {}, mockDeps);
       } catch (e) {
@@ -514,7 +515,7 @@ describe('ES search strategy', () => {
       }
 
       expect(mockGetCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnSearchError);
+      expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(undefined);

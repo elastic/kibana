@@ -112,7 +112,10 @@ describe('Search service', () => {
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(400);
     expect(error.body.message).toBe('search_phase_execution_exception');
-    expect(error.body.attributes).toBe(searchPhaseException.error);
+    expect(error.body.attributes).toEqual({
+      error: searchPhaseException.error,
+      rawResponse: undefined,
+    });
   });
 
   it('handler returns an error response if the search throws an index not found error', async () => {
@@ -138,7 +141,10 @@ describe('Search service', () => {
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(404);
     expect(error.body.message).toBe('index_not_found_exception');
-    expect(error.body.attributes).toBe(indexNotFoundException.error);
+    expect(error.body.attributes).toEqual({
+      error: indexNotFoundException.error,
+      rawResponse: undefined
+    });
   });
 
   it('handler returns an error response if the search throws a general error', async () => {
