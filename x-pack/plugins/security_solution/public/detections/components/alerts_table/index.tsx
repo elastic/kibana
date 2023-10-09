@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
+import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
@@ -86,7 +86,6 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
 `;
 interface DetectionEngineAlertTableProps {
   configId: string;
-  flyoutSize: EuiFlyoutSize;
   inputFilters: Filter[];
   tableId: TableId;
   sourcererScope?: SourcererScopeName;
@@ -96,7 +95,6 @@ interface DetectionEngineAlertTableProps {
 
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
-  flyoutSize,
   inputFilters,
   tableId = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
@@ -258,7 +256,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       configurationId: configId,
       // stores saperate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
-      flyoutSize,
       featureIds: ['siem'],
       query: finalBoolQuery,
       showExpandToDetails: false,
@@ -278,7 +275,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       triggersActionsUi.alertsTableConfigurationRegistry,
       configId,
       tableView,
-      flyoutSize,
       finalBoolQuery,
       gridStyle,
       rowHeightsOptions,
