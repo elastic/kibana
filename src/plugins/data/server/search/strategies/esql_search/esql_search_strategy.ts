@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0 and the Server Side Public License, v 1; you may not use this file except
@@ -52,7 +52,6 @@ export const esqlSearchStrategyProvider = (
           warning: headers?.warning,
         };
       } catch (e) {
-        console.log(JSON.stringify(e, null, ' '));
         throw getKbnSearchError(e);
       }
     };
