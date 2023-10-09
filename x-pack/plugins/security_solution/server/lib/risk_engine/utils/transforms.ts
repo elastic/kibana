@@ -145,12 +145,12 @@ export const scheduleTransformNow = async ({
     );
   }
 
-  if (!hasTransformStarted(transformStats.transforms[0])) {
-    await esClient.transform.startTransform({
+  if (hasTransformStarted(transformStats.transforms[0])) {
+    await esClient.transform.scheduleNowTransform({
       transform_id: transformId,
     });
   } else {
-    await esClient.transform.scheduleNowTransform({
+    await esClient.transform.startTransform({
       transform_id: transformId,
     });
   }

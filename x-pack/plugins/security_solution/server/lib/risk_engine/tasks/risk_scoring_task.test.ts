@@ -449,6 +449,18 @@ describe('Risk Scoring Task', () => {
             expect.stringContaining('task was cancelled')
           );
         });
+
+        it('schedules the transform to run now', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
+        });
       });
 
       describe('when execution was successful', () => {

@@ -19,7 +19,7 @@ const startedTransformsMock = {
       state: 'started',
     },
   ],
-} as unknown as TransformGetTransformStatsResponse;
+} as TransformGetTransformStatsResponse;
 
 const stoppedTransformsMock = {
   count: 1,
@@ -29,7 +29,7 @@ const stoppedTransformsMock = {
       state: 'stopped',
     },
   ],
-} as unknown as TransformGetTransformStatsResponse;
+} as TransformGetTransformStatsResponse;
 
 describe('transforms utils', () => {
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('transforms utils', () => {
       expect(esClient.transform.startTransform).toHaveBeenCalled();
     });
 
-    it('calls startTransform when the transform state is started ', async () => {
+    it('calls scheduleNowTransform when the transform state is started ', async () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       esClient.transform.getTransformStats.mockResolvedValueOnce(startedTransformsMock);
 
