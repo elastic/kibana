@@ -39,9 +39,10 @@ import type { MlInferenceState } from '../types';
 interface Props {
   sourceIndex?: string;
   state: MlInferenceState;
+  mode: 'standAlone' | 'step';
 }
 
-export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
+export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const [simulatePipelineResult, setSimulatePipelineResult] = useState<
     undefined | estypes.IngestSimulateResponse
   >();
@@ -147,13 +148,17 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             <p>
-              <strong>
-                {i18n.translate(
-                  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.optionalCallout',
-                  { defaultMessage: 'This is an optional step.' }
-                )}
-              </strong>
-              &nbsp;
+              {mode === 'step' ? (
+                <>
+                  <strong>
+                    {i18n.translate(
+                      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.optionalCallout',
+                      { defaultMessage: 'This is an optional step.' }
+                    )}
+                  </strong>
+                  &nbsp;
+                </>
+              ) : null}
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.description"
                 defaultMessage="Run a simulation of the pipeline to confirm it produces the anticipated results."

@@ -157,7 +157,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
-          <TestPipeline sourceIndex={sourceIndex} state={formState} />
+          <TestPipeline sourceIndex={sourceIndex} state={formState} mode="step" />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
