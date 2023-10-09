@@ -83,7 +83,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
     featureFlags: schema.object({
       customThresholdAlertsEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: false }),
-        serverless: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
       }),
       logsUIEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
