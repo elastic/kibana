@@ -17,13 +17,15 @@ import {
   isTaskRunEvent,
   TaskManagerStat,
 } from '../task_events';
-import { MetricCounterService } from './counter/metric_counter_service';
-import { SerializedHistogram, SimpleHistogram } from './simple_histogram';
+import {
+  getTaskTypeGroup,
+  MetricCounterService,
+  SimpleHistogram,
+  type SerializedHistogram,
+} from './lib';
 import { ITaskMetricsAggregator } from './types';
 
-const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
-
-const HDR_HISTOGRAM_MAX = 1800; // 30 minutes
+const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
 
 enum TaskRunKeys {
@@ -92,7 +94,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     const { task, isExpired }: RanTask | ErroredTask = unwrap(taskEvent.event);
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
-    const taskTypeGroup = this.getTaskTypeGroup(taskType);
+    const taskTypeGroup = getTaskTypeGroup(taskType);
 
     // increment the total counters
     this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);
@@ -120,14 +122,6 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${taskType}`);
     if (group) {
       this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${group}`);
-    }
-  }
-
-  private getTaskTypeGroup(taskType: string): string | undefined {
-    for (const group of taskTypeGrouping) {
-      if (taskType.startsWith(group)) {
-        return group.replaceAll(':', '');
-      }
     }
   }
 }

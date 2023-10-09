@@ -141,5 +141,11 @@
     "@kbn/aiops-utils",
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
+    "@kbn/coloring",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/ecs",
+    "@kbn/coloring",
+    "@kbn/es",
   ]
 }

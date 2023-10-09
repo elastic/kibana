@@ -23,7 +23,6 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
@@ -35,7 +34,6 @@ export type ObservabilityOnboardingPluginStart = void;
 
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
-  discover: DiscoverSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
 }

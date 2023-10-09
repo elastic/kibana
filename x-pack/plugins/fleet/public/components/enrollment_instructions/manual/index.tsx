@@ -28,11 +28,17 @@ export const ManualInstructions = ({
   fleetServerHosts,
   fleetProxy,
   agentVersion: agentVersion,
+  gcpProjectId = '<PROJECT_ID>',
+  gcpOrganizationId = '<ORGANIZATION_ID>',
+  gcpAccountType,
 }: {
   apiKey: string;
   fleetServerHosts: string[];
   fleetProxy?: FleetProxy;
   agentVersion: string;
+  gcpProjectId?: string;
+  gcpOrganizationId?: string;
+  gcpAccountType?: string;
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
   const fleetServerUrl = enrollArgs?.split('--url=')?.pop()?.split('--enrollment')[0];
@@ -64,7 +70,9 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
 sudo rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
-  const googleCloudShellCommand = `gcloud config set project <PROJECT_ID> && \nFLEET_URL=${fleetServerUrl} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${agentVersion} ./deploy.sh`;
+  const googleCloudShellCommand = `gcloud config set project ${gcpProjectId} && ${
+    gcpAccountType === 'organization-account' ? `ORG_ID=${gcpOrganizationId}` : ``
+  } FLEET_URL=${fleetServerUrl?.trim()} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${agentVersion} ./deploy.sh`;
 
   return {
     linux: linuxCommand,

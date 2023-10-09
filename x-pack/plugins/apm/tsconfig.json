@@ -101,7 +101,9 @@
     "@kbn/profiling-utils",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/shared-svg",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }

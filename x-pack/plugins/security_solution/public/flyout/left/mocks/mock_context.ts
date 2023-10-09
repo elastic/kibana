@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { mockBrowserFields } from '../../shared/mocks/mock_browser_fields';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 import type { LeftPanelContext } from '../context';
-
-/**
- * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
- * @param field
- * @returns string[]
- */
-export const mockGetFieldsData = (field: string): string[] => {
-  switch (field) {
-    case ALERT_SEVERITY:
-      return ['low'];
-    case ALERT_RISK_SCORE:
-      return ['0'];
-    case 'host.name':
-      return ['host1'];
-    case 'user.name':
-      return ['user1'];
-    case '@timestamp':
-      return ['2022-07-25T08:20:18.966Z'];
-    default:
-      return [];
-  }
-};
 
 /**
  * Mock contextValue for left panel context
@@ -37,15 +19,10 @@ export const mockContextValue: LeftPanelContext = {
   eventId: 'eventId',
   indexName: 'index',
   scopeId: 'scopeId',
-  browserFields: {},
-  dataFormattedForFieldBrowser: [],
+  browserFields: mockBrowserFields,
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: mockGetFieldsData,
-  searchHit: {
-    _id: 'testId',
-    _index: 'testIndex',
-  },
-  dataAsNestedObject: {
-    _id: 'testId',
-  },
+  searchHit: mockSearchHit,
+  dataAsNestedObject: mockDataAsNestedObject,
   investigationFields: [],
 };

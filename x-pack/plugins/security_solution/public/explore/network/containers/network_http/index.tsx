@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { NetworkHttpRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -18,7 +19,6 @@ import { networkSelectors } from '../../store';
 import type {
   NetworkHttpEdges,
   PageInfoPaginated,
-  NetworkHttpRequestOptions,
   SortField,
 } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
@@ -65,7 +65,9 @@ export const useNetworkHttp = ({
   const getHttpSelector = useMemo(() => networkSelectors.httpSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getHttpSelector(state, type));
 
-  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(null);
+  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptionsInput | null>(
+    null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -132,7 +134,7 @@ export const useNetworkHttp = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkHttpRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.http,

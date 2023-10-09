@@ -6,13 +6,13 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import type { UsersRelatedHostsRequestOptions } from '../../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
+import type { RelatedHostsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 export const buildRelatedHostsQuery = ({
   userName,
   defaultIndex,
   from,
-}: UsersRelatedHostsRequestOptions): ISearchRequestParams => {
+}: RelatedHostsRequestOptions): ISearchRequestParams => {
   const now = new Date();
   const filter = [
     { term: { 'user.name': userName } },

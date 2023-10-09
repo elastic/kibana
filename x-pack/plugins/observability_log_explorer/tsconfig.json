@@ -22,11 +22,17 @@
     "@kbn/serverless",
     "@kbn/core-chrome-browser",
     "@kbn/config-schema",
-    "@kbn/core-application-browser",
+    "@kbn/kibana-utils-plugin",
     "@kbn/discover-plugin",
-    "@kbn/observability-onboarding-plugin",
+    "@kbn/es-query",
     "@kbn/react-kibana-mount",
     "@kbn/share-plugin",
+    "@kbn/io-ts-utils",
+    "@kbn/deeplinks-observability",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/xstate-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*"

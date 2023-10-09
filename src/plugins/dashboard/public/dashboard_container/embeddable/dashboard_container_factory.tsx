@@ -16,6 +16,7 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
+  EmbeddableAppContext,
 } from '@kbn/embeddable-plugin/public';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -58,6 +59,8 @@ export interface DashboardCreationOptions {
   validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
   isEmbeddedExternally?: boolean;
+
+  getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
 export class DashboardContainerFactoryDefinition

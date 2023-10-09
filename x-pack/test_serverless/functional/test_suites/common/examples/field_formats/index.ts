@@ -10,11 +10,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'svlCommonPage']);
 
-  // Flaky in serverless tests
-  describe.skip('Field formats example', function () {
+  describe('Field formats example', function () {
     before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('fieldFormatsExample');
     });
 

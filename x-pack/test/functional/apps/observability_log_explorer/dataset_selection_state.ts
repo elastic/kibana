@@ -6,7 +6,6 @@
  */
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import querystring from 'querystring';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -16,12 +15,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('DatasetSelection initialization and update', () => {
     describe('when the "index" query param does not exist', () => {
-      it('should initialize the "All log datasets" selection', async () => {
+      it('should initialize the "All logs" selection', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
         const datasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
-        expect(datasetSelectionTitle).to.be('All log datasets');
+        expect(datasetSelectionTitle).to.be('All logs');
       });
     });
 
@@ -30,9 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: azureActivitylogsIndex }),
-          }),
+          },
         });
 
         const datasetSelectionTitle =
@@ -41,19 +40,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(datasetSelectionTitle).to.be('[Azure Logs] activitylogs');
       });
 
-      it('should fallback to the "All log datasets" selection and notify the user of an invalid encoded index', async () => {
+      it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
         const invalidEncodedIndex = 'invalid-encoded-index';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: invalidEncodedIndex }),
-          }),
+          },
         });
 
         const datasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
         await PageObjects.observabilityLogExplorer.assertRestoreFailureToastExist();
-        expect(datasetSelectionTitle).to.be('All log datasets');
+        expect(datasetSelectionTitle).to.be('All logs');
       });
     });
 
@@ -62,15 +61,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo();
         const allDatasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
-        expect(allDatasetSelectionTitle).to.be('All log datasets');
+        expect(allDatasetSelectionTitle).to.be('All logs');
 
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: azureActivitylogsIndex }),
             controlPanels: rison.encode({}),
-          }),
+          },
         });
         const azureDatasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
@@ -81,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.goBack();
           const backNavigationDatasetSelectionTitle =
             await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
-          expect(backNavigationDatasetSelectionTitle).to.be('All log datasets');
+          expect(backNavigationDatasetSelectionTitle).to.be('All logs');
         });
 
         // Go forward to previous page selection

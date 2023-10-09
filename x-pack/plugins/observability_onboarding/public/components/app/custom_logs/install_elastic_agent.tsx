@@ -15,6 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import {
+  SingleDatasetLocatorParams,
+  SINGLE_DATASET_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -34,25 +38,42 @@ import {
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
-import { getDiscoverNavigationParams } from '../utils';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
+const defaultDatasetName = '';
+
 export function InstallElasticAgent() {
   const {
-    services: {
-      discover: { locator },
-    },
+    services: { share },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
+  const singleDatasetLocator =
+    share.url.locators.get<SingleDatasetLocatorParams>(
+      SINGLE_DATASET_LOCATOR_ID
+    );
+
   const { goBack, getState, setState } = useWizard();
   const wizardState = getState();
+  const {
+    integrationName: integration,
+    datasetName: dataset,
+    autoDownloadConfig,
+  } = wizardState;
+
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
+  const enforcedDatasetName =
+    (integration === dataset ? dataset : `${integration}.${dataset}`) ??
+    defaultDatasetName;
+
   async function onContinue() {
-    await locator?.navigate(
-      getDiscoverNavigationParams([wizardState.datasetName])
-    );
+    await singleDatasetLocator!.navigate({
+      integration,
+      dataset: enforcedDatasetName,
+      origin: { id: 'application-log-onboarding' },
+    });
   }
 
   function onAutoDownloadConfig() {
@@ -92,7 +113,11 @@ export function InstallElasticAgent() {
         customConfigurations,
         logFilePaths,
       } = getState();
-      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
+      if (
+        !hasAlreadySavedFlow(getState()) &&
+        monitoringRole?.hasPrivileges &&
+        datasetName
+      ) {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
@@ -252,13 +277,13 @@ export function InstallElasticAgent() {
               'xpack.observability_onboarding.installElasticAgent.description',
               {
                 defaultMessage:
-                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipper is an Agent developed by Elastic.',
+                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
               }
             )}
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        {wizardState.integrationName && (
+        {integration && (
           <>
             <EuiCallOut
               title={i18n.translate(
@@ -266,7 +291,7 @@ export function InstallElasticAgent() {
                 {
                   defaultMessage: '{integrationName} integration installed.',
                   values: {
-                    integrationName: wizardState.integrationName,
+                    integrationName: integration,
                   },
                 }
               )}
@@ -331,10 +356,10 @@ export function InstallElasticAgent() {
             apiEndpoint: setup?.apiEndpoint,
             scriptDownloadUrl: setup?.scriptDownloadUrl,
             elasticAgentVersion: setup?.elasticAgentVersion,
-            autoDownloadConfig: wizardState.autoDownloadConfig,
+            autoDownloadConfig,
             onboardingId,
           })}
-          autoDownloadConfig={wizardState.autoDownloadConfig}
+          autoDownloadConfig={autoDownloadConfig}
           onToggleAutoDownloadConfig={onAutoDownloadConfig}
           installAgentStatus={
             installShipperSetupStatus === FETCH_STATUS.LOADING

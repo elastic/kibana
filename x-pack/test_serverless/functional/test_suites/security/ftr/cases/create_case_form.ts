@@ -16,18 +16,21 @@ const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
+    this.tags(['failsOnMKI']);
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
     const config = getService('config');
     const svlCommonPage = getPageObject('svlCommonPage');
-
-    beforeEach(async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-    });
+    const header = getPageObject('header');
 
     before(async () => {
       await svlCommonPage.login();
+    });
+
+    beforeEach(async () => {
+      await navigateToCasesApp(getPageObject, getService, owner);
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {

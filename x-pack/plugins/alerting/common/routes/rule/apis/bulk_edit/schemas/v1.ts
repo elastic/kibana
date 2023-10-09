@@ -7,8 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateDurationV1 } from '../../../validation';
+import { rRuleRequestSchemaV1 } from '../../../../r_rule';
 import { notifyWhenSchemaV1, scheduleIdsSchemaV1 } from '../../../response';
 import { ruleSnoozeScheduleSchemaV1 } from '../../../request';
+
+export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
+
+export const ruleSnoozeScheduleSchema = schema.object({
+  id: schema.maybe(schema.string()),
+  duration: schema.number(),
+  rRule: rRuleRequestSchemaV1,
+});
 
 const ruleActionSchema = schema.object({
   group: schema.string(),

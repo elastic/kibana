@@ -17,7 +17,7 @@ export const SETTINGS_TITLE = i18n.translate(
 export const SETTINGS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.settingsDescription',
   {
-    defaultMessage: 'Create and manage conversations with the Elastic AI Assistant',
+    defaultMessage: 'Create and manage conversations with the Elastic AI Assistant.',
   }
 );
 

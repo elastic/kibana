@@ -22,6 +22,20 @@ export const EQL_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ESQL_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.esqlTypeTitle',
+  {
+    defaultMessage: 'ES|QL',
+  }
+);
+
+export const ESQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.esqlTypeDescription',
+  {
+    defaultMessage: 'Use The Elasticsearch Query Language (ES|QL) to search or aggregate events',
+  }
+);
+
 export const QUERY_TYPE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeTitle',
   {

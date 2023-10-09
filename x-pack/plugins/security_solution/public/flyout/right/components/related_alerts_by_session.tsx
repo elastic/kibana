@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID } from './test_ids';
+import { CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID } from './test_ids';
 
 const ICON = 'warning';
 
@@ -50,7 +50,7 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
       icon={ICON}
       value={dataCount}
       text={text}
-      data-test-subj={INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID}
+      data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID}
       key={`correlation-row-${text}`}
     />
   );
