@@ -92,7 +92,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
           },
         ];
 
-        await cases.api.createConfigWithCustomFields({customFields, owner});
+        await cases.api.createConfigWithCustomFields({ customFields, owner });
 
         const caseTitle = 'test-' + uuidv4();
         await cases.create.openCreateCasePage();
@@ -104,10 +104,14 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.setDescription('this is a test description');
 
         // set custom field values
-        const textCustomField = await find.byCssSelector(`[data-test-subj*="text-create-custom-field"]`);
+        const textCustomField = await testSubjects.find(
+          `${customFields[0].key}-text-create-custom-field`
+        );
         await textCustomField.type('This is a sample text!');
 
-        const toggleCustomField = await find.byCssSelector('[data-test-subj*="toggle-create-custom-field"]');
+        const toggleCustomField = await testSubjects.find(
+          `${customFields[1].key}-toggle-create-custom-field`
+        );
         await toggleCustomField.click();
 
         await cases.create.submitCase();
@@ -115,12 +119,15 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.existOrFail('case-view-title');
-  
+
         // validate custom fields
-        const summary = await find.byCssSelector(`[data-test-subj="case-text-custom-field-${customFields[0].key}"]`);
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+
         expect(await summary.getVisibleText()).equal('This is a sample text!');
 
-        const sync = await find.byCssSelector(`[data-test-subj="case-toggle-custom-field-form-field-${customFields[1].key}"]`);
+        const sync = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
         expect(await sync.getAttribute('aria-checked')).equal('true');
       });
     });

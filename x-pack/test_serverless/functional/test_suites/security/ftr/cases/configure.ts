@@ -73,15 +73,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
-        // find the checkbox label and click it - `testSubjects.setCheckbox()` is not working for our checkbox
-        const flyout = await testSubjects.find('custom-field-flyout');
-        const control = await find.descendantDisplayedByCssSelector('.euiCheckbox__label', flyout);
-        await control.click();
+        await testSubjects.setCheckbox('text-custom-field-options-wrapper', 'check');
 
         await testSubjects.click('custom-field-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
-        await testSubjects.existOrFail('custom-field-Summary-text');
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary\nText');
       });
 
       it('edits a custom field', async () => {
@@ -90,14 +89,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await textField.click();
 
-        const input = await find.byCssSelector('[data-test-subj="custom-field-label-input"]')
+        const input = await testSubjects.find('custom-field-label-input');
 
         await input.type('!!!');
 
         await testSubjects.click('custom-field-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
-        await testSubjects.existOrFail('custom-field-Summary!!!-text');
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary!!!\nText');
       });
 
       it('deletes a custom field', async () => {
@@ -110,7 +111,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('confirmModalConfirmButton');
 
-        await testSubjects.missingOrFail('custom-field-Summary!!!-text');
+        await testSubjects.missingOrFail('custom-fields-list');
       });
     });
   });

@@ -1197,29 +1197,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const summary = await find.byCssSelector(
-          `[data-test-subj="case-text-custom-field-${customFields[0].key}"]`
-        );
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
         expect(await summary.getVisibleText()).equal('this is a text field value');
 
-        const sync = await find.byCssSelector(
-          `[data-test-subj="case-toggle-custom-field-form-field-${customFields[1].key}"]`
+        const sync = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
         expect(await sync.getAttribute('aria-checked')).equal('true');
 
         await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
 
-        await header.waitUntilLoadingHasFinished();
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-text-custom-field-form-field-${customFields[0].key}`
+          );
+        });
 
-        const inputField = await find.byCssSelector(
-          `[data-test-subj="case-text-custom-field-form-field-${customFields[0].key}"]`
+        const inputField = await testSubjects.find(
+          `case-text-custom-field-form-field-${customFields[0].key}`
         );
 
         await inputField.type(' edited!!');
 
         await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
 
-        await header.waitUntilLoadingHasFinished();
+        await retry.waitFor('update toast exist', async () => {
+          return await testSubjects.exists('toastCloseButton');
+        });
 
         await testSubjects.click('toastCloseButton');
 
@@ -1232,7 +1236,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await sync.getAttribute('aria-checked')).equal('false');
 
         // validate user action
-        const userActions = await find.allByCssSelector('[data-test-subj*="customFields-update-action"]');
+        const userActions = await find.allByCssSelector(
+          '[data-test-subj*="customFields-update-action"]'
+        );
 
         expect(userActions).length(2);
       });
