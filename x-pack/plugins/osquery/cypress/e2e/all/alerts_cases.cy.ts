@@ -88,8 +88,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  // verify why calling new action doesnt add to response actions list
-  describe.skip('Case', () => {
+  describe('Case', () => {
     let caseId: string;
 
     before(() => {
@@ -104,8 +103,8 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
 
     it('sees osquery results from last action and add to a case', () => {
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
+      cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
       cy.contains('select * from users;');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
@@ -123,7 +122,6 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
             // Result tab was rendered successfully
             cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
           }
-          // }
         });
       });
       checkActionItemsInResults({
