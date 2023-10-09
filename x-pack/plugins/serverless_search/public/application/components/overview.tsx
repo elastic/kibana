@@ -26,7 +26,6 @@ import {
   SelectClientPanel,
   OverviewPanel,
   CodeBox,
-  LanguageClientPanel,
   InstallClientPanel,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
@@ -42,9 +41,14 @@ import { Connector } from '@kbn/search-connectors';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
+import {
+  API_KEY_PLACEHOLDER,
+  CLOUD_ID_PLACEHOLDER,
+  ELASTICSEARCH_URL_PLACEHOLDER,
+} from '../constants';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
+import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 
@@ -57,10 +61,14 @@ export const ElasticsearchOverview = () => {
   const elasticsearchURL = useMemo(() => {
     return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
   }, [cloud]);
+  const cloudId = useMemo(() => {
+    return cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER;
+  }, [cloud]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
+    cloudId,
   };
 
   const { data: _data } = useQuery({
@@ -78,16 +86,14 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <SelectClientPanel docLinks={docLinks} http={http}>
-          {languageDefinitions.map((language, index) => (
-            <EuiFlexItem key={`panelItem.${index}`}>
-              <LanguageClientPanel
-                language={language}
-                setSelectedLanguage={setSelectedLanguage}
-                isSelectedLanguage={selectedLanguage === language}
-                assetBasePath={assetBasePath}
-              />
-            </EuiFlexItem>
-          ))}
+          <EuiFlexItem>
+            <LanguageGrid
+              assetBasePath={assetBasePath}
+              setSelectedLanguage={setSelectedLanguage}
+              languages={languageDefinitions}
+              selectedLanguage={selectedLanguage.id}
+            />
+          </EuiFlexItem>
         </SelectClientPanel>
       </EuiPageTemplate.Section>
 
