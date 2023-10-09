@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiLoadingSpinner,
@@ -42,12 +42,19 @@ const processSummaryNotAvailable = {
 };
 
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
-  const summary = !processSummary?.total ? processSummaryNotAvailable : processSummary;
+  const mergedSummary = useMemo(
+    () =>
+      ({
+        ...processSummaryNotAvailable,
+        ...processSummary,
+      } as SummaryRecord),
+    [processSummary]
+  );
 
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-        {Object.entries(summary).map(([field, value]) => (
+        {Object.entries(mergedSummary).map(([field, value]) => (
           <EuiFlexItem key={field}>
             <EuiDescriptionList
               data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
