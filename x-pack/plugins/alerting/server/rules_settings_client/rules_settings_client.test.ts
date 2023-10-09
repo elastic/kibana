@@ -487,7 +487,14 @@ describe('RulesSettingsClient', () => {
     const client = new RulesSettingsClient(rulesSettingsClientParams);
     const mockAttributes = getMockRulesSettings();
 
-    savedObjectsClient.get.mockResolvedValueOnce({
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    const result = await client.create({
       id: RULES_SETTINGS_FEATURE_ID,
       type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
       attributes: {
@@ -503,15 +510,6 @@ describe('RulesSettingsClient', () => {
       },
       references: [],
     });
-
-    savedObjectsClient.create.mockResolvedValueOnce({
-      id: RULES_SETTINGS_FEATURE_ID,
-      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-      attributes: mockAttributes,
-      references: [],
-    });
-
-    const result = await client.getOrCreate();
 
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
