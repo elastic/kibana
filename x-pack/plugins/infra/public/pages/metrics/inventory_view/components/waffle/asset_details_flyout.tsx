@@ -34,7 +34,6 @@ const flyoutTabs = [
   },
 ];
 
-const AUTO_REFRESH_INTERVAL = 60 * 1000;
 const ONE_HOUR = 60 * 60 * 1000;
 
 export const AssetDetailsFlyout = ({
@@ -43,8 +42,8 @@ export const AssetDetailsFlyout = ({
   closeFlyout,
   currentTime,
   options,
+  refreshInterval,
   isAutoReloading = false,
-  refreshInterval = AUTO_REFRESH_INTERVAL,
 }: Props) => {
   const { source } = useSourceContext();
 

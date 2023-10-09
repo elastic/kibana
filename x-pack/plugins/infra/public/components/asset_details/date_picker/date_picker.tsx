@@ -77,8 +77,14 @@ export const DatePicker = () => {
         isPaused,
         interval: refreshInterval,
       });
+
+      if (!isPaused) {
+        // when auto refresh is enabled, we need to force the end range to `now` in order for it to work automatically
+        // otherwise,  users have to manually set `now` in the date picker
+        setDateRange({ from: dateRange.from, to: 'now' });
+      }
     },
-    [setAutoRefresh]
+    [dateRange.from, setAutoRefresh, setDateRange]
   );
 
   return (

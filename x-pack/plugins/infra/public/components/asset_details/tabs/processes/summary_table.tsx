@@ -27,8 +27,8 @@ interface Props {
 }
 
 type SummaryRecord = {
-  total: number;
-} & Record<keyof typeof STATE_NAMES, number>;
+  total: number | string;
+} & Record<keyof typeof STATE_NAMES, number | string>;
 
 const processSummaryNotAvailable = {
   total: NOT_AVAILABLE_LABEL,
@@ -42,12 +42,11 @@ const processSummaryNotAvailable = {
 };
 
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
-  const mergedSummary = useMemo(
-    () =>
-      ({
-        ...processSummaryNotAvailable,
-        ...processSummary,
-      } as SummaryRecord),
+  const mergedSummary: SummaryRecord = useMemo(
+    () => ({
+      ...processSummaryNotAvailable,
+      ...Object.fromEntries(Object.entries(processSummary).filter(([_, v]) => !!v)),
+    }),
     [processSummary]
   );
 
