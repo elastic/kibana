@@ -21,6 +21,7 @@ import {
   projectSettingsNavLinks,
 } from './sections/project_settings_links';
 import { isCloudLink } from './util';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 const mockCloudStart = mockServices.cloud;
 const mockChromeNavLinks = jest.fn((): ChromeNavLink[] => []);
@@ -39,6 +40,7 @@ const testServices = {
     },
   },
 };
+const experimentalFeatures = { platformNavEnabled: false } as ExperimentalFeatures;
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
@@ -53,6 +55,11 @@ const linkMlLanding: NavigationLink<SecurityPageName> = {
 const projectLinkDevTools: ProjectNavigationLink = {
   id: ExternalPageName.devTools,
   title: 'Dev tools',
+};
+
+const projectLinkDiscover: ProjectNavigationLink = {
+  id: ExternalPageName.discover,
+  title: 'Discover',
 };
 
 const chromeNavLink1: ChromeNavLink = {
@@ -86,7 +93,8 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([link1, link2]);
@@ -99,7 +107,8 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
@@ -113,7 +122,8 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
@@ -131,7 +141,8 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
@@ -139,6 +150,7 @@ describe('getProjectNavLinks', () => {
       link1,
       link2,
       { ...linkMlLanding, categories: mlNavCategories, links: mlNavLinks },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -155,13 +167,15 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([
       link1,
       { ...linkAssets, links: [...assetsNavLinks, link2] },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -178,13 +192,15 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([
       link1,
       { ...linkInvestigations, links: [link2, ...investigationsNavLinks] },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -201,7 +217,8 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
@@ -217,6 +234,7 @@ describe('getProjectNavLinks', () => {
         categories: projectSettingsNavCategories,
         links: [...expectedProjectSettingsNavLinks, link2],
       },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -233,7 +251,8 @@ describe('getProjectNavLinks', () => {
     const projectNavLinks$ = createProjectNavLinks$(
       testSecurityNavLinks$,
       testServices,
-      mockCloudStart
+      mockCloudStart,
+      experimentalFeatures
     );
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));

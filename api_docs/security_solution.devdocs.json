@@ -1771,6 +1771,20 @@
         },
         {
           "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.experimentalFeatures",
+          "type": "Object",
+          "tags": [],
+          "label": "experimentalFeatures",
+          "description": [],
+          "signature": [
+            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; }"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "securitySolution",
           "id": "def-public.PluginSetup.setAppLinksSwitcher",
           "type": "Function",
           "tags": [],
@@ -1794,6 +1808,40 @@
               "description": [],
               "signature": [
                 "AppLinksSwitcher"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.setDeepLinksFormatter",
+          "type": "Function",
+          "tags": [],
+          "label": "setDeepLinksFormatter",
+          "description": [],
+          "signature": [
+            "(deepLinksFormatter: ",
+            "DeepLinksFormatter",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginSetup.setDeepLinksFormatter.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "deepLinksFormatter",
+              "description": [],
+              "signature": [
+                "DeepLinksFormatter"
               ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,
@@ -2855,6 +2903,22 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-server.SecuritySolutionPluginSetup.experimentalFeatures",
+          "type": "Object",
+          "tags": [],
+          "label": "experimentalFeatures",
+          "description": [
+            "\nThe security solution generic experimental features"
+          ],
+          "signature": [
+            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; }"
+          ],
+          "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
