@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType, CaseSeverity, CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import {
+  AttachmentType,
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -1167,7 +1172,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       before(async () => {
         await cases.navigation.navigateToApp();
-        await cases.api.createConfigWithCustomFields({customFields, owner: 'cases'});
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
         await cases.api.createCase({
           customFields: [
             {
@@ -1192,17 +1197,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const summary = await find.byCssSelector(`[data-test-subj="case-text-custom-field-${customFields[0].key}"]`);
+        const summary = await find.byCssSelector(
+          `[data-test-subj="case-text-custom-field-${customFields[0].key}"]`
+        );
         expect(await summary.getVisibleText()).equal('this is a text field value');
 
-        const sync = await find.byCssSelector(`[data-test-subj="case-toggle-custom-field-form-field-${customFields[1].key}"]`);
+        const sync = await find.byCssSelector(
+          `[data-test-subj="case-toggle-custom-field-form-field-${customFields[1].key}"]`
+        );
         expect(await sync.getAttribute('aria-checked')).equal('true');
 
         await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
 
         await header.waitUntilLoadingHasFinished();
 
-        const inputField = await find.byCssSelector(`[data-test-subj="case-text-custom-field-form-field-${customFields[0].key}"]`);
+        const inputField = await find.byCssSelector(
+          `[data-test-subj="case-text-custom-field-form-field-${customFields[0].key}"]`
+        );
 
         await inputField.type(' edited!!');
 

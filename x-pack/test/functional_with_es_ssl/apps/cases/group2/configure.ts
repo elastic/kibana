@@ -80,7 +80,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await textField.click();
 
-        const input = await find.byCssSelector('[data-test-subj="custom-field-label-input"]')
+        const input = await find.byCssSelector('[data-test-subj="custom-field-label-input"]');
 
         await input.type('!!!');
 
