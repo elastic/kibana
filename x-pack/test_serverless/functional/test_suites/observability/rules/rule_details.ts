@@ -9,14 +9,7 @@ import { expect } from 'expect';
 // import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  createAnomalyRule as createRule,
-  disableRule,
-  enableRule,
-  runRule,
-  createIndexConnector,
-  snoozeRule,
-} from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+import { createAnomalyRule as createRule } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
