@@ -8,7 +8,7 @@
 
 import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 
 export const esqlSearchStrategyProvider = (
@@ -19,14 +19,14 @@ export const esqlSearchStrategyProvider = (
    * @param request
    * @param options
    * @param deps
-   * @throws `KbnServerError`
+   * @throws `KbnSearchError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
-      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
+      throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
     const search = async () => {
@@ -53,7 +53,7 @@ export const esqlSearchStrategyProvider = (
         };
       } catch (e) {
         console.log(JSON.stringify(e, null, ' '));
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       }
     };
 

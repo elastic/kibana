@@ -14,7 +14,7 @@ import { SearchStrategyDependencies } from '../../types';
 
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
-import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../../report_search_error';
 import { firstValueFrom } from 'rxjs';
 
 describe('ES search strategy', () => {
@@ -150,7 +150,7 @@ describe('ES search strategy', () => {
         .toPromise();
     } catch (e) {
       expect(esClient.search).toBeCalled();
-      expect(e).toBeInstanceOf(KbnServerError);
+      expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(404);
       expect(e.message).toBe(errResponse.message);
       expect(e.errBody).toBe(indexNotFoundException);
@@ -167,7 +167,7 @@ describe('ES search strategy', () => {
         .toPromise();
     } catch (e) {
       expect(esClient.search).toBeCalled();
-      expect(e).toBeInstanceOf(KbnServerError);
+      expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
       expect(e.errBody).toBe(undefined);
@@ -184,14 +184,14 @@ describe('ES search strategy', () => {
         .toPromise();
     } catch (e) {
       expect(esClient.search).toBeCalled();
-      expect(e).toBeInstanceOf(KbnServerError);
+      expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
       expect(e.errBody).toBe(undefined);
     }
   });
 
-  it('throws KbnServerError for unknown index type', async () => {
+  it('throws KbnSearchError for unknown index type', async () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     try {
@@ -200,7 +200,7 @@ describe('ES search strategy', () => {
         .toPromise();
     } catch (e) {
       expect(esClient.search).not.toBeCalled();
-      expect(e).toBeInstanceOf(KbnServerError);
+      expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.message).toBe('Unsupported index pattern type banana');
       expect(e.statusCode).toBe(400);
       expect(e.errBody).toBe(undefined);
