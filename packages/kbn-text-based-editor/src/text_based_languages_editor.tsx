@@ -590,7 +590,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 {documentationSections && (
                   <EuiFlexItem grow={false}>
                     <LanguageDocumentationPopover
-                      language={getLanguageDisplayName(String(language)).toUpperCase()}
+                      language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
                       buttonProps={{
                         color: 'text',
@@ -743,6 +743,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         detectTimestamp={detectTimestamp}
                         editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
+                        hideRunQueryText={hideRunQueryText}
                       />
                     )}
                   </div>
