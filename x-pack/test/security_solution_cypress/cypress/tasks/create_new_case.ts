@@ -23,6 +23,7 @@ import {
   LOADING_SPINNER,
   TAGS_INPUT,
   TITLE_INPUT,
+  TIMELINE,
 } from '../screens/create_new_case';
 import {
   CONNECTOR_RESILIENT,
@@ -56,8 +57,25 @@ export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
 };
 
 export const attachTimeline = (newCase: TestCase) => {
-  cy.get(INSERT_TIMELINE_BTN).click({ force: true });
-  cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for timeline to appear');
+      cy.get(INSERT_TIMELINE_BTN).click();
+      return cy
+        .get(TIMELINE)
+        .eq(1)
+        .invoke('text')
+        .then((timelineTitle) => {
+          if (timelineTitle === newCase.timeline.title) {
+            cy.get(TIMELINE).eq(1).click();
+          } else {
+            cy.get(TIMELINE_SEARCHBOX).type('{esc}');
+            return false;
+          }
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
 };
 
 export const createCase = () => {
