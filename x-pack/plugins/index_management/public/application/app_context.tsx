@@ -52,7 +52,6 @@ export interface AppDependencies {
   config: {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
-    enableIndexDetailsPage: boolean;
     enableIndexStats: boolean;
   };
   history: ScopedHistory;

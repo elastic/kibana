@@ -18,7 +18,7 @@ export const MonitorForm: React.FC<{
   defaultValues?: SyntheticsMonitor;
   space?: string;
   readOnly?: boolean;
-  canUsePublicLocations: boolean;
+  canUsePublicLocations?: boolean;
 }> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',

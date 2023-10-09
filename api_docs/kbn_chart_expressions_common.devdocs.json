@@ -117,6 +117,71 @@
       },
       {
         "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getColorCategories",
+        "type": "Function",
+        "tags": [],
+        "label": "getColorCategories",
+        "description": [
+          "\nGet the stringified version of all the categories that needs to be colored in the chart.\nMultifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string."
+        ],
+        "signature": [
+          "(rows: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableRow",
+            "text": "DatatableRow"
+          },
+          "[], accessor: string | undefined) => (string | string[])[]"
+        ],
+        "path": "src/plugins/chart_expressions/common/color_categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableRow",
+                "text": "DatatableRow"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$2",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.getOverridesFor",
         "type": "Function",
         "tags": [],

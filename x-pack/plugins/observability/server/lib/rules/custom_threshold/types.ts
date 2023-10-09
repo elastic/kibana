@@ -51,8 +51,6 @@ interface BaseMetricExpressionParams {
   timeUnit: TimeUnitChar;
   threshold: number[];
   comparator: Comparator;
-  warningComparator?: Comparator;
-  warningThreshold?: number[];
 }
 
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
