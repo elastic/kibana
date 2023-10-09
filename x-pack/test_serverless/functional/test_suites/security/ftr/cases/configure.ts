@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const find = getService('find');
 
   describe('Configure Case', function () {
     // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
@@ -62,6 +63,54 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+      });
+    });
+
+    describe('Custom fields', function () {
+      it('adds a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+
+        await testSubjects.setValue('custom-field-label-input', 'Summary');
+
+        // find the checkbox label and click it - `testSubjects.setCheckbox()` is not working for our checkbox
+        const flyout = await testSubjects.find('custom-field-flyout');
+        const control = await find.descendantDisplayedByCssSelector('.euiCheckbox__label', flyout);
+        await control.click();
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-field-Summary-text');
+      });
+
+      it('edits a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const textField = await find.byCssSelector('[data-test-subj*="-custom-field-edit"]');
+
+        await textField.click();
+
+        const input = await find.byCssSelector('[data-test-subj="custom-field-label-input"]')
+
+        await input.type('!!!');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-field-Summary!!!-text');
+      });
+
+      it('deletes a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const deleteButton = await find.byCssSelector('[data-test-subj*="-custom-field-delete"]');
+
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-delete-custom-field-modal');
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await testSubjects.missingOrFail('custom-field-Summary!!!-text');
       });
     });
   });

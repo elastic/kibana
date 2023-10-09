@@ -159,7 +159,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         const textCustomField = await find.byCssSelector(
           `[data-test-subj*="text-create-custom-field"]`
         );
-        await textCustomField.type('This is a sample text for summary!');
+        await textCustomField.type('This is a sample text!');
 
         const toggleCustomField = await find.byCssSelector(
           '[data-test-subj*="toggle-create-custom-field"]'
@@ -176,7 +176,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         const summary = await find.byCssSelector(
           `[data-test-subj="case-text-custom-field-${customFields[0].key}"]`
         );
-        expect(await summary.getVisibleText()).equal('This is a sample text for summary!');
+        expect(await summary.getVisibleText()).equal('This is a sample text!');
 
         const sync = await find.byCssSelector(
           `[data-test-subj="case-toggle-custom-field-form-field-${customFields[1].key}"]`

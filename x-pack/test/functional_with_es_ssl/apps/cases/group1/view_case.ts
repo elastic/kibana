@@ -1221,10 +1221,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
+        await testSubjects.click('toastCloseButton');
+
+        await sync.click();
+
+        await header.waitUntilLoadingHasFinished();
+
         expect(await summary.getVisibleText()).equal('this is a text field value edited!!');
 
+        expect(await sync.getAttribute('aria-checked')).equal('false');
+
         // validate user action
-        await find.byCssSelector('[data-test-subj*="customFields-update-action"]');
+        const userActions = await find.allByCssSelector('[data-test-subj*="customFields-update-action"]');
+
+        expect(userActions).length(2);
       });
     });
   });
