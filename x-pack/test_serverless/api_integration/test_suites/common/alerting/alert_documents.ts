@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
-    this.tags(['skipOnMKI']);
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
