@@ -12,6 +12,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_TOGGLE_COLUMN,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL,
 } from '../../screens/expandable_flyout/alert_details_right_panel_table_tab';
@@ -54,7 +55,17 @@ export const filterOutTableTabTable = () => {
 export const addToTimelineTableTabTable = () => {
   cy.get('body').realHover();
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE).click();
+};
+
+/**
+ * Show Copy to clipboard button in the first table row under the Table tab in the alert details expandable flyout right section
+ */
+export const copyToClipboardTableTabTable = () => {
+  cy.get('body').realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
 };
 
 /**
@@ -63,6 +74,7 @@ export const addToTimelineTableTabTable = () => {
 export const toggleColumnTableTabTable = () => {
   cy.get('body').realHover();
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_TOGGLE_COLUMN).click();
 };
 

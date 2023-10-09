@@ -14,12 +14,12 @@ import { COLUMN_HEADER, FILTER_BADGE, TIMESTAMP_COLUMN } from '../../../../scree
 import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD,
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 import {
   addToTimelineTableTabTable,
   clearFilterTableTabTable,
+  copyToClipboardTableTabTable,
   filterInTableTabTable,
   filterOutTableTabTable,
   filterTableTabTable,
@@ -75,12 +75,6 @@ describe(
       cy.get(PROVIDER_BADGE).first().should('contain.text', '@timestamp');
       closeTimeline();
 
-      cy.log('cell actions copy to clipboard');
-
-      cy.get('body').realHover();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD).should('be.visible');
-
       cy.log('cell actions toggle column');
 
       const timestampColumn = '@timestamp';
@@ -91,6 +85,11 @@ describe(
       toggleColumnTableTabTable();
       cy.get(TIMESTAMP_COLUMN).should('be.visible');
       cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
+
+      cy.log('cell actions copy to clipboard');
+
+      copyToClipboardTableTabTable();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD).should('be.visible');
     });
   }
 );

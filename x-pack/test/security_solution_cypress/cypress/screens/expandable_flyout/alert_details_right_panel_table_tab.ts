@@ -22,6 +22,8 @@ export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL =
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW = getDataTestSubjectSelector(
   'event-fields-table-row-_id'
 );
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS =
+  getDataTestSubjectSelector('showExtraActionsButton');
 const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS =
   'actionItem-security-detailsFlyout-cellActions-';
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN = getDataTestSubjectSelector(
