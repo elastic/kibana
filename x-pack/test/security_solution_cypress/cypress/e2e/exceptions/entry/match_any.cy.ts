@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 
 import { RULE_STATUS } from '../../../screens/rule_details';
@@ -41,7 +42,7 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    createRule(
+    createRule<QueryRule>(
       getNewRule({
         index: ['exceptions-*'],
         enabled: false,

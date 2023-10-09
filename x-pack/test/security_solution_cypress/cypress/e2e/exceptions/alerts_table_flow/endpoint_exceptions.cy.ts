@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
@@ -56,7 +57,7 @@ describe.skip(
       deleteAlertsAndRules();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule<QueryRule>(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

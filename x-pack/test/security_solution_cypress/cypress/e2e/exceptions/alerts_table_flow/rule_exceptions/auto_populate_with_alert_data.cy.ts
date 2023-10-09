@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -54,7 +55,7 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule<QueryRule>(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForAlertsToPopulate();
     });

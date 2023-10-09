@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EsqlRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getEsqlRule } from '../../../objects/rule';
 
 import {
@@ -37,7 +38,7 @@ describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
   });
 
   it('displays ES|QL rule specific fields', function () {
-    createRule(getEsqlRule()).then((createdRule) => {
+    createRule<EsqlRule>(getEsqlRule()).then((createdRule) => {
       visit(ruleDetailsUrl(createdRule.body.id));
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);

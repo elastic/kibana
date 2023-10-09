@@ -6,6 +6,7 @@
  */
 
 import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { expectedExportedExceptionList, getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
@@ -61,7 +62,7 @@ describe(
 
         // Create exception list associated with a rule
         createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-          createRule(
+          createRule<QueryRule>(
             getNewRule({
               exceptions_list: [
                 {

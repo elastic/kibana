@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { NewTermsRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
+
 import { getNewTermsRule } from '../../../objects/rule';
 import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 
@@ -29,7 +31,7 @@ describe('New Terms rule details', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Displays correct details for new terms rule', function () {
-    createRule(rule).then((createdRule) => {
+    createRule<NewTermsRule>(rule).then((createdRule) => {
       visit(ruleDetailsUrl(createdRule.body.id));
 
       cy.get(RULE_NAME_HEADER).should('contain', `${createdRule.body.name}`);

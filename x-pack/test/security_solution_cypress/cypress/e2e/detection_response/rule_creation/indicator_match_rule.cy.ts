@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ThreatMatchRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import {
   getIndexPatterns,
@@ -103,7 +104,6 @@ import { goBackToRuleDetails } from '../../../tasks/rule_edit';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
-  goBackToRulesTable,
   getDetails,
   waitForTheRuleToBeExecuted,
   visitRuleDetailsPage,
@@ -507,9 +507,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
-        createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
-          (rule) => visitRuleDetailsPage(rule.body.id)
-        );
+        createRule<ThreatMatchRule>(
+          getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })
+        ).then((rule) => visitRuleDetailsPage(rule.body.id));
 
         waitForAlertsToPopulate();
         investigateFirstAlertInTimeline();
@@ -547,7 +547,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('on rule editing page', () => {
         beforeEach(() => {
-          createRule(TESTED_RULE_DATA);
+          createRule<ThreatMatchRule>(TESTED_RULE_DATA);
           visit(RULES_MANAGEMENT_URL);
           disableAutoRefresh();
         });
@@ -555,7 +555,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         it('Allows the rule to be duplicated from the table', () => {
           duplicateFirstRule();
           goBackToRuleDetails();
-          goBackToRulesTable();
+          openRuleManagementPageViaBreadcrumbs();
           checkDuplicatedRule(TESTED_RULE_DATA.name);
         });
 
@@ -568,7 +568,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('on rule details page', () => {
         beforeEach(() => {
-          createRule(getNewThreatIndicatorRule(TESTED_RULE_DATA)).then((rule) =>
+          createRule<ThreatMatchRule>(getNewThreatIndicatorRule(TESTED_RULE_DATA)).then((rule) =>
             visitRuleDetailsPage(rule.body.id)
           );
         });
@@ -576,7 +576,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         it('Allows the rule to be duplicated', () => {
           duplicateRuleFromMenu();
           goBackToRuleDetails();
-          goBackToRulesTable();
+          openRuleManagementPageViaBreadcrumbs();
           checkDuplicatedRule(`${TESTED_RULE_DATA.name} [Duplicate]`);
         });
       });

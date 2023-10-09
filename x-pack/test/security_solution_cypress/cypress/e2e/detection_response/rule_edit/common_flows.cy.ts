@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  QueryRule,
+  QueryRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getExistingRule, getMitre2, getMitre1 } from '../../../objects/rule';
 
 import {
@@ -19,7 +22,7 @@ import { login } from '../../../tasks/login';
 import { expandAdvancedSettings } from '../../../tasks/rule_creation';
 import {
   confirmRuleDetailsAbout,
-  confirmRuleDetailsDefinition,
+  confirmCustomQueryRuleDetailsDefinition,
   confirmRuleDetailsSchedule,
 } from '../../../tasks/rule_details';
 import {
@@ -75,7 +78,7 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     deleteConnectors();
     deleteAlertsAndRules();
     login();
-    createRule(originalRule).then((createdRule) => {
+    createRule<QueryRule>(originalRule).then((createdRule) => {
       visitEditRulePage(createdRule.body.id);
     });
   });
@@ -140,7 +143,7 @@ describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
     // edits persisted, checking against the response would not catch
     // if an expected changed value was not persisted.
     confirmRuleDetailsAbout(editedRule);
-    confirmRuleDetailsDefinition(editedRule);
+    confirmCustomQueryRuleDetailsDefinition(editedRule);
     confirmRuleDetailsSchedule(editedRule);
     // TODO - Check actions details
   });

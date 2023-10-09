@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -38,7 +39,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
 
     login();
     postDataView('exceptions-*');
-    createRule(
+    createRule<QueryRule>(
       getNewRule({
         query: 'agent.name:*',
         data_view_id: 'exceptions-*',

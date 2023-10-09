@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../../objects/rule';
 import { RULES_MONITORING_TAB, RULE_NAME } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -23,7 +24,7 @@ describe('Rules table: links', { tags: ['@ess', '@serverless', '@skipInServerles
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: 'rule1', enabled: false }));
+    createRule<QueryRule>(getNewRule({ rule_id: 'rule1', enabled: false }));
     visit(RULES_MANAGEMENT_URL);
   });
 

@@ -6,6 +6,7 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 
 import { expandFirstAlertActions } from '../../../tasks/alerts';
@@ -30,7 +31,7 @@ describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless
     // First we login as a privileged user to create alerts.
     cleanKibana();
     login();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

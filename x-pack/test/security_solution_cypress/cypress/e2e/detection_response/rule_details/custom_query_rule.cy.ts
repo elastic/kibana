@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  AlertSuppression,
+  QueryRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { getDataViewRule, getSimpleCustomQueryRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -38,7 +41,7 @@ describe('Custom query rule details', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('displays custom query rule details', () => {
-      createRule(rule).then((createdRule) => {
+      createRule<QueryRule>(rule).then((createdRule) => {
         visit(ruleDetailsUrl(createdRule.body.id));
         confirmAlertSuppressionDetails(createdRule.body.alert_suppression);
       });
@@ -55,9 +58,8 @@ describe('Custom query rule details', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('displays data view details', () => {
-      createRule(rule).then((createdRule) => {
+      createRule<QueryRule>(rule).then((createdRule) => {
         visit(ruleDetailsUrl(createdRule.body.id));
-
         checkDataViewDetails(createdRule.body.data_view_id);
       });
     });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EqlRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getEqlRule, getEqlSequenceRule } from '../../../objects/rule';
 import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 
@@ -22,7 +23,7 @@ describe('EQL rule details', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Displays correct details for EQL rule', function () {
-    createRule(getEqlRule()).then((createdRule) => {
+    createRule<EqlRule>(getEqlRule()).then((createdRule) => {
       visit(ruleDetailsUrl(createdRule.body.id));
 
       cy.get(RULE_NAME_HEADER).should('contain', `${createdRule.body.name}`);
@@ -34,7 +35,7 @@ describe('EQL rule details', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Displays correct details for EQL sequence rule', function () {
-    createRule(getEqlSequenceRule()).then((createdRule) => {
+    createRule<EqlRule>(getEqlSequenceRule()).then((createdRule) => {
       visit(ruleDetailsUrl(createdRule.body.id));
 
       cy.get(RULE_NAME_HEADER).should('contain', `${createdRule.body.name}`);

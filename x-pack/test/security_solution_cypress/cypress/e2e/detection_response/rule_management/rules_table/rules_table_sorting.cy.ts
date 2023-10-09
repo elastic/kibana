@@ -6,6 +6,10 @@
  */
 
 import {
+  QueryRule,
+  ThresholdRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   FIRST_RULE,
   RULE_NAME,
   RULE_SWITCH,
@@ -42,10 +46,10 @@ describe('Rules table: sorting', { tags: ['@ess', '@serverless', '@brokenInServe
   before(() => {
     cleanKibana();
     login();
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
-    createRule(getExistingRule({ rule_id: '2', enabled: false }));
-    createRule(getNewOverrideRule({ rule_id: '3', enabled: false }));
-    createRule(getNewThresholdRule({ rule_id: '4', enabled: false }));
+    createRule<QueryRule>(getNewRule({ rule_id: '1', enabled: false }));
+    createRule<QueryRule>(getExistingRule({ rule_id: '2', enabled: false }));
+    createRule<QueryRule>(getNewOverrideRule({ rule_id: '3', enabled: false }));
+    createRule<ThresholdRule>(getNewThresholdRule({ rule_id: '4', enabled: false }));
   });
 
   beforeEach(() => {

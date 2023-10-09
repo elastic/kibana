@@ -6,6 +6,13 @@
  */
 
 import {
+  EqlRule,
+  NewTermsRule,
+  QueryRule,
+  ThreatMatchRule,
+  ThresholdRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   RULES_BULK_EDIT_DATA_VIEWS_WARNING,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
 } from '../../../../../screens/rules_bulk_actions';
@@ -113,12 +120,12 @@ describe(
 
       postDataView(DATA_VIEW_ID);
 
-      createRule(TESTED_CUSTOM_QUERY_RULE_DATA);
-      createRule(TESTED_EQL_RULE_DATA);
-      createRule(TESTED_THREAT_INDICATOR_RULE_DATA);
-      createRule(TESTED_THRESHOLD_RULE_DATA);
-      createRule(TESTED_TERMS_RULE_DATA);
-      createRule(TESTED_CUSTOM_QUERY_RULE_DATA_2);
+      createRule<QueryRule>(TESTED_CUSTOM_QUERY_RULE_DATA);
+      createRule<EqlRule>(TESTED_EQL_RULE_DATA);
+      createRule<ThreatMatchRule>(TESTED_THREAT_INDICATOR_RULE_DATA);
+      createRule<ThresholdRule>(TESTED_THRESHOLD_RULE_DATA);
+      createRule<NewTermsRule>(TESTED_TERMS_RULE_DATA);
+      createRule<QueryRule>(TESTED_CUSTOM_QUERY_RULE_DATA_2);
 
       visitRulesManagementTable();
       disableAutoRefresh();
@@ -269,8 +276,8 @@ describe(
 
       postDataView(DATA_VIEW_ID);
 
-      createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW);
-      createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITHOUT_DATAVIEW);
+      createRule<QueryRule>(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW);
+      createRule<QueryRule>(TESTED_CUSTOM_QUERY_RULE_DATA_WITHOUT_DATAVIEW);
 
       visitRulesManagementTable();
       disableAutoRefresh();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { getNewRule } from '../../../../../objects/rule';
 
@@ -28,9 +29,9 @@ describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }
   ];
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(testRules[0]);
-    createRule(testRules[1]);
-    createRule(testRules[2]);
+    createRule<QueryRule>(testRules[0]);
+    createRule<QueryRule>(testRules[1]);
+    createRule<QueryRule>(testRules[2]);
     login();
     visitRulesManagementTable();
   });

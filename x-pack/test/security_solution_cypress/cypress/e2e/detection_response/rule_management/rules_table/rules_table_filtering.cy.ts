@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
@@ -54,7 +55,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
 
       createDocument('test_index', {});
 
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Successful rule',
           rule_id: 'successful_rule',
@@ -63,7 +64,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
         })
       );
 
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Warning rule',
           rule_id: 'warning_rule',
@@ -72,7 +73,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
         })
       );
 
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Failed rule',
           rule_id: 'failed_rule',
@@ -113,21 +114,21 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Tags filter', () => {
     beforeEach(() => {
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Rule 1',
           tags: [],
         })
       );
 
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Rule 2',
           tags: ['simpleTag'],
         })
       );
 
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Rule 3',
           tags: ['category:tag'],

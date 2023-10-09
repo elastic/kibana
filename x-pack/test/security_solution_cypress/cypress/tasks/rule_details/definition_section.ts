@@ -37,30 +37,32 @@ export const checkRuleDetailsRuleIndex = (index: string[] = ruleFields.defaultIn
   });
 };
 
-export const confirmAlertSuppressionDetails = (suppression: AlertSuppression) => {
-  cy.get(DEFINITION_DETAILS).within(() => {
-    getDetails(SUPPRESS_ALERTS_BY).should('have.text', suppression.group_by.join(''));
-    if (suppression.duration) {
-      getDetails(SUPPRESS_ALERTS_FOR).should(
-        'have.text',
-        `${suppression.duration.value}${suppression.duration.unit}`
-      );
-    } else {
-      getDetails(SUPPRESS_ALERTS_FOR).should('have.text', 'One rule execution');
-    }
+export const confirmAlertSuppressionDetails = (suppression: AlertSuppression | undefined) => {
+  if (suppression) {
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDetails(SUPPRESS_ALERTS_BY).should('have.text', suppression.group_by.join(''));
+      if (suppression.duration) {
+        getDetails(SUPPRESS_ALERTS_FOR).should(
+          'have.text',
+          `${suppression.duration.value}${suppression.duration.unit}`
+        );
+      } else {
+        getDetails(SUPPRESS_ALERTS_FOR).should('have.text', 'One rule execution');
+      }
 
-    if (suppression.missing_fields_strategy === 'suppress') {
-      getDetails(SUPPRESS_ALERTS_MISSING).should(
-        'have.text',
-        'Suppress and group alerts for events with missing fields'
-      );
-    } else {
-      getDetails(SUPPRESS_ALERTS_MISSING).should(
-        'have.text',
-        'Do not suppress alerts for events with missing fields'
-      );
-    }
-  });
+      if (suppression.missing_fields_strategy === 'suppress') {
+        getDetails(SUPPRESS_ALERTS_MISSING).should(
+          'have.text',
+          'Suppress and group alerts for events with missing fields'
+        );
+      } else {
+        getDetails(SUPPRESS_ALERTS_MISSING).should(
+          'have.text',
+          'Do not suppress alerts for events with missing fields'
+        );
+      }
+    });
+  }
 };
 
 export const checkDataViewDetails = (dataViewId: string = ruleFields.dataViewId) => {

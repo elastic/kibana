@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -40,7 +41,7 @@ describe(
       login();
       deleteAlertsAndRules();
       // At least create Rule with exceptions_list to be able to view created exceptions
-      createRule({
+      createRule<QueryRule>({
         ...getNewRule(),
         query: 'agent.name:*',
         index: ['exceptions*'],

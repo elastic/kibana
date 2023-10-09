@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  AlertSuppression,
+  QueryRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   CUSTOM_QUERY_INPUT,
   DATA_VIEW_COMBO_BOX,
@@ -40,7 +43,7 @@ export const editRuleQuery = (query: string = ruleFields.ruleQuery) => {
   cy.get(CUSTOM_QUERY_INPUT).first().type(query);
 };
 
-export const confirmEditDefineStepDetails = (rule) => {
+export const confirmEditDefineStepDetails = (rule: QueryRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.query);
   cy.get(DEFINE_INDEX_INPUT).should('have.text', rule.index?.join(''));
 };

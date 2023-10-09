@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { has } from 'lodash/fp';
-
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteRuleFromDetailsPage } from '../../../tasks/alerts_detection_rules';
 import {
   CUSTOM_RULES_BTN,
@@ -60,7 +59,7 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     beforeEach(() => {
-      createRule(rule).then((newRule) => {
+      createRule<QueryRule>(rule).then((newRule) => {
         visit(ruleDetailsUrl(newRule.body.id));
       });
     });
@@ -126,7 +125,7 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
           author: ['moi'],
           license: 'aLicense',
         });
-        createRule(ruleToCreate).then((rule) => {
+        createRule<QueryRule>(ruleToCreate).then((rule) => {
           visit(ruleDetailsUrl(rule.body.id));
 
           checkRuleDetailsRuleName(rule.body.name);
@@ -144,10 +143,12 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
           checkRuleDetailsRuleLicense(rule.body.license);
 
           cy.log('Checking definition section details');
-          if (has('body.index', rule)) {
+          if ('index' in rule.body) {
             checkRuleDetailsRuleIndex(rule.body.index);
           }
-          checkQueryDetails(rule.body.query);
+          if ('query' in rule.body) {
+            checkQueryDetails(rule.body.query);
+          }
           checkTimelineTemplateDetails(rule.body.timeline_title);
 
           cy.log('Checking schedule section details');

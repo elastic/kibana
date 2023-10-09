@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_FLYOUT } from '../../../screens/alerts_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
@@ -29,7 +30,7 @@ describe('user details flyout', () => {
 
   it('shows user detail flyout from alert table', () => {
     visit(ALERTS_URL);
-    createRule(getNewRule({ query: 'user.name:*' }));
+    createRule<QueryRule>(getNewRule({ query: 'user.name:*' }));
     refreshPage();
     waitForAlertsToPopulate();
 

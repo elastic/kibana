@@ -7,6 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERTS_URL } from '../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { getNewRule } from '../../objects/rule';
@@ -78,7 +79,7 @@ describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () =>
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createRule(getNewRule()).then((rule) =>
+        createRule<QueryRule>(getNewRule()).then((rule) =>
           loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
         );
       });
@@ -128,7 +129,7 @@ describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () =>
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createRule(getNewRule()).then((rule) =>
+        createRule<QueryRule>(getNewRule()).then((rule) =>
           loadPageAsPlatformEngineer(ruleDetailsUrl(rule.body.id))
         );
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
 import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
@@ -48,11 +49,11 @@ describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     cy.task('esArchiverResetKibana');
     login();
 
-    createRule(getNewRule({ name: 'Another rule' }));
+    createRule<QueryRule>(getNewRule({ name: 'Another rule' }));
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           exceptions_list: [
             {

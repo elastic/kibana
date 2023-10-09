@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type {
+  QueryRule,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -48,7 +51,7 @@ describe(
     beforeEach(() => {
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
-      createRule(getNewRule()).as('createdRule');
+      createRule<QueryRule>(getNewRule()).as('createdRule');
 
       login();
       visit(EXCEPTIONS_URL);

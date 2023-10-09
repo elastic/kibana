@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  NewTermsRule,
+  NewTermsRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewTermsRule } from '../../../objects/rule';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
@@ -35,20 +38,20 @@ describe('Edit new terms rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    createRule(originalRule).then((createdRule) => {
+    createRule<NewTermsRule>(originalRule).then((createdRule) => {
       visitEditRulePage(createdRule.body.id);
     });
   });
 
   it('Allows new term rule details to be edited', () => {
     editRuleQuery(ruleEdits.query);
-    editNewTermsFields(ruleEdits.new_terms_fields);
-    editNewTermsHistoryWindowSize(ruleEdits.history_window_start);
+    editNewTermsFields(ruleEdits.new_terms_fields ?? []);
+    editNewTermsHistoryWindowSize(ruleEdits.history_window_start ?? '');
 
     saveEditedRule();
 
     checkQueryDetails(ruleEdits.query);
-    checkNewTermsRuleFieldDetails(ruleEdits.new_terms_fields);
-    checkNewTermsRuleHistoryWindowDetails(ruleEdits.history_window_start);
+    checkNewTermsRuleFieldDetails(ruleEdits.new_terms_fields ?? []);
+    checkNewTermsRuleHistoryWindowDetails(ruleEdits.history_window_start ?? '');
   });
 });

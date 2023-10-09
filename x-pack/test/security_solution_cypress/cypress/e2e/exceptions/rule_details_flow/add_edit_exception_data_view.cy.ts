@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -62,7 +63,7 @@ describe(
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           query: 'agent.name:*',
           data_view_id: 'exceptions-*',

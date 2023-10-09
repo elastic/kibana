@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
@@ -107,7 +108,7 @@ describe(
             ],
           });
 
-          createRule(
+          createRule<QueryRule>(
             getNewRule({
               query: 'agent.name:*',
               index: ['exceptions*'],
@@ -252,7 +253,7 @@ describe(
 
     describe('rule without existing exceptions', () => {
       beforeEach(() => {
-        createRule(
+        createRule<QueryRule>(
           getNewRule({
             query: 'agent.name:*',
             index: ['exceptions*'],

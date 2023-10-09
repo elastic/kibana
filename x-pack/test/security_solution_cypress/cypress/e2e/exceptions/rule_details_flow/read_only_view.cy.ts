@@ -6,6 +6,7 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -37,7 +38,7 @@ describe('Exceptions viewer read only', { tags: ['@ess', '@skipInServerless'] },
 
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           name: 'Test exceptions rule',
           query: 'agent.name:*',

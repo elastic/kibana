@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
@@ -53,7 +54,7 @@ describe(
 
       // Create exception list associated with a rule
       createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
-        createRule(
+        createRule<QueryRule>(
           getNewRule({
             exceptions_list: [
               {
@@ -66,7 +67,7 @@ describe(
           })
         )
       );
-      createRule(getNewRule({ name: 'Rule to link to shared list' }));
+      createRule<QueryRule>(getNewRule({ name: 'Rule to link to shared list' }));
     });
 
     beforeEach(() => {

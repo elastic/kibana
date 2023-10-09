@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EsqlRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getEsqlRule } from '../../../objects/rule';
 
 import { ESQL_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../screens/rule_details';
@@ -41,7 +42,7 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(rule);
+    createRule<EsqlRule>(rule);
     login();
   });
 

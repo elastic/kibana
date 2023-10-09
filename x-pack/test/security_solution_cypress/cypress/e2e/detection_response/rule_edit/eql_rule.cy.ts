@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  EqlRule,
+  EqlRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getEqlRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -25,7 +28,7 @@ describe('EQL rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    createRule(originalRule).then((createdRule) => {
+    createRule<EqlRule>(originalRule).then((createdRule) => {
       visitEditRulePage(createdRule.body.id);
     });
   });

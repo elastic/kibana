@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import {
   UPGRADE_RISK_SCORE_BUTTON,
@@ -42,7 +43,7 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServer
     cleanKibana();
     login();
     deleteRiskEngineConfiguration();
-    createRule(getNewRule({ rule_id: 'rule1' }));
+    createRule<QueryRule>(getNewRule({ rule_id: 'rule1' }));
   });
 
   describe('show upgrade risk button', () => {

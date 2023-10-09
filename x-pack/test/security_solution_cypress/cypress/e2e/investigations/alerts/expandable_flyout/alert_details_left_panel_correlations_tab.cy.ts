@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -29,7 +30,7 @@ import {
   expandFirstAlertExpandableFlyout,
 } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -38,7 +39,7 @@ describe('Expandable flyout left panel correlations', { tags: ['@ess', '@serverl
   beforeEach(() => {
     cleanKibana();
     login();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();

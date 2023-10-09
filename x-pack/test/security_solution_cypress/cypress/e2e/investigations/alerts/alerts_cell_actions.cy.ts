@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { CELL_COPY_BUTTON, FILTER_BADGE, SHOW_TOP_N_HEADER } from '../../../screens/alerts';
 import {
@@ -40,7 +41,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
   });
 
   describe('Filter', () => {

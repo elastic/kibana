@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   switchAlertTableToEventRenderedView,
   switchAlertTableToGridView,
@@ -48,7 +49,7 @@ describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

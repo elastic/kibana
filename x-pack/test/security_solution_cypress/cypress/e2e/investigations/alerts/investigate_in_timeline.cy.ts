@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewRule } from '../../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
@@ -31,7 +32,7 @@ import { verifyInsightCount } from '../../../tasks/alerts_details';
 describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
   });
 
   describe('From alerts table', () => {

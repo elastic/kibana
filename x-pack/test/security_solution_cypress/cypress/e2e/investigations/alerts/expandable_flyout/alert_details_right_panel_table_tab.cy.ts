@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { openTableTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { closeTimeline, openActiveTimeline } from '../../../../tasks/timeline';
@@ -39,7 +40,7 @@ describe(
     beforeEach(() => {
       cleanKibana();
       login();
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();

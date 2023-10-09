@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  QueryRule,
+  QueryRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewOverrideRule } from '../../../objects/rule';
 
 import { deleteAlertsAndRules } from '../../../tasks/common';
@@ -52,7 +55,7 @@ describe('Edit rule overrides', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    createRule(originalRule).then((createdRule) => {
+    createRule<QueryRule>(originalRule).then((createdRule) => {
       visitEditRulePage(createdRule.body.id);
     });
   });
@@ -67,10 +70,10 @@ describe('Edit rule overrides', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.log('Update about step fields');
     editSeverityOverride(editedRule.severity_mapping);
-    editRiskOverride(editedRule.risk_score_mapping);
+    editRiskOverride(editedRule.risk_score_mapping ?? []);
     expandAdvancedSettings();
-    editRuleNameOverride(editedRule.rule_name_override);
-    editTimestampOverride(editedRule.timestamp_override);
+    editRuleNameOverride(editedRule.rule_name_override ?? '');
+    editTimestampOverride(editedRule.timestamp_override ?? '');
 
     saveEditedRule();
 

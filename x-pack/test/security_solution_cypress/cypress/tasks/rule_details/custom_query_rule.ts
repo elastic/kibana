@@ -6,7 +6,6 @@
  */
 
 import {
-  EqlRuleCreateProps,
   QueryRuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -27,18 +26,22 @@ export const checkCustomQueryRuleTypeDetails = () => {
 };
 
 export const confirmCustomQueryRuleDetailsDefinition = (
-  rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps
+  rule: RuleResponse | QueryRuleCreateProps
 ) => {
-  if (rule.data_view_id) {
+  if ('data_view_id' in rule && rule.data_view_id) {
     checkDataViewDetails(rule.data_view_id);
   } else {
-    checkRuleDetailsRuleIndex(rule.index);
+    if ('index' in rule) {
+      checkRuleDetailsRuleIndex(rule.index);
+    }
   }
 
   checkCustomQueryRuleTypeDetails();
   confirmCommonRuleDetailsDefinition(rule);
-  checkQueryDetails(rule.query);
-  if (rule.alert_suppression) {
+  if ('query' in rule) {
+    checkQueryDetails(rule.query);
+  }
+  if ('alert_suppression' in rule && rule.alert_suppression) {
     confirmAlertSuppressionDetails(rule.alert_suppression);
   }
 };

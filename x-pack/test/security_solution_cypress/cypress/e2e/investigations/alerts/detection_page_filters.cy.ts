@@ -9,6 +9,7 @@ import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,
@@ -113,7 +114,7 @@ const assertFilterControlsWithFilterObject = (
 describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
+    createRule<QueryRule>(getNewRule({ rule_id: 'custom_rule_filters' }));
   });
 
   beforeEach(() => {
@@ -240,7 +241,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
   context.skip('with data modificiation', () => {
     after(() => {
       cleanKibana();
-      createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
+      createRule<QueryRule>(getNewRule({ rule_id: 'custom_rule_filters' }));
     });
 
     it(`Alert list is updated when the alerts are updated`, () => {

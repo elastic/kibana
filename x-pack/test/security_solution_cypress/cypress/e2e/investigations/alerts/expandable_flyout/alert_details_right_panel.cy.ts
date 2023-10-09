@@ -7,6 +7,7 @@
 
 import { upperFirst } from 'lodash';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
@@ -73,7 +74,7 @@ describe('Alert details expandable flyout right panel', () => {
   beforeEach(() => {
     cleanKibana();
     login();
-    createRule(rule);
+    createRule<QueryRule>(rule);
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

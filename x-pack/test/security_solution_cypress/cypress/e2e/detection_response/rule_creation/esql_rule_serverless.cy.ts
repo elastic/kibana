@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EqlRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getEsqlRule } from '../../../objects/rule';
 
 import { ESQL_TYPE, NEW_TERMS_TYPE, THRESHOLD_TYPE } from '../../../screens/rule_creation';
@@ -37,7 +38,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@serverless'] }, () => {
   });
 
   it('does not allow to create rule by API call', function () {
-    createRule(getEsqlRule()).then((response) => {
+    createRule<EqlRule>(getEsqlRule()).then((response) => {
       expect(response.status).to.equal(400);
 
       expect(response.body).to.deep.equal({

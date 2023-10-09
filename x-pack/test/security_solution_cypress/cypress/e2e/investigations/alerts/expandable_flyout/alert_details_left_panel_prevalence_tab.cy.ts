@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { openPrevalenceTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_prevalence_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
@@ -30,7 +31,7 @@ import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 
 describe(
   'Alert details expandable flyout left panel prevalence',
@@ -39,7 +40,10 @@ describe(
     beforeEach(() => {
       cleanKibana();
       login();
-      createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });
+      createRule<QueryRule>({
+        ...getNewRule(),
+        investigation_fields: { field_names: ['host.os.name'] },
+      });
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();

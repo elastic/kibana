@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
@@ -46,7 +47,7 @@ describe(
         enabled: true,
         refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,
       });
-      createRule(getNewRule({ name: 'Test rule 1', rule_id: '1', enabled: false }));
+      createRule<QueryRule>(getNewRule({ name: 'Test rule 1', rule_id: '1', enabled: false }));
     });
 
     beforeEach(() => {

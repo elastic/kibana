@@ -6,6 +6,7 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import {
   ALERTS_COUNT,
@@ -53,7 +54,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
   context('Opening alerts', () => {
     beforeEach(() => {
       login();
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectNumberOfAlerts(3);
@@ -123,7 +124,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
@@ -163,7 +164,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
+      createRule<QueryRule>(getNewRule({ rule_id: '1', max_signals: 100 }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
@@ -315,7 +316,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       login(ROLES.t2_analyst);
       deleteAlertsAndRules();
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();

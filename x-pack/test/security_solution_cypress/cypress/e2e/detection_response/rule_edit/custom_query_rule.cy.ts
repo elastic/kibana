@@ -7,6 +7,7 @@
 
 import {
   AlertSuppression,
+  QueryRule,
   QueryRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getDataViewRule, getSimpleCustomQueryRule } from '../../../objects/rule';
@@ -51,7 +52,7 @@ describe('Edit custom query rule', { tags: ['@ess', '@serverless'] }, () => {
     const originalRule = getSimpleCustomQueryRule();
 
     beforeEach(() => {
-      createRule(originalRule).then((createdRule) => {
+      createRule<QueryRule>(originalRule).then((createdRule) => {
         visitEditRulePage(createdRule.body.id);
       });
     });
@@ -111,7 +112,7 @@ describe('Edit custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       if (originalRule.data_view_id != null) {
         postDataView(originalRule.data_view_id);
       }
-      createRule(originalRule).then((createdRule) => {
+      createRule<QueryRule>(originalRule).then((createdRule) => {
         visitEditRulePage(createdRule.body.id);
       });
     });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getSeverityOverride1,
   getSeverityOverride2,
@@ -50,7 +51,7 @@ describe('Rule overrides rule details', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   it('displays rule override option details', () => {
-    createRule(rule).then((createdRule) => {
+    createRule<QueryRule>(rule).then((createdRule) => {
       visit(ruleDetailsUrl(createdRule.body.id));
       checkRuleDetailsRuleDescription(createdRule.body.description);
       checkRuleDetailsRuleSeverity(createdRule.body.severity);

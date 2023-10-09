@@ -16,7 +16,6 @@ import {
   DETAILS_TITLE,
   DETAILS_DESCRIPTION,
   EDIT_RULE_SETTINGS_LINK,
-  BACK_TO_RULES_TABLE,
   RULE_NAME_HEADER,
   RULE_STATUS,
 } from '../../screens/rule_details';
@@ -78,10 +77,6 @@ export const waitForTheRuleToBeExecuted = () => {
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
   });
-};
-
-export const goBackToRulesTable = () => {
-  cy.get(BACK_TO_RULES_TABLE).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

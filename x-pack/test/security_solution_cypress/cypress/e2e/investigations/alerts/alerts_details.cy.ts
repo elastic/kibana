@@ -6,6 +6,7 @@
  */
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   ALERT_FLYOUT,
@@ -46,7 +47,7 @@ describe('Alert details flyout', () => {
       cleanKibana();
       login();
       disableExpandableFlyout();
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -72,7 +73,10 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'unmapped_fields' });
-      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
+      createRule<QueryRule>({
+        ...getUnmappedRule(),
+        investigation_fields: { field_names: ['event.kind'] },
+      });
     });
 
     beforeEach(() => {

@@ -11,6 +11,10 @@ import {
   Threat,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
+  QueryRuleCreateProps,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   AUTHOR_INPUT,
@@ -181,7 +185,7 @@ export const editTimestampOverride = (timestampOverride: string) => {
   fillTimestampOverride(timestampOverride);
 };
 
-export const confirmEditAboutStepDetails = (rule) => {
+export const confirmEditAboutStepDetails = (rule: RuleResponse | QueryRuleCreateProps) => {
   cy.get(RULE_NAME_INPUT).invoke('val').should('eql', rule.name);
   cy.get(RULE_DESCRIPTION_INPUT).should('have.text', rule.description);
   cy.get(SEVERITY_DROPDOWN).contains(rule.severity, { matchCase: false });

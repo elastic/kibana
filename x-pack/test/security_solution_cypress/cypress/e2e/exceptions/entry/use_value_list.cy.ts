@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   addExceptionEntryFieldMatchIncludedValue,
   addExceptionEntryFieldValue,
@@ -60,7 +61,7 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
 
-      createRule(
+      createRule<QueryRule>(
         getNewRule({
           query: 'user.name:*',
           index: ['exceptions*'],

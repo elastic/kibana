@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedQueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule, getSavedQueryRule } from '../../../objects/rule';
 
 import {
@@ -110,7 +111,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
 
       describe('on rule details page', () => {
         beforeEach(() => {
-          createRule(
+          createRule<SavedQueryRule>(
             getSavedQueryRule({
               saved_id: 'non-existent',
               query: undefined,
@@ -125,7 +126,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
 
       describe('on rule editing page', () => {
         beforeEach(() => {
-          createRule(
+          createRule<SavedQueryRule>(
             getSavedQueryRule({
               saved_id: 'non-existent',
               query: undefined,
@@ -159,7 +160,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     context('Editing', () => {
       it('Allows to update query rule as saved_query rule type', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule(getNewRule()).then((rule) => visitEditRulePage(rule.body.id));
+        createRule<SavedQueryRule>(getNewRule()).then((rule) => visitEditRulePage(rule.body.id));
 
         selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
         checkLoadQueryDynamically();
@@ -182,9 +183,9 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
         const expectedCustomTestQuery = 'random test query';
         createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
-          createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then(
-            (rule) => visitEditRulePage(rule.body.id)
-          );
+          createRule<SavedQueryRule>(
+            getSavedQueryRule({ saved_id: response.body.id, query: undefined })
+          ).then((rule) => visitEditRulePage(rule.body.id));
         });
 
         // query input should be disabled and has value of saved query
@@ -207,9 +208,9 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
 
       it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
-        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-          visitEditRulePage(rule.body.id)
-        );
+        createRule<SavedQueryRule>(
+          getSavedQueryRule({ saved_id: 'non-existent', query: undefined })
+        ).then((rule) => visitEditRulePage(rule.body.id));
 
         uncheckLoadQueryDynamically();
 
@@ -230,9 +231,9 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
 
       it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-          visitEditRulePage(rule.body.id)
-        );
+        createRule<SavedQueryRule>(
+          getSavedQueryRule({ saved_id: 'non-existent', query: undefined })
+        ).then((rule) => visitEditRulePage(rule.body.id));
 
         visit(RULES_MANAGEMENT_URL);
 

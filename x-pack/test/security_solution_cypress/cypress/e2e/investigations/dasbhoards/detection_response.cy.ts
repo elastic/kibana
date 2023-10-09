@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT } from '../../../screens/alerts';
 import {
@@ -46,7 +47,7 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
   });
 
   beforeEach(() => {

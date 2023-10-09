@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ANALYZER_NODE } from '../../../screens/alerts';
 
 import { openAnalyzerForFirstAlertInTimeline } from '../../../tasks/alerts';
@@ -21,7 +22,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
   });
 
   beforeEach(() => {
