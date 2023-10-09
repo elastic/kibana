@@ -11,6 +11,7 @@ import type { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
+  policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -251,7 +252,7 @@ function isEndpointProtectionUpdatesValidForLicense(
     return true;
   }
 
-  const defaults = policyFactoryWithoutPaidFeatures();
+  const defaults = policyFactoryWithoutPaidEnterpriseFeatures();
 
   return policy.global_manifest_version === defaults.global_manifest_version;
 }
@@ -287,7 +288,8 @@ export const unsetPolicyFeaturesAccordingToLicenseLevel = (
     return policyFactoryWithSupportedFeatures(policy);
   }
   if (isAtLeast(license, 'platinum')) {
-    return { ...policyFactoryWithSupportedFeatures(policy), global_manifest_version: 'latest' };
+    const policyWithSupportedFeatures = policyFactoryWithSupportedFeatures(policy);
+    return policyFactoryWithoutPaidEnterpriseFeatures(policyWithSupportedFeatures);
   }
 
   // set any license-gated features back to the defaults
