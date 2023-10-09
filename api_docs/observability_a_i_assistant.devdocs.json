@@ -526,8 +526,8 @@
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           "[]>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -915,8 +915,8 @@
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           "[]>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -1410,8 +1410,8 @@
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           "[]>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
