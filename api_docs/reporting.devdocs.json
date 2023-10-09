@@ -637,7 +637,7 @@
         "label": "JobAppParamsPDF",
         "description": [],
         "signature": [
-          "{ title: string; layout: { id?: ",
+          "{ isDeprecated?: boolean | undefined; title: string; layout: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -647,7 +647,7 @@
           },
           " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
-          "> | undefined; zoom?: number | undefined; }; objectType: string; relativeUrls: string[]; isDeprecated?: boolean | undefined; }"
+          "> | undefined; zoom?: number | undefined; }; objectType: string; relativeUrls: string[]; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
         "deprecated": true,
