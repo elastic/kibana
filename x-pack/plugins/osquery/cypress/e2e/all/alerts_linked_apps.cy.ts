@@ -27,7 +27,7 @@ describe(
     let ruleName: string;
 
     beforeEach(() => {
-      loadRule(true).then((data) => {
+      loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
         loadRuleAlerts(data.name);
