@@ -106,11 +106,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-      });
-
-      const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
+        const expects = ['The data might be incomplete or wrong.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
       });
 
       // click "see full error" button in the toast
