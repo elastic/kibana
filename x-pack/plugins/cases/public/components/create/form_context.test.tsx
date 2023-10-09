@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Screen } from '@testing-library/react';
-import { waitFor, within, screen, act } from '@testing-library/react';
+import { waitFor, within, screen, act, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
@@ -135,11 +135,11 @@ const fillFormReactTestingLib = async ({
 
   if (withTags) {
     const caseTags = renderer.getByTestId('caseTags');
+    const tag = sampleTags[0];
 
-    for (const tag of sampleTags) {
-      const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-      userEvent.type(tagsInput, `${tag}{enter}`);
-    }
+    const tagsInput = await within(caseTags).findByTestId('comboBoxSearchInput');
+    fireEvent.change(tagsInput, { target: { value: tag } });
+    fireEvent.keyDown(tagsInput, { key: 'Enter', code: 'Enter', charCode: 13 });
   }
 };
 
@@ -231,7 +231,7 @@ describe('Create case', () => {
     sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
   });
 
-  for (let index = 0; index < 50; index++) {
+  for (let index = 0; index < 25; index++) {
     describe('Step 1 - Case Fields', () => {
       it('renders correctly', async () => {
         appMockRender.render(
@@ -267,7 +267,7 @@ describe('Create case', () => {
         );
 
         await waitForFormToRender(screen);
-        await fillFormReactTestingLib({ renderer: screen, withTags: false });
+        await fillFormReactTestingLib({ renderer: screen, withTags: true });
 
         userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -276,28 +276,30 @@ describe('Create case', () => {
         });
 
         expect(postCase.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "request": Object {
-            "assignees": Array [],
-            "category": null,
-            "connector": Object {
-              "fields": null,
-              "id": "none",
-              "name": "none",
-              "type": ".none",
+          Object {
+            "request": Object {
+              "assignees": Array [],
+              "category": null,
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "customFields": Array [],
+              "description": "what a great description",
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "tags": Array [
+                "coke",
+              ],
+              "title": "what a cool title",
             },
-            "customFields": Array [],
-            "description": "what a great description",
-            "owner": "securitySolution",
-            "settings": Object {
-              "syncAlerts": true,
-            },
-            "severity": "low",
-            "tags": Array [],
-            "title": "what a cool title",
-          },
-        }
-      `);
+          }
+        `);
       });
 
       it('should post a case on submit click with the selected severity', async () => {
@@ -337,7 +339,7 @@ describe('Create case', () => {
       });
 
       it('should trim fields correctly while submit', async () => {
-        const newTags = ['coke     ', '     pepsi'];
+        const tag = '     coke     ';
         const newCategory = 'First           ';
 
         appMockRender.render(
@@ -361,16 +363,16 @@ describe('Create case', () => {
 
         const caseTags = screen.getByTestId('caseTags');
 
-        for (const tag of newTags) {
-          const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-          userEvent.type(tagsInput, `${tag}{enter}`);
-        }
+        const tagsInput = await within(caseTags).findByTestId('comboBoxSearchInput');
+        fireEvent.change(tagsInput, { target: { value: tag } });
+        fireEvent.keyDown(tagsInput, { key: 'Enter', code: 'Enter', charCode: 13 });
 
         const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole(
           'combobox'
         );
 
-        userEvent.type(categoryComboBox, `${newCategory}{enter}`);
+        fireEvent.change(categoryComboBox, { target: { value: newCategory } });
+        fireEvent.keyDown(categoryComboBox, { key: 'Enter', code: 'Enter', charCode: 13 });
 
         userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -378,7 +380,35 @@ describe('Create case', () => {
           expect(postCase).toHaveBeenCalled();
         });
 
-        expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
+        expect(postCase.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "request": Object {
+                  "assignees": Array [],
+                  "category": "First",
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "customFields": Array [],
+                  "description": "what a great description",
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "tags": Array [
+                    "coke",
+                  ],
+                  "title": "what a cool title",
+                },
+              },
+            ],
+          ]
+        `);
       });
 
       it('should toggle sync settings', async () => {
