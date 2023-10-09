@@ -580,25 +580,25 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             title: 'Open panel (custom title)',
             openPanel: true,
             link: 'item1',
-                children: [
-                  {
-                    link: 'group:settings.logs',
-                    title: 'Those links',
-                  },
-                  {
-                    link: 'group:settings.signals',
-                    title: 'are automatically',
-                  },
-                  {
-                    link: 'group:settings.tracing',
-                    title: 'generated',
-                  },
-                ],
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Those links',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'are automatically',
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'generated',
               },
             ],
           },
         ],
       },
+    ],
+  },
 };
 
 export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
