@@ -38,6 +38,7 @@ import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
+import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoint/utils/controlled_artifact_rollout';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
@@ -92,7 +93,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
-    const cutoffDate = moment.utc().subtract(18, 'months').add(1, 'day'); // Earliest selectable date
+    const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
 
     const viewModeSwitchLabel = automaticUpdatesEnabled
       ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
