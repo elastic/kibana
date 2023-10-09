@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InterceptedRequest } from '../../screens/types';
 import {
   cleanupPack,
   cleanupRule,
@@ -128,9 +129,11 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChanges');
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesOne');
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleChanges').then(({ request }) => {
+
+    cy.wait('@saveRuleChangesOne');
+    cy.get<{ request: InterceptedRequest }>('@saveRuleChangesOne').should(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,
@@ -162,8 +165,11 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesTwo');
+
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleChanges').then(({ request }) => {
+    cy.wait('@saveRuleChangesTwo');
+    cy.get<{ request: InterceptedRequest }>('@saveRuleChangesTwo').should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,
