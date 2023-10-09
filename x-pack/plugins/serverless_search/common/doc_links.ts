@@ -42,9 +42,7 @@ class ESDocLinks {
   public rubyExamples: string = '';
 
   // Getting Started
-  public gettingStartedIngest: string = '';
-  public gettingStartedSearch: string = '';
-  public gettingStartedExplore: string = '';
+  public gettingStarted: string = '';
 
   constructor() {}
 
@@ -84,9 +82,7 @@ class ESDocLinks {
     this.rubyClient = newDocLinks.serverlessClients.rubyGettingStarted;
 
     // Getting Started
-    this.gettingStartedIngest = newDocLinks.serverlessSearch.gettingStartedIngest;
-    this.gettingStartedSearch = newDocLinks.serverlessSearch.gettingStartedSearch;
-    this.gettingStartedExplore = newDocLinks.serverlessSearch.gettingStartedExplore;
+    this.gettingStarted = newDocLinks.serverlessSearch.gettingStarted;
   }
 }
 

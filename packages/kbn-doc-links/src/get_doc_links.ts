@@ -843,9 +843,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-logstash`,
       integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-beats`,
       integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
-      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#explore`,
-      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#ingest`,
-      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#search`,
+      gettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,

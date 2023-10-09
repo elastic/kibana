@@ -397,7 +397,7 @@ const OverviewFooter = () => {
                 defaultMessage: 'Learn more with our references, how-to guides, and tutorials.',
               }
             )}
-            href={docLinks.gettingStartedSearch}
+            href={docLinks.gettingStarted}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

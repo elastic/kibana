@@ -596,9 +596,7 @@ export interface DocLinks {
     readonly rubyGettingStarted: string;
   };
   readonly serverlessSearch: {
-    readonly gettingStartedExplore: string;
-    readonly gettingStartedIngest: string;
-    readonly gettingStartedSearch: string;
+    readonly gettingStarted: string;
     readonly integrations: string;
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
