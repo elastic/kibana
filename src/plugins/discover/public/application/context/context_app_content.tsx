@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -26,7 +26,7 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -36,7 +36,6 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../components/discover_tour';
 
 export interface ContextAppContentProps {
@@ -56,8 +55,11 @@ export interface ContextAppContentProps {
   interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
   useNewFieldsApi: boolean;
   isLegacy: boolean;
+  expandedDoc: UnifiedDataTableProps['expandedDoc'];
+  setExpandedDoc: UnifiedDataTableProps['setExpandedDoc'];
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
+  renderDocumentView: UnifiedDataTableProps['renderDocumentView'];
 }
 
 const controlColumnIds = ['openDetails'];
@@ -87,13 +89,15 @@ export function ContextAppContent({
   interceptedWarnings,
   useNewFieldsApi,
   isLegacy,
+  expandedDoc,
+  setExpandedDoc,
   setAppState,
   addFilter,
+  renderDocumentView,
 }: ContextAppContentProps) {
   const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
 
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -129,24 +133,6 @@ export function ContextAppContent({
   const sort = useMemo(() => {
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
-
-  const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        onFilter={addFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-      />
-    ),
-    [addFilter, dataView, onAddColumn, onRemoveColumn]
-  );
 
   return (
     <Fragment>

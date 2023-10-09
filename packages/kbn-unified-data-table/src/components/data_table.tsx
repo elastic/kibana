@@ -684,7 +684,7 @@ export const UnifiedDataTable = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
-  const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
+  const canSetExpandedDoc = Boolean(setExpandedDoc);
 
   const leadingControlColumns = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
@@ -865,7 +865,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnTypes)}
+          renderDocumentView?.(expandedDoc, displayedRows, displayedColumns, columnTypes)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

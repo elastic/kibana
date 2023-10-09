@@ -31,3 +31,14 @@ export enum ResizableLayoutDirection {
    */
   Vertical = 'vertical',
 }
+
+export enum FixedPanelPosition {
+  /**
+   * Fixed panel is on the left or top
+   */
+  Start = 'start',
+  /**
+   * Fixed panel is on the right or bottom
+   */
+  End = 'end',
+}

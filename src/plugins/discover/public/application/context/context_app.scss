@@ -1,7 +1,7 @@
 @import '../../../../../core/public/mixins';
 
 .dscDocsPage {
-  @include kibanaFullBodyHeight(54px); // action bar height
+  @include kibanaFullBodyHeight(48px); // action bar height
 }
 
 .dscDocsContent {
@@ -17,4 +17,14 @@
   &__cell--highlight {
     background-color: tintOrShade($euiColorPrimary, 90%, 70%);
   }
+}
+
+.dscDocViewer {
+  @include kibanaFullBodyHeight();
+}
+
+.dscDocViewer__body {
+  @include euiOverflowShadow;
+  @include euiScrollBar;
+  overflow-y: auto;
 }
