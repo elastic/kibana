@@ -57,6 +57,11 @@ const projectLinkDevTools: ProjectNavigationLink = {
   title: 'Dev tools',
 };
 
+const projectLinkDiscover: ProjectNavigationLink = {
+  id: ExternalPageName.discover,
+  title: 'Discover',
+};
+
 const chromeNavLink1: ChromeNavLink = {
   id: `${APP_UI_ID}:${link1.id}`,
   title: link1.title,
@@ -145,6 +150,7 @@ describe('getProjectNavLinks', () => {
       link1,
       link2,
       { ...linkMlLanding, categories: mlNavCategories, links: mlNavLinks },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -169,6 +175,7 @@ describe('getProjectNavLinks', () => {
     expect(value).toEqual([
       link1,
       { ...linkAssets, links: [...assetsNavLinks, link2] },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -193,6 +200,7 @@ describe('getProjectNavLinks', () => {
     expect(value).toEqual([
       link1,
       { ...linkInvestigations, links: [link2, ...investigationsNavLinks] },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
@@ -226,6 +234,7 @@ describe('getProjectNavLinks', () => {
         categories: projectSettingsNavCategories,
         links: [...expectedProjectSettingsNavLinks, link2],
       },
+      projectLinkDiscover,
       projectLinkDevTools,
     ]);
   });
