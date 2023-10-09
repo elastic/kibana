@@ -101,13 +101,13 @@ describe(
       });
 
       it('should install rules from the Fleet package when user clicks on CTA', () => {
-        type Response = {
+        interface Response {
           body: {
             hits: {
               hits: Array<{ _source: { ['security-rule']: Rule } }>;
             };
           };
-        };
+        }
         const getRulesAndAssertNumberInstalled = () => {
           getRuleAssets().then((response) => {
             const ruleIds = (response as Response).body.hits.hits.map(
