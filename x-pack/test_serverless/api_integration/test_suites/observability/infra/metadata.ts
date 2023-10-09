@@ -26,14 +26,17 @@ export default function ({ getService }: FtrProviderContext) {
   const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
   const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
 
-  const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
+  const fetchMetadata = async (
+    body: InfraMetadataRequest,
+    expectedStatusCode = 200
+  ): Promise<InfraMetadata | undefined> => {
     const response = await supertest
       .post('/api/infra/metadata')
       .set('kbn-xsrf', 'foo')
       .set('x-elastic-internal-origin', 'foo')
       .auth(username, password)
       .send(body)
-      .expect(200);
+      .expect(expectedStatusCode);
     return response.body;
   };
 
@@ -116,16 +119,15 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('with not existing host', async () => {
-          const metadata = await fetchMetadata({
-            sourceId: 'default',
-            nodeId: 'some-not-existing-host-name',
-            nodeType: 'host',
-            timeRange,
-          });
-
-          if (metadata) {
-            expect(metadata.features.length).to.be(0);
-          }
+          await fetchMetadata(
+            {
+              sourceId: 'default',
+              nodeId: 'some-not-existing-host-name',
+              nodeType: 'host',
+              timeRange,
+            },
+            404
+          );
         });
       });
     });
