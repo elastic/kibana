@@ -482,4 +482,63 @@ describe('RulesSettingsClient', () => {
       })
     );
   });
+
+  test('can create new query delay rules settings when it does not exist and persist flapping settings', async () => {
+    const client = new RulesSettingsClient(rulesSettingsClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: {
+        flapping: {
+          enabled: mockAttributes.flapping.enabled,
+          lookBackWindow: 13,
+          statusChangeThreshold: 13,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        },
+      },
+      references: [],
+    });
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    const result = await client.getOrCreate();
+
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      {
+        flapping: expect.objectContaining({
+          enabled: mockAttributes.flapping.enabled,
+          lookBackWindow: 13,
+          statusChangeThreshold: 13,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 0,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      {
+        id: RULES_SETTINGS_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
+    expect(result.attributes).toEqual(mockAttributes);
+  });
 });

@@ -82,7 +82,7 @@ export class RulesSettingsClient {
     }
   }
 
-  public async create(): Promise<SavedObject<RulesSettings>> {
+  public async create(settings?: SavedObject<RulesSettings>): Promise<SavedObject<RulesSettings>> {
     const modificationMetadata = await this.getModificationMetadata();
     const defaultQueryDelaySettings = this.isServerless
       ? DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS
@@ -91,14 +91,26 @@ export class RulesSettingsClient {
       return await this.savedObjectsClient.create<RulesSettings>(
         RULES_SETTINGS_SAVED_OBJECT_TYPE,
         {
-          flapping: {
-            ...DEFAULT_FLAPPING_SETTINGS,
-            ...modificationMetadata,
-          },
-          queryDelay: {
-            ...defaultQueryDelaySettings,
-            ...modificationMetadata,
-          },
+          ...(settings && settings.attributes.flapping
+            ? {
+                flapping: settings.attributes.flapping,
+              }
+            : {
+                flapping: {
+                  ...DEFAULT_FLAPPING_SETTINGS,
+                  ...modificationMetadata,
+                },
+              }),
+          ...(settings && settings.attributes.queryDelay
+            ? {
+                queryDelay: settings.attributes.queryDelay,
+              }
+            : {
+                queryDelay: {
+                  ...defaultQueryDelaySettings,
+                  ...modificationMetadata,
+                },
+              }),
         },
         {
           id: RULES_SETTINGS_SAVED_OBJECT_ID,
@@ -117,7 +129,11 @@ export class RulesSettingsClient {
    */
   private async getOrCreate(): Promise<SavedObject<RulesSettings>> {
     try {
-      return await this.get();
+      const settings = await this.get();
+      if (!settings.attributes.queryDelay) {
+        return await this.create(settings);
+      }
+      return settings;
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.info('Creating new default rules settings for current space.');
