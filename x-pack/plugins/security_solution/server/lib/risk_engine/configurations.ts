@@ -149,9 +149,6 @@ export const getIndexPatternDataStream = (namespace: string): IIndexPatternStrin
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
 });
 
-export const getLatestTransformId = (namespace: string): string =>
-  `risk_score_latest_transform_${namespace}`;
-
 export const getTransformOptions = ({ dest, source }: { dest: string; source: string[] }) => ({
   dest: {
     index: dest,

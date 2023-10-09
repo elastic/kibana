@@ -109,6 +109,16 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
+          it('starts the latest transform', async () => {
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+
+            const transformStats = await es.transform.getTransformStats({
+              transform_id: 'risk_score_latest_transform_default',
+            });
+
+            expect(transformStats.transforms[0].state).to.eql('started');
+          });
+
           describe('disabling and re-enabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
