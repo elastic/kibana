@@ -19,7 +19,12 @@ else
   SOURCE_IMAGE="$BASE_ES_SERVERLESS_REPO:$SOURCE_IMAGE_OR_TAG"
 fi
 
-echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
+if [[ "${SKIP_PROMOTION:-}" =~ ^(1|true)$ ]]; then
+  echo "--- Skipping ES Serverless image promotion through SKIP_PROMOTION=$SKIP_PROMOTION"
+  exit 0
+else
+  echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
+fi
 
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
