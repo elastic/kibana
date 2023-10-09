@@ -143,7 +143,7 @@ describe('Search service', () => {
     expect(error.body.message).toBe('index_not_found_exception');
     expect(error.body.attributes).toEqual({
       error: indexNotFoundException.error,
-      rawResponse: undefined
+      rawResponse: undefined,
     });
   });
 
