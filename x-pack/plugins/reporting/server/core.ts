@@ -134,7 +134,7 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: this.getScreenshots.bind(this),
+      getScreenshots: config.statefulSettings.enabled ? this.getScreenshots.bind(this) : undefined,
       getSpaceId: this.getSpaceId.bind(this),
     });
 

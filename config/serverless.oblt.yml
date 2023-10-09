@@ -7,6 +7,7 @@ xpack.infra.enabled: false
 xpack.securitySolution.enabled: false
 xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
+xpack.screenshotting.enabled: false
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
