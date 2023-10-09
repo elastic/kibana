@@ -74,7 +74,7 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       <EuiText grow={false}>
         <EuiTextColor color="warning">
           <FormattedMessage
-            id="console.loadingError.message"
+            id="xpack.idxMgmt.indexDetails.overviewTab.dataStream.errorDescription"
             defaultMessage="Unable to load data stream details"
           />
         </EuiTextColor>
@@ -86,7 +86,10 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
         onClick={resendRequest}
         data-test-subj="indexDetailsDataStreamReload"
       >
-        <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload" />
+        <FormattedMessage
+          id="xpack.idxMgmt.indexDetails.overviewTab.dataStream.reloadButtonLabel"
+          defaultMessage="Reload"
+        />
       </EuiButton>
     );
   }
