@@ -53,7 +53,6 @@ const fieldsCapsResponse: FieldCapsResponse = {
   },
 };
 
-
 describe('get_allowed_fields_for_terms_query copy', () => {
   describe('getAllowedFieldForTermQueryFromMapping', () => {
     it('should return map of fields allowed for term query', () => {
