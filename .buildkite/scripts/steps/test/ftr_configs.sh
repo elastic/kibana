@@ -47,6 +47,8 @@ fi
 failedConfigs=""
 results=()
 
+buildkite-agent annotate --style info --context "ftr-command" --append "## FTR Commands ran"
+
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
@@ -54,8 +56,6 @@ while read -r config; do
 
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
   echo "--- $ $FULL_COMMAND"
-
-  buildkite-agent annotate --style info --context "ftr-command" "$FULL_COMMAND"
 
   start=$(date +%s)
 
@@ -92,6 +92,10 @@ while read -r config; do
     else
       failedConfigs="$config"
     fi
+
+    buildkite-agent annotate --style info --context "ftr-command" --append "$FULL_COMMAND $duration (failed)"
+  else
+    buildkite-agent annotate --style info --context "ftr-command" --append "$FULL_COMMAND $duration (success)"
   fi
 done <<< "$configs"
 
