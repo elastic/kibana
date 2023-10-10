@@ -9,6 +9,6 @@
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface DashboardShareService {
-  url: SharePluginStart['url'];
+  url?: SharePluginStart['url'];
   toggleShareContextMenu?: SharePluginStart['toggleShareContextMenu'];
 }

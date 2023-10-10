@@ -18,7 +18,6 @@ import {
   EmbeddablePackageState,
   EmbeddableAppContext,
 } from '@kbn/embeddable-plugin/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
@@ -28,7 +27,6 @@ import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { createInject, createExtract, DashboardContainerInput } from '../../../common';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
-import { DashboardAppLocatorParams } from '../../dashboard_app/locator/locator';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,

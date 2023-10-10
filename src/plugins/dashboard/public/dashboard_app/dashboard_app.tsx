@@ -65,12 +65,6 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const {
-    share: {
-      url: { locators },
-    },
-  } = pluginServices.getServices();
-
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
 
   useMount(() => {
@@ -89,6 +83,7 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
     customBranding,
+    share: { url },
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
@@ -195,7 +190,7 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
-  const locator = useMemo(() => locators.get(DASHBOARD_APP_LOCATOR), [locators]);
+  const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
   return (
     <>
