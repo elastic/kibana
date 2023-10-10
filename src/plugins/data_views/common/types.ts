@@ -158,7 +158,7 @@ export interface DataViewAttributes {
    */
   name?: string;
   /**
-   * MORE
+   * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
 }
