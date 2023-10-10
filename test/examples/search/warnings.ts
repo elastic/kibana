@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const monacoEditor = getService('monacoEditor');
 
-  describe.only('handling warnings with search source fetch', function () {
+  describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
