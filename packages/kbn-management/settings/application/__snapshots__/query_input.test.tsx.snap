@@ -22,12 +22,12 @@ exports[`Search should render normally 1`] = `
               "value": "general",
             },
             Object {
-              "name": "Dashboard",
-              "value": "dashboard",
-            },
-            Object {
               "name": "Notifications",
               "value": "notifications",
+            },
+            Object {
+              "name": "Dashboard",
+              "value": "dashboard",
             },
           ],
           "type": "field_value_selection",
