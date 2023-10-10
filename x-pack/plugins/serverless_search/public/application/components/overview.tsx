@@ -57,11 +57,11 @@ export const ElasticsearchOverview = () => {
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { application, cloud, http, user, share } = useKibanaServices();
 
-  const elasticsearchURL = useMemo(() => {
-    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
-  }, [cloud]);
-  const cloudId = useMemo(() => {
-    return cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER;
+  const { elasticsearchURL, cloudId } = useMemo(() => {
+    return {
+      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
+      cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
+    };
   }, [cloud]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
