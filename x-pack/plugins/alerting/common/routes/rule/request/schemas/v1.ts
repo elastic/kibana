@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { rRuleSchema } from '../../../r_rule';
+import { rRuleRequestSchemaV1 } from '../../../r_rule';
 import { validateSnoozeScheduleV1 } from '../../validation';
 
 export const ruleSnoozeScheduleSchema = schema.object(
   {
     id: schema.maybe(schema.string()),
     duration: schema.number(),
-    rRule: rRuleSchema,
+    rRule: rRuleRequestSchemaV1,
   },
   { validate: validateSnoozeScheduleV1 }
 );
