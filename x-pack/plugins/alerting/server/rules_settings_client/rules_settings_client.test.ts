@@ -507,7 +507,7 @@ describe('RulesSettingsClient', () => {
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         },
-      },
+      } as RulesSettings,
       references: [],
     });
 

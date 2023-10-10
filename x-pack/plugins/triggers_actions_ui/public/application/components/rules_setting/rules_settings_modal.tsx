@@ -84,14 +84,17 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   } = capabilities;
 
-  const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
-  const [queryDelaySettings, setQueryDelaySettings] = useState<RulesSettingsQueryDelayProperties>();
+  const [flappingSettings, setFlappingSettings] = useState<RulesSettingsFlappingProperties>();
+  const [hasFlappingChanged, setHasFlappingChanged] = useState<boolean>(false);
 
-  const { isLoading, isError: hasError } = useGetFlappingSettings({
+  const [queryDelaySettings, setQueryDelaySettings] = useState<RulesSettingsQueryDelayProperties>();
+  const [hasQueryDelayChanged, setHasQueryDelayChanged] = useState<boolean>(false);
+
+  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useGetFlappingSettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
-      if (!settings) {
-        setSettings({
+      if (!flappingSettings) {
+        setFlappingSettings({
           enabled: fetchedSettings.enabled,
           lookBackWindow: fetchedSettings.lookBackWindow,
           statusChangeThreshold: fetchedSettings.statusChangeThreshold,
@@ -120,7 +123,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // In the future when we have more settings sub-features, we should
   // disassociate the rule settings capabilities (save, show) from the
   // sub-feature capabilities (writeXSettingsUI).
-  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
+  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasFlappingError;
   const canShowFlappingSettings = show && readFlappingSettingsUI;
   const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
@@ -131,20 +134,21 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     value: boolean | number
   ) => {
     if (setting === 'flapping') {
-      if (!settings) {
+      if (!flappingSettings) {
         return;
       }
       const newSettings = {
-        ...settings,
+        ...flappingSettings,
         [key]: value,
       };
-      setSettings({
+      setFlappingSettings({
         ...newSettings,
         statusChangeThreshold: Math.min(
           newSettings.lookBackWindow,
           newSettings.statusChangeThreshold
         ),
       });
+      setHasFlappingChanged(true);
     }
 
     if (setting === 'queryDelay') {
@@ -156,18 +160,16 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         [key]: value,
       };
       setQueryDelaySettings(newSettings);
+      setHasQueryDelayChanged(true);
     }
   };
 
   const handleSave = () => {
-    if (!settings) {
-      return;
-    }
     const updatedSettings: Partial<RulesSettingsProperties> = {};
-    if (canWriteFlappingSettings) {
-      updatedSettings.flapping = settings;
+    if (canWriteFlappingSettings && hasFlappingChanged) {
+      updatedSettings.flapping = flappingSettings;
     }
-    if (canWriteQueryDelaySettings) {
+    if (canWriteQueryDelaySettings && hasQueryDelayChanged) {
       updatedSettings.queryDelay = queryDelaySettings;
     }
     mutate(updatedSettings);
@@ -181,18 +183,18 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
       return <RulesSettingsErrorPrompt />;
     }
-    if (isLoading || isQueryDelayLoading) {
+    if (isFlappingLoading || isQueryDelayLoading) {
       return <CenterJustifiedSpinner />;
     }
     return (
       <>
-        {settings && (
+        {flappingSettings && (
           <RulesSettingsFlappingSection
             onChange={(key, value) => handleSettingsChange('flapping', key, value)}
-            settings={settings}
+            settings={flappingSettings}
             canWrite={canWriteFlappingSettings}
             canShow={canShowFlappingSettings}
-            hasError={hasError}
+            hasError={hasFlappingError}
           />
         )}
         {queryDelaySettings && (

@@ -27,13 +27,16 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
   } = useKibana().services;
 
   const mutationFn = async (settings: Partial<RulesSettingsProperties>) => {
+    const updates = [];
     if (settings.flapping) {
-      await updateFlappingSettings({ http, flappingSettings: settings.flapping });
+      updates.push(updateFlappingSettings({ http, flappingSettings: settings.flapping }));
     }
 
     if (settings.queryDelay) {
-      await updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay });
+      updates.push(updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay }));
     }
+
+    return await Promise.all(updates);
   };
 
   return useMutation({

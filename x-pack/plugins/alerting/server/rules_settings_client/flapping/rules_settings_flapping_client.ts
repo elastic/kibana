@@ -19,6 +19,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_SAVED_OBJECT_ID,
 } from '../../../common';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 
 const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingProperties) => {
   const { lookBackWindow, statusChangeThreshold } = flappingSettings;
@@ -71,6 +72,14 @@ export class RulesSettingsFlappingClient {
   }
 
   public async update(newFlappingProperties: RulesSettingsFlappingProperties) {
+    return await retryIfConflicts(
+      this.logger,
+      'ruleSettingsClient.flapping.update()',
+      async () => await this.updateWithOCC(newFlappingProperties)
+    );
+  }
+
+  private async updateWithOCC(newFlappingProperties: RulesSettingsFlappingProperties) {
     try {
       verifyFlappingSettings(newFlappingProperties);
     } catch (e) {

@@ -17,6 +17,7 @@ import {
   MAX_QUERY_DELAY,
   RulesSettingsQueryDelay,
 } from '../../../common';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 
 const verifyQueryDelaySettings = (settings: RulesSettingsQueryDelayProperties) => {
   const { delay } = settings;
@@ -54,6 +55,14 @@ export class RulesSettingsQueryDelayClient {
   }
 
   public async update(newQueryDelayProperties: RulesSettingsQueryDelayProperties) {
+    return await retryIfConflicts(
+      this.logger,
+      'ruleSettingsClient.queryDelay.update()',
+      async () => await this.updateWithOCC(newQueryDelayProperties)
+    );
+  }
+
+  private async updateWithOCC(newQueryDelayProperties: RulesSettingsQueryDelayProperties) {
     try {
       verifyQueryDelaySettings(newQueryDelayProperties);
     } catch (e) {

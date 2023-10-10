@@ -33,7 +33,7 @@ const queryDelayDescription = i18n.translate(
 );
 
 const queryDelayLabel = i18n.translate('xpack.triggersActionsUI.rulesSettings.queryDelayLabel', {
-  defaultMessage: 'Query delay length',
+  defaultMessage: 'Query delay length (s)',
 });
 
 const queryDelayHelp = i18n.translate('xpack.triggersActionsUI.rulesSettings.queryDelayHelp', {
