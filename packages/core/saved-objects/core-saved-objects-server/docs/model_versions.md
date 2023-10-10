@@ -921,7 +921,7 @@ describe('mySoTypeDefinition model version transformations', () => {
         toVersion: 2,
       });
 
-      expect(migrated.properties).toEqual(myExpectedProperties);
+      expect(migrated.properties).toEqual(expectedV2Properties);
     });
 
     it('properly removes the expected fields when converting from v2 to v1', () => {
@@ -933,7 +933,7 @@ describe('mySoTypeDefinition model version transformations', () => {
         toVersion: 1,
       });
 
-      expect(migrated.properties).toEqual(myExpectedProperties);
+      expect(migrated.properties).toEqual(expectedV1Properties);
     });
   });
 });
