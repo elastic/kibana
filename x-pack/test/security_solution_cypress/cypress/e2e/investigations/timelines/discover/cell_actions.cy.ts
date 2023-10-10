@@ -26,7 +26,6 @@ const TIMESTAMP_COLUMN_NAME = '@timestamp';
 describe.skip(
   `Discover Datagrid Cell Actions`,
   {
-    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
     tags: ['@ess'],
   },
   () => {

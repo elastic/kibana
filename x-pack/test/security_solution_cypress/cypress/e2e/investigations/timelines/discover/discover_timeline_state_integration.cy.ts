@@ -63,7 +63,6 @@ const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 describe(
   'Discover Timeline State Integration',
   {
-    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
     tags: ['@ess', '@brokenInServerless'],
     // ESQL and test involving STACK_MANAGEMENT_PAGE are broken in serverless
   },
