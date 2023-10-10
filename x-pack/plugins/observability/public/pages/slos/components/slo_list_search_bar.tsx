@@ -24,7 +24,7 @@ import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
 import { SearchState } from '../hooks/use_store_search_state';
 
-export interface SloListSearchFilterSortBarProps {
+export interface Props {
   loading: boolean;
   initialState: SearchState;
   onChangeQuery: (query: string) => void;
@@ -66,12 +66,7 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
   },
 ];
 
-export function SloListSearchFilterSortBar({
-  loading,
-  onChangeQuery,
-  onChangeSort,
-  initialState,
-}: SloListSearchFilterSortBarProps) {
+export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initialState }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
   const { dataView } = useCreateDataView({ indexPatternString: '.slo-observability.summary-*' });

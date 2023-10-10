@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useStoreSearchState } from '../hooks/use_store_search_state';
 import { SloListItems } from './slo_list_items';
-import { SloListSearchFilterSortBar, SortField } from './slo_list_search_filter_sort_bar';
+import { SloListSearchBar, SortField } from './slo_list_search_bar';
 
 export interface Props {
   autoRefresh: boolean;
@@ -61,7 +61,7 @@ export function SloList({ autoRefresh }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
-        <SloListSearchFilterSortBar
+        <SloListSearchBar
           loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}

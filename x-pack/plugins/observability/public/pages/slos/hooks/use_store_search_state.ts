@@ -8,7 +8,7 @@
 import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
-import { SortField } from '../components/slo_list_search_filter_sort_bar';
+import { SortField } from '../components/slo_list_search_bar';
 
 export interface SearchState {
   kqlQuery: string;
@@ -19,7 +19,7 @@ export interface SearchState {
   };
 }
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   kqlQuery: '',
   page: 0,
   sort: { by: 'status' as const, direction: 'desc' as const },
