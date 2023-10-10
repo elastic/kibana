@@ -11,8 +11,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
-
+  const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -20,6 +19,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const retry = getService('retry');
   const deployment = getService('deployment');
   const esArchiver = getService('esArchiver');
+
+  function waitUntilLoadingIsDone() {
+    return PageObjects.header.waitUntilLoadingHasFinished();
+  }
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -53,6 +56,27 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   //     return (await browser.getCurrentUrl()) === expectedUrl;
   //   });
   // };
+
+  // Try using Dashboard implementations
+  // intension: Use navigateToAppFromAppsMenu rather than appsMenu.clickLink directly,
+  async function navigateToAppFromAppsMenu(title: string) {
+    await retry.try(async () => {
+      await appsMenu.clickLink(title);
+      //
+      // try using if plain clickLink doesn't work:
+      //
+      // await appsMenu.clickLink(title, {
+      //   category: 'recentlyViewed',
+      //   closeCollapsibleNav: true,
+      // });
+      await waitUntilLoadingIsDone();
+      const currentUrl = await browser.getCurrentUrl();
+      if (!currentUrl.includes('app/foo/home')) {
+        throw new Error(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
+      }
+    });
+  }
+
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
@@ -65,6 +89,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
   describe('ui applications', function describeIndexTests() {
+    console.log('STARTING CORE APPLICATIONS FTR TESTS!!!!!!!!!');
     debugger;
     before(async () => {
       await esArchiver.emptyKibanaIndex();
@@ -73,11 +98,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('starts on home page', async () => {
-      debugger;
+      console.log('DOES IT START ON THE HOME PAGE?????');
       await testSubjects.existOrFail('fooAppHome');
     });
 
     it('redirects and renders correctly regardless of trailing slash', async () => {
+      console.log('STARTING: redirects and renders correctly regardless of trailing slash');
       await navigateTo(`/app/foo`);
       await waitForUrlToBe('/app/foo/home');
       await testSubjects.existOrFail('fooAppHome');
@@ -87,6 +113,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('navigates to its own pages', async () => {
+      debugger;
       // Go to page A
       await testSubjects.click('fooNavPageA');
       await waitForUrlToBe('/app/foo/page-a');
@@ -94,6 +121,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.existOrFail('fooAppPageA');
 
       // Go to home page
+      debugger;
+      console.log('DO WE NAVIGATE BACK TO HOME?');
       await testSubjects.click('fooNavHome');
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
@@ -101,19 +130,29 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('can use the back button to navigate within an app', async () => {
+      debugger;
       await browser.goBack();
       await waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
     });
 
+    // this is the one that's causing the failures
     it('navigates to app root when navlink is clicked', async () => {
       debugger;
-      await appsMenu.clickLink('Foo');
+      console.log("DO WE NAVIGATE BACK TO HOME IN THE TEST THAT'S CAUSING ISSUES?");
+      await testSubjects.click('fooNavHome');
+      debugger;
+      console.log('now trying to navigate to the app root, named Foo');
+
+      // await appsMenu.clickLink('Foo');
+      navigateToAppFromAppsMenu('Foo');
+      console.log('THE TEST CLICKED THE LINK, DOES THE URL AND UI CHANGE AT ALL?');
 
       // await waitForUrlToBeWithTimeout('/app/foo/home'); // fix https://github.com/elastic/kibana/issues/166677 timeout failure
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
+      console.log('DID WE NAVIGATE BACK TO HOME?');
       await testSubjects.existOrFail('fooAppHome');
     });
 
