@@ -1791,6 +1791,25 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.useBulkUntrackAlerts",
+        "type": "Function",
+        "tags": [],
+        "label": "useBulkUntrackAlerts",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseMutationResult",
+          "<string, string, { indices: string[]; alertUuids: string[]; }, unknown>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_untrack_alerts.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.useConnectorContext",
         "type": "Function",
         "tags": [],
@@ -5604,13 +5623,23 @@
             "label": "alertsTableConfigurationRegistry",
             "description": [],
             "signature": [
-              "{ get: (id: string) => ",
+              "{ update: (id: string, objectType: ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ") => ",
               "AlertsTableConfigurationRegistry",
-              "; list: () => ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; get: (id: string) => ",
               "AlertsTableConfigurationRegistry",
-              "[]; register: (objectType: ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; list: () => (",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; }"
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ")[]; register: (objectType: ",
+              "AlertsTableConfigurationRegistry",
+              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6011,13 +6040,23 @@
         "label": "AlertsTableConfigurationRegistryContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => ",
+          "{ update: (id: string, objectType: ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ") => ",
           "AlertsTableConfigurationRegistry",
-          "; list: () => ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; get: (id: string) => ",
           "AlertsTableConfigurationRegistry",
-          "[]; register: (objectType: ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; list: () => (",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; }"
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ")[]; register: (objectType: ",
+          "AlertsTableConfigurationRegistry",
+          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6046,7 +6085,7 @@
           },
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
-          "[]; deletedEventIds: string[]; disabledCellActions: string[]; flyoutSize?: \"m\" | \"s\" | \"l\" | undefined; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
+          "[]; deletedEventIds: string[]; disabledCellActions: string[]; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
           "EuiDataGridControlColumn",
           "[]; showExpandToDetails: boolean; showAlertStatusWithFlapping?: boolean | undefined; trailingControlColumns: ",
           "EuiDataGridControlColumn",
@@ -7340,10 +7379,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -7418,10 +7454,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,

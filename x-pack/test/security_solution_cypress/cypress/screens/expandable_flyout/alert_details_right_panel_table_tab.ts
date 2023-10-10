@@ -17,21 +17,25 @@ export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER =
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW = getDataTestSubjectSelector(
   'event-fields-table-row-@timestamp'
 );
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL =
+  getDataTestSubjectSelector('event-field-@timestamp');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW = getDataTestSubjectSelector(
   'event-fields-table-row-_id'
 );
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-event.type'
-);
+const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS =
+  'actionItem-security-detailsFlyout-cellActions-';
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN = getDataTestSubjectSelector(
-  'actionItem-security-detailsFlyout-cellActions-filterIn'
+  `${DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS}filterIn`
 );
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT = getDataTestSubjectSelector(
-  'actionItem-security-detailsFlyout-cellActions-filterOut'
+  `${DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS}filterOut`
 );
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS =
-  getDataTestSubjectSelector('showExtraActionsButton');
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_TOGGLE_COLUMN = getDataTestSubjectSelector(
+  `${DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS}toggleColumn`
+);
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE =
-  getDataTestSubjectSelector('actionItem-security-detailsFlyout-cellActions-addToTimeline');
+  getDataTestSubjectSelector(`${DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS}addToTimeline`);
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD =
-  getDataTestSubjectSelector('actionItem-security-detailsFlyout-cellActions-copyToClipboard');
+  getDataTestSubjectSelector(
+    `${DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS}copyToClipboard`
+  );
