@@ -113,28 +113,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // wait for response - toasts appear before the response is rendered
-      let response: estypes.SearchResponse | undefined;
-      await retry.try(async () => {
-        response = await getTestJson('responseTab', 'responseCodeBlock');
-        expect(response).not.to.eql({});
-      });
-
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
       await openShardModalButton.click();
 
       // request
       await testSubjects.click('inspectorRequestDetailRequest');
-      const requestText = await monacoEditor.getCodeEditorValue(0);
-      expect(requestText).to.contain(testRollupField);
+      await retry.try(async () => {
+        const requestText = await monacoEditor.getCodeEditorValue(0);
+        expect(requestText).to.contain(testRollupField);
+      });
 
       // response
       await testSubjects.click('inspectorRequestDetailResponse');
-      const responseText = await monacoEditor.getCodeEditorValue(0);
-      expect(responseText).to.contain(shardFailureReason);
+      await retry.try(async () => {
+        const responseText = await monacoEditor.getCodeEditorValue(0);
+        expect(responseText).to.contain(shardFailureReason);
+      });
 
       await testSubjects.click('euiFlyoutCloseButton');
+
+      // wait for response - toasts appear before the response is rendered
+      let response: estypes.SearchResponse | undefined;
+      await retry.try(async () => {
+        response = await getTestJson('responseTab', 'responseCodeBlock');
+        expect(response).not.to.eql({});
+      });
 
       // response tab
       assert(response && response._shards.failures);
