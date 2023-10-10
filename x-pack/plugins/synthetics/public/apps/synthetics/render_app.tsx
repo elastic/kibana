@@ -66,7 +66,7 @@ export function renderApp(
           },
           {
             linkType: 'discuss',
-            href: 'https://discuss.elastic.co/c/uptime', // Redirects to https://discuss.elastic.co/c/uptime
+            href: 'https://discuss.elastic.co/c/uptime', // Redirects to https://discuss.elastic.co/c/observability/synthetics/75
           },
         ],
       }),
