@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { useLicense } from '../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PolicyDetails, PolicyList } from './view';
 import {
@@ -25,7 +26,11 @@ import { NotFoundPage } from '../../../app/404';
 import { getPolicyDetailPath } from '../../common/routing';
 
 export const PolicyContainer = memo(() => {
-  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
+  const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'protectionUpdatesEnabled'
+  );
+  const isEnterprise = useLicense().isEnterprise();
+  const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
 
   return (
     <Routes>
