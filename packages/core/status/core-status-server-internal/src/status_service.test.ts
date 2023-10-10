@@ -28,7 +28,11 @@ import {
   getPluginStatusChangesMessagesMock,
 } from './status_service.test.mocks';
 import { StatusService, type StatusServiceSetupDeps } from './status_service';
-import { PluginsByStatus, PluginStatusChanges, ServiceStatusWithName } from './log_plugins_status';
+import type {
+  PluginsByStatus,
+  PluginStatusChanges,
+  PluginStatusWithName,
+} from './log_plugins_status';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 import type { InternalStatusServiceSetup } from './types';
 
@@ -75,17 +79,17 @@ describe('StatusService', () => {
     unavailable: [],
   };
 
-  const pluginStatusA: ServiceStatusWithName = {
+  const pluginStatusA: PluginStatusWithName = {
     pluginName: 'pluginA',
     level: ServiceStatusLevels.available,
     summary: 'bootstrapped correctly!',
   };
-  const pluginStatusB: ServiceStatusWithName = {
+  const pluginStatusB: PluginStatusWithName = {
     pluginName: 'pluginB',
     level: ServiceStatusLevels.available,
     summary: 'bootstrapped correctly!',
   };
-  const pluginStatusC: ServiceStatusWithName = {
+  const pluginStatusC: PluginStatusWithName = {
     pluginName: 'pluginC',
     level: ServiceStatusLevels.available,
     summary: 'bootstrapped correctly!',

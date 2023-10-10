@@ -434,7 +434,6 @@ describe('PluginStatusService', () => {
       const available: ServiceStatus = {
         level: ServiceStatusLevels.available,
         summary: 'a available',
-        isReportedStatus: true,
       };
 
       const statusUpdates: Array<Record<string, ServiceStatus>> = [];
