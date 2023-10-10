@@ -71,22 +71,23 @@ export function SloList({ autoRefresh }: Props) {
           initialState={state}
         />
       </EuiFlexItem>
-
       <EuiFlexItem>
         <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
-          <EuiFlexItem>
-            <EuiPagination
-              pageCount={Math.ceil(total / perPage)}
-              activePage={page}
-              onPageClick={handlePageClick}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {total > 0 ? (
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
+            <EuiFlexItem>
+              <EuiPagination
+                pageCount={Math.ceil(total / perPage)}
+                activePage={page}
+                onPageClick={handlePageClick}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }
