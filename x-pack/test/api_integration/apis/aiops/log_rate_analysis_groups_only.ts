@@ -63,11 +63,17 @@ export default ({ getService }: FtrProviderContext) => {
           const addSignificantTermsActions = data.filter(
             (d) => d.type === testData.expected.significantTermFilter
           );
-          expect(addSignificantTermsActions.length).to.be(0);
+          expect(addSignificantTermsActions.length).to.eql(
+            0,
+            `Expected significant terms actions to be 0, got ${addSignificantTermsActions.length}`
+          );
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
           // for each significant term we should get a histogram
-          expect(histogramActions.length).to.be(0);
+          expect(histogramActions.length).to.eql(
+            0,
+            `Expected histogram actions to be 0, got ${histogramActions.length}`
+          );
 
           const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
           const groups = groupActions.flatMap((d) => d.payload);
@@ -188,21 +194,26 @@ export default ({ getService }: FtrProviderContext) => {
             }
 
             // If streaming works correctly we should receive more than one chunk.
-            expect(chunkCounter).to.be.greaterThan(1);
+            expect(chunkCounter).to.be.greaterThan(
+              1,
+              `Expected 'chunkCounter' to be greater than 1, got ${chunkCounter} with the following data: ${JSON.stringify(
+                data
+              )}.`
+            );
 
             await assertAnalysisResult(data);
           }
         }
 
-        it('should return group only  in chunks with streaming with compression with flushFix', async () => {
+        it('should return group only in chunks with streaming with compression with flushFix', async () => {
           await requestWithStreaming({ ...testData.requestBody, overrides });
         });
 
-        it('should return group only  in chunks with streaming with compression without flushFix', async () => {
+        it('should return group only in chunks with streaming with compression without flushFix', async () => {
           await requestWithStreaming({ ...testData.requestBody, overrides, flushFix: false });
         });
 
-        it('should return group only  in chunks with streaming without compression with flushFix', async () => {
+        it('should return group only in chunks with streaming without compression with flushFix', async () => {
           await requestWithStreaming({
             ...testData.requestBody,
             overrides,
@@ -210,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should return group only  in chunks with streaming without compression without flushFix', async () => {
+        it('should return group only in chunks with streaming without compression without flushFix', async () => {
           await requestWithStreaming({
             ...testData.requestBody,
             overrides,
