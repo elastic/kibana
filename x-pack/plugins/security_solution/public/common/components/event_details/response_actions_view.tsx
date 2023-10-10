@@ -93,7 +93,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   );
 
   useLayoutEffect(() => {
-    setIsLive(() => !(!responseActions?.length || automatedList?.items?.length > 0));
+    setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
   }, [automatedList, responseActions?.length]);
 
   if (shouldEarlyReturn) {
