@@ -360,11 +360,6 @@ export class ActionExecutor {
               body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
             })
               .then(({ total, prompt, completion }) => {
-                console.log({
-                  total,
-                  prompt,
-                  completion,
-                });
                 event.kibana!.action!.execution!.gen_ai!.usage = {
                   total_tokens: total,
                   prompt_tokens: prompt,
