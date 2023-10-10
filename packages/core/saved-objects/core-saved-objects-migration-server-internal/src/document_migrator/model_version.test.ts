@@ -112,6 +112,7 @@ describe('convertModelVersionTransformFn', () => {
   };
 
   it('generates a transform function calling the model transform', () => {
+    const typeDefinition = createType({});
     const upTransform = createModelTransformFn();
 
     const definition: SavedObjectsModelVersion = {
@@ -127,7 +128,8 @@ describe('convertModelVersionTransformFn', () => {
       log,
       modelVersion: 1,
       virtualVersion: '10.1.0',
-      definition,
+      modelVersionDefinition: definition,
+      typeDefinition,
     });
 
     expect(upTransform).not.toHaveBeenCalled();
@@ -142,6 +144,7 @@ describe('convertModelVersionTransformFn', () => {
   });
 
   it('generates a transform function calling all model transforms of the version', () => {
+    const typeDefinition = createType({});
     const upTransform1 = createModelTransformFn();
     const upTransform2 = createModelTransformFn();
 
@@ -162,7 +165,8 @@ describe('convertModelVersionTransformFn', () => {
       log,
       modelVersion: 1,
       virtualVersion: '10.1.0',
-      definition,
+      typeDefinition,
+      modelVersionDefinition: definition,
     });
 
     const doc = createDoc();
