@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectUnsanitizedDoc } from '../serialization';
 import type { SavedObjectsMigrationLogger } from '../migration';
 
@@ -30,6 +31,10 @@ export interface SavedObjectModelTransformationContext {
    * The model version this migration is registered for
    */
   readonly modelVersion: number;
+  /**
+   * The namespace type of the savedObject type this migration is registered for
+   */
+  readonly namespaceType: SavedObjectsNamespaceType;
 }
 
 /**
@@ -66,7 +71,7 @@ export type SavedObjectModelTransformationFn<
  *
  * @public
  */
-export interface SavedObjectModelBidirectionalTransformation<
+export interface SavedObjectModelBidirectionalTransformation< // TODO: is this unused?
   PreviousAttributes = unknown,
   NewAttributes = unknown
 > {
