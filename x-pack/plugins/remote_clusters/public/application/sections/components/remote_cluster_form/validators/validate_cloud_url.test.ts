@@ -33,7 +33,12 @@ describe('Cloud url', () => {
     });
 
     it('true when proxy connection is empty', () => {
-      const actual = isCloudUrlEnabled({ name: 'test', proxyAddress: '', serverName: '' });
+      const actual = isCloudUrlEnabled({
+        name: 'test',
+        proxyAddress: '',
+        serverName: '',
+        securityModel: 'certificate',
+      });
       expect(actual).toBe(true);
     });
 
@@ -42,6 +47,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-proxy',
+        securityModel: 'certificate',
       });
       expect(actual).toBe(true);
     });
@@ -50,6 +56,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: 'some-proxy:1234',
         serverName: 'some-proxy',
+        securityModel: 'certificate',
       });
       expect(actual).toBe(false);
     });
@@ -58,6 +65,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-server-name',
+        securityModel: 'certificate',
       });
       expect(actual).toBe(false);
     });
@@ -94,6 +102,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: '',
         serverName: 'test',
+        securityModel: 'certificate',
       });
       expect(actual).toEqual('');
     });
@@ -103,6 +112,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: 'test',
         serverName: '',
+        securityModel: 'certificate',
       });
       expect(actual).toEqual('');
     });
@@ -112,6 +122,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: 'test',
         serverName: 'another-test',
+        securityModel: 'certificate',
       });
       expect(actual).toEqual('');
     });
@@ -121,6 +132,7 @@ describe('Cloud url', () => {
         name: 'test',
         proxyAddress: 'test-proxy:9400',
         serverName: 'test-proxy',
+        securityModel: 'certificate',
       });
       expect(actual).toEqual('test-proxy');
     });

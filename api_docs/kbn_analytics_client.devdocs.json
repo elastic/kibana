@@ -796,6 +796,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
