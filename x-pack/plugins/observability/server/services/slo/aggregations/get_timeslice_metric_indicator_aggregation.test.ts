@@ -5,29 +5,8 @@
  * 2.0.
  */
 
-import { TimesliceMetricIndicator } from '@kbn/slo-schema';
 import { createTimesliceMetricIndicator } from '../fixtures/slo';
 import { GetTimesliceMetricIndicatorAggregation } from './get_timeslice_metric_indicator_aggregation';
-
-const BASE_TIMESLICE_INDICATOR: TimesliceMetricIndicator = {
-  type: 'sli.metric.timeslice',
-  params: {
-    index: 'test-*',
-    timestampField: '@timestamp',
-    metric: {
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'avg',
-          field: 'test.field',
-        },
-      ],
-      equation: 'A',
-      threshold: 100,
-      comparator: 'GTE',
-    },
-  },
-};
 
 describe('GetTimesliceMetricIndicatorAggregation', () => {
   it('should generate an aggregation for basic metrics', () => {
