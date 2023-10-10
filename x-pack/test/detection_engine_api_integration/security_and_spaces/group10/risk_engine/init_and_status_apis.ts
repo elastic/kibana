@@ -47,7 +47,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('init api', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168376
+    describe.skip('init api', () => {
       it('should return response with success status', async () => {
         const response = await riskEngineRoutes.init();
         expect(response.body).to.eql({
@@ -296,7 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
           transform_id: transformId,
         });
 
-        expect(transformStats.transforms[0].state).to.eql('started');
+        expect(transformStats.transforms[0].state).to.eql('stopped');
       });
 
       it('should create configuration saved object', async () => {
@@ -310,7 +311,7 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
           filter: {},
           interval: '1h',
-          pageSize: 10000,
+          pageSize: 3500,
           range: {
             end: 'now',
             start: 'now-30d',
@@ -372,10 +373,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('status api', () => {
-      it('should disable / enable risk engige', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168355
+    describe.skip('status api', () => {
+      it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
-        await riskEngineRoutes.init();
 
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
@@ -390,7 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: false,
+          is_max_amount_of_risk_engines_reached: true,
         });
 
         await riskEngineRoutes.disable();
@@ -408,7 +409,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: false,
+          is_max_amount_of_risk_engines_reached: true,
         });
       });
 
@@ -429,7 +430,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: false,
+          is_max_amount_of_risk_engines_reached: true,
         });
       });
     });

@@ -26,6 +26,7 @@ export const persistPinnedEvent = async ({
   const response = await KibanaServices.get().http.patch<PinnedEvent | null>(PINNED_EVENT_URL, {
     method: 'PATCH',
     body: requestBody,
+    version: '2023-10-31',
   });
   return response;
 };

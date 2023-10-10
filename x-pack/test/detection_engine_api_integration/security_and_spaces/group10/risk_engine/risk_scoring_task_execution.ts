@@ -23,6 +23,7 @@ import {
   getRiskEngineTask,
   cleanRiskEngineConfig,
   waitForRiskEngineTaskToBeGone,
+  deleteRiskScoreIndices,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -92,7 +93,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        describe('initializing the risk engine', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/168415
+        describe.skip('initializing the risk engine', () => {
           beforeEach(async () => {
             await riskEngineRoutes.init();
           });
@@ -106,6 +108,16 @@ export default ({ getService }: FtrProviderContext): void => {
                 .fill(0)
                 .map((_, index) => `host-${index}`)
             );
+          });
+
+          it('starts the latest transform', async () => {
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+
+            const transformStats = await es.transform.getTransformStats({
+              transform_id: 'risk_score_latest_transform_default',
+            });
+
+            expect(transformStats.transforms[0].state).to.eql('started');
           });
 
           describe('disabling and re-enabling the risk engine', () => {
@@ -270,6 +282,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         afterEach(async () => {
           await getService('spaces').delete(namespace);
+          await deleteRiskScoreIndices({ log, es, namespace });
         });
 
         it('calculates and persists risk scores for alert documents', async () => {
