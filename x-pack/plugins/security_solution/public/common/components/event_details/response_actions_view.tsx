@@ -65,6 +65,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   ecsData?: Ecs | null;
   rawEventData: SearchHit | undefined;
 }): EuiTabbedContentTab | undefined => {
+  // can not be moved outside of the component, because then EventsViewType throws runtime error regarding not being initialized yet
   const viewData = useMemo(
     () => ({
       id: EventsViewType.responseActionsView,
@@ -92,6 +93,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     { enabled: !shouldEarlyReturn, isLive }
   );
 
+  // calculating whether or not our useGetAutomatedActionList (react-query) should try to refetch data
   useEffect(() => {
     setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
   }, [automatedList, responseActions?.length]);
