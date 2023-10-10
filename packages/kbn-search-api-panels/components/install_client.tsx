@@ -78,8 +78,7 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   return (
     <OverviewPanel
       description={i18n.translate('searchApiPanels.welcomeBanner.installClient.description', {
-        defaultMessage:
-          'First you need to install your programming language client of choice.',
+        defaultMessage: 'First you need to install your programming language client of choice.',
       })}
       links={
         language.docLink
