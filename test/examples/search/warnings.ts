@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const monacoEditor = getService('monacoEditor');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -101,10 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
-      let toasts: WebElementWrapper[] = [];
 
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
+        const toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
         const expects = ['The data might be incomplete or wrong.', 'Query result'];
         await asyncForEach(toasts, async (t, index) => {
@@ -112,23 +113,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      // wait for response - toasts appear before the response is rendered
+      let response: estypes.SearchResponse | undefined;
+      await retry.try(async () => {
+        response = await getTestJson('responseTab', 'responseCodeBlock');
+        expect(response).not.to.eql({});
+      });
+
       // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openIncompleteResultsModalBtn');
+      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
       await openShardModalButton.click();
 
       // request
-      await testSubjects.click('showRequestButton');
-      const requestBlock = await testSubjects.find('incompleteResultsModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
+      await testSubjects.click('inspectorRequestDetailRequest');
+      const requestText = await monacoEditor.getCodeEditorValue(0);
+      expect(requestText).to.contain(testRollupField);
+
       // response
-      await testSubjects.click('showResponseButton');
-      const responseBlock = await testSubjects.find('incompleteResultsModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
+      await testSubjects.click('inspectorRequestDetailResponse');
+      const responseText = await monacoEditor.getCodeEditorValue(0);
+      expect(responseText).to.contain(shardFailureReason);
 
-      await testSubjects.click('closeIncompleteResultsModal');
+      await testSubjects.click('euiFlyoutCloseButton');
 
-      const response = await getTestJson('responseTab', 'responseCodeBlock');
-      expect(response).not.to.eql({});
       // response tab
       assert(response && response._shards.failures);
       expect(response._shards.total).to.be(4);
