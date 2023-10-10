@@ -49,8 +49,10 @@ export const DocumentCountChart: FC<Props> = ({
     return eventRate.map(({ key, docCount }) => {
       let value = docCount;
       if (category && sparkLines[category.key] && sparkLines[category.key][key]) {
-        value -= sparkLines[category.key][key];
+        const val = sparkLines[category.key][key];
+        value = val > docCount ? 0 : docCount - val;
       }
+
       return { time: key, value };
     });
   }, [eventRate, pinnedCategory, selectedCategory, sparkLines]);
@@ -58,11 +60,13 @@ export const DocumentCountChart: FC<Props> = ({
   const chartPointsSplit = useMemo(() => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return category !== null
-      ? eventRate.map(({ key }) => {
-          const value =
+      ? eventRate.map(({ key, docCount }) => {
+          const val =
             sparkLines && sparkLines[category.key] && sparkLines[category.key][key]
               ? sparkLines[category.key][key]
               : 0;
+          const value = val > docCount ? docCount : val;
+
           return { time: key, value };
         })
       : undefined;

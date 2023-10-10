@@ -521,6 +521,7 @@ export interface DocLinks {
     agentPolicy: string;
     api: string;
     uninstallAgent: string;
+    installAndUninstallIntegrationAssets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -580,6 +581,7 @@ export interface DocLinks {
     readonly elasticsearch: string;
   };
   readonly serverlessClients: {
+    readonly clientLib: string;
     readonly goApiReference: string;
     readonly goGettingStarted: string;
     readonly httpApis: string;

@@ -13,14 +13,15 @@ import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
   policyFactory,
-  policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
+  policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { ProtectionModes } from '../endpoint/types';
 
 describe('policy_config and licenses', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
+  const Enterprise = licenseMock.createLicense({ license: { type: 'enterprise' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
 
@@ -155,6 +156,22 @@ describe('policy_config and licenses', () => {
 
       valid = isEndpointPolicyValidForLicense(policy, Basic);
       expect(valid).toBeFalsy();
+    });
+
+    it('allows protection updates custom date with an Enterprise license', () => {
+      const policy = policyFactoryWithSupportedFeatures();
+      policy.global_manifest_version = '2022-01-10';
+      const valid = isEndpointPolicyValidForLicense(policy, Enterprise);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks protection updates custom date for Platinum and below license', () => {
+      const policy = policyFactoryWithSupportedFeatures();
+      policy.global_manifest_version = '2022-01-10';
+      [Platinum, Gold, Basic].forEach((license) => {
+        const valid = isEndpointPolicyValidForLicense(policy, license);
+        expect(valid).toBeFalsy();
+      });
     });
 
     describe('ransomware protection checks', () => {
@@ -376,6 +393,25 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.linux.behavior_protection.mode).toEqual(ProtectionModes.detect);
       expect(retPolicy.linux.popup.behavior_protection.enabled).toBeFalsy();
       expect(retPolicy.linux.popup.behavior_protection.message).toEqual(popupMessage);
+    });
+
+    it('does not change protection updates fields with an Enterprise license', () => {
+      const policy = policyFactory();
+      const date = '2022-10-01';
+      policy.global_manifest_version = date;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Enterprise);
+      expect(retPolicy.global_manifest_version).toEqual(date);
+    });
+
+    it('resets Enterprise-paid fields for lower license tiers', () => {
+      const defaults = policyFactory(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.global_manifest_version = '2022-10-01';
+      [Platinum, Gold, Basic].forEach((license) => {
+        const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+        expect(retPolicy.global_manifest_version).toEqual(defaults.global_manifest_version);
+      });
     });
 
     it('resets Platinum-paid fields for lower license tiers', () => {
