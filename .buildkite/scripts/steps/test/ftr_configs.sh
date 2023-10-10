@@ -47,7 +47,7 @@ fi
 failedConfigs=""
 results=()
 
-buildkite-agent annotate --style info --context "ftr-command" --append "## FTR Commands ran<br/>"
+buildkite-agent annotate --style info --context "ftr-command" --append "<h2>FTR Commands ran</h2><br/>"
 
 while read -r config; do
   if [[ ! "$config" ]]; then
