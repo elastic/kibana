@@ -89,8 +89,6 @@ Review important information about the {kib} 7.17.x releases.
 
 Review the following information about the {kib} 7.17.14 release.
 
-coming::[7.17.14]
-
 [float]
 [[security-update-7.17.14]]
 === Security update
