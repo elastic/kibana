@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
@@ -19,15 +20,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
 
-  describe.only('Configure Case', function () {
+  describe('Configure Case', function () {
     //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
     this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
-
       await svlObltNavigation.navigateToLandingPage();
-
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
