@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 /**
@@ -18,7 +17,3 @@ export const CasesConnectorSecretsSchema = schema.object({});
  * TODO: Add needed properties in the params schema.
  */
 export const CasesConnectorParamsSchema = schema.object({});
-
-export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
-export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
-export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;

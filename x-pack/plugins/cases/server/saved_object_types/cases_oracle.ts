@@ -20,13 +20,13 @@ export const casesOracleSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      case_ids: {
+      caseIds: {
         type: 'keyword',
       },
       counter: {
         type: 'unsigned_long',
       },
-      created_at: {
+      createdAt: {
         type: 'date',
       },
       /*
@@ -34,10 +34,10 @@ export const casesOracleSavedObjectType: SavedObjectsType = {
         type: 'keyword',
       },
       */
-      rule_id: {
+      ruleId: {
         type: 'keyword',
       },
-      updated_at: {
+      updatedAt: {
         type: 'date',
       },
     },
