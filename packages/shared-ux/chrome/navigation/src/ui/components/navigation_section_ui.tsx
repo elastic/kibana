@@ -84,6 +84,8 @@ const navigationNodeToEuiItem = (
     }
   };
 
+  const filteredChildren = item.children?.filter((child) => child.sideNavStatus !== 'hidden');
+
   return {
     id,
     title: item.title,
@@ -97,7 +99,7 @@ const navigationNodeToEuiItem = (
     href,
     items: itemOpenPanel
       ? undefined // Don't render children if the item opens a panel
-      : item.children?.map((_item) =>
+      : filteredChildren?.map((_item) =>
           navigationNodeToEuiItem(_item, {
             navigateToUrl,
             openPanel,
@@ -126,36 +128,44 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
   // If the item has no link and no children, we don't want to render it
-  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNode) => {
+  const itemIsVisible = (item: ChromeProjectNavigationNode) => {
+    if (item.sideNavStatus === 'hidden') return false;
+
     const isGroupTitle = Boolean(item.isGroupTitle);
-    const hasLink = Boolean(item.deepLink) || Boolean(item.href);
     if (isGroupTitle) {
       return true;
     }
+
+    const hasLink = Boolean(item.deepLink) || Boolean(item.href);
     if (hasLink) {
       return true;
     }
+
     const hasChildren = Boolean(item.children?.length);
     if (hasChildren) {
-      return item.children!.some(itemHasLinkOrChildren);
+      return item.children!.some(itemIsVisible);
     }
+
     return false;
   };
 
-  const filteredItems = items.filter(itemHasLinkOrChildren).map((item) => {
-    if (item.children) {
-      return {
-        ...item,
-        children: item.children.filter(itemHasLinkOrChildren),
-      };
-    }
-    return item;
-  });
+  const filterItems = (_items: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode[] => {
+    return _items.filter(itemIsVisible).map((_item) => {
+      if (_item.children) {
+        return {
+          ..._item,
+          children: filterItems(_item.children),
+        };
+      }
+      return _item;
+    });
+  };
+
+  const filteredItems = filterItems(items);
 
   const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
-  const groupHasChildren = filteredItems.some(itemHasLinkOrChildren);
+  const groupIsVisible = filteredItems.length > 0;
   // Group with a link and no children will be rendered as a link and not an EUI accordion
-  const groupIsLink = groupHasLink && !groupHasChildren;
   const groupHref = navNode.deepLink?.url ?? navNode.href!;
 
   useEffect(() => {
@@ -164,22 +174,23 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     }
   }, [isActive, doCollapseFromActiveState]);
 
-  if (!groupHasLink && !groupHasChildren) {
+  if (!groupHasLink && !groupIsVisible) {
     return null;
   }
 
-  const propsForGroupAsLink: Partial<EuiCollapsibleNavItemProps> = groupIsLink
-    ? {
-        linkProps: {
-          href: groupHref,
-          onClick: (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigateToUrl(groupHref);
+  const propsForGroupAsItem: Partial<EuiCollapsibleNavItemProps> =
+    navNode.sideNavStatus === 'renderAsItem'
+      ? {
+          linkProps: {
+            href: groupHref,
+            onClick: (e: React.MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigateToUrl(groupHref);
+            },
           },
-        },
-      }
-    : {};
+        }
+      : {};
 
   return (
     <EuiCollapsibleNavItem
@@ -197,7 +208,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
         ...navNode.accordionProps,
       }}
       data-test-subj={`nav-bucket-${id}`}
-      {...propsForGroupAsLink}
+      {...propsForGroupAsItem}
       items={filteredItems.map((item) =>
         navigationNodeToEuiItem(item, {
           navigateToUrl,

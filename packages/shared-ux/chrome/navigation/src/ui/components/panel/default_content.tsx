@@ -42,7 +42,10 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
     ];
   }
 
-  const allChildrenAreGroups = node.children.every(isGroupNode);
+  const allChildrenAreGroups = node.children.every((_node) => {
+    if (_node.sideNavStatus === 'renderAsItem') return false;
+    return isGroupNode(_node);
+  });
 
   if (!allChildrenAreGroups) {
     throw new Error(
@@ -58,10 +61,10 @@ interface Props {
 }
 
 export const DefaultContent: FC<Props> = ({ activeNode }) => {
-  const serializedChildren = serializeChildren(activeNode);
-  const filteredChildren = serializedChildren?.filter((child) => child.sideNavStatus !== 'hidden');
-  const totalChildren = filteredChildren?.length ?? 0;
-  const firstGroupTitle = filteredChildren?.[0]?.title;
+  const filteredChildren = activeNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
+  const serializedChildren = serializeChildren({ ...activeNode, children: filteredChildren });
+  const totalChildren = serializedChildren?.length ?? 0;
+  const firstGroupTitle = serializedChildren?.[0]?.title;
   const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
 
   return (
@@ -80,11 +83,11 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
         <>
           {firstGroupHasTitle && <EuiSpacer size="l" />}
 
-          {filteredChildren && (
+          {serializedChildren && (
             <>
-              {filteredChildren.map((child, i) => {
+              {serializedChildren.map((child, i) => {
                 const hasHorizontalRuleBefore =
-                  i === 0 ? false : !!filteredChildren?.[i - 1]?.appendHorizontalRule;
+                  i === 0 ? false : !!serializedChildren?.[i - 1]?.appendHorizontalRule;
 
                 return (
                   <Fragment key={child.id}>

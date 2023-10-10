@@ -225,6 +225,11 @@ const navigationDefinition: ProjectNavigationDefinition = {
             title: 'Alerts',
           },
           {
+            link: 'item2',
+            title: 'Item should NOT appear!!',
+            sideNavStatus: 'hidden', // Should not appear
+          },
+          {
             link: 'item3',
             title: 'Some other node',
           },
@@ -241,8 +246,29 @@ const navigationDefinition: ProjectNavigationDefinition = {
                 title: 'Signals',
               },
               {
+                link: 'group:settings.signals',
+                title: 'Signals - should NOT appear',
+                sideNavStatus: 'hidden', // Should not appear
+              },
+              {
                 link: 'group:settings.tracing',
                 title: 'Tracing',
+              },
+              {
+                id: 'seb.nestedGroup',
+                title: 'Nested group',
+                children: [],
+              },
+            ],
+          },
+          {
+            id: 'group:settings.hidden',
+            title: 'Settings - should NOT appear',
+            sideNavStatus: 'hidden',
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
               },
             ],
           },
@@ -617,6 +643,35 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   },
                 ],
               },
+              {
+                children: [
+                  {
+                    title: 'Another group as Item',
+                    id: 'group2.renderAsItem',
+                    sideNavStatus: 'renderAsItem',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'group2:settings.tracing',
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                        sideNavStatus: 'hidden',
+                      },
+                    ],
+                  },
+                ],
+              },
               // Groups with accordion
               {
                 id: 'group2',
@@ -678,6 +733,22 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                         link: 'group:settings.logs',
                         title: 'Logs',
                       },
+                      {
+                        title: 'Yet another group as item',
+                        sideNavStatus: 'renderAsItem',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
                       {
                         id: 'group2:settings.signals',
                         link: 'group:settings.signals',

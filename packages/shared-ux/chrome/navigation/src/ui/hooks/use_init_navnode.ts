@@ -52,10 +52,7 @@ function getNodeStatus(
     cloudLink?: CloudLinkId;
     sideNavStatus?: SideNavNodeStatus;
   },
-  {
-    cloudLinks,
-    childrenNodes,
-  }: { cloudLinks: CloudLinks; childrenNodes: Record<string, ChromeProjectNavigationNode> }
+  { cloudLinks }: { cloudLinks: CloudLinks }
 ): SideNavNodeStatus | 'remove' {
   if (link && !deepLink) {
     // If a link is provided, but no deepLink is found, don't render anything
@@ -71,15 +68,6 @@ function getNodeStatus(
   }
 
   if (deepLink && deepLink.hidden) return 'remove';
-
-  const children = Object.values(childrenNodes);
-  const allChildrenAreHidden = children.every((child) => child.sideNavStatus === 'hidden');
-
-  // If there are children and all of them are hidden, we don't render the parent
-  // Except if the parent is mark as "renderAsItem".
-  if (children.length > 0 && allChildrenAreHidden && sideNavStatus !== 'renderAsItem') {
-    return 'remove';
-  }
 
   return sideNavStatus ?? 'visible';
 }
@@ -157,18 +145,20 @@ function createInternalNavNode<
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null,
   isActive: boolean,
-  {
-    cloudLinks,
-    childrenNodes,
-  }: { cloudLinks: CloudLinks; childrenNodes: Record<string, ChromeProjectNavigationNode> }
+  { cloudLinks }: { cloudLinks: CloudLinks }
 ): ChromeProjectNavigationNode | null {
   validateNodeProps(_navNode);
 
   const { children, link, cloudLink, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const sideNavStatus = getNodeStatus(
-    { link, deepLink, cloudLink, sideNavStatus: navNode.sideNavStatus },
-    { cloudLinks, childrenNodes }
+    {
+      link,
+      deepLink,
+      cloudLink,
+      sideNavStatus: navNode.sideNavStatus,
+    },
+    { cloudLinks }
   );
   const title = getTitleForNode(_navNode, { deepLink, cloudLinks });
   const href = cloudLink ? cloudLinks[cloudLink]?.href : _navNode.href;
@@ -254,9 +244,8 @@ export const useInitNavNode = <
   const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () =>
-      createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks, childrenNodes }),
-    [node, id, deepLinks, nodePath, isActive, cloudLinks, childrenNodes]
+    () => createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks }),
+    [node, id, deepLinks, nodePath, isActive, cloudLinks]
   );
 
   // Register the node on the parent whenever its properties change or whenever
