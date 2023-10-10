@@ -481,11 +481,6 @@ describe('RiskEngineDataClient', () => {
               transform_id: 'risk_score_latest_transform_default',
             },
           });
-
-          expect(transforms.startTransform).toHaveBeenCalledWith({
-            esClient,
-            transformId: 'risk_score_latest_transform_default',
-          });
         });
       });
 

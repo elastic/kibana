@@ -21,7 +21,6 @@ import {
   getIndexPatternDataStream,
   totalFieldsLimit,
   mappingComponentName,
-  getLatestTransformId,
   getTransformOptions,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
@@ -36,8 +35,8 @@ import {
 } from '../../../common/risk_engine';
 import {
   getLegacyTransforms,
+  getLatestTransformId,
   removeLegacyTransforms,
-  startTransform,
   createTransform,
 } from './utils/transforms';
 import {
@@ -348,8 +347,6 @@ export class RiskEngineDataClient {
           }),
         },
       });
-
-      await startTransform({ esClient, transformId });
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
       throw error;
