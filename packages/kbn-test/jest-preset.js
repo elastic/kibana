@@ -43,13 +43,13 @@ module.exports = {
     ],
     ...(process.env.TEST_GROUP_TYPE_UNIT
       ? [
-        [
-          '<rootDir>/packages/kbn-test/src/jest/ci_stats_jest_reporter.ts',
-          {
-            testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
-          },
-        ],
-      ]
+          [
+            '<rootDir>/packages/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+            {
+              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
+            },
+          ],
+        ]
       : []),
   ],
 
