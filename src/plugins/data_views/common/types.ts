@@ -325,7 +325,6 @@ export interface FieldsForWildcardResponse {
 export type ExistingIndicesResponse = string[];
 
 export interface IDataViewsApiClient {
-  getExistingIndices: (indices: string[]) => Promise<string[]>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
   hasUserDataView: () => Promise<boolean>;
 }

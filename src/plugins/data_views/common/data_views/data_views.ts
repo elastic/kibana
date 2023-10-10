@@ -239,12 +239,6 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   /**
-   * Get existing index pattern list by providing string array index pattern list.
-   * @param indices - index pattern list
-   * @returns index pattern list of index patterns that match indices
-   */
-  getExistingIndices: (indices: string[]) => Promise<string[]>;
-  /**
    * Get list of data view ids.
    * @param refresh - clear cache and fetch from server
    */
@@ -515,15 +509,6 @@ export class DataViewsService {
       metaFields,
     });
     return fields;
-  };
-
-  /**
-   * Get existing index pattern list by providing string array index pattern list.
-   * @param indices index pattern list
-   * @returns index pattern list
-   */
-  getExistingIndices = async (indices: string[]): Promise<string[]> => {
-    return this.apiClient.getExistingIndices(indices);
   };
 
   /**
