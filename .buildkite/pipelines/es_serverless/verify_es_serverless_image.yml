@@ -49,6 +49,7 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless.sh
         label: 'Serverless Security Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           queue: n2-4-spot
         depends_on: build
@@ -61,6 +62,7 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
         label: 'Serverless Explore - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           queue: n2-4-spot
         depends_on: build
@@ -73,6 +75,7 @@ steps:
 
       - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
         label: 'Serverless Investigations - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           queue: n2-4-spot
         depends_on: build
