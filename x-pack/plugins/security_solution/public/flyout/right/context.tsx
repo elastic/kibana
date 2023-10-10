@@ -6,9 +6,10 @@
  */
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import React, { createContext, memo, useContext, useMemo } from 'react';
+import React, { createContext, memo, useContext, useMemo, useState } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useEventDetails } from '../shared/hooks/use_event_details';
 import { FlyoutError } from '../shared/components/flyout_error';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
@@ -59,6 +60,10 @@ export interface RightPanelContext {
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: GetFieldsData;
+  rowIndex: number;
+  setRowIndex: (rowIndex: number) => void;
+  docs: DataTableRecord[];
+  setExpandedDoc: (doc: DataTableRecord | undefined) => void;
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -71,7 +76,19 @@ export type RightPanelProviderProps = {
 } & Partial<RightPanelProps['params']>;
 
 export const RightPanelProvider = memo(
-  ({ id, indexName, scopeId, children }: RightPanelProviderProps) => {
+  ({
+    id,
+    indexName,
+    scopeId,
+    rowIndex,
+    docs,
+    setExpandedDoc,
+    children,
+  }: RightPanelProviderProps) => {
+    const [displayedRowIndex, setDisplayedRowIndex] = useState(rowIndex ?? -1);
+    const displayedId = docs ? docs[displayedRowIndex]?.id : id;
+    const displayedIndexName = docs ? docs[displayedRowIndex]?.raw._index : indexName;
+
     const {
       browserFields,
       dataAsNestedObject,
@@ -80,22 +97,24 @@ export const RightPanelProvider = memo(
       loading,
       refetchFlyoutData,
       searchHit,
-    } = useEventDetails({ eventId: id, indexName });
+    } = useEventDetails({ eventId: displayedId, indexName: displayedIndexName ?? undefined });
 
     const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
     const contextValue = useMemo(
       () =>
-        id &&
-        indexName &&
+        displayedId &&
+        displayedIndexName &&
         scopeId &&
         dataAsNestedObject &&
         dataFormattedForFieldBrowser &&
-        searchHit
+        searchHit &&
+        docs &&
+        setExpandedDoc
           ? {
-              eventId: id,
-              indexName,
+              eventId: displayedId,
+              indexName: displayedIndexName,
               scopeId,
               browserFields,
               dataAsNestedObject,
@@ -104,12 +123,16 @@ export const RightPanelProvider = memo(
               investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
               refetchFlyoutData,
               getFieldsData,
+              rowIndex: displayedRowIndex,
+              setRowIndex: setDisplayedRowIndex,
+              docs,
+              setExpandedDoc,
             }
           : undefined,
       [
-        id,
+        displayedId,
         maybeRule,
-        indexName,
+        displayedIndexName,
         scopeId,
         browserFields,
         dataAsNestedObject,
@@ -117,6 +140,10 @@ export const RightPanelProvider = memo(
         searchHit,
         refetchFlyoutData,
         getFieldsData,
+        displayedRowIndex,
+        setDisplayedRowIndex,
+        setExpandedDoc,
+        docs,
       ]
     );
 

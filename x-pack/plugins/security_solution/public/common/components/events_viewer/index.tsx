@@ -426,6 +426,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     }
   }, [isSelectAllChecked, onSelectPage, selectAll]);
 
+  const docs: DataTableRecord[] = useMemo(
+    () => timelineItemsToTableRecords(nonDeletedEvents),
+    [nonDeletedEvents]
+  );
+  const [expandedDoc, setExpanded] = useState<DataTableRecord | undefined>();
+  const setExpandedDoc = useCallback((doc?: DataTableRecord) => setExpanded(doc), [setExpanded]);
+
   const [transformedLeadingControlColumns] = useMemo(() => {
     return [
       showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
@@ -450,6 +457,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         setEventsLoading,
         setEventsDeleted,
         pageSize: itemsPerPage,
+        docs,
+        setExpandedDoc,
       })
     );
   }, [
@@ -471,6 +480,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     setEventsLoading,
     setEventsDeleted,
     itemsPerPage,
+    docs,
+    setExpandedDoc,
   ]);
 
   const alertBulkActions = useAlertBulkActions({
@@ -533,7 +544,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                           externalAdditionalControls={alertBulkActions}
                           dataView={dataView}
                           columns={columns.map(({ id }) => id)}
-                          rows={timelineItemsToTableRecords(nonDeletedEvents)}
+                          rows={docs}
                           onFilter={() => {}}
                           onSetColumns={() => {}}
                           onFetchMoreRecords={loadMore}
@@ -564,6 +575,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             storage,
                             data,
                           }}
+                          setExpandedDoc={setExpandedDoc}
+                          expandedDoc={expandedDoc}
                         />
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>
