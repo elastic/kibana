@@ -15,10 +15,7 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  type SearchResponseWarning,
-  SearchResponseWarnings,
-} from '@kbn/search-response-warnings';
+import { type SearchResponseWarning, SearchResponseWarnings } from '@kbn/search-response-warnings';
 import {
   CONTEXT_STEP_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,

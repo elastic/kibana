@@ -9,8 +9,8 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { type SearchResponseWarning, SearchResponseWarnings } from '@kbn/search-response-warnings';
+import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
 const containerStyles = css`
   width: 100%;

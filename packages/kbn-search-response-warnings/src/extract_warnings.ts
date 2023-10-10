@@ -20,7 +20,7 @@ export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
   requestId?: string,
-  requestAdapter?: RequestAdapter,
+  requestAdapter?: RequestAdapter
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
