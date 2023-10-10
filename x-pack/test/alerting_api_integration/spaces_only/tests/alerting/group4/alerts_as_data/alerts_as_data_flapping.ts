@@ -33,7 +33,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
   describe('alerts as data flapping', () => {
-    afterEach(async () => {
+    beforeEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },
