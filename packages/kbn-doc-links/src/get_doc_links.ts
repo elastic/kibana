@@ -824,6 +824,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
     },
     serverlessClients: {
+      clientLib: `${SERVERLESS_ELASTICSEARCH_DOCS}clients`,
       goApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}go-client-getting-started`,
       goGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}go-client-getting-started`,
       httpApis: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,
@@ -844,6 +845,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-beats`,
       integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
       gettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,
+    },
+    serverlessSecurity: {
+      apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys#restrict-privileges`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
