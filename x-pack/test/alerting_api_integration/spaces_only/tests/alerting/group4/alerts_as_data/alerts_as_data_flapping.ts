@@ -34,7 +34,11 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   describe('alerts as data flapping', () => {
     afterEach(async () => {
-      await es.deleteByQuery({ index: alertsAsDataIndex, query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
       objectRemover.removeAll();
     });
 
