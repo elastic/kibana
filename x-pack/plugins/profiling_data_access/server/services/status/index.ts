@@ -8,7 +8,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ProfilingStatus } from '@kbn/profiling-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getSetupState } from '../get_setup_state';
+import { getCloudSetupState } from '../setup_state';
 import { RegisterServicesParams } from '../register_services';
 import { ProfilingCloudSetupOptions, areCloudResourcesSetup } from '../../../common/cloud_setup';
 
@@ -53,7 +53,7 @@ export function createGetStatusService({
         isCloudEnabled,
       };
 
-      const setupState = await getSetupState(setupOptions, clientWithProfilingAuth);
+      const setupState = await getCloudSetupState(setupOptions, clientWithProfilingAuth);
 
       return {
         has_setup: areCloudResourcesSetup(setupState),

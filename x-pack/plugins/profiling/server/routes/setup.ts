@@ -93,14 +93,14 @@ export function registerSetupRoute({
         const commonParams = {
           client: clientWithDefaultAuth,
           logger,
-          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
+          packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
           soClient: core.savedObjects.client,
           spaceId:
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           isCloudEnabled,
         };
 
-        const setupState = await dependencies.start.profilingDataAccess.services.getSetupState(
+        const setupState = await dependencies.start.profilingDataAccess.services.getCloudSetupState(
           commonParams,
           clientWithProfilingAuth
         );

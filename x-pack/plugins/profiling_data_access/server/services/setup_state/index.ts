@@ -24,7 +24,7 @@ import {
 import { RegisterServicesParams } from '../register_services';
 import { mergePartialSetupStates } from '../../../common/setup';
 
-export async function getSetupState(
+export async function getCloudSetupState(
   options: ProfilingCloudSetupOptions,
   clientWithProfilingAuth: ProfilingESClient
 ) {
@@ -51,6 +51,6 @@ export async function getSetupState(
   return mergePartialSetupStates(state, partialStates);
 }
 
-export function createGetSetupState(params: RegisterServicesParams) {
-  return getSetupState;
+export function createGetCloudSetupState(params: RegisterServicesParams) {
+  return getCloudSetupState;
 }
