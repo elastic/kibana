@@ -43,10 +43,91 @@ describe('modelsProvider', () => {
     jest.clearAllMocks();
   });
 
+  describe('getModelDownloads', () => {
+    test('provides a list of models with recommended and default flag', async () => {
+      const result = await modelService.getModelDownloads();
+      expect(result).toEqual([
+        {
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
+          hidden: true,
+          name: '.elser_model_1',
+          version: 1,
+        },
+        {
+          config: { input: { field_names: ['text_field'] } },
+          default: true,
+          description: 'Elastic Learned Sparse EncodeR v2',
+          name: '.elser_model_2',
+          version: 2,
+        },
+        {
+          arch: 'amd64',
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
+          name: '.elser_model_2_linux-x86_64',
+          os: 'Linux',
+          recommended: true,
+          version: 2,
+        },
+      ]);
+    });
+
+    test('provides a list of models with default model as recommended', async () => {
+      mockCloud.cloudId = undefined;
+      (mockClient.asInternalUser.transport.request as jest.Mock).mockResolvedValueOnce({
+        _nodes: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+        },
+        cluster_name: 'default',
+        nodes: {
+          yYmqBqjpQG2rXsmMSPb9pQ: {
+            name: 'node-0',
+            roles: ['ml'],
+            attributes: {},
+            os: {
+              name: 'Mac OS X',
+              arch: 'aarch64',
+            },
+          },
+        },
+      });
+
+      const result = await modelService.getModelDownloads();
+
+      expect(result).toEqual([
+        {
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
+          hidden: true,
+          name: '.elser_model_1',
+          version: 1,
+        },
+        {
+          config: { input: { field_names: ['text_field'] } },
+          recommended: true,
+          description: 'Elastic Learned Sparse EncodeR v2',
+          name: '.elser_model_2',
+          version: 2,
+        },
+        {
+          arch: 'amd64',
+          config: { input: { field_names: ['text_field'] } },
+          description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
+          name: '.elser_model_2_linux-x86_64',
+          os: 'Linux',
+          version: 2,
+        },
+      ]);
+    });
+  });
+
   describe('getELSER', () => {
     test('provides a recommended definition by default', async () => {
       const result = await modelService.getELSER();
-      expect(result.name).toEqual('.elser_model_2_linux-x86_64_SNAPSHOT');
+      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
     });
 
     test('provides a default version if there is no recommended', async () => {
@@ -72,7 +153,7 @@ describe('modelsProvider', () => {
       });
 
       const result = await modelService.getELSER();
-      expect(result.name).toEqual('.elser_model_2_SNAPSHOT');
+      expect(result.name).toEqual('.elser_model_2');
     });
 
     test('provides the requested version', async () => {
@@ -82,7 +163,7 @@ describe('modelsProvider', () => {
 
     test('provides the requested version of a recommended architecture', async () => {
       const result = await modelService.getELSER({ version: 2 });
-      expect(result.name).toEqual('.elser_model_2_linux-x86_64_SNAPSHOT');
+      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
     });
   });
 });
