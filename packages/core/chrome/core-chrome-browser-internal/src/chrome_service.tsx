@@ -214,11 +214,9 @@ export class ChromeService {
           'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
-          chromeStyle === 'project' && actionMenu
-            ? 'kbnBody--projectActionMenuVisible'
-            : 'kbnBody--projectActionMenuHidden',
+          chromeStyle === 'project' && actionMenu ? 'kbnBody--projectActionMenuVisible' : '',
           getKbnVersionClass(),
-        ];
+        ].filter((className) => !!className);
       })
     );
 
