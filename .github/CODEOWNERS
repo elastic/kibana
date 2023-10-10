@@ -542,7 +542,7 @@ x-pack/plugins/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_log_explorer @elastic/infra-monitoring-ui
-x-pack/plugins/observability_onboarding @elastic/apm-ui
+x-pack/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
