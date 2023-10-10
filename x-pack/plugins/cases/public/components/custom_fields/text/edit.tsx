@@ -108,7 +108,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
     const { isValid, data } = await formState.submit();
 
     if (isValid) {
-      const value = isEmpty(data.value) ? null : [data.value];
+      const value = isEmpty(data.value) ? null : data.value;
 
       onSubmit({
         ...customField,
