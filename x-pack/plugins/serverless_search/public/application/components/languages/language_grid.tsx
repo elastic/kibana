@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexGrid,
   EuiFlexItem,
@@ -15,9 +14,9 @@ import {
   EuiImage,
   EuiText,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 
 export interface LanguageGridProps {
@@ -25,7 +24,6 @@ export interface LanguageGridProps {
   languages: LanguageDefinition[];
   selectedLanguage: Languages;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  defaultVisibleCount?: number;
 }
 
 export const LanguageGrid: React.FC<LanguageGridProps> = ({
@@ -33,80 +31,48 @@ export const LanguageGrid: React.FC<LanguageGridProps> = ({
   languages,
   selectedLanguage,
   setSelectedLanguage,
-  defaultVisibleCount = 4,
 }: LanguageGridProps) => {
   const { euiTheme } = useEuiTheme();
-  const [allLanguagesVisible, setAllLanguagesVisible] = useState<boolean>(false);
-  const visibleLanguages = allLanguagesVisible
-    ? languages
-    : languages.slice(0, defaultVisibleCount);
+  const isLarge = useIsWithinBreakpoints(['l']);
+  const isXLarge = useIsWithinBreakpoints(['xl']);
+  const columns = isXLarge ? 3 : isLarge ? 2 : 1;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <EuiFlexGrid columns={2} gutterSize="s">
-          {visibleLanguages.map((language) => (
-            <EuiFlexItem>
-              <EuiPanel
-                hasBorder
-                borderRadius="m"
-                className={
-                  language.id === selectedLanguage
-                    ? 'serverlessSearchSelectClientPanelSelectedBorder'
-                    : 'serverlessSearchSelectClientPanelBorder'
-                }
-                onClick={() => setSelectedLanguage(language)}
-                color={language.id === selectedLanguage ? 'primary' : 'plain'}
-              >
-                <EuiFlexGroup justifyContent="flexStart">
-                  <EuiFlexItem grow={false}>
-                    <EuiImage
-                      alt=""
-                      src={`${assetBasePath}/${language.iconType}`}
-                      height={euiTheme.size.l}
-                      width={euiTheme.size.l}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText
-                      textAlign="left"
-                      color={language.id === selectedLanguage ? 'default' : 'subdued'}
-                    >
-                      <h5>{language.name}</h5>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {allLanguagesVisible ? (
-          <EuiButton
-            iconSide="right"
-            iconType="arrowUp"
-            onClick={() => setAllLanguagesVisible(false)}
+    <EuiFlexGrid columns={columns} gutterSize="s">
+      {languages.map((language) => (
+        <EuiFlexItem key={language.id}>
+          <EuiPanel
+            hasBorder
+            borderRadius="m"
+            className={
+              language.id === selectedLanguage
+                ? 'serverlessSearchSelectClientPanelSelectedBorder'
+                : 'serverlessSearchSelectClientPanelBorder'
+            }
+            onClick={() => setSelectedLanguage(language)}
+            color={language.id === selectedLanguage ? 'primary' : 'plain'}
           >
-            {i18n.translate('xpack.serverlessSearch.selectClient.languagesGrid.showLessLabel', {
-              defaultMessage: 'See less',
-            })}
-          </EuiButton>
-        ) : (
-          <EuiButton
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={() => setAllLanguagesVisible(true)}
-          >
-            {i18n.translate('xpack.serverlessSearch.selectClient.languagesGrid.showMoreLabel', {
-              defaultMessage: 'See {additionalCount} more',
-              values: {
-                additionalCount: languages.length - defaultVisibleCount,
-              },
-            })}
-          </EuiButton>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiImage
+                  alt=""
+                  src={`${assetBasePath}/${language.iconType}`}
+                  height={euiTheme.size.l}
+                  width={euiTheme.size.l}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  textAlign="left"
+                  color={language.id === selectedLanguage ? 'default' : 'subdued'}
+                >
+                  <h5>{language.name}</h5>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
   );
 };
