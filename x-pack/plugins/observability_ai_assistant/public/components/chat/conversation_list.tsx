@@ -119,6 +119,12 @@ export function ConversationList({
                         conversation.id
                           ? {
                               iconType: 'trash',
+                              'aria-label': i18n.translate(
+                                'xpack.observabilityAiAssistant.conversationList.deleteConversationIconLabel',
+                                {
+                                  defaultMessage: 'Delete',
+                                }
+                              ),
                               onClick: () => {
                                 onClickDeleteConversation(conversation.id);
                               },
