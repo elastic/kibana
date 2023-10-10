@@ -8,7 +8,7 @@
 export const waitUntil = (fn: () => Cypress.Chainable) => {
   const timeout = 90000;
   const interval = 5000;
-  let attempts = Math.floor(timeout / interval);
+  let attempts = timeout / interval;
 
   const completeOrRetry = (result: Cypress.Chainable) => {
     if (result) {

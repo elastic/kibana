@@ -125,7 +125,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       viewRecentCaseAndCheckResults();
     });
 
-    it('user cant delete prebuilt saved query but can delete normal saved query', () => {
+    it('user can not delete prebuilt saved query but can delete normal saved query', () => {
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: 'users_elastic' } },
       }).click();

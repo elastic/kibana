@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useLayoutEffect } from 'react';
 import styled from 'styled-components';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
@@ -78,16 +78,23 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
 
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
   const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
 
   const alertId = rawEventData?._id ?? '';
+  const [isLive, setIsLive] = useState(false);
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: [alertId],
     },
-    { enabled: !shouldEarlyReturn }
+    { enabled: !shouldEarlyReturn, isLive }
   );
+
+  useLayoutEffect(() => {
+    setIsLive(() => !(!responseActions?.length || automatedList?.items?.length > 0));
+  }, [automatedList, responseActions?.length]);
 
   if (shouldEarlyReturn) {
     return {
@@ -97,21 +104,21 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   } else {
     const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
 
-    const totalItemCount = automatedList?.items?.length ?? 0;
+    const automatedListItems = automatedList?.items ?? [];
     return {
       ...viewData,
       append: (
         <EuiNotificationBadge data-test-subj="response-actions-notification">
-          {totalItemCount ?? 0}
+          {automatedListItems.length}
         </EuiNotificationBadge>
       ),
       content: (
         <>
           <EuiSpacer size="s" />
           <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-            {isFetched && totalItemCount && automatedList?.items.length ? (
+            {isFetched && !!automatedListItems.length ? (
               <ResponseActionsResults
-                actions={automatedList.items}
+                actions={automatedListItems}
                 ruleName={ruleName}
                 ecsData={ecsData}
               />
