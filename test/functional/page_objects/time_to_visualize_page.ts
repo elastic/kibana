@@ -55,9 +55,7 @@ export class TimeToVisualizePageObject extends FtrService {
       await this.testSubjects.setValue('dashboard-picker-search', dashboardId);
       await this.common.sleep(150); // wait for input debounce so loading starts
       await this.testSubjects.waitForEnabled('open-dashboard-picker');
-      await this.testSubjects.click(
-        `dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`
-      );
+      await this.testSubjects.click(`dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`);
       const dashboardPickerLabel = await this.testSubjects.getVisibleText('open-dashboard-picker');
       if (dashboardPickerLabel === 'Select dashboard') {
         throw new Error(`Dashboard not selected`);
