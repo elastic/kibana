@@ -444,7 +444,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'test_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            value: ['new value'],
+            value: 'new value',
           },
         ],
       });
