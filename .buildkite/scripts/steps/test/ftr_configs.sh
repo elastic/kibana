@@ -47,8 +47,6 @@ fi
 failedConfigs=""
 results=()
 
-buildkite-agent annotate --style info --context "ftr-command" --append "<h2>FTR Commands ran</h2><br/>"
-
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
@@ -92,10 +90,6 @@ while read -r config; do
     else
       failedConfigs="$config"
     fi
-
-    buildkite-agent annotate --style info --context "ftr-command" --append "$FULL_COMMAND $duration (failed)<br/>"
-  else
-    buildkite-agent annotate --style info --context "ftr-command" --append "$FULL_COMMAND $duration (success)<br/>"
   fi
 done <<< "$configs"
 
