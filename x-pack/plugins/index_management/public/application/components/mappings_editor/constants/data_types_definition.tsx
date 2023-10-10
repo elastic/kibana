@@ -975,6 +975,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'shape',
+  'sparse_vector',
   'text',
   'token_count',
   'histogram',
