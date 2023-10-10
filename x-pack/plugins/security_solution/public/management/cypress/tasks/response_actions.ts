@@ -105,7 +105,7 @@ export const waitForActionToComplete = (
           return false;
         });
       },
-      { timeout }
+      { timeout, interval: 2000 }
     )
     .then(() => {
       if (!action) {

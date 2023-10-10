@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../screens/alerts';
 import { waitForEndpointAlerts } from '../tasks/alerts';
@@ -19,8 +20,7 @@ import { login } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-// FIXME: Flaky. Needs fixing (security team issue #7763)
-describe.skip(
+describe(
   'Endpoint generated alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
@@ -28,7 +28,8 @@ describe.skip(
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    before(() => {
+    beforeEach(() => {
+      login(SECURITY_SERVERLESS_ROLE_NAMES.soc_manager);
       getEndpointIntegrationVersion().then((version) => {
         createAgentPolicyTask(version, 'alerts test').then((data) => {
           indexedPolicy = data;
@@ -44,7 +45,7 @@ describe.skip(
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (createdHost) {
         cy.task('destroyEndpointHost', createdHost);
       }
@@ -56,10 +57,6 @@ describe.skip(
       if (createdHost) {
         deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
-    });
-
-    beforeEach(() => {
-      login();
     });
 
     it('should create a Detection Engine alert from an endpoint alert', () => {
@@ -92,7 +89,6 @@ describe.skip(
             `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
           );
         });
-
       getAlertsTableRows().should('have.length.greaterThan', 0);
     });
   }
