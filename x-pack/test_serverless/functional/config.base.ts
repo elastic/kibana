@@ -80,16 +80,17 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         reportingManagement: {
           pathname: '/app/management/insightsAndAlerting/reporting',
-        securitySolution: {
-          pathname: '/app/security',
+          securitySolution: {
+            pathname: '/app/security',
+          },
         },
+        // choose where screenshots should be saved
+        screenshots: {
+          directory: resolve(__dirname, 'screenshots'),
+        },
+        junit: options.junit,
+        suiteTags: options.suiteTags,
       },
-      // choose where screenshots should be saved
-      screenshots: {
-        directory: resolve(__dirname, 'screenshots'),
-      },
-      junit: options.junit,
-      suiteTags: options.suiteTags,
     };
   };
 }
