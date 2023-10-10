@@ -118,15 +118,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openShardModalButton.click();
 
       // request
-      await testSubjects.click('inspectorRequestDetailRequest');
       await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailRequest');
         const requestText = await monacoEditor.getCodeEditorValue(0);
         expect(requestText).to.contain(testRollupField);
       });
 
       // response
-      await testSubjects.click('inspectorRequestDetailResponse');
       await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailResponse');
         const responseText = await monacoEditor.getCodeEditorValue(0);
         expect(responseText).to.contain(shardFailureReason);
       });
