@@ -242,7 +242,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       }
     });
 
-    describe('From Endpoint list', function () {
+    describe('From Endpoint list', () => {
       it('"get-file --path" - should retrieve a file', () => {
         waitForEndpointListPageToBeLoaded(createdHost.hostname);
         cy.task('createFileOnEndpoint', {
@@ -304,7 +304,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       });
     });
 
-    describe('From Alerts', function () {
+    describe('From Alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
