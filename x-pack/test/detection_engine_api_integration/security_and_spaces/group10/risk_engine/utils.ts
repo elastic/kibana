@@ -112,12 +112,13 @@ export const deleteRiskScoreIndices = async ({
   namespace?: string;
 }) => {
   try {
-    await Promise.allSettled([
+    const result = await Promise.allSettled([
       es.indices.deleteDataStream({ name: [`risk-score.risk-score-${namespace}`] }),
       es.indices.delete({
         index: [`risk-score.risk-score-latest-${namespace}`],
       }),
     ]);
+    log.info(result)
   } catch (e) {
     log.error(`Error deleting risk score indices: ${e.message}`);
   }
