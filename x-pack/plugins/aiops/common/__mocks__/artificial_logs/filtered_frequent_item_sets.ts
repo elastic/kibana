@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ItemsetResult } from '../../types';
+import type { ItemSet } from '../../types';
 
-export const filteredFrequentItemSets: ItemsetResult[] = [
+export const filteredFrequentItemSets: ItemSet[] = [
   {
     set: { response_code: '500', url: 'home.php' },
     size: 2,

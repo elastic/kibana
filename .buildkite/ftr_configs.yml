@@ -112,6 +112,7 @@ enabled:
   - test/functional/apps/discover/group1/config.ts
   - test/functional/apps/discover/group2/config.ts
   - test/functional/apps/discover/group3/config.ts
+  - test/functional/apps/discover/group4/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
@@ -412,15 +413,23 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group4.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts
