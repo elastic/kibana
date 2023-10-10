@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useLayoutEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
@@ -92,7 +92,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     { enabled: !shouldEarlyReturn, isLive }
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
   }, [automatedList, responseActions?.length]);
 
