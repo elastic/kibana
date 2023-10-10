@@ -35,16 +35,27 @@ function addQueryParam(url: string, param: string, value: string) {
   return urlObj.search;
 }
 
+function getQueryParam(url: string) {
+  if (url) {
+    const urlObj = new URL(url);
+    return urlObj.searchParams.get('query') || '';
+  }
+  return '';
+}
+
 /**
  * Component for displaying the {@link SettingsApplication} component.
  */
 export const SettingsApplication = () => {
   const { addUrlToHistory } = useServices();
   const fields = useFields();
+  const [filteredFields, setFilteredFields] = useState(fields);
+
   const categorizedFields = categorizeFields(fields);
   const categories = Object.keys(categorizedFields);
-  const [filteredFields, setFilteredFields] = useState(fields);
-  const [query, setQuery] = useState<Query | undefined>();
+
+  const queryParam = getQueryParam(window.location.href);
+  const [query, setQuery] = useState<Query>(Query.parse(queryParam));
 
   const onQueryChange: QueryInputProps['onQueryChange'] = (newQuery = Query.parse('')) => {
     setQuery(newQuery);

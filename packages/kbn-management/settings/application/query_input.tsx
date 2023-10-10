@@ -62,10 +62,10 @@ export const QueryInput = ({ categories: categoryList, query, onQueryChange }: Q
   const onChange: EuiSearchBarProps['onChange'] = ({ query: newQuery, error }) => {
     if (error) {
       setQueryError(error?.message || null);
-      onQueryChange(undefined);
+      onQueryChange();
     } else {
       setQueryError(null);
-      onQueryChange(newQuery || undefined);
+      onQueryChange(newQuery || Query.parse(''));
     }
   };
 
