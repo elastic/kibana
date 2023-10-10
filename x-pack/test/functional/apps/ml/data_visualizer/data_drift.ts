@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { farequoteDataViewTestDataWithQuery } from '../../aiops/test_data';
+import { farequoteDataViewTestDataWithQuery } from '../../aiops/log_rate_analysis_test_data';
 import { TestData } from '../../aiops/types';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
