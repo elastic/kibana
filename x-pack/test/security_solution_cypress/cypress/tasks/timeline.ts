@@ -83,7 +83,7 @@ import {
   TIMELINE_QUERY,
   PROVIDER_BADGE,
   PROVIDER_BADGE_DELETE,
-  DISCOVER_TAB,
+  ESQL_TAB,
   OPEN_TIMELINE_MODAL_TIMELINE_NAMES,
   OPEN_TIMELINE_MODAL_SEARCH_BAR,
   OPEN_TIMELINE_MODAL,
@@ -140,9 +140,9 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const gotToDiscoverTab = () => {
+export const gotToEsqlTab = () => {
   recurse(
-    () => cy.get(DISCOVER_TAB).click(),
+    () => cy.get(ESQL_TAB).click(),
     ($el) => expect($el).to.have.class('euiTab-isSelected'),
     {
       delay: 500,

@@ -23,7 +23,7 @@ import {
   addFieldToTable,
   convertNBSPToSP,
 } from '../../../../tasks/discover';
-import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
+import { createNewTimeline, gotToEsqlTab } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -33,9 +33,7 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-// Failing: See https://github.com/elastic/kibana/issues/167186
-// TODO: reuse or remove this tests when ESQL tab will be added
-describe.skip(
+describe(
   'Basic discover search and filter operations',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
@@ -46,7 +44,7 @@ describe.skip(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
