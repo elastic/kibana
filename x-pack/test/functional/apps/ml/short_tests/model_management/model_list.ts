@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
         false
       );
 
-      // // Need to delete index before ingest pipeline, else it will give error
+      // Need to delete index before ingest pipeline, else it will give error
       await ml.api.deleteIngestPipeline(modelWithPipelineAndDestIndex.modelId);
       await ml.testResources.deleteIndexPatternByTitle(
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
