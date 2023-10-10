@@ -170,28 +170,26 @@ export function ChatActionsMenu({
             content: (
               <EuiPanel>
                 <EuiText size="s">
-                  <p>
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.description.paragraph',
+                    {
+                      defaultMessage:
+                        'Using a knowledge base is optional but improves the experience of using the Assistant significantly.',
+                    }
+                  )}{' '}
+                  <EuiLink
+                    data-test-subj="observabilityAiAssistantChatActionsMenuLearnMoreLink"
+                    external
+                    target="_blank"
+                    href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html"
+                  >
                     {i18n.translate(
-                      'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.description.paragraph',
+                      'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.elser.learnMore',
                       {
-                        defaultMessage:
-                          'Using a knowledge base is optional but improves the experience of using the Assistant significantly.',
+                        defaultMessage: 'Learn more',
                       }
-                    )}{' '}
-                    <EuiLink
-                      data-test-subj="observabilityAiAssistantChatActionsMenuLearnMoreLink"
-                      external
-                      target="_blank"
-                      href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html"
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.elser.learnMore',
-                        {
-                          defaultMessage: 'Learn more',
-                        }
-                      )}
-                    </EuiLink>
-                  </p>
+                    )}
+                  </EuiLink>
                 </EuiText>
 
                 <EuiSpacer size="l" />

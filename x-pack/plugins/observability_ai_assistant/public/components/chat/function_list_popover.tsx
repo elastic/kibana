@@ -88,17 +88,13 @@ export function FunctionListPopover({
     return (
       <>
         <EuiText size="s">
-          <p>
-            <strong>
-              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
-            </strong>
-          </p>
+          <strong>
+            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
+          </strong>
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiText size="s">
-          <p style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
-            <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
-          </p>
+        <EuiText size="s" style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+          <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
         </EuiText>
       </>
     );
