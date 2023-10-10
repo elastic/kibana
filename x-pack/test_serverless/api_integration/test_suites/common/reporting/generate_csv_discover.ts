@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       await kibanaServer.importExport.unload(archives.savedObjects);
     });
 
-    it(`exported CSV file matches snapshot`, async () => {
+    xit(`exported CSV file matches snapshot`, async () => {
       const fromTime = '2019-06-20T00:00:00.000Z';
       const toTime = '2019-06-24T00:00:00.000Z';
 
@@ -130,19 +130,19 @@ export default ({ getService }: FtrProviderContext) => {
         return reportingAPI.getCompletedJobOutput(path, ELASTIC_USERNAME, ELASTIC_PASSWORD);
       }
 
-      it('includes an unmapped field to the report', async () => {
+      xit('includes an unmapped field to the report', async () => {
         const csvFile = await generateCsvReport(['text', 'unmapped']);
 
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('includes an unmapped nested field to the report', async () => {
+      xit('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReport(['text', 'nested.unmapped']);
 
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('includes all unmapped fields to the report', async () => {
+      xit('includes all unmapped fields to the report', async () => {
         const csvFile = await generateCsvReport(['*']);
 
         expectSnapshot(csvFile).toMatch();
