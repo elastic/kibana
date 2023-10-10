@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ProfilingStatus } from '@kbn/profiling-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getSetupState } from '../get_setup_state';
@@ -14,7 +14,7 @@ import { ProfilingSetupOptions, areResourcesSetup } from '../../../common/setup'
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   spaceId?: string;
 }
 
@@ -35,17 +35,18 @@ export function createGetStatusService({
         };
       }
 
-      const clientWithDefaultAuth = createProfilingEsClient({
-        esClient,
+      const kibanaInternalProfilingESClient = createProfilingEsClient({
+        esClient: esClient.asInternalUser,
         useDefaultAuth: true,
       });
-      const clientWithProfilingAuth = createProfilingEsClient({
-        esClient,
+
+      const profilingESClient = createProfilingEsClient({
+        esClient: esClient.asCurrentUser,
         useDefaultAuth: false,
       });
 
       const setupOptions: ProfilingSetupOptions = {
-        client: clientWithDefaultAuth,
+        client: kibanaInternalProfilingESClient,
         logger,
         packagePolicyClient: deps.fleet.packagePolicyService,
         soClient,
@@ -53,7 +54,7 @@ export function createGetStatusService({
         isCloudEnabled,
       };
 
-      const setupState = await getSetupState(setupOptions, clientWithProfilingAuth);
+      const setupState = await getSetupState(setupOptions, profilingESClient);
 
       return {
         has_setup: areResourcesSetup(setupState),

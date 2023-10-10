@@ -42,7 +42,7 @@ export function registerSetupRoute({
             })
           : true;
 
-        const esClient = await getClient(context);
+        const esClient = (await context.core).elasticsearch.client;
         const core = await context.core;
 
         const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
