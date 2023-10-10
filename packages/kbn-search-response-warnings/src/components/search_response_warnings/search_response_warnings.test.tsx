@@ -12,10 +12,7 @@ import { SearchResponseWarnings } from './search_response_warnings';
 import { searchResponseIncompleteWarningLocalCluster } from '../../__mocks__/search_response_warnings';
 
 const interceptedWarnings = [
-  {
-    originalWarning: searchResponseIncompleteWarningLocalCluster,
-    action: <button>{`test`}</button>,
-  },
+  searchResponseIncompleteWarningLocalCluster,
 ];
 
 describe('SearchResponseWarnings', () => {

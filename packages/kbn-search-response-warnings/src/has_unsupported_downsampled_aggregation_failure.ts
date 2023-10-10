@@ -9,7 +9,7 @@
 import type {
   SearchResponseWarning,
   SearchResponseIncompleteWarning,
-} from '@kbn/data-plugin/public';
+} from './types';
 
 export function hasUnsupportedDownsampledAggregationFailure(warning: SearchResponseWarning) {
   return warning.type === 'incomplete'

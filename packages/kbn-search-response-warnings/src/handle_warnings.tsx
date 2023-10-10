@@ -9,19 +9,17 @@
 import React from 'react';
 import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import { SearchRequest } from '..';
-import { getNotifications } from '../../services';
-import type { IInspectorInfo } from '../../../common/search/search_source';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
-} from '../types';
+} from './types';
 import { extractWarnings } from './extract_warnings';
-import { ViewWarningButton } from './view_warning_button';
+import { ViewWarningButton } from './components/view_warning_button';
 
 /**
  * @internal
@@ -33,18 +31,20 @@ export function handleWarnings({
   theme,
   callback,
   requestId,
-  inspector,
+  requestAdapter,
   inspectorService,
+  notificationService,
 }: {
-  request: SearchRequest;
+  request: estypes.SearchRequest;
   response: estypes.SearchResponse;
   theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
   requestId?: string;
-  inspector?: IInspectorInfo;
+  requestAdapter?: RequestAdapter;
   inspectorService: InspectorStartContract;
+  notificationService: NotificationsStart;
 }) {
-  const warnings = extractWarnings(response, inspectorService, inspector);
+  const warnings = extractWarnings(response, inspectorService, requestId, requestAdapter);
   if (warnings.length === 0) {
     return;
   }
@@ -63,7 +63,7 @@ export function handleWarnings({
   }
 
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
-  getNotifications().toasts.addWarning({
+  notificationService.toasts.addWarning({
     title: incompleteWarning.message,
     text: toMountPoint(
       <EuiTextAlign textAlign="right">
@@ -77,10 +77,10 @@ export function handleWarnings({
 /**
  * @internal
  */
-export function filterWarnings(
+function filterWarnings(
   warnings: SearchResponseWarning[],
   cb: WarningHandlerCallback,
-  request: SearchRequest,
+  request: estypes.SearchRequest,
   response: estypes.SearchResponse,
   requestId: string | undefined
 ) {

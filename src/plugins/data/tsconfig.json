@@ -49,7 +49,8 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/data-service",
     "@kbn/react-kibana-context-render",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/search-response-warnings"
   ],
   "exclude": [
     "target/**/*",

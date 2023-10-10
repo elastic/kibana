@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import {
   DataLoadingState as DiscoverGridLoadingState,
   UnifiedDataTable,
@@ -24,7 +24,7 @@ import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../components/discover_tour';
 export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   totalHitCount?: number;
   query?: AggregateQuery | Query;
-  interceptedWarnings?: SearchResponseInterceptedWarning[];
+  interceptedWarnings?: SearchResponseWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;

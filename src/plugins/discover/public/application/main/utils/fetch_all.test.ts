@@ -297,9 +297,7 @@ describe('test fetchAll', () => {
     const moreRecords = [records[2], records[3]];
 
     const interceptedWarnings = [
-      {
-        originalWarning: searchResponseIncompleteWarningLocalCluster,
-      },
+      searchResponseIncompleteWarningLocalCluster,
     ];
 
     test('should add more records', async () => {

@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
-import type { IInspectorInfo } from '../../../common/search/search_source';
-import { SearchResponseWarning } from '../types';
+import type { SearchResponseWarning } from './types';
 
 /**
  * @internal
@@ -20,7 +19,8 @@ import { SearchResponseWarning } from '../types';
 export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
-  inspector?: IInspectorInfo
+  requestId?: string,
+  requestAdapter?: RequestAdapter,
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
@@ -56,8 +56,8 @@ export function extractWarnings(
             },
           },
       openInInspector: () => {
-        const adapter = inspector?.adapter ? inspector.adapter : new RequestAdapter();
-        if (!inspector?.adapter) {
+        const adapter = requestAdapter ? requestAdapter : new RequestAdapter();
+        if (!requestAdapter) {
           const requestResponder = adapter.start(
             i18n.translate('data.search.searchSource.anonymousRequestTitle', {
               defaultMessage: 'Request',
@@ -72,7 +72,7 @@ export function extractWarnings(
           },
           {
             options: {
-              initialRequestId: inspector?.id,
+              initialRequestId: requestId,
               initialTabs: ['clusters', 'response'],
             },
           }

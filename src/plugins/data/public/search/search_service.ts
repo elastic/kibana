@@ -8,6 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { handleWarnings } from '@kbn/search-response-warnings';
 import {
   CoreSetup,
   CoreStart,
@@ -49,7 +50,6 @@ import {
   rangeFilterFunction,
   rangeFunction,
   removeFilterFunction,
-  SearchRequest,
   SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
@@ -66,7 +66,6 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import { handleWarnings } from './warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -223,7 +222,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, theme, uiSettings, chrome, application }: CoreStart,
+    { http, theme, uiSettings, chrome, application, notifications }: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -250,12 +249,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const { rawResponse } = response;
 
           handleWarnings({
-            request: request.body,
+            request: request.body as estypes.SearchRequest,
             response: rawResponse,
             theme,
             requestId: request.id,
-            inspector: options.inspector,
+            requestAdapter: options.inspector?.adapter,
             inspectorService: inspector,
+            notificationService: notifications,
           });
         }
         return response;
@@ -298,17 +298,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             return;
           }
           handleWarnings({
-            request: request.json as SearchRequest,
+            request: request.json as estypes.SearchRequest,
             response: rawResponse,
             theme,
             callback,
             requestId: request.id,
-            inspector: {
-              adapter,
-              title: request.name,
-              id: request.id,
-            },
+            requestAdapter: adapter,
             inspectorService: inspector,
+            notificationService: notifications,
           });
         });
       },

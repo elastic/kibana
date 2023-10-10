@@ -6,13 +6,54 @@
  * Side Public License, v 1.
  */
 
-import type { ReactNode } from 'react';
-import type { SearchResponseWarning } from '@kbn/data-plugin/public';
+import { estypes } from '@elastic/elasticsearch';
+import type { ClusterDetails } from '@kbn/es-types';
 
 /**
- * Search Response Warning type which also includes an action
+ * A warning object for a search response with incomplete ES results
+ * ES returns incomplete results when:
+ * 1) Set timeout flag on search and the timeout expires on cluster
+ * 2) Some shard failures on a cluster
+ * 3) skipped remote(s) (skip_unavailable=true)
+ *   a. all shards failed
+ *   b. disconnected/not-connected
+ * @public
  */
-export interface SearchResponseInterceptedWarning {
-  originalWarning: SearchResponseWarning;
-  action?: ReactNode;
+export interface SearchResponseIncompleteWarning {
+  /**
+   * type: for sorting out incomplete warnings
+   */
+  type: 'incomplete';
+  /**
+   * message: human-friendly message
+   */
+  message: string;
+  /**
+   * clusters: cluster details.
+   */
+  clusters: Record<string, ClusterDetails>;
+  /**
+   * openInInspector: callback to open warning in inspector
+   */
+  openInInspector: () => void;
 }
+
+/**
+ * A warning object for a search response with warnings
+ * @public
+ */
+export type SearchResponseWarning = SearchResponseIncompleteWarning;
+
+/**
+ * A callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the
+ * function to prevent the search service from showing warning notifications by default.
+ * @public
+ */
+export type WarningHandlerCallback = (
+  warning: SearchResponseWarning,
+  meta: {
+    request: estypes.SearchRequest;
+    response: estypes.SearchResponse;
+    requestId: string | undefined;
+  }
+) => boolean | undefined;
