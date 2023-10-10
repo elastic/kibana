@@ -9,7 +9,11 @@
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
-import { type Start as InspectorStartContract, LOCAL_CLUSTER_KEY, getLocalClusterDetails } from '@kbn/inspector-plugin/public';
+import {
+  type Start as InspectorStartContract,
+  LOCAL_CLUSTER_KEY,
+  getLocalClusterDetails,
+} from '@kbn/inspector-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { SearchResponseWarning } from './types';
 
