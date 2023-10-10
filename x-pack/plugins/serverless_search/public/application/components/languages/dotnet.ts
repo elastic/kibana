@@ -20,9 +20,9 @@ export const dotnetDefinition: LanguageDefinition = {
     link: 'https://github.com/elastic/elasticsearch-serverless-net',
   },
   // Code Snippets,
-  installClient: `dotnet add package Elastic.Clients.Elasticsearch`,
+  installClient: 'dotnet add package Elastic.Clients.Elasticsearch.Serverless',
   configureClient: ({ apiKey, cloudId }) => `using System;
-using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.Serverless;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 
 var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));`,
