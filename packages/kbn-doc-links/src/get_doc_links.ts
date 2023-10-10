@@ -848,6 +848,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#ingest`,
       gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#search`,
     },
+    serverlessSecurity: {
+      apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys#restrict-privileges`,
+    },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
     },
