@@ -70,10 +70,6 @@ export const registerRiskScoringTask = ({
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-      // the risk engine seems to be using alerts-as-data innards for it's
-      // own purposes.  It appears the client is using ILM, and this won't work
-      // on serverless, so we hardcode "not using datastreams" here, since that
-      // code will have to change someday ...
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
