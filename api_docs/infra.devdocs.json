@@ -491,7 +491,7 @@
             "label": "featureFlags",
             "description": [],
             "signature": [
-              "{ metricsExplorerEnabled: boolean; customThresholdAlertsEnabled: boolean; osqueryEnabled: boolean; }"
+              "{ customThresholdAlertsEnabled: boolean; logsUIEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
