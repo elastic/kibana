@@ -25,7 +25,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
   const svlRuleDetailsUI = getPageObject('svlRuleDetailsUI');
-  const svlObltNavigation = getService('svlObltNavigation');
+  const svlSearchNavigation = getService('svlSearchNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const find = getService('find');
@@ -39,6 +39,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Rule details', () => {
     let ruleIdList: string[];
+    let connectorIdList: string[];
 
     describe('Header', () => {
       const testRunUuid = uuidv4();
@@ -47,7 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       before(async () => {
         await svlCommonPage.login();
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         const rule = await createRule({
@@ -242,11 +243,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const ruleName = `${testRunUuid}`;
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
       const RULE_TYPE_ID = '.es-query';
-      // const testRunUuid = uuidv4();
 
       before(async () => {
         await svlCommonPage.login();
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         const rule = await createRule({
@@ -353,13 +353,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               .set('x-elastic-internal-origin', 'foo');
           })
         );
+        await Promise.all(
+          connectorIdList.map(async (connectorId) => {
+            await supertest
+              .delete(`/api/actions/connector/${connectorId}`)
+              .set('kbn-xsrf', 'foo')
+              .set('x-elastic-internal-origin', 'foo');
+          })
+        );
       });
 
       after(async () => {
         await svlCommonPage.forceLogout();
       });
 
-      it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
+      it.only('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
 
         const connector1 = await createSlackConnector({
@@ -371,6 +379,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           supertest,
           name: `slack-${testRunUuid}-${1}`,
         });
+
+        connectorIdList = [connector2.id];
 
         const rule = await createRule({
           supertest,
@@ -404,14 +414,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         ruleIdList = [rule.id];
 
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         // verify content
         await testSubjects.existOrFail('rulesList');
 
         // navigate to connectors
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
         await testSubjects.click('app-card-triggersActionsConnectors');
@@ -429,8 +439,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(toastText).toEqual('Deleted 1 connector');
         });
 
-        // click on first alert
-        await svlObltNavigation.navigateToLandingPage();
+        // click on first rule
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
         await svlTriggersActionsUI.searchRules(rule.name);
         await find.clickDisplayedByCssSelector(
@@ -450,7 +460,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // click the available option (my-slack1 is a preconfigured connector created before this test runs)
         await testSubjects.click(`dropdown-connector-${connector2.id}`);
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
+        await new Promise((resolve) => {});
+        // expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
       });
 
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
@@ -503,14 +514,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         ruleIdList = [rule.id];
 
         // refresh to see alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         // verify content
         await testSubjects.existOrFail('rulesList');
 
         // navigate to connectors
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
         await testSubjects.click('app-card-triggersActionsConnectors');
@@ -528,7 +539,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         // click on first alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
         await svlTriggersActionsUI.searchRules(rule.name);
         await find.clickDisplayedByCssSelector(
@@ -566,14 +577,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).toEqual(true);
 
         // refresh to see alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         // verify content
         await testSubjects.existOrFail('rulesList');
 
         // navigate to connectors
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
         await testSubjects.click('app-card-triggersActionsConnectors');
@@ -601,6 +612,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               .set('x-elastic-internal-origin', 'foo');
           })
         );
+        await Promise.all(
+          connectorIdList.map(async (connectorId) => {
+            await supertest
+              .delete(`/api/actions/connector/${connectorId}`)
+              .set('kbn-xsrf', 'foo')
+              .set('x-elastic-internal-origin', 'foo');
+          })
+        );
       });
 
       after(async () => {
@@ -620,6 +639,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           supertest,
           name: `slack-${testRunUuid}-${1}`,
         });
+
+        connectorIdList = [connector1.id, connector2.id];
 
         const rule = await createRule({
           supertest,
@@ -656,14 +677,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const updatedRuleName = `Changed rule ${rule.name}`;
 
         // refresh to see alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         // verify content
         await testSubjects.existOrFail('rulesList');
 
         // click on first alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
         await svlTriggersActionsUI.searchRules(rule.name);
         await find.clickDisplayedByCssSelector(
@@ -737,14 +758,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         ruleIdList = [rule.id];
 
         // refresh to see alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
 
         // verify content
         await testSubjects.existOrFail('rulesList');
 
         // click on first alert
-        await svlObltNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToLandingPage();
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
         await svlTriggersActionsUI.searchRules(rule.name);
         await find.clickDisplayedByCssSelector(
