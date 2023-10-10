@@ -84,13 +84,16 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             pathname: '/app/security',
           },
         },
-        // choose where screenshots should be saved
-        screenshots: {
-          directory: resolve(__dirname, 'screenshots'),
+        securitySolution: {
+          pathname: '/app/security',
         },
-        junit: options.junit,
-        suiteTags: options.suiteTags,
       },
+      // choose where screenshots should be saved
+      screenshots: {
+        directory: resolve(__dirname, 'screenshots'),
+      },
+      junit: options.junit,
+      suiteTags: options.suiteTags,
     };
   };
 }
