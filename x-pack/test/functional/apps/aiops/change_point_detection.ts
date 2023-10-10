@@ -85,6 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage
         .getTable(0)
         .invokeAction(0, 'aiopsChangePointFilterForValue');
+      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const resultFor = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(resultFor.length).to.eql(1);
     });
