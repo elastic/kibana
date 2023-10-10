@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
@@ -27,10 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
-
-      await retry.waitFor('navigates to the cases configuration page', async () => {
-        return await testSubjects.exists('case-configure-title');
-      });
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
