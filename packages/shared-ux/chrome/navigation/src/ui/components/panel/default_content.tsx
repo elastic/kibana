@@ -25,7 +25,10 @@ import type { PanelNavNode } from './types';
 function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | undefined {
   if (!node.children) return undefined;
 
-  const allChildrenAreItems = node.children.every(isItemNode);
+  const allChildrenAreItems = node.children.every((_node) => {
+    if (isItemNode(_node)) return true;
+    return _node.sideNavStatus === 'renderAsItem';
+  });
 
   if (allChildrenAreItems) {
     // Automatically wrap all the children into top level "root" group.

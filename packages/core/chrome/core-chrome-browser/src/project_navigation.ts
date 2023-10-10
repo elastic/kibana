@@ -66,6 +66,12 @@ export type GetIsActiveFn = (params: {
  */
 interface NodeDefinitionBase {
   /**
+   * Node type is automatically detected by checking if the node has children or not.
+   * A node without children is considered an "item" node.
+   * If you want to force a node to be a "group" node you can use this property.
+   */
+  nodeType?: 'group' | 'item';
+  /**
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
   icon?: IconType;
@@ -74,20 +80,23 @@ interface NodeDefinitionBase {
    */
   href?: string;
   /**
-   * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
+   * Optional status to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
+   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
+   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
+   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
+   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
+   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * @default 'visible'
+   */
+  sideNavStatus?: 'hidden' | 'visible' | 'renderAsItem';
+  /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: GetIsActiveFn;
-  /**
-   * Node type is automatically detected by checking if the node has children or not.
-   * A node without children is considered an "item" node.
-   * If you want to force a node to be a "group" node you can use this property.
-   */
-  nodeType?: 'group' | 'item';
   /**
    * ----------------------------------------------------------------------------------------------
    * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------

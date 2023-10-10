@@ -105,7 +105,7 @@ function serializeNode<
     id?: string;
     children?: NonEmptyArray<{ id?: string }>;
   }
->(item: T): T {
+>(item: T): T & { id: string } {
   const id = item.id ?? generateUniqueNodeId();
   const serializedChildren = item.children?.map(serializeNode);
 
@@ -119,18 +119,17 @@ function serializeNode<
 const serializeNavigationTree = (navTree: NavigationTreeDefinition): NavigationTreeDefinition => {
   const serialized: NavigationTreeDefinition = { ...navTree };
 
+  const serialize = (item: RootNavigationItemDefinition) => {
+    if (item.type !== 'navGroup') return item;
+    return serializeNode(item);
+  };
+
   if (navTree.body) {
-    serialized.body = navTree.body.map((item) => {
-      if (item.type !== 'navGroup') return item;
-      return serializeNode(item);
-    });
+    serialized.body = navTree.body.map(serialize);
   }
 
   if (navTree.footer) {
-    serialized.footer = navTree.footer.map((item) => {
-      if (item.type !== 'navGroup') return item;
-      return serializeNode(item);
-    });
+    serialized.footer = navTree.footer.map(serialize);
   }
 
   return serialized;
@@ -176,7 +175,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
           return <Navigation.Group preset={item.preset} key={item.preset} />;
         }
 
-        const { id = '' } = item;
+        const { id = generateUniqueNodeId() } = item;
 
         return item.children || (item as GroupDefinition).type === 'navGroup' ? (
           <Navigation.Group {...item} id={id} key={id}>

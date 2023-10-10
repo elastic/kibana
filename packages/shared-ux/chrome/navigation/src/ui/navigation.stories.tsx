@@ -555,6 +555,117 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
+            // Panel with nav group title that acts like nav items
+            title: 'Open panel (4)',
+            openPanel: true,
+            link: 'item1',
+            children: [
+              {
+                id: 'root',
+                children: [
+                  {
+                    title: 'Should act as item 1',
+                    sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Should act as item 2',
+                    sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                ],
+              },
+              // Groups with accordion
+              {
+                id: 'group2',
+                title: 'MANAGEMENT',
+                isCollapsible: true,
+                children: [
+                  {
+                    id: 'group2-A',
+                    title: 'Group 1',
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                        withBadge: true, // Default to "Beta" badge
+                      },
+                    ],
+                  },
+                  {
+                    id: 'root-groupB',
+                    children: [
+                      {
+                        id: 'group2-B',
+                        title: 'Group 2 (render as Item)',
+                        sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                        children: [
+                          {
+                            id: 'group2:settings.logs',
+                            link: 'group:settings.logs',
+                            title: 'Logs',
+                          },
+                          {
+                            id: 'group2:settings.signals',
+                            link: 'group:settings.signals',
+                            title: 'Signals',
+                          },
+                          {
+                            id: 'group2:settings.tracing',
+                            link: 'group:settings.tracing',
+                            title: 'Tracing',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'group2-C',
+                    title: 'Group 3',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
             id: 'group:openpanel2',
             title: 'Open panel (custom content)',
             openPanel: true,

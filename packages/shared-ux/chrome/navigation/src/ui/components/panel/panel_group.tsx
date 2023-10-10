@@ -64,7 +64,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
     if (!children) return null;
 
     return children.map((item, i) =>
-      item.children ? (
+      item.children && item.sideNavStatus !== 'renderAsItem' ? (
         <Fragment key={item.id}>
           <PanelGroup navNode={item} />
           {i < totalChildren - 1 && <EuiSpacer />}
