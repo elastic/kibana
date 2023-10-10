@@ -53,7 +53,7 @@ import {
   parseWarning,
   getInlineEditorText,
   getDocumentationSections,
-  MonacoError,
+  type MonacoMessage,
   getWrappedInPipesCode,
   parseErrors,
   getIndicesForAutocomplete,
@@ -134,6 +134,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
+  // To make server side errors less "sticky", register the state of the code when submitting
+  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(errors ? code : '');
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
@@ -141,10 +143,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(false);
-  const [editorErrors, setEditorErrors] = useState<MonacoError[]>(
-    errors ? parseErrors(errors, code) : []
-  );
-  const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
+
+  const [editorMessages, setEditorMessages] = useState<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>({
+    errors: errors ? parseErrors(errors, code) : [],
+    warnings: warning ? parseWarning(warning) : [],
+  });
   const [editorLanguageProvider, setLanguageProvider] = useState<
     | {
         validate: Function;
@@ -153,6 +159,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
     | undefined
   >(undefined);
+
+  const onTextLangQuerySubmitWrapped = useCallback(() => {
+    setCodeStateOnSubmission(code);
+    onTextLangQuerySubmit();
+  }, [code, onTextLangQuerySubmit]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -173,7 +184,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCompactFocused,
     editorHeight,
     isCodeEditorExpanded,
-    Boolean(editorErrors?.length),
+    Boolean(editorMessages.errors.length),
     Boolean(warning),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections)
@@ -268,48 +279,88 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     updateLinesFromModel = true;
   }, []);
 
+  const queryValidation = useCallback(
+    async ({ active }: { active: boolean }) => {
+      if (!editorModel.current || !editorLanguageProvider) return;
+      monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+      const { warnings: parserWarnings, errors: parserErrors } =
+        await editorLanguageProvider.validate(editorModel.current);
+      const markers = [];
+
+      if (parserErrors.length) {
+        markers.push(...parserErrors);
+      }
+      if (parserWarnings.length) {
+        markers.push(...parserWarnings);
+      }
+      if (markers.length && active) {
+        setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
+        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
+        return;
+      }
+    },
+    [editorLanguageProvider]
+  );
+
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
-      if (errors && errors.length && code === queryString) {
-        const parsedErrors = parseErrors(errors, code);
-        setEditorErrors(parsedErrors);
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
-      } else if (code && editorLanguageProvider) {
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-        const { warnings: parserWarnings, errors: parserErrors } = editorLanguageProvider.validate(
-          editorModel.current
-        );
-        const markers = [];
-
-        if (parserErrors.length) {
-          markers.push(...parserErrors);
-          setEditorErrors(parserErrors);
-        }
-        if (parserWarnings.length) {
-          markers.push(...parserWarnings);
-          setEditorWarning(parserWarnings);
-        }
-        if (markers.length) {
-          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
+      if (code === codeWhenSubmitted) {
+        if (errors || warning) {
+          const parsedErrors = parseErrors(errors || [], code);
+          const parsedWarning = parseWarning(warning || '');
+          setEditorMessages({ errors: parsedErrors, warnings: parsedWarning });
+          monaco.editor.setModelMarkers(
+            editorModel.current,
+            'Unified search',
+            parsedErrors.concat(parsedWarning)
+          );
           return;
         }
-        if (warning) {
-          const parsedWarning = parseWarning(warning);
-          setEditorWarning(parsedWarning);
-        } else {
-          setEditorWarning([]);
-        }
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-        setEditorErrors([]);
       }
+      const subscription = { active: true };
+      queryValidation(subscription).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log({ error });
+      });
+      return () => (subscription.active = false);
+      // if (errors && errors.length && code === codeWhenSubmitted) {
+      //   const parsedErrors = parseErrors(errors, code);
+      //   setEditorMessages({ errors: parsedErrors, warnings: [] });
+      //   monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
+      // } else if (code && editorLanguageProvider) {
+      //   monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+      //   const { warnings: parserWarnings, errors: parserErrors } = editorLanguageProvider.validate(
+      //     editorModel.current
+      //   );
+      //   const markers = [];
+
+      //   if (parserErrors.length) {
+      //     markers.push(...parserErrors);
+      //   }
+      //   if (parserWarnings.length) {
+      //     markers.push(...parserWarnings);
+      //   }
+      //   if (markers.length) {
+      //     setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
+      //     monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
+      //     return;
+      //   }
+      //   if (warning) {
+      //     const parsedWarning = parseWarning(warning);
+      //     setEditorMessages({ errors: [], warnings: parsedWarning });
+      //   } else {
+      //     setEditorMessages({ errors: [], warnings: [] });
+      //   }
+      //   monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+      // }
     },
     { skipFirstRender: false },
     256,
     [errors, warning, code]
   );
 
-  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoError) => {
+  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
     }
@@ -413,10 +464,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [dataViews]);
 
   const getFields: ESQLCustomAutocompleteCallbacks['getFields'] = useCallback(
-    async (ctx) => {
+    async ({ sourceOnly } = {}) => {
       const pipes = currentCursorContent?.split('|');
       pipes?.pop();
-      const validContent = pipes?.join('|');
+      const validContent = sourceOnly ? pipes[0] : pipes?.join('|');
       if (validContent) {
         // ES|QL with limit 0 returns only the columns and is more performant
         const esqlQuery = {
@@ -442,7 +493,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (error || !policies) {
         return [];
       }
-      return policies.map(({ name, sourceIndices }) => ({ name, indices: sourceIndices }));
+      return policies.map(({ type, query: policyQuery, ...rest }) => rest);
     },
     [indexManagementApiService]
   );
@@ -692,7 +743,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         iconSide="left"
                         data-test-subj="TextBasedLangEditor-inline-warning-badge"
                       >
-                        {editorWarning.length}
+                        {editorMessages.warnings.length}
                       </EuiBadge>
                     )}
                     <CodeEditor
@@ -742,7 +793,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           // eslint-disable-next-line no-bitwise
                           monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                           function () {
-                            onTextLangQuerySubmit();
+                            onTextLangQuerySubmitWrapped();
                           }
                         );
                         if (!isCodeEditorExpanded) {
@@ -756,12 +807,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       <EditorFooter
                         lines={lines}
                         containerCSS={styles.bottomContainer}
-                        errors={editorErrors}
-                        warning={editorWarning}
+                        {...editorMessages}
                         onErrorClick={onErrorClick}
                         refreshErrors={() => {
-                          if (editorErrors.some((e) => e.source !== 'client')) {
-                            onTextLangQuerySubmit();
+                          if (editorMessages.errors.some((e) => e.source !== 'client')) {
+                            onTextLangQuerySubmitWrapped();
                           }
                         }}
                         detectTimestamp={detectTimestamp}
@@ -846,12 +896,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <EditorFooter
           lines={lines}
           containerCSS={styles.bottomContainer}
-          errors={editorErrors}
-          warning={editorWarning}
           onErrorClick={onErrorClick}
-          refreshErrors={onTextLangQuerySubmit}
+          refreshErrors={onTextLangQuerySubmitWrapped}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
+          {...editorMessages}
         />
       )}
       {isCodeEditorExpanded && (

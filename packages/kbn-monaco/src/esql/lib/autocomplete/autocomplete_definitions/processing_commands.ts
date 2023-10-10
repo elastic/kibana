@@ -148,7 +148,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     documentation: {
       value: buildDocumentation(
         'dissect <inputExpression> <pattern-string> (append_separator=<string>)?',
-        ['… | dissect a "%{b} %{c}";']
+        ['… | dissect a "%{b} %{c}"']
       ),
     },
     sortText: 'B',
@@ -163,7 +163,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     }),
     documentation: {
       value: buildDocumentation('grok <inputExpression> <pattern-string>', [
-        '… | grok a "%{b} %{c}";',
+        '… | grok a "%{b} %{c}"',
       ]),
     },
     sortText: 'B',

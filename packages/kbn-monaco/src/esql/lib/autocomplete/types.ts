@@ -11,17 +11,17 @@ import { monaco } from '../../../..';
 /** @public **/
 export interface ESQLCustomAutocompleteCallbacks {
   getSources?: CallbackFn;
-  getFields?: CallbackFn<{ name: string; type: string | string[] }>;
-  getPolicies?: CallbackFn<{ name: string; indices: string[] }>;
+  getFields?: CallbackFn<{ sourceOnly?: boolean }, { name: string; type: string }>;
+  getPolicies?: CallbackFn<
+    {},
+    { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
+  >;
   getPolicyFields?: CallbackFn;
   getPolicyMatchingField?: CallbackFn;
 }
 
 /** @internal **/
-type CallbackFn<T = string> = (ctx?: {
-  word: string;
-  variables: UserDefinedVariables;
-}) => T[] | Promise<T[]>;
+type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
 /** @internal **/
 export interface UserDefinedVariables {

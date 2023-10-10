@@ -11,11 +11,52 @@ import { statsAggregationFunctionDefinitions } from './definitions/aggs';
 import { builtinFunctions } from './definitions/builtin';
 import { commandDefinitions } from './definitions/commands';
 import { evalFunctionsDefinitions } from './definitions/functions';
-import { CommandDefinition, FunctionDefinition } from './definitions/types';
-import { ESQLLiteral, ESQLSingleAstItem } from './types';
+import { getFunctionSignatures } from './definitions/helpers';
+import { chronoLiterals, timeLiterals } from './definitions/literals';
+import { CommandDefinition, FunctionDefinition, SignatureArgType } from './definitions/types';
+import {
+  ESQLAstItem,
+  ESQLColumn,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLLiteral,
+  ESQLSingleAstItem,
+  ESQLSource,
+  ESQLTimeInterval,
+} from './types';
+import { ESQLRealField, ESQLVariable, ReferenceMaps } from './validation/types';
 
-type SignatureType = FunctionDefinition['signatures'][number];
-type SignatureArgType = SignatureType['params'][number];
+export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
+  return !Array.isArray(arg) && arg.type === 'function';
+}
+
+export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
+  return !Array.isArray(arg) && arg.type === 'option';
+}
+
+export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
+  return !Array.isArray(arg) && arg.type === 'source';
+}
+
+export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
+  return !Array.isArray(arg) && arg.type === 'column';
+}
+
+export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
+  return !Array.isArray(arg) && arg.type === 'literal';
+}
+
+export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
+  return !Array.isArray(arg) && arg.type === 'timeInterval';
+}
+
+export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
+  return isFunctionItem(arg) && arg.name === '=';
+}
+
+export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
+  return isFunctionItem(arg) && arg.name !== '=';
+}
 
 // from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
@@ -101,40 +142,172 @@ export function getCommandDefinition(name: string): CommandDefinition {
   return buildCommandLookup().get(name.toLowerCase())!;
 }
 
-function compareLiteralType(argTypes: string[], type: ESQLLiteral['literalType']) {
-  if (type !== 'string') {
-    return argTypes.includes(type);
+function compareLiteralType(argTypes: string, item: ESQLLiteral) {
+  if (item.literalType !== 'string') {
+    return argTypes === item.literalType;
   }
-  const hasLiteralTypes = argTypes.some((t) => /literal$/.test(t));
-  return hasLiteralTypes;
+  if (argTypes === 'chrono_literal') {
+    return chronoLiterals.some(({ name }) => name === item.text);
+  }
+  return argTypes === item.literalType;
+}
+
+export function getColumnHit(
+  columnName: string,
+  { fields, variables }: ReferenceMaps,
+  position?: number
+): ESQLRealField | ESQLVariable | undefined {
+  return fields.get(columnName) || variables.get(columnName)?.[0];
+}
+
+const ARRAY_REGEXP = /\[\]$/;
+
+export function isArrayType(type: string) {
+  return ARRAY_REGEXP.test(type);
+}
+
+export function extractSingleType(type: string) {
+  return type.replace(ARRAY_REGEXP, '');
+}
+
+export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
+  const arrMap = new Map<string, T>();
+  for (const item of arr) {
+    arrMap.set(item.name, item);
+  }
+  return arrMap;
+}
+
+export function areFieldAndVariableTypesCompatible(
+  fieldType: string | string[] | undefined,
+  variableType: string | string[]
+) {
+  if (fieldType == null) {
+    return false;
+  }
+  return fieldType === variableType;
+}
+
+export function printFunctionSignature(arg: ESQLFunction): string {
+  const fnDef = getFunctionDefinition(arg.name);
+  if (fnDef) {
+    const signature = getFunctionSignatures(
+      {
+        ...fnDef,
+        signatures: [
+          {
+            ...fnDef?.signatures[0],
+            params: arg.args.map((innerArg) =>
+              Array.isArray(innerArg)
+                ? { name: `InnerArgument[]`, type: '' }
+                : { name: innerArg.text, type: innerArg.type }
+            ),
+            returnType: '',
+          },
+        ],
+      },
+      { withTypes: false }
+    );
+    return signature[0].declaration;
+  }
+  return '';
+}
+
+export function getAllArrayValues(arg: ESQLAstItem) {
+  const values: string[] = [];
+  if (Array.isArray(arg)) {
+    for (const subArg of arg) {
+      if (Array.isArray(subArg)) {
+        break;
+      }
+      if (subArg.type === 'literal') {
+        values.push(String(subArg.value));
+      }
+      if (subArg.type === 'column') {
+        values.push(subArg.name);
+      }
+      if (subArg.type === 'timeInterval') {
+        values.push(subArg.name);
+      }
+      if (subArg.type === 'function') {
+        const signature = printFunctionSignature(subArg);
+        if (signature) {
+          values.push(signature);
+        }
+      }
+    }
+  }
+  return values;
+}
+
+export function getAllArrayTypes(
+  arg: ESQLAstItem,
+  parentCommand: string,
+  references: ReferenceMaps
+) {
+  const types = [];
+  if (Array.isArray(arg)) {
+    for (const subArg of arg) {
+      if (Array.isArray(subArg)) {
+        break;
+      }
+      if (subArg.type === 'literal') {
+        types.push(subArg.literalType);
+      }
+      if (subArg.type === 'column') {
+        const hit = getColumnHit(subArg.name, references);
+        types.push(hit?.type || 'unsupported');
+      }
+      if (subArg.type === 'timeInterval') {
+        types.push('time_literal');
+      }
+      if (subArg.type === 'function') {
+        if (isSupportedFunction(subArg.name, parentCommand).supported) {
+          const fnDef = buildFunctionLookup().get(subArg.name)!;
+          types.push(fnDef.signatures[0].returnType);
+        }
+      }
+    }
+  }
+  return types;
 }
 
 export function isEqualType(
   item: ESQLSingleAstItem,
-  argType: SignatureArgType['type'],
+  argDef: SignatureArgType,
+  references: ReferenceMaps,
   parentCommand?: string
 ) {
-  const argTypes = Array.isArray(argType) ? argType : [argType];
-  if (argTypes[0] === 'any') {
+  const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
+  if (argType === 'any') {
     return true;
   }
   if (item.type === 'literal') {
-    return compareLiteralType(argTypes, item.literalType);
+    return compareLiteralType(argType, item);
   }
   if (item.type === 'list') {
     const listType = `${item.values[0].literalType}[]`;
-    return argTypes.includes(listType);
+    return argType === listType;
   }
   if (item.type === 'function') {
     if (isSupportedFunction(item.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(item.name)!;
-      return fnDef.signatures.some((signature) => argTypes.includes(signature.returnType));
+      return fnDef.signatures.some((signature) => argType === signature.returnType);
     }
   }
   if (item.type === 'timeInterval') {
-    return argTypes.includes('time_literal');
+    return argType === 'time_literal' && timeLiterals.some(({ name }) => name === item.unit);
   }
   if (item.type === 'column') {
-    return true; // will evaluate later on
+    if (argType === 'column') {
+      // anything goes, so avoid any effort here
+      return true;
+    }
+    const hit = getColumnHit(item.name, references);
+    if (!hit) {
+      return false;
+    }
+    const wrappedTypes = Array.isArray(hit.type) ? hit.type : [hit.type];
+    return wrappedTypes.some((ct) => argType === ct);
   }
 }

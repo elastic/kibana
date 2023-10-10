@@ -24,66 +24,52 @@ export interface ESQLLocation {
   max: number;
 }
 
-export interface ESQLCommand {
+interface ESQLAstBaseItem {
+  name: string;
+  text: string;
+  location: ESQLLocation;
+  incomplete: boolean;
+}
+
+export interface ESQLCommand extends ESQLAstBaseItem {
   type: 'command';
-  name: string;
-  text: string;
-  location: ESQLLocation;
   args: ESQLAstItem[];
 }
 
-export interface ESQLCommandOption {
+export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
-  name: string;
-  text: string;
-  location: ESQLLocation;
   args: ESQLAstItem[];
 }
 
-export interface ESQLFunction {
+export interface ESQLFunction extends ESQLAstBaseItem {
   type: 'function';
-  name: string;
-  text: string;
-  location: ESQLLocation;
   args: ESQLAstItem[];
 }
 
-export interface ESQLTimeInterval {
+export interface ESQLTimeInterval extends ESQLAstBaseItem {
   type: 'timeInterval';
   unit: string;
   quantity: number;
-  text: string;
-  location: ESQLLocation;
 }
 
-export interface ESQLSource {
+export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
-  name: string;
-  text: string;
-  location: ESQLLocation;
 }
 
-export interface ESQLColumn {
+export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
-  name: string;
-  text: string;
-  location: ESQLLocation;
+  quoted: boolean;
 }
 
-export interface ESQLList {
+export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
   values: ESQLLiteral[];
-  text: string;
-  location: ESQLLocation;
 }
 
-export interface ESQLLiteral {
+export interface ESQLLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'string' | 'number' | 'boolean' | 'null';
-  name?: string;
   value: string | number;
-  text: string;
-  location: ESQLLocation;
 }
 
 export interface ESQLMessage {

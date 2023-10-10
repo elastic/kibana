@@ -11,20 +11,31 @@ import { FunctionDefinition } from './types';
 
 function createMathDefinition(
   name: string,
-  types: Array<'number' | 'date'>,
+  types: Array<string | string[]>,
   warning?: FunctionDefinition['warning']
 ) {
   return {
     name,
     description: '',
-    supportedCommands: ['eval', 'stats'],
-    signatures: types.map((type) => ({
-      params: [
-        { name: 'left', type },
-        { name: 'right', type },
-      ],
-      returnType: type,
-    })),
+    supportedCommands: ['eval', 'stats', 'where'],
+    signatures: types.map((type) => {
+      if (Array.isArray(type)) {
+        return {
+          params: [
+            { name: 'left', type: type[0] },
+            { name: 'right', type: type[1] },
+          ],
+          returnType: /literal/.test(type[0]) ? type[1] : type[0],
+        };
+      }
+      return {
+        params: [
+          { name: 'left', type },
+          { name: 'right', type },
+        ],
+        returnType: type,
+      };
+    }),
     warning,
   };
 }
@@ -33,7 +44,7 @@ function createComparisonDefinition(name: string, warning?: FunctionDefinition['
   return {
     name,
     description: '',
-    supportedCommands: ['eval', 'stats'],
+    supportedCommands: ['eval', 'stats', 'where'],
     signatures: [
       {
         params: [
@@ -42,13 +53,20 @@ function createComparisonDefinition(name: string, warning?: FunctionDefinition['
         ],
         returnType: 'boolean',
       },
+      {
+        params: [
+          { name: 'left', type: 'string' },
+          { name: 'right', type: 'string' },
+        ],
+        returnType: 'boolean',
+      },
     ],
   };
 }
 
 export const builtinFunctions: FunctionDefinition[] = [
-  createMathDefinition('+', ['number', 'date']),
-  createMathDefinition('-', ['number', 'date']),
+  createMathDefinition('+', ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']]),
+  createMathDefinition('-', ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']]),
   createMathDefinition('*', ['number']),
   createMathDefinition('/', ['number'], (left, right) => {
     if (right.type === 'literal' && right.literalType === 'number') {
@@ -80,7 +98,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['like', 'not_like', 'rlike', 'not_rlike'].map((name) => ({
     name,
     description: '',
-    supportedCommands: ['eval', 'stats'],
+    supportedCommands: ['eval', 'stats', 'where'],
     signatures: [
       {
         params: [
@@ -94,12 +112,33 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['in', 'not_in'].map((name) => ({
     name,
     description: '',
-    supportedCommands: ['eval', 'stats'],
+    supportedCommands: ['eval', 'stats', 'where'],
     signatures: [
       {
         params: [
           { name: 'left', type: 'number' },
-          { name: 'right', type: 'any[]' },
+          { name: 'right', type: 'number[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'string' },
+          { name: 'right', type: 'string[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'boolean' },
+          { name: 'right', type: 'boolean[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' },
+          { name: 'right', type: 'date[]' },
         ],
         returnType: 'boolean',
       },
@@ -108,7 +147,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['and', 'or'].map((name) => ({
     name,
     description: '',
-    supportedCommands: ['eval', 'stats'],
+    supportedCommands: ['eval', 'stats', 'where'],
     signatures: [
       {
         params: [
@@ -122,7 +161,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     name: 'not',
     description: '',
-    supportedCommands: ['eval', 'stats'],
+    supportedCommands: ['eval', 'stats', 'where'],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -135,7 +174,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     description: i18n.translate('monaco.esql.autocomplete.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: ['eval', 'stats', 'row', 'dissect'],
+    supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where'],
     signatures: [
       {
         params: [

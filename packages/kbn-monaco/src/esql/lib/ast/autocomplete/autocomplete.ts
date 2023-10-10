@@ -300,7 +300,7 @@ export async function suggest(
     );
   }
 
-  console.log({ ast, triggerContext });
+  // console.log({ ast, triggerContext });
   throw Error(`Where am I?`);
 }
 

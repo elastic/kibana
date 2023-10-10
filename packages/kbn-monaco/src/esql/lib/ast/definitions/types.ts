@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLSingleAstItem } from '../types';
+import { ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
 
 export interface FunctionDefinition {
   name: string;
@@ -15,11 +15,12 @@ export interface FunctionDefinition {
   signatures: Array<{
     params: Array<{
       name: string;
-      type: string | string[];
+      type: string;
       optional?: boolean;
       noNestingFunctions?: boolean;
     }>;
     infiniteParams?: boolean;
+    minParams?: number;
     returnType: string;
     examples?: string[];
   }>;
@@ -32,13 +33,16 @@ export interface CommandBaseDefinition {
   description: string;
   signature: {
     multipleParams: boolean;
-    params: Array<{ name: string; type: string; optional?: boolean }>;
+    // innerType here is useful to drill down the type in case of "column"
+    // i.e. column of type string
+    params: Array<{ name: string; type: string; optional?: boolean; innerType?: string }>;
   };
 }
 
 export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
+  validate?: (option: ESQLCommandOption) => ESQLMessage[];
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {
@@ -50,3 +54,8 @@ export interface Literals {
   name: string;
   description: string;
 }
+
+export type SignatureType =
+  | FunctionDefinition['signatures'][number]
+  | CommandOptionsDefinition['signature'];
+export type SignatureArgType = SignatureType['params'][number];

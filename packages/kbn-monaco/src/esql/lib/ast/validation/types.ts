@@ -6,7 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { ESQLMessage } from '../types';
+import { ESQLMessage, ESQLLocation } from '../types';
+
+export interface ESQLVariable {
+  name: string;
+  type: string;
+  location: ESQLLocation;
+}
+
+export interface ESQLRealField {
+  name: string;
+  type: string;
+}
+
+export interface ESQLPolicy {
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
+}
+
+export interface ReferenceMaps {
+  sources: Set<string>;
+  variables: Map<string, ESQLVariable[]>;
+  fields: Map<string, ESQLRealField>;
+  policies: Map<string, ESQLPolicy>;
+}
 
 export interface ValidationErrors {
   wrongArgumentType: {
@@ -24,9 +49,13 @@ export interface ValidationErrors {
   };
   unknownColumn: {
     message: string;
-    type: { value: string | number };
+    type: { name: string | number };
   };
   unknownFunction: {
+    message: string;
+    type: { name: string };
+  };
+  unknownIndex: {
     message: string;
     type: { name: string };
   };
@@ -37,6 +66,22 @@ export interface ValidationErrors {
   unsupportedFunction: {
     message: string;
     type: { name: string; command: string };
+  };
+  shadowFieldType: {
+    message: string;
+    type: { field: string; fieldType: string; newType: string };
+  };
+  unsupportedColumnTypeForCommand: {
+    message: string;
+    type: { command: string; type: string; typeCount: number; givenType: string; column: string };
+  };
+  unknownOption: {
+    message: string;
+    type: { command: string; option: string };
+  };
+  wrongOptionArgumentType: {
+    message: string;
+    type: { command: string; option: string; type: string; givenValue: string };
   };
 }
 

@@ -7,34 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CommandDefinition, CommandOptionsDefinition } from './types';
-
-const byOption: CommandOptionsDefinition = {
-  name: 'by',
-  description: i18n.translate('monaco.esql.autocomplete.byDoc', {
-    defaultMessage: 'By',
-  }),
-  signature: {
-    multipleParams: true,
-    params: [{ name: 'column', type: 'column' }],
-  },
-  optional: true,
-};
-
-const metadataOption: CommandOptionsDefinition = {
-  name: 'metadata',
-  description: i18n.translate('monaco.esql.autocomplete.metadataDoc', {
-    defaultMessage: 'Metadata',
-  }),
-  signature: {
-    multipleParams: true,
-    params: [{ name: 'column', type: 'column' }],
-  },
-  optional: true,
-  wrapped: ['[', ']'],
-};
-
-export const options: CommandOptionsDefinition[] = [byOption, metadataOption];
+import { appendSeparatorOption, asOption, byOption, metadataOption } from './options';
+import type { CommandDefinition } from './types';
 
 export const commandDefinitions: CommandDefinition[] = [
   {
@@ -46,6 +20,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['row a=1', 'row a=1, b=2'],
     signature: {
       multipleParams: true,
+      // syntax check already validates part of this
       params: [{ name: 'assignment', type: 'any' }],
     },
     options: [],
@@ -97,7 +72,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: [
       '… | eval b * c',
       '… | eval a = b * c',
-      '… | eval then = 1 year + 2 weeks',
+      '… | eval then = now() + 1 year + 2 weeks',
       '… | eval a = b * c, d = e * f',
     ],
     signature: {
@@ -107,13 +82,28 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [],
   },
   {
+    name: 'rename',
+    description: i18n.translate('monaco.esql.autocomplete.renameDoc', {
+      defaultMessage: 'Renames an old column to a new one',
+    }),
+    examples: ['… | rename old as new', '… | rename old as new, a as b'],
+    signature: {
+      multipleParams: false,
+      params: [{ name: 'renameClause', type: 'any' }],
+    },
+    options: [asOption],
+  },
+  {
     name: 'limit',
     description: i18n.translate('monaco.esql.autocomplete.limitDoc', {
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),
     examples: ['… | limit 100', '… | limit 0'],
-    signature: { multipleParams: false, params: [{ name: 'size', type: 'number' }] },
+    signature: {
+      multipleParams: false,
+      params: [{ name: 'size', type: 'number' }],
+    },
     options: [],
   },
   {
@@ -147,7 +137,7 @@ export const commandDefinitions: CommandDefinition[] = [
         'Sorts all results by the specified fields. When in descending order, the results missing a field are considered the smallest possible value of the field, or the largest possible value of the field when in ascending order.',
     }),
     examples: [
-      '… | sort a  desc, b nulls last, c asc nulls first',
+      '… | sort a desc, b nulls last, c asc nulls first',
       '… | sort b nulls last`',
       '… | sort c asc nulls first`',
     ],
@@ -181,11 +171,11 @@ export const commandDefinitions: CommandDefinition[] = [
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
     examples: ['… | dissect a "%{b} %{c}";'],
-    options: [],
+    options: [appendSeparatorOption],
     signature: {
       multipleParams: false,
       params: [
-        { name: 'column', type: 'column' },
+        { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string' },
       ],
     },
@@ -201,7 +191,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        { name: 'column', type: 'column' },
+        { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string' },
       ],
     },
@@ -215,7 +205,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column' }],
+      params: [{ name: 'column', type: 'column', innerType: 'list' }],
     },
   },
   {

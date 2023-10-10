@@ -32,26 +32,35 @@ export function getCommandOrOptionsSignature({
   return signatureString;
 }
 
-export function getFunctionSignatures({ name, signatures }: FunctionDefinition) {
+export function getFunctionSignatures(
+  { name, signatures }: FunctionDefinition,
+  { withTypes }: { withTypes: boolean } = { withTypes: true }
+) {
   return signatures.map(({ params, returnType, infiniteParams, examples }) => ({
-    declaration: `${name}(${params.map(printArguments).join(', ')}${
-      infiniteParams ? ` ,[... ${params.map(printArguments)}]` : ''
-    }): ${returnType}`,
+    declaration: `${name}(${params.map((arg) => printArguments(arg, withTypes)).join(', ')}${
+      infiniteParams ? ` ,[... ${params.map((arg) => printArguments(arg, withTypes))}]` : ''
+    })${withTypes ? `: ${returnType}` : ''}`,
     examples,
   }));
 }
 
-export function printArguments({
-  name,
-  type,
-  optional,
-  reference,
-}: {
-  name: string;
-  type: string | string[];
-  optional?: boolean;
-  reference?: string;
-}): string {
+export function printArguments(
+  {
+    name,
+    type,
+    optional,
+    reference,
+  }: {
+    name: string;
+    type: string | string[];
+    optional?: boolean;
+    reference?: string;
+  },
+  withTypes: boolean
+): string {
+  if (!withTypes) {
+    return name;
+  }
   return `${name}${optional ? ':?' : ':'} ${Array.isArray(type) ? type.join(' | ') : type}`;
 }
 

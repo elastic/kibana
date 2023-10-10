@@ -26,6 +26,7 @@ import {
   type ShowCommandContext,
   type EnrichCommandContext,
   esql_parser,
+  WhereCommandContext,
 } from '../../antlr/esql_parser';
 import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_parser_listener';
 import {
@@ -37,6 +38,12 @@ import {
   collectAllSourceIdentifiers,
   collectAllFieldsStatements,
   visitByOption,
+  collectAllColumnIdentifiers,
+  visitRenameClauses,
+  visitDissect,
+  visitGrok,
+  collectBooleanExpression,
+  visitOrderExpression,
 } from './ast_walker';
 import { ESQLAst } from './types';
 
@@ -627,11 +634,14 @@ export class AstListener implements ESQLParserListener {
    * Exit a parse tree produced by `esql_parser.whereCommand`.
    * @param ctx the parse tree
    */
-  // exitWhereCommand(ctx: WhereCommandContext) {
-  //   if (ctx.exception) {
-  //     this.errors.push(createError(ctx.exception));
-  //   }
-  // }
+  exitWhereCommand(ctx: WhereCommandContext) {
+    // if (ctx.exception) {
+    //   this.errors.push(createError(ctx.exception));
+    // }
+    const command = createCommand('where', ctx);
+    this.ast.push(command);
+    command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
+  }
 
   /**
    * Enter a parse tree produced by `esql_parser.booleanExpression`.
@@ -771,14 +781,11 @@ export class AstListener implements ESQLParserListener {
     // }
     const commandAst = createCommand('from', ctx);
     this.ast.push(commandAst);
-    if (commandAst) {
-      commandAst.text = ctx.text;
-      commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-      const metadataContext = ctx.metadata();
-      if (metadataContext) {
-        const option = createOption(metadataContext.text.toLowerCase(), metadataContext);
-        commandAst.args.push(option);
-      }
+    commandAst.args.push(...collectAllSourceIdentifiers(ctx));
+    const metadataContext = ctx.metadata();
+    if (metadataContext) {
+      const option = createOption(metadataContext.METADATA().text.toLowerCase(), metadataContext);
+      commandAst.args.push(option);
     }
   }
 
@@ -941,11 +948,9 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitSortCommand(ctx: SortCommandContext) {
-    // if (ctx.exception) {
-    //   this.errors.push(createError(ctx.exception));
-    // }
     const command = createCommand('sort', ctx);
     this.ast.push(command);
+    command.args.push(...visitOrderExpression(ctx.orderExpression()));
   }
 
   /**
@@ -978,6 +983,7 @@ export class AstListener implements ESQLParserListener {
     // }
     const command = createCommand('keep', ctx);
     this.ast.push(command);
+    command.args.push(...collectAllColumnIdentifiers(ctx));
   }
 
   /**
@@ -995,6 +1001,7 @@ export class AstListener implements ESQLParserListener {
     // }
     const command = createCommand('drop', ctx);
     this.ast.push(command);
+    command.args.push(...collectAllColumnIdentifiers(ctx));
   }
 
   /**
@@ -1012,6 +1019,7 @@ export class AstListener implements ESQLParserListener {
     // }
     const command = createCommand('rename', ctx);
     this.ast.push(command);
+    command.args.push(...visitRenameClauses(ctx.renameClause()));
   }
 
   /**
@@ -1046,6 +1054,7 @@ export class AstListener implements ESQLParserListener {
     // }
     const command = createCommand('dissect', ctx);
     this.ast.push(command);
+    command.args.push(...visitDissect(ctx));
   }
 
   /**
@@ -1063,6 +1072,7 @@ export class AstListener implements ESQLParserListener {
     // }
     const command = createCommand('grok', ctx);
     this.ast.push(command);
+    command.args.push(...visitGrok(ctx));
   }
 
   /**
@@ -1075,11 +1085,9 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitMvExpandCommand(ctx: MvExpandCommandContext) {
-    // if (ctx.exception) {
-    //   this.errors.push(createError(ctx.exception));
-    // }
-    const command = createCommand('mvExpand', ctx);
+    const command = createCommand('mv_expand', ctx);
     this.ast.push(command);
+    command.args.push(...collectAllColumnIdentifiers(ctx));
   }
 
   /**

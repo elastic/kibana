@@ -80,9 +80,9 @@ export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) 
   return {
     // used for debugging purposes only
     getAst,
-    validate: (model: monaco.editor.ITextModel) => {
+    validate: async (model: monaco.editor.ITextModel) => {
       const { ast } = getAst(model.getValue());
-      const { errors, warnings } = validateAst(ast);
+      const { errors, warnings } = await validateAst(ast, callbacks);
       const code = model?.getValue();
       const monacoErrors = wrapAsMonacoMessage('error', code, errors);
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);

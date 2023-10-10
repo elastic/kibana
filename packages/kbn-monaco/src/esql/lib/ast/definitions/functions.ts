@@ -274,7 +274,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
-        returnType: 'string[]',
+        returnType: 'ip',
         examples: [`from index where field="value"" | EVAL ip = to_ip(field)`],
       },
     ],
@@ -286,9 +286,14 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'field', type: ['string', 'version'] }],
+        params: [{ name: 'field', type: 'string' }],
         returnType: 'version',
-        examples: [`from index where field="value"" | EVAL version = to_version(field)`],
+        examples: [`from index | EVAL version = to_version(stringField)`],
+      },
+      {
+        params: [{ name: 'field', type: 'version' }],
+        returnType: 'version',
+        examples: [`from index | EVAL version = to_version(versionField)`],
       },
     ],
   },
@@ -434,10 +439,10 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'condition', type: 'booleanExpression' },
+          { name: 'condition', type: 'boolean' },
           { name: 'value', type: 'any' },
         ],
-        infiniteParams: true,
+        minParams: 3,
         returnType: 'any',
         examples: [
           `from index where field="value" | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
@@ -719,6 +724,141 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  {
+    name: 'cidr_match',
+    description: i18n.translate('monaco.esql.autocomplete.cidrMatchDoc', {
+      defaultMessage:
+        'The function takes a first parameter of type IP, followed by one or more parameters evaluated to a CIDR specificatione.',
+    }),
+    signatures: [
+      {
+        minParams: 2,
+        params: [
+          { name: 'ip', type: 'ip' },
+          { name: 'cidr_block', type: 'string' },
+        ],
+        returnType: 'boolean',
+        examples: [
+          'from index | where cidr_match(ip_field, "127.0.0.1/30")',
+          'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
+        ],
+      },
+    ],
+  },
+  {
+    name: 'mv_avg',
+    description: i18n.translate('monaco.esql.autocomplete.mvAvgDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the average of all of the values.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | mv_avg(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_concat',
+    description: i18n.translate('monaco.esql.autocomplete.mvConcatDoc', {
+      defaultMessage:
+        'Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'multivalue', type: 'string[]' },
+          { name: 'delimeter', type: 'string' },
+        ],
+        returnType: 'string',
+        examples: ['row a = ["1", "2", "3"] | mv_concat(a, ", ")'],
+      },
+    ],
+  },
+  {
+    name: 'mv_count',
+    description: i18n.translate('monaco.esql.autocomplete.mvCountDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing a count of the number of values',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_count(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_dedupe',
+    description: i18n.translate('monaco.esql.autocomplete.mvDedupeDoc', {
+      defaultMessage: 'Removes duplicates from a multivalued field',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any[]' }],
+        returnType: 'any[]',
+        examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_max',
+    description: i18n.translate('monaco.esql.autocomplete.mvMaxDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the maximum value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_min',
+    description: i18n.translate('monaco.esql.autocomplete.mvMinDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the minimum value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_median',
+    description: i18n.translate('monaco.esql.autocomplete.mvMedianDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the median value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_median(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_sum',
+    description: i18n.translate('monaco.esql.autocomplete.mvSumDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the minimum value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_sum(a)'],
+      },
+    ],
+  },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-  .map((def) => ({ ...def, supportedCommands: ['eval'] }));
+  .map((def) => ({ ...def, supportedCommands: ['eval', 'where'] }));

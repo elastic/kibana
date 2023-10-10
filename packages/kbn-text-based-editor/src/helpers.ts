@@ -12,7 +12,7 @@ import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-export interface MonacoError {
+export interface MonacoMessage {
   message: string;
   startColumn: number;
   startLineNumber: number;
@@ -44,7 +44,7 @@ export const useDebounceWithOptions = (
   );
 };
 
-export const parseWarning = (warning: string): MonacoError[] => {
+export const parseWarning = (warning: string): MonacoMessage[] => {
   if (warning.includes('Line')) {
     const splitByLine = warning.split('Line');
     splitByLine.shift();
@@ -63,7 +63,7 @@ export const parseWarning = (warning: string): MonacoError[] => {
         startLineNumber: Number(lineNumber),
         endColumn: Number(startPosition) + errorLength,
         endLineNumber: Number(lineNumber),
-        severity: monaco.MarkerSeverity.Error,
+        severity: monaco.MarkerSeverity.Warning,
       };
     });
   } else {
@@ -75,13 +75,13 @@ export const parseWarning = (warning: string): MonacoError[] => {
         startLineNumber: 1,
         endColumn: 10,
         endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Error,
+        severity: monaco.MarkerSeverity.Warning,
       },
     ];
   }
 };
 
-export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
+export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   return errors.map((error) => {
     if (
       // Found while testing random commands (as inlinestats)
