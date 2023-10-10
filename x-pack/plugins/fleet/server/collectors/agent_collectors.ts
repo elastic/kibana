@@ -58,13 +58,13 @@ export const getAgentUsage = async (
   };
 };
 
+export interface AgentPerVersion {
+  version: string;
+  count: number;
+}
+
 export interface AgentData {
-  agents_per_version: Array<
-    {
-      version: string;
-      count: number;
-    } & AgentStatus
-  >;
+  agents_per_version: Array<AgentPerVersion & AgentStatus>;
   agent_checkin_status: {
     error: number;
     degraded: number;
@@ -203,5 +203,47 @@ export const getAgentData = async (
       throw error;
     }
     return DEFAULT_AGENT_DATA;
+  }
+};
+
+export const getAgentsPerVersion = async (
+  esClient: ElasticsearchClient,
+  abortController: AbortController
+): Promise<AgentPerVersion[]> => {
+  try {
+    const response = await esClient.search(
+      {
+        index: AGENTS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  active: 'true',
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        aggs: {
+          versions: {
+            terms: { field: 'agent.version' },
+          },
+        },
+      },
+      { signal: abortController.signal }
+    );
+    return ((response?.aggregations?.versions as any).buckets ?? []).map((bucket: any) => ({
+      version: bucket.key,
+      count: bucket.doc_count,
+    }));
+  } catch (error) {
+    if (error.statusCode === 404) {
+      appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
+    } else {
+      throw error;
+    }
+    return [];
   }
 };
