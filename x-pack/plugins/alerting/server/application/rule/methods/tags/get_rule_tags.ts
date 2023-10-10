@@ -9,7 +9,7 @@ import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
 import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
-import { defaultTagsPerPage } from '../../../../../common/routes/rule/apis/tags/constants/latest';
+import { DEFAULT_TAGS_PER_PAGE } from '../../../../../common/routes/rule/apis/tags/constants/latest';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
@@ -29,7 +29,7 @@ export async function getRuleTags(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
-  const { page, perPage = defaultTagsPerPage, search = '' } = validatedParams;
+  const { page, perPage = DEFAULT_TAGS_PER_PAGE, search = '' } = validatedParams;
 
   let authorizationTuple;
   try {

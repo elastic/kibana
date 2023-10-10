@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const defaultTagsPerPageV1 = 50 as const;
+export const DEFAULT_TAGS_PER_PAGEV1 = 50 as const;
