@@ -17,7 +17,6 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
