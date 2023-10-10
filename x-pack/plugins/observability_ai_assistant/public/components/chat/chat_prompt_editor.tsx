@@ -102,7 +102,7 @@ export function ChatPromptEditor({
   }, [functionEditorLineCount, model]);
 
   const handleSubmit = useCallback(async () => {
-    if (loading || !prompt?.trim()) {
+    if (loading || (!prompt?.trim() && !selectedFunctionName)) {
       return;
     }
     const currentPrompt = prompt;
