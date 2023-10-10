@@ -129,7 +129,7 @@ export type UpdateArgsToSoUpdateOptions<Types extends CMCrudTypes> = (
   params: Types['UpdateOptions']
 ) => SavedObjectsUpdateOptions<Types['Attributes']>;
 
-export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
+export interface SOContentStorageConstructorParams<Types extends CMCrudTypes> {
   savedObjectType: string;
   cmServicesDefinition: ServicesDefinitionSet;
   // this is necessary since unexpected saved object attributes could cause schema validation to fail
@@ -163,7 +163,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     mSearchAdditionalSearchFields,
     logger,
     throwOnResultValidationError,
-  }: SOContentStorageConstrutorParams<Types>) {
+  }: SOContentStorageConstructorParams<Types>) {
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
     this.savedObjectType = savedObjectType;
@@ -219,8 +219,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
   private throwOnResultValidationError: boolean;
   private logger: Logger;
-  private savedObjectType: SOContentStorageConstrutorParams<Types>['savedObjectType'];
-  private cmServicesDefinition: SOContentStorageConstrutorParams<Types>['cmServicesDefinition'];
+  private savedObjectType: SOContentStorageConstructorParams<Types>['savedObjectType'];
+  private cmServicesDefinition: SOContentStorageConstructorParams<Types>['cmServicesDefinition'];
   private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
   private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
   private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
