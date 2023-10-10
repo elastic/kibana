@@ -84,7 +84,7 @@ export const SearchIndex: React.FC = () => {
       ?.isGuideStepActive$('appSearch', 'add_data')
       .subscribe((isStepActive) => {
         if (isStepActive) {
-          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
         }
       });
     return () => subscription?.unsubscribe();
@@ -95,7 +95,7 @@ export const SearchIndex: React.FC = () => {
       ?.isGuideStepActive$('websiteSearch', 'add_data')
       .subscribe((isStepActive) => {
         if (isStepActive) {
-          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
         }
       });
     return () => subscription?.unsubscribe();

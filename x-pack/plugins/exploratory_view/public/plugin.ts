@@ -60,7 +60,7 @@ export interface ExploratoryViewPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
 
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;

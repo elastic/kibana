@@ -51,7 +51,7 @@ To use the API service in your plugin, declare the guided onboarding plugin as a
 
 ```js
 export interface AppPluginStartDependencies {
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 ```
 
@@ -132,7 +132,7 @@ The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, 
 
 Follow these simple steps to add a new guide to the guided onboarding framework. For more detailed information about framework functionality and architecture and about API services exposed by the plugin, please read the full readme.
 
-1.  Declare the `guidedOnboarding` plugin as a dependency in your plugin's `kibana.json` file. Add the guided onboarding plugin's client-side start contract to your plugin's client-side start dependencies and the guided onboarding plugin's server-side setup contract to your plugin's server-side dependencies.
+1.  Declare the `guidedOnboarding` plugin as an optional dependency in your plugin's `kibana.json` file. Add the guided onboarding plugin's client-side start contract to your plugin's client-side start dependencies and the guided onboarding plugin's server-side setup contract to your plugin's server-side dependencies.
 2.  Define the configuration for your guide. At a high level, this includes a title, description, and list of steps. See this [example config](https://github.com/elastic/kibana/blob/main/packages/kbn-guided-onboarding/src/common/test_guide_config.ts) or consult the `GuideConfig` interface.
 3.  Register your guide during your plugin's server-side setup by calling a function exposed by the guided onboarding plugin: `registerGuideConfig(guideId: GuideId, guideConfig: GuideConfig)`. For an example, see this [example plugin](https://github.com/elastic/kibana/blob/main/examples/guided_onboarding_example/server/plugin.ts).
 4.  Update the cards on the landing page to include your guide in the use case selection. Make sure that the card doesn't have the property `navigateTo` because that is only used for cards that redirect to Kibana pages and don't start a guide. Also add the same value to the property `guideId` as used in the guide config. Landing page cards are configured in this [kbn-guided-onboarding package](https://github.com/elastic/kibana/blob/main/packages/kbn-guided-onboarding/src/components/landing_page/guide_cards.constants.tsx).

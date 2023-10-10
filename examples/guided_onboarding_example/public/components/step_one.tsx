@@ -26,23 +26,21 @@ import {
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 interface GuidedOnboardingExampleAppDeps {
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
 export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) => {
-  const { guidedOnboardingApi } = guidedOnboarding;
-
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
   const [indexName, setIndexName] = useState('test1234');
 
   useEffect(() => {
-    const subscription = guidedOnboardingApi
+    const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('testGuide', 'step1')
       .subscribe((isStepActive) => {
         setIsTourStepOpen(isStepActive);
       });
     return () => subscription?.unsubscribe();
-  }, [guidedOnboardingApi]);
+  }, [guidedOnboarding]);
 
   return (
     <>
@@ -107,9 +105,13 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
               >
                 <EuiButton
                   onClick={async () => {
-                    await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1', {
-                      indexName,
-                    });
+                    await guidedOnboarding?.guidedOnboardingApi?.completeGuideStep(
+                      'testGuide',
+                      'step1',
+                      {
+                        indexName,
+                      }
+                    );
                   }}
                 >
                   Complete step 1

@@ -26,7 +26,7 @@ export interface ObservabilitySharedSetup {
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   cases: CasesUiStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;

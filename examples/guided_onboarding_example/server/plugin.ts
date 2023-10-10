@@ -11,7 +11,7 @@ import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/s
 import { testGuideId, testGuideConfig } from '@kbn/guided-onboarding';
 
 interface PluginsSetup {
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
 }
 
 export class GuidedOnboardingExamplePlugin implements Plugin {

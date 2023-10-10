@@ -25,13 +25,10 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
     tourPopoverWidth: 300,
   };
 
-  const {
-    storage,
-    guidedOnboarding: { guidedOnboardingApi },
-  } = useKibana().services;
+  const { storage, guidedOnboarding } = useKibana().services;
 
   const isGuidedOnboardingActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
+    guidedOnboarding?.guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
     true
   );
 
