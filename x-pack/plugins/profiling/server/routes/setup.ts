@@ -84,25 +84,14 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
-        const clientWithProfilingAuth = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: false,
-        });
-
-        const commonParams = {
-          client: clientWithDefaultAuth,
-          logger,
-          packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
-          soClient: core.savedObjects.client,
-          spaceId:
-            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-          isCloudEnabled,
-        };
 
         const setupState = await dependencies.start.profilingDataAccess.services.getCloudSetupState(
-          commonParams,
-          clientWithProfilingAuth
+          {
+            esClient,
+            soClient: core.savedObjects.client,
+            spaceId:
+              dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+          }
         );
 
         const executeAdminFunctions = [
@@ -124,7 +113,13 @@ export function registerSetupRoute({
         }
 
         const setupParams = {
-          ...commonParams,
+          client: clientWithDefaultAuth,
+          logger,
+          packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
+          soClient: core.savedObjects.client,
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+          isCloudEnabled,
           config: dependencies.config,
         };
         await Promise.all(executeAdminFunctions.map((fn) => fn(setupParams)));

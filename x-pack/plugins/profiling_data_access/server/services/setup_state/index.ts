@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   validateMaximumBuckets,
   validateResourceManagement,
@@ -15,7 +16,6 @@ import {
   validateSymbolizerPackagePolicy,
 } from '../../../common/fleet_policies';
 import { hasProfilingData } from '../../../common/has_profiling_data';
-import { ProfilingESClient } from '../../../common/profiling_es_client';
 import { validateSecurityRole } from '../../../common/security_role';
 import {
   ProfilingCloudSetupOptions,
@@ -24,12 +24,44 @@ import {
 import { RegisterServicesParams } from '../register_services';
 import { mergePartialSetupStates } from '../../../common/setup';
 
-export async function getCloudSetupState(
-  options: ProfilingCloudSetupOptions,
-  clientWithProfilingAuth: ProfilingESClient
-) {
+export interface CloudSetupStateParams {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  spaceId?: string;
+}
+
+export async function getCloudSetupState({
+  createProfilingEsClient,
+  deps,
+  esClient,
+  logger,
+  soClient,
+  spaceId,
+}: RegisterServicesParams & CloudSetupStateParams) {
+  const isCloudEnabled = deps.cloud?.isCloudEnabled;
+  if (!isCloudEnabled || !deps.fleet) {
+    throw new Error('BOOMMMMMMMMMM');
+  }
+  const clientWithDefaultAuth = createProfilingEsClient({
+    esClient,
+    useDefaultAuth: true,
+  });
+  const clientWithProfilingAuth = createProfilingEsClient({
+    esClient,
+    useDefaultAuth: false,
+  });
+
+  const setupOptions: ProfilingCloudSetupOptions = {
+    client: clientWithDefaultAuth,
+    logger,
+    soClient,
+    spaceId: spaceId ?? DEFAULT_SPACE_ID,
+    packagePolicyClient: deps.fleet.packagePolicyService,
+    isCloudEnabled,
+  };
+
   const state = createDefaultCloudSetupState();
-  state.cloud.available = options.isCloudEnabled;
+  state.cloud.available = isCloudEnabled;
 
   const verifyFunctions = [
     validateMaximumBuckets,
@@ -41,9 +73,9 @@ export async function getCloudSetupState(
   ];
 
   const partialStates = await Promise.all([
-    ...verifyFunctions.map((fn) => fn(options)),
+    ...verifyFunctions.map((fn) => fn(setupOptions)),
     hasProfilingData({
-      ...options,
+      ...setupOptions,
       client: clientWithProfilingAuth,
     }),
   ]);
@@ -52,5 +84,6 @@ export async function getCloudSetupState(
 }
 
 export function createGetCloudSetupState(params: RegisterServicesParams) {
-  return getCloudSetupState;
+  return async ({ esClient, soClient, spaceId }: CloudSetupStateParams) =>
+    getCloudSetupState({ ...params, esClient, soClient, spaceId });
 }

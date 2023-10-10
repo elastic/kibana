@@ -7,10 +7,10 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ProfilingStatus } from '@kbn/profiling-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getCloudSetupState } from '../setup_state';
+import { areCloudResourcesSetup } from '../../../common/cloud_setup';
+import { areResourcesSetup } from '../../../common/setup';
 import { RegisterServicesParams } from '../register_services';
-import { ProfilingCloudSetupOptions, areCloudResourcesSetup } from '../../../common/cloud_setup';
+import { getCloudSetupState } from '../setup_state';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
@@ -18,45 +18,27 @@ export interface HasSetupParams {
   spaceId?: string;
 }
 
-export function createGetStatusService({
-  createProfilingEsClient,
-  deps,
-  logger,
-}: RegisterServicesParams) {
+export function createGetStatusService(params: RegisterServicesParams) {
+  const { deps } = params;
   return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
     try {
       const isCloudEnabled = deps.cloud?.isCloudEnabled;
-      if (!isCloudEnabled) {
-        // When not on cloud just return that is has not set up and has no data
+      // Cloud
+      if (isCloudEnabled && deps.fleet) {
+        const setupState = await getCloudSetupState({ ...params, esClient, soClient, spaceId });
+
         return {
-          has_setup: false,
-          has_data: false,
-          pre_8_9_1_data: false,
+          has_setup: areCloudResourcesSetup(setupState),
+          has_data: setupState.data.available,
+          pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
         };
       }
 
-      const clientWithDefaultAuth = createProfilingEsClient({
-        esClient,
-        useDefaultAuth: true,
-      });
-      const clientWithProfilingAuth = createProfilingEsClient({
-        esClient,
-        useDefaultAuth: false,
-      });
-
-      const setupOptions: ProfilingCloudSetupOptions = {
-        client: clientWithDefaultAuth,
-        logger,
-        packagePolicyClient: deps.fleet?.packagePolicyService,
-        soClient,
-        spaceId: spaceId ?? DEFAULT_SPACE_ID,
-        isCloudEnabled,
-      };
-
-      const setupState = await getCloudSetupState(setupOptions, clientWithProfilingAuth);
+      // TODO: change to onprem
+      const setupState = await getCloudSetupState({ ...params, esClient, soClient, spaceId });
 
       return {
-        has_setup: areCloudResourcesSetup(setupState),
+        has_setup: areResourcesSetup(setupState),
         has_data: setupState.data.available,
         pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
       };
