@@ -824,6 +824,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
     },
     serverlessClients: {
+      clientLib: `${SERVERLESS_ELASTICSEARCH_DOCS}clients`,
       goApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}go-client-getting-started`,
       goGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}go-client-getting-started`,
       httpApis: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,

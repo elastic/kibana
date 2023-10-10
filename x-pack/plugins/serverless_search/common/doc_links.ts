@@ -61,7 +61,7 @@ class ESDocLinks {
     this.securityApis = newDocLinks.apis.securityApis;
 
     // Client links
-    this.elasticsearchClients = newDocLinks.serverlessClients.httpApis;
+    this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;
     // Go
     this.goApiReference = newDocLinks.serverlessClients.goApiReference;
     this.goBasicConfig = newDocLinks.serverlessClients.goGettingStarted;
