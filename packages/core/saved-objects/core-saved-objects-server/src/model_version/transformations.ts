@@ -71,7 +71,8 @@ export type SavedObjectModelTransformationFn<
  *
  * @public
  */
-export interface SavedObjectModelBidirectionalTransformation< // TODO: is this unused?
+export interface SavedObjectModelBidirectionalTransformation<
+  // TODO: is this unused?
   PreviousAttributes = unknown,
   NewAttributes = unknown
 > {
