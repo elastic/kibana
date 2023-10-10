@@ -47,6 +47,7 @@ import type { Rule } from '../../../../detection_engine/rule_management/logic/ty
 import { useOpenAlertDetailsAction } from './use_open_alert_details';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -228,6 +229,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     refetch: refetchAll,
   });
 
+  const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
+    closePopover,
+    ecsRowData,
+    refetch: refetchAll,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -235,6 +242,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...addToCaseActionItems,
             ...statusActionItems,
             ...alertTagsItems,
+            ...alertAssigneesItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
             ...alertDetailsActionItems,
@@ -256,6 +264,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       eventFilterActionItems,
       canCreateEndpointEventFilters,
       alertTagsItems,
+      alertAssigneesItems,
     ]
   );
 
@@ -266,8 +275,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         items,
       },
       ...alertTagsPanels,
+      ...alertAssigneesPanels,
     ],
-    [alertTagsPanels, items]
+    [alertTagsPanels, alertAssigneesPanels, items]
   );
 
   const osqueryFlyout = useMemo(() => {

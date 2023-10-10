@@ -211,3 +211,65 @@ export const ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
     defaultMessage: 'Change alert tag options in Kibana Advanced Settings.',
   }
 );
+
+export const UPDATE_ALERT_ASSIGNEES_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertAssigneesSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully updated assignees for {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_ASSIGNEES_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkActions.updateAlertAssigneesFailedToastMessage',
+  {
+    defaultMessage: 'Failed to update alert assignees.',
+  }
+);
+
+export const ALERT_ASSIGNEES_APPLY_BUTTON_MESSAGE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertAssigneesApplyButtonMessage',
+  {
+    defaultMessage: 'Apply assignees',
+  }
+);
+
+export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertAssigneesContextMenuItemTitle',
+  {
+    defaultMessage: 'Apply alert assignees',
+  }
+);
+
+export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertAssigneesContextMenuItemTooltip',
+  {
+    defaultMessage: 'Change alert assignees options in Kibana Advanced Settings.',
+  }
+);
+
+export const ALERT_TOTAL_ASSIGNEES_FILTERED = (total: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.totalFilteredUsers', {
+    defaultMessage: '{total, plural, one {# filter} other {# filters}} selected',
+    values: { total },
+  });
+
+export const ALERT_ASSIGNEES_SEARCH_USERS = i18n.translate(
+  'xpack.securitySolution.bulkActions.userProfile.selectableSearchPlaceholder',
+  {
+    defaultMessage: 'Search users',
+  }
+);
+
+export const ALERT_ASSIGNEES_CLEAR_FILTERS = i18n.translate(
+  'xpack.securitySolution.bulkActions.userProfile.clearFilters',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const ALERT_ASSIGNEES_NO_ASSIGNEES = i18n.translate(
+  'xpack.securitySolution.bulkActions.userProfile.noAssigneesLabel',
+  {
+    defaultMessage: 'No assignees',
+  }
+);

@@ -118,3 +118,7 @@ export interface Privilege {
   is_authenticated: boolean;
   has_encryption_key: boolean;
 }
+
+export interface SuggestUsersProps {
+  searchTerm: string;
+}

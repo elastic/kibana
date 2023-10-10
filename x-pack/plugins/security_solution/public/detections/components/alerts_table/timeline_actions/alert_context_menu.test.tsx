@@ -101,6 +101,7 @@ const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
 const openAlertDetailsPageButton = '[data-test-subj="open-alert-details-page-menu-item"]';
 const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
+const applyAlertAssigneesButton = '[data-test-subj="alert-assignees-context-menu-item"]';
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -336,6 +337,18 @@ describe('Alert table context menu', () => {
       wrapper.find(actionMenuButton).simulate('click');
 
       expect(wrapper.find(applyAlertTagsButton).first().exists()).toEqual(true);
+    });
+  });
+
+  describe('Apply alert assignees action', () => {
+    test('it renders the apply alert assignees action button', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
+      });
+
+      wrapper.find(actionMenuButton).simulate('click');
+
+      expect(wrapper.find(applyAlertAssigneesButton).first().exists()).toEqual(true);
     });
   });
 });
