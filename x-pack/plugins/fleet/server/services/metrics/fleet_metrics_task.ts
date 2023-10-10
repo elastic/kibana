@@ -19,7 +19,7 @@ import type { AgentMetrics } from './fetch_agent_metrics';
 
 export class FleetMetricsTask {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '0.0.4';
+  private taskVersion = '0.0.5';
   private taskType = 'Fleet-Metrics-Task';
   private wasStarted: boolean = false;
   private interval = '1m';
@@ -77,11 +77,7 @@ export class FleetMetricsTask {
       if (!agentMetrics) {
         return;
       }
-      const {
-        agents_per_version: agentsPerVersion,
-        agents,
-        upgrading_steps: agentUpgradingSteps,
-      } = agentMetrics;
+      const { agents_per_version: agentsPerVersion, agents } = agentMetrics;
       const agentStatusDoc = {
         '@timestamp': new Date().toISOString(),
         fleet: {
@@ -94,13 +90,8 @@ export class FleetMetricsTask {
             updating: agents.updating,
             unhealthy: agents.unhealthy,
             inactive: agents.inactive,
-            // TODO
-            unhealthy_reason: {
-              input: 0,
-              output: 0,
-              other: 0,
-            },
-            upgrading_step: agentUpgradingSteps,
+            unhealthy_reason: agentMetrics.unhealthy_reason,
+            upgrading_step: agentMetrics.upgrading_step,
           },
         },
       };
