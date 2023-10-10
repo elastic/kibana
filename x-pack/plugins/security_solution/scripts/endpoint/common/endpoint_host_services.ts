@@ -319,7 +319,7 @@ const enrollHostWithFleet = async ({
       env: {
         VAGRANT_CWD,
       },
-      stdio: ['inherit', 'inherit', 'inherit'],
+      // stdio: ['inherit', 'inherit', 'inherit'],
     });
   } else {
     log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
