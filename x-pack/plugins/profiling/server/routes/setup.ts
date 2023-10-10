@@ -84,24 +84,6 @@ export function registerSetupRoute({
           });
         }
 
-        // const hasRequiredRole = dependencies.start.security
-        //   ? isSuperuser({
-        //       securityPluginStart: dependencies.start.security,
-        //       request,
-        //     })
-        //   : true;
-
-        // if (hasRequiredRole === false) {
-        //   const msg = `Operation only permitted by users with the superuser role`;
-        //   logger.error(msg);
-        //   return response.custom({
-        //     statusCode: 403,
-        //     body: {
-        //       message: msg,
-        //     },
-        //   });
-        // }
-
         const esClient = await getClient(context);
         const core = await context.core;
         const clientWithDefaultAuth = createProfilingEsClient({
