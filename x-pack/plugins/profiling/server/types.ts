@@ -20,8 +20,8 @@ import {
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
   features: FeaturesPluginSetup;
-  cloud: CloudSetup;
-  fleet: FleetSetupContract;
+  cloud?: CloudSetup;
+  fleet?: FleetSetupContract;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   profilingDataAccess: ProfilingDataAccessPluginSetup;
@@ -30,8 +30,8 @@ export interface ProfilingPluginSetupDeps {
 export interface ProfilingPluginStartDeps {
   observability: {};
   features: {};
-  cloud: CloudStart;
-  fleet: FleetStartContract;
+  cloud?: CloudStart;
+  fleet?: FleetStartContract;
   spaces?: SpacesPluginStart;
   profilingDataAccess: ProfilingDataAccessPluginStart;
 }

@@ -13,8 +13,8 @@ import {
   getApmPolicy,
 } from '@kbn/profiling-data-access-plugin/common';
 import { omit } from 'lodash';
+import { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common';
 import { PackageInputType } from '../..';
-import { ProfilingSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 

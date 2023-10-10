@@ -25,7 +25,7 @@ export function createGetStatusService({
 }: RegisterServicesParams) {
   return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
     try {
-      const isCloudEnabled = deps.cloud.isCloudEnabled;
+      const isCloudEnabled = deps.cloud?.isCloudEnabled;
       if (!isCloudEnabled) {
         // When not on cloud just return that is has not set up and has no data
         return {

@@ -64,7 +64,7 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const isCloudEnabled = dependencies.setup.cloud.isCloudEnabled;
+        const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
 
         if (!isCloudEnabled) {
           const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
@@ -169,7 +169,7 @@ export function registerSetupRoute({
         const apmServerHost = dependencies.setup.cloud?.apm?.url;
         const stackVersion = dependencies.stackVersion;
         const setupInstructions = await getSetupInstructions({
-          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
+          packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
           apmServerHost,
           stackVersion,

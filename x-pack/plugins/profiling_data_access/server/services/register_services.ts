@@ -21,8 +21,8 @@ export interface RegisterServicesParams {
   }) => ProfilingESClient;
   logger: Logger;
   deps: {
-    fleet: FleetStartContract;
-    cloud: CloudStart;
+    fleet?: FleetStartContract;
+    cloud?: CloudStart;
   };
 }
 
