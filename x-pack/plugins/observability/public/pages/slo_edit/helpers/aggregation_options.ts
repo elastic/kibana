@@ -26,12 +26,6 @@ export const AGGREGATION_OPTIONS = [
     }),
   },
   {
-    value: 'min',
-    label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.min', {
-      defaultMessage: 'Min',
-    }),
-  },
-  {
     value: 'sum',
     label: i18n.translate('xpack.observability.slo.sloEdit.timesliceMetric.aggregation.sum', {
       defaultMessage: 'Sum',
