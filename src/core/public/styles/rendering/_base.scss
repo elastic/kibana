@@ -40,6 +40,9 @@
 }
 // Conditionally override :root CSS fixed header variable. Updating `--euiFixedHeadersOffset`
 // on the body will cause all child EUI components to automatically update their offsets
+.kbnBody--projectActionMenuVisible {
+  --kbnAppHeadersOffset: calc(var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight));
+}
 .kbnBody--hasHeaderBanner {
   --euiFixedHeadersOffset: var(--kbnHeaderOffsetWithBanner);
   --kbnAppHeadersOffset: var(--kbnHeaderOffsetWithBanner);
@@ -59,9 +62,7 @@
     top: var(--kbnHeaderBannerHeight);
   }
 }
-.kbnBody--projectActionMenuVisible {
-  --kbnAppHeadersOffset: calc(var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight));
-}
+
 .kbnBody--chromeHidden {
   --euiFixedHeadersOffset: 0;
   &.kbnBody--projectActionMenuVisible {

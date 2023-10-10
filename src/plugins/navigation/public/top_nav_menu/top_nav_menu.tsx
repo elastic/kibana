@@ -18,7 +18,7 @@ import {
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
-import { MountPointPortal } from '@kbn/kibana-react-plugin/public';
+import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
@@ -143,12 +143,12 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
       return (
         <>
           {(badgesEl || menuEl) && (
-            <UnmountableMountPointPortal setMountPoint={setMenuMountPoint}>
+            <MountPointPortal setMountPoint={setMenuMountPoint}>
               <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
                 {badgesEl}
                 {menuEl}
               </span>
-            </UnmountableMountPointPortal>
+            </MountPointPortal>
           )}
 
           {renderSearchBar()}
@@ -173,17 +173,4 @@ TopNavMenu.defaultProps = {
   showDatePicker: true,
   showFilterBar: true,
   screenTitle: '',
-};
-
-// TODO: make this a part of @kbn/react-kibana-mount ?
-const UnmountableMountPointPortal: React.FC<{
-  setMountPoint: (menuMount: MountPoint | undefined) => void;
-}> = ({ setMountPoint, children }) => {
-  React.useEffect(() => {
-    return () => {
-      setMountPoint(undefined);
-    };
-  }, [setMountPoint]);
-
-  return <MountPointPortal setMountPoint={setMountPoint}>{children}</MountPointPortal>;
 };
