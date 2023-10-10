@@ -8,7 +8,6 @@
 
 import { Client, estypes } from '@elastic/elasticsearch';
 import { ApmFields } from '@kbn/apm-synthtrace-client';
-import { Transform } from 'stream';
 import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
 import { Logger } from '../../../utils/create_logger';
@@ -66,7 +65,7 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
     this.logger.info(`Updated component template: ${name}`);
   }
 
-  getDefaultPipeline(includeSerialization: boolean = true, pipelines: Transform[] = []) {
-    return apmPipeline(this.logger, this.version, includeSerialization, pipelines);
+  getDefaultPipeline(includeSerialization: boolean = true) {
+    return apmPipeline(this.logger, this.version, includeSerialization);
   }
 }

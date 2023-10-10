@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PassThrough, pipeline, Readable, Transform } from 'stream';
+import { PassThrough, pipeline, Readable } from 'stream';
 import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
 import { Logger } from '../../../utils/create_logger';
@@ -20,12 +20,7 @@ import { getApmServerMetadataTransform } from './get_apm_server_metadata_transfo
 import { getIntakeDefaultsTransform } from './get_intake_defaults_transform';
 import { getRoutingTransform } from './get_routing_transform';
 
-export function apmPipeline(
-  logger: Logger,
-  version: string,
-  includeSerialization: boolean = true,
-  pipelines: Transform[] = []
-) {
+export function apmPipeline(logger: Logger, version: string, includeSerialization: boolean = true) {
   return (base: Readable) => {
     const aggregators = [
       createTransactionMetricsAggregator('1m'),
@@ -53,7 +48,6 @@ export function apmPipeline(
       createBreakdownMetricsAggregator('30s'),
       getApmServerMetadataTransform(version),
       getRoutingTransform(),
-      ...pipelines,
       getDedotTransform(),
       (err) => {
         if (err) {

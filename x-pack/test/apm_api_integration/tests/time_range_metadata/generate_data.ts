@@ -7,8 +7,6 @@
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment, { Moment } from 'moment';
-import { Transform, Readable } from 'stream';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export function getTransactionEvents(start: Moment, end: Moment) {
   const serviceName = 'synth-go';
@@ -50,27 +48,4 @@ export function subtractDateDifference(start: Moment, end: Moment) {
   const previousStart = moment(start).subtract(diff, 'milliseconds').format();
   const previousEnd = moment(end).subtract(diff, 'milliseconds').format();
   return { previousStart: moment(previousStart), previousEnd: moment(previousEnd) };
-}
-
-function deleteSummaryFieldTransform() {
-  return new Transform({
-    objectMode: true,
-    transform(chunk: any, encoding, callback) {
-      delete chunk?.transaction?.duration?.summary;
-      callback(null, chunk);
-    },
-  });
-}
-
-export function overwriteSynthPipelineWithSummaryFieldDeleteTransform({
-  synthtraceEsClient,
-}: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
-}) {
-  return (base: Readable) => {
-    const defaultPipeline = synthtraceEsClient.getDefaultPipeline()(base);
-    return (defaultPipeline as unknown as NodeJS.ReadableStream).pipe(
-      deleteSummaryFieldTransform()
-    );
-  };
 }

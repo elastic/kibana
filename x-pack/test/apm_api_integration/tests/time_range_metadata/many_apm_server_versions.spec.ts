@@ -5,10 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, ApmFields, timerange } from '@kbn/apm-synthtrace-client';
-import { Transform } from 'stream';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import {
+  addObserverVersionTransform,
+  ApmSynthtraceEsClient,
+  appendTransformsToDefaultApmPipeline,
+  deleteSummaryFieldTransform,
+} from '@kbn/apm-synthtrace';
 import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_DURATION_SUMMARY,
@@ -225,20 +229,14 @@ function generateTraceDataForService({
         .success()
     );
 
-  if (isLegacy) {
-    const versionPipeline = new Transform({
-      objectMode: true,
-      transform(document: ApmFields, encoding, callback) {
-        document['observer.version'] = '8.5.0';
-        delete document['transaction.duration.summary'];
-        callback(null, document);
-      },
-    });
-
-    synthtrace.pipeline(synthtrace.getDefaultPipeline(true, [versionPipeline]));
-  } else {
-    synthtrace.pipeline(synthtrace.getDefaultPipeline(true));
-  }
+  synthtrace.pipeline(
+    isLegacy
+      ? appendTransformsToDefaultApmPipeline(synthtrace, [
+          addObserverVersionTransform('8.5.0'),
+          deleteSummaryFieldTransform(),
+        ])
+      : synthtrace.getDefaultPipeline(true)
+  );
 
   return synthtrace.index(events);
 }

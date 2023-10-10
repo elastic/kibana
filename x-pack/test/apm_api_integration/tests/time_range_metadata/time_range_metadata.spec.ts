@@ -11,12 +11,12 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  getTransactionEvents,
-  subtractDateDifference,
-  overwriteSynthPipelineWithSummaryFieldDeleteTransform,
-} from './generate_data';
+  appendTransformsToDefaultApmPipeline,
+  deleteSummaryFieldTransform,
+} from '@kbn/apm-synthtrace';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getTransactionEvents, subtractDateDifference } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -88,9 +88,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const { previousStart, previousEnd } = subtractDateDifference(localStart, localEnd);
           const previousDataWithoutSummaryField = getTransactionEvents(previousStart, previousEnd);
           synthtraceEsClient.pipeline(
-            overwriteSynthPipelineWithSummaryFieldDeleteTransform({
-              synthtraceEsClient,
-            })
+            appendTransformsToDefaultApmPipeline(synthtraceEsClient, [
+              deleteSummaryFieldTransform(),
+            ])
           );
           await synthtraceEsClient.index([...previousDataWithoutSummaryField]);
         });
