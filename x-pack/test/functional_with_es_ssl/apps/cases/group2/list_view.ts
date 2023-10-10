@@ -634,7 +634,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Delete', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/168148
+      describe.skip('Delete', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();
