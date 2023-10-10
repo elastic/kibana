@@ -15,4 +15,4 @@ export {
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from './fleet_policies';
 
-export type { ProfilingSetupOptions } from './setup';
+export type { ProfilingCloudSetupOptions } from './cloud_setup';

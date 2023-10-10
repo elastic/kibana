@@ -6,9 +6,9 @@
  */
 
 import { MAX_BUCKETS } from '@kbn/profiling-data-access-plugin/common';
-import { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common';
+import { ProfilingCloudSetupOptions } from '@kbn/profiling-data-access-plugin/common';
 
-export async function setMaximumBuckets({ client }: ProfilingSetupOptions) {
+export async function setMaximumBuckets({ client }: ProfilingCloudSetupOptions) {
   await client.getEsClient().cluster.putSettings({
     persistent: {
       search: {
@@ -18,7 +18,7 @@ export async function setMaximumBuckets({ client }: ProfilingSetupOptions) {
   });
 }
 
-export async function enableResourceManagement({ client }: ProfilingSetupOptions) {
+export async function enableResourceManagement({ client }: ProfilingCloudSetupOptions) {
   await client.getEsClient().cluster.putSettings({
     persistent: {
       xpack: {

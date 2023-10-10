@@ -10,12 +10,15 @@ import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { merge } from 'lodash';
 import { ProfilingESClient } from './profiling_es_client';
 
-export interface ProfilingSetupOptions {
+interface BaseProfilingSetupOptions {
   client: ProfilingESClient;
   soClient: SavedObjectsClientContract;
-  packagePolicyClient: PackagePolicyClient;
   logger: Logger;
   spaceId: string;
+}
+
+export interface ProfilingCloudSetupOptions extends BaseProfilingSetupOptions {
+  packagePolicyClient: PackagePolicyClient;
   isCloudEnabled: boolean;
 }
 

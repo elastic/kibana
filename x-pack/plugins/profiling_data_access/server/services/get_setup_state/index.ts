@@ -18,14 +18,14 @@ import { hasProfilingData } from '../../../common/has_profiling_data';
 import { ProfilingESClient } from '../../../common/profiling_es_client';
 import { validateSecurityRole } from '../../../common/security_role';
 import {
-  ProfilingSetupOptions,
+  ProfilingCloudSetupOptions,
   createDefaultSetupState,
   mergePartialSetupStates,
-} from '../../../common/setup';
+} from '../../../common/cloud_setup';
 import { RegisterServicesParams } from '../register_services';
 
 export async function getSetupState(
-  options: ProfilingSetupOptions,
+  options: ProfilingCloudSetupOptions,
   clientWithProfilingAuth: ProfilingESClient
 ) {
   const state = createDefaultSetupState();
