@@ -22,3 +22,5 @@ export type { Setup, Start } from './plugin';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export * from './types';
 export * from '../common/adapters';
+
+export { LOCAL_CLUSTER_KEY, getLocalClusterDetails } from './views/requests/components/details';

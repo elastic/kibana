@@ -9,7 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { type Start as InspectorStartContract, LOCAL_CLUSTER_KEY, getLocalClusterDetails } from '@kbn/inspector-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { SearchResponseWarning } from './types';
 
@@ -46,14 +46,7 @@ export function extractWarnings(
             }
           ).details
         : {
-            '(local)': {
-              status: 'partial',
-              indices: '',
-              took: rawResponse.took,
-              timed_out: rawResponse.timed_out,
-              _shards: rawResponse._shards,
-              failures: rawResponse._shards.failures,
-            },
+            [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
           },
       openInInspector: () => {
         const adapter = requestAdapter ? requestAdapter : new RequestAdapter();

@@ -7,3 +7,4 @@
  */
 
 export { ClustersView } from './clusters_view';
+export { LOCAL_CLUSTER_KEY, getLocalClusterDetails } from './local_cluster';
