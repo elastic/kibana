@@ -176,12 +176,19 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): TestData => ({
-  suiteTitle: `artificial logs with ${analysisType}`,
+const getArtificialLogDataViewTestData = (
+  analysisType: LogRateAnalysisType,
+  textField: boolean
+): TestData => ({
+  suiteTitle: `artificial logs with ${analysisType} and ${
+    textField ? 'text field' : 'no text field'
+  }`,
   analysisType,
-  dataGenerator: `artificial_logs_with_${analysisType}`,
+  dataGenerator: `artificial_logs_with_${analysisType}_${textField ? 'textfield' : 'notextfield'}`,
   isSavedSearch: false,
-  sourceIndexOrSavedSearch: `artificial_logs_with_${analysisType}`,
+  sourceIndexOrSavedSearch: `artificial_logs_with_${analysisType}_${
+    textField ? 'textfield' : 'notextfield'
+  }`,
   brushBaselineTargetTimestamp: BASELINE_TS + DAY_MS / 2,
   brushDeviationTargetTimestamp: DEVIATION_TS + DAY_MS / 2,
   brushIntervalFactor: 10,
@@ -191,14 +198,24 @@ const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): Te
   expected: {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
-      {
-        group: 'response_code: 500url: home.php',
-        docCount: '792',
-      },
-      {
-        group: 'url: login.phpresponse_code: 500',
-        docCount: '790',
-      },
+      textField
+        ? {
+            group: 'message: an unexpected error occuredurl: home.phpresponse_code: 500',
+            docCount: '634',
+          }
+        : {
+            group: 'response_code: 500url: home.php',
+            docCount: '792',
+          },
+      textField
+        ? {
+            group: 'message: an unexpected error occuredurl: login.phpresponse_code: 500',
+            docCount: '632',
+          }
+        : {
+            group: 'url: login.phpresponse_code: 500',
+            docCount: '790',
+          },
       {
         docCount: '636',
         group: 'user: Peterurl: home.php',
@@ -208,11 +225,40 @@ const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): Te
         group: 'user: Peterurl: login.php',
       },
     ],
-    filteredAnalysisGroupsTable: [
-      { group: '* url: home.phpresponse_code: 500', docCount: '792' },
-      { group: '* url: login.phpresponse_code: 500', docCount: '790' },
-    ],
+    filteredAnalysisGroupsTable: textField
+      ? [
+          {
+            group: '* url: home.phpmessage: an unexpected error occuredresponse_code: 500',
+            docCount: '634',
+          },
+          {
+            group: '* url: login.phpmessage: an unexpected error occuredresponse_code: 500',
+            docCount: '632',
+          },
+        ]
+      : [
+          { group: '* url: home.phpresponse_code: 500', docCount: '792' },
+          { group: '* url: login.phpresponse_code: 500', docCount: '790' },
+        ],
     analysisTable: [
+      ...(textField
+        ? [
+            {
+              fieldName: 'message',
+              fieldValue: 'an unexpected error occured',
+              logRate: 'Chart type:bar chart',
+              pValue: '0.00000100',
+              impact: 'Medium',
+            },
+            {
+              fieldName: 'response_code',
+              fieldValue: '500',
+              logRate: 'Chart type:bar chart',
+              pValue: '3.61e-12',
+              impact: 'High',
+            },
+          ]
+        : []),
       {
         fieldName: 'url',
         fieldValue: 'home.php',
@@ -220,15 +266,19 @@ const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): Te
         logRate: 'Chart type:bar chart',
         pValue: '0.00974',
       },
-      {
-        fieldName: 'user',
-        fieldValue: 'Peter',
-        impact: 'High',
-        logRate: 'Chart type:bar chart',
-        pValue: '2.63e-21',
-      },
+      ...(textField
+        ? []
+        : [
+            {
+              fieldName: 'user',
+              fieldValue: 'Peter',
+              impact: 'High',
+              logRate: 'Chart type:bar chart',
+              pValue: '2.63e-21',
+            },
+          ]),
     ],
-    fieldSelectorPopover: ['response_code', 'url', 'user'],
+    fieldSelectorPopover: [...(textField ? ['message'] : []), 'response_code', 'url', 'user'],
   },
 });
 
@@ -236,6 +286,8 @@ export const logRateAnalysisTestData: TestData[] = [
   kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE),
-  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.DIP),
+  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE, false),
+  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE, true),
+  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.DIP, false),
+  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.DIP, true),
 ];
