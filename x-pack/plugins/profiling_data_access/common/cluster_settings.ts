@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PartialSetupState, ProfilingCloudSetupOptions } from './cloud_setup';
+import { PartialCloudSetupState, ProfilingCloudSetupOptions } from './cloud_setup';
 
 export const MAX_BUCKETS = 150000;
 
 export async function validateMaximumBuckets({
   client,
-}: ProfilingCloudSetupOptions): Promise<PartialSetupState> {
+}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
   const settings = await client.getEsClient().cluster.getSettings({});
   const maxBuckets = settings.persistent.search?.max_buckets;
   return {
@@ -23,7 +23,7 @@ export async function validateMaximumBuckets({
 
 export async function validateResourceManagement({
   client,
-}: ProfilingCloudSetupOptions): Promise<PartialSetupState> {
+}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
   const statusResponse = await client.profilingStatus();
   return {
     resource_management: {

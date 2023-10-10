@@ -10,7 +10,7 @@ import { ProfilingStatus } from '@kbn/profiling-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getSetupState } from '../get_setup_state';
 import { RegisterServicesParams } from '../register_services';
-import { ProfilingCloudSetupOptions, areResourcesSetup } from '../../../common/cloud_setup';
+import { ProfilingCloudSetupOptions, areCloudResourcesSetup } from '../../../common/cloud_setup';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
@@ -56,7 +56,7 @@ export function createGetStatusService({
       const setupState = await getSetupState(setupOptions, clientWithProfilingAuth);
 
       return {
-        has_setup: areResourcesSetup(setupState),
+        has_setup: areCloudResourcesSetup(setupState),
         has_data: setupState.data.available,
         pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
       };

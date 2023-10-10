@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PartialSetupState, ProfilingCloudSetupOptions } from './cloud_setup';
+import { PartialCloudSetupState, ProfilingCloudSetupOptions } from './cloud_setup';
 
 export async function hasProfilingData({
   client,
-}: ProfilingCloudSetupOptions): Promise<PartialSetupState> {
+}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
   const hasProfilingDataResponse = await client.search('has_any_profiling_data', {
     index: 'profiling*',
     size: 0,

@@ -5,33 +5,23 @@
  * 2.0.
  */
 import type { RecursivePartial } from '@elastic/eui';
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { merge } from 'lodash';
-import { ProfilingESClient } from './profiling_es_client';
+import {
+  areResourcesSetup,
+  createDefaultSetupState,
+  ProfilingSetupOptions,
+  SetupState,
+} from './setup';
 
-interface BaseProfilingSetupOptions {
-  client: ProfilingESClient;
-  soClient: SavedObjectsClientContract;
-  logger: Logger;
-  spaceId: string;
-}
-
-export interface ProfilingCloudSetupOptions extends BaseProfilingSetupOptions {
+export interface ProfilingCloudSetupOptions extends ProfilingSetupOptions {
   packagePolicyClient: PackagePolicyClient;
   isCloudEnabled: boolean;
 }
 
-export interface SetupState {
+interface CloudSetupState extends SetupState {
   cloud: {
     available: boolean;
     required: boolean;
-  };
-  data: {
-    available: boolean;
-  };
-  permissions: {
-    configured: boolean;
   };
   policies: {
     collector: {
@@ -44,31 +34,16 @@ export interface SetupState {
       profilingEnabled: boolean;
     };
   };
-  resource_management: {
-    enabled: boolean;
-  };
-  resources: {
-    created: boolean;
-    pre_8_9_1_data: boolean;
-  };
-  settings: {
-    configured: boolean;
-  };
 }
 
-export type PartialSetupState = RecursivePartial<SetupState>;
+export type PartialCloudSetupState = RecursivePartial<CloudSetupState>;
 
-export function createDefaultSetupState(): SetupState {
+export function createDefaultCloudSetupState(): CloudSetupState {
+  const defaultSetupState = createDefaultSetupState();
   return {
     cloud: {
       available: false,
       required: true,
-    },
-    data: {
-      available: false,
-    },
-    permissions: {
-      configured: false,
     },
     policies: {
       collector: {
@@ -81,38 +56,15 @@ export function createDefaultSetupState(): SetupState {
         profilingEnabled: false,
       },
     },
-    resource_management: {
-      enabled: false,
-    },
-    resources: {
-      created: false,
-      pre_8_9_1_data: false,
-    },
-    settings: {
-      configured: false,
-    },
+    ...defaultSetupState,
   };
 }
 
-export function areResourcesSetup(state: SetupState): boolean {
+export function areCloudResourcesSetup(state: CloudSetupState): boolean {
   return (
+    areResourcesSetup(state) &&
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
-    !state.policies.apm.profilingEnabled &&
-    state.resource_management.enabled &&
-    state.resources.created &&
-    state.permissions.configured &&
-    state.settings.configured
+    !state.policies.apm.profilingEnabled
   );
-}
-
-function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {
-  return merge(base, partial);
-}
-
-export function mergePartialSetupStates(
-  base: SetupState,
-  partials: PartialSetupState[]
-): SetupState {
-  return partials.reduce<SetupState>(mergeRecursivePartial, base);
 }
