@@ -1050,7 +1050,7 @@ describe('update', () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
         type: 'text',
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       });
 
       await expect(

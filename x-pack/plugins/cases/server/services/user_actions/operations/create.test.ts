@@ -257,9 +257,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "this is a text field value",
-                          ],
+                          "value": "this is a text field value",
                         },
                       ],
                     },
@@ -290,15 +288,15 @@ describe('UserActionPersister', () => {
             "1": Array [
               Object {
                 "eventDetails": Object {
-                  "action": "update",
-                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "action": "add",
+                  "descriptiveAction": "case_user_action_add_case_custom_fields",
                   "getMessage": [Function],
                   "savedObjectId": "1",
                   "savedObjectType": "cases",
                 },
                 "parameters": Object {
                   "attributes": Object {
-                    "action": "update",
+                    "action": "add",
                     "created_at": "2022-01-09T22:00:00.000Z",
                     "created_by": Object {
                       "email": "elastic@elastic.co",
@@ -311,9 +309,12 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "updated value",
-                          ],
+                          "value": "updated value",
+                        },
+                        Object {
+                          "key": "string_custom_field_2",
+                          "type": "text",
+                          "value": "old value 2",
                         },
                       ],
                     },
@@ -344,15 +345,15 @@ describe('UserActionPersister', () => {
             "1": Array [
               Object {
                 "eventDetails": Object {
-                  "action": "update",
-                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "action": "add",
+                  "descriptiveAction": "case_user_action_add_case_custom_fields",
                   "getMessage": [Function],
                   "savedObjectId": "1",
                   "savedObjectType": "cases",
                 },
                 "parameters": Object {
                   "attributes": Object {
-                    "action": "update",
+                    "action": "add",
                     "created_at": "2022-01-09T22:00:00.000Z",
                     "created_by": Object {
                       "email": "elastic@elastic.co",
@@ -367,45 +368,10 @@ describe('UserActionPersister', () => {
                           "type": "text",
                           "value": null,
                         },
-                      ],
-                    },
-                    "type": "customFields",
-                  },
-                  "references": Array [
-                    Object {
-                      "id": "1",
-                      "name": "associated-cases",
-                      "type": "cases",
-                    },
-                  ],
-                },
-              },
-              Object {
-                "eventDetails": Object {
-                  "action": "update",
-                  "descriptiveAction": "case_user_action_update_case_custom_fields",
-                  "getMessage": [Function],
-                  "savedObjectId": "1",
-                  "savedObjectType": "cases",
-                },
-                "parameters": Object {
-                  "attributes": Object {
-                    "action": "update",
-                    "created_at": "2022-01-09T22:00:00.000Z",
-                    "created_by": Object {
-                      "email": "elastic@elastic.co",
-                      "full_name": "Elastic User",
-                      "username": "elastic",
-                    },
-                    "owner": "securitySolution",
-                    "payload": Object {
-                      "customFields": Array [
                         Object {
                           "key": "string_custom_field_2",
                           "type": "text",
-                          "value": Array [
-                            "new custom field 2",
-                          ],
+                          "value": "new custom field 2",
                         },
                       ],
                     },
@@ -436,15 +402,15 @@ describe('UserActionPersister', () => {
             "1": Array [
               Object {
                 "eventDetails": Object {
-                  "action": "update",
-                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "action": "add",
+                  "descriptiveAction": "case_user_action_add_case_custom_fields",
                   "getMessage": [Function],
                   "savedObjectId": "1",
                   "savedObjectType": "cases",
                 },
                 "parameters": Object {
                   "attributes": Object {
-                    "action": "update",
+                    "action": "add",
                     "created_at": "2022-01-09T22:00:00.000Z",
                     "created_by": Object {
                       "email": "elastic@elastic.co",
@@ -457,9 +423,17 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "new value",
-                          ],
+                          "value": "new value",
+                        },
+                        Object {
+                          "key": "string_custom_field_2",
+                          "type": "text",
+                          "value": "old value 2",
+                        },
+                        Object {
+                          "key": "string_custom_field_3",
+                          "type": "text",
+                          "value": null,
                         },
                       ],
                     },
@@ -490,15 +464,15 @@ describe('UserActionPersister', () => {
             "1": Array [
               Object {
                 "eventDetails": Object {
-                  "action": "update",
-                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "action": "add",
+                  "descriptiveAction": "case_user_action_add_case_custom_fields",
                   "getMessage": [Function],
                   "savedObjectId": "1",
                   "savedObjectType": "cases",
                 },
                 "parameters": Object {
                   "attributes": Object {
-                    "action": "update",
+                    "action": "add",
                     "created_at": "2022-01-09T22:00:00.000Z",
                     "created_by": Object {
                       "email": "elastic@elastic.co",
@@ -511,9 +485,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "new value",
-                          ],
+                          "value": "new value",
                         },
                       ],
                     },
