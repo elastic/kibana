@@ -37,9 +37,42 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
   }
 
+  const openFirstRule = async (ruleName: string) => {
+    await svlTriggersActionsUI.searchRules(ruleName);
+    await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
+  };
+
+  const openRulesSection = async () => {
+    await svlSearchNavigation.navigateToLandingPage();
+    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+  };
+
+  const navigateToConnectors = async () => {
+    await svlSearchNavigation.navigateToLandingPage();
+    await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+    await testSubjects.click('app-card-triggersActionsConnectors');
+  };
+
+  const deleteConnector = async (connectorName: string) => {
+    await svlTriggersActionsUI.searchConnectors(connectorName);
+    await testSubjects.click('deleteConnector');
+    await testSubjects.existOrFail('deleteIdsConfirmation');
+    await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+    await testSubjects.missingOrFail('deleteIdsConfirmation');
+  };
+
   describe('Rule details', () => {
     let ruleIdList: string[];
     let connectorIdList: string[];
+
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
 
     describe('Header', () => {
       const testRunUuid = uuidv4();
@@ -47,9 +80,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const RULE_TYPE_ID = '.es-query';
 
       before(async () => {
-        await svlCommonPage.login();
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await openRulesSection();
 
         const rule = await createRule({
           supertest,
@@ -75,11 +106,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('rulesList');
 
-        // click on first rule
-        await svlTriggersActionsUI.searchRules(rule.name);
-        await find.clickDisplayedByCssSelector(
-          `[data-test-subj="rulesList"] [title="${rule.name}"]`
-        );
+        await openFirstRule(rule.name);
       });
 
       after(async () => {
@@ -91,7 +118,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               .set('x-elastic-internal-origin', 'foo');
           })
         );
-        await svlCommonPage.forceLogout();
       });
 
       it('renders the rule details', async () => {
@@ -102,15 +128,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
         expect(owner).toEqual('elastic_serverless');
       });
-
-      // it('renders toast when schedule is less than configured minimum', async () => {
-      //   await testSubjects.existOrFail('intervalConfigToast');
-
-      //   const editButton = await testSubjects.find('ruleIntervalToastEditButton');
-      //   await editButton.click();
-
-      //   await testSubjects.click('cancelSaveEditedRuleButton');
-      // });
 
       it('should disable the rule', async () => {
         const actionsDropdown = await testSubjects.find('statusDropdown');
@@ -184,7 +201,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
         await snoozeCancel.click();
-        // await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should snooze the rule for a set duration', async () => {
@@ -193,8 +209,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const snooze8h = await testSubjects.find('linkSnooze8h');
         await snooze8h.click();
-
-        // await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
           await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
@@ -206,7 +220,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
         await snoozeCancel.click();
-        // await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should add snooze schedule', async () => {
@@ -218,8 +231,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const saveScheduleButton = await testSubjects.find('scheduler-saveSchedule');
         await saveScheduleButton.click();
-
-        // await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
           await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
@@ -234,7 +245,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const confirmButton = await testSubjects.find('confirmModalConfirmButton');
         await confirmButton.click();
-        // await pageObjects.header.waitUntilLoadingHasFinished();
       });
     });
 
@@ -245,9 +255,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const RULE_TYPE_ID = '.es-query';
 
       before(async () => {
-        await svlCommonPage.login();
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await openRulesSection();
 
         const rule = await createRule({
           supertest,
@@ -273,11 +281,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('rulesList');
 
-        // click on first rule
-        await svlTriggersActionsUI.searchRules(rule.name);
-        await find.clickDisplayedByCssSelector(
-          `[data-test-subj="rulesList"] [title="${rule.name}"]`
-        );
+        await openFirstRule(rule.name);
       });
 
       after(async () => {
@@ -289,7 +293,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               .set('x-elastic-internal-origin', 'foo');
           })
         );
-        await svlCommonPage.forceLogout();
       });
 
       it('should open edit rule flyout', async () => {
@@ -340,10 +343,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const ALERT_ACTION_INDEX = 'alert-action-es-query';
       const RULE_TYPE_ID = '.es-query';
 
-      before(async () => {
-        await svlCommonPage.login();
-      });
-
       afterEach(async () => {
         await Promise.all(
           ruleIdList.map(async (ruleId) => {
@@ -363,11 +362,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
       });
 
-      after(async () => {
-        await svlCommonPage.forceLogout();
-      });
-
-      it.only('should show and update deleted connectors when there are existing connectors of the same type', async () => {
+      it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
 
         const connector1 = await createSlackConnector({
@@ -414,24 +409,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         ruleIdList = [rule.id];
 
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-
-        // verify content
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
+        await navigateToConnectors();
 
-        // navigate to connectors
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await testSubjects.click('app-card-triggersActionsConnectors');
-
-        // delete connector
-        await svlTriggersActionsUI.searchConnectors(connector1.name);
-        await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
+        await deleteConnector(connector1.name);
 
         await retry.try(async () => {
           const resultToast = await toasts.getToastElement(1);
@@ -439,13 +421,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(toastText).toEqual('Deleted 1 connector');
         });
 
-        // click on first rule
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-        await svlTriggersActionsUI.searchRules(rule.name);
-        await find.clickDisplayedByCssSelector(
-          `[data-test-subj="rulesList"] [title="${rule.name}"]`
-        );
+        await openRulesSection();
+        await openFirstRule(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -460,7 +437,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // click the available option (my-slack1 is a preconfigured connector created before this test runs)
         await testSubjects.click(`dropdown-connector-${connector2.id}`);
-        await new Promise((resolve) => {});
         // expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
       });
 
@@ -513,38 +489,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
         ruleIdList = [rule.id];
 
-        // refresh to see alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-
-        // verify content
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
+        await navigateToConnectors();
+        await deleteConnector(connector.name);
 
-        // navigate to connectors
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await testSubjects.click('app-card-triggersActionsConnectors');
-
-        // delete connector
-        await svlTriggersActionsUI.searchConnectors(connector.name);
-        await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
         await retry.try(async () => {
           const resultToast = await toasts.getToastElement(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual('Deleted 1 connector');
         });
 
-        // click on first alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-        await svlTriggersActionsUI.searchRules(rule.name);
-        await find.clickDisplayedByCssSelector(
-          `[data-test-subj="rulesList"] [title="${rule.name}"]`
-        );
+        await openRulesSection();
+        await openFirstRule(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -576,33 +533,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).toEqual(true);
 
-        // refresh to see alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-
-        // verify content
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
-
-        // navigate to connectors
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await testSubjects.click('app-card-triggersActionsConnectors');
-
-        // delete connector
-        await svlTriggersActionsUI.searchConnectors('new connector');
-        await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
+        await navigateToConnectors();
+        await deleteConnector('new connector');
       });
     });
 
     describe('Edit rule with legacy rule-level notify values', () => {
-      before(async () => {
-        await svlCommonPage.login();
-      });
-
       afterEach(async () => {
         await Promise.all(
           ruleIdList.map(async (ruleId) => {
@@ -620,10 +558,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               .set('x-elastic-internal-origin', 'foo');
           })
         );
-      });
-
-      after(async () => {
-        await svlCommonPage.forceLogout();
       });
 
       it('should convert rule-level params to action-level params and save the alert successfully', async () => {
@@ -676,20 +610,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const updatedRuleName = `Changed rule ${rule.name}`;
 
-        // refresh to see alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-
-        // verify content
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
-
-        // click on first alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-        await svlTriggersActionsUI.searchRules(rule.name);
-        await find.clickDisplayedByCssSelector(
-          `[data-test-subj="rulesList"] [title="${rule.name}"]`
-        );
+        await openFirstRule(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -717,10 +640,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const ruleName = uuidv4();
       const RULE_TYPE_ID = '.es-query';
 
-      before(async () => {
-        await svlCommonPage.login();
-      });
-
       afterEach(async () => {
         await Promise.all(
           ruleIdList.map(async (ruleId) => {
@@ -730,10 +649,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               .set('x-elastic-internal-origin', 'foo');
           })
         );
-      });
-
-      after(async () => {
-        await svlCommonPage.forceLogout();
       });
 
       it('renders a disabled rule details view in app button', async () => {
@@ -757,20 +672,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         ruleIdList = [rule.id];
 
-        // refresh to see alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-
-        // verify content
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
-
-        // click on first alert
-        await svlSearchNavigation.navigateToLandingPage();
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-        await svlTriggersActionsUI.searchRules(rule.name);
-        await find.clickDisplayedByCssSelector(
-          `[data-test-subj="rulesList"] [title="${rule.name}"]`
-        );
+        await openFirstRule(rule.name);
 
         expect(await svlRuleDetailsUI.isViewInAppDisabled()).toEqual(true);
       });
