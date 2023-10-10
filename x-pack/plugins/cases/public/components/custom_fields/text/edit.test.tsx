@@ -108,7 +108,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByText('No "My test label 1" added')).toBeInTheDocument();
+    expect(screen.getByText('No value is added')).toBeInTheDocument();
   });
 
   it('shows the no value text if the the value is null', async () => {
@@ -124,7 +124,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByText('No "My test label 1" added')).toBeInTheDocument();
+    expect(screen.getByText('No value is added')).toBeInTheDocument();
   });
 
   it('does not show the value when the custom field is undefined', async () => {
