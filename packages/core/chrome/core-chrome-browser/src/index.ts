@@ -36,6 +36,7 @@ export type {
   CloudLinkId,
   SideNavCompProps,
   SideNavComponent,
+  SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectBreadcrumb,
   NodeDefinition,

@@ -556,7 +556,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           },
           {
             // Panel with nav group title that acts like nav items
-            title: 'Open panel (4)',
+            title: 'Open panel (4) - sideNavStatus',
             openPanel: true,
             link: 'item1',
             children: [
@@ -566,6 +566,30 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     title: 'Should act as item 1',
                     sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Normal item',
+                  },
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Item should NOT appear!', // Should not appear
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    title: 'Group should NOT appear!',
+                    link: 'group:settings.logs',
+                    sideNavStatus: 'hidden', // This group should not appear
                     children: [
                       {
                         link: 'group:settings.logs',

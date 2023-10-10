@@ -125,7 +125,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   // but once the user manually expand a group we don't want to close it afterward automatically.
   const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
-  // If the item has no link and no cildren, we don't want to render it
+  // If the item has no link and no children, we don't want to render it
   const itemHasLinkOrChildren = (item: ChromeProjectNavigationNode) => {
     const isGroupTitle = Boolean(item.isGroupTitle);
     const hasLink = Boolean(item.deepLink) || Boolean(item.href);

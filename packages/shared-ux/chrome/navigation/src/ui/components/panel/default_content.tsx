@@ -58,9 +58,10 @@ interface Props {
 }
 
 export const DefaultContent: FC<Props> = ({ activeNode }) => {
-  const children = serializeChildren(activeNode);
-  const totalChildren = children?.length ?? 0;
-  const firstGroupTitle = children?.[0]?.title;
+  const serializedChildren = serializeChildren(activeNode);
+  const filteredChildren = serializedChildren?.filter((child) => child.sideNavStatus !== 'hidden');
+  const totalChildren = filteredChildren?.length ?? 0;
+  const firstGroupTitle = filteredChildren?.[0]?.title;
   const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
 
   return (
@@ -79,11 +80,11 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
         <>
           {firstGroupHasTitle && <EuiSpacer size="l" />}
 
-          {children && (
+          {filteredChildren && (
             <>
-              {children.map((child, i) => {
+              {filteredChildren.map((child, i) => {
                 const hasHorizontalRuleBefore =
-                  i === 0 ? false : !!children?.[i - 1]?.appendHorizontalRule;
+                  i === 0 ? false : !!filteredChildren?.[i - 1]?.appendHorizontalRule;
 
                 return (
                   <Fragment key={child.id}>

@@ -49,6 +49,8 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+export type SideNavNodeStatus = 'hidden' | 'visible' | 'renderAsItem';
+
 type NonEmptyArray<T> = [T, ...T[]];
 
 export type GetIsActiveFn = (params: {
@@ -92,7 +94,7 @@ interface NodeDefinitionBase {
    * in the Breadcrumbs, but are not rendered in the side navigation.
    * @default 'visible'
    */
-  sideNavStatus?: 'hidden' | 'visible' | 'renderAsItem';
+  sideNavStatus?: SideNavNodeStatus;
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */

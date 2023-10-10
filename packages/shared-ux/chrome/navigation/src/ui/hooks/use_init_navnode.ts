@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type {
   AppDeepLinkId,
   ChromeNavLink,
   ChromeProjectNavigationNode,
   CloudLinkId,
+  SideNavNodeStatus,
 } from '@kbn/core-chrome-browser';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { CloudLinks } from '../../cloud_links';
 
 import { useNavigation as useNavigationServices } from '../../services';
@@ -39,36 +40,48 @@ function hasUserAccessToCloudLink(): boolean {
   return true;
 }
 
-function isNodeVisible(
+function getNodeStatus(
   {
     link,
     deepLink,
     cloudLink,
+    sideNavStatus,
   }: {
     link?: string;
     deepLink?: ChromeNavLink;
     cloudLink?: CloudLinkId;
+    sideNavStatus?: SideNavNodeStatus;
   },
-  { cloudLinks }: { cloudLinks: CloudLinks }
-) {
+  {
+    cloudLinks,
+    childrenNodes,
+  }: { cloudLinks: CloudLinks; childrenNodes: Record<string, ChromeProjectNavigationNode> }
+): SideNavNodeStatus | 'remove' {
   if (link && !deepLink) {
     // If a link is provided, but no deepLink is found, don't render anything
-    return false;
+    return 'remove';
   }
 
   if (cloudLink) {
     if (!cloudLinks[cloudLink]) {
       // Invalid cloudLinkId or link url has not been set in kibana.yml
-      return false;
+      return 'remove';
     }
-    return hasUserAccessToCloudLink();
+    if (!hasUserAccessToCloudLink()) return 'remove';
   }
 
-  if (deepLink) {
-    return !deepLink.hidden;
+  if (deepLink && deepLink.hidden) return 'remove';
+
+  const children = Object.values(childrenNodes);
+  const allChildrenAreHidden = children.every((child) => child.sideNavStatus === 'hidden');
+
+  // If there are children and all of them are hidden, we don't render the parent
+  // Except if the parent is mark as "renderAsItem".
+  if (children.length > 0 && allChildrenAreHidden && sideNavStatus !== 'renderAsItem') {
+    return 'remove';
   }
 
-  return true;
+  return sideNavStatus ?? 'visible';
 }
 
 function getTitleForNode<
@@ -144,13 +157,19 @@ function createInternalNavNode<
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null,
   isActive: boolean,
-  { cloudLinks }: { cloudLinks: CloudLinks }
+  {
+    cloudLinks,
+    childrenNodes,
+  }: { cloudLinks: CloudLinks; childrenNodes: Record<string, ChromeProjectNavigationNode> }
 ): ChromeProjectNavigationNode | null {
   validateNodeProps(_navNode);
 
   const { children, link, cloudLink, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
-  const isVisible = isNodeVisible({ link, deepLink, cloudLink }, { cloudLinks });
+  const sideNavStatus = getNodeStatus(
+    { link, deepLink, cloudLink, sideNavStatus: navNode.sideNavStatus },
+    { cloudLinks, childrenNodes }
+  );
   const title = getTitleForNode(_navNode, { deepLink, cloudLinks });
   const href = cloudLink ? cloudLinks[cloudLink]?.href : _navNode.href;
 
@@ -158,7 +177,7 @@ function createInternalNavNode<
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
   }
 
-  if (!isVisible) {
+  if (sideNavStatus === 'remove') {
     return null;
   }
 
@@ -170,6 +189,7 @@ function createInternalNavNode<
     deepLink,
     href,
     isActive,
+    sideNavStatus,
   };
 }
 
@@ -234,8 +254,9 @@ export const useInitNavNode = <
   const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () => createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks }),
-    [node, id, deepLinks, nodePath, isActive, cloudLinks]
+    () =>
+      createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks, childrenNodes }),
+    [node, id, deepLinks, nodePath, isActive, cloudLinks, childrenNodes]
   );
 
   // Register the node on the parent whenever its properties change or whenever
