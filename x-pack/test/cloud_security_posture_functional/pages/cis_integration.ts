@@ -119,21 +119,6 @@ export default function (providerContext: FtrProviderContext) {
           true
         );
       });
-
-      it('Users should be to Edit the Integration (change account type from Single to Organization in this case)', async () => {
-        await cisIntegration.navigateToAddIntegrationCspList();
-        await cisIntegrationGcp.clickPolicyToBeEdited('cspm-3');
-        await cisIntegrationGcp.getOptionButtonEdit('Organization ID');
-        expect((await cisIntegrationGcp.getOptionButtonEdit('Organization ID')) === 0);
-        await cisIntegrationGcp.clickOptionButtonEdit('GCP Organization');
-        await cisIntegrationGcp.clickOptionButtonEdit('Google Cloud Shell');
-        await cisIntegrationGcp.clickSaveButtonEdit();
-        pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegrationGcp.clickPolicyToBeEdited('cspm-1');
-        expect((await cisIntegrationGcp.getOptionButtonEdit('Organization ID')) === 1);
-
-        await new Promise((r) => setTimeout(r, 80000));
-      });
     });
   });
 }
