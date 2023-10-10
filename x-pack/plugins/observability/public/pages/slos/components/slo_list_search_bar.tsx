@@ -28,7 +28,7 @@ export interface Props {
   loading: boolean;
   initialState: SearchState;
   onChangeQuery: (query: string) => void;
-  onChangeSort: (sort: SortField | undefined) => void;
+  onChangeSort: (sort: SortField) => void;
 }
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
@@ -85,7 +85,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
   const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
     setSortOptions(newOptions);
     setSortPopoverOpen(false);
-    onChangeSort(newOptions.find((o) => o.checked)?.type);
+    onChangeSort(newOptions.find((o) => o.checked)!.type);
   };
 
   return (
@@ -150,7 +150,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
                 })}
               </EuiPopoverTitle>
               <EuiSelectable<Item<SortField>>
-                singleSelection
+                singleSelection="always"
                 options={sortOptions}
                 onChange={handleChangeSort}
                 isLoading={loading}

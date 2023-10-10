@@ -21,11 +21,14 @@ export interface SearchState {
 
 export const DEFAULT_STATE = {
   kqlQuery: '',
-  page: 0,
+  page: 1,
   sort: { by: 'status' as const, direction: 'desc' as const },
 };
 
-export function useStoreSearchState(): { state: SearchState } {
+export function useStoreSearchState(): {
+  state: SearchState;
+  store: (state: Partial<SearchState>) => Promise<string | undefined>;
+} {
   const history = useHistory();
   const urlStateStorage = createKbnUrlStateStorage({
     history,
@@ -35,5 +38,9 @@ export function useStoreSearchState(): { state: SearchState } {
 
   const searchState = urlStateStorage.get<SearchState>('changeme') ?? DEFAULT_STATE;
 
-  return { state: deepmerge(DEFAULT_STATE, searchState) };
+  return {
+    state: deepmerge(DEFAULT_STATE, searchState),
+    store: (state: Partial<SearchState>) =>
+      urlStateStorage.set('changeme', deepmerge(searchState, state), { replace: true }),
+  };
 }
