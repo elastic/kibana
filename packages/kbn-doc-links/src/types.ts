@@ -605,6 +605,9 @@ export interface DocLinks {
     readonly integrationsConnectorClient: string;
     readonly integrationsLogstash: string;
   };
+  readonly serverlessSecurity: {
+    readonly apiKeyPrivileges: string;
+  };
   readonly synthetics: {
     readonly featureRoles: string;
   };
