@@ -121,7 +121,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
     setIsEdit(false);
   };
 
-  const initialValue = customField?.value?.[0] ?? '';
+  const initialValue = customField?.value ?? '';
   const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
   const isCustomFieldValueDefined = !isEmpty(customField?.value);
