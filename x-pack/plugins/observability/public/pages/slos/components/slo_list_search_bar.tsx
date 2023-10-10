@@ -22,7 +22,7 @@ import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { useState } from 'react';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
-import { SearchState } from '../hooks/use_search_state';
+import { SearchState } from '../hooks/use_url_search_state';
 
 export interface Props {
   loading: boolean;

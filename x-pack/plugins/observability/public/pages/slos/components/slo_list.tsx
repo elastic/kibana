@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { useSearchState as useSearchState } from '../hooks/use_search_state';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloListItems } from './slo_list_items';
 import { SloListSearchBar, SortField } from './slo_list_search_bar';
 
@@ -18,11 +18,11 @@ export interface Props {
 }
 
 export function SloList({ autoRefresh }: Props) {
-  const { state, store: storeState } = useSearchState();
-
+  const { state, store: storeState } = useUrlSearchState();
   const [page, setPage] = useState(state.page);
   const [query, setQuery] = useState(state.kqlQuery);
-  const [sort, setSort] = useState<SortField | undefined>(state.sort.by);
+  const [sort, setSort] = useState<SortField>(state.sort.by);
+  const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
 
   const {
     isLoading,
@@ -33,7 +33,7 @@ export function SloList({ autoRefresh }: Props) {
     page: page + 1,
     kqlQuery: query,
     sortBy: sort,
-    sortDirection: state.sort.direction,
+    sortDirection: direction,
     shouldRefetch: autoRefresh,
   });
 

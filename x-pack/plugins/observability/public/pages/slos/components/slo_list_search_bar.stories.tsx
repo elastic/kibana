@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListSearchBar as Component, Props } from './slo_list_search_bar';
-import { DEFAULT_STATE } from '../hooks/use_search_state';
+import { DEFAULT_STATE } from '../hooks/use_url_search_state';
 
 export default {
   component: Component,

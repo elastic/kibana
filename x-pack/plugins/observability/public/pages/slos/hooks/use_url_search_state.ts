@@ -25,7 +25,7 @@ export const DEFAULT_STATE = {
   sort: { by: 'status' as const, direction: 'desc' as const },
 };
 
-export function useSearchState(): {
+export function useUrlSearchState(): {
   state: SearchState;
   store: (state: Partial<SearchState>) => Promise<string | undefined>;
 } {
