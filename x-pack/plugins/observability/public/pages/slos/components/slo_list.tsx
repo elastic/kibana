@@ -20,7 +20,7 @@ export interface Props {
 export function SloList({ autoRefresh }: Props) {
   const { state } = useStoreSearchState();
 
-  const [activePage, setActivePage] = useState(state.page);
+  const [page, setPage] = useState(state.page);
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField | undefined>(state.sort.by);
 
@@ -30,7 +30,7 @@ export function SloList({ autoRefresh }: Props) {
     isError,
     data: sloList,
   } = useFetchSloList({
-    page: activePage + 1,
+    page: page + 1,
     kqlQuery: query,
     sortBy: sort,
     sortDirection: state.sort.direction,
@@ -45,16 +45,16 @@ export function SloList({ autoRefresh }: Props) {
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
   const handlePageClick = (pageNumber: number) => {
-    setActivePage(pageNumber);
+    setPage(pageNumber);
   };
 
   const handleChangeQuery = (newQuery: string) => {
-    setActivePage(0);
+    setPage(0);
     setQuery(newQuery);
   };
 
   const handleChangeSort = (newSort: SortField | undefined) => {
-    setActivePage(0);
+    setPage(0);
     setSort(newSort);
   };
 
@@ -79,7 +79,7 @@ export function SloList({ autoRefresh }: Props) {
             <EuiFlexItem>
               <EuiPagination
                 pageCount={Math.ceil(total / perPage)}
-                activePage={activePage}
+                activePage={page}
                 onPageClick={handlePageClick}
               />
             </EuiFlexItem>
