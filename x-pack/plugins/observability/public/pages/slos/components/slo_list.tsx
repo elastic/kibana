@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { useStoreSearchState } from '../hooks/use_store_search_state';
+import { useSearchState as useSearchState } from '../hooks/use_search_state';
 import { SloListItems } from './slo_list_items';
 import { SloListSearchBar, SortField } from './slo_list_search_bar';
 
@@ -18,7 +18,7 @@ export interface Props {
 }
 
 export function SloList({ autoRefresh }: Props) {
-  const { state, store } = useStoreSearchState();
+  const { state, store: storeState } = useSearchState();
 
   const [page, setPage] = useState(state.page);
   const [query, setQuery] = useState(state.kqlQuery);
@@ -46,19 +46,19 @@ export function SloList({ autoRefresh }: Props) {
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
-    store({ page: pageNumber });
+    storeState({ page: pageNumber });
   };
 
   const handleChangeQuery = (newQuery: string) => {
     setPage(1);
     setQuery(newQuery);
-    store({ page: 1, kqlQuery: newQuery });
+    storeState({ page: 1, kqlQuery: newQuery });
   };
 
   const handleChangeSort = (newSort: SortField) => {
     setPage(1);
     setSort(newSort);
-    store({ page: 1, sort: { by: newSort, direction: state.sort.direction } });
+    storeState({ page: 1, sort: { by: newSort, direction: state.sort.direction } });
   };
 
   return (

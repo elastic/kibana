@@ -25,7 +25,7 @@ export const DEFAULT_STATE = {
   sort: { by: 'status' as const, direction: 'desc' as const },
 };
 
-export function useStoreSearchState(): {
+export function useSearchState(): {
   state: SearchState;
   store: (state: Partial<SearchState>) => Promise<string | undefined>;
 } {
@@ -36,11 +36,11 @@ export function useStoreSearchState(): {
     useHashQuery: false,
   });
 
-  const searchState = urlStateStorage.get<SearchState>('changeme') ?? DEFAULT_STATE;
+  const searchState = urlStateStorage.get<SearchState>('search') ?? DEFAULT_STATE;
 
   return {
     state: deepmerge(DEFAULT_STATE, searchState),
     store: (state: Partial<SearchState>) =>
-      urlStateStorage.set('changeme', deepmerge(searchState, state), { replace: true }),
+      urlStateStorage.set('search', deepmerge(searchState, state), { replace: true }),
   };
 }
