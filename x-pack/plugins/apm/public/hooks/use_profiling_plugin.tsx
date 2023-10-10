@@ -13,7 +13,7 @@ export function useProfilingPlugin() {
   const { plugins, core } = useApmPluginContext();
   const isProfilingIntegrationEnabled = core.uiSettings.get<boolean>(
     apmEnableProfilingIntegration,
-    false
+    true
   );
 
   const { data } = useFetcher((callApmApi) => {
