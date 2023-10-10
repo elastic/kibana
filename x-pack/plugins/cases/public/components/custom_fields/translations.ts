@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
 export const TITLE = i18n.translate('xpack.cases.customFields.title', {
-  defaultMessage: 'Custom Fields',
+  defaultMessage: 'Custom fields',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.customFields.description', {
@@ -78,11 +78,9 @@ export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>
     defaultMessage: 'click to edit {customFieldLabel}',
   });
 
-export const NO_CUSTOM_FIELD_SET = (customFieldLabel: string) =>
-  i18n.translate('xpack.cases.caseView.noCustomFieldSet', {
-    values: { customFieldLabel },
-    defaultMessage: 'No "{customFieldLabel}" added',
-  });
+export const NO_CUSTOM_FIELD_SET = i18n.translate('xpack.cases.caseView.noCustomFieldSet', {
+  defaultMessage: 'No value is added',
+});
 
 export const DELETE_FIELD_TITLE = (fieldName: string) =>
   i18n.translate('xpack.cases.customFields.deleteField', {

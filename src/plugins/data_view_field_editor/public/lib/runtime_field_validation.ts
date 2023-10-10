@@ -10,7 +10,7 @@ import { ScriptError } from '../components/preview/types';
 import { RuntimeFieldPainlessError, PainlessErrorCode } from '../types';
 
 export const getErrorCodeFromErrorReason = (reason: string = ''): PainlessErrorCode => {
-  if (reason.startsWith('Cannot cast from')) {
+  if (reason.includes('Cannot cast from')) {
     return 'CAST_ERROR';
   }
   return 'UNKNOWN';
