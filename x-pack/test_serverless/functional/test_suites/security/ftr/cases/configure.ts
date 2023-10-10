@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlSecNavigation = getService('svlSecNavigation');
   const testSubjects = getService('testSubjects');
@@ -23,12 +24,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
-
       await svlSecNavigation.navigateToLandingPage();
-
       await testSubjects.click('solutionSideNavItemLink-cases');
-
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
