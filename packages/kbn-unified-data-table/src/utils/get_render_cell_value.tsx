@@ -33,7 +33,6 @@ import { defaultMonacoEditorWidth } from '../constants';
 import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
-const EMPTY_VALUE = ' - ';
 
 export const getRenderCellValueFn = ({
   dataView,
@@ -147,10 +146,10 @@ export const getRenderCellValueFn = ({
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([fieldDisplayName, value]) => {
+          {pairs.map(([fieldDisplayName, value, fieldName]) => {
             // temporary solution for text based mode. As there are a lot of unsupported fields we want to
             // hide the empty one from the Document view
-            if (isPlainRecord && value === EMPTY_VALUE) return null;
+            if (isPlainRecord && fieldName && row.flattened[fieldName] === null) return null;
             return (
               <Fragment key={fieldDisplayName}>
                 <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">

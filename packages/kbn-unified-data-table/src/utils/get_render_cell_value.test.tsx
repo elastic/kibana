@@ -80,7 +80,7 @@ const rowsSourceWithEmptyValues: EsHitRecord[] = [
     _id: '1',
     _index: 'test',
     _score: 1,
-    _source: { bytes: 100, extension: ' - ' },
+    _source: { bytes: 100, extension: null },
     highlight: {
       extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
