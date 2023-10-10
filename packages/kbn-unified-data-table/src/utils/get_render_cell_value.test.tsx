@@ -380,7 +380,6 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(
-      '',
       `
       <EuiDescriptionList
         className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
