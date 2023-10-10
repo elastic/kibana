@@ -9,8 +9,8 @@
 import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
-import { FieldsForWildcardResponse } from '../../common/types';
-import { FIELDS_FOR_WILDCARD_PATH } from '../../common/constants';
+import { ExistingIndicesResponse, FieldsForWildcardResponse } from '../../common/types';
+import { EXISTING_INDICES_PATH, FIELDS_FOR_WILDCARD_PATH } from '../../common/constants';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
@@ -86,5 +86,18 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       this._getUrl(['has_user_index_pattern'])
     );
     return response?.result ?? false;
+  }
+
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  async getExistingIndices(indices: string[]): Promise<string[]> {
+    return this._request<ExistingIndicesResponse>(EXISTING_INDICES_PATH, { indices }).then(
+      (response) => {
+        return response || [];
+      }
+    );
   }
 }
