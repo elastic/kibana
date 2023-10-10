@@ -48,6 +48,11 @@ export enum AppFeatureSecurityKey {
    * Enables managing endpoint exceptions on rules and alerts
    */
   endpointExceptions = 'endpointExceptions',
+
+  /**
+   * enables all rule actions
+   */
+  allRuleActions = 'all_rule_actions',
 }
 
 export enum AppFeatureCasesKey {
@@ -89,6 +94,7 @@ export enum SecuritySubFeatureId {
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
+  allRuleActions = 'allRuleActionsSubFeature',
 }
 
 /** Sub-features IDs for Cases */

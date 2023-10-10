@@ -22,6 +22,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
       AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
+      AppFeatureKey.allRuleActions,
     ],
   },
   endpoint: {

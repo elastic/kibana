@@ -41,6 +41,8 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+
 import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -63,6 +65,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   osquery: OsqueryPluginSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
+  actions: ActionsPluginSetupContract;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
@@ -92,6 +95,11 @@ export interface SecuritySolutionPluginSetup {
    * The security solution generic experimental features
    */
   experimentalFeatures: ExperimentalFeatures;
+
+  /**
+   * enables rule actions based on PLI
+   */
+  enableRulesActionsByPLI: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -111,6 +111,7 @@ import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protectio
 import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+import { enableRuleActions } from './utils/enable_rule_actions';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -457,6 +458,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       setAppFeaturesConfigurator:
         appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
       experimentalFeatures: { ...config.experimentalFeatures },
+      enableRulesActionsByPLI: () => {
+        enableRuleActions({ actions: plugins.actions, appFeatures: this.appFeaturesService });
+      },
     };
   }
 
