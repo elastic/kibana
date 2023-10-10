@@ -22,6 +22,8 @@ import type {
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
+  UninstallAgentFromHostTaskOptions,
+  IsAgentAndEndpointUninstalledFromHostTaskOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,

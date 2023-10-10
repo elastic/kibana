@@ -18,7 +18,11 @@ import {
   API_VERSIONS,
   agentPolicyRouteService,
 } from '@kbn/fleet-plugin/common';
-import type { GetOneAgentResponse, PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
+import type {
+  GetOneAgentResponse,
+  PutAgentReassignResponse,
+  UpdateAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common/types';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
 import type { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
@@ -89,7 +93,7 @@ export const createAgentPolicyTask = (
 };
 
 export const enableAgentTamperProtectionFeatureFlagInPolicy = (agentPolicyId: string) => {
-  return request({
+  return request<UpdateAgentPolicyResponse>({
     method: 'PUT',
     url: agentPolicyRouteService.getUpdatePath(agentPolicyId),
     body: {
@@ -129,7 +133,10 @@ export const unenrollAgent = (agentId: string): Cypress.Chainable<boolean> => {
   });
 };
 
-export const changeAgentPolicy = (agentId: string, policyId: string) => {
+export const changeAgentPolicy = (
+  agentId: string,
+  policyId: string
+): Cypress.Chainable<boolean> => {
   return request({
     method: 'POST',
     url: agentRouteService.getReassignPath(agentId),
