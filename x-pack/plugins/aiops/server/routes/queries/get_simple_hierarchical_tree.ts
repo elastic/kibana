@@ -178,18 +178,18 @@ function dfDepthFirstSearch(
  * By default (fields==None), the field search order is dependent on the highest count itemsets.
  */
 export function getSimpleHierarchicalTree(
-  df: ItemSet[],
+  itemSets: ItemSet[],
   collapseRedundant: boolean,
   displayOther: boolean,
   significantTerms: SignificantTerm[],
   fields: string[] = []
 ) {
-  const totalDocCount = Math.max(...df.map((d) => d.total_doc_count));
+  const totalDocCount = Math.max(...itemSets.map((d) => d.total_doc_count));
 
   const newRoot = NewNodeFactory('');
 
   for (const field of fields) {
-    for (const value of getValuesDescending(df, field)) {
+    for (const value of getValuesDescending(itemSets, field)) {
       dfDepthFirstSearch(
         significantTerms,
         fields,
@@ -198,7 +198,7 @@ export function getSimpleHierarchicalTree(
         '',
         field,
         value,
-        df,
+        itemSets,
         collapseRedundant,
         displayOther
       );
