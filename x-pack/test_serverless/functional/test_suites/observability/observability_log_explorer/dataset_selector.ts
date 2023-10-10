@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dataset Selector', function () {
     // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="datasetSelectorPopoverButton"])
-    this.tags(['skipOnMKI']);
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
