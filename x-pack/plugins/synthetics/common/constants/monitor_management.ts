@@ -8,6 +8,8 @@
 export enum AlertConfigKey {
   STATUS_ENABLED = 'alert.status.enabled',
   TLS_ENABLED = 'alert.tls.enabled',
+  CONNECTORS = 'alert.connectors',
+  HAS_CONNECTORS = 'alert.has_connectors',
 }
 
 // values must match keys in the integration package

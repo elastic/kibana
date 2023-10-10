@@ -59,6 +59,7 @@ import {
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
+  AlertConnectorWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
@@ -525,6 +526,23 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'data-test-subj': 'syntheticsAlertStatusSwitch',
         // alert config is an allowed field for read only
         disabled: !isProjectMonitor && readOnly,
+      };
+    },
+  },
+  [AlertConfigKey.CONNECTORS]: {
+    fieldKey: AlertConfigKey.CONNECTORS,
+    component: AlertConnectorWrapper,
+    label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
+      defaultMessage: 'Connectors',
+    }),
+    controlled: true,
+    dependencies: [AlertConfigKey.STATUS_ENABLED],
+    props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
+      return {
+        onChange: (updatedValues: string[]) => {
+          setValue(AlertConfigKey.CONNECTORS, updatedValues);
+        },
+        isDisabled: readOnly,
       };
     },
   },

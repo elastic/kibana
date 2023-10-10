@@ -88,16 +88,8 @@ const Application = (props: SyntheticsAppProps) => {
               services={{
                 ...core,
                 ...plugins,
+                ...startPlugins,
                 storage,
-                data: startPlugins.data,
-                inspector: startPlugins.inspector,
-                triggersActionsUi: startPlugins.triggersActionsUi,
-                observability: startPlugins.observability,
-                observabilityShared: startPlugins.observabilityShared,
-                exploratoryView: startPlugins.exploratoryView,
-                cases: startPlugins.cases,
-                spaces: startPlugins.spaces,
-                fleet: startPlugins.fleet,
               }}
             >
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>

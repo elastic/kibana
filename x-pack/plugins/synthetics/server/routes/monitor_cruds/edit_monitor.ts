@@ -8,6 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isEqual } from 'lodash';
+import { DefaultAlertService } from '../default_alerts/default_alert_service';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './helper';
@@ -90,6 +92,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         [ConfigKey.CONFIG_HASH]: '',
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
+      if (monitorWithRevision.alert) {
+        monitorWithRevision.alert.has_connectors =
+          (monitorWithRevision.alert.connectors ?? []).length > 0;
+      }
 
       const {
         publicSyncErrors,
@@ -220,6 +226,12 @@ export const syncEditedMonitor = async ({
       )
     );
 
+    updateDefaultAlerts(
+      editedMonitorSavedObject.attributes as EncryptedSyntheticsMonitorAttributes,
+      previousMonitor.attributes as EncryptedSyntheticsMonitorAttributes,
+      routeContext
+    );
+
     return {
       failedPolicyUpdates,
       publicSyncErrors,
@@ -255,5 +267,47 @@ export const validatePermissions = async (
     ) ?? true;
   if (!elasticManagedLocationsEnabled) {
     return "You don't have permission to use public locations";
+  }
+};
+
+const updateDefaultAlerts = (
+  attributes: EncryptedSyntheticsMonitorAttributes,
+  prevAttributes: EncryptedSyntheticsMonitorAttributes,
+  routeContext: RouteContext
+) => {
+  const currentConnectors = (attributes?.alert?.connectors ?? []).sort();
+  const prevConnectors = (prevAttributes?.alert?.connectors ?? []).sort();
+
+  // if the connectors are the same, we don't need to do anything
+  if (isEqual(currentConnectors, prevConnectors)) {
+    return;
+  }
+
+  const removedConnectors = prevConnectors.filter((prevConnector) => {
+    return !currentConnectors.includes(prevConnector);
+  });
+
+  const addedConnectors = currentConnectors.filter((currentConnector) => {
+    return !prevConnectors.includes(currentConnector);
+  });
+
+  const { name } = attributes;
+  const { server, savedObjectsClient, context } = routeContext;
+  try {
+    // we do this async, so we don't block the user, error handling will be done on the UI via separate api
+    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    defaultAlertService
+      .setupDefaultAlerts([
+        {
+          removedConnectors,
+          addedConnectors,
+          configId: attributes[ConfigKey.CONFIG_ID],
+        },
+      ])
+      .then(() => {
+        server.logger.debug(`Successfully updated default alert for monitor: ${name}`);
+      });
+  } catch (e) {
+    server.logger.error(`Error updating default alert: ${e} for monitor: ${name}`);
   }
 };

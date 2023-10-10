@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { selectDynamicSettings } from '../../../../state/settings/selectors';
 import { fetchActionTypes } from '../../../../state/settings/api';
-import { getConnectorsAction } from '../../../../state/settings/actions';
+import { getConnectorsAction, getDynamicSettingsAction } from '../../../../state/settings/actions';
 
 export const useAlertingDefaults = () => {
   const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
@@ -25,13 +25,17 @@ export const useAlertingDefaults = () => {
 
   useEffect(() => {
     dispatch(getConnectorsAction.get());
+    dispatch(getDynamicSettingsAction.get());
   }, [dispatch]);
 
   const options = (connectors ?? [])
     .filter((action) => (actionTypes ?? []).find((type) => type.id === action.actionTypeId))
     .map((connectorAction) => ({
       value: connectorAction.id,
-      label: connectorAction.name,
+      label:
+        connectorAction.name +
+        ' - ' +
+        actionTypes?.find((type) => type.id === connectorAction.actionTypeId)?.name,
       'data-test-subj': connectorAction.name,
       prepend: (
         <EuiIcon

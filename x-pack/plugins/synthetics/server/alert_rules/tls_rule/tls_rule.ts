@@ -19,6 +19,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { O11Y_AAD_FIELDS } from '@kbn/infra-plugin/common/constants';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 import {
@@ -35,7 +36,7 @@ import {
   SYNTHETICS_ALERT_RULE_TYPES,
   TLS_CERTIFICATE,
 } from '../../../common/constants/synthetics_alerts';
-import { generateAlertMessage, updateState, UptimeRuleTypeAlertDefinition } from '../common';
+import { generateAlertMessage, updateState, SyntheticsRuleTypeAlertDefinition } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
@@ -152,8 +153,9 @@ export const registerSyntheticsTLSCheckRule = (
 
       return { state: updateState(ruleState, foundCerts) };
     },
-    alerts: UptimeRuleTypeAlertDefinition,
+    alerts: SyntheticsRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
+    fieldsForAAD: O11Y_AAD_FIELDS,
   });
 };

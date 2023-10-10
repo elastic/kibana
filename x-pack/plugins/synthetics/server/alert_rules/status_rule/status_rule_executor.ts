@@ -82,6 +82,7 @@ export class StatusRuleExecutor {
     } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
 
     return {
+      allMonitors: this.monitors,
       enabledMonitorQueryIds,
       monitorLocationIds,
       allIds,
@@ -95,6 +96,7 @@ export class StatusRuleExecutor {
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
     const {
+      allMonitors,
       monitorLocationIds,
       enabledMonitorQueryIds,
       allIds,
@@ -126,6 +128,12 @@ export class StatusRuleExecutor {
         if (!downConfigs[locId] && !upConfigs[locId]) {
           downConfigs[locId] = prevDownConfigs[locId];
         }
+      });
+
+      Object.keys(downConfigs).forEach((locId) => {
+        const downConfig = downConfigs[locId];
+        const monitor = allMonitors.find((m) => m.id === downConfig.configId);
+        downConfig.connectors = monitor?.attributes?.[ConfigKey.ALERT_CONFIG]?.connectors;
       });
 
       const staleDownConfigs = this.markDeletedConfigs(downConfigs);

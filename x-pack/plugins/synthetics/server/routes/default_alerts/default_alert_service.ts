@@ -7,8 +7,10 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { monitorAttributes } from '../../../common/types/saved_objects';
 import { savedObjectsAdapter } from '../../saved_objects';
-import { populateAlertActions } from '../../../common/rules/alert_actions';
+import { populateAlertActions, RuleAction } from '../../../common/rules/alert_actions';
 import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
@@ -19,8 +21,14 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
+import { AlertConfigKey, ConfigKey } from '../../../common/constants/monitor_management';
 
 type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
+export interface MonitorConnectors {
+  addedConnectors?: string[];
+  removedConnectors?: string[];
+  configId?: string;
+}
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
@@ -36,10 +44,10 @@ export class DefaultAlertService {
     this.soClient = soClient;
   }
 
-  async setupDefaultAlerts() {
+  async setupDefaultAlerts(connectors?: MonitorConnectors[]) {
     const [statusRule, tlsRule] = await Promise.allSettled([
-      this.setupStatusRule(),
-      this.setupTlsRule(),
+      this.setupStatusRule(connectors),
+      this.setupTlsRule(connectors),
     ]);
 
     if (statusRule.status === 'rejected') {
@@ -55,19 +63,21 @@ export class DefaultAlertService {
     };
   }
 
-  setupStatusRule() {
+  setupStatusRule(connectors?: MonitorConnectors[]) {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal alert`,
-      '1m'
+      '1m',
+      connectors
     );
   }
 
-  setupTlsRule() {
+  setupTlsRule(connectors?: MonitorConnectors[]) {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS alert`,
-      '1m'
+      '1m',
+      connectors
     );
   }
 
@@ -89,15 +99,48 @@ export class DefaultAlertService {
 
     return { ...alert, ruleTypeId: alert.alertTypeId };
   }
-  async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+
+  async createDefaultAlertIfNotExist(
+    ruleType: DefaultRuleType,
+    name: string,
+    interval: string,
+    monitorConnectors?: MonitorConnectors[]
+  ) {
     const alert = await this.getExistingAlert(ruleType);
+
     if (alert) {
-      return alert;
+      if (!monitorConnectors) {
+        return alert;
+      } else {
+        const existingActions = alert.actions;
+        const actions = await this.getAlertActions({
+          ruleType,
+          monitorConnectors,
+          existingActions,
+        });
+        const rulesClient = (await this.context.alerting)?.getRulesClient();
+        const updatedAlert = await rulesClient.update({
+          id: alert.id,
+          data: {
+            actions,
+            name: alert.name,
+            tags: alert.tags,
+            schedule: alert.schedule,
+            params: alert.params,
+          },
+        });
+        return { ...updatedAlert, ruleTypeId: updatedAlert.alertTypeId };
+      }
     }
 
-    const actions = await this.getAlertActions(ruleType);
+    const customMonitorConnectors = await this.getCustomActions();
 
     const rulesClient = (await this.context.alerting)?.getRulesClient();
+    const actions = await this.getAlertActions({
+      ruleType,
+      monitorConnectors: customMonitorConnectors,
+    });
+
     const newAlert = await rulesClient.create<{}>({
       data: {
         actions,
@@ -112,6 +155,26 @@ export class DefaultAlertService {
       },
     });
     return { ...newAlert, ruleTypeId: newAlert.alertTypeId };
+  }
+
+  async getCustomActions() {
+    const allMonitors = await getAllMonitors({
+      soClient: this.soClient,
+      filter: `${monitorAttributes}.${AlertConfigKey.HAS_CONNECTORS}: true`,
+    });
+
+    const monitorConnectors: MonitorConnectors[] = [];
+    allMonitors.forEach((monitor) => {
+      const connectors = monitor.attributes.alert?.connectors ?? [];
+      const configId = monitor.attributes?.[ConfigKey.CONFIG_ID];
+      if (connectors.length > 0) {
+        monitorConnectors.push({
+          configId,
+          addedConnectors: connectors,
+        });
+      }
+    });
+    return monitorConnectors;
   }
 
   updateStatusRule() {
@@ -130,7 +193,7 @@ export class DefaultAlertService {
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
-      const actions = await this.getAlertActions(ruleType);
+      const actions = await this.getAlertActions({ ruleType, existingActions: alert.actions });
       const updatedAlert = await rulesClient.update({
         id: alert.id,
         data: {
@@ -147,37 +210,37 @@ export class DefaultAlertService {
     return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
   }
 
-  async getAlertActions(ruleType: DefaultRuleType) {
-    const { actionConnectors, settings } = await this.getActionConnectors();
-
-    const defaultActions = (actionConnectors ?? []).filter((act) =>
-      settings?.defaultConnectors?.includes(act.id)
-    );
+  async getAlertActions({
+    ruleType,
+    monitorConnectors,
+    existingActions,
+  }: {
+    ruleType: DefaultRuleType;
+    monitorConnectors?: MonitorConnectors[];
+    existingActions?: RuleAction[];
+  }): Promise<RuleAction[]> {
+    const [settings, allActionConnectors] = await Promise.all([
+      savedObjectsAdapter.getUptimeDynamicSettings(this.soClient),
+      this.getActionConnectors(),
+    ]);
 
     if (ruleType === SYNTHETICS_STATUS_RULE) {
       return populateAlertActions({
-        defaultActions,
+        settings,
+        allActionConnectors,
+        monitorConnectors,
         groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
-        defaultEmail: settings?.defaultEmail!,
-        translations: {
-          defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
-          defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
-          defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
-          defaultRecoverySubjectMessage:
-            SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
-        },
+        translations: StatusTranslations,
+        existingActions,
       });
     } else {
       return populateAlertActions({
-        defaultActions,
+        settings,
+        monitorConnectors,
+        allActionConnectors,
         groupId: ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
-        defaultEmail: settings?.defaultEmail!,
-        translations: {
-          defaultActionMessage: TlsTranslations.defaultActionMessage,
-          defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
-          defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
-          defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
-        },
+        translations: CertTranslations,
+        existingActions,
       });
     }
   }
@@ -185,13 +248,26 @@ export class DefaultAlertService {
   async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
 
-    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.soClient);
     let actionConnectors: FindActionResult[] = [];
     try {
       actionConnectors = await actionsClient.getAll();
     } catch (e) {
       this.server.logger.error(e);
     }
-    return { actionConnectors, settings };
+    return actionConnectors;
   }
 }
+
+const StatusTranslations = {
+  defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+  defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+  defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+  defaultRecoverySubjectMessage: SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+};
+
+const CertTranslations = {
+  defaultActionMessage: TlsTranslations.defaultActionMessage,
+  defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
+  defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
+  defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
+};

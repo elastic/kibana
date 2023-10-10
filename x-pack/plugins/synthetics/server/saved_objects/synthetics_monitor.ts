@@ -174,6 +174,9 @@ export const getSyntheticsMonitorSavedObjectType = (
                 },
               },
             },
+            has_connectors: {
+              type: 'boolean',
+            },
           },
         },
         throttling: {

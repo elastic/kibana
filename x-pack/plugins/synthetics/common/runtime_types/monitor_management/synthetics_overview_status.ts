@@ -29,14 +29,19 @@ export const OverviewPingCodec = t.intersection([
   }),
 ]);
 
-export const OverviewStatusMetaDataCodec = t.interface({
-  monitorQueryId: t.string,
-  configId: t.string,
-  status: t.string,
-  locationId: t.string,
-  timestamp: t.string,
-  ping: OverviewPingCodec,
-});
+export const OverviewStatusMetaDataCodec = t.intersection([
+  t.interface({
+    monitorQueryId: t.string,
+    configId: t.string,
+    status: t.string,
+    locationId: t.string,
+    timestamp: t.string,
+    ping: OverviewPingCodec,
+  }),
+  t.partial({
+    connectors: t.array(t.string),
+  }),
+]);
 
 export const OverviewPendingStatusMetaDataCodec = t.intersection([
   t.interface({

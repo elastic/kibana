@@ -62,6 +62,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
     };
+    if (monitorWithDefaults.alert) {
+      monitorWithDefaults.alert.has_connectors =
+        (monitorWithDefaults.alert.connectors ?? []).length > 0;
+    }
 
     const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
 
@@ -94,7 +98,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           },
         });
       }
-      initDefaultAlerts(newMonitor.attributes.name, routeContext);
+      initDefaultAlerts(newMonitor.attributes, routeContext);
       setupGettingStarted(newMonitor.id, routeContext);
 
       return response.ok({ body: mapSavedObjectToMonitor(newMonitor) });
@@ -295,14 +299,31 @@ export const getMonitorNamespace = (
   return namespace;
 };
 
-const initDefaultAlerts = (name: string, routeContext: RouteContext) => {
+export const initDefaultAlerts = (
+  attributes: EncryptedSyntheticsMonitorAttributes,
+  routeContext: RouteContext
+) => {
+  const { name, alert } = attributes;
   const { server, savedObjectsClient, context } = routeContext;
   try {
     // we do this async, so we don't block the user, error handling will be done on the UI via separate api
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-    defaultAlertService.setupDefaultAlerts().then(() => {
-      server.logger.debug(`Successfully created default alert for monitor: ${name}`);
-    });
+    if ((alert?.connectors ?? []).length === 0) {
+      defaultAlertService.setupDefaultAlerts().then(() => {
+        server.logger.debug(`Successfully created default alert for monitor: ${name}`);
+      });
+    } else {
+      defaultAlertService
+        .setupDefaultAlerts([
+          {
+            addedConnectors: alert?.connectors,
+            configId: attributes[ConfigKey.CONFIG_ID],
+          },
+        ])
+        .then(() => {
+          server.logger.debug(`Successfully created default alert for monitor: ${name}`);
+        });
+    }
   } catch (e) {
     server.logger.error(`Error creating default alert: ${e} for monitor: ${name}`);
   }

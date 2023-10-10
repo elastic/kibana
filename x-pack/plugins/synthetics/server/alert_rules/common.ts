@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
@@ -129,28 +129,6 @@ export const getRelativeViewInAppUrl = ({
   });
 
   return relativeViewInAppUrl;
-};
-
-export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
-  const diffInDays = endsAt.diff(startedAt, 'days');
-  if (diffInDays > 1) {
-    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
-      defaultMessage: '{value} days',
-      values: { value: diffInDays },
-    });
-  }
-  const diffInHours = endsAt.diff(startedAt, 'hours');
-  if (diffInHours > 1) {
-    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.hours', {
-      defaultMessage: '{value} hours',
-      values: { value: diffInHours },
-    });
-  }
-  const diffInMinutes = endsAt.diff(startedAt, 'minutes');
-  return i18n.translate('xpack.synthetics.errorDetails.errorDuration.mins', {
-    defaultMessage: '{value} mins',
-    values: { value: diffInMinutes },
-  });
 };
 
 export const setRecoveredAlertsContext = ({
@@ -340,10 +318,13 @@ export const generateFilterDSL = async (
   return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const syntheticsRuleTypeFieldMap = {
+  ...uptimeRuleFieldMap,
+  ...legacyExperimentalFieldMap,
+};
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
 };

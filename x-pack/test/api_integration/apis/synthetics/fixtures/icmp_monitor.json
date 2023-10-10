@@ -4,6 +4,7 @@
   "journey_id": "",
   "enabled": true,
   "alert": {
+    "has_connectors": false,
     "status": {
       "enabled": true
     }

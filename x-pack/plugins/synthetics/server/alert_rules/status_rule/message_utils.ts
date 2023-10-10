@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { isEqual } from 'lodash';
 import { ALERT_REASON_MSG } from '../action_variables';
 import { MonitorSummaryStatusRule } from './types';
 import {
@@ -20,22 +21,32 @@ import {
   AGENT_NAME,
   STATE_ID,
 } from '../../../common/field_names';
-import { OverviewPing } from '../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes, OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 
-export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule) => ({
-  [MONITOR_ID]: monitorSummary.monitorId,
-  [MONITOR_TYPE]: monitorSummary.monitorType,
-  [MONITOR_NAME]: monitorSummary.monitorName,
-  [URL_FULL]: monitorSummary.monitorUrl,
-  [OBSERVER_GEO_NAME]: monitorSummary.locationName,
-  [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
-  [AGENT_NAME]: monitorSummary.hostName,
-  [ALERT_REASON]: monitorSummary.reason,
-  [STATE_ID]: monitorSummary.stateId,
-  'location.id': monitorSummary.locationId,
-  configId: monitorSummary.configId,
-});
+export const getMonitorAlertDocument = (
+  monitorSummary: MonitorSummaryStatusRule,
+  config?: EncryptedSyntheticsMonitorAttributes,
+  defaultConnectors: string[] = []
+) => {
+  const monitorConnectors = config?.alert?.connectors ?? defaultConnectors;
+  // compare monitor connectors with default connectors to see if there are any new connectors
+  const hasCustomerConnectors = !isEqual(monitorConnectors.sort(), defaultConnectors.sort());
+  return {
+    [MONITOR_ID]: monitorSummary.monitorId,
+    [MONITOR_TYPE]: monitorSummary.monitorType,
+    [MONITOR_NAME]: monitorSummary.monitorName,
+    [URL_FULL]: monitorSummary.monitorUrl,
+    [OBSERVER_GEO_NAME]: monitorSummary.locationName,
+    [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
+    [AGENT_NAME]: monitorSummary.hostName,
+    [ALERT_REASON]: monitorSummary.reason,
+    [STATE_ID]: monitorSummary.stateId,
+    'location.id': monitorSummary.locationId,
+    configId: monitorSummary.configId,
+    'monitor.custom_connectors': hasCustomerConnectors,
+  };
+};
 
 export const getMonitorSummary = (
   monitorInfo: OverviewPing,

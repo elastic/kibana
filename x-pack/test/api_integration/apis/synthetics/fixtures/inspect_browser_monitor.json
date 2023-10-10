@@ -3,6 +3,7 @@
   "form_monitor_type": "multistep",
   "enabled": true,
   "alert": {
+    "has_connectors": false,
     "status": {
       "enabled": true
     }

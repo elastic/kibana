@@ -11,6 +11,8 @@ import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { O11Y_AAD_FIELDS } from '@kbn/infra-plugin/common/constants';
+import { savedObjectsAdapter } from '../../saved_objects';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
@@ -31,7 +33,7 @@ import {
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
-  UptimeRuleTypeAlertDefinition,
+  SyntheticsRuleTypeAlertDefinition,
 } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
@@ -93,9 +95,13 @@ export const registerSyntheticsStatusCheckRule = (
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
         ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
       );
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+        savedObjectsClient
+      );
 
-      Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
+      Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId, connectors }]) => {
         const locationId = ping.observer.name ?? '';
+        const config = statusRule.monitors.find((monitor) => monitor.id === configId);
         const alertId = idWithLocation;
         const monitorSummary = getMonitorSummary(
           ping,
@@ -108,7 +114,11 @@ export const registerSyntheticsStatusCheckRule = (
 
         const alert = alertWithLifecycle({
           id: alertId,
-          fields: getMonitorAlertDocument(monitorSummary),
+          fields: getMonitorAlertDocument(
+            monitorSummary,
+            config?.attributes,
+            dynamicSettings.defaultConnectors
+          ),
         });
         const alertUuid = getAlertUuid(alertId);
         const alertState = alert.getState() as SyntheticsMonitorStatusAlertState;
@@ -159,8 +169,9 @@ export const registerSyntheticsStatusCheckRule = (
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: UptimeRuleTypeAlertDefinition,
+    alerts: SyntheticsRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
+    fieldsForAAD: O11Y_AAD_FIELDS,
   });
 };
