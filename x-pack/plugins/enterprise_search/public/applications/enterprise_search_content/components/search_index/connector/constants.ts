@@ -47,6 +47,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.dropbox,
+    platinumOnly: true,
   },
   github: {
     docsUrl: docLinks.connectorsGithub,
@@ -152,6 +153,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.servicenow,
+    platinumOnly: true,
   },
   sharepoint_server: {
     docsUrl: docLinks.connectorsSharepoint,
