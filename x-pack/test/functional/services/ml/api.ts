@@ -1507,8 +1507,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const { body, status } = await esSupertest.delete(
         `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
       );
-      // @todo
-      // this.assertResponseStatusCode(200, status, body);
+      this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
     },
@@ -1551,6 +1550,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, module);
 
       log.debug('Module set up');
+      return module;
+    },
+
+    async getModule(moduleId: string) {
+      log.debug(`Get module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .get(`/internal/ml/modules/get_module/${moduleId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
       return module;
     },
   };

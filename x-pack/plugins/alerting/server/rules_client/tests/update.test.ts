@@ -90,6 +90,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -182,6 +184,7 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -1001,6 +1004,7 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1524,6 +1528,7 @@ describe('update()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validLegacyConsumers: [],
     });
@@ -1906,6 +1911,7 @@ describe('update()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },

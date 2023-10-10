@@ -79,6 +79,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
@@ -154,6 +156,7 @@ describe('bulkDelete', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: schema.any(),
