@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
@@ -22,6 +22,8 @@ import { GraphStorage } from './content_management/graph_storage';
 
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
@@ -45,7 +47,10 @@ export class GraphPlugin implements Plugin {
 
     contentManagement.register({
       id: CONTENT_ID,
-      storage: new GraphStorage(),
+      storage: new GraphStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.initializerContext.logger.get(),
+      }),
       version: {
         latest: LATEST_VERSION,
       },
