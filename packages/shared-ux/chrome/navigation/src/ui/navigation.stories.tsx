@@ -26,7 +26,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+  NodeDefinition,
+} from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../../types';
@@ -136,15 +140,15 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
       defaultIsCollapsed: false,
       children: [
         {
-          id: 'item1',
+          link: 'item1',
           title: 'Get started',
         },
         {
-          id: 'item2',
+          link: 'item2',
           title: 'Alerts',
         },
         {
-          id: 'item3',
+          link: 'item3',
           title: 'Dashboards',
         },
         {
@@ -153,7 +157,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
           href: 'https://elastic.co',
         },
         {
-          id: 'item5',
+          link: 'item5',
           title: 'Another link',
         },
         {
@@ -161,21 +165,21 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
           title: 'Settings',
           children: [
             {
-              id: 'logs',
+              link: 'item1',
               title: 'Logs',
             },
             {
-              id: 'signals',
+              link: 'item2',
               title: 'Signals',
             },
             {
-              id: 'tracing',
+              link: 'item3',
               title: 'Tracing',
             },
           ],
         },
       ],
-    },
+    } as NodeDefinition<any>,
   ],
 };
 
@@ -360,12 +364,11 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             // Panel with default content
             // Groups with title
             id: 'group:openpanel1',
-            title: 'Open panel (default 1)',
+            title: 'Open panel (1)',
             openPanel: true,
             link: 'item1',
             children: [
               {
-                id: 'group1',
                 title: 'Group 1',
                 children: [
                   {
@@ -385,7 +388,6 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                 ],
               },
               {
-                id: 'group2',
                 title: 'Group 2',
                 children: [
                   {
@@ -410,13 +412,11 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with default content
             // Groups with **not** title
-            id: 'group:openpanel1b',
-            title: 'Open panel (default 2)',
+            title: 'Open panel (2)',
             openPanel: true,
             link: 'item1',
             children: [
               {
-                id: 'group1',
                 appendHorizontalRule: true, // Add a separator after the group
                 children: [
                   {
@@ -459,8 +459,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with default content
             // Accordion to wrap groups
-            id: 'group:openpanel1c',
-            title: 'Open panel (default 3)',
+            title: 'Open panel (3)',
             openPanel: true,
             link: 'item1',
             children: [
@@ -582,21 +581,16 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             link: 'item1',
             children: [
               {
-                id: 'root',
-                children: [
-                  {
-                    link: 'group:settings.logs',
-                    title: 'Those links',
-                  },
-                  {
-                    link: 'group:settings.signals',
-                    title: 'are automatically',
-                  },
-                  {
-                    link: 'group:settings.tracing',
-                    title: 'generated',
-                  },
-                ],
+                link: 'group:settings.logs',
+                title: 'Those links',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'are automatically',
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'generated',
               },
             ],
           },
@@ -676,7 +670,7 @@ export const WithUIComponents = (args: NavigationServices) => {
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
-              <Navigation.Group id="group:settings" link="apm" title="Open panel" openPanel>
+              <Navigation.Group<any> id="group:openPanel" link="item1" title="Open panel" openPanel>
                 <Navigation.Group id="group1">
                   <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
