@@ -138,14 +138,19 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
       'kbnTopNavMenu__wrapper--hidden': visible === false,
     });
     if (setMenuMountPoint) {
+      const badgesEl = renderBadges();
+      const menuEl = renderMenu(menuClassName);
       return (
         <>
-          <MountPointPortal setMountPoint={setMenuMountPoint}>
-            <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
-              {renderBadges()}
-              {renderMenu(menuClassName)}
-            </span>
-          </MountPointPortal>
+          {(badgesEl || menuEl) && (
+            <UnmountableMountPointPortal setMountPoint={setMenuMountPoint}>
+              <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
+                {badgesEl}
+                {menuEl}
+              </span>
+            </UnmountableMountPointPortal>
+          )}
+
           {renderSearchBar()}
         </>
       );
@@ -168,4 +173,17 @@ TopNavMenu.defaultProps = {
   showDatePicker: true,
   showFilterBar: true,
   screenTitle: '',
+};
+
+// TODO: make this a part of @kbn/react-kibana-mount ?
+const UnmountableMountPointPortal: React.FC<{
+  setMountPoint: (menuMount: MountPoint | undefined) => void;
+}> = ({ setMountPoint, children }) => {
+  React.useEffect(() => {
+    return () => {
+      setMountPoint(undefined);
+    };
+  }, [setMountPoint]);
+
+  return <MountPointPortal setMountPoint={setMountPoint}>{children}</MountPointPortal>;
 };

@@ -19,7 +19,6 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
@@ -183,12 +182,10 @@ export function ObservabilityOnboardingAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <EuiErrorBoundary>
-                <HeaderMenuPortal
+                <ObservabilityOnboardingHeaderActionMenu
                   setHeaderActionMenu={setHeaderActionMenu}
                   theme$={theme$}
-                >
-                  <ObservabilityOnboardingHeaderActionMenu />
-                </HeaderMenuPortal>
+                />
                 <ObservabilityOnboardingApp />
               </EuiErrorBoundary>
             </Router>
