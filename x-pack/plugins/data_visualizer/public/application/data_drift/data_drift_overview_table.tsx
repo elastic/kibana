@@ -152,7 +152,9 @@ export const DataDriftOverviewTable = ({
       'data-test-subj': 'mlDataDriftOverviewTableDriftDetected',
       sortable: true,
       textOnly: true,
-      render: (driftDetected: boolean) => {
+      render: (driftDetected: boolean, item) => {
+        // @ts-expect-error currently ES two_sided does return string NaN, will be fixed
+        if (item.similarityTestPValue === 'NaN') return '';
         return <span>{driftDetected ? dataComparisonYesLabel : dataComparisonNoLabel}</span>;
       },
     },
