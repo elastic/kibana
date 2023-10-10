@@ -21,7 +21,7 @@ export interface SearchState {
 
 export const DEFAULT_STATE = {
   kqlQuery: '',
-  page: 1,
+  page: 0,
   sort: { by: 'status' as const, direction: 'desc' as const },
 };
 

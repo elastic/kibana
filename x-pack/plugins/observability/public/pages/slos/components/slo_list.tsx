@@ -30,7 +30,7 @@ export function SloList({ autoRefresh }: Props) {
     isError,
     data: sloList,
   } = useFetchSloList({
-    page,
+    page: page + 1,
     kqlQuery: query,
     sortBy: sort,
     sortDirection: state.sort.direction,
@@ -50,15 +50,15 @@ export function SloList({ autoRefresh }: Props) {
   };
 
   const handleChangeQuery = (newQuery: string) => {
-    setPage(1);
+    setPage(0);
     setQuery(newQuery);
-    storeState({ page: 1, kqlQuery: newQuery });
+    storeState({ page: 0, kqlQuery: newQuery });
   };
 
   const handleChangeSort = (newSort: SortField) => {
-    setPage(1);
+    setPage(0);
     setSort(newSort);
-    storeState({ page: 1, sort: { by: newSort, direction: state.sort.direction } });
+    storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
   return (
@@ -76,19 +76,17 @@ export function SloList({ autoRefresh }: Props) {
         <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
       </EuiFlexItem>
 
-      {results.length ? (
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
-            <EuiFlexItem>
-              <EuiPagination
-                pageCount={Math.ceil(total / perPage)}
-                activePage={page - 1}
-                onPageClick={handlePageClick}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
+          <EuiFlexItem>
+            <EuiPagination
+              pageCount={Math.ceil(total / perPage)}
+              activePage={page}
+              onPageClick={handlePageClick}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
