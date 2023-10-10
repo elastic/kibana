@@ -162,7 +162,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       dashboardCapabilities: { showWriteControls: this.showWriteControls },
     } = pluginServices.getServices());
 
-    this.locator = creationOptions?.locator;
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
     this.dashboardCreationStartTime = dashboardCreationStartTime;

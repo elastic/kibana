@@ -63,7 +63,6 @@ export interface DashboardCreationOptions {
   isEmbeddedExternally?: boolean;
 
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
-  locator?: Pick<LocatorPublic<DashboardAppLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 }
 
 export class DashboardContainerFactoryDefinition

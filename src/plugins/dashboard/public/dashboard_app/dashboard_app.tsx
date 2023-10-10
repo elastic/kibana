@@ -146,7 +146,6 @@ export function DashboardApp({
     };
 
     return Promise.resolve<DashboardCreationOptions>({
-      locator: locators.get(DASHBOARD_APP_LOCATOR),
       getIncomingEmbeddable: () =>
         getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
@@ -175,7 +174,6 @@ export function DashboardApp({
     });
   }, [
     history,
-    locators,
     embedSettings,
     validateOutcome,
     getScopedHistory,
@@ -197,6 +195,8 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
+  const locator = useMemo(() => locators.get(DASHBOARD_APP_LOCATOR), [locators]);
+
   return (
     <>
       {showNoDataPage && (
@@ -215,6 +215,7 @@ export function DashboardApp({
           {getLegacyConflictWarning?.()}
 
           <DashboardRenderer
+            locator={locator}
             ref={setDashboardAPI}
             dashboardRedirect={redirectTo}
             savedObjectId={savedDashboardId}
