@@ -506,7 +506,7 @@ export const defineLogRateAnalysisRoute = (
                 );
 
                 try {
-                  const { fields, df } = await fetchFrequentItemSets(
+                  const { fields, itemSets } = await fetchFrequentItemSets(
                     client,
                     request.body.index,
                     JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
@@ -520,23 +520,26 @@ export const defineLogRateAnalysisRoute = (
                     abortSignal
                   );
 
-                  if (significantCategories.length > 0) {
-                    const { fields: significantCategoriesFields, df: significantCategoriesDf } =
-                      await fetchTerms2CategoriesCounts(
-                        client,
-                        request.body,
-                        JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-                        significantTerms,
-                        significantCategories,
-                        request.body.deviationMin,
-                        request.body.deviationMax,
-                        logger,
-                        pushError,
-                        abortSignal
-                      );
+                  if (significantCategories.length > 0 && significantTerms.length > 0) {
+                    const {
+                      fields: significantCategoriesFields,
+                      itemSets: significantCategoriesItemSets,
+                    } = await fetchTerms2CategoriesCounts(
+                      client,
+                      request.body,
+                      JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
+                      significantTerms,
+                      itemSets,
+                      significantCategories,
+                      request.body.deviationMin,
+                      request.body.deviationMax,
+                      logger,
+                      pushError,
+                      abortSignal
+                    );
 
                     fields.push(...significantCategoriesFields);
-                    df.push(...significantCategoriesDf);
+                    itemSets.push(...significantCategoriesItemSets);
                   }
 
                   if (shouldStop) {
@@ -545,9 +548,9 @@ export const defineLogRateAnalysisRoute = (
                     return;
                   }
 
-                  if (fields.length > 0 && df.length > 0) {
+                  if (fields.length > 0 && itemSets.length > 0) {
                     const significantTermGroups = getSignificantTermGroups(
-                      df,
+                      itemSets,
                       [...significantTerms, ...significantCategories],
                       fields
                     );
@@ -757,7 +760,11 @@ export const defineLogRateAnalysisRoute = (
               }
 
               // histograms for text field patterns
-              if (overallTimeSeries !== undefined && significantCategories.length > 0) {
+              if (
+                overallTimeSeries !== undefined &&
+                significantCategories.length > 0 &&
+                !request.body.overrides?.regroupOnly
+              ) {
                 const significantCategoriesHistogramQueries = significantCategories.map((d) => {
                   const histogramQuery = getHistogramQuery(request.body);
                   const categoryQuery = getCategoryQuery(d.fieldName, [

@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -451,6 +455,97 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const reporterText = await reporter.getVisibleText();
 
         expect(reporterText).to.be('elastic_serverless');
+      });
+    });
+
+    describe('customFields', () => {
+      const customFields = [
+        {
+          key: 'valid_key_1',
+          label: 'Summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'valid_key_2',
+          label: 'Sync',
+          type: CustomFieldTypes.TOGGLE,
+          required: true,
+        },
+      ];
+
+      before(async () => {
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await cases.api.createConfigWithCustomFields({ customFields, owner });
+        await cases.api.createCase({
+          customFields: [
+            {
+              key: 'valid_key_1',
+              type: CustomFieldTypes.TEXT,
+              value: ['this is a text field value'],
+            },
+            {
+              key: 'valid_key_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+          owner,
+        });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      afterEach(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('updates a custom field correctly', async () => {
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await summary.getVisibleText()).equal('this is a text field value');
+
+        const sync = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await sync.getAttribute('aria-checked')).equal('true');
+
+        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-text-custom-field-form-field-${customFields[0].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-text-custom-field-form-field-${customFields[0].key}`
+        );
+
+        await inputField.type(' edited!!');
+
+        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
+
+        await retry.waitFor('update toast exist', async () => {
+          return await testSubjects.exists('toastCloseButton');
+        });
+
+        await testSubjects.click('toastCloseButton');
+
+        await sync.click();
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await summary.getVisibleText()).equal('this is a text field value edited!!');
+
+        expect(await sync.getAttribute('aria-checked')).equal('false');
+
+        // validate user action
+        const userActions = await find.allByCssSelector(
+          '[data-test-subj*="customFields-update-action"]'
+        );
+
+        expect(userActions).length(2);
       });
     });
   });
