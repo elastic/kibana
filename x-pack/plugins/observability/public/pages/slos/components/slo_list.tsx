@@ -21,7 +21,12 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortField | undefined>('status');
 
-  const { isLoading, isRefetching, isError, sloList } = useFetchSloList({
+  const {
+    isLoading,
+    isRefetching,
+    isError,
+    data: sloList,
+  } = useFetchSloList({
     page: activePage + 1,
     kqlQuery: query,
     sortBy: sort,
@@ -29,7 +34,7 @@ export function SloList({ autoRefresh }: Props) {
     shouldRefetch: autoRefresh,
   });
 
-  const { results = [], total = 0, perPage = 0 } = sloList || {};
+  const { results = [], total = 0, perPage = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
