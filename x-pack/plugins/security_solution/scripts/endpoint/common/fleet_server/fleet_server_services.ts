@@ -124,7 +124,7 @@ export const startFleetServer = async ({
 
     // Only fetch/create a fleet-server policy
     const policyId =
-      policy ?? !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
+      policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
     const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
