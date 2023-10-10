@@ -215,6 +215,15 @@ describe('rules_settings_modal', () => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
 
+    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+
+    fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
+    fireEvent.change(statusChangeThresholdInput, { target: { value: 5 } });
+
+    expect(lookBackWindowInput.getAttribute('value')).toBe('20');
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
+
     // Try saving
     userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
     await waitFor(() => {
@@ -306,9 +315,7 @@ describe('rules_settings_modal', () => {
     });
 
     const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
-
     fireEvent.change(queryDelayRangeInput, { target: { value: 20 } });
-
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
@@ -337,6 +344,10 @@ describe('rules_settings_modal', () => {
     await waitFor(() => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
+
+    const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
+    fireEvent.change(queryDelayRangeInput, { target: { value: 20 } });
+    expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
     userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
