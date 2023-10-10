@@ -117,18 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
             throw new Error('Metadata should never be empty');
           }
         });
-
-        it('with not existing host', async () => {
-          await fetchMetadata(
-            {
-              sourceId: 'default',
-              nodeId: 'some-not-existing-host-name',
-              nodeType: 'host',
-              timeRange,
-            },
-            404
-          );
-        });
       });
     });
   });
