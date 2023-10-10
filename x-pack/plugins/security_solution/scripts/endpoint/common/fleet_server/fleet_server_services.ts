@@ -313,7 +313,7 @@ const startFleetServerWithDocker = async ({
           './elastic-agent version',
         ]).catch((err) => {
           log.verbose(`Failed to retrieve agent version information from running instance.`, err);
-          return 'Unable to retrieve version information';
+          return { stdout: 'Unable to retrieve version information' };
         })
       ).stdout;
     } catch (error) {
