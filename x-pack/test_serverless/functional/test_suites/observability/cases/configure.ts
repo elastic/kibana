@@ -17,6 +17,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const find = getService('find');
 
   describe('Configure Case', function () {
     //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
@@ -65,6 +66,55 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+      });
+    });
+
+    describe('Custom fields', function () {
+      it('adds a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+
+        await testSubjects.setValue('custom-field-label-input', 'Summary');
+
+        await testSubjects.setCheckbox('text-custom-field-options-wrapper', 'check');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary\nText');
+      });
+
+      it('edits a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const textField = await find.byCssSelector('[data-test-subj*="-custom-field-edit"]');
+
+        await textField.click();
+
+        const input = await testSubjects.find('custom-field-label-input');
+
+        await input.type('!!!');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary!!!\nText');
+      });
+
+      it('deletes a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const deleteButton = await find.byCssSelector('[data-test-subj*="-custom-field-delete"]');
+
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-delete-custom-field-modal');
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await testSubjects.missingOrFail('custom-fields-list');
       });
     });
   });
