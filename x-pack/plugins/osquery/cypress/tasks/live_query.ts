@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
+import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -28,6 +29,11 @@ export const clearInputQuery = () =>
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
   cy.get(LIVE_QUERY_EDITOR).type(query, options);
+
+export const inputQueryInFlyout = (
+  query: string,
+  options?: { parseSpecialCharSequences: boolean }
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -104,18 +110,7 @@ export const loadRuleAlerts = (ruleName: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules');
   clickRuleName(ruleName);
-  cy.getBySel('alertsTable').within(() => {
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
-  });
+  waitForAlertsToPopulate();
 };
 
 export const addToCase = (caseId: string) => {
