@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+require('@babel/register')({
+  extensions: ['.ts', '.js'],
+  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+});
+
+var createCustomThresholdRule =
+  require('@kbn/observability-alerting-test-data').createCustomThresholdRule;
+var createDataView = require('@kbn/observability-alerting-test-data').createDataView;
+var createIndexConnector = require('@kbn/observability-alerting-test-data').createIndexConnector;
+
+var scenario1 = require('@kbn/observability-alerting-test-data').scenario1;
+var scenario2 = require('@kbn/observability-alerting-test-data').scenario2;
+var scenario3 = require('@kbn/observability-alerting-test-data').scenario3;
+
+var senarios = [scenario1, scenario2, scenario3];
+
+async function run() {
+  console.log('Creating index connector - start');
+  var response = await createIndexConnector();
+  var actionId = await response.data.id;
+  console.log('Creating index connector - finished - actionId: ', actionId);
+  for (var scenario of senarios) {
+    if (scenario.dataView.shouldCreate) {
+      console.log('Creating data view - start - id: ', scenario.dataView.id);
+      await createDataView(scenario.dataView);
+      console.log('Creating data view - finished - id: ', scenario.dataView.id);
+    }
+    console.log('Creating Custom threshold rule - start - name: ', scenario.ruleParams.name);
+    await createCustomThresholdRule(actionId, scenario.dataView.id, scenario.ruleParams);
+    console.log('Creating Custom threshold rule - finished - name: ', scenario.ruleParams.name);
+  }
+}
+
+run();
