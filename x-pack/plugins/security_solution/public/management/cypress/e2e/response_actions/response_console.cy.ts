@@ -273,7 +273,8 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     });
   });
 
-  describe('document signing', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/168296
+  describe.skip('document signing', () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
