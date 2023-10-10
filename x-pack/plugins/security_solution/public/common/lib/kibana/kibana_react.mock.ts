@@ -52,6 +52,7 @@ import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contractStartServicesMock } from '../../../mocks';
+import { getDefaultConfigSettings } from '../../../../common/config_settings';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -126,6 +127,7 @@ export const createStartServicesMock = (
   return {
     ...core,
     ...contractStartServicesMock,
+    configSettings: getDefaultConfigSettings(),
     apm,
     cases,
     unifiedSearch,
