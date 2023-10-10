@@ -76,6 +76,7 @@ export interface CategoryEntry {
 }
 
 export interface ConfigView {
+  advancedConfigurations: ConfigEntryView[];
   categories: CategoryEntry[];
   unCategorizedItems: ConfigEntryView[];
 }

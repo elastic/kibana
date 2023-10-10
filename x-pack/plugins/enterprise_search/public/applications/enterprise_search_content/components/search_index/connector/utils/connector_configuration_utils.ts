@@ -11,11 +11,16 @@ import {
   ConnectorConfiguration,
   Dependency,
   FieldType,
+  isConfigEntry,
 } from '@kbn/search-connectors';
 
 import { isCategoryEntry } from '../../../../../../../common/connectors/is_category_entry';
 
 import { isNotNullish } from '../../../../../../../common/utils/is_not_nullish';
+
+import type { ConfigEntryView, ConfigView } from '../connector_configuration_logic';
+
+export type ConnectorConfigEntry = ConnectorConfigProperties & { key: string };
 
 export const validIntInput = (value: string | number | boolean | null): boolean => {
   // reject non integers (including x.0 floats), but don't validate if empty
@@ -58,8 +63,6 @@ export const ensureBooleanType = (value: string | number | boolean | null): bool
   return Boolean(value);
 };
 
-import type { ConfigEntryView, ConfigView } from '../connector_configuration_logic';
-
 export function dependenciesSatisfied(
   dependencies: Dependency[],
   dependencyLookup: ConnectorConfiguration
@@ -80,30 +83,36 @@ export function dependenciesSatisfied(
   return true;
 }
 
+export const sortByConfigOrder = (a: ConnectorConfigEntry, b: ConnectorConfigEntry) => {
+  if (isNotNullish(a.order)) {
+    if (isNotNullish(b.order)) {
+      return a.order - b.order;
+    }
+    return -1;
+  }
+  if (isNotNullish(b.order)) {
+    // a doesn't have an order, but b has an order so takes precedence
+    return 1;
+  }
+  return a.key.localeCompare(b.key);
+};
+
+export const hasUiRestrictions = (configEntry: Partial<ConnectorConfigEntry>) => {
+  return (configEntry.ui_restrictions ?? []).length > 0;
+};
+
 export const filterSortValidateEntries = (
-  configEntries: Array<ConnectorConfigProperties & { key: string }>,
+  configEntries: ConnectorConfigEntry[],
   config: ConnectorConfiguration,
   isNative: boolean
 ): ConfigEntryView[] => {
   return configEntries
-    .filter(
-      (configEntry) =>
-        ((configEntry.ui_restrictions ?? []).length <= 0 || !isNative) &&
-        dependenciesSatisfied(configEntry.depends_on, config)
+    .filter((configEntry) =>
+      isNative
+        ? !hasUiRestrictions(configEntry) && dependenciesSatisfied(configEntry.depends_on, config)
+        : dependenciesSatisfied(configEntry.depends_on, config)
     )
-    .sort((a, b) => {
-      if (isNotNullish(a.order)) {
-        if (isNotNullish(b.order)) {
-          return a.order - b.order;
-        }
-        return -1;
-      }
-      if (isNotNullish(b.order)) {
-        // a doesn't have an order, but b has an order so takes precedence
-        return 1;
-      }
-      return a.key.localeCompare(b.key);
-    })
+    .sort(sortByConfigOrder)
     .map((configEntry) => {
       const label = configEntry.label;
 
@@ -150,6 +159,7 @@ export const sortAndFilterConnectorConfiguration = (
   const entries = Object.entries(
     config as Omit<ConnectorConfiguration, 'extract_full_html'>
   ).filter(([key]) => key !== 'extract_full_html');
+
   const groupedConfigView = entries
     .map(([key, entry]) => {
       if (!entry || !isCategoryEntry(entry)) {
@@ -170,7 +180,9 @@ export const sortAndFilterConnectorConfiguration = (
   const unCategorizedItems = filterSortValidateEntries(
     entries
       .map(([key, entry]) =>
-        entry && !isCategoryEntry(entry) && !entry.category ? { key, ...entry } : null
+        entry && !isCategoryEntry(entry) && !entry.category && !hasUiRestrictions(entry)
+          ? { key, ...entry }
+          : null
       )
       .filter(isNotNullish),
     config,
@@ -184,15 +196,22 @@ export const sortAndFilterConnectorConfiguration = (
     })
     .filter(isNotNullish);
 
-  // const advancedConnections = entries
-  //   .filter(([key, entry]) => {
-  //     if (!entry) return false;
-  //     if (entry?.ui_restrictions && entry.ui_restrictions[0] === 'advanced') {
-  //       return true;
-  //     }
-  //     return false;
-  //   })
-  //   .filter(isNotNullish);
-
-  return { categories, unCategorizedItems };
+  const advancedConfigurations = isNative
+    ? []
+    : filterSortValidateEntries(
+        entries
+          .map(([key, entry]) => {
+            return entry && isConfigEntry(entry) && entry.ui_restrictions.includes('advanced')
+              ? { key, ...entry }
+              : null;
+          })
+          .filter(isNotNullish),
+        config,
+        isNative
+      );
+  return {
+    advancedConfigurations: advancedConfigurations || [],
+    categories,
+    unCategorizedItems,
+  };
 };
