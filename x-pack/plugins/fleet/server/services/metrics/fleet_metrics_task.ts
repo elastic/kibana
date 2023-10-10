@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
@@ -14,13 +13,13 @@ import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
-import type { AgentMetrics } from '../../collectors/register';
-
 import { appContextService } from '../app_context';
+
+import type { AgentMetrics } from './fetch_agent_metrics';
 
 export class FleetMetricsTask {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '0.0.2';
+  private taskVersion = '0.0.4';
   private taskType = 'Fleet-Metrics-Task';
   private wasStarted: boolean = false;
   private interval = '1m';
@@ -78,56 +77,60 @@ export class FleetMetricsTask {
       if (!agentMetrics) {
         return;
       }
-      const { agents_per_version: agentsPerVersion, agents } = agentMetrics;
-      appContextService.getLogger().debug('Agent status metrics: ' + JSON.stringify(agents));
-      this.esClient?.create({
-        index: 'metrics-fleet_server.agent_status-default',
-        id: uuidv4(),
-        body: {
-          '@timestamp': new Date().toISOString(),
-          fleet: {
-            agents: {
-              total: agents.total_all_statuses,
-              enrolled: agents.total_enrolled,
-              unenrolled: agents.unenrolled,
-              healthy: agents.healthy,
-              offline: agents.offline,
-              updating: agents.updating,
-              unhealthy: agents.unhealthy,
-              inactive: agents.inactive,
-              // TODO
-              unhealthy_reason: {
-                input: 0,
-                output: 0,
-                other: 0,
-              },
-              upgrading_step: {
-                scheduled: 0,
-                // TODO
-              },
+      const {
+        agents_per_version: agentsPerVersion,
+        agents,
+        upgrading_steps: agentUpgradingSteps,
+      } = agentMetrics;
+      const agentStatusDoc = {
+        '@timestamp': new Date().toISOString(),
+        fleet: {
+          agents: {
+            total: agents.total_all_statuses,
+            enrolled: agents.total_enrolled,
+            unenrolled: agents.unenrolled,
+            healthy: agents.healthy,
+            offline: agents.offline,
+            updating: agents.updating,
+            unhealthy: agents.unhealthy,
+            inactive: agents.inactive,
+            // TODO
+            unhealthy_reason: {
+              input: 0,
+              output: 0,
+              other: 0,
             },
+            upgrading_step: agentUpgradingSteps,
           },
         },
-      });
+      };
+      appContextService
+        .getLogger()
+        .debug('Agent status metrics: ' + JSON.stringify(agentStatusDoc));
+      // this.esClient?.create({
+      //   index: 'metrics-fleet_server.agent_status-default',
+      //   id: uuidv4(),
+      //   body: agentStatusDoc,
+      // });
 
       appContextService
         .getLogger()
         .debug('Agent versions metrics: ' + JSON.stringify(agentsPerVersion));
-      agentsPerVersion.forEach((byVersion) => {
-        this.esClient?.create({
-          index: 'metrics-fleet_server.agent_versions-default',
-          id: uuidv4(),
-          body: {
-            '@timestamp': new Date().toISOString(),
-            fleet: {
-              agent: {
-                version: byVersion.version,
-                count: byVersion.count,
-              },
-            },
-          },
-        });
-      });
+      // agentsPerVersion.forEach((byVersion) => {
+      //   this.esClient?.create({
+      //     index: 'metrics-fleet_server.agent_versions-default',
+      //     id: uuidv4(),
+      //     body: {
+      //       '@timestamp': new Date().toISOString(),
+      //       fleet: {
+      //         agent: {
+      //           version: byVersion.version,
+      //           count: byVersion.count,
+      //         },
+      //       },
+      //     },
+      //   });
+      // });
     } catch (error) {
       appContextService
         .getLogger()

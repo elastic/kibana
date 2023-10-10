@@ -11,8 +11,8 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { FleetConfigType } from '..';
 
 import { getIsAgentsEnabled } from './config_collectors';
-import { getAgentUsage, getAgentData, getAgentsPerVersion } from './agent_collectors';
-import type { AgentUsage, AgentData, AgentPerVersion } from './agent_collectors';
+import { getAgentUsage, getAgentData } from './agent_collectors';
+import type { AgentUsage, AgentData } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
@@ -61,26 +61,6 @@ export const fetchFleetUsage = async (
     ...(await getPanicLogsLastHour(esClient)),
     ...(await getAgentLogsTopErrors(esClient)),
     agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
-  };
-  return usage;
-};
-
-export interface AgentMetrics {
-  agents: AgentUsage;
-  agents_per_version: AgentPerVersion[];
-}
-
-export const fetchAgentMetrics = async (
-  core: CoreSetup,
-  abortController: AbortController
-): Promise<AgentMetrics | undefined> => {
-  const [soClient, esClient] = await getInternalClients(core);
-  if (!soClient || !esClient) {
-    return;
-  }
-  const usage = {
-    agents: await getAgentUsage(soClient, esClient),
-    agents_per_version: await getAgentsPerVersion(esClient, abortController),
   };
   return usage;
 };
