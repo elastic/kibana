@@ -44,7 +44,14 @@ interface PluginData {
   };
 }
 
-interface PluginStatus {
+export interface PluginStatus extends ServiceStatus {
+  /**
+   * Whether the status is reported by the plugin itself (true), or it is inferred from the status of its dependencies (false)
+   */
+  isReportedStatus?: boolean;
+}
+
+interface PluginsStatus {
   [name: PluginName]: ServiceStatus;
 }
 
@@ -54,15 +61,15 @@ interface ReportedStatusSubscriptions {
 
 export class PluginsStatusService {
   private coreStatus: CoreStatus = {
-    elasticsearch: { ...defaultStatus, isReportedStatus: true },
-    savedObjects: { ...defaultStatus, isReportedStatus: true },
+    elasticsearch: { ...defaultStatus },
+    savedObjects: { ...defaultStatus },
   };
   private pluginData: PluginData;
   private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies
   private orderedPluginNames: PluginName[];
   private pluginData$ = new ReplaySubject<PluginData>(1);
-  private pluginStatus: PluginStatus = {};
-  private pluginStatus$ = new BehaviorSubject<PluginStatus>(this.pluginStatus);
+  private pluginStatus: PluginsStatus = {};
+  private pluginStatus$ = new BehaviorSubject<PluginsStatus>(this.pluginStatus);
   private reportedStatusSubscriptions: ReportedStatusSubscriptions = {};
   private isReportingStatus: Record<PluginName, boolean> = {};
   private newRegistrationsAllowed = true;
@@ -124,10 +131,7 @@ export class PluginsStatusService {
         })
       )
       .subscribe((status) => {
-        const levelChanged = this.updatePluginReportedStatus(plugin, {
-          ...status,
-          isReportedStatus: true,
-        });
+        const levelChanged = this.updatePluginReportedStatus(plugin, status);
 
         if (levelChanged) {
           this.updateDependantStatuses([plugin]);
@@ -305,7 +309,7 @@ export class PluginsStatusService {
       const current = this.orderedPluginNames[i];
       if (toCheck.has(current)) {
         // update the current plugin status
-        this.updatePluginStatus(current);
+        this.updatePluginsStatus(current);
         // flag all its reverse dependencies to be checked
         // TODO flag them only IF the status of this plugin has changed, seems to break some tests
         this.pluginData[current].reverseDependencies.forEach((revDep) => toCheck.add(revDep));
@@ -318,8 +322,8 @@ export class PluginsStatusService {
    * Optionally, if the plugin has not registered a custom status Observable, update its "current" status as well
    * @param {PluginName} plugin The name of the plugin to be updated
    */
-  private updatePluginStatus(plugin: PluginName): void {
-    const newStatus = this.determinePluginStatus(plugin);
+  private updatePluginsStatus(plugin: PluginName): void {
+    const newStatus = this.determinePluginsStatus(plugin);
     this.pluginData[plugin].derivedStatus = newStatus;
 
     if (!this.isReportingStatus[plugin]) {
@@ -335,7 +339,7 @@ export class PluginsStatusService {
    * @param {PluginName} plugin the name of the plugin whose status must be determined
    * @returns {ServiceStatus} The status of the plugin
    */
-  private determinePluginStatus(plugin: PluginName): ServiceStatus {
+  private determinePluginsStatus(plugin: PluginName): ServiceStatus {
     const coreStatus: Array<[PluginName, ServiceStatus]> = Object.entries(this.coreStatus);
     const newLocal = this.pluginData[plugin];
 
@@ -359,12 +363,16 @@ export class PluginsStatusService {
   /**
    * Updates the reported status for the given plugin.
    * @param {PluginName} plugin The name of the plugin whose reported status must be updated
-   * @param {ServiceStatus} reportedStatus The newly reported status for that plugin
+   * @param {ServiceStatus} status The newly reported status for that plugin
    * @return {boolean} true if the level of the reported status changed
    */
-  private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): boolean {
+  private updatePluginReportedStatus(plugin: PluginName, status: ServiceStatus): boolean {
     const previousReportedStatus = this.pluginData[plugin].reportedStatus;
 
+    const reportedStatus: PluginStatus = {
+      ...status,
+      isReportedStatus: true,
+    };
     this.pluginData[plugin].reportedStatus = reportedStatus;
     this.pluginStatus[plugin] = reportedStatus;
 

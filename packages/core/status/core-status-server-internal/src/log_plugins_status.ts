@@ -9,14 +9,14 @@
 import { Observable } from 'rxjs';
 import { pairwise, takeUntil, map, filter, startWith } from 'rxjs/operators';
 import type { PluginName } from '@kbn/core-base-common';
-import { ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
+import type { PluginStatus } from './plugins_status';
 
-export type ServiceStatusWithName = ServiceStatus & {
+export type PluginLevel = 'unavailable' | 'critical' | 'degraded' | 'available';
+export type PluginStatusWithName = PluginStatus & {
   pluginName: PluginName;
 };
-
-export type PluginStatus = 'unavailable' | 'critical' | 'degraded' | 'available';
-export type PluginsByStatus = Record<PluginStatus, ServiceStatusWithName[]>;
+export type PluginsByStatus = Record<PluginLevel, PluginStatusWithName[]>;
 
 export interface PluginStatusChanges {
   status: PluginsByStatus;
@@ -26,7 +26,7 @@ export interface PluginStatusChanges {
 }
 
 export const getPluginsStatusChanges = (
-  plugins$: Observable<Record<PluginName, ServiceStatus>>,
+  plugins$: Observable<Record<PluginName, PluginStatus>>,
   stop$: Observable<void>
 ): Observable<PluginStatusChanges> => {
   return plugins$.pipe(
@@ -39,8 +39,8 @@ export const getPluginsStatusChanges = (
 };
 
 const getPluginsStatusDiff = (
-  previous: Record<PluginName, ServiceStatus>,
-  next: Record<PluginName, ServiceStatus>
+  previous: Record<PluginName, PluginStatus>,
+  next: Record<PluginName, PluginStatus>
 ): PluginStatusChanges => {
   let updated: number = 0;
   const status: PluginsByStatus = {
@@ -65,7 +65,7 @@ const getPluginsStatusDiff = (
       updates[currentLevel.toString()].push({
         pluginName,
         ...pluginStatus,
-      } as ServiceStatusWithName);
+      } as PluginStatusWithName);
       ++updated;
     }
   });
@@ -142,7 +142,7 @@ export const getPluginStatusChangesMessages = ({
       const statusReportingPlugins = pluginStatuses
         .filter(
           (pluginStatus) =>
-            !updates[currentLevel as PluginStatus].find(
+            !updates[currentLevel as PluginLevel].find(
               (updatedStatus) => updatedStatus.pluginName === pluginStatus.pluginName
             )
         )
@@ -183,5 +183,5 @@ export const getPluginStatusChangesMessages = ({
   return messages;
 };
 
-const getReason = ({ summary, detail }: Partial<ServiceStatusWithName>): string =>
+const getReason = ({ summary, detail }: Partial<PluginStatusWithName>): string =>
   `${summary}${detail ? ` (${detail})` : ''}`;

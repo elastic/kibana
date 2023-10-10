@@ -37,11 +37,6 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
    * machine-readable information about the service status. May include status information for underlying features.
    */
   meta?: Meta;
-
-  /**
-   * Whether this status is reported by the service/plugin itself, or it is inferred from the status of other services that this service depends on
-   */
-  isReportedStatus?: boolean;
 }
 
 /**

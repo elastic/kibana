@@ -518,8 +518,8 @@ describe('getPluginStatusChangesMessages', () => {
 
           unavailable: [],
         },
-        total: 2,
-        updated: 2,
+        total: 13,
+        updated: 7,
         updates: {
           available: [
             {
