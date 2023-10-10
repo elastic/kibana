@@ -9,7 +9,11 @@ import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
+import {
+  DEFAULT_BEDROCK_MODEL,
+  DEFAULT_BEDROCK_URL,
+  DEFAULT_TOKEN_LIMIT,
+} from '../../../common/bedrock/constants';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -17,7 +21,7 @@ const assistant = '\n\nAssistant:';
 
 export const DEFAULT_BODY = JSON.stringify({
   prompt: `${human} Hello world! ${assistant}`,
-  max_tokens_to_sample: 300,
+  max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
   stop_sequences: [human],
 });
 
