@@ -514,6 +514,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
           }
         }
+        locale="en"
         theme={
           Array [
             Object {

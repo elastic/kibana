@@ -207,6 +207,7 @@ export function DurationDistributionChart({
             showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
+            locale={i18n.getLocale()}
           />
           {selectionAnnotation !== undefined && (
             <RectAnnotation

@@ -14,6 +14,7 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
+import { i18n } from '@kbn/i18n';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
@@ -370,6 +371,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            locale={i18n.getLocale()}
             {...getOverridesFor(overrides, 'settings')}
           />
           <Goal

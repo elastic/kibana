@@ -20,6 +20,7 @@ import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { i18n } from '@kbn/i18n';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
@@ -126,6 +127,7 @@ export function FlameGraph({
                         setHighlightedVmIndex(selectedElement!.vmIndex);
                       }
                     }}
+                    locale={i18n.getLocale()}
                   />
                   <Tooltip
                     actions={[{ label: '', onSelect: () => {} }]}

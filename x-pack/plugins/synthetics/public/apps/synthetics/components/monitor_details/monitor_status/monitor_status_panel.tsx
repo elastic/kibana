@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { Chart, Settings, Heatmap, ScaleType, Tooltip } from '@elastic/charts';
 
+import { i18n } from '@kbn/i18n';
 import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
@@ -71,6 +72,7 @@ export const MonitorStatusPanel = ({
                 onBrushEnd={(brushArea) => {
                   onBrushed?.(getBrushData(brushArea));
                 }}
+                locale={i18n.getLocale()}
               />
               <Heatmap
                 id="monitor-details-monitor-status-chart"

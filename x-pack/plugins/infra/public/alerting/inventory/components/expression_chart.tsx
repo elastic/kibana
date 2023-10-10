@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
@@ -191,7 +192,7 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings baseTheme={chartTheme.baseTheme} />
+          <Settings baseTheme={chartTheme.baseTheme} locale={i18n.getLocale()} />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

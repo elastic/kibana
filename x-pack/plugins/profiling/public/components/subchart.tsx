@@ -220,7 +220,12 @@ export function SubChart({
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
           <Tooltip showNullValues={false} />
-          <Settings showLegend={false} baseTheme={chartsBaseTheme} theme={chartsTheme} />
+          <Settings
+            showLegend={false}
+            baseTheme={chartsBaseTheme}
+            theme={chartsTheme}
+            locale={i18n.getLocale()}
+          />
           <AreaSeries
             id={category}
             name={category}

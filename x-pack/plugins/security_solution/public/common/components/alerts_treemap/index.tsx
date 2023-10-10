@@ -12,6 +12,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { i18n } from '@kbn/i18n';
 import { useThemes } from '../charts/common';
 import { DraggableLegend } from '../charts/draggable_legend';
 import type { LegendItem } from '../charts/draggable_legend_item';
@@ -178,6 +179,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
                 showLegend={false}
                 theme={[treemapTheme, theme]}
                 onElementClick={onElementClick}
+                locale={i18n.getLocale()}
               />
               <Partition
                 data={normalizedData}

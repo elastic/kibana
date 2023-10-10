@@ -8,6 +8,7 @@
 import { Axis, BarSeries, Chart, Tooltip, Position, ScaleType, Settings } from '@elastic/charts';
 import React from 'react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { NoChartsData } from './no_charts_data';
 import type { Feature } from '../types';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE } from '../constants';
@@ -36,7 +37,7 @@ export const DataDriftDistributionChart = ({
     <div css={{ width: '100%', height: CHART_HEIGHT }}>
       <Chart>
         <Tooltip body={DataComparisonChartTooltipBody} />
-        <Settings />
+        <Settings locale={i18n.getLocale()} />
         <Axis
           id="bottom"
           position={Position.Bottom}

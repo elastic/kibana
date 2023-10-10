@@ -204,6 +204,7 @@ export function StorageDetailsPerService({
                       },
                       ...chartTheme,
                     ]}
+                    locale={i18n.getLocale()}
                     showLegend
                   />
                   <Partition

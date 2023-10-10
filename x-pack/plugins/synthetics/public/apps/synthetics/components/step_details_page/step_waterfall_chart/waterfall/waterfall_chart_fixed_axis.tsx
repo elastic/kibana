@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../hooks/use_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_marker/waterfall_markers';
@@ -49,6 +50,7 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
             },
             theme,
           ]}
+          locale={i18n.getLocale()}
         />
 
         <Axis
