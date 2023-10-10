@@ -155,12 +155,12 @@ const originalCasesWithCustomFields = [
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            value: ['old value'],
+            value: 'old value',
           },
           {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
-            value: ['old value 2'],
+            value: 'old value 2',
           },
         ],
       },
