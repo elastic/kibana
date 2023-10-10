@@ -80,6 +80,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         reportingManagement: {
           pathname: '/app/management/insightsAndAlerting/reporting',
+        securitySolution: {
+          pathname: '/app/security',
         },
       },
       // choose where screenshots should be saved
