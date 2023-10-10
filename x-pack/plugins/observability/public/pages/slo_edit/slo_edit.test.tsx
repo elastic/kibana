@@ -147,7 +147,7 @@ describe('SLO Edit Page', () => {
         .spyOn(Router, 'useLocation')
         .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-      useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+      useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
       useFetchIndicesMock.mockReturnValue({
         isLoading: false,
@@ -201,7 +201,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
@@ -237,7 +237,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
@@ -287,7 +287,7 @@ describe('SLO Edit Page', () => {
           data: ['some-index'],
         });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
         const mockCreate = jest.fn();
         const mockUpdate = jest.fn();
@@ -377,7 +377,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
         useFetchApmSuggestionsMock.mockReturnValue({
           suggestions: ['cartService'],
@@ -428,7 +428,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
@@ -496,7 +496,7 @@ describe('SLO Edit Page', () => {
           data: ['some-index'],
         });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const mockCreate = jest.fn();
         const mockUpdate = jest.fn();
@@ -537,7 +537,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         useFetchApmSuggestionsMock.mockReturnValue({
           suggestions: ['cartService'],
@@ -607,7 +607,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
@@ -648,7 +648,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
@@ -693,7 +693,7 @@ describe('SLO Edit Page', () => {
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: 'create-rule=true', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
