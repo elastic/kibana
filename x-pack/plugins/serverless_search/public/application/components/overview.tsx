@@ -124,7 +124,7 @@ export const ElasticsearchOverview = () => {
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
             defaultMessage:
-              "You'll need your Cloud ID and Cloud URL to identify and connect to your project.",
+              "You'll need your Cloud ID and Elasticsearch endpoint to identify and connect to your project.",
           })}
           leftPanelContent={
             <EuiFlexGroup direction="column" gutterSize="xl">
