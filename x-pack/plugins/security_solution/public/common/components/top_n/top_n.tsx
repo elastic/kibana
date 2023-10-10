@@ -83,9 +83,8 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const { selectedPatterns, runtimeMappings } = useSourcererDataView(
-    getSourcererScopeName({ scopeId, view })
-  );
+  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
+  const { selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScopeId);
 
   useEffect(() => {
     setView(defaultView);
@@ -116,7 +115,6 @@ const TopNComponent: React.FC<Props> = ({
       <TopNContent>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
-            applyGlobalQueriesAndFilters={false} // Global filters are already included in combinedQueries
             combinedQueries={combinedQueries}
             deleteQuery={deleteQuery}
             filters={applicableFilters}
@@ -135,6 +133,7 @@ const TopNComponent: React.FC<Props> = ({
             showSpacer={false}
             toggleTopN={toggleTopN}
             scopeId={scopeId}
+            sourcererScopeId={sourcererScopeId}
             to={to}
             hideQueryToggle
           />
