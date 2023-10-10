@@ -45,7 +45,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'dropbox.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
@@ -66,7 +66,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'github.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['github', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.github.name', {
@@ -157,7 +157,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'servicenow.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     isTechPreview: false,
     keywords: ['servicenow', 'cloud', 'connector'],
