@@ -109,6 +109,20 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.configSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "configSettings",
+            "description": [],
+            "signature": [
+              "ConfigSettings"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.Unnamed",
             "type": "Function",
             "tags": [],
@@ -1850,40 +1864,6 @@
             }
           ],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "securitySolution",
-          "id": "def-public.PluginSetup.setDataQualityPanelConfig",
-          "type": "Function",
-          "tags": [],
-          "label": "setDataQualityPanelConfig",
-          "description": [],
-          "signature": [
-            "(dataQualityPanelConfig: ",
-            "DataQualityPanelConfig",
-            ") => void"
-          ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "securitySolution",
-              "id": "def-public.PluginSetup.setDataQualityPanelConfig.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "dataQualityPanelConfig",
-              "description": [],
-              "signature": [
-                "DataQualityPanelConfig"
-              ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1946,38 +1926,6 @@
               "signature": [
                 "RouteProps",
                 "<string, { [x: string]: string | undefined; }>[]"
-              ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.setIsSidebarEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsSidebarEnabled",
-          "description": [],
-          "signature": [
-            "(isSidebarEnabled: boolean) => void"
-          ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "securitySolution",
-              "id": "def-public.PluginStart.setIsSidebarEnabled.$1",
-              "type": "boolean",
-              "tags": [],
-              "label": "isSidebarEnabled",
-              "description": [],
-              "signature": [
-                "boolean"
               ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,
@@ -2841,7 +2789,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskPackagePolicyUpdateBatchSize: number; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
+          "Omit<Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskPackagePolicyUpdateBatchSize: number; maxUploadResponseActionFileBytes: number; offeringSettings: Record<string, boolean>; }>, \"offeringSettings\"> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -2849,6 +2797,8 @@
             "section": "def-common.ExperimentalFeatures",
             "text": "ExperimentalFeatures"
           },
+          "; settings: ",
+          "ConfigSettings",
           "; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
