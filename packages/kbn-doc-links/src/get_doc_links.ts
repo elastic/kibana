@@ -177,7 +177,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       elser: `${ELASTICSEARCH_DOCS}semantic-search-elser.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
-      ingestionApis: `${ELASTICSEARCH_DOCS}search-your-data.html`,
+      ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
       knnSearchCombine: `${ELASTICSEARCH_DOCS}knn-search.html#_combine_approximate_knn_with_other_features`,
@@ -847,6 +847,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#explore`,
       gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#ingest`,
       gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#search`,
+    },
+    serverlessSecurity: {
+      apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys#restrict-privileges`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
