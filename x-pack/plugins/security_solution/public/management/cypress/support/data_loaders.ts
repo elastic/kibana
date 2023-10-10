@@ -290,6 +290,8 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
+  // Env. variable is set by `cypress_serverless.config.ts`
+  const isServerless = config.env.IS_SERVERLESS;
   let fleetServerContainerId: string | undefined;
 
   const stackServicesPromise = createRuntimeServices({
