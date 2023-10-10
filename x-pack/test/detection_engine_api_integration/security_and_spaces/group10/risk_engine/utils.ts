@@ -118,7 +118,7 @@ export const deleteRiskScoreIndices = async ({
         index: [`risk-score.risk-score-latest-${namespace}`],
       }),
     ]);
-    log.info(result)
+    log.info(result);
   } catch (e) {
     log.error(`Error deleting risk score indices: ${e.message}`);
   }
