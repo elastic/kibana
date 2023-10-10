@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
+import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -118,19 +120,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openIncompleteResultsModalBtn');
+      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
       await openShardModalButton.click();
 
       // request
-      await testSubjects.click('showRequestButton');
-      const requestBlock = await testSubjects.find('incompleteResultsModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
+      await testSubjects.click('inspectorRequestDetailRequest');
+      await testSubjects.click('inspectorRequestCopyClipboardButton');
+      expect(await browser.getClipboardValue()).to.contain(testRollupField);
       // response
-      await testSubjects.click('showResponseButton');
-      const responseBlock = await testSubjects.find('incompleteResultsModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
+      await testSubjects.click('inspectorRequestDetailResponse');
+      await testSubjects.click('inspectorRequestCopyClipboardButton');
+      expect(await browser.getClipboardValue()).to.contain(shardFailureReason);
 
-      await testSubjects.click('closeIncompleteResultsModal');
+      await testSubjects.click('euiFlyoutCloseButton');
 
       // response tab
       assert(response && response._shards.failures);
@@ -152,14 +154,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toastContents: string[] = [];
+      let toasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        const toasts = await find.allByCssSelector(toastsSelector);
+        toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-        toastContents = await Promise.all(toasts.map((t) => t.getVisibleText()));
       });
       const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      expect(toastContents).to.eql(expects);
+      await asyncForEach(toasts, async (t, index) => {
+        expect(await t.getVisibleText()).to.eql(expects[index]);
+      });
 
       // warnings tab
       const warnings = await getTestJson('warningsTab', 'warningsCodeBlock');
