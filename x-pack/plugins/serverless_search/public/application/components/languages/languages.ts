@@ -18,11 +18,11 @@ import { rubyDefinition } from './ruby';
 
 const languageDefinitionRecords: Partial<Record<Languages, LanguageDefinition>> = {
   [Languages.CURL]: curlDefinition,
-  [Languages.PYTHON]: pythonDefinition,
+  [Languages.JAVA]: javaDefinition,
   [Languages.DOTNET]: dotnetDefinition,
+  [Languages.PYTHON]: pythonDefinition,
   [Languages.JAVASCRIPT]: javascriptDefinition,
   [Languages.PHP]: phpDefinition,
-  [Languages.JAVA]: javaDefinition,
   [Languages.GO]: goDefinition,
   [Languages.RUBY]: rubyDefinition,
 };

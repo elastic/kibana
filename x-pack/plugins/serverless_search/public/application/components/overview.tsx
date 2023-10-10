@@ -46,15 +46,14 @@ import {
   CLOUD_ID_PLACEHOLDER,
   ELASTICSEARCH_URL_PLACEHOLDER,
 } from '../constants';
-import { javascriptDefinition } from './languages/javascript';
+import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 
 export const ElasticsearchOverview = () => {
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<LanguageDefinition>(javascriptDefinition);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { application, cloud, http, user, share } = useKibanaServices();
 
