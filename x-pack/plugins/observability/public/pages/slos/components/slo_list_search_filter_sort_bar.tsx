@@ -22,9 +22,11 @@ import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { useState } from 'react';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
+import { SearchState } from '../hooks/use_store_search_state';
 
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;
+  initialState: SearchState;
   onChangeQuery: (query: string) => void;
   onChangeSort: (sort: SortField | undefined) => void;
 }
@@ -49,7 +51,6 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
       defaultMessage: 'SLO status',
     }),
     type: 'status',
-    checked: 'on',
   },
   {
     label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
@@ -69,18 +70,23 @@ export function SloListSearchFilterSortBar({
   loading,
   onChangeQuery,
   onChangeSort,
+  initialState,
 }: SloListSearchFilterSortBarProps) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
   const { dataView } = useCreateDataView({ indexPatternString: '.slo-observability.summary-*' });
 
+  const [query, setQuery] = useState(initialState.kqlQuery);
   const [isSortPopoverOpen, setSortPopoverOpen] = useState(false);
-  const [sortOptions, setSortOptions] = useState(SORT_OPTIONS);
-  const [query, setQuery] = useState('');
-
+  const [sortOptions, setSortOptions] = useState<Array<Item<SortField>>>(
+    SORT_OPTIONS.map((option) => ({
+      ...option,
+      checked: option.type === initialState.sort.by ? 'on' : undefined,
+    }))
+  );
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
-  const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
 
+  const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
   const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
     setSortOptions(newOptions);
     setSortPopoverOpen(false);
@@ -133,7 +139,7 @@ export function SloListSearchFilterSortBar({
               >
                 {i18n.translate('xpack.observability.slo.list.sortByType', {
                   defaultMessage: 'Sort by {type}',
-                  values: { type: selectedSort?.label.toLowerCase() || '' },
+                  values: { type: selectedSort?.label.toLowerCase() ?? '' },
                 })}
               </EuiFilterButton>
             }
