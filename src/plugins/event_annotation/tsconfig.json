@@ -31,10 +31,11 @@
     "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/content-management-plugin",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/event-annotation-components",
     "@kbn/event-annotation-common",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/logging",
+    "@kbn/core-plugins-server"
   ],
   "exclude": [
     "target/**/*",
