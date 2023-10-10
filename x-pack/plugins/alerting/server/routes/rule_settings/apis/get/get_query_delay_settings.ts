@@ -6,24 +6,12 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
-import { API_PRIVILEGES, RulesSettingsQueryDelay } from '../../common';
-
-const rewriteBodyRes: RewriteResponseCase<RulesSettingsQueryDelay> = ({
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  ...rest
-}) => ({
-  ...rest,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-});
+import { ILicenseState } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
+import { API_PRIVILEGES } from '../../../../../common';
+import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
+import { GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rule_settings/apis/get';
 
 export const getQueryDelaySettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -32,7 +20,7 @@ export const getQueryDelaySettingsRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_query_delay`,
-      validate: false,
+      validate: {},
       options: {
         tags: [`access:${API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS}`],
       },
@@ -41,7 +29,10 @@ export const getQueryDelaySettingsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
         const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
-        return res.ok({ body: rewriteBodyRes(queryDelaySettings) });
+        const response: GetQueryDelaySettingsResponseV1 = {
+          body: transformQueryDelaySettingsToResponseV1(queryDelaySettings),
+        };
+        return res.ok(response);
       })
     )
   );

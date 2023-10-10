@@ -6,14 +6,17 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import {
+  rulesSettingsClientMock,
+  RulesSettingsClientMock,
+} from '../../../../rules_settings_client.mock';
 import { getQueryDelaySettingsRoute } from './get_query_delay_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -39,7 +42,7 @@ describe('getQueryDelaySettingsRoute', () => {
           ],
         },
         "path": "/internal/alerting/rules/settings/_query_delay",
-        "validate": false,
+        "validate": Object {},
       }
     `);
 
