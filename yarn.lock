@@ -4640,6 +4640,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/high-cardinality-indexer-plugin@link:x-pack/plugins/high_cardinality_indexer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/home-plugin@link:src/plugins/home":
   version "0.0.0"
   uid ""

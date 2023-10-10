@@ -1,0 +1,35 @@
+import { set } from 'lodash';
+import { Moment } from 'moment';
+import { MESSAGE_PROCESSOR } from '../../../common/constants';
+
+export function createBaseEvent(timestamp: Moment, level: 'ERROR' | 'INFO', host: string, message: string, accepted?: number, processed?: number, latency?: { values: number[], counts: number[] }, outcome?: 'success' | 'failure') {
+  const event = {
+    namespace: MESSAGE_PROCESSOR,
+    '@timestamp': timestamp.toISOString(),
+    host: { name: host },
+    log: {
+      level: level || 'INFO',
+      logger: MESSAGE_PROCESSOR,
+    },
+    message,
+    tags: [`infra:${MESSAGE_PROCESSOR}`],
+  };
+
+  if (accepted != null) {
+    set(event, 'processor.accepted', accepted);
+  }
+
+  if (processed != null) {
+    set(event, 'processor.processed', processed);
+  }
+
+  if (latency != null) {
+    set(event, 'processor.latency', latency);
+  }
+
+  if (outcome != null) {
+    set(event, 'processor.outcome', outcome);
+  }
+
+  return event;
+}

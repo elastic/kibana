@@ -7,7 +7,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "high_cardinality_indexer"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["kibanaReact"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }
