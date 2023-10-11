@@ -15,7 +15,7 @@ import type {
   NodeMetricsTableFetchMock,
   SourceResponseMock,
 } from '../test_helpers';
-import { createStartServicesAccessorMock } from '../test_helpers';
+import { createStartServicesAccessorMock, createMetricsClientMock } from '../test_helpers';
 import { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
 import { HostMetricsTable } from './host_metrics_table';
 import IntegratedHostMetricsTable from './integrated_host_metrics_table';
@@ -57,9 +57,16 @@ describe('HostMetricsTable', () => {
   describe('createLazyHostMetricsTable', () => {
     it('should lazily load and render the table', async () => {
       const { fetch, getStartServices } = createStartServicesAccessorMock(fetchMock);
-      const LazyHostMetricsTable = createLazyHostMetricsTable(getStartServices);
+      const metricsClient = createMetricsClientMock();
+      const LazyHostMetricsTable = createLazyHostMetricsTable(getStartServices()[0], metricsClient);
 
-      render(<LazyHostMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(
+        <LazyHostMetricsTable
+          timerange={timerange}
+          filterClauseDsl={filterClauseDsl}
+          metricsClient={metricsClient}
+        />
+      );
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).not.toBeInTheDocument();
@@ -84,6 +91,7 @@ describe('HostMetricsTable', () => {
           timerange={timerange}
           filterClauseDsl={filterClauseDsl}
           sourceId="default"
+          metricsClient={createMetricsClientMock()}
           {...coreProvidersPropsMock}
         />
       );

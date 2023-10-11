@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { DeepPartial } from 'utility-types';
 import type { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
 import type { CoreProvidersProps } from '../../apps/common_providers';
+import { MetricsDataClient } from '../../lib/metrics_client';
 
 export type DataResponseMock = DeepPartial<MetricsExplorerResponse>;
 export type NodeMetricsTableFetchMock = (
@@ -35,4 +36,9 @@ export function createStartServicesAccessorMock(fetchMock: NodeMetricsTableFetch
     fetch: core.http.fetch,
     getStartServices,
   };
+}
+
+export function createMetricsClientMock() {
+  const core = coreMock.createStart();
+  return new MetricsDataClient(core.http);
 }

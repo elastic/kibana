@@ -15,7 +15,7 @@ import type {
   NodeMetricsTableFetchMock,
   SourceResponseMock,
 } from '../test_helpers';
-import { createStartServicesAccessorMock } from '../test_helpers';
+import { createStartServicesAccessorMock, createMetricsClientMock } from '../test_helpers';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
@@ -57,9 +57,19 @@ describe('ContainerMetricsTable', () => {
   describe('createLazyContainerMetricsTable', () => {
     it('should lazily load and render the table', async () => {
       const { fetch, getStartServices } = createStartServicesAccessorMock(fetchMock);
-      const LazyContainerMetricsTable = createLazyContainerMetricsTable(getStartServices);
+      const metricsClient = createMetricsClientMock();
+      const LazyContainerMetricsTable = createLazyContainerMetricsTable(
+        getStartServices()[0],
+        metricsClient
+      );
 
-      render(<LazyContainerMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(
+        <LazyContainerMetricsTable
+          timerange={timerange}
+          filterClauseDsl={filterClauseDsl}
+          metricsClient={metricsClient}
+        />
+      );
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('containerMetricsTable')).not.toBeInTheDocument();
@@ -84,6 +94,7 @@ describe('ContainerMetricsTable', () => {
           timerange={timerange}
           filterClauseDsl={filterClauseDsl}
           sourceId="default"
+          metricsClient={createMetricsClientMock()}
           {...coreProvidersPropsMock}
         />
       );
