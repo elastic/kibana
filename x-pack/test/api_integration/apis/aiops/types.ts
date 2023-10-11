@@ -8,10 +8,12 @@
 import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
+import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
+
 export interface TestData {
   testName: string;
   esArchive?: string;
-  dataGenerator?: string;
+  dataGenerator?: LogRateAnalysisDataGenerator;
   requestBody: AiopsApiLogRateAnalysis['body'];
   expected: {
     chunksLength: number;
