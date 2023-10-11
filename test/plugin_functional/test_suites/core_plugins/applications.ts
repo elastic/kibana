@@ -113,7 +113,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       // await appsMenu.clickLink('Foo');
       navigateToAppFromAppsMenu('Foo');
 
-      // await waitForUrlToBeWithTimeout('/app/foo/home'); // fix https://github.com/elastic/kibana/issues/166677 timeout failure
+      // await waitForUrlToBeWithTimeout('/app/foo/home');
+      // fix https://github.com/elastic/kibana/issues/166677 timeout failure
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
 
