@@ -135,7 +135,7 @@ describe('convertModelVersionTransformFn', () => {
     expect(upTransform).not.toHaveBeenCalled();
 
     const doc = createDoc();
-    const context = { log, modelVersion: 1 };
+    const context = { log, modelVersion: 1, namespaceType: typeDefinition.namespaceType };
 
     transform(doc);
 
@@ -170,7 +170,7 @@ describe('convertModelVersionTransformFn', () => {
     });
 
     const doc = createDoc();
-    const context = { log, modelVersion: 1 };
+    const context = { log, modelVersion: 1, namespaceType: typeDefinition.namespaceType };
 
     transform(doc);
 
