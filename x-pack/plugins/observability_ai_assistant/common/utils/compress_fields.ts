@@ -8,23 +8,19 @@
 type IntermediateSchema = Map<string, string | IntermediateSchema>;
 
 function ensureMap(value: string | IntermediateSchema): IntermediateSchema {
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     const map = new Map();
-    map.set("_value", value);
+    map.set('_value', value);
     return map;
   }
   return value;
 }
 
-function addPathToSchema(
-  schema: IntermediateSchema,
-  parts: string[],
-  type: string
-) {
+function addPathToSchema(schema: IntermediateSchema, parts: string[], type: string) {
   if (parts.length === 1) {
     if (schema.has(parts[0])) {
       const existingSchema = ensureMap(schema.get(parts[0])!);
-      existingSchema.set("_value", type);
+      existingSchema.set('_value', type);
       schema.set(parts[0], existingSchema);
     } else {
       schema.set(parts[0], type);
@@ -49,27 +45,25 @@ function schemaToString(schema: IntermediateSchema): string {
   const nestedEntries: string[] = [];
 
   entries.forEach(([key, value]) => {
-    if (key === "_value") {
+    if (key === '_value') {
       fieldEntries.push(`:${value}`);
-    } else if (typeof value === "string") {
+    } else if (typeof value === 'string') {
       fieldEntries.push(`${key}:${value}`);
     } else {
-      nestedEntries.push(
-        `${key}${schemaToString(value as IntermediateSchema)}`
-      );
+      nestedEntries.push(`${key}${schemaToString(value as IntermediateSchema)}`);
     }
   });
 
   const combinedEntries = [...fieldEntries, ...nestedEntries];
-  return combinedEntries.length ? `{${combinedEntries.join(",")}}` : "";
+  return combinedEntries.length ? `{${combinedEntries.join(',')}}` : '';
 }
 
 export function compressFields(inputs: string[]) {
   const schema: IntermediateSchema = new Map();
 
   for (const input of inputs) {
-    const [path, type] = input.split(",");
-    const parts = path.split(".");
+    const [path, type] = input.split(',');
+    const parts = path.split('.');
     addPathToSchema(schema, parts, type);
   }
 
