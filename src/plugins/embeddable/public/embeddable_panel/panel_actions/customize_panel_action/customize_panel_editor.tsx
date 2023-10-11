@@ -67,7 +67,6 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
   const [panelTitle, setPanelTitle] = useState(
     embeddable.getInput().title ?? embeddable.getOutput().defaultTitle
   );
-
   const [inheritTimeRange, setInheritTimeRange] = useState(
     timeRangeCompatible ? doesInheritTimeRange(embeddable as Embeddable<TimeRangeInput>) : false
   );
