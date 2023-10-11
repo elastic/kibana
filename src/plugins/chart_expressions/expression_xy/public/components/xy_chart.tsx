@@ -962,6 +962,7 @@ export function XYChart({
               uiState={uiState}
               singleTable={singleTable}
               isDarkMode={darkMode}
+              overrides={overrides}
             />
           )}
           {referenceLineLayers.length ? (

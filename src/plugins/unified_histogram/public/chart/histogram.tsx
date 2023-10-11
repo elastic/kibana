@@ -215,6 +215,11 @@ export function Histogram({
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          overrides={{
+            barSeries: {
+              minBarHeight: 2,
+            }
+          }}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           onFilter={onFilter}

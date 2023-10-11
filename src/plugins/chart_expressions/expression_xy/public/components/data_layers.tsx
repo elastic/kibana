@@ -8,6 +8,7 @@
 import {
   AreaSeries,
   BarSeries,
+  BarSeriesProps,
   CurveType,
   LabelOverflowConstraint,
   LineSeries,
@@ -18,6 +19,7 @@ import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import {
+  AllowedXYOverrides,
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
@@ -35,6 +37,7 @@ import {
   LayersFieldFormats,
   hasMultipleLayersWithSplits,
 } from '../helpers';
+import { getOverridesFor } from '../../../common';
 
 interface Props {
   titles?: LayersAccessorsTitles;
@@ -58,6 +61,7 @@ interface Props {
   uiState?: PersistedState;
   singleTable?: boolean;
   isDarkMode: boolean;
+  overrides?: AllowedXYOverrides;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -82,6 +86,7 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
+  overrides,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -189,20 +194,20 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-              const valueLabelsSettings = {
+              const valueLabelsSettings: Partial<BarSeriesProps> = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== ValueLabelModes.HIDE,
-                  isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
                   overflowConstraints: [
                     LabelOverflowConstraint.ChartEdges,
                     LabelOverflowConstraint.BarGeometry,
                   ],
                 },
+                ...getOverridesFor(overrides, 'barSeries'),
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
             case SeriesTypes.AREA:
