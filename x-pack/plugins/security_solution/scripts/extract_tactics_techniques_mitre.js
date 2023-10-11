@@ -83,6 +83,8 @@ const getIdReference = (references) => {
   }
 };
 
+const isCurrentData = (mitreObj) => !mitreObj.revoked && !mitreObj.x_mitre_deprecated;
+
 const extractTacticsData = (mitreData) => {
   const tactics = mitreData
     .filter((obj) => obj.type === 'x-mitre-tactic')
@@ -115,7 +117,8 @@ const extractTechniques = (mitreData) => {
     .filter(
       (obj) =>
         obj.type === 'attack-pattern' &&
-        (obj.x_mitre_is_subtechnique === false || obj.x_mitre_is_subtechnique === undefined)
+        (obj.x_mitre_is_subtechnique === false || obj.x_mitre_is_subtechnique === undefined) &&
+        isCurrentData(obj)
     )
     .reduce((acc, item) => {
       let tactics = [];
@@ -142,7 +145,7 @@ const extractTechniques = (mitreData) => {
 
 const extractSubtechniques = (mitreData) => {
   const subtechniques = mitreData
-    .filter((obj) => obj.x_mitre_is_subtechnique === true)
+    .filter((obj) => obj.x_mitre_is_subtechnique === true && isCurrentData(obj))
     .reduce((acc, item) => {
       let tactics = [];
       const { id, reference } = getIdReference(item.external_references);
