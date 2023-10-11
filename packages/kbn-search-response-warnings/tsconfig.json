@@ -11,7 +11,7 @@
     "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/es-types",
-    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": ["target/**/*"]
 }
