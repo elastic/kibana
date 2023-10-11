@@ -357,7 +357,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     key: 'test_custom_field_1',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value'],
+                    value: 'this is a text field value',
                   },
                   {
                     key: 'test_custom_field_2',
@@ -374,7 +374,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'test_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            value: ['this is a text field value'],
+            value: 'this is a text field value',
           },
           {
             key: 'test_custom_field_2',
@@ -988,12 +988,12 @@ export default ({ getService }: FtrProviderContext): void => {
                     {
                       key: 'duplicated_key',
                       type: CustomFieldTypes.TEXT,
-                      value: ['this is a text field value'],
+                      value: 'this is a text field value',
                     },
                     {
                       key: 'duplicated_key',
                       type: CustomFieldTypes.TEXT,
-                      value: ['this is a text field value'],
+                      value: 'this is a text field value',
                     },
                   ],
                 },
@@ -1032,7 +1032,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     {
                       key: 'key_does_not_exist',
                       type: CustomFieldTypes.TEXT,
-                      value: ['this is a text field value'],
+                      value: 'this is a text field value',
                     },
                   ],
                 },
@@ -1065,7 +1065,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 key: 'test_custom_field',
                 type: CustomFieldTypes.TEXT,
-                value: ['hello'],
+                value: 'hello',
               },
             ],
           });
@@ -1108,7 +1108,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 key: 'test_custom_field',
                 type: CustomFieldTypes.TEXT,
-                value: ['hello'],
+                value: 'hello',
               },
             ],
           });
