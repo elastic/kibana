@@ -511,7 +511,7 @@ test: invalid manifest
       expect(packages.find((item) => item.id === 'fleet_server')).toBeUndefined();
     });
 
-    it('should filter packages configured in xpack.fleet.internal.excludePackages', async () => {
+    it('should filter packages configured in xpack.fleet.internal.registry.excludePackages', async () => {
       const mockContract = createAppContextStartContractMock({
         internal: {
           excludePackages: ['nginx'],
