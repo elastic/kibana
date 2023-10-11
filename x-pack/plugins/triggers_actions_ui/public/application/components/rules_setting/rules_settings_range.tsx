@@ -26,7 +26,9 @@ export const RulesSettingsRange = memo((props: RulesSettingsRangeProps) => {
       <div>
         {label}
         &nbsp;
-        <EuiIconTip color="subdued" size="s" type="questionInCircle" content={labelPopoverText} />
+        {labelPopoverText && (
+          <EuiIconTip color="subdued" size="s" type="questionInCircle" content={labelPopoverText} />
+        )}
       </div>
     );
   };
