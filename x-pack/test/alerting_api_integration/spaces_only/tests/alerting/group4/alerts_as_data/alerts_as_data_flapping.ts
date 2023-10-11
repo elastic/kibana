@@ -103,7 +103,11 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       // Should be 2 alert docs because alert pattern was:
       // active, recovered, recovered, active, recovered
-      expect(alertDocs.length).to.equal(2);
+      expect(alertDocs.length).to.equal(
+        2,
+        `expected ${alertDocs.length} to equal 2\nalertDocs: ${JSON.stringify(alertDocs, null, 4)}
+        )}`
+      );
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
