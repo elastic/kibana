@@ -31,7 +31,7 @@ import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
-import { useUpdateRuleSettings } from '../../hooks/use_update_rule_settings';
+import { useUpdateRuleSettings } from '../../hooks/use_update_rules_settings';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
 
 export const RulesSettingsErrorPrompt = memo(() => {

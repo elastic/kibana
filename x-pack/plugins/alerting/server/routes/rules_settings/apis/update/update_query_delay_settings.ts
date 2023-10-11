@@ -7,31 +7,44 @@
 
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { API_PRIVILEGES } from '../../../../../common';
+import {
+  updateQueryDelaySettingsBodySchemaV1,
+  UpdateQueryDelaySettingsRequestBodyV1,
+  UpdateQueryDelaySettingsResponseV1,
+} from '../../../../../common/routes/rules_settings/apis/update';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
-import { GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rule_settings/apis/get';
 
-export const getQueryDelaySettingsRoute = (
+export const updateQueryDelaySettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_query_delay`,
-      validate: {},
+      validate: {
+        body: updateQueryDelaySettingsBodySchemaV1,
+      },
       options: {
-        tags: [`access:${API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS}`],
+        tags: [`access:${API_PRIVILEGES.WRITE_QUERY_DELAY_SETTINGS}`],
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
-        const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
-        const response: GetQueryDelaySettingsResponseV1 = {
-          body: transformQueryDelaySettingsToResponseV1(queryDelaySettings),
+
+        const body: UpdateQueryDelaySettingsRequestBodyV1 = req.body;
+
+        const updatedQueryDelaySettings = await rulesSettingsClient.queryDelay().update(body);
+
+        const response: UpdateQueryDelaySettingsResponseV1 = {
+          body:
+            updatedQueryDelaySettings &&
+            transformQueryDelaySettingsToResponseV1(updatedQueryDelaySettings),
         };
+
         return res.ok(response);
       })
     )
