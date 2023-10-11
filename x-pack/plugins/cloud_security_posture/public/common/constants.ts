@@ -63,6 +63,7 @@ export interface CloudPostureIntegrationProps {
     icon?: string;
     tooltip?: string;
     isBeta?: boolean;
+    testId?: string;
   }>;
 }
 
@@ -95,6 +96,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: googleCloudLogo,
+        testId: 'cisGcpTestId',
       },
       // needs to be a function that disables/enabled based on integration version
       {

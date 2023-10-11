@@ -42,13 +42,7 @@ export function AddCisIntegrationFormPageProvider({
 
     findOptionInPage: async (page: 'add' | 'edit', text: string) => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      let tabs;
-      if (page === 'add') {
-        tabs = await cisGcp.getIntegrationFormEntirePage();
-      } else {
-        tabs = await cisGcp.getIntegrationFormEditPage();
-      }
-      const optionToBeClicked = await tabs.findByXpath(`//*[text()="${text}"]`);
+      const optionToBeClicked = await testSubjects.find(text);
       return await optionToBeClicked;
     },
 
@@ -57,25 +51,11 @@ export function AddCisIntegrationFormPageProvider({
       await optionToBeClicked.click();
     },
 
-    getOptionButtonEdit: async (text: string) => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const tabs = await cisGcp.getIntegrationFormEditPage();
-      const optionToBeClicked = await tabs.findAllByXpath(`//*[text()="${text}"]`);
-      return optionToBeClicked.length;
-    },
-
-    clickOptionButtonEdit: async (text: string) => {
-      const optionToBeClicked = await cisGcp.findOptionInPage('edit', text);
-      await optionToBeClicked.click();
-    },
-
     clickSaveButton: async () => {
-      const optionToBeClicked = await cisGcp.findOptionInPage('add', 'Save and continue');
-      await optionToBeClicked.click();
-    },
-
-    clickSaveButtonEdit: async () => {
-      const optionToBeClicked = await cisGcp.findOptionInPage('edit', 'Save integration');
+      const optionToBeClicked = await cisGcp.findOptionInPage(
+        'add',
+        'createPackagePolicySaveButton'
+      );
       await optionToBeClicked.click();
     },
 
@@ -83,13 +63,7 @@ export function AddCisIntegrationFormPageProvider({
       return await testSubjects.find('confirmModalTitleText');
     },
 
-    clickPolicyToBeEdited: async (name: string) => {
-      const table = await cisGcp.getIntegrationPolicyTable();
-      const policyToBeClicked = await table.findByXpath(`//*[text()="${name}"]`);
-      await policyToBeClicked.click();
-    },
-
-    getPostInstallGoogleCloudShellModal: async (isOrg: boolean, orgID?: string, prjID?: string) => {
+    isPostInstallGoogleCloudShellModal: async (isOrg: boolean, orgID?: string, prjID?: string) => {
       const googleCloudShellModal = await testSubjects.find('postInstallGoogleCloudShellModal');
       const googleCloudShellModalVisibleText = await googleCloudShellModal.getVisibleText();
       const stringProjectId = `cloud config set project ${prjID ? `${prjID}` : '<PROJECT_ID>'}`;
@@ -105,9 +79,8 @@ export function AddCisIntegrationFormPageProvider({
     },
 
     checkGcpFieldExist: async (text: string) => {
-      const page = await testSubjects.find('project_id_test_id');
-      const field = await page.findAllByXpath(`//label[text()="${text}"]`);
-      return await field.length;
+      const field = await testSubjects.findAll(text);
+      return field.length;
     },
 
     fillInTextField: async (selector: string, text: string) => {
@@ -119,15 +92,8 @@ export function AddCisIntegrationFormPageProvider({
   const navigateToAddIntegrationCspmPage = async () => {
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture-1.6.0/add-integration/cspm',
+      'integrations/cloud_security_posture/add-integration/cspm',
       { shouldUseHashForSubUrl: false }
-    );
-  };
-
-  const navigateToAddIntegrationCspList = async () => {
-    await PageObjects.common.navigateToActualUrl(
-      'integrations', // Defined in Security Solution plugin
-      '/detail/cloud_security_posture-1.6.0/policies'
     );
   };
 
@@ -135,6 +101,5 @@ export function AddCisIntegrationFormPageProvider({
     cisGcp,
     navigateToAddIntegrationCspmPage,
     waitForPluginInitialized,
-    navigateToAddIntegrationCspList,
   };
 }
