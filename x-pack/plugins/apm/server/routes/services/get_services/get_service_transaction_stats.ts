@@ -44,6 +44,7 @@ interface AggregationParams {
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }
 
 export interface ServiceTransactionStatsResponse {
@@ -70,13 +71,17 @@ export async function getServiceTransactionStats({
   randomSampler,
   documentType,
   rollupInterval,
+  useDurationSummary,
 }: AggregationParams): Promise<ServiceTransactionStatsResponse> {
   const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(documentType),
+        field: getDurationFieldForTransactions(
+          documentType,
+          useDurationSummary
+        ),
       },
     },
     ...outcomes,
