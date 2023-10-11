@@ -304,7 +304,6 @@ export default function (providerContext: FtrProviderContext) {
     let updatedPackageVarId: string;
     let inputVarId: string;
     let streamVarId: string;
-    let outputWithSecret: LogstashOutput;
     let expectedCompiledStream: any;
     let expectedCompiledInput: any;
 
@@ -349,7 +348,6 @@ export default function (providerContext: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       fleetServerAgentPolicyId = await createFleetServerAgentPolicy();
-      outputWithSecret = await createOutputWithSecret();
     });
 
     after(async () => {
@@ -463,6 +461,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('Should return output secrets if policy uses output with secrets', async () => {
+      const outputWithSecret = await createOutputWithSecret();
+
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -483,6 +483,12 @@ export default function (providerContext: FtrProviderContext) {
       const output = Object.entries(fullAgentPolicy.outputs)[0][1];
       // @ts-expect-error
       expect(output.secrets.password.id).to.eql(passwordSecretId);
+
+      // delete output with secret
+      await supertest
+        .delete(`/api/fleet/outputs/${outputWithSecret.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
     });
 
     it('should have correctly created the secrets', async () => {
@@ -513,12 +519,15 @@ export default function (providerContext: FtrProviderContext) {
     it('should allow secret values to be updated (single policy update API)', async () => {
       const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
       updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
+
+      console.log('BADGER secrets before', JSON.stringify(await getSecrets()));
       const updateRes = await supertest
         .put(`/api/fleet/package_policies/${createdPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .send(updatedPolicy)
         .expect(200);
 
+      console.log('BADGER secrets after', JSON.stringify(await getSecrets()));
       const updatedPackagePolicy = updateRes.body.item;
 
       updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
@@ -558,6 +567,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should have correctly deleted unused secrets after update', async () => {
+      console.log('secrets in test', JSON.stringify(await getSecrets()));
+
       const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
