@@ -57,8 +57,19 @@ const getRuleCircuitBreakerErrorDetail = ({
   intervalAvailable: number;
   rules: number;
 }) => {
-  return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.ruleDetail', {
-    defaultMessage: `The {rules, plural, one {rule has} other {rules have}} {interval, plural, one {{interval} run} other {{interval} runs}} per minute; there {intervalAvailable, plural, one {is only {intervalAvailable} run} other {are only {intervalAvailable} runs}} per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.`,
+  console.log('rules', rules);
+  if (rules === 1) {
+    return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.ruleDetail', {
+      defaultMessage: `The rule has {interval, plural, one {{interval} run} other {{interval} runs}} per minute; there {intervalAvailable, plural, one {is only {intervalAvailable} run} other {are only {intervalAvailable} runs}} per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals.`,
+      values: {
+        interval,
+        intervalAvailable,
+        rules,
+      },
+    });
+  }
+  return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.multipleRuleDetail', {
+    defaultMessage: `The rules have {interval, plural, one {{interval} run} other {{interval} runs}} per minute; there {intervalAvailable, plural, one {is only {intervalAvailable} run} other {are only {intervalAvailable} runs}} per minute available. Before you can modify these rules, you must disable other rules or change their check intervals so they run less frequently.`,
     values: {
       interval,
       intervalAvailable,

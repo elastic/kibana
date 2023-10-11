@@ -43,7 +43,7 @@ describe('getRuleCircuitBreakerErrorMessage', () => {
         rules: 5,
       })
     ).toMatchInlineSnapshot(
-      `"Error validating circuit breaker - Rules cannot be bulk edited. The maximum number of runs per minute would be exceeded. - The rules have 1 run per minute; there is only 1 run per minute available. Before you can modify this rule, you must increase its check interval so that it runs less frequently. Alternatively, disable other rules or change their check intervals."`
+      `"Error validating circuit breaker - Rules cannot be bulk edited. The maximum number of runs per minute would be exceeded. - The rules have 1 run per minute; there is only 1 run per minute available. Before you can modify these rules, you must disable other rules or change their check intervals so they run less frequently."`
     );
   });
 
