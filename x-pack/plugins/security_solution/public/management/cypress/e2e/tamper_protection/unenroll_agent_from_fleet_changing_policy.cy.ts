@@ -92,14 +92,16 @@ describe('Unenroll agent from fleet changing agent policy', { tags: ['@ess'] }, 
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(createdHost.agentId, policyWithAgentTamperProtectionEnabled.policy_id).then(
-        (hasChanged) => {
-          expect(hasChanged).to.eql(true);
-          unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
-            expect(isUnenrolled).to.eql(true);
-          });
-        }
-      );
+      changeAgentPolicy(
+        createdHost.agentId,
+        policyWithAgentTamperProtectionEnabled.policy_id,
+        3
+      ).then((hasChanged) => {
+        expect(hasChanged).to.eql(true);
+        unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
+          expect(isUnenrolled).to.eql(true);
+        });
+      });
     });
   });
 
@@ -126,7 +128,7 @@ describe('Unenroll agent from fleet changing agent policy', { tags: ['@ess'] }, 
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(createdHost.agentId, policy.policy_id).then((hasChanged) => {
+      changeAgentPolicy(createdHost.agentId, policy.policy_id, 3).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         unenrollAgent(createdHost.agentId).then((isUnenrolled) => {
           expect(isUnenrolled).to.eql(true);
@@ -160,7 +162,8 @@ describe('Unenroll agent from fleet changing agent policy', { tags: ['@ess'] }, 
       // Change agent policy and wait for action to be completed
       changeAgentPolicy(
         createdHost.agentId,
-        secondPolicyWithAgentTamperProtectionEnabled.policy_id
+        secondPolicyWithAgentTamperProtectionEnabled.policy_id,
+        3
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         unenrollAgent(createdHost.agentId).then((isUnenrolled) => {

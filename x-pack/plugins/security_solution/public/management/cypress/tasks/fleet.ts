@@ -129,13 +129,14 @@ export const unenrollAgent = (agentId: string): Cypress.Chainable<boolean> => {
     url: agentRouteService.getUnenrollPath(agentId),
     headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
   }).then(() => {
-    return isAgentUnenrolled(agentId);
+    return waitForIsAgentUnenrolled(agentId);
   });
 };
 
 export const changeAgentPolicy = (
   agentId: string,
-  policyId: string
+  policyId: string,
+  policyRevision: number
 ): Cypress.Chainable<boolean> => {
   return request({
     method: 'POST',
@@ -145,7 +146,7 @@ export const changeAgentPolicy = (
     },
     headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
   }).then(() => {
-    return hasAgentPolicyChanged(agentId);
+    return waitForHasAgentPolicyChanged(agentId, policyId, policyRevision);
   });
 };
 
@@ -169,7 +170,7 @@ export const isAgentAndEndpointUninstalledFromHost = (
   });
 };
 
-const isAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> => {
+const waitForIsAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> => {
   let isUnenrolled = false;
   return cy
     .waitUntil(
@@ -196,7 +197,11 @@ const isAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> => {
     });
 };
 
-const hasAgentPolicyChanged = (agentId: string): Cypress.Chainable<boolean> => {
+const waitForHasAgentPolicyChanged = (
+  agentId: string,
+  policyId: string,
+  policyRevision: number
+): Cypress.Chainable<boolean> => {
   let isPolicyUpdated = false;
   return cy
     .waitUntil(
@@ -208,7 +213,11 @@ const hasAgentPolicyChanged = (agentId: string): Cypress.Chainable<boolean> => {
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         }).then((response) => {
-          if (response.body.item.status !== 'updating') {
+          if (
+            response.body.item.status !== 'updating' &&
+            response.body.item?.policy_revision === policyRevision &&
+            response.body.item?.policy_id === policyId
+          ) {
             isPolicyUpdated = true;
             return true;
           }

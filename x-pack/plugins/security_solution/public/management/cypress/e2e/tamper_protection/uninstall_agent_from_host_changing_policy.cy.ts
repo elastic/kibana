@@ -95,26 +95,27 @@ describe('Uninstall agent from host changing agent policy', { tags: ['@ess'] }, 
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
 
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(createdHost.agentId, policyWithAgentTamperProtectionEnabled.policy_id).then(
-        (hasChanged) => {
-          expect(hasChanged).to.eql(true);
+      changeAgentPolicy(
+        createdHost.agentId,
+        policyWithAgentTamperProtectionEnabled.policy_id,
+        3
+      ).then((hasChanged) => {
+        expect(hasChanged).to.eql(true);
 
-          // Try to uninstall agent from host without the uninstall token
-          uninstallAgentFromHost(createdHost.hostname).then((responseWithoutToken) => {
-            expect(responseWithoutToken).to.match(/(.*)Invalid uninstall token(.*)/);
-            expect(responseWithoutToken).to.not.match(/(.*)Elastic Agent has been uninstalled(.*)/);
-            isAgentAndEndpointUninstalledFromHost(createdHost.hostname).then(
-              (isUninstalledWithoutToken) => {
-                expect(isUninstalledWithoutToken).to.eql(false);
+        // Try to uninstall agent from host without the uninstall token
+        uninstallAgentFromHost(createdHost.hostname).then((responseWithoutToken) => {
+          expect(responseWithoutToken).to.match(/(.*)Invalid uninstall token(.*)/);
+          expect(responseWithoutToken).to.not.match(/(.*)Elastic Agent has been uninstalled(.*)/);
+          isAgentAndEndpointUninstalledFromHost(createdHost.hostname).then(
+            (isUninstalledWithoutToken) => {
+              expect(isUninstalledWithoutToken).to.eql(false);
 
-                // Get the uninstall token from that agent policy
-                getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_id).then(
-                  (uninstallToken) => {
-                    // Try to uninstall agent from host using the retrieved uninstall token
-                    uninstallAgentFromHost(
-                      createdHost.hostname,
-                      uninstallToken.body.item.token
-                    ).then((responseWithToken) => {
+              // Get the uninstall token from that agent policy
+              getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_id).then(
+                (uninstallToken) => {
+                  // Try to uninstall agent from host using the retrieved uninstall token
+                  uninstallAgentFromHost(createdHost.hostname, uninstallToken.body.item.token).then(
+                    (responseWithToken) => {
                       expect(responseWithToken).to.not.match(/(.*)Invalid uninstall token(.*)/);
                       expect(responseWithToken).to.match(
                         /(.*)Elastic Agent has been uninstalled(.*)/
@@ -125,14 +126,14 @@ describe('Uninstall agent from host changing agent policy', { tags: ['@ess'] }, 
                           expect(isUninstalledWithToken).to.eql(true);
                         }
                       );
-                    });
-                  }
-                );
-              }
-            );
-          });
-        }
-      );
+                    }
+                  );
+                }
+              );
+            }
+          );
+        });
+      });
     });
   });
 
@@ -159,7 +160,7 @@ describe('Uninstall agent from host changing agent policy', { tags: ['@ess'] }, 
     it('should uninstall from host without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
 
-      changeAgentPolicy(createdHost.agentId, policy.policy_id).then((hasChanged) => {
+      changeAgentPolicy(createdHost.agentId, policy.policy_id, 3).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         uninstallAgentFromHost(createdHost.hostname).then((responseWithoutToken) => {
           expect(responseWithoutToken).to.not.match(/(.*)Invalid uninstall token(.*)/);
@@ -200,7 +201,8 @@ describe('Uninstall agent from host changing agent policy', { tags: ['@ess'] }, 
       // Change agent policy and wait for action to be completed
       changeAgentPolicy(
         createdHost.agentId,
-        secondPolicyWithAgentTamperProtectionEnabled.policy_id
+        secondPolicyWithAgentTamperProtectionEnabled.policy_id,
+        3
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
 
