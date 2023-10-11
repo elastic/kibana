@@ -110,6 +110,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           eventLogClient: startPlugins.eventLog.getClient(request),
           currentSpaceId: getSpaceId(),
+          savedObjectsClient: coreContext.savedObjects.client,
         })
       ),
 

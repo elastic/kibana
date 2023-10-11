@@ -7,6 +7,7 @@
 
 import { HttpSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { CreateTagOptions } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import {
   Tag,
   TagAttributes,
@@ -66,10 +67,10 @@ export class TagsClient implements ITagInternalClient {
 
   // public APIs from ITagsClient
 
-  public async create(attributes: TagAttributes) {
+  public async create(attributes: TagAttributes, options?: CreateTagOptions) {
     const startTime = window.performance.now();
     const { tag } = await this.http.post<{ tag: Tag }>('/api/saved_objects_tagging/tags/create', {
-      body: JSON.stringify(attributes),
+      body: JSON.stringify({ attributes, options }),
     });
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {

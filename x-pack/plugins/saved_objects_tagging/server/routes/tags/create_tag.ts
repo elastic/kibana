@@ -15,9 +15,17 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
       path: '/api/saved_objects_tagging/tags/create',
       validate: {
         body: schema.object({
-          name: schema.string(),
-          description: schema.string(),
-          color: schema.string(),
+          attributes: schema.object({
+            name: schema.string(),
+            description: schema.string(),
+            color: schema.string(),
+          }),
+          options: schema.maybe(
+            schema.object({
+              id: schema.maybe(schema.string()),
+              overwrite: schema.maybe(schema.boolean()),
+            })
+          ),
         }),
       },
     },
@@ -25,14 +33,14 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
       try {
         const { tagsClient } = await ctx.tags;
 
-        const existingTag = await tagsClient.findByName(req.body.name, { exact: true });
+        const existingTag = await tagsClient.findByName(req.body.attributes.name, { exact: true });
         if (existingTag) {
           return res.conflict({
-            body: `A tag with the name "${req.body.name}" already exists.`,
+            body: `A tag with the name "${req.body.attributes.name}" already exists.`,
           });
         }
 
-        const tag = await tagsClient.create(req.body);
+        const tag = await tagsClient.create(req.body.attributes, req.body.options);
         return res.ok({
           body: {
             tag,

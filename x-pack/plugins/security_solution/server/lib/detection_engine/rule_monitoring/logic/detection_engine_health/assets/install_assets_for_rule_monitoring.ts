@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
+import type {
+  ISavedObjectsImporter,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import pRetry from 'p-retry';
 import { Readable } from 'stream';
+import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
+import { SECURITY_TAG_NAME } from '../../../../../../../common/constants';
+import { findTagsByName } from '../../../../../tags/saved_objects';
 
 import sourceRuleMonitoringDashboard from './dashboard_rule_monitoring.json';
 import sourceKibanaEventLogDataView from './data_view_kibana_event_log.json';
@@ -24,12 +32,13 @@ const MAX_RETRIES = 2;
 export const installAssetsForRuleMonitoring = async (
   savedObjectsImporter: ISavedObjectsImporter,
   logger: Logger,
-  currentSpaceId: string
+  currentSpaceId: string,
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   const operation = async (attemptCount: number) => {
     logger.debug(`Installing assets for rule monitoring (attempt ${attemptCount})...`);
 
-    const assets = getAssetsForRuleMonitoring(currentSpaceId);
+    const assets = getAssetsForRuleMonitoring(currentSpaceId, savedObjectsClient);
 
     // The assets are marked as "managed: true" at the saved object level, which in the future
     // should be reflected in the UI for the user. Ticket to track:
@@ -66,7 +75,10 @@ export const installAssetsForRuleMonitoring = async (
   await pRetry(operation, { retries: MAX_RETRIES });
 };
 
-const getAssetsForRuleMonitoring = (currentSpaceId: string) => {
+const getAssetsForRuleMonitoring = async (
+  currentSpaceId: string,
+  savedObjectsClient: SavedObjectsClientContract
+) => {
   const withSpaceId = appendSpaceId(currentSpaceId);
 
   const assetRuleMonitoringDashboard = cloneDeep(sourceRuleMonitoringDashboard);
@@ -79,6 +91,18 @@ const getAssetsForRuleMonitoring = (currentSpaceId: string) => {
   assetManagedTag.id = withSpaceId('fleet-managed');
   assetSecuritySolutionTag.id = withSpaceId('security-solution');
 
+  let tags: Array<SavedObjectsFindResult<TagAttributes>> | undefined;
+  try {
+    tags = await findTagsByName({
+      savedObjectsClient,
+      tagName: SECURITY_TAG_NAME,
+    });
+  } catch (err) {
+    // If no Security Solution tag exists, we will import it
+  }
+
+  const securityTagExists = tags && tags?.length > 0;
+
   // Update saved object references of the dashboard accordingly
   assetRuleMonitoringDashboard.references = assetRuleMonitoringDashboard.references.map(
     (reference) => {
@@ -86,13 +110,19 @@ const getAssetsForRuleMonitoring = (currentSpaceId: string) => {
         return { ...reference, id: assetManagedTag.id };
       }
       if (reference.id === 'security-solution-<spaceId>') {
-        return { ...reference, id: assetSecuritySolutionTag.id };
+        return {
+          ...reference,
+          id: tags?.[0]?.id ?? assetSecuritySolutionTag.id,
+        };
       }
 
       return reference;
     }
   );
-
+  if (securityTagExists) {
+    // If the Security Solution tag already exists, we will not import it
+    return [assetManagedTag, assetKibanaEventLogDataView, assetRuleMonitoringDashboard];
+  }
   return [
     assetManagedTag,
     assetSecuritySolutionTag,
@@ -102,5 +132,4 @@ const getAssetsForRuleMonitoring = (currentSpaceId: string) => {
 };
 
 const appendSpaceId = (spaceId: string) => (str: string) => `${str}-${spaceId}`;
-
 const spaceIdToNamespace = SavedObjectsUtils.namespaceStringToId;

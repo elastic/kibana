@@ -11,6 +11,7 @@ import type {
   TagAttributes,
   Tag as TagResponse,
 } from '@kbn/saved-objects-tagging-plugin/common';
+import type { CreateTagOptions } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 
 export interface Tag {
@@ -33,7 +34,9 @@ export const getTagsByName = (
 export const createTag = ({
   savedObjectsTaggingClient,
   tag,
+  options,
 }: {
   savedObjectsTaggingClient: ITagsClient;
   tag: TagAttributes;
-}): Promise<TagResponse> => savedObjectsTaggingClient.create(tag);
+  options?: CreateTagOptions;
+}): Promise<TagResponse> => savedObjectsTaggingClient.create(tag, options);

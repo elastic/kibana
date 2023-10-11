@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
+import type { ISavedObjectsImporter, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { ExtMeta } from '../utils/console_logging';
 
@@ -29,7 +29,8 @@ export const createDetectionEngineHealthClient = (
   ruleObjectsHealthClient: IRuleObjectsHealthClient,
   eventLogHealthClient: IEventLogHealthClient,
   savedObjectsImporter: ISavedObjectsImporter,
-  logger: Logger
+  logger: Logger,
+  savedObjectsClient: SavedObjectsClientContract
 ): IDetectionEngineHealthClient => {
   const currentSpaceId = ruleSpacesClient.getCurrentSpaceId();
 
@@ -134,7 +135,12 @@ export const createDetectionEngineHealthClient = (
         'IDetectionEngineHealthClient.installAssetsForMonitoringHealth',
         async () => {
           try {
-            await installAssetsForRuleMonitoring(savedObjectsImporter, logger, currentSpaceId);
+            await installAssetsForRuleMonitoring(
+              savedObjectsImporter,
+              logger,
+              currentSpaceId,
+              savedObjectsClient
+            );
           } catch (e) {
             const logMessage = 'Error installing assets for monitoring Detection Engine health';
             const logReason = e instanceof Error ? e.message : String(e);

@@ -69,7 +69,7 @@ export const createRuleMonitoringService = (
     ): IDetectionEngineHealthClient => {
       invariant(coreStart, 'Dependencies of RuleMonitoringService are not initialized');
 
-      const { rulesClient, eventLogClient, currentSpaceId } = params;
+      const { rulesClient, eventLogClient, currentSpaceId, savedObjectsClient } = params;
       const { savedObjects } = coreStart;
 
       // Create a saved objects client and an importer that can work with saved objects on behalf
@@ -108,7 +108,8 @@ export const createRuleMonitoringService = (
         ruleObjectsHealthClient,
         eventLogHealthClient,
         internalSavedObjectsImporter,
-        logger
+        logger,
+        savedObjectsClient
       );
     },
 

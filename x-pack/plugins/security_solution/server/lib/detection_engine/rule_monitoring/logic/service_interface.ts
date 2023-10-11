@@ -55,6 +55,7 @@ export interface DetectionEngineHealthClientParams {
   rulesClient: RulesClientApi;
   eventLogClient: IEventLogClient;
   currentSpaceId: string;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface RuleExecutionLogClientForRoutesParams {
