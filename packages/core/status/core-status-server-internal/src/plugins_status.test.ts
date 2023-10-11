@@ -450,7 +450,7 @@ describe('PluginStatusService', () => {
       await delay(25);
       subscription.unsubscribe();
 
-      expect(statusUpdates).toStrictEqual([{ a: available }]);
+      expect(statusUpdates).toStrictEqual([{ a: { ...available, isReportedStatus: true } }]);
     });
 
     it('debounces events in quick succession', async () => {
