@@ -67,13 +67,13 @@ export const createDashboard = async (
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
-  const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
+  const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
   const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
   const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
     reduxEmbeddablePackagePromise,
     dashboardSavedObjectPromise,
-    defaultDataViewAssignmentPromise,
+    defaultDataViewExistsPromise,
   ]);
 
   if (!defaultDataView) {
