@@ -8,7 +8,7 @@
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { CASES_CONNECTOR_SUB_ACTION } from './constants';
-import type { CasesConnectorConfig, CasesConnectorSecrets } from './schema';
+import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { CasesConnectorParamsSchema } from './schema';
 
 export class CasesConnector extends SubActionConnector<

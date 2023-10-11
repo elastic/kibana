@@ -6,7 +6,7 @@
  */
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import { getCasesConnectorType } from './cases_action';
+import { getCasesConnectorType } from './cases';
 
 export * from './types';
 export { casesConnectors } from './factory';
