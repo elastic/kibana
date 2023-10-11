@@ -76,7 +76,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
     return (
       <>
         <EuiBasicTable
-          tableCaption={i18n.translate('xpack.infra.metricsTable.pod.tableCaption', {
+          tableCaption={i18n.translate('xpack.metricsData.metricsTable.pod.tableCaption', {
             defaultMessage: 'Infrastructure metrics for pods',
           })}
           items={data.rows}
@@ -91,7 +91,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <StepwisePagination
-              ariaLabel={i18n.translate('xpack.infra.metricsTable.pod.paginationAriaLabel', {
+              ariaLabel={i18n.translate('xpack.metricsData.metricsTable.pod.paginationAriaLabel', {
                 defaultMessage: 'Pod metrics pagination',
               })}
               pageCount={data.pageCount}
@@ -113,7 +113,7 @@ function podNodeColumns(
 ): Array<EuiBasicTableColumn<PodNodeMetricsRow>> {
   return [
     {
-      name: i18n.translate('xpack.infra.metricsTable.pod.nameColumnHeader', {
+      name: i18n.translate('xpack.metricsData.metricsTable.pod.nameColumnHeader', {
         defaultMessage: 'Name',
       }),
       field: 'name',
@@ -126,9 +126,12 @@ function podNodeColumns(
       },
     },
     {
-      name: i18n.translate('xpack.infra.metricsTable.pod.averageCpuUsagePercentColumnHeader', {
-        defaultMessage: 'CPU usage (avg.)',
-      }),
+      name: i18n.translate(
+        'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
+        {
+          defaultMessage: 'CPU usage (avg.)',
+        }
+      ),
       field: 'averageCpuUsagePercent',
       align: 'right',
       render: (averageCpuUsagePercent: number) => (
@@ -136,9 +139,12 @@ function podNodeColumns(
       ),
     },
     {
-      name: i18n.translate('xpack.infra.metricsTable.pod.averageMemoryUsageMegabytesColumnHeader', {
-        defaultMessage: 'Memory usage (avg.)',
-      }),
+      name: i18n.translate(
+        'xpack.metricsData.metricsTable.pod.averageMemoryUsageMegabytesColumnHeader',
+        {
+          defaultMessage: 'Memory usage (avg.)',
+        }
+      ),
       field: 'averageMemoryUsageMegabytes',
       align: 'right',
       render: (averageMemoryUsageMegabytes: number) => (

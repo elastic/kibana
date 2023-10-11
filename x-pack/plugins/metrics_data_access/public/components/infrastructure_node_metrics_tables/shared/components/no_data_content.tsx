@@ -35,7 +35,7 @@ export const MetricsTableLoadingContent = () => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.infra.metricsTable.loadingContentTitle"
+          id="xpack.metricsData.metricsTable.loadingContentTitle"
           defaultMessage="Loading metrics"
         />
       </h2>
@@ -73,25 +73,25 @@ export const MetricsTableEmptyIndicesContent = () => {
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>
             <FormattedMessage
-              id="xpack.infra.metricsTable.emptyIndicesPromptTimeRangeHintTitle"
+              id="xpack.metricsData.metricsTable.emptyIndicesPromptTimeRangeHintTitle"
               defaultMessage="Expand your time range"
             />
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <FormattedMessage
-              id="xpack.infra.metricsTable.emptyIndicesPromptTimeRangeHintDescription"
+              id="xpack.metricsData.metricsTable.emptyIndicesPromptTimeRangeHintDescription"
               defaultMessage="Try searching over a longer period of time."
             />
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
             <FormattedMessage
-              id="xpack.infra.metricsTable.emptyIndicesPromptQueryHintTitle"
+              id="xpack.metricsData.metricsTable.emptyIndicesPromptQueryHintTitle"
               defaultMessage="Adjust your query"
             />
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <FormattedMessage
-              id="xpack.infra.metricsTable.emptyIndicesPromptQueryHintDescription"
+              id="xpack.metricsData.metricsTable.emptyIndicesPromptQueryHintDescription"
               defaultMessage="Try searching for a different combination of terms."
             />
           </EuiDescriptionListDescription>
@@ -104,7 +104,7 @@ export const MetricsTableEmptyIndicesContent = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.infra.metricsTable.emptyIndicesPromptTitle"
+            id="xpack.metricsData.metricsTable.emptyIndicesPromptTitle"
             defaultMessage="No results match your search criteria"
           />
         </h2>
@@ -128,6 +128,6 @@ const NoResultsIllustration = () => {
 };
 
 const noResultsIllustrationAlternativeText = i18n.translate(
-  'xpack.infra.metricsTable.noResultsIllustrationAlternativeText',
+  'xpack.metricsData.metricsTable.noResultsIllustrationAlternativeText',
   { defaultMessage: 'A magnifying glass with an exclamation mark' }
 );

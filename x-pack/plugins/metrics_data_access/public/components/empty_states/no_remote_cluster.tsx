@@ -16,7 +16,7 @@ export const NoRemoteCluster = () => {
 
   const goToSettings = (
     <EuiButton data-test-subj="infraHostsPageGoToSettings" color="danger" {...settingLinkProps}>
-      {i18n.translate('xpack.infra.hostsPage.goToMetricsSettings', {
+      {i18n.translate('xpack.metricsData.hostsPage.goToMetricsSettings', {
         defaultMessage: 'Check settings',
       })}
     </EuiButton>
@@ -28,10 +28,10 @@ export const NoRemoteCluster = () => {
       iconType="error"
       titleSize="m"
       data-test-subj="infraHostsNoRemoteCluster"
-      title={i18n.translate('xpack.infra.sourceConfiguration.noRemoteClusterTitle', {
+      title={i18n.translate('xpack.metricsData.sourceConfiguration.noRemoteClusterTitle', {
         defaultMessage: "Couldn't connect to the remote cluster",
       })}
-      body={i18n.translate('xpack.infra.sourceConfiguration.noRemoteClusterMessage', {
+      body={i18n.translate('xpack.metricsData.sourceConfiguration.noRemoteClusterMessage', {
         defaultMessage:
           "We're unable to connect to the remote cluster, which is preventing us from retrieving the metrics and data you need.\nTo resolve this issue, please check your indices configuration and ensure that it's properly configured.",
       })}

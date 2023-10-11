@@ -78,7 +78,7 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
     return (
       <>
         <EuiBasicTable
-          tableCaption={i18n.translate('xpack.infra.metricsTable.container.tableCaption', {
+          tableCaption={i18n.translate('xpack.metricsData.metricsTable.container.tableCaption', {
             defaultMessage: 'Infrastructure metrics for containers',
           })}
           items={data.rows}
@@ -93,9 +93,12 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <StepwisePagination
-              ariaLabel={i18n.translate('xpack.infra.metricsTable.container.paginationAriaLabel', {
-                defaultMessage: 'Container metrics pagination',
-              })}
+              ariaLabel={i18n.translate(
+                'xpack.metricsData.metricsTable.container.paginationAriaLabel',
+                {
+                  defaultMessage: 'Container metrics pagination',
+                }
+              )}
               pageCount={data.pageCount}
               currentPageIndex={data.currentPageIndex}
               setCurrentPageIndex={setCurrentPageIndex}
@@ -115,7 +118,7 @@ function containerNodeColumns(
 ): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
   return [
     {
-      name: i18n.translate('xpack.infra.metricsTable.container.idColumnHeader', {
+      name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
         defaultMessage: 'Id',
       }),
       field: 'id',
@@ -129,7 +132,7 @@ function containerNodeColumns(
     },
     {
       name: i18n.translate(
-        'xpack.infra.metricsTable.container.averageCpuUsagePercentColumnHeader',
+        'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
         {
           defaultMessage: 'CPU usage (avg.)',
         }
@@ -142,7 +145,7 @@ function containerNodeColumns(
     },
     {
       name: i18n.translate(
-        'xpack.infra.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
+        'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
         {
           defaultMessage: 'Memory usage(avg.)',
         }

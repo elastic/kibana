@@ -19,7 +19,7 @@ export function NumberCell({ value, unit }: NumberCellProps) {
     return (
       <EuiTextColor color="subdued">
         <FormattedMessage
-          id="xpack.infra.metricsTable.numberCell.metricNotAvailableLabel"
+          id="xpack.metricsData.metricsTable.numberCell.metricNotAvailableLabel"
           defaultMessage="N/A"
           description="N/A is short for not available"
         />

@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const noMetricIndicesPromptPrimaryActionTitle = i18n.translate(
-  'xpack.infra.metrics.noDataConfig.beatsCard.title',
+  'xpack.metricsData.metrics.noDataConfig.beatsCard.title',
   {
     defaultMessage: 'Add a metrics integration',
   }
 );
 
 export const noMetricIndicesPromptDescription = i18n.translate(
-  'xpack.infra.metrics.noDataConfig.beatsCard.description',
+  'xpack.metricsData.metrics.noDataConfig.beatsCard.description',
   {
     defaultMessage:
       'Use Beats to send metrics data to Elasticsearch. We make it easy with modules for many popular systems and apps.',
@@ -23,6 +23,6 @@ export const noMetricIndicesPromptDescription = i18n.translate(
 );
 
 export const noMetricIndicesPromptTitle = i18n.translate(
-  'xpack.infra.metrics.noDataConfig.promptTitle',
+  'xpack.metricsData.metrics.noDataConfig.promptTitle',
   { defaultMessage: 'Add metrics data' }
 );
