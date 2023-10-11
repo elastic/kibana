@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./telemetry/telemetry_config'));
     loadTestFile(require.resolve('./apm_api_integration/feature_flags.ts'));
     loadTestFile(require.resolve('./cases'));
+    loadTestFile(require.resolve('./infra'));
   });
 }
