@@ -31,6 +31,11 @@ interface LocationStats {
     value: Maybe<number>;
     timeseries: Timeseries;
   };
+  mostLaunches: {
+    location?: string;
+    value: Maybe<number>;
+    timeseries: Timeseries;
+  };
 }
 
 export interface MobileLocationStats {
