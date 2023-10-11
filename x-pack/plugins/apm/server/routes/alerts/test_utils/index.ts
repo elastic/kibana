@@ -56,7 +56,10 @@ export const createRuleTypeMocks = () => {
       publicBaseUrl: 'http://localhost:5601/eyr',
       serverBasePath: '/eyr',
     } as IBasePath,
-    apmConfig: { searchAggregatedTransactions: true } as any as APMConfig,
+    apmConfig: {
+      searchAggregatedTransactions: true,
+      rules: { useO11yFeatureIdAsOwner: false },
+    } as any as APMConfig,
     getApmIndices: async () => ({
       error: 'apm-*',
       transaction: 'apm-*',
