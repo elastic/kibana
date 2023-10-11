@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loadPage } from '../../tasks/common';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
   addAlertToCase,
@@ -28,62 +28,65 @@ import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_dat
 import { APP_CASES_PATH } from '../../../../../common/constants';
 
 describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
   beforeEach(() => {
     login();
+    disableExpandableFlyoutAdvancedSettings();
+  });
+
+  before(() => {
+    getEndpointIntegrationVersion().then((version) =>
+      createAgentPolicyTask(version).then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      })
+    );
+  });
+
+  after(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost);
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
   });
 
   describe('From Cases', () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
-    let createdHost: CreateAndEnrollEndpointHostResponse;
     let ruleId: string;
     let ruleName: string;
     let caseId: string;
-
     const caseOwner = 'securitySolution';
 
     before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
-
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
-            });
-          });
-        })
-      );
-
-      if (createdHost) {
-        loadRule(
-          { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
-          false
-        ).then((data) => {
-          ruleId = data.id;
-          ruleName = data.name;
-        });
-      }
-
+      loadRule(
+        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+        false
+      ).then((data) => {
+        ruleId = data.id;
+        ruleName = data.name;
+      });
       loadCase(caseOwner).then((data) => {
         caseId = data.id;
       });
     });
 
     after(() => {
-      if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost);
-      }
-
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-      }
-
-      if (createdHost) {
-        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
-      }
       if (ruleId) {
         cleanupRule(ruleId);
       }
