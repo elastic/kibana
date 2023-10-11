@@ -111,6 +111,7 @@ export interface APMUsage {
     services: TimeframeMap1d;
     environments: TimeframeMap1d;
     span_destination_service_resource: TimeframeMap1d;
+    global_labels: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
@@ -212,6 +213,10 @@ export interface APMUsage {
     kuery_fields: string[];
     total: number;
   };
+  custom_dashboards: {
+    kuery_fields: string[];
+    total: number;
+  };
   per_service: APMPerService[];
   top_traces: {
     max: number;
@@ -223,6 +228,7 @@ export interface APMUsage {
     | 'host'
     | 'processor_events'
     | 'agent_configuration'
+    | 'global_labels'
     | 'services'
     | 'versions'
     | 'groupings'
@@ -232,6 +238,7 @@ export interface APMUsage {
     | 'cardinality'
     | 'environments'
     | 'service_groups'
+    | 'custom_dashboards'
     | 'per_service'
     | 'top_traces',
     { took: { ms: number } }

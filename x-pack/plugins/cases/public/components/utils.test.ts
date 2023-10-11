@@ -20,6 +20,7 @@ import {
   parseURL,
   stringifyToURL,
   parseCaseUsers,
+  convertCustomFieldValue,
 } from './utils';
 
 describe('Utils', () => {
@@ -503,6 +504,32 @@ describe('Utils', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('convertCustomFieldValue ', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns array of string when value is string', async () => {
+      expect(convertCustomFieldValue('my text value')).toMatchInlineSnapshot(`
+        Array [
+          "my text value",
+        ]
+      `);
+    });
+
+    it('returns null when value is empty string', async () => {
+      expect(convertCustomFieldValue('')).toMatchInlineSnapshot('null');
+    });
+
+    it('returns value as it is when value is true', async () => {
+      expect(convertCustomFieldValue(true)).toMatchInlineSnapshot('true');
+    });
+
+    it('returns value as it is when value is false', async () => {
+      expect(convertCustomFieldValue(false)).toMatchInlineSnapshot('false');
     });
   });
 });

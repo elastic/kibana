@@ -12,7 +12,6 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudChat: 19894
-  cloudChatProvider: 17114
   cloudDataMigration: 19170
   cloudDefend: 18697
   cloudExperiments: 59358
@@ -87,6 +86,7 @@ pageLoadAssetSize:
   lens: 38000
   licenseManagement: 41817
   licensing: 29004
+  links: 44490
   lists: 22900
   logExplorer: 39045
   logsShared: 281060
@@ -124,7 +124,7 @@ pageLoadAssetSize:
   security: 81771
   securitySolution: 66738
   securitySolutionEss: 16573
-  securitySolutionServerless: 45000
+  securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 71995

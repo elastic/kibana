@@ -30,7 +30,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-describe('Artifacts pages', { tags: '@ess' }, () => {
+describe('Artifacts pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
