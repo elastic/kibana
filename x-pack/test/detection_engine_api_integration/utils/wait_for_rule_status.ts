@@ -53,8 +53,9 @@ export const waitForRuleStatus = async (
         .get(route)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
-        .query(query)
-        .expect(200);
+        .query(query);
+      // .expect(200);
+      console.log('rule status response', JSON.stringify(response));
 
       // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
       const rule = response.body;

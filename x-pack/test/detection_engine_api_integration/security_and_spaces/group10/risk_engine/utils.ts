@@ -445,13 +445,15 @@ export const riskEngineRouteHelpersFactory = (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   namespace?: string
 ) => ({
-  init: async () =>
-    await supertest
+  init: async () => {
+    const response = await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
-      .send()
-      .expect(200),
+      .send();
+    console.log('init response', JSON.stringify(response));
+    return response;
+  },
 
   getStatus: async () =>
     await supertest

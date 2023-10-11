@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('Risk engine telemetry', async () => {
+  describe('Risk Engine - Telemetry', async () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168429
-    describe.skip('Risk engine enabled', () => {
+    describe('Risk engine enabled', () => {
       let hostId: string;
       let userId: string;
 
