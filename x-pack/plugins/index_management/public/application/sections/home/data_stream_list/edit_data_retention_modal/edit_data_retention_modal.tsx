@@ -97,7 +97,12 @@ const configurationFormSchema: FormSchema = {
     formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: ({ value }) => {
+        validator: ({ value, formData }) => {
+          // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
+          if (formData.infiniteRetentionPeriod) {
+            return undefined;
+          }
+
           if (!value) {
             return {
               message: i18n.translate(
