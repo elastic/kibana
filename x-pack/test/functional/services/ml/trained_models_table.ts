@@ -263,7 +263,7 @@ export function TrainedModelsTableProvider(
 
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected row delete action button for trained model '${modelId}' to be '${
+          `Expected row analyze data drift action button for trained model '${modelId}' to be '${
             expectedValue ? 'enabled' : 'disabled'
           }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
         );

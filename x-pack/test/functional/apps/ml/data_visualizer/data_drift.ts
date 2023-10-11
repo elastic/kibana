@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await ml.dataDrift.assertComparisonDocCountContent();
 
     await ml.testExecution.logTestStep(
-      `${testData.suiteTitle} displays elements in the page correctly`
+      `${testData.suiteTitle} displays elements on the page correctly`
     );
     await ml.dataDrift.assertNoWindowParametersEmptyPromptExists();
 

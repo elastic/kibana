@@ -295,17 +295,21 @@ export function MachineLearningDataDriftProvider({
 
     async assertAnalyzeWithoutSavingButtonState(disabled = true) {
       await retry.tryForTime(5000, async () => {
-        const btn = await testSubjects.find('analyzeDataDriftWithoutSavingButton');
-        const isDisabled = await btn.getAttribute('disabled');
-        expect(isDisabled).to.equal(disabled ? 'true' : null);
+        const isDisabled = !(await testSubjects.isEnabled('analyzeDataDriftWithoutSavingButton'));
+        expect(isDisabled).to.equal(
+          disabled,
+          `Expect analyze without saving button disabled state to be ${disabled} (got ${isDisabled})`
+        );
       });
     },
 
     async assertAnalyzeDataDriftButtonState(disabled = true) {
       await retry.tryForTime(5000, async () => {
-        const btn = await testSubjects.find('analyzeDataDriftButton');
-        const isDisabled = await btn.getAttribute('disabled');
-        expect(isDisabled).to.equal(disabled ? 'true' : null);
+        const isDisabled = !(await testSubjects.isEnabled('analyzeDataDriftButton'));
+        expect(isDisabled).to.equal(
+          disabled,
+          `Expect analyze data drift button disabled state to be ${disabled} (got ${isDisabled})`
+        );
       });
     },
 
