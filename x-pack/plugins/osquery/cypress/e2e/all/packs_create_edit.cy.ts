@@ -100,13 +100,13 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
   describe('Check if result type is correct', { tags: ['@ess', '@serverless'] }, () => {
     let resultTypePackId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptPackId((pack) => {
         resultTypePackId = pack;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(resultTypePackId);
     });
 
@@ -225,17 +225,14 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptPackId((pack) => {
         packId = pack;
       });
-    });
-
-    beforeEach(() => {
       packName = 'Pack-name' + generateRandomStringName(1)[0];
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
     });
 
@@ -270,7 +267,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     let packName: string;
     let newQueryName: string;
 
-    before(() => {
+    beforeEach(() => {
       request<{ items: PackagePolicy[] }>({
         url: '/internal/osquery/fleet_wrapper/package_policies',
         headers: {
@@ -289,12 +286,10 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
           packId = pack.saved_object_id;
           packName = pack.name;
         });
-    });
-    beforeEach(() => {
       newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
     });
 
@@ -374,7 +369,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
-    before(() => {
+    beforeEach(() => {
       request<{ items: PackagePolicy[] }>({
         url: '/internal/osquery/fleet_wrapper/package_policies',
         headers: {
@@ -399,7 +394,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
     });
 
@@ -483,7 +478,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
-    before(() => {
+    beforeEach(() => {
       request<{ items: PackagePolicy[] }>({
         url: '/internal/osquery/fleet_wrapper/package_policies',
         headers: {
@@ -504,7 +499,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
     });
 
@@ -519,7 +514,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
-    before(() => {
+    beforeEach(() => {
       request<{ items: PackagePolicy[] }>({
         url: '/internal/osquery/fleet_wrapper/package_policies',
         headers: {
@@ -540,7 +535,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
     });
 
@@ -634,7 +629,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       let packId: string;
       let packName: string;
 
-      before(() => {
+      beforeEach(() => {
         request<{ items: PackagePolicy[] }>({
           url: '/internal/osquery/fleet_wrapper/package_policies',
           headers: {
@@ -659,7 +654,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
           });
       });
 
-      after(() => {
+      afterEach(() => {
         cleanupPack(packId);
       });
 
@@ -704,6 +699,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('to click delete button', { tags: ['@ess', '@serverless'] }, () => {
     let packName: string;
+    let packId: string;
 
     beforeEach(() => {
       request<{ items: PackagePolicy[] }>({
@@ -722,7 +718,11 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         )
         .then((pack) => {
           packName = pack.name;
+          packId = pack.saved_object_id;
         });
+    });
+    afterEach(() => {
+      cleanupPack(packId);
     });
 
     it('', { tags: ['@ess', '@serverless'] }, () => {
