@@ -400,6 +400,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     link: 'group:settings.logs',
                     title: 'Logs',
+                    icon: 'logoObservability',
                   },
                   {
                     link: 'group:settings.signals',
