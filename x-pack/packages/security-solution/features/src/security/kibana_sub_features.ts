@@ -601,22 +601,6 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
   ],
 };
 
-const allRuleActionsSubFeature: SubFeatureConfig = {
-  name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.allRuleActions',
-    {
-      defaultMessage: 'All rule actions',
-    }
-  ),
-  description: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.allRuleActions.description',
-    {
-      defaultMessage: 'Use all rule actions',
-    }
-  ),
-  privilegeGroups: [],
-};
-
 /**
  * Sub-features that will always be available for Security
  * regardless of the product type.
@@ -643,6 +627,5 @@ export const securitySubFeaturesMap = Object.freeze(
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature],
-    [SecuritySubFeatureId.allRuleActions, allRuleActionsSubFeature],
   ])
 );

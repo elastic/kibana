@@ -19,7 +19,7 @@ export const enableRuleActions = ({
   actions: ActionsPluginSetupContract;
   appFeatures: AppFeaturesService;
 }) => {
-  if (appFeatures.isEnabled(AppFeatureSecurityKey.allRuleActions)) {
+  if (appFeatures.isEnabled(AppFeatureSecurityKey.externalRuleActions)) {
     actions.setEnabledConnectorTypes(['*']);
   } else {
     actions.setEnabledConnectorTypes(['.email', '.slack', '.index']);

@@ -52,7 +52,7 @@ export enum AppFeatureSecurityKey {
   /**
    * enables all rule actions
    */
-  allRuleActions = 'all_rule_actions',
+  externalRuleActions = 'external_rule_actions',
 }
 
 export enum AppFeatureCasesKey {
@@ -94,7 +94,6 @@ export enum SecuritySubFeatureId {
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
-  allRuleActions = 'allRuleActionsSubFeature',
 }
 
 /** Sub-features IDs for Cases */
