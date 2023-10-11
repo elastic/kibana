@@ -19,7 +19,7 @@ describe('Response actions history page', { tags: ['@ess', '@serverless'] }, () 
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
   before(() => {
-    login(ROLE.endpoint_response_actions_access);
+    login(ROLE.soc_manager);
 
     indexEndpointHosts({ numResponseActions: 2 }).then((indexEndpoints) => {
       endpointData = indexEndpoints;

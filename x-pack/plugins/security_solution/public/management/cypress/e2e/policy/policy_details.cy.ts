@@ -212,7 +212,7 @@ describe(
           const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
           beforeEach(() => {
-            login(ROLE.endpoint_security_policy_management_read);
+            login(ROLE.t3_analyst);
             disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
@@ -260,7 +260,7 @@ describe(
           const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
           beforeEach(() => {
-            login(ROLE.endpoint_security_policy_management_read);
+            login(ROLE.t3_analyst);
             disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
