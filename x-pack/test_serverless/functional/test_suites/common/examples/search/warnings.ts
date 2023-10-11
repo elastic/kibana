@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -104,19 +104,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
-      // wait for response - toasts appear before the response is rendered
-      let response: estypes.SearchResponse | undefined;
       await retry.try(async () => {
-        response = await getTestJson('responseTab', 'responseCodeBlock');
-        expect(response).not.to.eql({});
-      });
-
-      // toasts
-      const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(2);
-      const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
+        const toasts = await find.allByCssSelector(toastsSelector);
+        expect(toasts.length).to.be(2);
+        const expects = ['The data might be incomplete or wrong.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
       });
 
       // click "see full error" button in the toast
@@ -124,15 +118,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openShardModalButton.click();
 
       // request
-      await testSubjects.click('inspectorRequestDetailRequest');
-      await testSubjects.click('inspectorRequestCopyClipboardButton');
-      expect(await browser.getClipboardValue()).to.contain(testRollupField);
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailRequest');
+        const requestText = await monacoEditor.getCodeEditorValue(0);
+        expect(requestText).to.contain(testRollupField);
+      });
+
       // response
-      await testSubjects.click('inspectorRequestDetailResponse');
-      await testSubjects.click('inspectorRequestCopyClipboardButton');
-      expect(await browser.getClipboardValue()).to.contain(shardFailureReason);
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailResponse');
+        const responseText = await monacoEditor.getCodeEditorValue(0);
+        expect(responseText).to.contain(shardFailureReason);
+      });
 
       await testSubjects.click('euiFlyoutCloseButton');
+
+      // wait for response - toasts appear before the response is rendered
+      let response: estypes.SearchResponse | undefined;
+      await retry.try(async () => {
+        response = await getTestJson('responseTab', 'responseCodeBlock');
+        expect(response).not.to.eql({});
+      });
 
       // response tab
       assert(response && response._shards.failures);
@@ -158,10 +164,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-      });
-      const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
+        const expects = ['The data might be incomplete or wrong.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
       });
 
       // warnings tab
