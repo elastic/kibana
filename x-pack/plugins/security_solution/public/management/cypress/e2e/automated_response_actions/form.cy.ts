@@ -39,7 +39,9 @@ describe('Form', { tags: ['@ess', '@serverless'] }, () => {
       login(ROLE.soc_manager);
     });
     after(() => {
-      cleanupRule(ruleId);
+      if (ruleId) {
+        cleanupRule(ruleId);
+      }
     });
 
     it('create and save endpoint response action inside of a rule', () => {
