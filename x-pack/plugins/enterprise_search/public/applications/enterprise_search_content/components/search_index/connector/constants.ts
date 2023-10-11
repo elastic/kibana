@@ -155,19 +155,19 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.servicenow,
     platinumOnly: true,
   },
-  sharepoint_server: {
-    docsUrl: docLinks.connectorsSharepoint,
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    icon: CONNECTOR_ICONS.sharepoint,
-    platinumOnly: false,
-  },
   sharepoint_online: {
     docsUrl: docLinks.connectorsSharepointOnline,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
     platinumOnly: true,
+  },
+  sharepoint_server: {
+    docsUrl: docLinks.connectorsSharepoint,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint,
+    platinumOnly: false,
   },
   slack: {
     docsUrl: docLinks.connectorsSlack,
