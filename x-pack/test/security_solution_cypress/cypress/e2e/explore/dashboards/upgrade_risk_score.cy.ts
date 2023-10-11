@@ -70,7 +70,7 @@ describe('Upgrade risk scores', () => {
     });
   });
 
-  describe('upgrade risk engine', { tags: ['@ess', '@brokenInserverless'] }, () => {
+  describe('upgrade risk engine', () => {
     beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       cy.task('esArchiverLoad', { archiveName: 'risk_users' });

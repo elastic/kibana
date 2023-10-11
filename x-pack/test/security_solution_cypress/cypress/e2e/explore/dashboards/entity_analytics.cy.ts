@@ -315,36 +315,32 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    describe(
-      'Risk Score enabled but still no data',
-      { tags: ['@ess', '@brokenInServerless'] },
-      () => {
-        before(() => {
-          cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
-        });
+    describe('Risk Score enabled but still no data', () => {
+      before(() => {
+        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
+      });
 
-        beforeEach(() => {
-          login();
-          enableRiskEngine();
-          visitWithTimeRange(ENTITY_ANALYTICS_URL);
-        });
+      beforeEach(() => {
+        login();
+        enableRiskEngine();
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
+      });
 
-        afterEach(() => {
-          deleteRiskEngineConfiguration();
-        });
+      afterEach(() => {
+        deleteRiskEngineConfiguration();
+      });
 
-        after(() => {
-          cy.task('esArchiverUnload', 'risk_scores_new_no_data');
-        });
+      after(() => {
+        cy.task('esArchiverUnload', 'risk_scores_new_no_data');
+      });
 
-        it('shows no data detected prompt for host and user risk scores', () => {
-          cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-          cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-        });
-      }
-    );
+      it('shows no data detected prompt for host and user risk scores', () => {
+        cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+        cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+      });
+    });
 
-    describe('With host risk data', { tags: ['@ess', '@brokenInServerless'] }, () => {
+    describe('With host risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         login();
@@ -430,7 +426,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    describe('With user risk data', { tags: ['@ess', '@brokenInServerless'] }, () => {
+    describe('With user risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         login();
