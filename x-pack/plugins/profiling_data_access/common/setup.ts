@@ -11,9 +11,15 @@ import { ProfilingESClient } from './profiling_es_client';
 
 export interface ProfilingSetupOptions {
   client: ProfilingESClient;
+  clientWithProfilingAuth: ProfilingESClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
   spaceId: string;
+}
+
+export interface SetupStateType {
+  type: 'on-prem';
+  setupState: SetupState;
 }
 
 export interface SetupState {

@@ -10,7 +10,7 @@ import { ProfilingStatus } from '@kbn/profiling-utils';
 import { areCloudResourcesSetup } from '../../../common/cloud_setup';
 import { areResourcesSetup } from '../../../common/setup';
 import { RegisterServicesParams } from '../register_services';
-import { getCloudSetupState } from '../setup_state';
+import { getSetupState } from '../setup_state';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
@@ -19,26 +19,13 @@ export interface HasSetupParams {
 }
 
 export function createGetStatusService(params: RegisterServicesParams) {
-  const { deps } = params;
   return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
     try {
-      const isCloudEnabled = deps.cloud?.isCloudEnabled;
-      // Cloud
-      if (isCloudEnabled && deps.fleet) {
-        const setupState = await getCloudSetupState({ ...params, esClient, soClient, spaceId });
-
-        return {
-          has_setup: areCloudResourcesSetup(setupState),
-          has_data: setupState.data.available,
-          pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
-        };
-      }
-
-      // TODO: change to onprem
-      const setupState = await getCloudSetupState({ ...params, esClient, soClient, spaceId });
+      const { type, setupState } = await getSetupState({ ...params, esClient, soClient, spaceId });
 
       return {
-        has_setup: areResourcesSetup(setupState),
+        has_setup:
+          type === 'cloud' ? areCloudResourcesSetup(setupState) : areResourcesSetup(setupState),
         has_data: setupState.data.available,
         pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
       };

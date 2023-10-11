@@ -12,7 +12,7 @@ import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
 import { ProfilingESClient } from '../../common/profiling_es_client';
 import { createFetchFunctions } from './functions';
-import { createGetCloudSetupState } from './setup_state';
+import { createSetupState } from './setup_state';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
@@ -30,7 +30,7 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetStatusService(params),
-    getCloudSetupState: createGetCloudSetupState(params),
+    getSetupState: createSetupState(params),
     fetchFunction: createFetchFunctions(params),
   };
 }

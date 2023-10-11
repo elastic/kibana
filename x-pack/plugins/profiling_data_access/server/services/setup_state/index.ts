@@ -6,42 +6,26 @@
  */
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import {
-  validateMaximumBuckets,
-  validateResourceManagement,
-} from '../../../common/cluster_settings';
-import {
-  validateCollectorPackagePolicy,
-  validateProfilingInApmPackagePolicy,
-  validateSymbolizerPackagePolicy,
-} from '../../../common/fleet_policies';
-import { hasProfilingData } from '../../../common/has_profiling_data';
-import { validateSecurityRole } from '../../../common/security_role';
-import {
-  ProfilingCloudSetupOptions,
-  createDefaultCloudSetupState,
-} from '../../../common/cloud_setup';
+import { CloudSetupStateType } from '../../../common/cloud_setup';
+import { SetupStateType } from '../../../common/setup';
 import { RegisterServicesParams } from '../register_services';
-import { mergePartialSetupStates } from '../../../common/setup';
+import { cloudSetupState } from './cloud_setup_state';
+import { selfManagedSetupState } from './self_managed_setup_state';
 
-export interface CloudSetupStateParams {
+interface SetupStateParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   spaceId?: string;
 }
 
-export async function getCloudSetupState({
+export async function getSetupState({
   createProfilingEsClient,
   deps,
   esClient,
   logger,
   soClient,
   spaceId,
-}: RegisterServicesParams & CloudSetupStateParams) {
-  const isCloudEnabled = deps.cloud?.isCloudEnabled;
-  if (!isCloudEnabled || !deps.fleet) {
-    throw new Error('BOOMMMMMMMMMM');
-  }
+}: RegisterServicesParams & SetupStateParams): Promise<CloudSetupStateType | SetupStateType> {
   const clientWithDefaultAuth = createProfilingEsClient({
     esClient,
     useDefaultAuth: true,
@@ -51,39 +35,43 @@ export async function getCloudSetupState({
     useDefaultAuth: false,
   });
 
-  const setupOptions: ProfilingCloudSetupOptions = {
+  const isCloudEnabled = deps.cloud?.isCloudEnabled;
+  if (isCloudEnabled) {
+    if (!deps.fleet) {
+      // TODO: fix it
+      throw new Error('BOOMMM');
+    }
+
+    const setupState = await cloudSetupState({
+      client: clientWithDefaultAuth,
+      clientWithProfilingAuth,
+      logger,
+      soClient,
+      spaceId: spaceId ?? DEFAULT_SPACE_ID,
+      packagePolicyClient: deps.fleet.packagePolicyService,
+      isCloudEnabled,
+    });
+    return {
+      type: 'cloud',
+      setupState,
+    };
+  }
+
+  const setupState = await selfManagedSetupState({
     client: clientWithDefaultAuth,
+    clientWithProfilingAuth,
     logger,
     soClient,
     spaceId: spaceId ?? DEFAULT_SPACE_ID,
-    packagePolicyClient: deps.fleet.packagePolicyService,
-    isCloudEnabled,
+  });
+
+  return {
+    type: 'on-prem',
+    setupState,
   };
-
-  const state = createDefaultCloudSetupState();
-  state.cloud.available = isCloudEnabled;
-
-  const verifyFunctions = [
-    validateMaximumBuckets,
-    validateResourceManagement,
-    validateSecurityRole,
-    validateCollectorPackagePolicy,
-    validateSymbolizerPackagePolicy,
-    validateProfilingInApmPackagePolicy,
-  ];
-
-  const partialStates = await Promise.all([
-    ...verifyFunctions.map((fn) => fn(setupOptions)),
-    hasProfilingData({
-      ...setupOptions,
-      client: clientWithProfilingAuth,
-    }),
-  ]);
-
-  return mergePartialSetupStates(state, partialStates);
 }
 
-export function createGetCloudSetupState(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: CloudSetupStateParams) =>
-    getCloudSetupState({ ...params, esClient, soClient, spaceId });
+export function createSetupState(params: RegisterServicesParams) {
+  return async ({ esClient, soClient, spaceId }: SetupStateParams) =>
+    getSetupState({ ...params, esClient, soClient, spaceId });
 }

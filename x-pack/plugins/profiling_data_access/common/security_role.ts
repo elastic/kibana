@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PartialCloudSetupState, ProfilingCloudSetupOptions } from './cloud_setup';
+import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
 export const PROFILING_READER_ROLE_NAME = 'profiling-reader';
 export const METADATA_VERSION = 1;
 
 export async function validateSecurityRole({
   client,
-}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const esClient = client.getEsClient();
   const roles = await esClient.security.getRole();
   const profilingRole = roles[PROFILING_READER_ROLE_NAME];
