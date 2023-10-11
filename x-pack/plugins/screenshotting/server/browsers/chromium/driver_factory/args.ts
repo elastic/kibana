@@ -53,8 +53,6 @@ export const args = ({
     '--hide-scrollbars',
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
-    // // set the protocolTimeout to avoid puppeteer bug
-    // 'protocolTimeout: 0'
   ];
 
   if (windowSize) {
