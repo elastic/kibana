@@ -57,13 +57,16 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         })
       );
 
-      loadRule(
-        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
-        false
-      ).then((data) => {
-        ruleId = data.id;
-        ruleName = data.name;
-      });
+      if (createdHost) {
+        loadRule(
+          { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+          false
+        ).then((data) => {
+          ruleId = data.id;
+          ruleName = data.name;
+        });
+      }
+
       loadCase(caseOwner).then((data) => {
         caseId = data.id;
       });

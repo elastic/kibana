@@ -51,12 +51,14 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         })
       );
 
-      loadRule(
-        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
-        false
-      ).then((data) => {
-        ruleName = data.name;
-      });
+      if (createdHost) {
+        loadRule(
+          { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+          false
+        ).then((data) => {
+          ruleName = data.name;
+        });
+      }
     });
 
     after(() => {
