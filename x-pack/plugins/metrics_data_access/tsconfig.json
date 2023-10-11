@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "server/**/*", "common/**/*"],
+  "include": ["../../../typings/**/*", "server/**/*", "common/**/*", "public/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -28,6 +28,6 @@
     "@kbn/datemath",
     "@kbn/es-types",
     "@kbn/config-schema",
-    "@kbn/es-query",
+    "@kbn/es-query"
   ]
 }
