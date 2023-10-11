@@ -30,6 +30,7 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingUseLegacyFlamegraphAPI,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,
@@ -373,9 +374,17 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
       defaultMessage: 'Enable Universal Profiling integration in APM',
     }),
-    value: false,
+    value: true,
     schema: schema.boolean(),
     requiresPageReload: false,
+  },
+  [profilingUseLegacyFlamegraphAPI]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingUseLegacyFlamegraphAPI', {
+      defaultMessage: 'Use legacy Flamegraph API in Universal Profiling',
+    }),
+    value: false,
+    schema: schema.boolean(),
   },
   [profilingPerCoreWatt]: {
     category: [observabilityFeatureId],

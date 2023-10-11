@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
 import { isTransformStats } from '../../../../common/types/transform_stats';
 import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
@@ -76,6 +77,7 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
+  const { dataViewEditor } = useAppDependencies();
 
   const deleteTransforms = useDeleteTransforms();
 
@@ -167,15 +169,42 @@ export const TransformManagement: FC = () => {
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
 
+  const onCloseModal = useCallback(() => setIsSearchSelectionVisible(false), []);
+  const onOpenModal = () => setIsSearchSelectionVisible(true);
+
+  const onSearchSelected = useCallback((id: string, type: string) => {
+    setSavedObjectId(id);
+  }, []);
+
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+
+  const closeDataViewEditorRef = useRef<() => void | undefined>();
+
+  const createNewDataView = useCallback(() => {
+    onCloseModal();
+    closeDataViewEditorRef.current = dataViewEditor?.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          onSearchSelected(dataView.id, 'index-pattern');
+        }
+      },
+
+      allowAdHocDataView: true,
+    });
+  }, [dataViewEditor, onCloseModal, onSearchSelected]);
+
+  useEffect(function cleanUpDataViewEditorFlyout() {
+    return () => {
+      // Close the editor when unmounting
+      if (closeDataViewEditorRef.current) {
+        closeDataViewEditorRef.current();
+      }
+    };
+  }, []);
+
   if (savedObjectId !== null) {
     return <RedirectToCreateTransform savedObjectId={savedObjectId} />;
   }
-
-  const onCloseModal = () => setIsSearchSelectionVisible(false);
-  const onOpenModal = () => setIsSearchSelectionVisible(true);
-  const onSearchSelected = (id: string, type: string) => {
-    setSavedObjectId(id);
-  };
 
   const docsLink = (
     <EuiButtonEmpty
@@ -330,7 +359,11 @@ export const TransformManagement: FC = () => {
           className="transformCreateTransformSearchDialog"
           data-test-subj="transformSelectSourceModal"
         >
-          <SearchSelection onSearchSelected={onSearchSelected} />
+          <SearchSelection
+            onSearchSelected={onSearchSelected}
+            canEditDataView={canEditDataView}
+            createNewDataView={createNewDataView}
+          />
         </EuiModal>
       )}
     </>
