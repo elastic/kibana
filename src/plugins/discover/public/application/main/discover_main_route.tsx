@@ -116,14 +116,14 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
         return false;
       }
 
-      let defaultDataView: DataView | null = null;
+      let defaultDataViewExists: boolean = false;
       try {
-        defaultDataView = await data.dataViews.getDefaultDataView({ displayErrors: false });
+        defaultDataViewExists = await data.dataViews.defaultDataViewExists();
       } catch (e) {
         //
       }
 
-      if (!defaultDataView) {
+      if (!defaultDataViewExists) {
         setShowNoDataPage(true);
         return false;
       }
