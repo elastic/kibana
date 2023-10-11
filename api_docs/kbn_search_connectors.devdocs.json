@@ -113,7 +113,7 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          " | undefined; indexName: string | null; isNative: boolean; language: string | null; name?: string | undefined; pipeline: ",
+          " | undefined; indexName: string | null; isNative: boolean; language: string | null; name?: string | undefined; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -121,7 +121,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          "; serviceType?: string | null | undefined; }) => Promise<",
+          " | undefined; serviceType?: string | null | undefined; instant_response?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -276,7 +276,8 @@
                     "docId": "kibKbnSearchConnectorsPluginApi",
                     "section": "def-common.IngestPipelineParams",
                     "text": "IngestPipelineParams"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "packages/kbn-search-connectors/lib/create_connector.ts",
                 "deprecated": false,
@@ -291,6 +292,20 @@
                 "description": [],
                 "signature": [
                   "string | null | undefined"
+                ],
+                "path": "packages/kbn-search-connectors/lib/create_connector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-connectors",
+                "id": "def-common.createConnector.$2.instant_response",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "instant_response",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "packages/kbn-search-connectors/lib/create_connector.ts",
                 "deprecated": false,
@@ -1217,6 +1232,147 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.syncJobTypeToText",
+        "type": "Function",
+        "tags": [],
+        "label": "syncJobTypeToText",
+        "description": [],
+        "signature": [
+          "(syncType: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.SyncJobType",
+            "text": "SyncJobType"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.syncJobTypeToText.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "syncType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncJobType",
+                "text": "SyncJobType"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.syncStatusToColor",
+        "type": "Function",
+        "tags": [],
+        "label": "syncStatusToColor",
+        "description": [],
+        "signature": [
+          "(status: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.SyncStatus",
+            "text": "SyncStatus"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.syncStatusToColor.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncStatus",
+                "text": "SyncStatus"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.syncStatusToText",
+        "type": "Function",
+        "tags": [],
+        "label": "syncStatusToText",
+        "description": [],
+        "signature": [
+          "(status: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.SyncStatus",
+            "text": "SyncStatus"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.syncStatusToText.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncStatus",
+                "text": "SyncStatus"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
