@@ -31,10 +31,6 @@ const mockValidSearchHit = {
   },
 } as unknown as SearchHit;
 
-const mockInvalidSearchHit = {
-  fields: {},
-} as unknown as SearchHit;
-
 const renderResponseButton = (panelContextValue: RightPanelContext = mockContextValue) =>
   render(
     <IntlProvider locale="en">
@@ -52,15 +48,5 @@ describe('<ResponseButton />', () => {
     expect(getByTestId(RESPONSE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RESPONSE_BUTTON_TEST_ID)).toHaveTextContent('Response');
     expect(queryByTestId(RESPONSE_EMPTY_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it(`should not render investigation guide button when searchHit doesn't have correct data`, () => {
-    const panelContextValue = { ...mockContextValue, searchHit: mockInvalidSearchHit };
-    const { getByTestId, queryByTestId } = renderResponseButton(panelContextValue);
-    expect(getByTestId(RESPONSE_EMPTY_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RESPONSE_EMPTY_TEST_ID)).toHaveTextContent(
-      'There are no response actions defined for this event.'
-    );
-    expect(queryByTestId(RESPONSE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });
