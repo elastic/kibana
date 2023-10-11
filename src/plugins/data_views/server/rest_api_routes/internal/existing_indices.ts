@@ -6,26 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, RequestHandlerContext } from '@kbn/core/server';
-import type { VersionedRoute } from '@kbn/core-http-server';
+import { IRouter, RequestHandler } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../..';
 import { EXISTING_INDICES_PATH } from '../../../common/constants';
 
-type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
+/**
+ * Accepts one of the following:
+ * 1. An array of field names
+ * 2. A JSON-stringified array of field names
+ * 3. A single field name (not comma-separated)
+ * @returns an array of indices
+ * @param indices
+ */
+export const parseIndices = (indices: string | string[]): string[] => {
+  if (Array.isArray(indices)) return indices;
+  try {
+    return JSON.parse(indices);
+  } catch (e) {
+    if (!indices.includes(',')) return [indices];
+    throw new Error(
+      'indices should be an array of index aliases, a JSON-stringified array of index aliases, or a single index alias'
+    );
+  }
+};
+export const handler: RequestHandler<{}, { indices: string | string[] }, string[]> = async (
+  ctx,
+  req,
+  res
+) => {
+  const { indices } = req.query;
+  try {
+    const indexArray = parseIndices(indices);
+    const core = await ctx.core;
+    const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+    const indexPatterns = new IndexPatternsFetcher(elasticsearchClient, true);
 
-export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
-  const core = await ctx.core;
-  const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-  const indexPatterns = new IndexPatternsFetcher(elasticsearchClient, true);
-
-  const indices: string[] = [];
-  req.url.searchParams.forEach((param) => {
-    indices.push(param);
-  });
-
-  const response: string[] = await indexPatterns.getExistingIndices(indices);
-  return res.ok({ body: response });
+    const response: string[] = await indexPatterns.getExistingIndices(indexArray);
+    return res.ok({ body: response });
+  } catch (error) {
+    return res.badRequest();
+  }
 };
 
 export const registerExistingIndicesPath = (router: IRouter): void => {
@@ -36,8 +58,13 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
     })
     .addVersion(
       {
-        version: '1',
+        version,
         validate: {
+          request: {
+            query: schema.object({
+              indices: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+            }),
+          },
           response: {
             200: {
               body: schema.arrayOf(schema.string()),
