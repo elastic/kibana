@@ -545,7 +545,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           bool: {
             must: {
               term: {
-                [ALERT_RULE_UUID]: ruleUuid,
+                [ALERT_RULE_UUID]: { value: ruleUuid },
               },
             },
           },
