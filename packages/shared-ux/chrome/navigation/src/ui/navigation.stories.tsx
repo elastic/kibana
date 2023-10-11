@@ -736,19 +736,19 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                       {
                         title: 'Yet another group as item',
                         sideNavStatus: 'renderAsItem',
-                    children: [
-                      {
-                        id: 'group2:settings.logs',
-                        link: 'group:settings.logs',
-                        title: 'Logs',
+                        children: [
+                          {
+                            id: 'group2:settings.logs',
+                            link: 'group:settings.logs',
+                            title: 'Logs',
+                          },
+                          {
+                            id: 'group2:settings.signals',
+                            link: 'group:settings.signals',
+                            title: 'Signals',
+                          },
+                        ],
                       },
-                      {
-                        id: 'group2:settings.signals',
-                        link: 'group:settings.signals',
-                        title: 'Signals',
-                      },
-                    ],
-                  },
                       {
                         id: 'group2:settings.signals',
                         link: 'group:settings.signals',
