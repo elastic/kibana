@@ -8,6 +8,7 @@
 import type { Serializable } from '@kbn/utility-types';
 import { FunctionVisibility, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
+import { compressFields } from '../../common/utils/compressFields';
 
 export function registerGetDatasetInfoFunction({
   service,
@@ -52,15 +53,15 @@ export function registerGetDatasetInfoFunction({
           signal,
         })
         .then((response) => {
+          const compressedFields = compressFields(
+            response.fields.map((field) => {
+              return `${field.name},${field.type}`;
+            })
+          );
           return {
             content: {
               indices: response.indices,
-              fields: [
-                'fieldName,fieldType',
-                ...response.fields.map((field) => {
-                  return `${field.name},${field.type}`;
-                }),
-              ],
+              fields: compressedFields,
             } as unknown as Serializable,
           };
         });
