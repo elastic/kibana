@@ -108,28 +108,15 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const onRefresh = useCallback(
       ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
         const isQuickSelection = newStart.includes('now') || newEnd.includes('now');
-        const { kqlHaveBeenUpdated } = updateReduxTime({
-          end: newEnd,
-          id,
-          isInvalid: false,
-          isQuickSelection,
-          kql: kqlQuery,
-          start: newStart,
-          timelineId,
-        });
         const currentStart = formatDate(newStart);
         const currentEnd = isQuickSelection
           ? formatDate(newEnd, { roundUp: true })
           : formatDate(newEnd);
-        if (
-          queries &&
-          !kqlHaveBeenUpdated &&
-          (!isQuickSelection || (start === currentStart && end === currentEnd))
-        ) {
+        if (queries && (!isQuickSelection || (start === currentStart && end === currentEnd))) {
           refetchQuery(queries);
         }
       },
-      [end, id, kqlQuery, queries, start, timelineId, updateReduxTime]
+      [start, end, queries]
     );
 
     const onRefreshChange = useCallback(
