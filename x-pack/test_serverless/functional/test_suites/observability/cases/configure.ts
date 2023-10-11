@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
@@ -24,10 +25,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
-
       await svlObltNavigation.navigateToLandingPage();
-
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -37,10 +38,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     // FLAKY: https://github.com/elastic/kibana/issues/166469
     describe.skip('Closure options', function () {
-      before(async () => {
-        await common.clickAndValidate('configure-case-button', 'case-configure-title');
-      });
-
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
