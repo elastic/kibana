@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody, EuiPageSection } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -328,19 +328,18 @@ export const ConfigureCases: React.FC = React.memo(() => {
   ) : null;
 
   return (
-    <>
+    <EuiPageSection restrictWidth={true}>
       <HeaderPage
-        border={true}
         showBackButton={true}
         data-test-subj="case-configure-title"
         title={i18n.CONFIGURE_CASES_PAGE_TITLE}
       />
       <EuiPageBody restrictWidth={true}>
-        <FormWrapper>
+        <FormWrapper style={{ paddingTop: 0 }}>
           {hasMinimumLicensePermissions && (
             <>
               {!connectorIsValid && (
-                <SectionWrapper style={{ marginTop: 0 }}>
+                <SectionWrapper>
                   <EuiCallOut
                     title={i18n.WARNING_NO_CONNECTOR_TITLE}
                     color="warning"
@@ -400,7 +399,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           {CustomFieldAddFlyout}
         </FormWrapper>
       </EuiPageBody>
-    </>
+    </EuiPageSection>
   );
 });
 
