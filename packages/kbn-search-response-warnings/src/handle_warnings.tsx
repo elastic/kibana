@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   SearchResponseIncompleteWarning,
