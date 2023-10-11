@@ -2020,7 +2020,7 @@
     history "^4.9.0"
     qs "^6.7.0"
 
-"@elastic/synthetics@~1.0.0":
+"@elastic/synthetics@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.0.0.tgz#cfea137539180c97be7eef02163de86f222c8e6f"
   integrity sha512-Kwx4GU2tcXlpbbuVEnM5SwmDDwKZUaVt54wx8ix1WAvcrrxq6R448mSEHePA3MKNKFEW8cp98yk15xfgBO6Qaw==
@@ -28003,9 +28003,9 @@ undertaker@^1.2.1:
     undertaker-registry "^1.0.0"
 
 undici@^5.21.2:
-  version "5.25.4"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.25.4.tgz#7d8ef81d94f84cd384986271e5e5599b6dff4296"
-  integrity sha512-450yJxT29qKMf3aoudzFpIciqpx6Pji3hEWaXqXmanbXF58LTAGCKxcJjxMXWu3iG+Mudgo3ZUfDB6YDFd/dAw==
+  version "5.26.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.26.1.tgz#e4f36f2e79de7a35b35489327a06d844271b64e5"
+  integrity sha512-M8fZNYGEcUCEp0s3t8my8wx1XnalnJZ0vcB27bZpllicFWdIzrbtWOPCtM8+7vEhPXqzw6y0CJZhXuJqkppe/g==
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
