@@ -8,7 +8,7 @@
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AllowedFieldsForTermsQuery, GetAllowedFieldsForTermQuery } from './types';
 
-const allowedFieldTypes = ['keyword', 'constant_keyword', 'wildcard', 'ip'];
+const allowedFieldTypesSet = new Set(['keyword', 'constant_keyword', 'wildcard', 'ip']);
 
 /*
  * Return map of fields allowed for term query
@@ -23,16 +23,16 @@ export const getAllowedFieldForTermQueryFromMapping = (
     const fieldCaps = fieldsCaps[field];
 
     const isAllVariationsAllowed = Object.values(fieldCaps).every((fieldCapByType) => {
-      return allowedFieldTypes.includes(fieldCapByType.type);
+      return allowedFieldTypesSet.has(fieldCapByType.type);
     });
 
     return isAllVariationsAllowed;
   });
 
-  return availableFields.reduce((acc, field) => {
+  return availableFields.reduce<Record<string, boolean>>((acc, field) => {
     acc[field] = true;
     return acc;
-  }, {} as Record<string, boolean>);
+  }, {});
 };
 
 /**
