@@ -13,7 +13,7 @@ import { CommandOptionsDefinition } from './types';
 
 export const byOption: CommandOptionsDefinition = {
   name: 'by',
-  description: i18n.translate('monaco.esql.autocomplete.byDoc', {
+  description: i18n.translate('monaco.esql.definitions.byDoc', {
     defaultMessage: 'By',
   }),
   signature: {
@@ -25,7 +25,7 @@ export const byOption: CommandOptionsDefinition = {
 
 export const metadataOption: CommandOptionsDefinition = {
   name: 'metadata',
-  description: i18n.translate('monaco.esql.autocomplete.metadataDoc', {
+  description: i18n.translate('monaco.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
   signature: {
@@ -38,7 +38,7 @@ export const metadataOption: CommandOptionsDefinition = {
 
 export const asOption: CommandOptionsDefinition = {
   name: 'as',
-  description: i18n.translate('monaco.esql.autocomplete.asDoc', { defaultMessage: 'As' }),
+  description: i18n.translate('monaco.esql.definitions.asDoc', { defaultMessage: 'As' }),
   signature: {
     multipleParams: false,
     params: [
@@ -51,7 +51,7 @@ export const asOption: CommandOptionsDefinition = {
 
 export const onOption: CommandOptionsDefinition = {
   name: 'on',
-  description: i18n.translate('monaco.esql.autocomplete.onDoc', { defaultMessage: 'On' }),
+  description: i18n.translate('monaco.esql.definitions.onDoc', { defaultMessage: 'On' }),
   signature: {
     multipleParams: false,
     params: [{ name: 'matchingColumn', type: 'column' }],
@@ -61,7 +61,7 @@ export const onOption: CommandOptionsDefinition = {
 
 export const withOption: CommandOptionsDefinition = {
   name: 'with',
-  description: i18n.translate('monaco.esql.autocomplete.withDoc', { defaultMessage: 'With' }),
+  description: i18n.translate('monaco.esql.definitions.withDoc', { defaultMessage: 'With' }),
   signature: {
     multipleParams: true,
     params: [{ name: 'assignment', type: 'any' }],
@@ -71,7 +71,7 @@ export const withOption: CommandOptionsDefinition = {
 
 export const appendSeparatorOption: CommandOptionsDefinition = {
   name: 'append_separator',
-  description: i18n.translate('monaco.esql.autocomplete.appendSeparatorDoc', {
+  description: i18n.translate('monaco.esql.definitions.appendSeparatorDoc', {
     defaultMessage:
       'The character(s) that separate the appended fields. Default to empty string ("").',
   }),

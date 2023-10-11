@@ -12,97 +12,97 @@ import type { Literals } from './types';
 export const timeLiterals: Literals[] = [
   {
     name: 'years',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.years', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.years', {
       defaultMessage: 'Years (Plural)',
     }),
   },
   {
     name: 'year',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.year', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.year', {
       defaultMessage: 'Year',
     }),
   },
   {
     name: 'month',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.month', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.month', {
       defaultMessage: 'Month',
     }),
   },
   {
     name: 'months',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.months', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.months', {
       defaultMessage: 'Months (Plural)',
     }),
   },
   {
     name: 'week',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.week', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.week', {
       defaultMessage: 'Week',
     }),
   },
   {
     name: 'weeks',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.weeks', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.weeks', {
       defaultMessage: 'Weeks (Plural)',
     }),
   },
   {
     name: 'day',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.day', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.day', {
       defaultMessage: 'Day',
     }),
   },
   {
     name: 'days',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.days', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.days', {
       defaultMessage: 'Days (Plural)',
     }),
   },
   {
     name: 'hour',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.hour', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.hour', {
       defaultMessage: 'Hour',
     }),
   },
   {
     name: 'hours',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.hours', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.hours', {
       defaultMessage: 'Hours (Plural)',
     }),
   },
   {
     name: 'minute',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.minute', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.minute', {
       defaultMessage: 'Minute',
     }),
   },
   {
     name: 'minutes',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.minutes', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.minutes', {
       defaultMessage: 'Minutes (Plural)',
     }),
   },
   {
     name: 'second',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.second', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.second', {
       defaultMessage: 'Second',
     }),
   },
   {
     name: 'seconds',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.seconds', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.seconds', {
       defaultMessage: 'Seconds (Plural)',
     }),
   },
   {
     name: 'millisecond',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.millisecond', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.millisecond', {
       defaultMessage: 'Millisecond',
     }),
   },
   {
     name: 'milliseconds',
-    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.milliseconds', {
+    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.milliseconds', {
       defaultMessage: 'Milliseconds (Plural)',
     }),
   },
