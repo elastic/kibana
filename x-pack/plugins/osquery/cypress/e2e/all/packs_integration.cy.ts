@@ -41,7 +41,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     { tags: ['@ess'] },
     () => {
       beforeEach(() => {
-        cy.login(ServerlessRoleName.SOC_MANAGER);
+        cy.login('elastic');
       });
       const AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
       const REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
@@ -175,7 +175,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
-      cy.login('elastic');
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery/packs');
     });
 
