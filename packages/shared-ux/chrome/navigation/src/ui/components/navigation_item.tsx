@@ -37,6 +37,9 @@ function NavigationItemComp<
       ...rest,
       isGroup: false,
     };
+    if (typeof _children === 'string') {
+      nodeEnhanced.title = nodeEnhanced.title ?? _children;
+    }
     return {
       children: _children,
       node: nodeEnhanced,
