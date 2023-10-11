@@ -18,7 +18,7 @@ export interface ProfilingSetupOptions {
 }
 
 export interface SetupStateType {
-  type: 'on-prem';
+  type: 'self-managed';
   setupState: SetupState;
 }
 

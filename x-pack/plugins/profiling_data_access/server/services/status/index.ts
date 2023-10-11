@@ -23,6 +23,8 @@ export function createGetStatusService(params: RegisterServicesParams) {
     try {
       const { type, setupState } = await getSetupState({ ...params, esClient, soClient, spaceId });
 
+      params.logger.debug(`Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`);
+
       return {
         has_setup:
           type === 'cloud' ? areCloudResourcesSetup(setupState) : areResourcesSetup(setupState),

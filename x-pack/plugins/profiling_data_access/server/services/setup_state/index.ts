@@ -38,8 +38,7 @@ export async function getSetupState({
   const isCloudEnabled = deps.cloud?.isCloudEnabled;
   if (isCloudEnabled) {
     if (!deps.fleet) {
-      // TODO: fix it
-      throw new Error('BOOMMM');
+      throw new Error('Elastic Fleet is required to set up Universal Profiling on Cloud');
     }
 
     const setupState = await cloudSetupState({
@@ -51,6 +50,7 @@ export async function getSetupState({
       packagePolicyClient: deps.fleet.packagePolicyService,
       isCloudEnabled,
     });
+
     return {
       type: 'cloud',
       setupState,
@@ -66,7 +66,7 @@ export async function getSetupState({
   });
 
   return {
-    type: 'on-prem',
+    type: 'self-managed',
     setupState,
   };
 }
