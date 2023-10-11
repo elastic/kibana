@@ -268,15 +268,20 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
-         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
-        'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
-        /**
          * xpack.infra.featureFlags.customThresholdAlertsEnabled is conditional based on traditional/serverless offering
          * and will resolve to (boolean)
          */
         'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
+        /**
+         * xpack.infra.featureFlags.logsUIEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
+         */
+        'xpack.infra.featureFlags.logsUIEnabled (any)',
+        /**
+         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
+         */
+        'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         /**
          * xpack.infra.featureFlags.osqueryEnabled is conditional based on traditional/serverless offering
          * and will resolve to (boolean)
@@ -311,6 +316,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
+        'xpack.securitySolution.offeringSettings (record)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.stack_connectors.enableExperimental (array)',

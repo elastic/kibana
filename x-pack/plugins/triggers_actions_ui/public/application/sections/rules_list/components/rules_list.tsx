@@ -246,6 +246,7 @@ export const RulesList = ({
     ruleTypesState,
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
@@ -288,6 +289,7 @@ export const RulesList = ({
     });
 
   const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
