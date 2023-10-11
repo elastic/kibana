@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 key: 'valid_key_1',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value'],
+                value: 'this is a text field value',
               },
               {
                 key: 'valid_key_2',
@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'valid_key_1',
             type: CustomFieldTypes.TEXT,
-            value: ['this is a text field value'],
+            value: 'this is a text field value',
           },
           {
             key: 'valid_key_2',
@@ -438,12 +438,12 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'duplicated_key',
                   type: CustomFieldTypes.TEXT,
-                  value: ['this is a text field value'],
+                  value: 'this is a text field value',
                 },
                 {
                   key: 'duplicated_key',
                   type: CustomFieldTypes.TEXT,
-                  value: ['this is a text field value'],
+                  value: 'this is a text field value',
                 },
               ],
             }),
@@ -474,7 +474,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'invalid_key',
                   type: CustomFieldTypes.TEXT,
-                  value: ['this is a text field value'],
+                  value: 'this is a text field value',
                 },
               ],
             }),
@@ -511,7 +511,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'text_custom_field',
                   type: CustomFieldTypes.TEXT,
-                  value: ['a'],
+                  value: 'a',
                 },
               ],
             }),
