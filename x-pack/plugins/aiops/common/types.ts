@@ -14,13 +14,19 @@ export interface SignificantTermDuplicateGroup {
 
 export type FieldValuePairCounts = Record<string, Record<string, number>>;
 
-export interface ItemsetResult {
+export interface ItemSet {
   set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
   size: number;
   maxPValue: number;
   doc_count: number;
   support: number;
   total_doc_count: number;
+}
+
+export interface FetchFrequentItemSetsResponse {
+  fields: string[];
+  itemSets: ItemSet[];
+  totalDocCount: number;
 }
 
 interface SimpleHierarchicalTreeNodeSet extends FieldValuePair {
