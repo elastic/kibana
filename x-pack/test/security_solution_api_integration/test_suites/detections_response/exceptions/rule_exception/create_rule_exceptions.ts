@@ -15,12 +15,13 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   getRule,
   createRule,
   getSimpleRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   createExceptionList,
   deleteAllAlerts,
@@ -28,7 +29,7 @@ import {
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
-} from '../../../lists_api_integration/utils';
+} from '../../../../../lists_api_integration/utils';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',
@@ -44,15 +45,16 @@ const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   type: 'simple',
 });
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('create_rule_exception_route', () => {
+  describe('@serverless @ess create_rule_exception_route', () => {
     before(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     after(async () => {
@@ -84,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: 'elastic',
+          created_by: ELASTICSEARCH_USERNAME,
           description: 'Exception item for rule default exception list',
           entries: [
             {
@@ -100,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
           os_types: [],
           tags: [],
           type: 'simple',
-          updated_by: 'elastic',
+          updated_by: ELASTICSEARCH_USERNAME,
         },
       ]);
       expect(udpatedRule.exceptions_list.some((list) => list.type === 'rule_default')).to.eql(true);
@@ -148,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: 'elastic',
+          created_by: ELASTICSEARCH_USERNAME,
           description: 'Exception item for rule default exception list',
           entries: [
             {
@@ -164,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           os_types: [],
           tags: [],
           type: 'simple',
-          updated_by: 'elastic',
+          updated_by: ELASTICSEARCH_USERNAME,
         },
       ]);
     });
@@ -210,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(itemsWithoutServerGeneratedValues[0]).to.eql({
         comments: [],
-        created_by: 'elastic',
+        created_by: ELASTICSEARCH_USERNAME,
         description: 'Exception item for rule default exception list',
         entries: [
           {
@@ -226,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
         os_types: [],
         tags: [],
         type: 'simple',
-        updated_by: 'elastic',
+        updated_by: ELASTICSEARCH_USERNAME,
       });
     });
 
