@@ -110,6 +110,7 @@ export function IndexSelection() {
             isClearable
             isInvalid={fieldState.invalid}
             isLoading={isIndicesLoading && isDataViewsLoading}
+            placeholder={placeholder}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
               if (selected.length) {
                 return field.onChange(selected[0].value);
@@ -117,11 +118,10 @@ export function IndexSelection() {
 
               field.onChange('');
             }}
-            onSearchChange={onDataViewSearchChange}
             options={
-              indexPatternOption ? [...dataViewOptions, indexPatternOption] : dataViewOptions
+              !!indexPatternOption ? [...dataViewOptions, indexPatternOption] : dataViewOptions
             }
-            placeholder={placeholder}
+            onSearchChange={onSearchChange}
             selectedOptions={
               !!field.value ? [findSelectedIndexPattern(dataViews, field.value)] : []
             }
@@ -158,10 +158,9 @@ function createDataViewOptions(dataViews: DataView[]): Option[] {
   const options = [];
 
   options.push({
-    label: i18n.translate(
-      'xpack.observability.slo.sloEdit.customKql.indexSelection.dataViewOptionsLabel',
-      { defaultMessage: 'Select an existing Data View' }
-    ),
+    label: i18n.translate('xpack.observability.slo.sloEdit.indexSelection.dataViewOptionsLabel', {
+      defaultMessage: 'Select an index pattern from an existing Data View',
+    }),
     options: dataViews
       .map((view) => ({
         label: createDataViewLabel(view),

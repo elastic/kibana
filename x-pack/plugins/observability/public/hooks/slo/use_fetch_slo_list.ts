@@ -63,21 +63,17 @@ export function useFetchSloList({
     {
       queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
       queryFn: async ({ signal }) => {
-        try {
-          const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
-            query: {
-              ...(kqlQuery && { kqlQuery }),
-              ...(sortBy && { sortBy }),
-              ...(sortDirection && { sortDirection }),
-              ...(page && { page }),
-            },
-            signal,
-          });
+        const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
+          query: {
+            ...(kqlQuery && { kqlQuery }),
+            ...(sortBy && { sortBy }),
+            ...(sortDirection && { sortDirection }),
+            ...(page && { page }),
+          },
+          signal,
+        });
 
-          return response;
-        } catch (error) {
-          throw error;
-        }
+        return response;
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
