@@ -42,10 +42,10 @@ export function useTabs({
   end: string;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { infra } = services;
-  const HostMetricsTable = infra?.HostMetricsTable;
-  const ContainerMetricsTable = infra?.ContainerMetricsTable;
-  const PodMetricsTable = infra?.PodMetricsTable;
+  const { metricsDataAccess } = services;
+  const HostMetricsTable = metricsDataAccess?.HostMetricsTable;
+  const ContainerMetricsTable = metricsDataAccess?.ContainerMetricsTable;
+  const PodMetricsTable = metricsDataAccess?.PodMetricsTable;
 
   const timerange = useMemo(
     () => ({
