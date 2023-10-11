@@ -18,6 +18,7 @@ import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import {
   AllowedXYOverrides,
   CommonXYDataLayerConfig,
@@ -37,7 +38,6 @@ import {
   LayersFieldFormats,
   hasMultipleLayersWithSplits,
 } from '../helpers';
-import { getOverridesFor } from '../../../common';
 
 interface Props {
   titles?: LayersAccessorsTitles;

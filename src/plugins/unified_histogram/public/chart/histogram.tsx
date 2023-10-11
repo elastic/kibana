@@ -218,7 +218,7 @@ export function Histogram({
           overrides={{
             barSeries: {
               minBarHeight: 2,
-            }
+            },
           }}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}

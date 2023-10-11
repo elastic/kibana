@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment, BarSeriesProps } from '@elastic/charts';
+import {
+  type AxisProps,
+  HorizontalAlignment,
+  Position,
+  VerticalAlignment,
+  BarSeriesProps,
+} from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
@@ -512,6 +518,6 @@ export type AllowedXYOverrides = Partial<
     // id and groupId should not be overridden
     Simplify<Omit<MakeOverridesSerializable<AxisProps>, 'id' | 'groupId'>>
   > & {
-    'barSeries': Simplify<Pick<MakeOverridesSerializable<BarSeriesProps>, 'minBarHeight'>>;
+    barSeries: Simplify<Pick<MakeOverridesSerializable<BarSeriesProps>, 'minBarHeight'>>;
   }
 >;
