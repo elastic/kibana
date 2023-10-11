@@ -21,14 +21,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
 
   describe('Configure Case', function () {
-    //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('configure-case-button exist', async () => {
+        return await testSubjects.exists('configure-case-button');
+      });
+
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
       await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
+      });
     });
 
     after(async () => {
