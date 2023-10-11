@@ -52,7 +52,7 @@ interface Props {
 
 export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
   const { euiTheme } = useEuiTheme();
-  const { id, title, isCollapsible, appendHorizontalRule } = navNode;
+  const { id, title, appendHorizontalRule } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
   const totalChildren = filteredChildren?.length ?? 0;
   const classNames = getClassnames(euiTheme);
@@ -65,7 +65,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
     if (!filteredChildren) return null;
 
     return filteredChildren.map((item, i) =>
-      item.children && item.sideNavStatus !== 'renderAsItem' ? (
+      item.children && item.renderAs !== 'item' ? (
         <Fragment key={item.id}>
           <PanelGroup navNode={item} />
           {i < totalChildren - 1 && <EuiSpacer />}
@@ -80,7 +80,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
     return null;
   }
 
-  if (isCollapsible) {
+  if (navNode.renderAs === 'accordion') {
     return (
       <>
         <EuiAccordion

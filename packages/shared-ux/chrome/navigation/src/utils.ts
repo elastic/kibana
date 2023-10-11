@@ -28,18 +28,10 @@ export function getUniqueNodeId<T extends { path?: string[]; id: string } | null
     : undefined;
 }
 
-export function isGroupNode({
-  nodeType,
-  children,
-}: Pick<ChromeProjectNavigationNode, 'nodeType' | 'children'>) {
-  if (nodeType === 'group') return true;
+export function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children !== undefined;
 }
 
-export function isItemNode({
-  nodeType,
-  children,
-}: Pick<ChromeProjectNavigationNode, 'nodeType' | 'children'>) {
-  if (nodeType === 'item') return true;
+export function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children === undefined;
 }

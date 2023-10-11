@@ -391,7 +391,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             // Groups with title
             id: 'group:openpanel1',
             title: 'Open panel (1)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -439,7 +439,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             // Panel with default content
             // Groups with **not** title
             title: 'Open panel (2)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -486,7 +486,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             // Panel with default content
             // Accordion to wrap groups
             title: 'Open panel (3)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -512,7 +512,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
               {
                 id: 'group2',
                 title: 'MANAGEMENT',
-                isCollapsible: true,
+                renderAs: 'accordion',
                 children: [
                   {
                     id: 'group2-A',
@@ -536,7 +536,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     id: 'group2-B',
                     title: 'Group 2 (marked as collapsible)',
-                    isCollapsible: true,
+                    renderAs: 'accordion',
                     children: [
                       {
                         id: 'group2:settings.logs',
@@ -583,7 +583,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with nav group title that acts like nav items
             title: 'Open panel (4) - sideNavStatus',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -591,7 +591,8 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                 children: [
                   {
                     title: 'Should act as item 1',
-                    sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                    link: 'item1',
+                    renderAs: 'item',
                     children: [
                       {
                         link: 'group:settings.logs',
@@ -629,7 +630,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   },
                   {
                     title: 'Should act as item 2',
-                    sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                    renderAs: 'item', // This group renders as a normal item
                     children: [
                       {
                         link: 'group:settings.logs',
@@ -648,7 +649,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     title: 'Another group as Item',
                     id: 'group2.renderAsItem',
-                    sideNavStatus: 'renderAsItem',
+                    renderAs: 'item',
                     children: [
                       {
                         id: 'group2:settings.logs',
@@ -676,7 +677,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
               {
                 id: 'group2',
                 title: 'MANAGEMENT',
-                isCollapsible: true,
+                renderAs: 'accordion',
                 children: [
                   {
                     id: 'group2-A',
@@ -703,7 +704,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                       {
                         id: 'group2-B',
                         title: 'Group 2 (render as Item)',
-                        sideNavStatus: 'renderAsItem', // This group renders as a normal item
+                        renderAs: 'item', // This group renders as a normal item
                         children: [
                           {
                             id: 'group2:settings.logs',
@@ -735,20 +736,20 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                       },
                       {
                         title: 'Yet another group as item',
-                        sideNavStatus: 'renderAsItem',
-                    children: [
-                      {
-                        id: 'group2:settings.logs',
-                        link: 'group:settings.logs',
-                        title: 'Logs',
+                        renderAs: 'item',
+                        children: [
+                          {
+                            id: 'group2:settings.logs',
+                            link: 'group:settings.logs',
+                            title: 'Logs',
+                          },
+                          {
+                            id: 'group2:settings.signals',
+                            link: 'group:settings.signals',
+                            title: 'Signals',
+                          },
+                        ],
                       },
-                      {
-                        id: 'group2:settings.signals',
-                        link: 'group:settings.signals',
-                        title: 'Signals',
-                      },
-                    ],
-                  },
                       {
                         id: 'group2:settings.signals',
                         link: 'group:settings.signals',
@@ -764,7 +765,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             // Panel where all children are hidden. The "open panel" icon should NOT
             // appear next to the node title
             title: 'Open panel (5) - all children hidden',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             id: 'test',
             children: [
@@ -787,7 +788,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             id: 'group:openpanel2',
             title: 'Open panel (custom content)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -807,7 +808,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             id: 'group:openpanel3',
             title: 'Open panel (custom title)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -900,7 +901,12 @@ export const WithUIComponents = (args: NavigationServices) => {
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
-              <Navigation.Group<any> id="group:openPanel" link="item1" title="Open panel" openPanel>
+              <Navigation.Group<any>
+                id="group:openPanel"
+                link="item1"
+                title="Open panel"
+                renderAs="panelOpener"
+              >
                 <Navigation.Group id="group1">
                   <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
@@ -911,7 +917,7 @@ export const WithUIComponents = (args: NavigationServices) => {
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" />
                   <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
                 </Navigation.Group>
-                <Navigation.Group title="MANAGEMENT" id="group3" isCollapsible>
+                <Navigation.Group title="MANAGEMENT" id="group3" renderAs="accordion">
                   <Navigation.Group title="Group A" id="group3-a">
                     <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                     <Navigation.Item<any>

@@ -49,7 +49,7 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
-export type SideNavNodeStatus = 'hidden' | 'visible' | 'renderAsItem';
+export type SideNavNodeStatus = 'hidden' | 'visible';
 
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -67,12 +67,6 @@ export type GetIsActiveFn = (params: {
  * Each have commmon properties and specific properties.
  */
 interface NodeDefinitionBase {
-  /**
-   * Node type is automatically detected by checking if the node has children or not.
-   * A node without children is considered an "item" node.
-   * If you want to force a node to be a "group" node you can use this property.
-   */
-  nodeType?: 'group' | 'item';
   /**
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
@@ -110,15 +104,13 @@ interface NodeDefinitionBase {
    */
   isGroupTitle?: boolean;
   /**
-   * ["group" nodes only] Optional flag to indicate if the group node is collapsible in an accordion.
-   * Default :false
+   * ["group" nodes only] Property to indicate how the group should be rendered.
+   * - Accordion: wraps the items in an EuiAccordion
+   * - PanelOpener: renders a button to open a panel on the right of the side nav
+   * - item: renders the group as an item in the side nav
+   * @default 'block'
    */
-  isCollapsible?: boolean;
-  /**
-   * ["group" nodes only] Flag to indicate if the node opens a panel when clicking on it.
-   * Note: Can't be used with a `link` or `href` value.
-   */
-  openPanel?: boolean;
+  renderAs?: 'block' | 'accordion' | 'panelOpener' | 'item';
   /**
    * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
    * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation

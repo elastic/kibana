@@ -38,7 +38,7 @@ const navigationNodeToEuiItem = (
 ): EuiCollapsibleNavSubItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = getUniqueNodeId(item);
-  const { openPanel: itemOpenPanel = false } = item;
+  const { renderAs = 'block' } = item;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
@@ -69,7 +69,7 @@ const navigationNodeToEuiItem = (
     };
   }
 
-  if (itemOpenPanel) {
+  if (renderAs === 'panelOpener') {
     return {
       renderItem: () => <NavigationItemOpenPanel item={item} navigateToUrl={navigateToUrl} />,
     };
@@ -97,16 +97,14 @@ const navigationNodeToEuiItem = (
     linkProps: { external: isExternal },
     onClick,
     href,
-    items: itemOpenPanel
-      ? undefined // Don't render children if the item opens a panel
-      : filteredChildren?.map((_item) =>
-          navigationNodeToEuiItem(_item, {
-            navigateToUrl,
-            openPanel,
-            closePanel,
-            isSideNavCollapsed,
-          })
-        ),
+    items: filteredChildren?.map((_item) =>
+      navigationNodeToEuiItem(_item, {
+        navigateToUrl,
+        openPanel,
+        closePanel,
+        isSideNavCollapsed,
+      })
+    ),
     ['data-test-subj']: dataTestSubj,
     icon: item.icon,
     iconProps: { size: 's' },
@@ -142,7 +140,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     }
 
     const hasChildren = Boolean(item.children?.length);
-    if (item.sideNavStatus === 'renderAsItem' && hasChildren) {
+    if (item.renderAs === 'item' && hasChildren) {
       return true;
     }
 
@@ -183,7 +181,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   }
 
   const propsForGroupAsItem: Partial<EuiCollapsibleNavItemProps> =
-    navNode.sideNavStatus === 'renderAsItem'
+    navNode.renderAs === 'item'
       ? {
           linkProps: {
             href: groupHref,

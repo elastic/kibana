@@ -27,7 +27,7 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
 
   const allChildrenAreItems = node.children.every((_node) => {
     if (isItemNode(_node)) return true;
-    return _node.sideNavStatus === 'renderAsItem';
+    return _node.renderAs === 'item';
   });
 
   if (allChildrenAreItems) {
@@ -43,7 +43,7 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
   }
 
   const allChildrenAreGroups = node.children.every((_node) => {
-    if (_node.sideNavStatus === 'renderAsItem') return false;
+    if (_node.renderAs === 'item') return false;
     return isGroupNode(_node);
   });
 
