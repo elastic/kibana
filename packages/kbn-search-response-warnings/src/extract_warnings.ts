@@ -14,7 +14,7 @@ import {
   LOCAL_CLUSTER_KEY,
   getLocalClusterDetails,
 } from '@kbn/inspector-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { SearchResponseWarning } from './types';
 
 /**
@@ -23,8 +23,8 @@ import type { SearchResponseWarning } from './types';
 export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
+  requestAdapter: RequestAdapter,
   requestId?: string,
-  requestAdapter?: RequestAdapter
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
@@ -53,19 +53,9 @@ export function extractWarnings(
             [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
           },
       openInInspector: () => {
-        const adapter = requestAdapter ? requestAdapter : new RequestAdapter();
-        if (!requestAdapter) {
-          const requestResponder = adapter.start(
-            i18n.translate('searchResponseWarnings.anonymousRequestTitle', {
-              defaultMessage: 'Request',
-            })
-          );
-          requestResponder.ok({ json: rawResponse });
-        }
-
         inspectorService.open(
           {
-            requests: adapter,
+            requests: requestAdapter,
           },
           {
             options: {

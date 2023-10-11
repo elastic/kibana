@@ -11,7 +11,8 @@ import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
@@ -39,11 +40,11 @@ export function handleWarnings({
   theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
   requestId?: string;
-  requestAdapter?: RequestAdapter;
+  requestAdapter: RequestAdapter;
   inspectorService: InspectorStartContract;
   notificationService: NotificationsStart;
 }) {
-  const warnings = extractWarnings(response, inspectorService, requestId, requestAdapter);
+  const warnings = extractWarnings(response, inspectorService, requestAdapter, requestId);
   if (warnings.length === 0) {
     return;
   }

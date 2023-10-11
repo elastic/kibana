@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { handleWarnings } from '@kbn/search-response-warnings';
@@ -16,6 +17,7 @@ import {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -248,12 +250,28 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 
+          const requestAdapter = options.inspector?.adapter
+            ? options.inspector?.adapter
+            : new RequestAdapter();
+          if (!options.inspector?.adapter) {
+            const requestResponder = requestAdapter.start(
+              i18n.translate('data.searchService.anonymousRequestTitle', {
+                defaultMessage: 'Request',
+              }),
+              {
+                id: request.id,
+              }
+            );
+            requestResponder.json(request.body);
+            requestResponder.ok({ json: response });
+          }
+
           handleWarnings({
             request: request.body as estypes.SearchRequest,
             response: rawResponse,
             theme,
             requestId: request.id,
-            requestAdapter: options.inspector?.adapter,
+            requestAdapter,
             inspectorService: inspector,
             notificationService: notifications,
           });
