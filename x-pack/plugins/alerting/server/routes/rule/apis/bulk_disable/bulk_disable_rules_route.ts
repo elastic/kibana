@@ -9,16 +9,17 @@ import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+
 import {
-  bulkDeleteRulesRequestBodySchemaV1,
-  BulkDeleteRulesRequestBodyV1,
-  BulkDeleteRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/bulk_delete';
+  bulkDisableRulesRequestBodySchemaV1,
+  BulkDisableRulesRequestBodyV1,
+  BulkDisableRulesResponseV1,
+} from '../../../../../common/routes/rule/apis/bulk_disable';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { Rule } from '../../../../application/rule/types';
 
-export const bulkDeleteRulesRoute = ({
+export const bulkDisableRulesRoute = ({
   router,
   licenseState,
 }: {
@@ -27,9 +28,9 @@ export const bulkDeleteRulesRoute = ({
 }) => {
   router.patch(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_disable`,
       validate: {
-        body: bulkDeleteRulesRequestBodySchemaV1,
+        body: bulkDisableRulesRequestBodySchemaV1,
       },
     },
     handleDisabledApiKeysError(
@@ -37,24 +38,23 @@ export const bulkDeleteRulesRoute = ({
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const rulesClient = (await context.alerting).getRulesClient();
 
-          const body: BulkDeleteRulesRequestBodyV1 = req.body;
+          const body: BulkDisableRulesRequestBodyV1 = req.body;
           const { filter, ids } = body;
 
           try {
-            const bulkDeleteResult = await rulesClient.bulkDeleteRules({
-              filter,
-              ids,
-            });
-            const resultBody: BulkDeleteRulesResponseV1<RuleParamsV1> = {
+            const bulkDisableResults = await rulesClient.bulkDisableRules({ filter, ids });
+
+            const resultBody: BulkDisableRulesResponseV1<RuleParamsV1> = {
               body: {
-                ...bulkDeleteResult,
-                rules: bulkDeleteResult.rules.map((rule) => {
+                ...bulkDisableResults,
+                rules: bulkDisableResults.rules.map((rule) => {
                   // TODO (http-versioning): Remove this cast, this enables us to move forward
                   // without fixing all of other solution types
                   return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);
                 }),
               },
             };
+
             return res.ok(resultBody);
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
