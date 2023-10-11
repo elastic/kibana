@@ -35,13 +35,13 @@ import {
 } from '../../../../../shared_imports';
 
 import { documentationService } from '../../../../services/documentation';
-import { splitSizeAndUnits } from '../../../../../../common';
+import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
-  dataRetention: string;
+  lifecycle: DataStream['lifecycle'];
   dataStreamName: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
@@ -144,11 +144,11 @@ const configurationFormSchema: FormSchema = {
 };
 
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
-  dataRetention,
+  lifecycle,
   dataStreamName,
   onClose,
 }) => {
-  const { size, unit } = splitSizeAndUnits(dataRetention);
+  const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
   } = useAppContext();
@@ -157,7 +157,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      infiniteRetentionPeriod: !dataRetention,
+      infiniteRetentionPeriod: lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',

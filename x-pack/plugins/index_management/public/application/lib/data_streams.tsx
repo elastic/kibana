@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DataStream } from '../../../common';
 
 export const isFleetManaged = (dataStream: DataStream): boolean => {
@@ -37,4 +38,18 @@ export const isSelectedDataStreamHidden = (
     !!dataStreams.find((dataStream: DataStream) => dataStream.name === selectedDataStreamName)
       ?.hidden
   );
+};
+
+export const getLifecycleValue = (lifecycle: DataStream['lifecycle']) => {
+  if (!lifecycle?.enabled) {
+    return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionDisabled', {
+      defaultMessage: 'Disabled',
+    });
+  } else if (!lifecycle?.data_retention) {
+    return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionInfinite', {
+      defaultMessage: 'Keep data indefinitely',
+    });
+  }
+
+  return lifecycle?.data_retention;
 };
