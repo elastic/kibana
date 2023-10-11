@@ -229,7 +229,7 @@
     "coloring.dynamicColoring.rangeType.label": "值类型",
     "coloring.dynamicColoring.rangeType.number": "数字",
     "coloring.dynamicColoring.rangeType.percent": "百分比",
-    "coloring.colorMapping.terms.otherBucketLabel":"其他",
+    "coloring.colorMapping.terms.otherBucketLabel": "其他",
     "coloring.colorMapping.terms.emptyLabel": "（空）",
     "console.helpPage.learnAboutConsoleAndQueryDslText": "了解 {console} 和 {queryDsl}",
     "console.historyPage.itemOfRequestListAriaLabel": "请求：{historyItem}",
