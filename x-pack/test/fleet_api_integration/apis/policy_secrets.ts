@@ -520,14 +520,12 @@ export default function (providerContext: FtrProviderContext) {
       const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
       updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
 
-      console.log('BADGER secrets before', JSON.stringify(await getSecrets()));
       const updateRes = await supertest
         .put(`/api/fleet/package_policies/${createdPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .send(updatedPolicy)
         .expect(200);
 
-      console.log('BADGER secrets after', JSON.stringify(await getSecrets()));
       const updatedPackagePolicy = updateRes.body.item;
 
       updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
@@ -567,8 +565,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should have correctly deleted unused secrets after update', async () => {
-      console.log('secrets in test', JSON.stringify(await getSecrets()));
-
       const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
