@@ -807,37 +807,21 @@ describe('data telemetry collection tasks', () => {
 
     it('returns custom dashboards stats from all spaces', async () => {
       savedObjectsClient.find.mockResolvedValueOnce({
-        page: 1,
-        per_page: 500,
         total: 2,
-        saved_objects: [
-          {
-            type: 'apm-custom-dashboards',
-            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
-            namespaces: ['default'],
-            attributes: {
-              dashboardSavedObjectId: 'foo-id',
-              serviceEnvironmentFilterEnabled: true,
-              serviceNameFilterEnabled: true,
-              kuery: 'service.name: frontend and service.environment: prod',
-            },
-            references: [],
-            score: 1,
+        saved_objects: [],
+        per_page: 1,
+        page: 1,
+        aggregations: {
+          kueries: {
+            buckets: [
+              {
+                doc_count: 1,
+                key: 'service.name: foo or service.environment: foo ',
+              },
+              { doc_count: 1, key: 'service.environment: bar' },
+            ],
           },
-          {
-            type: 'apm-custom-dashboards',
-            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
-            namespaces: ['space-1'],
-            attributes: {
-              dashboardSavedObjectId: 'bar-id',
-              serviceEnvironmentFilterEnabled: true,
-              serviceNameFilterEnabled: true,
-              kuery: 'service.name: frontend',
-            },
-            references: [],
-            score: 0,
-          },
-        ],
+        },
       });
 
       expect(

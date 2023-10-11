@@ -71,10 +71,7 @@ import {
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
-import {
-  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-  SavedApmCustomDashboard,
-} from '../../../../common/custom_dashboards';
+import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../../common/custom_dashboards';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -82,6 +79,11 @@ type TimeRange = typeof TIME_RANGES[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
+
+// interface Bucket<T extends string | number = string | number> {
+//   doc_count: number;
+//   key: T;
+// }
 
 interface TelemetryTask {
   name: string;
@@ -1498,7 +1500,17 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'custom_dashboards',
     executor: async ({ savedObjectsClient }) => {
-      const response = await savedObjectsClient.find<SavedApmCustomDashboard>({
+      const response = await savedObjectsClient.find<
+        unknown,
+        {
+          kueries: {
+            buckets: Array<{
+              doc_count: number;
+              key: string;
+            }>;
+          };
+        }
+      >({
         type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
         aggs: {
