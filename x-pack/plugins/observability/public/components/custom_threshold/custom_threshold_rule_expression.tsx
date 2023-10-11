@@ -35,11 +35,11 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import PreviewChart from './components/preview_chart';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
-import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
@@ -387,7 +387,7 @@ export default function Expressions(props: Props) {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
-
+  console.log('dataView', dataView);
   return (
     <>
       <EuiTitle size="xs">
@@ -481,14 +481,15 @@ export default function Expressions(props: Props) {
                 expression={e || {}}
                 dataView={derivedIndexPattern}
               >
+                <PreviewChart metricExpression={e} dataViewId={dataView.id} />
                 {/* Preview */}
-                <ExpressionChart
-                  expression={e}
-                  derivedIndexPattern={derivedIndexPattern}
-                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
-                  groupBy={ruleParams.groupBy}
-                  timeFieldName={dataView?.timeFieldName}
-                />
+                {/* <ExpressionChart*/}
+                {/*  expression={e}*/}
+                {/*  derivedIndexPattern={derivedIndexPattern}*/}
+                {/*  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}*/}
+                {/*  groupBy={ruleParams.groupBy}*/}
+                {/*  timeFieldName={dataView?.timeFieldName}*/}
+                {/* />*/}
               </ExpressionRow>
             </div>
           );
