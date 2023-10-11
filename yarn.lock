@@ -8696,10 +8696,10 @@
   resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-2.1.3.tgz#0b03d737ff28fad10eb884e0c6cedd5ffdc4ba0a"
   integrity sha512-1xGPhoSGY1CPmXLCBcjVZSQinFjL26vlR8ZqprsBWiFyED4JacJJ9zHhh5aaUXqbY9B37mKQ73nlydVAXmr1+g==
 
-"@types/chromedriver@^81.0.1":
-  version "81.0.1"
-  resolved "https://registry.yarnpkg.com/@types/chromedriver/-/chromedriver-81.0.1.tgz#bff3e4cdc7830dc0f115a9c0404f6979771064d4"
-  integrity sha512-I7ma6bBzfWc5YiMV/OZ6lYMZIANAwGbDH+QRYKnbXRptdAvUhSoFP5iHzQHas6QZCRDtefMvbxCjySUyXhxafQ==
+"@types/chromedriver@^81.0.2":
+  version "81.0.2"
+  resolved "https://registry.yarnpkg.com/@types/chromedriver/-/chromedriver-81.0.2.tgz#b01a1007f9b39804e8ebaed07b2b86a33a21e121"
+  integrity sha512-sWozcf88uN5B5hh9wuLupSY1JRuN551NjhbNTK+4DGp1c1qiQGprpPy+hJkWuckQcEzyDAN3BbOezXfefWAI/Q==
   dependencies:
     "@types/node" "*"
 
@@ -12795,10 +12795,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^116.0.0:
-  version "116.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-116.0.0.tgz#3f5d07b5427953270461791651d7b68cb6afe9fe"
-  integrity sha512-/TQaRn+RUAYnVqy5Vx8VtU8DvtWosU8QLM2u7BoNM5h55PRQPXF/onHAehEi8Sj/CehdKqH50NFdiumQAUr0DQ==
+chromedriver@^117.0.3:
+  version "117.0.3"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-117.0.3.tgz#4a14cc992d572367b99b53c772adcc4c19078e1e"
+  integrity sha512-c2rk2eGK5zZFBJMdviUlAJfQEBuPNIKfal4+rTFVYAmrWbMPYAqPozB+rIkc1lDP/Ryw44lPiqKglrI01ILhTQ==
   dependencies:
     "@testim/chrome-version" "^1.1.3"
     axios "^1.4.0"
