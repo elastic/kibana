@@ -9,17 +9,17 @@
  * Get all actions with in-memory connectors
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { connectorSchema } from '../../schemas';
+import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import { FindConnectorResult } from '../../types';
+import { ConnectorWithExtraFindData } from '../../types';
 
 export async function getAll({
   context,
   includeSystemActions = false,
-}: GetAllParams): Promise<FindConnectorResult[]> {
+}: GetAllParams): Promise<ConnectorWithExtraFindData[]> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -63,27 +63,29 @@ export async function getAll({
     })),
   ].sort((a, b) => a.name.localeCompare(b.name));
 
-  mergedResult.forEach((connector) => {
+  const connectors = await injectExtraFindData({
+    kibanaIndices: context.kibanaIndices,
+    scopedClusterClient: context.scopedClusterClient,
+    connectors: mergedResult,
+  });
+
+  connectors.forEach((connector) => {
     // Try to validate the connectors, but don't throw.
     try {
-      connectorSchema.validate(connector);
+      connectorWithExtraFindDataSchema.validate(connector);
     } catch (e) {
       context.logger.warn(`Error validating connector: ${connector.id}, ${e}`);
     }
   });
 
-  return await injectExtraFindData({
-    kibanaIndices: context.kibanaIndices,
-    scopedClusterClient: context.scopedClusterClient,
-    connectors: mergedResult,
-  });
+  return connectors;
 }
 
 async function injectExtraFindData({
   kibanaIndices,
   scopedClusterClient,
   connectors,
-}: InjectExtraFindDataParams): Promise<FindConnectorResult[]> {
+}: InjectExtraFindDataParams): Promise<ConnectorWithExtraFindData[]> {
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   for (const connector of connectors) {
     aggs[connector.id] = {
