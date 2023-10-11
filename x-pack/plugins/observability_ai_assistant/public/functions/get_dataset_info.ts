@@ -7,7 +7,7 @@
 
 import { FunctionVisibility, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
-import { compressFields } from '../../common/utils/compressFields';
+import { compressFields } from '../../common/utils/compress_fields';
 
 export function registerGetDatasetInfoFunction({
   service,
