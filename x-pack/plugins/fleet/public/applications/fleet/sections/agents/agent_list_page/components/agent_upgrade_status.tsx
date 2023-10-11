@@ -35,6 +35,14 @@ export function getUpgradeStartDelay(scheduledAt?: string): string {
   return ` The upgrade will start in less than ${Math.ceil(timeDiffMillis / 36e5)} hours.`;
 }
 
+export function getDownloadEstimate(downloadPercent?: number): string {
+  if (!downloadPercent || downloadPercent === 0) {
+    return '';
+  }
+
+  return ` (${downloadPercent}%)`;
+}
+
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   switch (agentUpgradeDetails?.state) {
     case 'UPG_REQUESTED':
@@ -87,9 +95,9 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
-            defaultMessage="Downloading the new agent artifact version ({downloadPercent}%)."
+            defaultMessage="Downloading the new agent artifact version{downloadEstimate}."
             values={{
-              downloadPercent: agentUpgradeDetails?.metadata.download_percent || 0,
+              downloadEstimate: getDownloadEstimate(agentUpgradeDetails?.metadata.download_percent),
             }}
           />
         ),
@@ -215,6 +223,7 @@ export const AgentUpgradeStatus: React.FC<{
     [agentUpgradeStartedAt, agentUpgradedAt]
   );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
+  const minVersion = undefined; // Change this to a string in order for a tooltip to render for upgrading agents with no upgrade details.
 
   if (isAgentUpgradable) {
     return (
@@ -238,14 +247,17 @@ export const AgentUpgradeStatus: React.FC<{
     );
   }
 
-  if (isAgentUpgrading) {
+  if (minVersion && isAgentUpgrading) {
     return (
       <EuiIconTip
         type="iInCircle"
         content={
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDetailsNotAvailable"
-            defaultMessage="Detailed upgrade status is available for Elastic Agents on version 8.12 and higher."
+            defaultMessage="Detailed upgrade status is available for Elastic Agents on version {minVersion} and higher."
+            values={{
+              minVersion,
+            }}
           />
         }
         color="subdued"

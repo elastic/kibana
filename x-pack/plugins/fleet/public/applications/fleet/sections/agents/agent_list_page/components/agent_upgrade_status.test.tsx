@@ -10,10 +10,14 @@ import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { AgentUpgradeStatus, getUpgradeStartDelay } from './agent_upgrade_status';
+import {
+  AgentUpgradeStatus,
+  getDownloadEstimate,
+  getUpgradeStartDelay,
+} from './agent_upgrade_status';
 
 function getDateString(futureOffsetInMinutes: number): string {
-  return new Date(Date.now() + futureOffsetInMinutes * 6e4).toString();
+  return new Date(Date.now() + futureOffsetInMinutes * 6e4).toISOString();
 }
 
 describe('getUpgradeStartDelay', () => {
@@ -36,6 +40,20 @@ describe('getUpgradeStartDelay', () => {
     expect(getUpgradeStartDelay(getDateString(121))).toEqual(
       ' The upgrade will start in less than 3 hours.'
     );
+  });
+});
+
+describe('getDownloadEstimate', () => {
+  it('should return an empty string if the agent does not have a download percent', () => {
+    expect(getDownloadEstimate()).toEqual('');
+  });
+
+  it('should return an empty string if the agent has a zero download percent', () => {
+    expect(getDownloadEstimate(0)).toEqual('');
+  });
+
+  it('should return a formatted string if the agent has a positive download percent', () => {
+    expect(getDownloadEstimate(16.4)).toEqual(' (16.4%)');
   });
 });
 
@@ -226,7 +244,8 @@ describe('AgentUpgradeStatus', () => {
       expect(results.queryAllByText('Info')).toEqual([]);
     });
 
-    it('should render an icon with tooltip if the agent is upgrading', async () => {
+    // Unskip this test when minVersion is set.
+    it.skip('should render an icon with tooltip if the agent is upgrading', async () => {
       const results = render({
         agentUpgradeStartedAt: '2023-10-03T14:34:12Z',
         agentUpgradedAt: null,
