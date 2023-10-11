@@ -5,33 +5,51 @@
  * 2.0.
  */
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { RawRule } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../lib';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import type { RawRule, SanitizedRule, RawRuleAction } from '../../../../types';
+import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
-  getAndValidateCommonBulkOptions,
-} from '../common';
+  tryToRemoveTasks,
+} from '../../../../rules_client/common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  getAlertFromRaw,
   untrackRuleAlerts,
   updateMeta,
   migrateLegacyActions,
-} from '../lib';
-import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
-import { tryToRemoveTasks } from '../common';
-import { RuleAttributes } from '../../data/rule/types';
+} from '../../../../rules_client/lib';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import type {
+  BulkOperationError,
+  BulkDisableRulesResult,
+  BulkDisableRulesRequestBody,
+} from './types';
+import type { RuleAttributes } from '../../../../data/rule/types';
+import { validateBulkDisableRulesBody } from './validation';
+import { ruleDomainSchema } from '../../schemas';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type { RuleParams, RuleDomain } from '../../types';
+import { bulkDisableRulesSo } from '../../../../data/rule';
 
-export const bulkDisableRules = async (context: RulesClientContext, options: BulkOptions) => {
-  const { ids, filter } = getAndValidateCommonBulkOptions(options);
+export const bulkDisableRules = async <Params extends RuleParams>(
+  context: RulesClientContext,
+  options: BulkDisableRulesRequestBody
+): Promise<BulkDisableRulesResult<Params>> => {
+  try {
+    validateBulkDisableRulesBody(options);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating bulk disable data - ${error.message}`);
+  }
+
+  const { ids, filter } = options;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DISABLE' });
@@ -70,18 +88,33 @@ export const bulkDisableRules = async (context: RulesClientContext, options: Bul
     tryToRemoveTasks({ taskIdsToDelete, logger: context.logger, taskManager: context.taskManager }),
   ]);
 
-  const updatedRules = rules.map(({ id, attributes, references }) => {
-    return getAlertFromRaw(
-      context,
+  const disabledRules = rules.map(({ id, attributes, references }) => {
+    // TODO (http-versioning): alertTypeId should never be null, but we need to
+    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+    // when we are doing the bulk disable and this should fix itself
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
       id,
-      attributes.alertTypeId as string,
-      attributes as RawRule,
+      logger: context.logger,
+      ruleType,
       references,
-      false
-    );
+      omitGeneratedValues: false,
+    });
+
+    try {
+      ruleDomainSchema.validate(ruleDomain);
+    } catch (e) {
+      context.logger.warn(`Error validating bulk disabled rule domain object for id: ${id}, ${e}`);
+    }
+    return ruleDomain;
   });
 
-  return { errors, rules: updatedRules, total };
+  // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+  const disabledPublicRules = disabledRules.map((rule: RuleDomain<Params>) => {
+    return transformRuleDomainToRule<Params>(rule);
+  }) as Array<SanitizedRule<Params>>;
+
+  return { errors, rules: disabledPublicRules, total };
 };
 
 const bulkDisableRulesWithOCC = async (
@@ -96,15 +129,17 @@ const bulkDisableRulesWithOCC = async (
       type: 'rules',
     },
     () =>
-      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
-        filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-        type: 'alert',
-        perPage: 100,
-        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      })
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+        {
+          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          type: 'alert',
+          perPage: 100,
+          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+        }
+      )
   );
 
-  const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
@@ -115,21 +150,25 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            await untrackRuleAlerts(context, rule.id, rule.attributes as RuleAttributes);
+            await untrackRuleAlerts(context, rule.id, rule.attributes);
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
+            // migrate legacy actions only for SIEM rules
+            // TODO (http-versioning) Remove RawRuleAction and RawRule casts
             const migratedActions = await migrateLegacyActions(context, {
               ruleId: rule.id,
-              actions: rule.attributes.actions,
+              actions: rule.attributes.actions as RawRuleAction[],
               references: rule.references,
-              attributes: rule.attributes,
+              attributes: rule.attributes as RawRule,
             });
 
+            // TODO (http-versioning) Remove casts when updateMeta has been converted
+            const castedAttributes = rule.attributes as RawRule;
             const updatedAttributes = updateMeta(context, {
-              ...rule.attributes,
+              ...castedAttributes,
               ...(migratedActions.hasLegacyActions
                 ? {
                     actions: migratedActions.resultedActions,
@@ -148,9 +187,10 @@ const bulkDisableRulesWithOCC = async (
 
             rulesToDisable.push({
               ...rule,
+              // TODO (http-versioning) Remove casts when updateMeta has been converted
               attributes: {
                 ...updatedAttributes,
-              },
+              } as RuleAttributes,
               ...(migratedActions.hasLegacyActions
                 ? { references: migratedActions.resultedReferences }
                 : {}),
@@ -184,18 +224,26 @@ const bulkDisableRulesWithOCC = async (
     }
   );
 
+  // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
+  // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
+  // bulk_disable, bulk_enable, etc. to fix this cast
+
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
-      context.unsecuredSavedObjectsClient.bulkCreate(rulesToDisable, {
-        overwrite: true,
+      bulkDisableRulesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        bulkDisableRuleAttributes: rulesToDisable as Array<
+          SavedObjectsBulkCreateObject<RuleAttributes>
+        >,
+        savedObjectsBulkCreateOptions: { overwrite: true },
       })
   );
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];
   const taskIdsToClearState: string[] = [];
-  const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const disabledRules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
 
   result.saved_objects.forEach((rule) => {
     if (rule.error === undefined) {

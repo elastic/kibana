@@ -517,7 +517,8 @@ export const UnifiedDataTable = ({
         () => dataGridRef.current?.closeCellPopover(),
         services.fieldFormats,
         maxDocFieldsDisplayed,
-        externalCustomRenderers
+        externalCustomRenderers,
+        isPlainRecord
       ),
     [
       dataView,
@@ -527,6 +528,7 @@ export const UnifiedDataTable = ({
       maxDocFieldsDisplayed,
       services.fieldFormats,
       externalCustomRenderers,
+      isPlainRecord,
     ]
   );
 

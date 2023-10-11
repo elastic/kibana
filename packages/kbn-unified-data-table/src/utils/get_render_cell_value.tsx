@@ -45,7 +45,8 @@ export const getRenderCellValueFn =
     externalCustomRenderers?: Record<
       string,
       (props: EuiDataGridCellValueElementProps) => React.ReactNode
-    >
+    >,
+    isPlainRecord?: boolean
   ) =>
   ({
     rowIndex,
@@ -135,17 +136,22 @@ export const getRenderCellValueFn =
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value]) => (
-            <Fragment key={key}>
-              <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                {key}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription
-                className="unifiedDataTable__descriptionListDescription"
-                dangerouslySetInnerHTML={{ __html: value }}
-              />
-            </Fragment>
-          ))}
+          {pairs.map(([key, value]) => {
+            // temporary solution for text based mode. As there are a lot of unsupported fields we want to
+            // hide the empty one from the Document view
+            if (isPlainRecord && row.flattened[key] === null) return null;
+            return (
+              <Fragment key={key}>
+                <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+                  {key}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription
+                  className="unifiedDataTable__descriptionListDescription"
+                  dangerouslySetInnerHTML={{ __html: value }}
+                />
+              </Fragment>
+            );
+          })}
         </EuiDescriptionList>
       );
     }

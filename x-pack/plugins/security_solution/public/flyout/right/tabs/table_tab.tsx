@@ -15,7 +15,7 @@ import { useRightPanelContext } from '../context';
  * Table view displayed in the document details expandable flyout right section
  */
 export const TableTab: FC = memo(() => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId } = useRightPanelContext();
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
 
   return (
     <EventFieldsBrowser
@@ -24,7 +24,7 @@ export const TableTab: FC = memo(() => {
       eventId={eventId}
       isDraggable={false}
       timelineTabType={TimelineTabs.query}
-      scopeId={'alert-details-flyout'}
+      scopeId={scopeId}
       isReadOnly={false}
     />
   );
