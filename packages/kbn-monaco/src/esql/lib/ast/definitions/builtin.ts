@@ -17,7 +17,7 @@ function createMathDefinition(
   return {
     name,
     description: '',
-    supportedCommands: ['eval', 'stats', 'where'],
+    supportedCommands: ['eval', 'stats', 'where', 'row'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
         return {
@@ -44,7 +44,7 @@ function createComparisonDefinition(name: string, warning?: FunctionDefinition['
   return {
     name,
     description: '',
-    supportedCommands: ['eval', 'stats', 'where'],
+    supportedCommands: ['eval', 'stats', 'where', 'row'],
     signatures: [
       {
         params: [
@@ -57,6 +57,13 @@ function createComparisonDefinition(name: string, warning?: FunctionDefinition['
         params: [
           { name: 'left', type: 'string' },
           { name: 'right', type: 'string' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' },
+          { name: 'right', type: 'date' },
         ],
         returnType: 'boolean',
       },
@@ -98,7 +105,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['like', 'not_like', 'rlike', 'not_rlike'].map((name) => ({
     name,
     description: '',
-    supportedCommands: ['eval', 'stats', 'where'],
+    supportedCommands: ['eval', 'stats', 'where', 'row'],
     signatures: [
       {
         params: [
@@ -112,7 +119,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['in', 'not_in'].map((name) => ({
     name,
     description: '',
-    supportedCommands: ['eval', 'stats', 'where'],
+    supportedCommands: ['eval', 'stats', 'where', 'row'],
     signatures: [
       {
         params: [
@@ -147,7 +154,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['and', 'or'].map((name) => ({
     name,
     description: '',
-    supportedCommands: ['eval', 'stats', 'where'],
+    supportedCommands: ['eval', 'stats', 'where', 'row'],
     signatures: [
       {
         params: [
@@ -161,7 +168,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     name: 'not',
     description: '',
-    supportedCommands: ['eval', 'stats', 'where'],
+    supportedCommands: ['eval', 'stats', 'where', 'row'],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -174,7 +181,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     description: i18n.translate('monaco.esql.autocomplete.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where'],
+    supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where', 'enrich'],
     signatures: [
       {
         params: [

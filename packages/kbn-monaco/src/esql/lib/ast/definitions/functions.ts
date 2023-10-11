@@ -20,7 +20,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval round_value = round(field)`],
+        examples: [`from index | eval round_value = round(field)`],
       },
     ],
   },
@@ -33,7 +33,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval abs_value = abs(field)`],
+        examples: [`from index | eval abs_value = abs(field)`],
       },
     ],
   },
@@ -46,7 +46,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval log10_value = log10(field)`],
+        examples: [`from index | eval log10_value = log10(field)`],
       },
     ],
   },
@@ -63,7 +63,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'exponent', type: 'number' },
         ],
         returnType: 'number',
-        examples: ['from index where field="value" | eval s = POW(field, exponent)'],
+        examples: ['from index | eval s = POW(field, exponent)'],
       },
     ],
   },
@@ -76,10 +76,27 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'string' }],
         infiniteParams: true,
+        minParams: 1,
         returnType: 'string',
-        examples: [
-          'from index where field="value" | eval concatenated = concat(field1, "-", field2)',
+        examples: ['from index | eval concatenated = concat(field1, "-", field2)'],
+      },
+    ],
+  },
+  {
+    name: 'replace',
+    description: i18n.translate('monaco.esql.autocomplete.replaceDoc', {
+      defaultMessage:
+        'The function substitutes in the string (1st argument) any match of the regular expression (2nd argument) with the replacement string (3rd argument). If any of the arguments are NULL, the result is NULL.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'string' },
+          { name: 'regexp', type: 'string' },
+          { name: 'replacement', type: 'string' },
         ],
+        returnType: 'string',
+        examples: ['from index | eval newStr = replace(field, "Hello", "World")'],
       },
     ],
   },
@@ -97,7 +114,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'endIndex', type: 'number' },
         ],
         returnType: 'string',
-        examples: ['from index where field="value" | eval new_string = substring(field, 1, 3)'],
+        examples: ['from index | eval new_string = substring(field, 1, 3)'],
       },
     ],
   },
@@ -110,7 +127,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'string' }],
         returnType: 'string',
-        examples: ['from index where field="value" | eval new_string = trim(field)'],
+        examples: ['from index | eval new_string = trim(field)'],
       },
     ],
   },
@@ -127,7 +144,24 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'prefix', type: 'string' },
         ],
         returnType: 'boolean',
-        examples: ['from index where field="value" | eval new_string = starts_with(field, "a")'],
+        examples: ['from index | eval new_string = starts_with(field, "a")'],
+      },
+    ],
+  },
+  {
+    name: 'ends_with',
+    description: i18n.translate('monaco.esql.autocomplete.endsWithDoc', {
+      defaultMessage:
+        'Returns a boolean that indicates whether a keyword string ends with another string:',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'string' },
+          { name: 'prefix', type: 'string' },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval new_string = ends_with(field, "a")'],
       },
     ],
   },
@@ -149,6 +183,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_string',
+    alias: ['to_str'],
     description: i18n.translate('monaco.esql.autocomplete.toStringDoc', {
       defaultMessage: 'Converts to string.',
     }),
@@ -156,12 +191,13 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'string',
-        examples: [`from index where field="value"" | EVAL string = to_string(field)`],
+        examples: [`from index" | EVAL string = to_string(field)`],
       },
     ],
   },
   {
     name: 'to_boolean',
+    alias: ['to_bool'],
     description: i18n.translate('monaco.esql.autocomplete.toBooleanDoc', {
       defaultMessage: 'Converts to boolean.',
     }),
@@ -169,12 +205,13 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'boolean',
-        examples: [`from index where field="value"" | EVAL bool = to_boolean(field)`],
+        examples: [`from index" | EVAL bool = to_boolean(field)`],
       },
     ],
   },
   {
     name: 'to_datetime',
+    alias: ['to_dt'],
     description: i18n.translate('monaco.esql.autocomplete.toDateTimeDoc', {
       defaultMessage: 'Converts to date.',
     }),
@@ -182,7 +219,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'date',
-        examples: [`from index where field="value"" | EVAL datetime = to_datetime(field)`],
+        examples: [`from index" | EVAL datetime = to_datetime(field)`],
       },
     ],
   },
@@ -195,12 +232,13 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval degrees = to_degrees(field)`],
+        examples: [`from index | eval degrees = to_degrees(field)`],
       },
     ],
   },
   {
     name: 'to_double',
+    alias: ['to_dbl'],
     description: i18n.translate('monaco.esql.autocomplete.toDoubleDoc', {
       defaultMessage: 'Converts to double.',
     }),
@@ -208,12 +246,13 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index where field="value"" | EVAL double = to_double(field)`],
+        examples: [`from index" | EVAL double = to_double(field)`],
       },
     ],
   },
   {
     name: 'to_integer',
+    alias: ['to_int'],
     description: i18n.translate('monaco.esql.autocomplete.toIntegerDoc', {
       defaultMessage: 'Converts to integer.',
     }),
@@ -221,7 +260,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index where field="value"" | EVAL integer = to_integer(field)`],
+        examples: [`from index" | EVAL integer = to_integer(field)`],
       },
     ],
   },
@@ -234,7 +273,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index where field="value"" | EVAL long = to_long(field)`],
+        examples: [`from index" | EVAL long = to_long(field)`],
       },
     ],
   },
@@ -247,12 +286,13 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval radians = to_radians(field)`],
+        examples: [`from index | eval radians = to_radians(field)`],
       },
     ],
   },
   {
     name: 'to_unsigned_long',
+    alias: ['to_ul', 'to_ulong'],
     description: i18n.translate('monaco.esql.autocomplete.toUnsignedLongDoc', {
       defaultMessage: 'Converts to unsigned long.',
     }),
@@ -260,9 +300,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [
-          `from index where field="value"" | EVAL unsigned_long = to_unsigned_long(field)`,
-        ],
+        examples: [`from index" | EVAL unsigned_long = to_unsigned_long(field)`],
       },
     ],
   },
@@ -275,12 +313,13 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'ip',
-        examples: [`from index where field="value"" | EVAL ip = to_ip(field)`],
+        examples: [`from index" | EVAL ip = to_ip(field)`],
       },
     ],
   },
   {
     name: 'to_version',
+    alias: ['to_ver'],
     description: i18n.translate('monaco.esql.autocomplete.toVersionDoc', {
       defaultMessage: 'Converts to version.',
     }),
@@ -330,9 +369,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'format_string', type: 'string', optional: true },
         ],
         returnType: 'string',
-        examples: [
-          'from index where field="value" | eval hired = date_format(hire_date, "YYYY-MM-dd")',
-        ],
+        examples: ['from index | eval hired = date_format(hire_date, "YYYY-MM-dd")'],
       },
     ],
   },
@@ -348,9 +385,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'date' },
         ],
         returnType: 'date',
-        examples: [
-          `from index where field="value" | eval year_hired = DATE_TRUNC(1 year, hire_date)`,
-        ],
+        examples: [`from index | eval year_hired = DATE_TRUNC(1 year, hire_date)`],
       },
     ],
   },
@@ -367,7 +402,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'date',
         examples: [
-          `from index where field="value" | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
+          `from index | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
         ],
       },
     ],
@@ -387,7 +422,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'date',
         examples: [
-          'from index where field="value" | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+          'from index | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
         ],
       },
       {
@@ -398,9 +433,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'endValue', type: 'number' },
         ],
         returnType: 'number',
-        examples: [
-          'from index where field="value" | eval bs = auto_bucket(salary, 20, 25324, 74999)',
-        ],
+        examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],
       },
     ],
   },
@@ -413,7 +446,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'boolean',
-        examples: ['from index where field="value" | eval s = is_finite(field/0)'],
+        examples: ['from index | eval s = is_finite(field/0)'],
       },
     ],
   },
@@ -426,7 +459,20 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'boolean',
-        examples: ['from index where field="value" | eval s = is_infinite(field/0)'],
+        examples: ['from index | eval s = is_infinite(field/0)'],
+      },
+    ],
+  },
+  {
+    name: 'is_nan',
+    description: i18n.translate('monaco.esql.autocomplete.isNanDoc', {
+      defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'boolean',
+        examples: ['row a = 1 | eval is_nan(a)'],
       },
     ],
   },
@@ -445,7 +491,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         minParams: 3,
         returnType: 'any',
         examples: [
-          `from index where field="value" | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
+          `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
         ],
       },
     ],
@@ -459,7 +505,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'string' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval fn_length = length(field)`],
+        examples: [`from index | eval fn_length = length(field)`],
       },
     ],
   },
@@ -472,7 +518,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval acos = acos(field)`],
+        examples: [`from index | eval acos = acos(field)`],
       },
     ],
   },
@@ -485,7 +531,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval asin = asin(field)`],
+        examples: [`from index | eval asin = asin(field)`],
       },
     ],
   },
@@ -498,7 +544,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval atan = atan(field)`],
+        examples: [`from index | eval atan = atan(field)`],
       },
     ],
   },
@@ -515,7 +561,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'y', type: 'number' },
         ],
         returnType: 'number',
-        examples: [`from index where field="value" | eval atan2 = atan2(x, y)`],
+        examples: [`from index | eval atan2 = atan2(x, y)`],
       },
     ],
   },
@@ -542,7 +588,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval cos = cos(field)`],
+        examples: [`from index | eval cos = cos(field)`],
       },
     ],
   },
@@ -555,7 +601,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval cosh = cosh(field)`],
+        examples: [`from index | eval cosh = cosh(field)`],
       },
     ],
   },
@@ -568,7 +614,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval a = floor(field)`],
+        examples: [`from index | eval a = floor(field)`],
       },
     ],
   },
@@ -599,7 +645,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'length', type: 'number' },
         ],
         returnType: 'string',
-        examples: [`from index where field="value" | eval substr = left(field, 3)`],
+        examples: [`from index | eval substr = left(field, 3)`],
       },
     ],
   },
@@ -642,7 +688,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'length', type: 'number' },
         ],
         returnType: 'string',
-        examples: [`from index where field="value" | eval string = right(field, 3)`],
+        examples: [`from index | eval string = right(field, 3)`],
       },
     ],
   },
@@ -859,6 +905,45 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  {
+    name: 'pi',
+    description: i18n.translate('monaco.esql.autocomplete.piDoc', {
+      defaultMessage: 'The ratio of a circle’s circumference to its diameter.',
+    }),
+    signatures: [
+      {
+        params: [],
+        returnType: 'number',
+        examples: ['row a = 1 | eval pi()'],
+      },
+    ],
+  },
+  {
+    name: 'e',
+    description: i18n.translate('monaco.esql.autocomplete.eDoc', {
+      defaultMessage: 'Euler’s number.',
+    }),
+    signatures: [
+      {
+        params: [],
+        returnType: 'number',
+        examples: ['row a = 1 | eval e()'],
+      },
+    ],
+  },
+  {
+    name: 'tau',
+    description: i18n.translate('monaco.esql.autocomplete.tauDoc', {
+      defaultMessage: 'The ratio of a circle’s circumference to its radius.',
+    }),
+    signatures: [
+      {
+        params: [],
+        returnType: 'number',
+        examples: ['row a = 1 | eval tau()'],
+      },
+    ],
+  },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-  .map((def) => ({ ...def, supportedCommands: ['eval', 'where'] }));
+  .map((def) => ({ ...def, supportedCommands: ['eval', 'where', 'row'] }));

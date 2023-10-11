@@ -26,6 +26,7 @@ import {
   DereferenceContext,
   DissectCommandContext,
   DropCommandContext,
+  EnrichCommandContext,
   esql_parser,
   FieldContext,
   FieldsContext,
@@ -155,6 +156,49 @@ export function collectAllColumnIdentifiers(
         return createColumn(sourceContext);
       }) ?? [];
   return args;
+}
+
+export function getPolicyName(ctx: EnrichCommandContext) {
+  if (!ctx._policyName) {
+    return [];
+  }
+  return [createSource(ctx._policyName, 'policy')];
+}
+
+export function getMatchField(ctx: EnrichCommandContext) {
+  if (!ctx._matchField) {
+    return [];
+  }
+  const identifier = ctx.sourceIdentifier(1);
+  if (identifier) {
+    const fn = createOption('on', ctx);
+    fn.args.push(createColumn(identifier));
+    return [fn];
+  }
+  return [];
+}
+
+export function getEnrichClauses(ctx: EnrichCommandContext) {
+  const ast: ESQLCommandOption[] = [];
+  if (ctx.WITH()) {
+    const option = createOption(ctx.WITH()!.text, ctx);
+    ast.push(option);
+    const clauses = ctx.enrichWithClause();
+    for (const clause of clauses) {
+      const fn = createFunction('=', clause);
+      if (clause._enrichField) {
+        fn.args.push(
+          // if an explicit assign is not set, create a fake assign with
+          // both left and right value with the same column
+          clause.ASSIGN() ? createColumn(clause._newName) : createColumn(clause._enrichField),
+          createColumn(clause._enrichField)
+        );
+      }
+      option.args.push(fn);
+    }
+  }
+
+  return ast;
 }
 
 function visitLogicalNot(ctx: LogicalNotContext) {
@@ -453,7 +497,7 @@ export function visitOrderExpression(ctx: OrderExpressionContext[]) {
     }
     if (orderCtx.NULLS()) {
       expression.push(createLiteral('string', orderCtx.NULLS()!));
-      if (orderCtx._nullOrdering && /^<missing/.test(orderCtx._nullOrdering.text || '')) {
+      if (orderCtx._nullOrdering) {
         const innerTerminalNode =
           orderCtx.tryGetToken(esql_parser.FIRST, 0) || orderCtx.tryGetToken(esql_parser.LAST, 0);
         if (innerTerminalNode) {
@@ -637,11 +681,15 @@ function sanifyIdentifierString(ctx: ParserRuleContext) {
   return getUnquotedText(ctx)?.text || getQuotedText(ctx)?.text.replace(/`/g, '') || ctx.text;
 }
 
-export function createSource(ctx: ParserRuleContext): ESQLSource {
+export function createSource(
+  ctx: ParserRuleContext,
+  type: 'index' | 'policy' = 'index'
+): ESQLSource {
   const text = sanifyIdentifierString(ctx);
   return {
     type: 'source',
     name: text,
+    sourceType: type,
     text,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),

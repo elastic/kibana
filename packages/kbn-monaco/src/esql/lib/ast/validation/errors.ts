@@ -94,6 +94,27 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values,
         }),
       };
+    case 'unknownInterval':
+      return {
+        message: i18n.translate('monaco.esql.validation.unknownInterval', {
+          defaultMessage: `Unexpected time interval qualifier: '{value}'`,
+          values,
+        }),
+      };
+    case 'unsupportedTypeForCommand':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedTypeForCommand', {
+          defaultMessage: '{command} does not support [{type}] in expression [{value}]',
+          values,
+        }),
+      };
+    case 'unknownPolicy':
+      return {
+        message: i18n.translate('monaco.esql.validation.unknownPolicy', {
+          defaultMessage: 'Unknown policy [{name}]',
+          values,
+        }),
+      };
   }
   return { message: '' };
 }

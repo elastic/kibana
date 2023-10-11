@@ -19,32 +19,36 @@ import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition } from '../definitions/types';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import capitalize from 'lodash/capitalize';
 
-const callbackMocks = {
-  getFields: jest.fn(async ({}) => [
-    ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-      name: `${type}Field`,
-      type,
-    })),
-    { name: 'any#Char$ field', type: 'number' },
-    { name: 'kubernetes.something.something', type: 'number' },
-  ]),
-  getSources: jest.fn(async () => ['a', 'index', 'otherIndex']),
-  getPolicies: jest.fn(async () => [
-    {
-      name: 'policy',
-      sourceIndices: ['enrichIndex1'],
-      matchField: 'stringField',
-      enrichFields: ['otherField'],
-    },
-    {
-      name: 'otherPolicy',
-      sourceIndices: ['enrichIndex2'],
-      matchField: 'otherNumericField',
-      enrichFields: ['stringField'],
-    },
-  ]),
-};
+function getCallbackMocks() {
+  return {
+    getFields: jest.fn(async ({ sourcesOnly }) =>
+      sourcesOnly
+        ? [
+            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
+              name: `${type}Field`,
+              type,
+            })),
+            { name: 'any#Char$ field', type: 'number' },
+            { name: 'kubernetes.something.something', type: 'number' },
+          ]
+        : [
+            { name: 'otherField', type: 'string' },
+            { name: 'yetAnotherField', type: 'number' },
+          ]
+    ),
+    getSources: jest.fn(async () => ['a', 'index', 'otherIndex']),
+    getPolicies: jest.fn(async () => [
+      {
+        name: 'policy',
+        sourceIndices: ['enrichIndex1'],
+        matchField: 'otherStringField',
+        enrichFields: ['otherField', 'yetAnotherField'],
+      },
+    ]),
+  };
+}
 
 const toDoubleSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_double')!;
 const toStringSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_string')!;
@@ -161,6 +165,7 @@ describe('validation logic', () => {
   ) {
     it(`${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`, async () => {
       const { ast, syntaxErrors } = getAstAndErrors(statement);
+      const callbackMocks = getCallbackMocks();
       const { warnings, errors } = await validateAst(ast, callbackMocks);
       const finalErrors = errors.concat(
         // squash syntax errors
@@ -235,6 +240,181 @@ describe('validation logic', () => {
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found ","',
       "SyntaxError: extraneous input ')' expecting <EOF>",
     ]);
+
+    testErrorsAndWarnings('row var = 1 in (1, 2, 3)', []);
+    testErrorsAndWarnings('row var = 5 in (1, 2, 3)', []);
+    testErrorsAndWarnings('row var = 5 not in (1, 2, 3)', []);
+    testErrorsAndWarnings('row var = 1 in (1, 2, 3, round(5))', []);
+    testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
+    testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
+    testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
+    testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
+      'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+    ]);
+    testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
+      'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+    ]);
+    testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
+      'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+    ]);
+    testErrorsAndWarnings('row var = 5 not in (1, 2, 3, "a")', [
+      'Argument of [not_in] must be [number[]], found value [(1, 2, 3, "a")] type [(number, number, number, string)]',
+    ]);
+
+    function tweakSignatureForRowCommand(signature: string) {
+      /**
+       * row has no access to any field, so replace it with literal
+       * or functions (for dates)
+       */
+      return signature
+        .replace(/numberField/g, '5')
+        .replace(/stringField/g, '"a"')
+        .replace(/dateField/g, 'now()')
+        .replace(/booleanField/g, 'true')
+        .replace(/ipField/g, 'to_ip("127.0.0.1")');
+    }
+
+    for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
+      for (const { params, returnType } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+        const signatureStringCorrect = tweakSignatureForRowCommand(
+          getFunctionSignatures(
+            { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+            { withTypes: false }
+          )[0].declaration
+        );
+
+        testErrorsAndWarnings(`row var = ${signatureStringCorrect}`, []);
+        testErrorsAndWarnings(`row ${signatureStringCorrect}`);
+
+        if (alias) {
+          for (const otherName of alias) {
+            const signatureStringWithAlias = tweakSignatureForRowCommand(
+              getFunctionSignatures(
+                { name: otherName, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            );
+
+            testErrorsAndWarnings(`row var = ${signatureStringWithAlias}`, []);
+          }
+        }
+
+        // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
+        // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+        // the right error message
+        if (
+          params.every(({ type }) => type !== 'any') &&
+          !['auto_bucket', 'to_version'].includes(name)
+        ) {
+          // now test nested functions
+          const fieldMappingWithNestedFunctions = getFieldMapping(params, {
+            useNestedFunction: true,
+            useLiterals: true,
+          });
+          const signatureString = tweakSignatureForRowCommand(
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMappingWithNestedFunctions, returnType }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          );
+
+          testErrorsAndWarnings(`row var = ${signatureString}`);
+
+          const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
+            const typeString = type;
+            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const isLiteralType = /literal$/.test(typeString);
+            // pick a field name purposely wrong
+            const nameValue = canBeFieldButNotString || isLiteralType ? '"a"' : '5';
+            return { name: nameValue, type, ...rest };
+          });
+          const expectedErrors = params.map(
+            ({ type }, i) =>
+              `Argument of [${name}] must be [${type}], found value [${
+                wrongFieldMapping[i].name
+              }] type [${wrongFieldMapping[i].name === '5' ? 'number' : 'string'}]`
+          );
+          const wrongSignatureString = tweakSignatureForRowCommand(
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: wrongFieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          );
+          testErrorsAndWarnings(`row var = ${wrongSignatureString}`, expectedErrors);
+        }
+      }
+    }
+    for (const op of ['>', '>=', '<', '<=', '==']) {
+      testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
+      testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
+      testErrorsAndWarnings(`row var = (numberField ${op} 0)`, []);
+      testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
+      testErrorsAndWarnings(`row var = "a" ${op} 0`, [
+        `Argument of [${op}] must be [number], found value ["a"] type [string]`,
+      ]);
+    }
+    for (const op of ['+', '-', '*', '/', '%']) {
+      testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
+      testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
+    }
+
+    for (const op of ['like', 'rlike']) {
+      testErrorsAndWarnings(`row var = "a" ${op} "?a"`, []);
+      testErrorsAndWarnings(`row var = "a" NOT ${op} "?a"`, []);
+      testErrorsAndWarnings(`row var = NOT "a" ${op} "?a"`, []);
+      testErrorsAndWarnings(`row var = NOT "a" NOT ${op} "?a"`, []);
+      testErrorsAndWarnings(`row var = 5 ${op} "?a"`, [
+        `Argument of [${op}] must be [string], found value [5] type [number]`,
+      ]);
+      testErrorsAndWarnings(`row var = 5 NOT ${op} "?a"`, [
+        `Argument of [not_${op}] must be [string], found value [5] type [number]`,
+      ]);
+      testErrorsAndWarnings(`row var = NOT 5 ${op} "?a"`, [
+        `Argument of [${op}] must be [string], found value [5] type [number]`,
+      ]);
+      testErrorsAndWarnings(`row var = NOT 5 NOT ${op} "?a"`, [
+        `Argument of [not_${op}] must be [string], found value [5] type [number]`,
+      ]);
+    }
+
+    describe('date math', () => {
+      testErrorsAndWarnings('row 1 anno', [
+        'Row does not support [date_period] in expression [1 anno]',
+      ]);
+      testErrorsAndWarnings('row var = 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
+      testErrorsAndWarnings('row now() + 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
+      for (const timeLiteral of timeLiterals) {
+        testErrorsAndWarnings(`row 1 ${timeLiteral.name}`, [
+          `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        ]);
+        testErrorsAndWarnings(`row 1                ${timeLiteral.name}`, [
+          `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        ]);
+
+        // this is not possible for now
+        // testErrorsAndWarnings(`row var = 1 ${timeLiteral.name}`, [
+        //   `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        // ]);
+        testErrorsAndWarnings(`row var = now() - 1 ${timeLiteral.name}`, []);
+        testErrorsAndWarnings(`row var = now() - 1 ${timeLiteral.name.toUpperCase()}`, []);
+        testErrorsAndWarnings(`row var = now() - 1 ${capitalize(timeLiteral.name)}`, []);
+        testErrorsAndWarnings(`row var = now() + 1 ${timeLiteral.name}`, []);
+        testErrorsAndWarnings(`row 1 ${timeLiteral.name} + 1 year`, [
+          `Argument of [+] must be [date], found value [1 ${timeLiteral.name}] type [duration]`,
+        ]);
+        for (const op of ['*', '/', '%']) {
+          testErrorsAndWarnings(`row var = now() ${op} 1 ${timeLiteral.name}`, [
+            `Argument of [${op}] must be [number], found value [now()] type [date]`,
+            `Argument of [${op}] must be [number], found value [1 ${timeLiteral.name}] type [duration]`,
+          ]);
+        }
+      }
+    });
   });
 
   describe('show', () => {
@@ -331,7 +511,10 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | rename stringField AS b', []);
     testErrorsAndWarnings('from a | rename stringField As b', []);
     testErrorsAndWarnings('from a | rename stringField As b, b AS c', []);
-    testErrorsAndWarnings('from a | rename fn() as a', ['Unknown column [fn()]']);
+    testErrorsAndWarnings('from a | rename fn() as a', [
+      'Unknown column [fn()]',
+      'Unknown column [a]',
+    ]);
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as a', []);
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
@@ -508,44 +691,6 @@ describe('validation logic', () => {
     }
   });
 
-  //   describe('enrich', () => {
-  //     for (const prevCommand of [
-  //       '',
-  //       '| enrich other-policy ',
-  //       '| enrich other-policy on b ',
-  //       '| enrich other-policy with c ',
-  //     ]) {
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich`, ['PolicyIdentifier']);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy `, ['|', 'on', 'with']);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on `, [
-  //         'PolicyMatchingFieldIdentifier',
-  //       ]);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b `, ['|', 'with']);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with `, [
-  //         'var0',
-  //         'PolicyFieldIdentifier',
-  //       ]);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with var0 `, ['=', '|']);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with var0 = `, [
-  //         'PolicyFieldIdentifier',
-  //       ]);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with var0 = c `, ['|']);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with var0 = c, `, [
-  //         'var1',
-  //         'PolicyFieldIdentifier',
-  //       ]);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with var0 = c, var1 `, ['=', '|']);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy on b with var0 = c, var1 = `, [
-  //         'PolicyFieldIdentifier',
-  //       ]);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy with `, [
-  //         'var0',
-  //         'PolicyFieldIdentifier',
-  //       ]);
-  //       testErrorsAndWarnings(`from a ${prevCommand}| enrich policy with c`, ['=', '|']);
-  //     }
-  //   });
-
   describe('eval', () => {
     testErrorsAndWarnings('from a | eval ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
@@ -589,7 +734,7 @@ describe('validation logic', () => {
       []
     );
 
-    for (const { name, signatures, ...defRest } of evalFunctionsDefinitions) {
+    for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
       for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
@@ -608,6 +753,17 @@ describe('validation logic', () => {
             )[0].declaration
           }`
         );
+
+        if (alias) {
+          for (const otherName of alias) {
+            const signatureStringWithAlias = getFunctionSignatures(
+              { name: otherName, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration;
+
+            testErrorsAndWarnings(`from a | eval var = ${signatureStringWithAlias}`, []);
+          }
+        }
 
         // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
         // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
@@ -734,14 +890,40 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | eval avg(numberField)', ['Eval does not support function avg']);
 
     describe('date math', () => {
+      testErrorsAndWarnings('from a | eval 1 anno', [
+        'Eval does not support [date_period] in expression [1 anno]',
+      ]);
+      testErrorsAndWarnings('from a | eval var = 1 anno', [
+        "Unexpected time interval qualifier: 'anno'",
+      ]);
+      testErrorsAndWarnings('from a | eval now() + 1 anno', [
+        "Unexpected time interval qualifier: 'anno'",
+      ]);
       for (const timeLiteral of timeLiterals) {
-        testErrorsAndWarnings(`from a | eval 1 ${timeLiteral.name}`, []);
-        testErrorsAndWarnings(`from a | eval 1                ${timeLiteral.name}`, []);
-        testErrorsAndWarnings(`from a | eval var = 1 ${timeLiteral.name}`, []);
+        testErrorsAndWarnings(`from a | eval 1 ${timeLiteral.name}`, [
+          `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        ]);
+        testErrorsAndWarnings(`from a | eval 1                ${timeLiteral.name}`, [
+          `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        ]);
+
+        // this is not possible for now
+        // testErrorsAndWarnings(`from a | eval var = 1 ${timeLiteral.name}`, [
+        //   `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        // ]);
         testErrorsAndWarnings(`from a | eval var = now() - 1 ${timeLiteral.name}`, []);
-        testErrorsAndWarnings(`from a | eval var = now() + 1 ${timeLiteral.name}`, []);
+        testErrorsAndWarnings(`from a | eval var = dateField - 1 ${timeLiteral.name}`, []);
+        testErrorsAndWarnings(
+          `from a | eval var = dateField - 1 ${timeLiteral.name.toUpperCase()}`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a | eval var = dateField - 1 ${capitalize(timeLiteral.name)}`,
+          []
+        );
+        testErrorsAndWarnings(`from a | eval var = dateField + 1 ${timeLiteral.name}`, []);
         testErrorsAndWarnings(`from a | eval 1 ${timeLiteral.name} + 1 year`, [
-          'Argument of [+] must be [date], found value [1 year] type [duration]',
+          `Argument of [+] must be [date], found value [1 ${timeLiteral.name}] type [duration]`,
         ]);
         for (const op of ['*', '/', '%']) {
           testErrorsAndWarnings(`from a | eval var = now() ${op} 1 ${timeLiteral.name}`, [
@@ -791,7 +973,7 @@ describe('validation logic', () => {
       []
     );
 
-    for (const { name, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
+    for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
       for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
@@ -810,6 +992,17 @@ describe('validation logic', () => {
             )[0].declaration
           }`
         );
+
+        if (alias) {
+          for (const otherName of alias) {
+            const signatureStringWithAlias = getFunctionSignatures(
+              { name: otherName, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration;
+
+            testErrorsAndWarnings(`from a | stats var = ${signatureStringWithAlias}`, []);
+          }
+        }
 
         // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
         // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
@@ -899,5 +1092,123 @@ describe('validation logic', () => {
         `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
       ]);
     }
+  });
+
+  describe('enrich', () => {
+    testErrorsAndWarnings(`from a | enrich`, [
+      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy `, []);
+    testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
+    testErrorsAndWarnings(`from a | enrich policy on `, [
+      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy on b `, ['Unknown column [b]']);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with `, [
+      'SyntaxError: expected {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 `, [
+      'Unknown column [var0]',
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = `, [
+      'Unknown column [var0]',
+      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = c `, [
+      'Unknown column [var0]',
+      `Unknown column [c]`,
+    ]);
+    // need to re-enable once the fields/variables become location aware
+    // testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = stringField `, [
+    //   `Unknown column [stringField]`,
+    // ]);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = , `, [
+      'Unknown column [var0]',
+      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at ','",
+      'SyntaxError: expected {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 `, [
+      'Unknown column [var1]',
+    ]);
+    testErrorsAndWarnings(
+      `from a | enrich policy on numberField with var0 = otherField, yetAnotherField `,
+      []
+    );
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 = `, [
+      'Unknown column [var1]',
+      "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
+    ]);
+
+    testErrorsAndWarnings(
+      `from a | enrich policy on numberField with var0 = otherField, var1 = yetAnotherField`,
+      []
+    );
+    testErrorsAndWarnings(`from a | enrich policy with `, [
+      'SyntaxError: expected {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
+    testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
+    testErrorsAndWarnings(`from a | enrich policy with var0 = otherField | eval var0`, []);
+  });
+
+  describe('callbacks', () => {
+    it(`it should not fetch source and fields list when a row command is set`, async () => {
+      const { ast } = getAstAndErrors(`row a = 1 | eval a`);
+      const callbackMocks = getCallbackMocks();
+      await validateAst(ast, callbackMocks);
+      expect(callbackMocks.getFields).not.toHaveBeenCalled();
+      expect(callbackMocks.getSources).not.toHaveBeenCalled();
+    });
+
+    it(`it should fetch policies if no enrich command is found`, async () => {
+      const { ast } = getAstAndErrors(`row a = 1 | eval a`);
+      const callbackMocks = getCallbackMocks();
+      await validateAst(ast, callbackMocks);
+      expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
+    });
+
+    it(`should not fetch source and fields for empty command`, async () => {
+      const { ast } = getAstAndErrors(` `);
+      const callbackMocks = getCallbackMocks();
+      await validateAst(ast, callbackMocks);
+      expect(callbackMocks.getFields).not.toHaveBeenCalled();
+      expect(callbackMocks.getSources).not.toHaveBeenCalled();
+    });
+
+    it(`should skip initial source and fields call but still call fields for enriched policy`, async () => {
+      const { ast } = getAstAndErrors(`row a = 1 | eval b  = a | enrich policy`);
+      const callbackMocks = getCallbackMocks();
+      await validateAst(ast, callbackMocks);
+      expect(callbackMocks.getSources).not.toHaveBeenCalled();
+      expect(callbackMocks.getPolicies).toHaveBeenCalled();
+      expect(callbackMocks.getFields).toHaveBeenCalledTimes(1);
+      expect(callbackMocks.getFields).toHaveBeenLastCalledWith({
+        customQuery: `from enrichIndex1 | keep otherField, yetAnotherField`,
+      });
+    });
+
+    it('should call fields callbacks also for show command', async () => {
+      const { ast } = getAstAndErrors(`show functions | keep name`);
+      const callbackMocks = getCallbackMocks();
+      await validateAst(ast, callbackMocks);
+      expect(callbackMocks.getSources).not.toHaveBeenCalled();
+      expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
+      expect(callbackMocks.getFields).toHaveBeenCalledTimes(1);
+      expect(callbackMocks.getFields).toHaveBeenLastCalledWith({
+        sourcesOnly: true,
+      });
+    });
+
+    it(`should fetch additional fields if an enrich command is found`, async () => {
+      const { ast } = getAstAndErrors(`from a | eval b  = a | enrich policy`);
+      const callbackMocks = getCallbackMocks();
+      await validateAst(ast, callbackMocks);
+      expect(callbackMocks.getSources).toHaveBeenCalled();
+      expect(callbackMocks.getPolicies).toHaveBeenCalled();
+      expect(callbackMocks.getFields).toHaveBeenCalledTimes(2);
+      expect(callbackMocks.getFields).toHaveBeenLastCalledWith({
+        customQuery: `from enrichIndex1 | keep otherField, yetAnotherField`,
+      });
+    });
   });
 });

@@ -464,10 +464,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [dataViews]);
 
   const getFields: ESQLCustomAutocompleteCallbacks['getFields'] = useCallback(
-    async ({ sourceOnly } = {}) => {
+    async ({ sourceOnly, customQuery } = {}) => {
       const pipes = currentCursorContent?.split('|');
       pipes?.pop();
-      const validContent = sourceOnly ? pipes[0] : pipes?.join('|');
+      const validContent = customQuery ?? (sourceOnly ? pipes[0] : pipes?.join('|'));
       if (validContent) {
         // ES|QL with limit 0 returns only the columns and is more performant
         const esqlQuery = {

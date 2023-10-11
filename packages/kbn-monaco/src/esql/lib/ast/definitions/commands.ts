@@ -7,7 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { appendSeparatorOption, asOption, byOption, metadataOption } from './options';
+import {
+  appendSeparatorOption,
+  asOption,
+  byOption,
+  metadataOption,
+  onOption,
+  withOption,
+} from './options';
 import type { CommandDefinition } from './types';
 
 export const commandDefinitions: CommandDefinition[] = [
@@ -218,10 +225,10 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | enrich my-policy on pivotField',
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
-    options: [],
+    options: [onOption, withOption],
     signature: {
       multipleParams: false,
-      params: [{ name: 'policyName', type: 'string' }],
+      params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
     },
   },
 ];

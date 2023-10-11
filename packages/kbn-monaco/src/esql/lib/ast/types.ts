@@ -54,6 +54,7 @@ export interface ESQLTimeInterval extends ESQLAstBaseItem {
 
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
+  sourceType: 'index' | 'policy';
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {

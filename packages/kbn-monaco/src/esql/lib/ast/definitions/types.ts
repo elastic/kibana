@@ -10,6 +10,7 @@ import { ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
 
 export interface FunctionDefinition {
   name: string;
+  alias?: string[];
   description: string;
   supportedCommands: string[];
   signatures: Array<{

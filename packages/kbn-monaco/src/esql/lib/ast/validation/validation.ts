@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { uniqBy } from 'lodash';
 import capitalize from 'lodash/capitalize';
 import { ESQLCustomAutocompleteCallbacks } from '../../autocomplete/types';
+import { nonNullable } from '../ast_walker';
 import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -29,6 +31,7 @@ import {
   isSourceItem,
   isSupportedFunction,
   isTimeIntervalItem,
+  inKnownTimeInterval,
   printFunctionSignature,
 } from '../helpers';
 import type {
@@ -76,19 +79,32 @@ function validateFunctionLiteralArg(
     }
   }
   if (isTimeIntervalItem(actualArg)) {
-    if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+    // check first if it's a valid interval string
+    if (!inKnownTimeInterval(actualArg)) {
       messages.push(
         getMessageFromId({
-          messageId: 'wrongArgumentType',
+          messageId: 'unknownInterval',
           values: {
-            name: astFunction.name,
-            argType: argDef.type,
-            value: actualArg.name,
-            givenType: 'duration',
+            value: actualArg.unit,
           },
           locations: actualArg.location,
         })
       );
+    } else {
+      if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'wrongArgumentType',
+            values: {
+              name: astFunction.name,
+              argType: argDef.type,
+              value: actualArg.name,
+              givenType: 'duration',
+            },
+            locations: actualArg.location,
+          })
+        );
+      }
     }
   }
   return messages;
@@ -144,7 +160,7 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isColumnItem(actualArg)) {
+  if (isColumnItem(actualArg) && actualArg.name) {
     const columnHit = getColumnHit(actualArg.name, references);
     if (!columnHit) {
       messages.push(
@@ -311,7 +327,6 @@ function validateFunction(
       }
       const wrappedArg = Array.isArray(outerArg) ? outerArg : [outerArg];
       for (const actualArg of wrappedArg) {
-        // console.log({ astFunction, actualArg });
         const argValidationMessages = [
           validateFunctionLiteralArg,
           validateNestedFunctionArg,
@@ -338,7 +353,9 @@ function validateFunction(
     const indexForShortestFailingsignature = failingSignatureOrderedByErrorCount[0].index;
     messages.push(...failingSignatures[indexForShortestFailingsignature]);
   }
-  return messages;
+  // This is due to a special case in enrich where an implicit assignment is possible
+  // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
+  return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
 }
 
 function validateOption(
@@ -408,6 +425,9 @@ function validateOption(
           if (isColumnItem(arg)) {
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
+          if (isFunctionItem(arg) && isAssignment(arg)) {
+            messages.push(...validateFunction(arg, command.name, referenceMaps));
+          }
         }
       }
     });
@@ -416,7 +436,11 @@ function validateOption(
   return messages;
 }
 
-function validateSource(source: ESQLSource, commandName: string, { sources }: ReferenceMaps) {
+function validateSource(
+  source: ESQLSource,
+  commandName: string,
+  { sources, policies }: ReferenceMaps
+) {
   const messages: ESQLMessage[] = [];
   if (source.incomplete) {
     return messages;
@@ -436,10 +460,18 @@ function validateSource(source: ESQLSource, commandName: string, { sources }: Re
         locations: source.location,
       })
     );
-  } else if (!sources.has(source.name)) {
+  } else if (source.sourceType === 'index' && !sources.has(source.name)) {
     messages.push(
       getMessageFromId({
         messageId: 'unknownIndex',
+        values: { name: source.name },
+        locations: source.location,
+      })
+    );
+  } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownPolicy',
         values: { name: source.name },
         locations: source.location,
       })
@@ -467,12 +499,14 @@ function validateColumnForCommand(
     );
   }
   if (
-    ['keep', 'drop', 'eval', 'stats', 'rename', 'dissect', 'grok', 'sort'].includes(commandName)
+    ['keep', 'drop', 'eval', 'stats', 'rename', 'dissect', 'grok', 'sort', 'enrich'].includes(
+      commandName
+    )
   ) {
     const columnRef = getColumnHit(column.name, references);
     if (columnRef) {
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ innerType }) => innerType
+        ({ type, innerType }) => type === 'column' && innerType
       );
 
       if (
@@ -542,6 +576,19 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
       if (isColumnItem(arg)) {
         messages.push(...validateColumnForCommand(arg, command.name, references));
       }
+      if (isTimeIntervalItem(arg)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unsupportedTypeForCommand',
+            values: {
+              command: capitalize(command.name),
+              type: 'date_period',
+              value: arg.name,
+            },
+            locations: arg.location,
+          })
+        );
+      }
       if (isSourceItem(arg)) {
         messages.push(...validateSource(arg, command.name, references));
       }
@@ -597,6 +644,38 @@ function replaceTrimmedVariable(
   variables.delete(oldRef[0].name);
 }
 
+function addToVariables(
+  oldArg: ESQLAstItem,
+  newArg: ESQLAstItem,
+  fields: Map<string, ESQLRealField>,
+  variables: Map<string, ESQLVariable[]>
+) {
+  if (isColumnItem(oldArg) && isColumnItem(newArg)) {
+    const newVariable: ESQLVariable = {
+      name: newArg.name,
+      type: 'number' /* fallback to number */,
+      location: newArg.location,
+    };
+    // Now workout the exact type
+    // it can be a rename of another variable as well
+    let oldRef = fields.get(oldArg.name) || variables.get(oldArg.name);
+    if (oldRef) {
+      addToVariableOccurrencies(variables, newVariable);
+      newVariable.type = Array.isArray(oldRef) ? oldRef[0].type : oldRef.type;
+    } else if (oldArg.quoted) {
+      // a last attempt in case the user tried to rename an expression:
+      // trim every space and try a new hit
+      const expressionTrimmedRef = oldArg.text.replace(/\s/g, '');
+      oldRef = variables.get(expressionTrimmedRef);
+      if (oldRef) {
+        addToVariableOccurrencies(variables, newVariable);
+        newVariable.type = oldRef[0].type;
+        replaceTrimmedVariable(variables, oldArg, oldRef);
+      }
+    }
+  }
+}
+
 function collectVariables(
   commands: ESQLCommand[],
   fields: Map<string, ESQLRealField>
@@ -626,35 +705,26 @@ function collectVariables(
         });
       }
     }
-    if (command.name === 'rename') {
-      const asOperations = command.args.filter(
-        (arg) => isOptionItem(arg) && arg.name === 'as'
-      ) as ESQLFunction[];
-      for (const asOperation of asOperations) {
-        const [oldArg, newArg] = asOperation.args;
-        if (isColumnItem(oldArg) && isColumnItem(newArg)) {
-          const newVariable: ESQLVariable = {
-            name: newArg.name,
-            type: 'number' /* fallback to number */,
-            location: newArg.location,
-          };
-          addToVariableOccurrencies(variables, newVariable);
-          // Now workout the exact type
-          // it can be a rename of another variable as well
-          let oldRef = fields.get(oldArg.name) || variables.get(oldArg.name);
-          if (oldRef) {
-            newVariable.type = Array.isArray(oldRef) ? oldRef[0].type : oldRef.type;
-          } else if (oldArg.quoted) {
-            // a last attempt in case the user tried to rename an expression:
-            // trim every space and try a new hit
-            const expressionTrimmedRef = oldArg.text.replace(/\s/g, '');
-            oldRef = variables.get(expressionTrimmedRef);
-            if (oldRef) {
-              newVariable.type = oldRef[0].type;
-              replaceTrimmedVariable(variables, oldArg, oldRef);
-            }
+    if (command.name === 'enrich') {
+      const commandOptionsWithAssignment = command.args.filter(
+        (arg) => isOptionItem(arg) && arg.name === 'with'
+      ) as ESQLCommandOption[];
+      for (const commandOption of commandOptionsWithAssignment) {
+        for (const assignFn of commandOption.args) {
+          if (isFunctionItem(assignFn)) {
+            const [newArg, oldArg] = assignFn?.args || [];
+            addToVariables(oldArg, newArg, fields, variables);
           }
         }
+      }
+    }
+    if (command.name === 'rename') {
+      const commandOptionsWithAssignment = command.args.filter(
+        (arg) => isOptionItem(arg) && arg.name === 'as'
+      ) as ESQLCommandOption[];
+      for (const commandOption of commandOptionsWithAssignment) {
+        const [oldArg, newArg] = commandOption.args;
+        addToVariables(oldArg, newArg, fields, variables);
       }
     }
   }
@@ -671,7 +741,7 @@ async function retrieveFields(
   if (commands[0].name === 'row') {
     return new Map();
   }
-  const fields = (await callbacks.getFields?.({ sourceOnly: true })) || [];
+  const fields = (await callbacks.getFields?.({ sourcesOnly: true })) || [];
   return createMapFromList(fields);
 }
 
@@ -686,8 +756,14 @@ async function retrievePolicies(
   return createMapFromList(policies);
 }
 
-async function retrieveSources(callbacks?: ESQLCustomAutocompleteCallbacks): Promise<Set<string>> {
-  if (!callbacks) {
+async function retrieveSources(
+  commands: ESQLCommand[],
+  callbacks?: ESQLCustomAutocompleteCallbacks
+): Promise<Set<string>> {
+  if (!callbacks || commands.length < 1) {
+    return new Set();
+  }
+  if (['row', 'show'].includes(commands[0].name)) {
     return new Set();
   }
   const sources = (await callbacks?.getSources?.()) || [];
@@ -724,6 +800,34 @@ function validateFieldsShadowing(
   return messages;
 }
 
+async function retrievePoliciesFields(
+  commands: ESQLCommand[],
+  policies: Map<string, ESQLPolicy>,
+  callbacks?: ESQLCustomAutocompleteCallbacks
+): Promise<Map<string, ESQLRealField>> {
+  if (!callbacks) {
+    return new Map();
+  }
+  const enrichCommands = commands.filter(({ name }) => name === 'enrich');
+  if (!enrichCommands.length) {
+    return new Map();
+  }
+  const policyNames = enrichCommands
+    .map(({ args }) => (isSourceItem(args[0]) ? args[0].name : undefined))
+    .filter(nonNullable);
+  if (!policyNames.every((name) => policies.has(name))) {
+    return new Map();
+  }
+  const fullPolicies = policyNames.map((name) => policies.get(name)) as ESQLPolicy[];
+
+  const customQuery = `from ${fullPolicies
+    .flatMap(({ sourceIndices }) => sourceIndices)
+    .join(', ')} | keep ${fullPolicies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
+
+  const fields = (await callbacks.getFields?.({ customQuery })) || [];
+  return createMapFromList(fields);
+}
+
 /**
  * This function will perform an high level validation of the
  * query AST. An initial syntax validation is already performed by the parser
@@ -738,16 +842,19 @@ export async function validateAst(
 
   const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
-    retrieveSources(callbacks),
+    retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
   ]);
 
-  const variables = collectVariables(ast, availableFields);
-  // console.log({ ast, variables });
+  if (availablePolicies.size && ast.filter(({ name }) => name === 'enrich')) {
+    const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
+    fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
+  }
 
+  const variables = collectVariables(ast, availableFields);
   // notify if the user is rewriting a column as variable with another type
   messages.push(...validateFieldsShadowing(availableFields, variables));
 

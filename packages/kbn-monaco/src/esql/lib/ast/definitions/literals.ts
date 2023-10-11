@@ -17,6 +17,12 @@ export const timeLiterals: Literals[] = [
     }),
   },
   {
+    name: 'year',
+    description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.year', {
+      defaultMessage: 'Year',
+    }),
+  },
+  {
     name: 'month',
     description: i18n.translate('monaco.esql.autocomplete.dateDurationDefinition.month', {
       defaultMessage: 'Month',

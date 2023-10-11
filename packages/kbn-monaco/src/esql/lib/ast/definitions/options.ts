@@ -64,10 +64,7 @@ export const withOption: CommandOptionsDefinition = {
   description: i18n.translate('monaco.esql.autocomplete.withDoc', { defaultMessage: 'With' }),
   signature: {
     multipleParams: true,
-    params: [
-      { name: 'newColumn', type: 'column' },
-      { name: 'enrichedField', type: 'column' },
-    ],
+    params: [{ name: 'assignment', type: 'any' }],
   },
   optional: true,
 };

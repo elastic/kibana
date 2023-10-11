@@ -83,6 +83,18 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; option: string; type: string; givenValue: string };
   };
+  unknownInterval: {
+    message: string;
+    type: { value: string };
+  };
+  unsupportedTypeForCommand: {
+    message: string;
+    type: { command: string; value: string; type: string };
+  };
+  unknownPolicy: {
+    message: string;
+    type: { name: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

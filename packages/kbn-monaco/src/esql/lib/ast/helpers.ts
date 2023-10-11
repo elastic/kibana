@@ -39,7 +39,7 @@ export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
 }
 
 export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
-  return !Array.isArray(arg) && arg.type === 'column';
+  return arg && !Array.isArray(arg) && arg.type === 'column';
 }
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
@@ -95,6 +95,11 @@ function buildFunctionLookup() {
       .concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
       .reduce((memo, def) => {
         memo.set(def.name, def);
+        if (def.alias) {
+          for (const alias of def.alias) {
+            memo.set(alias, def);
+          }
+        }
         return memo;
       }, new Map<string, FunctionDefinition>());
   }
@@ -272,6 +277,10 @@ export function getAllArrayTypes(
   return types;
 }
 
+export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
+  return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
+}
+
 export function isEqualType(
   item: ESQLSingleAstItem,
   argDef: SignatureArgType,
@@ -296,7 +305,7 @@ export function isEqualType(
     }
   }
   if (item.type === 'timeInterval') {
-    return argType === 'time_literal' && timeLiterals.some(({ name }) => name === item.unit);
+    return argType === 'time_literal' && inKnownTimeInterval(item);
   }
   if (item.type === 'column') {
     if (argType === 'column') {
@@ -309,5 +318,8 @@ export function isEqualType(
     }
     const wrappedTypes = Array.isArray(hit.type) ? hit.type : [hit.type];
     return wrappedTypes.some((ct) => argType === ct);
+  }
+  if (item.type === 'source') {
+    return item.sourceType === argType;
   }
 }
