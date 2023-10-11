@@ -12,5 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     //  TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="infrastructure-alerts-and-rules"])
     this.tags(['failsOnMKI']);
     loadTestFile(require.resolve('./header_menu'));
+    loadTestFile(require.resolve('./node_details'));
+    loadTestFile(require.resolve('./hosts_page'));
+    loadTestFile(require.resolve('./infra'));
   });
 }
