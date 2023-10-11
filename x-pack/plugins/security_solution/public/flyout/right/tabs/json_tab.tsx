@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,10 +15,7 @@ import { CopyToClipboard } from '../../shared/components/copy_to_clipboard';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 
-const TOP_NAV_HEIGHT = 48;
-const SECURITY_SOLUTION_NAVBAR_HEIGHT = 47;
-const FLYOUT_HEADER_HEIGHT = 185;
-const FLYOUT_BODY_PADDING = 48;
+const FLYOUT_BODY_PADDING = 24;
 const COPY_TO_CLIPBOARD_BUTTON_HEIGHT = 24;
 const FLYOUT_FOOTER_HEIGHT = 72;
 
@@ -27,20 +24,20 @@ const FLYOUT_FOOTER_HEIGHT = 72;
  */
 export const JsonTab: FC = memo(() => {
   const { searchHit } = useRightPanelContext();
-
   const jsonValue = JSON.stringify(searchHit, null, 2);
 
+  const flexGroupElement = useRef<HTMLDivElement>(null);
   const [editorHeight, setEditorHeight] = useState<number>();
 
   useEffect(() => {
+    const topPosition = flexGroupElement?.current?.getBoundingClientRect().top || 0;
     const height =
       window.innerHeight -
-      TOP_NAV_HEIGHT -
-      SECURITY_SOLUTION_NAVBAR_HEIGHT -
-      FLYOUT_HEADER_HEIGHT -
-      FLYOUT_BODY_PADDING -
+      topPosition -
       COPY_TO_CLIPBOARD_BUTTON_HEIGHT -
+      FLYOUT_BODY_PADDING -
       FLYOUT_FOOTER_HEIGHT;
+
     if (height === 0) {
       return;
     }
@@ -50,6 +47,7 @@ export const JsonTab: FC = memo(() => {
 
   return (
     <EuiFlexGroup
+      ref={flexGroupElement}
       direction={'column'}
       gutterSize={'none'}
       data-test-subj={JSON_TAB_CONTENT_TEST_ID}
