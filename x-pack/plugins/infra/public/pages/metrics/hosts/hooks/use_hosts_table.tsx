@@ -138,7 +138,6 @@ export const useHostsTable = () => {
   } = useKibanaContextForPlugin();
   const { dataView } = useMetricsDataViewContext();
 
-  const popoverContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
@@ -360,7 +359,6 @@ export const useHostsTable = () => {
     selectedItemsCount: selectedItems.length,
     filterSelectedHosts,
     refs: {
-      popoverContainerRef,
       tableRef,
     },
   };

@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { SLO, IndicatorTypes } from '../../domain/models';
+import { SecurityException } from '../../errors';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { TransformGenerator } from './transform_generators';
 
@@ -42,6 +43,10 @@ export class DefaultTransformManager implements TransformManager {
       });
     } catch (err) {
       this.logger.error(`Cannot create SLO transform for indicator type [${slo.indicator.type}]`);
+      if (err.meta?.body?.error?.type === 'security_exception') {
+        throw new SecurityException(err.meta.body.error.reason);
+      }
+
       throw err;
     }
 

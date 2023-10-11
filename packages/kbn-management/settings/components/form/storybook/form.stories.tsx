@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiPanel } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { getSettingsMock, uiSettingsClientMock } from '../mocks';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+
+import { uiSettingsClientMock } from '../mocks';
 import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
@@ -37,12 +38,15 @@ export default {
         showError={action('showError')}
         showReloadPagePrompt={action('showReloadPagePrompt')}
       >
-        <EuiPanel>
-          <Story />
-        </EuiPanel>
+        <Story />
       </FormProvider>
     ),
   ],
+  parameters: {
+    backgrounds: {
+      default: 'ghost',
+    },
+  },
 } as ComponentMeta<typeof Component>;
 
 interface FormStoryProps {
@@ -53,12 +57,16 @@ interface FormStoryProps {
 }
 
 export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => {
-  const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+  const fields: FieldDefinition[] = getFieldDefinitions(
     getSettingsMock(requirePageReload),
     uiSettingsClientMock
   );
 
-  return <Component {...{ fields, isSavingEnabled }} />;
+  // This is only needed for when a search query is present
+  const categoryCounts = {};
+  const onClearQuery = () => {};
+
+  return <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery }} />;
 };
 
 Form.args = {

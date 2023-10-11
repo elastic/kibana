@@ -6,6 +6,7 @@
  */
 
 import { getOr, noop, sortBy } from 'lodash/fp';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { rgba } from 'polished';
@@ -32,6 +33,16 @@ import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } fr
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { TimelineTabs } from '../../../../common/types/timeline';
 
+export type ColumnsProvider = (providerOptions: {
+  browserFields: BrowserFields;
+  eventId: string;
+  contextId: string;
+  scopeId: string;
+  getLinkValue: (field: string) => string | null;
+  isDraggable?: boolean;
+  isReadOnly?: boolean;
+}) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
+
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
@@ -40,6 +51,7 @@ interface Props {
   scopeId: string;
   timelineTabType: TimelineTabs | 'flyout';
   isReadOnly?: boolean;
+  columnsProvider?: ColumnsProvider;
 }
 
 const TableWrapper = styled.div`
@@ -159,7 +171,16 @@ const useFieldBrowserPagination = () => {
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
+  ({
+    browserFields,
+    data,
+    eventId,
+    isDraggable,
+    timelineTabType,
+    scopeId,
+    isReadOnly,
+    columnsProvider = getColumns,
+  }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
@@ -210,7 +231,7 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const columns = useMemo(
       () =>
-        getColumns({
+        columnsProvider({
           browserFields,
           eventId,
           contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
@@ -219,7 +240,16 @@ export const EventFieldsBrowser = React.memo<Props>(
           isDraggable,
           isReadOnly,
         }),
-      [browserFields, eventId, scopeId, timelineTabType, getLinkValue, isDraggable, isReadOnly]
+      [
+        browserFields,
+        eventId,
+        scopeId,
+        columnsProvider,
+        timelineTabType,
+        getLinkValue,
+        isDraggable,
+        isReadOnly,
+      ]
     );
 
     const focusSearchInput = useCallback(() => {

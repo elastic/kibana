@@ -9,9 +9,10 @@
 import React, { Fragment } from 'react';
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
-import { FieldRow, RowOnChangeFn } from '@kbn/management-settings-components-field-row';
-import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { FieldCategories } from '@kbn/management-settings-components-field-category';
+import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
+import { categorizeFields } from '@kbn/management-settings-utilities';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -20,9 +21,13 @@ import { useSave } from './use_save';
  */
 export interface FormProps {
   /** A list of {@link FieldDefinition} corresponding to settings to be displayed in the form. */
-  fields: Array<FieldDefinition<SettingType>>;
+  fields: FieldDefinition[];
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
+  /** Contains the number of registered settings in each category. */
+  categoryCounts: { [category: string]: number };
+  /** Handler for the "clear search" link. */
+  onClearQuery: () => void;
 }
 
 /**
@@ -30,11 +35,11 @@ export interface FormProps {
  * @param props The {@link FormProps} for the {@link Form} component.
  */
 export const Form = (props: FormProps) => {
-  const { fields, isSavingEnabled } = props;
+  const { fields, isSavingEnabled, categoryCounts, onClearQuery } = props;
 
-  const [unsavedChanges, setUnsavedChanges] = React.useState<
-    Record<string, UnsavedFieldChange<SettingType>>
-  >({});
+  const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
+    {}
+  );
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -53,7 +58,7 @@ export const Form = (props: FormProps) => {
     setIsLoading(false);
   };
 
-  const onChange: RowOnChangeFn<SettingType> = (id, change) => {
+  const onFieldChange: OnFieldChangeFn = (id, change) => {
     if (!change) {
       const { [id]: unsavedChange, ...rest } = unsavedChanges;
       setUnsavedChanges(rest);
@@ -63,15 +68,20 @@ export const Form = (props: FormProps) => {
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
 
-  const fieldRows = fields.map((field) => {
-    const { id: key } = field;
-    const unsavedChange = unsavedChanges[key];
-    return <FieldRow {...{ key, field, unsavedChange, onChange, isSavingEnabled }} />;
-  });
+  const categorizedFields = categorizeFields(fields);
 
   return (
     <Fragment>
-      <div>{fieldRows}</div>
+      <FieldCategories
+        {...{
+          categorizedFields,
+          categoryCounts,
+          isSavingEnabled,
+          onFieldChange,
+          onClearQuery,
+          unsavedChanges,
+        }}
+      />
       {!isEmpty(unsavedChanges) && (
         <BottomBar
           onSaveAll={saveAll}

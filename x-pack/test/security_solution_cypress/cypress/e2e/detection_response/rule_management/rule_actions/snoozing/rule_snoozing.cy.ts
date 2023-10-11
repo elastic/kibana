@@ -43,9 +43,7 @@ import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-// Flaky in serverless tests
-describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

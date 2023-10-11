@@ -8,9 +8,14 @@
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
+import { VulnerabilityDashboardPageProvider } from './vulnerability_dashboard_page_object';
 
-export const pageObjects = {
-  ...xpackFunctionalPageObjects,
+export const cloudSecurityPosturePageObjects = {
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
+  vulnerabilityDashboard: VulnerabilityDashboardPageProvider,
+};
+export const pageObjects = {
+  ...xpackFunctionalPageObjects,
+  ...cloudSecurityPosturePageObjects,
 };

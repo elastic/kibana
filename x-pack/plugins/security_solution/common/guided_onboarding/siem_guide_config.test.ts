@@ -37,7 +37,7 @@ describe('getSiemGuideConfig', () => {
           integration: 'endpoint',
           location: {
             appID: 'integrations',
-            path: '/browse/security',
+            path: '/detail/endpoint/overview',
           },
         },
         {
@@ -119,7 +119,7 @@ describe('getSiemGuideConfig', () => {
           integration: 'endpoint',
           location: {
             appID: 'integrations',
-            path: '/browse/security',
+            path: '/detail/endpoint/overview',
           },
         },
         {
@@ -198,7 +198,7 @@ describe('getSiemGuideConfig', () => {
           integration: 'endpoint',
           location: {
             appID: 'integrations',
-            path: '/browse/security',
+            path: '/detail/endpoint/overview',
           },
         },
         {

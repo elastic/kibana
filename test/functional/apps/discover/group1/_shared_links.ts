@@ -173,6 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const resolvedTime = await PageObjects.timePicker.getTimeConfig();
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
+          await toasts.dismissAllToasts();
           return true;
         });
       });

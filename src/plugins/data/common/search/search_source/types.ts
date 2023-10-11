@@ -39,11 +39,6 @@ export interface ISearchStartSearchSource
   createEmpty: () => ISearchSource;
 }
 
-/**
- * @deprecated use {@link estypes.SortResults} instead.
- */
-export type EsQuerySearchAfter = [string | number, string | number];
-
 export enum SortDirection {
   asc = 'asc',
   desc = 'desc',
@@ -176,53 +171,6 @@ export type SerializedSearchSourceFields = {
 
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
-}
-
-export interface SortOptions {
-  mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';
-  type?: 'double' | 'long' | 'date' | 'date_nanos';
-  nested?: object;
-  unmapped_type?: string;
-  distance_type?: 'arc' | 'plane';
-  unit?: string;
-  ignore_unmapped?: boolean;
-  _script?: object;
-}
-
-export interface Request {
-  docvalue_fields: string[];
-  _source: unknown;
-  query: unknown;
-  script_fields: unknown;
-  sort: unknown;
-  stored_fields: string[];
-}
-
-export interface ResponseWithShardFailure {
-  _shards: {
-    failed: number;
-    failures: ShardFailure[];
-    skipped: number;
-    successful: number;
-    total: number;
-  };
-}
-
-export interface ShardFailure {
-  index: string;
-  node: string;
-  reason: {
-    caused_by: {
-      reason: string;
-      type: string;
-    };
-    reason: string;
-    lang?: estypes.ScriptLanguage;
-    script?: string;
-    script_stack?: string[];
-    type: string;
-  };
-  shard: number;
 }
 
 export function isSerializedSearchSource(
