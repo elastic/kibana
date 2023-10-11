@@ -60,7 +60,7 @@ export interface DataStream {
   privileges: Privileges;
   hidden: boolean;
   lifecycle?: IndicesDataLifecycleWithRollover & {
-    enabled: boolean;
+    enabled?: boolean;
   };
 }
 

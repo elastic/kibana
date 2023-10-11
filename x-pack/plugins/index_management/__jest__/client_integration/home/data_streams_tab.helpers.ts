@@ -278,6 +278,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   },
   hidden: false,
   lifecycle: {
+    enabled: true,
     data_retention: '7d',
   },
   ...dataStream,
