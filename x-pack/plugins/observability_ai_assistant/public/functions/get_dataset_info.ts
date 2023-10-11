@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import { FunctionVisibility, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
 import { compressFields } from '../../common/utils/compressFields';
@@ -53,16 +52,29 @@ export function registerGetDatasetInfoFunction({
           signal,
         })
         .then((response) => {
-          const compressedFields = compressFields(
-            response.fields.map((field) => {
-              return `${field.name},${field.type}`;
-            })
-          );
+          const content: {
+            indices: string[];
+            fields: string;
+            warning?: string;
+          } = {
+            indices: response.indices,
+            fields: '[]',
+          };
+
+          const fields = response.fields.map((field) => {
+            return `${field.name},${field.type}`;
+          });
+
+          // limit to 500 fields
+          if (fields.length > 500) {
+            fields.length = 500;
+            content.warning = 'field list too long';
+          }
+
+          content.fields = compressFields(fields);
+
           return {
-            content: {
-              indices: response.indices,
-              fields: compressedFields,
-            } as unknown as Serializable,
+            content,
           };
         });
     }
