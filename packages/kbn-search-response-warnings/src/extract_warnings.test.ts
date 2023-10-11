@@ -50,7 +50,12 @@ describe('extract search response warnings', () => {
               indices: '',
               took: 25,
               timed_out: false,
-              _shards: response._shards,
+              _shards: {
+                total: 4,
+                successful: 3,
+                skipped: 0,
+                failed: 1,
+              },
               failures: response._shards.failures,
             },
           },

@@ -40,7 +40,7 @@ export function extractWarnings(
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
-      message: i18n.translate('data.search.searchSource.fetch.incompleteResultsMessage', {
+      message: i18n.translate('searchResponseWarnings.incompleteResultsMessage', {
         defaultMessage: 'The data might be incomplete or wrong.',
       }),
       clusters: rawResponse._clusters
@@ -56,7 +56,7 @@ export function extractWarnings(
         const adapter = requestAdapter ? requestAdapter : new RequestAdapter();
         if (!requestAdapter) {
           const requestResponder = adapter.start(
-            i18n.translate('data.search.searchSource.anonymousRequestTitle', {
+            i18n.translate('searchResponseWarnings.anonymousRequestTitle', {
               defaultMessage: 'Request',
             })
           );
