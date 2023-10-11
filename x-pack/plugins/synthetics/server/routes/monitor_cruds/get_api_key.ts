@@ -6,6 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IKibanaResponse } from '@kbn/core-http-server';
+import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -22,8 +24,26 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       accessToElasticManagedLocations: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ request, server }): Promise<ProjectAPIKeyResponse> => {
+  handler: async ({
+    request,
+    server,
+    response,
+  }): Promise<ProjectAPIKeyResponse | IKibanaResponse> => {
     const { accessToElasticManagedLocations } = request.query;
+
+    if (accessToElasticManagedLocations) {
+      const elasticManagedLocationsEnabled =
+        Boolean(
+          (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime
+            .elasticManagedLocationsEnabled
+        ) ?? true;
+      if (!elasticManagedLocationsEnabled) {
+        return response.customError({
+          body: { message: ELASTIC_MANAGED_LOCATIONS_DISABLED },
+          statusCode: 403,
+        });
+      }
+    }
 
     const apiKey = await generateProjectAPIKey({
       request,

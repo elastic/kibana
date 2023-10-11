@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiText, EuiLink, EuiEmptyPrompt, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
@@ -32,23 +33,36 @@ export const ProjectAPIKeys = () => {
   const canSaveIntegrations: boolean =
     !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
 
-  const { data, loading } = useFetcher(async () => {
+  const canUsePublicLocations =
+    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+
+  const { data, loading, error } = useFetcher(async () => {
     if (loadAPIKey) {
-      return fetchProjectAPIKey(accessToElasticManagedLocations);
+      return fetchProjectAPIKey(accessToElasticManagedLocations && Boolean(canUsePublicLocations));
     }
     return null;
-  }, [loadAPIKey]);
+  }, [loadAPIKey, canUsePublicLocations]);
 
   useEffect(() => {
     if (data?.apiKey) {
       setApiKey(data?.apiKey.encoded);
     }
+    setLoadAPIKey(false);
   }, [data]);
 
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+  useEffect(() => {
+    if (error) {
+      const requestError = error as IHttpFetchError<ResponseErrorBody>;
+      kServices?.notifications?.toasts.addError(error, {
+        title: i18n.translate('xpack.synthetics.createApiKey.error', {
+          defaultMessage: 'Error',
+        }),
+        toastMessage: requestError?.body?.message,
+      });
+    }
+  }, [error, kServices?.notifications?.toasts]);
 
-  const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
   if (enablementLoading) {
     return <LoadingState />;
