@@ -11,7 +11,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 let uniqueId = 0;
 
 export function generateUniqueNodeId() {
-  const id = `node-${uniqueId++}`;
+  const id = `node${uniqueId++}`;
   return id;
 }
 

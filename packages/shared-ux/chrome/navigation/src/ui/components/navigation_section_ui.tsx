@@ -142,6 +142,10 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     }
 
     const hasChildren = Boolean(item.children?.length);
+    if (item.sideNavStatus === 'renderAsItem' && hasChildren) {
+      return true;
+    }
+
     if (hasChildren) {
       return item.children!.some(itemIsVisible);
     }

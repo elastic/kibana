@@ -761,6 +761,30 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
+            // Panel where all children are hidden. The "open panel" icon should NOT
+            // appear next to the node title
+            title: 'Open panel (5) - all children hidden',
+            openPanel: true,
+            link: 'item1',
+            id: 'test',
+            children: [
+              {
+                link: 'test1',
+                sideNavStatus: 'hidden',
+              },
+              {
+                title: 'Some group',
+                children: [
+                  {
+                    link: 'item1',
+                    title: 'My first group item',
+                    sideNavStatus: 'hidden',
+                  },
+                ],
+              },
+            ],
+          },
+          {
             id: 'group:openpanel2',
             title: 'Open panel (custom content)',
             openPanel: true,
