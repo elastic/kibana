@@ -29,7 +29,6 @@ import {
   policyContainsIntegration,
 } from '../../tasks/integrations';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
@@ -41,7 +40,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    cy.login('elastic');
   });
 
   after(() => {
