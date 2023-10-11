@@ -8,7 +8,6 @@ xpack.observabilityLogExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
-xpack.screenshotting.enabled: false
 
 ## Enable the Security Solution Serverless plugin
 xpack.securitySolutionServerless.enabled: true
