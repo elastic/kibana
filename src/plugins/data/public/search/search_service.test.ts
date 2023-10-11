@@ -143,7 +143,7 @@ describe('Search service', () => {
 
         expect(notifications.toasts.addWarning).toBeCalledTimes(1);
         expect(notifications.toasts.addWarning).toBeCalledWith({
-          title: 'The data might be incomplete or wrong.',
+          title: 'Results are partial and may be incomplete.',
           text: expect.any(Function),
         });
       });
