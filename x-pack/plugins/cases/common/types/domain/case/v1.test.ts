@@ -78,7 +78,7 @@ const basicCase = {
     {
       key: 'first_custom_field_key',
       type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      value: 'this is a text field value',
     },
     {
       key: 'second_custom_field_key',
@@ -186,7 +186,7 @@ describe('CaseAttributesRt', () => {
       {
         key: 'first_custom_field_key',
         type: 'text',
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
       {
         key: 'second_custom_field_key',
