@@ -18,6 +18,8 @@ import {
   installLegacyRiskScore,
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
+  deleteRiskEngineTask,
+  deleteAllRiskScores,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,6 +31,12 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('Risk Engine', () => {
+    beforeEach(async () => {
+      await cleanRiskEngineConfig({ kibanaServer });
+      await deleteRiskEngineTask({ es, log });
+      await deleteAllRiskScores(log, es);
+    });
+
     afterEach(async () => {
       await cleanRiskEngineConfig({
         kibanaServer,
@@ -45,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         supertest,
         log,
       });
+      await deleteRiskEngineTask({ es, log });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168376
