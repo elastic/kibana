@@ -543,6 +543,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       monitorUptimeSynthetics: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime-synthetics.html`,
       userExperience: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/user-experience.html`,
       createAlerts: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/create-alerts.html`,
+      syntheticsAlerting: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-settings.html#synthetics-settings-alerting`,
       syntheticsCommandReference: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-configuration.html#synthetics-configuration-playwright-options`,
       syntheticsProjectMonitors: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetic-run-tests.html#synthetic-monitor-choose-project`,
       syntheticsMigrateFromIntegration: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-migrate-from-integration.html`,
