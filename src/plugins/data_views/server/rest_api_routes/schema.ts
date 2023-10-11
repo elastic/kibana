@@ -38,6 +38,7 @@ export const dataViewSpecSchema = schema.object({
       schema.string(),
       schema.object({
         customLabel: schema.maybe(schema.string()),
+        customDescription: schema.maybe(schema.string()),
         count: schema.maybe(schema.number()),
       })
     )

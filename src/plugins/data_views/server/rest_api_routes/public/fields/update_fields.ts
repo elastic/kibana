@@ -60,6 +60,11 @@ export const updateFields = async ({
       dataView.setFieldCustomLabel(fieldName, field.customLabel);
     }
 
+    if (field.customDescription !== undefined) {
+      changeCount++;
+      dataView.setFieldCustomDescription(fieldName, field.customDescription);
+    }
+
     if (field.count !== undefined) {
       changeCount++;
       dataView.setFieldCount(fieldName, field.count);
@@ -85,12 +90,21 @@ export const updateFields = async ({
 
 interface FieldUpdateType {
   customLabel?: string | null;
+  customDescription?: string | null;
   count?: number | null;
   format?: SerializedFieldFormat | null;
 }
 
 const fieldUpdateSchema = schema.object({
   customLabel: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 1_000,
+      })
+    )
+  ),
+  customDescription: schema.maybe(
     schema.nullable(
       schema.string({
         minLength: 1,

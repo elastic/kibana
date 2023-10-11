@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldDescriptionIconButton } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
 
@@ -78,7 +79,15 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={true}>
         <EuiTitle size="xxs">
-          <h5 className="eui-textBreakWord">{field.displayName}</h5>
+          <h5 className="eui-textBreakWord">
+            {field.displayName}
+            {field.customDescription ? (
+              <FieldDescriptionIconButton
+                customDescription={field.customDescription}
+                margin="left"
+              />
+            ) : null}
+          </h5>
         </EuiTitle>
       </EuiFlexItem>
       {onAddFieldToWorkspace && (

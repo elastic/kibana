@@ -38,6 +38,7 @@ const primitiveRuntimeFieldSchemaShared = {
   ),
   format: schema.maybe(serializedFieldFormatSchema),
   customLabel: schema.maybe(schema.string()),
+  customDescription: schema.maybe(schema.string()),
   popularity: schema.maybe(
     schema.number({
       min: 0,
@@ -68,6 +69,7 @@ const compositeRuntimeFieldSchemaShared = {
         type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
         format: schema.maybe(serializedFieldFormatSchema),
         customLabel: schema.maybe(schema.string()),
+        customDescription: schema.maybe(schema.string()),
         popularity: schema.maybe(
           schema.number({
             min: 0,
@@ -134,6 +136,7 @@ export const fieldSpecSchemaFields = {
     })
   ),
   customLabel: schema.maybe(schema.string()),
+  customDescription: schema.maybe(schema.string()),
   shortDotsEnable: schema.maybe(schema.boolean()),
   searchable: schema.maybe(schema.boolean()),
   aggregatable: schema.maybe(schema.boolean()),

@@ -164,6 +164,11 @@ const labelDescription = i18n.translate(
   { defaultMessage: 'A custom label for the field.' }
 );
 
+const fieldDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.customDescriptionTooltip',
+  { defaultMessage: 'A custom description for the field.' }
+);
+
 function runtimeIconTipTitle(fld: IndexedFieldItem) {
   // composite runtime fields
   if (fld.runtimeField?.type === 'composite') {
@@ -262,6 +267,15 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
           <EuiBadge iconType="flag" iconSide="left">
             {field.customLabel}
           </EuiBadge>
+        </EuiToolTip>
+      </div>
+    ) : null}
+    {field.customDescription ? (
+      <div>
+        <EuiToolTip content={fieldDescription}>
+          <EuiText color="subdued" size="xs">
+            {field.customDescription}
+          </EuiText>
         </EuiToolTip>
       </div>
     ) : null}

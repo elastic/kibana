@@ -12,7 +12,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { AdvancedParametersSection } from './advanced_parameters_section';
 import { FormRow } from './form_row';
-import { PopularityField, FormatField, ScriptField, CustomLabelField } from './form_fields';
+import {
+  PopularityField,
+  FormatField,
+  ScriptField,
+  CustomLabelField,
+  CustomDescriptionField,
+} from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 
 const geti18nTexts = (): {
@@ -25,6 +31,17 @@ const geti18nTexts = (): {
     description: i18n.translate('indexPatternFieldEditor.editor.form.customLabelDescription', {
       defaultMessage: `Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.`,
     }),
+  },
+  customDescription: {
+    title: i18n.translate('indexPatternFieldEditor.editor.form.customDescriptionTitle', {
+      defaultMessage: 'Set custom description',
+    }),
+    description: i18n.translate(
+      'indexPatternFieldEditor.editor.form.customDescriptionDescription',
+      {
+        defaultMessage: 'Create a description for your field.',
+      }
+    ),
   },
   value: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.valueTitle', {
@@ -102,6 +119,18 @@ export const FieldDetail = ({}) => {
 
       {/* Advanced settings */}
       <AdvancedParametersSection>
+        {/* Set custom description */}
+        <FormRow
+          title={i18nTexts.customDescription.title}
+          description={i18nTexts.customDescription.description}
+          formFieldPath="__meta__.isCustomDescriptionVisible"
+          data-test-subj="customDescriptionRow"
+          withDividerRule
+        >
+          <CustomDescriptionField />
+        </FormRow>
+
+        {/* Popularity score (higher value means it will be positioned higher in the fields list) */}
         <FormRow
           title={i18nTexts.popularity.title}
           description={i18nTexts.popularity.description}

@@ -110,6 +110,23 @@ export const schema = {
       },
     ],
   },
+  customDescription: {
+    label: i18n.translate('indexPatternFieldEditor.editor.form.customDescriptionLabel', {
+      defaultMessage: 'Field description',
+    }),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.customDescriptionIsRequiredErrorMessage',
+            {
+              defaultMessage: 'Give a description to the field.',
+            }
+          )
+        ),
+      },
+    ],
+  },
   popularity: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.popularityLabel', {
       defaultMessage: 'Popularity',
@@ -144,6 +161,9 @@ export const schema = {
   },
   __meta__: {
     isCustomLabelVisible: {
+      defaultValue: false,
+    },
+    isCustomDescriptionVisible: {
       defaultValue: false,
     },
     isValueVisible: {

@@ -131,7 +131,7 @@ export class DataView implements DataViewBase {
    */
   private fieldFormats: FieldFormatsStartCommon;
   /**
-   * Map of field attributes by field name. Currently count and customLabel.
+   * Map of field attributes by field name. Currently: count, customLabel, customDescription.
    */
   private fieldAttrs: FieldAttrs;
   /**
@@ -233,6 +233,10 @@ export class DataView implements DataViewBase {
       let hasAttr = false;
       if (field.customLabel) {
         attrs.customLabel = field.customLabel;
+        hasAttr = true;
+      }
+      if (field.customDescription) {
+        attrs.customDescription = field.customDescription;
         hasAttr = true;
       }
       if (field.count) {
@@ -491,7 +495,7 @@ export class DataView implements DataViewBase {
       throw new CharacterNotAllowedInField('*', name);
     }
 
-    const { type, script, customLabel, format, popularity } = runtimeField;
+    const { type, script, customLabel, customDescription, format, popularity } = runtimeField;
 
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
@@ -504,6 +508,7 @@ export class DataView implements DataViewBase {
       { type, script },
       {
         customLabel,
+        customDescription,
         format,
         popularity,
       }
@@ -693,6 +698,27 @@ export class DataView implements DataViewBase {
   }
 
   /**
+   * Set field custom description
+   * @param fieldName name of field to set custom label on
+   * @param customDescription custom description value. If undefined, custom description is removed
+   */
+
+  public setFieldCustomDescription(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCustomDescription: string | undefined =
+      customDescription === null ? undefined : customDescription;
+
+    if (fieldObject) {
+      fieldObject.customDescription = newCustomDescription;
+    }
+
+    this.setFieldAttrs(fieldName, 'customDescription', newCustomDescription);
+  }
+
+  /**
    * Set field count
    * @param fieldName name of field to set count on
    * @param count count value. If undefined, count is removed
@@ -771,6 +797,7 @@ export class DataView implements DataViewBase {
       // Every child field gets the complete runtime field script for consumption by searchSource
       this.updateOrAddRuntimeField(`${name}.${subFieldName}`, subField.type, runtimeFieldSpec, {
         customLabel: subField.customLabel,
+        customDescription: subField.customDescription,
         format: subField.format,
         popularity: subField.popularity,
       })
@@ -814,6 +841,10 @@ export class DataView implements DataViewBase {
     // Apply configuration to the field
     if (config.customLabel || config.customLabel === null) {
       this.setFieldCustomLabel(fieldName, config.customLabel);
+    }
+
+    if (config.customDescription || config.customDescription === null) {
+      this.setFieldCustomDescription(fieldName, config.customDescription);
     }
 
     if (config.popularity || config.popularity === null) {

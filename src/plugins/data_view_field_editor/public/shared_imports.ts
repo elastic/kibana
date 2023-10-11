@@ -58,6 +58,7 @@ export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   TextField,
+  TextAreaField,
   ToggleField,
   NumericField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
