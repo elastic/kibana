@@ -152,7 +152,7 @@ describe('SyncJobsViewLogic', () => {
               completed_at: null,
               deleted_document_count: 0,
               duration: expect.anything(),
-              lastSync: syncJob.created_at,
+              lastSync: null,
               status: SyncStatus.IN_PROGRESS,
             },
           ],
