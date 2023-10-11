@@ -31,3 +31,7 @@ export interface OracleRecord {
   createdAt: string;
   updatedAt: string;
 }
+
+export type OracleRecordCreateRequest = {
+  caseIds: string[];
+} & OracleKey;
