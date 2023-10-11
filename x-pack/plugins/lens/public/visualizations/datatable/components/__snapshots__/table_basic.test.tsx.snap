@@ -143,7 +143,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "a",
             "id": "a",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -195,7 +195,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "b",
             "id": "b",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -247,7 +247,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "c",
             "id": "c",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
         ]
       }
@@ -427,7 +427,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "a",
             "id": "a",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -479,7 +479,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "b",
             "id": "b",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -531,7 +531,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "c",
             "id": "c",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
         ]
       }
@@ -704,7 +704,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "a",
             "id": "a",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -756,7 +756,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "b",
             "id": "b",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -808,7 +808,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "c",
             "id": "c",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
         ]
       }
@@ -983,7 +983,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "a",
             "id": "a",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -1035,7 +1035,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "b",
             "id": "b",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
           Object {
             "actions": Object {
@@ -1087,7 +1087,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "c",
             "id": "c",
-            "visibleCellActions": 5,
+            "visibleCellActions": 0,
           },
         ]
       }

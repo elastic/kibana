@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, ToastsStart } from '@kbn/core/public';
+import type { CoreSetup, ToastsStart } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';

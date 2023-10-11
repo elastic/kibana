@@ -20,7 +20,7 @@ import type {
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
@@ -82,9 +82,10 @@ export const createGridColumns = (
     const filterable = columnFilterable?.[colIndex] || false;
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const showFilterActions = filterable && handleFilterClick && !columnArgs?.oneClickFilter;
 
     const cellActions: EuiDataGridColumnCellAction[] = [];
-    if (filterable && handleFilterClick && !columnArgs?.oneClickFilter) {
+    if (showFilterActions) {
       cellActions.push(
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
           const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -325,6 +326,7 @@ export const createGridColumns = (
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
+      visibleCellActions: showFilterActions ? 2 : 0,
       display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
       actions: {
