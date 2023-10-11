@@ -81,7 +81,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       expect(createdRule.status).to.eql(200);
       const ruleId = createdRule.body.id;
-      const ruleUuid = createdRule.body.uuid;
+
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       // Wait for the rule to run once
@@ -97,18 +97,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       let state: any = await getRuleState(ruleId);
 
       // Should be 2 alert docs because alert pattern was:
       // active, recovered, recovered, active, recovered
-      expect(alertDocs.length).to.equal(
-        2,
-        `expected ${alertDocs.length} to equal 2\nalertDocs: ${JSON.stringify(alertDocs, null, 4)}
-        )}`
-      );
+      expect(alertDocs.length).to.equal(2);
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -132,7 +128,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -160,7 +156,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -215,7 +211,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       expect(createdRule.status).to.eql(200);
       const ruleId = createdRule.body.id;
-      const ruleUuid = createdRule.body.uuid;
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       // Wait for the rule to run once
@@ -231,7 +226,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       let state: any = await getRuleState(ruleId);
@@ -262,7 +257,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -290,7 +285,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -342,7 +337,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       expect(createdRule.status).to.eql(200);
       const ruleId = createdRule.body.id;
-      const ruleUuid = createdRule.body.uuid;
+
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       // Wait for the rule to run once
@@ -357,7 +352,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
       const state = await getRuleState(ruleId);
 
       expect(alertDocs.length).to.equal(2);
@@ -403,7 +398,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       expect(createdRule.status).to.eql(200);
       const ruleId = createdRule.body.id;
-      const ruleUuid = createdRule.body.uuid;
+
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       // Wait for the rule to run once
@@ -419,7 +414,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       let state: any = await getRuleState(ruleId);
@@ -448,7 +443,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -478,7 +473,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -508,7 +503,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       }
 
       // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleUuid);
+      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
       // Get rule state from task document
       state = await getRuleState(ruleId);
@@ -537,7 +532,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     return JSON.parse(task._source!.task.state);
   }
 
-  async function queryForAlertDocs<T>(ruleUuid: string): Promise<Array<SearchHit<T>>> {
+  async function queryForAlertDocs<T>(ruleId: string): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
       body: {
@@ -545,7 +540,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           bool: {
             must: {
               term: {
-                [ALERT_RULE_UUID]: { value: ruleUuid },
+                [ALERT_RULE_UUID]: { value: ruleId },
               },
             },
           },
