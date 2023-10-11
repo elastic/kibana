@@ -5,21 +5,8 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObject,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
-import {
-  RulesSettings,
-  DEFAULT_FLAPPING_SETTINGS,
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  RULES_SETTINGS_SAVED_OBJECT_ID,
-  DEFAULT_QUERY_DELAY_SETTINGS,
-  DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS,
-} from '../../common';
 import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 
 export interface RulesSettingsClientConstructorOptions {
@@ -46,14 +33,13 @@ export class RulesSettingsClient {
     this._flapping = new RulesSettingsFlappingClient({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
-      getOrCreate: this.getOrCreate.bind(this),
       getModificationMetadata: this.getModificationMetadata.bind(this),
     });
 
     this._queryDelay = new RulesSettingsQueryDelayClient({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
-      getOrCreate: this.getOrCreate.bind(this),
+      isServerless: this.isServerless,
       getModificationMetadata: this.getModificationMetadata.bind(this),
     });
   }
@@ -68,80 +54,6 @@ export class RulesSettingsClient {
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
     };
-  }
-
-  public async get(): Promise<SavedObject<RulesSettings>> {
-    try {
-      return await this.savedObjectsClient.get<RulesSettings>(
-        RULES_SETTINGS_SAVED_OBJECT_TYPE,
-        RULES_SETTINGS_SAVED_OBJECT_ID
-      );
-    } catch (e) {
-      this.logger.error(`Failed to get rules setting for current space. Error: ${e}`);
-      throw e;
-    }
-  }
-
-  public async create(settings?: SavedObject<RulesSettings>): Promise<SavedObject<RulesSettings>> {
-    const modificationMetadata = await this.getModificationMetadata();
-    const defaultQueryDelaySettings = this.isServerless
-      ? DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS
-      : DEFAULT_QUERY_DELAY_SETTINGS;
-    try {
-      return await this.savedObjectsClient.create<RulesSettings>(
-        RULES_SETTINGS_SAVED_OBJECT_TYPE,
-        {
-          ...(settings && settings.attributes.flapping
-            ? {
-                flapping: settings.attributes.flapping,
-              }
-            : {
-                flapping: {
-                  ...DEFAULT_FLAPPING_SETTINGS,
-                  ...modificationMetadata,
-                },
-              }),
-          ...(settings && settings.attributes.queryDelay
-            ? {
-                queryDelay: settings.attributes.queryDelay,
-              }
-            : {
-                queryDelay: {
-                  ...defaultQueryDelaySettings,
-                  ...modificationMetadata,
-                },
-              }),
-        },
-        {
-          id: RULES_SETTINGS_SAVED_OBJECT_ID,
-          overwrite: true,
-        }
-      );
-    } catch (e) {
-      this.logger.error(`Failed to create rules setting for current space. Error: ${e}`);
-      throw e;
-    }
-  }
-
-  /**
-   * Helper function to ensure that a rules-settings saved object always exists.
-   * Ensures the creation of the saved object is done lazily during retrieval.
-   */
-  private async getOrCreate(): Promise<SavedObject<RulesSettings>> {
-    try {
-      const settings = await this.get();
-      if (!settings.attributes.queryDelay) {
-        return await this.create(settings);
-      }
-      return settings;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        this.logger.info('Creating new default rules settings for current space.');
-        return await this.create();
-      }
-      this.logger.error(`Failed to persist rules setting for current space. Error: ${e}`);
-      throw e;
-    }
   }
 
   public flapping(): RulesSettingsFlappingClient {

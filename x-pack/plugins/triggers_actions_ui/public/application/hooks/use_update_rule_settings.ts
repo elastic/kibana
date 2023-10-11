@@ -26,7 +26,7 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = async (settings: Partial<RulesSettingsProperties>) => {
+  const mutationFn = async (settings: RulesSettingsProperties) => {
     const updates = [];
     if (settings.flapping) {
       updates.push(updateFlappingSettings({ http, flappingSettings: settings.flapping }));
