@@ -19,10 +19,17 @@ import {
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
-import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
+import {
+  loadCase,
+  cleanupCase,
+  loadPack,
+  cleanupPack,
+  loadSavedQuery,
+  cleanupSavedQuery,
+} from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -65,6 +72,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
   describe('prebuilt', () => {
     let packName: string;
     let packId: string;
+    let savedQueryId: string;
 
     before(() => {
       loadPack({
@@ -79,6 +87,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
         packId = data.saved_object_id;
         packName = data.name;
       });
+      loadSavedQuery().then((data) => {
+        savedQueryId = data.saved_object_id;
+      });
     });
 
     beforeEach(() => {
@@ -90,6 +101,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
 
     after(() => {
       cleanupPack(packId);
+      cleanupSavedQuery(savedQueryId);
     });
 
     it('checks result type on prebuilt saved query', () => {
@@ -113,20 +125,13 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
       viewRecentCaseAndCheckResults();
     });
 
-    it('user cant delete prebuilt saved query', () => {
+    it('user can not delete prebuilt saved query but can delete normal saved query', () => {
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: 'users_elastic' } },
       }).click();
       cy.contains('Delete query').should('not.exist');
-      navigateTo('/app/osquery/saved_queries');
+      navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 
-      cy.contains('Add saved query').click();
-      inputQuery('test');
-      findFormFieldByRowsLabelAndType('ID', 'query-to-delete');
-      cy.contains('Save query').click();
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { id: 'query-to-delete' } },
-      }).click();
       deleteAndConfirm('query');
     });
 
