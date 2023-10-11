@@ -5,49 +5,26 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { TypeOf, schema } from '@kbn/config-schema';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
-import { RulesClientContext } from '../types';
-import { AlertingAuthorizationEntity } from '../../authorization';
-import { alertingAuthorizationFilterOpts } from '../common/constants';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RawRule } from '../../types';
+import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
+import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
+import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
+import { DEFAULT_TAGS_PER_PAGE } from '../../../../../common/routes/rule/apis/tags/constants/latest';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { AlertingAuthorizationEntity } from '../../../../authorization';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 
-export const DEFAULT_TAGS_PER_PAGE = 50;
 const MAX_TAGS = 10000;
 
-const getTagsParamsSchema = schema.object({
-  page: schema.number({ defaultValue: 1, min: 1 }),
-  perPage: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
-  search: schema.maybe(schema.string()),
-});
-
-export type GetTagsParams = TypeOf<typeof getTagsParamsSchema>;
-
-export interface RuleTagsAggregationResult {
-  tags: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
-}
-
-export interface GetTagsResult {
-  total: number;
-  page: number;
-  perPage: number;
-  data: string[];
-}
-
-export async function getTags(
+export async function getRuleTags(
   context: RulesClientContext,
-  params: GetTagsParams
-): Promise<GetTagsResult> {
-  let validatedParams: GetTagsParams;
+  params: RuleTagsParams
+): Promise<RuleTagsFormattedResponse> {
+  let validatedParams: RuleTagsParams;
 
   try {
-    validatedParams = getTagsParamsSchema.validate(params);
+    validatedParams = ruleTagsParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
@@ -80,20 +57,19 @@ export async function getTags(
         ])
       : authorizationFilter;
 
-  const response = await context.unsecuredSavedObjectsClient.find<
-    RawRule,
-    RuleTagsAggregationResult
-  >({
-    filter,
-    type: 'alert',
-    aggs: {
-      tags: {
-        terms: {
-          field: 'alert.attributes.tags',
-          order: {
-            _key: 'asc',
+  const response = await findRulesSo<RuleTagsAggregationResult>({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsFindOptions: {
+      filter,
+      aggs: {
+        tags: {
+          terms: {
+            field: 'alert.attributes.tags',
+            order: {
+              _key: 'asc',
+            },
+            size: MAX_TAGS,
           },
-          size: MAX_TAGS,
         },
       },
     },
