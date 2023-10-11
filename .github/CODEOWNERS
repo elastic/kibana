@@ -679,6 +679,7 @@ packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
 packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/card/no_data/types @elastic/appex-sharedux
 packages/shared-ux/chrome/navigation @elastic/appex-sharedux
+packages/shared-ux/error_boundary @elastic/appex-sharedux
 packages/shared-ux/file/context @elastic/appex-sharedux
 packages/shared-ux/file/image/impl @elastic/appex-sharedux
 packages/shared-ux/file/image/mocks @elastic/appex-sharedux

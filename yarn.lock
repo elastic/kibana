@@ -5644,6 +5644,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-error-boundary@link:packages/shared-ux/error_boundary":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-context@link:packages/shared-ux/file/context":
   version "0.0.0"
   uid ""

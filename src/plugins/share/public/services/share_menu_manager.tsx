@@ -13,6 +13,7 @@ import { EuiWrappingPopover } from '@elastic/eui';
 
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ErrorBoundary, ErrorBoundaryKibanaProvider } from '@kbn/shared-ux-error-boundary';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -108,25 +109,29 @@ export class ShareMenuManager {
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <ShareContextMenu
-              allowEmbed={allowEmbed}
-              allowShortUrl={allowShortUrl}
-              objectId={objectId}
-              objectType={objectType}
-              objectTypeTitle={objectTypeTitle}
-              shareMenuItems={menuItems}
-              sharingData={sharingData}
-              shareableUrl={shareableUrl}
-              shareableUrlForSavedObject={shareableUrlForSavedObject}
-              shareableUrlLocatorParams={shareableUrlLocatorParams}
-              onClose={onClose}
-              embedUrlParamExtensions={embedUrlParamExtensions}
-              anonymousAccess={anonymousAccess}
-              showPublicUrlSwitch={showPublicUrlSwitch}
-              urlService={urlService}
-              snapshotShareWarning={snapshotShareWarning}
-              disabledShareUrl={disabledShareUrl}
-            />
+            <ErrorBoundaryKibanaProvider>
+              <ErrorBoundary>
+                <ShareContextMenu
+                  allowEmbed={allowEmbed}
+                  allowShortUrl={allowShortUrl}
+                  objectId={objectId}
+                  objectType={objectType}
+                  objectTypeTitle={objectTypeTitle}
+                  shareMenuItems={menuItems}
+                  sharingData={sharingData}
+                  shareableUrl={shareableUrl}
+                  shareableUrlForSavedObject={shareableUrlForSavedObject}
+                  shareableUrlLocatorParams={shareableUrlLocatorParams}
+                  onClose={onClose}
+                  embedUrlParamExtensions={embedUrlParamExtensions}
+                  anonymousAccess={anonymousAccess}
+                  showPublicUrlSwitch={showPublicUrlSwitch}
+                  urlService={urlService}
+                  snapshotShareWarning={snapshotShareWarning}
+                  disabledShareUrl={disabledShareUrl}
+                />
+              </ErrorBoundary>
+            </ErrorBoundaryKibanaProvider>
           </EuiWrappingPopover>
         </KibanaThemeProvider>
       </I18nProvider>

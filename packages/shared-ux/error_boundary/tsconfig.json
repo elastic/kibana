@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
+      "@kbn/ambient-ui-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-storybook-mock",
+    "@kbn/i18n",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-theme-browser"
+  ]
+}
