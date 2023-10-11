@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { DataViewsService, MatchedItem } from '.';
 
 import { DataViewsServiceDeps } from '../common/data_views/data_views';
@@ -36,7 +36,7 @@ export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
 
   getRollupsEnabled: () => boolean;
   scriptedFieldsEnabled: boolean;
-  http: HttpSetup;
+  http: HttpStart;
 }
 
 /**
@@ -53,7 +53,7 @@ export class DataViewsServicePublic extends DataViewsService {
   }) => Promise<MatchedItem[]>;
   public hasData: HasDataService;
   private rollupsEnabled: boolean = false;
-  private readonly http: HttpSetup;
+  private readonly http: HttpStart;
   public readonly scriptedFieldsEnabled: boolean;
 
   /**
