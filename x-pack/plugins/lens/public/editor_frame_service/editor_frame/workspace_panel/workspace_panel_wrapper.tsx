@@ -107,6 +107,9 @@ export function WorkspacePanelWrapper({
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
+  const aspectRatio = { x: 9, y: 16 };
+  // const aspectRatio = { x: 2, y: 1 };
+
   return (
     <EuiPageTemplate
       direction="column"
@@ -195,8 +198,33 @@ export function WorkspacePanelWrapper({
         })}
         color="transparent"
       >
-        <WorkspaceTitle />
-        {children}
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
+          justifyContent="center"
+          direction="column"
+          css={{ height: '100%' }}
+        >
+          <EuiFlexItem
+            grow={false}
+            css={{
+              flexGrow: 0,
+              ...(aspectRatio.y > aspectRatio.x
+                ? {
+                    height: '100%',
+                    width: 'auto',
+                  }
+                : {
+                    height: 'auto',
+                    width: '100%',
+                  }),
+              aspectRatio: `${aspectRatio.x}/${aspectRatio.y}`,
+            }}
+          >
+            <WorkspaceTitle />
+            {children}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
