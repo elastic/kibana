@@ -160,7 +160,6 @@ async function refreshFieldsInDocs(
 
           if (freshStatus !== ALERT_STATUS_ACTIVE && freshStatus !== ALERT_STATUS_RECOVERED) {
             conflictDoc[ALERT_STATUS] = freshStatus;
-            conflictDoc['kibana.alert.DEBUG_CONFLICT_RESOLVER'] = true;
           }
           break;
       }

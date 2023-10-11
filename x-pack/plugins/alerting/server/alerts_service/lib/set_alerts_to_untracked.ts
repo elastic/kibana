@@ -186,6 +186,9 @@ export async function setAlertsToUntracked({
 
 // Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
 const getUntrackUpdatePainlessScript = (now: Date) => `
+ctx._source.STACKTRACE = """
+${JSON.stringify(Error().stack, null, 4)}
+""";
 if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
   ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
   ctx._source.${ALERT_END} = '${now.toISOString()}';
