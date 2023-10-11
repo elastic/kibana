@@ -69,8 +69,26 @@ export class SynthtraceEsClient<TFields extends Fields> {
     this.pipelineCallback = cb;
   }
 
-  async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>) {
+  async index(
+    streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>,
+    transforms: Transform[] = []
+  ) {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
+
+    // temporarily override pipeline callback for this operation only
+    const previousPipelineCallback = this.pipelineCallback;
+    if (transforms) {
+      const pipelineCallbackWithTransforms = (base: Readable) => {
+        // @ts-expect-error
+        const previousPipeline: NodeJS.ReadableStream = previousPipelineCallback(base);
+
+        return transforms.reduce((acc, transform) => {
+          return acc.pipe(transform);
+        }, previousPipeline) as Transform;
+      };
+
+      this.pipeline(pipelineCallbackWithTransforms);
+    }
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
@@ -120,6 +138,11 @@ export class SynthtraceEsClient<TFields extends Fields> {
     });
 
     this.logger.info(`Produced ${count} events`);
+
+    // restore pipeline callback
+    if (transforms) {
+      this.pipeline(previousPipelineCallback);
+    }
 
     if (this.refreshAfterIndex) {
       await this.refresh();

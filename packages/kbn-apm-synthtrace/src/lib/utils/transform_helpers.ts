@@ -16,7 +16,7 @@ export function addObserverVersionTransform(observerVersion: string) {
       if (chunk?.observer?.version) {
         chunk.observer.version = observerVersion;
       }
-      callback(null, document);
+      callback(null, chunk);
     },
   });
 }

@@ -10,7 +10,6 @@ import moment from 'moment';
 import {
   addObserverVersionTransform,
   ApmSynthtraceEsClient,
-  appendTransformsToDefaultApmPipeline,
   deleteSummaryFieldTransform,
 } from '@kbn/apm-synthtrace';
 import {
@@ -40,28 +39,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when ingesting traces from APM Server with different versions', () => {
         before(async () => {
-          await synthtrace.clean();
-          await Promise.all([
-            generateTraceDataForService({
-              serviceName: 'synth-java-legacy',
-              start: startLegacy,
-              end,
-              isLegacy: true,
-              synthtrace,
-            }),
+          await generateTraceDataForService({
+            serviceName: 'synth-java-legacy',
+            start: startLegacy,
+            end,
+            isLegacy: true,
+            synthtrace,
+          });
 
-            generateTraceDataForService({
-              serviceName: 'synth-java',
-              start,
-              end,
-              isLegacy: false,
-              synthtrace,
-            }),
-          ]);
+          await generateTraceDataForService({
+            serviceName: 'synth-java',
+            start,
+            end,
+            isLegacy: false,
+            synthtrace,
+          });
         });
 
         after(() => {
-          // return synthtrace.clean();
+          return synthtrace.clean();
         });
 
         it('ingests transaction metrics with transaction.duration.summary', async () => {
@@ -229,14 +225,8 @@ function generateTraceDataForService({
         .success()
     );
 
-  synthtrace.pipeline(
-    isLegacy
-      ? appendTransformsToDefaultApmPipeline(synthtrace, [
-          addObserverVersionTransform('8.5.0'),
-          deleteSummaryFieldTransform(),
-        ])
-      : synthtrace.getDefaultPipeline(true)
-  );
-
-  return synthtrace.index(events);
+  const transforms = isLegacy
+    ? [addObserverVersionTransform('8.5.0'), deleteSummaryFieldTransform()]
+    : [];
+  return synthtrace.index(events, transforms);
 }
