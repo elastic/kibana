@@ -28,13 +28,13 @@ export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
 export interface RulesSettingsProperties {
-  flapping: RulesSettingsFlappingProperties;
-  queryDelay: RulesSettingsQueryDelayProperties;
+  flapping?: RulesSettingsFlappingProperties;
+  queryDelay?: RulesSettingsQueryDelayProperties;
 }
 
 export interface RulesSettings {
-  flapping: RulesSettingsFlapping;
-  queryDelay: RulesSettingsQueryDelay;
+  flapping?: RulesSettingsFlapping;
+  queryDelay?: RulesSettingsQueryDelay;
 }
 
 export const MIN_LOOK_BACK_WINDOW = 2;
@@ -58,7 +58,8 @@ export const API_PRIVILEGES = {
 };
 
 export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules-settings';
-export const RULES_SETTINGS_SAVED_OBJECT_ID = 'rules-settings';
+export const RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID = 'rules-settings';
+export const RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID = 'query-delay-settings';
 
 export const DEFAULT_LOOK_BACK_WINDOW = 20;
 export const DEFAULT_STATUS_CHANGE_THRESHOLD = 4;

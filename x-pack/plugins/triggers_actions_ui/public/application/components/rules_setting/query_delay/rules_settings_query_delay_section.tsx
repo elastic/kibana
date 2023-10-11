@@ -28,16 +28,12 @@ const queryDelayDescription = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.modal.queryDelayDescription',
   {
     defaultMessage:
-      'Increase the query time window to mitigate gaps in data availability due to the ES index refresh interval.',
+      'Delay all rule queries to mitigate the impact of index refresh intervals on data availability.',
   }
 );
 
 const queryDelayLabel = i18n.translate('xpack.triggersActionsUI.rulesSettings.queryDelayLabel', {
-  defaultMessage: 'Query delay length',
-});
-
-const queryDelayHelp = i18n.translate('xpack.triggersActionsUI.rulesSettings.queryDelayHelp', {
-  defaultMessage: 'The length of the delay, in seconds, added on to the query time window.',
+  defaultMessage: 'Query delay length (seconds)',
 });
 
 export const RulesSettingsQueryDelayErrorPrompt = memo(() => {
@@ -118,7 +114,6 @@ export const RulesSettingsQueryDelaySection = memo((props: RulesSettingsQueryDel
             value={settings.delay}
             onChange={(e) => onChange('delay', parseInt(e.currentTarget.value, 10))}
             label={queryDelayLabel}
-            labelPopoverText={queryDelayHelp}
             disabled={!canWrite}
           />
         </EuiFlexItem>

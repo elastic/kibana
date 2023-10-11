@@ -57,6 +57,9 @@ export const useStyles = () => {
     & .cspDataTableTotal {
       font-size: ${euiTheme.size.m};
       font-weight: ${euiTheme.font.weight.bold};
+      border-right: ${euiTheme.border.thin};
+      margin-right: ${euiTheme.size.s};
+      padding-right: ${euiTheme.size.m};
     }
     & .euiDataGrid__rightControls {
       display: none;
