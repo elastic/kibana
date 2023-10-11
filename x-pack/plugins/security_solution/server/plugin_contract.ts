@@ -97,9 +97,9 @@ export interface SecuritySolutionPluginSetup {
   experimentalFeatures: ExperimentalFeatures;
 
   /**
-   * enables rule actions based on PLI
+   * enables rule actions based on feature configuration
    */
-  enableRulesActionsByPLI: () => void;
+  enableRuleActionsByFeatureConfig: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

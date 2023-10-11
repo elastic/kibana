@@ -67,7 +67,7 @@ export class SecuritySolutionServerlessPlugin
         this.config
       );
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
-      pluginsSetup.securitySolution.enableRulesActionsByPLI();
+      pluginsSetup.securitySolution.enableRuleActionsByFeatureConfig();
     }
 
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({

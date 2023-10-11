@@ -458,7 +458,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       setAppFeaturesConfigurator:
         appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
       experimentalFeatures: { ...config.experimentalFeatures },
-      enableRulesActionsByPLI: () => {
+      enableRuleActionsByFeatureConfig: () => {
         enableRuleActions({ actions: plugins.actions, appFeatures: this.appFeaturesService });
       },
     };
