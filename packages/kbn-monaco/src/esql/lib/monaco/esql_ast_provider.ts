@@ -67,7 +67,7 @@ export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) 
     if (!text) {
       return { ast: [], errors: [] };
     }
-    const inputStream = CharStreams.fromString(text.toLowerCase());
+    const inputStream = CharStreams.fromString(text);
     const errorListener = new ESQLErrorListener();
     const parseListener = createParserListener();
     const parser = getParser(inputStream, errorListener, parseListener);
@@ -81,9 +81,9 @@ export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) 
     // used for debugging purposes only
     getAst,
     validate: async (model: monaco.editor.ITextModel) => {
-      const { ast } = getAst(model.getValue());
+      const code = model.getValue();
+      const { ast } = getAst(code);
       const { errors, warnings } = await validateAst(ast, callbacks);
-      const code = model?.getValue();
       const monacoErrors = wrapAsMonacoMessage('error', code, errors);
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };

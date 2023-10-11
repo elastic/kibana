@@ -15,20 +15,23 @@ import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
-import { createAstGenerator } from './lib/monaco/esql_ast_provider';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
+
+let astGeneratorUtility: CustomLangModuleType['getLanguageProvider'];
 
 export const ESQLLang: CustomLangModuleType = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
-    const { ESQLTokensProvider } = await import('./lib/monaco');
+    const { ESQLTokensProvider, createAstGenerator } = await import('./lib/monaco');
+    astGeneratorUtility = createAstGenerator;
 
     workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
 
-    // syntax errors are manually handled
+    // handle syntax errors via the diagnostic adapter
+    // but then enrich them via the separate validate function
     new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
   languageConfiguration: {
@@ -49,6 +52,6 @@ export const ESQLLang: CustomLangModuleType = {
   },
 
   getLanguageProvider(callbacks) {
-    return createAstGenerator(callbacks);
+    return astGeneratorUtility?.(callbacks);
   },
 };

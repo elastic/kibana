@@ -7,3 +7,4 @@
  */
 
 export { ESQLTokensProvider } from './esql_tokens_provider';
+export { createAstGenerator } from './esql_ast_provider';

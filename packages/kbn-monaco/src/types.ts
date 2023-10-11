@@ -32,7 +32,7 @@ export interface CustomLangModuleType extends LangModuleType {
     validate: (
       model: monaco.editor.ITextModel,
       position: monaco.Position
-    ) => { errors: object[]; warnings: object[] };
+    ) => Promise<{ errors: object[]; warnings: object[] }>;
     getSuggestions: () => monaco.languages.CompletionItemProvider;
   };
 }
