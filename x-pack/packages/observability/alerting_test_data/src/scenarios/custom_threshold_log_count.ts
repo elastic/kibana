@@ -18,7 +18,7 @@ export const scenario1 = {
   },
   ruleParams: {
     consumer: 'logs',
-    name: 'fake_hosts-custom_threshold_log_count',
+    name: 'custom_threshold_log_count',
     params: {
       criteria: [
         {
@@ -32,7 +32,7 @@ export const scenario1 = {
       ],
       searchConfiguration: {
         query: {
-          query: 'scenario: fake_hosts-custom_threshold_log_count',
+          query: 'labels.scenario: custom_threshold_log_count',
         },
       },
     },

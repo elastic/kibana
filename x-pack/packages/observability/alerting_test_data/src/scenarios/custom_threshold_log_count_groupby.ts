@@ -18,7 +18,7 @@ export const scenario2 = {
   },
   ruleParams: {
     consumer: 'logs',
-    name: 'fake_hosts-custom_threshold_log_count_groupby',
+    name: 'custom_threshold_log_count_groupby',
     params: {
       criteria: [
         {
@@ -33,7 +33,7 @@ export const scenario2 = {
       groupBy: ['event.dataset'],
       searchConfiguration: {
         query: {
-          query: 'scenario: fake_hosts-custom_threshold_log_count_groupby',
+          query: 'labels.scenario: custom_threshold_log_count_groupby',
         },
       },
     },
