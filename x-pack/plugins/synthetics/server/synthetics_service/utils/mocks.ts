@@ -6,21 +6,43 @@
  */
 
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { cloneDeep } from 'lodash';
 
 export const mockEncryptedSO = (
   data: any = { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] }
-) => ({
-  getClient: jest.fn().mockReturnValue({
-    getDecryptedAsInternalUser: jest.fn().mockResolvedValue(data),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(() => ({
-      close: jest.fn(),
-      find: jest.fn().mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            saved_objects: data === null ? [] : [data],
-          };
-        },
-      }),
-    })),
-  } as jest.Mocked<EncryptedSavedObjectsClient>),
-});
+) => {
+  const result = cloneDeep(data);
+  return {
+    isEncryptionError: jest.fn(),
+    getClient: jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(data),
+      createPointInTimeFinderDecryptedAsInternalUser: jest
+        .fn()
+        .mockImplementation(({ perPage }) => ({
+          close: jest.fn(),
+          find: jest.fn().mockReturnValue({
+            async *[Symbol.asyncIterator]() {
+              if (!perPage) {
+                yield {
+                  saved_objects: result,
+                };
+                return;
+              }
+              if (data === null) {
+                return;
+              }
+              do {
+                const currentPage = result.splice(0, perPage);
+                if (currentPage.length === 0) {
+                  return;
+                }
+                yield {
+                  saved_objects: currentPage,
+                };
+              } while (result.length > 0);
+            },
+          }),
+        })),
+    } as jest.Mocked<EncryptedSavedObjectsClient>),
+  };
+};

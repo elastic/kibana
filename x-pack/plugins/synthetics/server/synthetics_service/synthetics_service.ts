@@ -7,16 +7,16 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { concatMap, Subject } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import pMap from 'p-map';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
@@ -32,7 +32,6 @@ import {
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
-  SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsParams,
   ThrottlingOptions,
@@ -276,6 +275,18 @@ export class SyntheticsService {
     return license;
   }
 
+  private async getSOClientFinder({ pageSize }: { pageSize: number }) {
+    const encryptedClient = this.server.encryptedSavedObjects.getClient();
+
+    return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+      {
+        type: syntheticsMonitorType,
+        perPage: pageSize,
+        namespaces: [ALL_SPACES_ID],
+      }
+    );
+  }
+
   private getESClient() {
     if (!this.server.coreStart) {
       return;
@@ -368,60 +379,94 @@ export class SyntheticsService {
   }
 
   async pushConfigs() {
-    if (!this.config.manifestUrl) {
-      return;
-    }
     const license = await this.getLicense();
     const service = this;
-    const subject = new Subject<MonitorFields[]>();
+
+    const PER_PAGE = 250;
+    service.syncErrors = [];
 
     let output: ServiceData['output'] | null = null;
 
-    subject
-      .pipe(
-        concatMap(async (monitors) => {
-          try {
-            if (monitors.length === 0) {
-              return;
-            }
+    const paramsBySpace = await this.getSyntheticsParams();
+    const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
-            if (!output) {
-              output = await this.getOutput();
+    const bucketsByLocation: Record<string, MonitorFields[]> = {};
+    this.locations.forEach((location) => {
+      bucketsByLocation[location.id] = [];
+    });
 
-              if (!output) {
-                sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                  reason: 'API key is not valid.',
-                  message: 'Failed to push configs. API key is not valid.',
-                  type: 'invalidApiKey',
-                  stackVersion: service.server.stackVersion,
-                });
-                return;
-              }
-            }
+    const synAllLocations = async (perBucket = 0) => {
+      await pMap(
+        this.locations,
+        async (location) => {
+          if (bucketsByLocation[location.id].length > perBucket && output) {
+            const locMonitors = bucketsByLocation[location.id].splice(0, PER_PAGE);
 
-            this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+            this.logger.debug(
+              `${locMonitors.length} monitors will be pushed to synthetics service for location ${location.id}.`
+            );
 
-            service.syncErrors = await this.apiClient.syncMonitors({
-              monitors,
+            const syncErrors = await this.apiClient.syncMonitors({
+              monitors: locMonitors,
               output,
               license,
             });
-          } catch (e) {
+
+            this.syncErrors = [...(this.syncErrors ?? []), ...(syncErrors ?? [])];
+          }
+        },
+        {
+          stopOnError: false,
+        }
+      );
+    };
+
+    for await (const result of finder.find()) {
+      try {
+        if (!output) {
+          output = await this.getOutput();
+          if (!output) {
             sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-              reason: 'Failed to push configs to service',
-              message: e?.message,
-              type: 'pushConfigsError',
-              code: e?.code,
-              status: e.status,
+              reason: 'API key is not valid.',
+              message: 'Failed to push configs. API key is not valid.',
+              type: 'invalidApiKey',
               stackVersion: service.server.stackVersion,
             });
-            this.logger.error(e);
+            return;
           }
-        })
-      )
-      .subscribe();
+        }
 
-    await this.getMonitorConfigs(subject);
+        const monitors = result.saved_objects.filter(({ error }) => !error);
+        const formattedConfigs = this.normalizeConfigs(monitors, paramsBySpace);
+
+        this.logger.debug(
+          `${formattedConfigs.length} monitors will be pushed to synthetics service.`
+        );
+
+        formattedConfigs.forEach((monitor) => {
+          monitor.locations.forEach((location) => {
+            bucketsByLocation[location.id].push(monitor);
+          });
+        });
+
+        await synAllLocations(PER_PAGE);
+      } catch (e) {
+        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+          reason: 'Failed to push configs to service',
+          message: e?.message,
+          type: 'pushConfigsError',
+          code: e?.code,
+          status: e.status,
+          stackVersion: service.server.stackVersion,
+        });
+        this.logger.error(e);
+      }
+    }
+
+    // execute the remaining monitors
+    await synAllLocations();
+
+    await finder.close();
   }
 
   async runOnceConfigs(configs?: ConfigData) {
@@ -481,77 +526,28 @@ export class SyntheticsService {
 
   async deleteAllConfigs() {
     const license = await this.getLicense();
-    const subject = new Subject<MonitorFields[]>();
-
-    subject
-      .pipe(
-        concatMap(async (monitors) => {
-          const hasPublicLocations = monitors.some((config) =>
-            config.locations.some(({ isServiceManaged }) => isServiceManaged)
-          );
-
-          if (hasPublicLocations) {
-            const output = await this.getOutput();
-            if (!output) {
-              return;
-            }
-
-            const data = {
-              output,
-              monitors,
-              license,
-            };
-            return await this.apiClient.delete(data);
-          }
-        })
-      )
-      .subscribe();
-
-    await this.getMonitorConfigs(subject);
-  }
-
-  async getMonitorConfigs(subject: Subject<MonitorFields[]>) {
-    const soClient = this.server.savedObjectsClient;
-    const encryptedClient = this.server.encryptedSavedObjects.getClient();
-
-    if (!soClient?.find) {
-      return [] as SyntheticsMonitorWithId[];
-    }
-
     const paramsBySpace = await this.getSyntheticsParams();
-
-    const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        {
-          type: syntheticsMonitorType,
-          perPage: 100,
-          namespaces: [ALL_SPACES_ID],
-        }
-      );
+    const finder = await this.getSOClientFinder({ pageSize: 100 });
+    const output = await this.getOutput();
+    if (!output) {
+      return;
+    }
 
     for await (const result of finder.find()) {
-      const monitors = result.saved_objects.filter(({ error }) => !error);
+      const monitors = this.normalizeConfigs(result.saved_objects, paramsBySpace);
+      const hasPublicLocations = monitors.some((config) =>
+        config.locations.some(({ isServiceManaged }) => isServiceManaged)
+      );
 
-      const configDataList: ConfigData[] = (monitors ?? []).map((monitor) => {
-        const attributes = monitor.attributes as unknown as MonitorFields;
-        const monitorSpace = monitor.namespaces?.[0] ?? DEFAULT_SPACE_ID;
-
-        const params = paramsBySpace[monitorSpace];
-
-        return {
-          params: { ...params, ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}) },
-          monitor: normalizeSecrets(monitor).attributes,
-          configId: monitor.id,
-          heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
+      if (hasPublicLocations) {
+        const data = {
+          output,
+          monitors,
+          license,
         };
-      });
-
-      const formattedConfigs = this.formatConfigs(configDataList);
-
-      subject.next(formattedConfigs as MonitorFields[]);
+        return await this.apiClient.delete(data);
+      }
     }
-
-    await finder.close();
   }
 
   async getSyntheticsParams({
@@ -624,6 +620,27 @@ export class SyntheticsService {
         params ?? {}
       );
     });
+  }
+
+  normalizeConfigs(
+    monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>,
+    paramsBySpace: Record<string, Record<string, string>>
+  ) {
+    const configDataList = (monitors ?? []).map((monitor) => {
+      const attributes = monitor.attributes as unknown as MonitorFields;
+      const monitorSpace = monitor.namespaces?.[0] ?? DEFAULT_SPACE_ID;
+
+      const params = paramsBySpace[monitorSpace];
+
+      return {
+        params: { ...params, ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}) },
+        monitor: normalizeSecrets(monitor).attributes,
+        configId: monitor.id,
+        heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
+      };
+    });
+
+    return this.formatConfigs(configDataList) as MonitorFields[];
   }
 }
 

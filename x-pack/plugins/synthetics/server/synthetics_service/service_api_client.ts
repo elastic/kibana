@@ -161,7 +161,11 @@ export class ServiceAPIClient {
   }
 
   async syncMonitors(data: ServiceData) {
-    return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
+    try {
+      return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   processServiceData({ monitors, ...restOfData }: ServiceData) {
