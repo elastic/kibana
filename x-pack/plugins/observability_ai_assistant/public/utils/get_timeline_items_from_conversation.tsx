@@ -164,7 +164,7 @@ export function getTimelineItemsfromConversation({
             }
 
             actions.canEdit = false;
-            display.collapsed = isError || (!isError && !element);
+            display.collapsed = !element;
           } else if (message.message.function_call) {
             // User suggested a function
             title = (
