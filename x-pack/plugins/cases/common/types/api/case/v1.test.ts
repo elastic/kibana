@@ -105,7 +105,7 @@ const basicCase: Case = {
     {
       key: 'first_custom_field_key',
       type: CustomFieldTypes.TEXT,
-      value: ['this is a text field value', 'this is second'],
+      value: 'this is a text field value',
     },
     {
       key: 'second_custom_field_key',
@@ -115,7 +115,7 @@ const basicCase: Case = {
     {
       key: 'second_custom_field_key',
       type: CustomFieldTypes.TEXT,
-      value: ['www.example.com'],
+      value: 'www.example.com',
     },
   ],
 };
@@ -141,7 +141,7 @@ describe('CasePostRequestRt', () => {
       {
         key: 'first_custom_field_key',
         type: CustomFieldTypes.TEXT,
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
       {
         key: 'second_custom_field_key',
@@ -244,8 +244,8 @@ describe('CasePostRequestRt', () => {
   it('removes foo:bar attributes from customFields', () => {
     const customField = {
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     };
 
     const query = CasePostRequestRt.decode({
@@ -262,8 +262,8 @@ describe('CasePostRequestRt', () => {
   it('removes foo:bar attributes from field inside customFields', () => {
     const customField = {
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     };
 
     const query = CasePostRequestRt.decode({
@@ -280,8 +280,8 @@ describe('CasePostRequestRt', () => {
   it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     });
 
     expect(
@@ -310,8 +310,8 @@ describe('CasePostRequestRt', () => {
           customFields: [
             {
               key: 'first_custom_field_key',
-              type: 'text',
-              value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)],
+              type: CustomFieldTypes.TEXT,
+              value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
             },
           ],
         })
@@ -319,6 +319,23 @@ describe('CasePostRequestRt', () => {
     ).toContain(
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
+  });
+
+  it('throws an error when a text customField is an empty string', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              value: '',
+            },
+          ],
+        })
+      )
+    ).toContain('The value field cannot be an empty string.');
   });
 });
 
@@ -595,8 +612,8 @@ describe('CasePatchRequestRt', () => {
     customFields: [
       {
         key: 'first_custom_field_key',
-        type: 'text',
-        value: ['this is a text field value', 'this is second'],
+        type: CustomFieldTypes.TEXT,
+        value: 'this is a text field value',
       },
       {
         key: 'second_custom_field_key',
@@ -685,8 +702,8 @@ describe('CasePatchRequestRt', () => {
   it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
-      type: 'text',
-      value: ['this is a text field value', 'this is second'],
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
     });
 
     expect(
@@ -709,8 +726,8 @@ describe('CasePatchRequestRt', () => {
           customFields: [
             {
               key: 'first_custom_field_key',
-              type: 'text',
-              value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)],
+              type: CustomFieldTypes.TEXT,
+              value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
             },
           ],
         })
