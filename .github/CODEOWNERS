@@ -1395,6 +1395,7 @@ x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_en
 /x-pack/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
