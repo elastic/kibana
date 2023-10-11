@@ -80,10 +80,10 @@ export class DataViewsServicePublic extends DataViewsService {
    * @param indices - index pattern list
    * @returns index pattern list of index patterns that match indices
    */
-  async getExistingIndices(indices: string[]): Promise<string[]> {
-    const response = await this.http.get<ExistingIndicesResponse>(EXISTING_INDICES_PATH, {
+  async getExistingIndices(indices: string[]): Promise<ExistingIndicesResponse> {
+    return this.http.get<ExistingIndicesResponse>(EXISTING_INDICES_PATH, {
       query: { indices },
+      version: '1',
     });
-    return response || [];
   }
 }
