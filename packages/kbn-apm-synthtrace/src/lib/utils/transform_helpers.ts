@@ -25,7 +25,9 @@ export function deleteSummaryFieldTransform() {
   return new Transform({
     objectMode: true,
     transform(chunk: { transaction?: { duration?: { summary?: number } } }, encoding, callback) {
-      delete chunk?.transaction?.duration?.summary;
+      if (chunk?.transaction?.duration?.summary) {
+        delete chunk.transaction.duration.summary;
+      }
       callback(null, chunk);
     },
   });

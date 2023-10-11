@@ -228,5 +228,6 @@ function generateTraceDataForService({
   const transforms = isLegacy
     ? [addObserverVersionTransform('8.5.0'), deleteSummaryFieldTransform()]
     : [];
+
   return synthtrace.index(events, transforms);
 }

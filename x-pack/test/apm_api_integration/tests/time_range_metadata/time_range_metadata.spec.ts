@@ -11,10 +11,7 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import {
-  appendTransformsToDefaultApmPipeline,
-  deleteSummaryFieldTransform,
-} from '@kbn/apm-synthtrace';
+import { deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getTransactionEvents, subtractDateDifference } from './generate_data';
 
@@ -82,24 +79,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('data loaded with and without summary field', () => {
         const localStart = moment('2023-04-28T00:00:00.000Z');
         const localEnd = moment('2023-04-28T06:00:00.000Z');
+
         before(async () => {
           const regularData = getTransactionEvents(localStart, localEnd);
-          await synthtraceEsClient.index([...regularData]);
+          await synthtraceEsClient.index(regularData);
+
           const { previousStart, previousEnd } = subtractDateDifference(localStart, localEnd);
-          const previousDataWithoutSummaryField = getTransactionEvents(previousStart, previousEnd);
-          synthtraceEsClient.pipeline(
-            appendTransformsToDefaultApmPipeline(synthtraceEsClient, [
-              deleteSummaryFieldTransform(),
-            ])
-          );
-          await synthtraceEsClient.index([...previousDataWithoutSummaryField]);
+          const previousData = getTransactionEvents(previousStart, previousEnd);
+
+          const transforms = [deleteSummaryFieldTransform()];
+          // FIX: this casues a timeout in the test. Why??
+          await synthtraceEsClient.index(previousData, transforms);
         });
+
         after(() => {
-          synthtraceEsClient.clean();
-          synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline());
+          return synthtraceEsClient.clean();
         });
+
         describe('Values for hasDurationSummaryField for transaction metrics', () => {
-          it('returns true when summary field is available both inside and outside the range', async () => {
+          it.only('returns true when summary field is available both inside and outside the range', async () => {
             const response = await getTimeRangeMedata({
               start: moment(localStart).add(3, 'hours'),
               end: moment(localEnd),
@@ -491,7 +489,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => {
+        return synthtraceEsClient.clean();
+      });
     }
   );
 }

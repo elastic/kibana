@@ -13,7 +13,7 @@ import {
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
+import { castArray, isArray, isFunction } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
@@ -71,13 +71,14 @@ export class SynthtraceEsClient<TFields extends Fields> {
 
   async index(
     streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>,
-    transforms: Transform[] = []
+    transformsOrPipelineCallback?: Transform[] | ((base: Readable) => NodeJS.WritableStream)
   ) {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
     // temporarily override pipeline callback for this operation only
     const previousPipelineCallback = this.pipelineCallback;
-    if (transforms) {
+    if (isArray(transformsOrPipelineCallback)) {
+      const transforms = transformsOrPipelineCallback;
       const pipelineCallbackWithTransforms = (base: Readable) => {
         // @ts-expect-error
         const previousPipeline: NodeJS.ReadableStream = previousPipelineCallback(base);
@@ -88,6 +89,9 @@ export class SynthtraceEsClient<TFields extends Fields> {
       };
 
       this.pipeline(pipelineCallbackWithTransforms);
+    } else if (isFunction(transformsOrPipelineCallback)) {
+      const pipelineCallback = transformsOrPipelineCallback;
+      this.pipeline(pipelineCallback);
     }
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
@@ -140,7 +144,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
     this.logger.info(`Produced ${count} events`);
 
     // restore pipeline callback
-    if (transforms) {
+    if (transformsOrPipelineCallback) {
       this.pipeline(previousPipelineCallback);
     }
 
