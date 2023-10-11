@@ -16,11 +16,6 @@ import { extensionsService } from './extension_service';
 
 export { extensionsService };
 
-export const getDetailPanelData = (state) => state.detailPanel.data;
-export const getDetailPanelError = (state) => state.detailPanel.error;
-export const getDetailPanelType = (state) => state.detailPanel.panelType;
-export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
-export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
 export const getIndices = (state) => state.indices.byId;
 export const indicesLoading = (state) => state.indices.loading;
 export const indicesError = (state) => state.indices.error;

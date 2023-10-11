@@ -47,9 +47,11 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServ
       login();
 
       visit(url, {
-        onLoad: () => {
-          waitForWelcomePanelToBeLoaded();
-          selectDataView(DATA_VIEW);
+        visitOptions: {
+          onLoad: () => {
+            waitForWelcomePanelToBeLoaded();
+            selectDataView(DATA_VIEW);
+          },
         },
       });
 

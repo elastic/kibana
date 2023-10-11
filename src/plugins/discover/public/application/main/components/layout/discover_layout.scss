@@ -29,16 +29,34 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
+  height: 100%;
+}
+
+.dscSidebarResizeButton {
+  background-color: transparent !important;
+
+  &:not(:hover):not(:focus) {
+    &:before, &:after {
+      width: 0;
+    }
+  }
 }
 
 .dscPageContent__wrapper {
   overflow: hidden; // Ensures horizontal scroll of table
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dscPageContent {
   position: relative;
   overflow: hidden;
   height: 100%;
+
+  .euiDataGrid__controls {
+    border-top: none;
+  }
 }
 
 .dscPageContent--centered {

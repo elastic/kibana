@@ -13,11 +13,19 @@ import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  PaletteRegistry,
+  PaletteOutput,
+  getColorFactory,
+  getPalette,
+  AVAILABLE_PALETTES,
+  NeutralPalette,
+} from '@kbn/coloring';
+import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
+import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -31,6 +39,7 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
+  isDarkMode: boolean;
 };
 
 const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>
@@ -84,9 +93,10 @@ export const TagCloudChart = ({
   renderComplete,
   syncColors,
   overrides,
+  isDarkMode,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
-  const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
+  const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {
     return bucket
@@ -96,23 +106,35 @@ export const TagCloudChart = ({
 
   const tagCloudData = useMemo(() => {
     const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
-    const tagColumn = bucket ? bucketColumn!.id : null;
+    const tagColumn = bucket ? bucketColumn!.id : undefined;
     const metricColumn = getColumnByAccessor(metric, visData.columns)!.id;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);
-    const values = bucket && tagColumn !== null ? visData.rows.map((row) => row[tagColumn]) : [];
+    const values =
+      bucket && tagColumn !== undefined ? visData.rows.map((row) => row[tagColumn]) : [];
     const maxValue = Math.max(...metrics);
     const minValue = Math.min(...metrics);
 
+    const colorFromMappingFn = getColorFromMappingFactory(
+      tagColumn,
+      visData.rows,
+      isDarkMode,
+      colorMapping
+    );
+
     return visData.rows.map((row) => {
-      const tag = tagColumn === null ? 'all' : row[tagColumn];
+      const tag = tagColumn === undefined ? 'all' : row[tagColumn];
+
+      const category = isMultiFieldKey(tag) ? tag.keys.map(String) : `${tag}`;
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color: getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
+        color: colorFromMappingFn
+          ? colorFromMappingFn(category)
+          : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
   }, [
@@ -124,6 +146,8 @@ export const TagCloudChart = ({
     syncColors,
     visData.columns,
     visData.rows,
+    colorMapping,
+    isDarkMode,
   ]);
 
   useEffect(() => {
@@ -145,10 +169,7 @@ export const TagCloudChart = ({
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-        window.requestAnimationFrame(() => {
-          renderComplete();
-        });
+        renderComplete();
       }
     },
     [renderComplete]
@@ -278,3 +299,28 @@ export const TagCloudChart = ({
 
 // eslint-disable-next-line import/no-default-export
 export { TagCloudChart as default };
+
+/**
+ * If colorMapping is available, returns a function that accept a string or an array of strings (used in case of multi-field-key)
+ * and returns a color specified in the provided mapping
+ */
+function getColorFromMappingFactory(
+  tagColumn: string | undefined,
+  rows: DatatableRow[],
+  isDarkMode: boolean,
+  colorMapping?: string
+): undefined | ((category: string | string[]) => string) {
+  if (!colorMapping) {
+    // return undefined, we will use the legacy color mapping instead
+    return undefined;
+  }
+  return getColorFactory(
+    JSON.parse(colorMapping),
+    getPalette(AVAILABLE_PALETTES, NeutralPalette),
+    isDarkMode,
+    {
+      type: 'categories',
+      categories: getColorCategories(rows, tagColumn),
+    }
+  );
+}

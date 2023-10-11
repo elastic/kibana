@@ -9,7 +9,7 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
+import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
   formatFieldValue,

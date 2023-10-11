@@ -172,7 +172,6 @@ export const ensureResponseActionAuthzAccess = (
       {
         const file = new File(['foo'], 'foo.txt');
         const formData = new FormData();
-
         formData.append('file', file, file.name);
 
         for (const [key, value] of Object.entries(apiPayload as object)) {
@@ -199,6 +198,8 @@ export const ensureResponseActionAuthzAccess = (
     },
     failOnStatusCode: false,
     body: apiPayload as Cypress.RequestBody,
+    // Increased timeout due to `upload` action. It seems to take much longer to complete due to file upload
+    timeout: 120000,
   };
 
   if (accessLevel === 'none') {

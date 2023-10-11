@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
+import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
   formatFieldValue,
@@ -105,6 +105,7 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
+  columnTypes,
   hit,
   dataView,
   filter,
@@ -165,7 +166,9 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView)
+      const fieldType = columnTypes
+        ? columnTypes[field] // for text-based results types come separately
+        : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
         ? getFieldIconType(fieldMapping)
@@ -208,6 +211,7 @@ export const DocViewerTable = ({
       onToggleColumn,
       filter,
       columns,
+      columnTypes,
       flattened,
       pinnedFields,
       onTogglePinned,

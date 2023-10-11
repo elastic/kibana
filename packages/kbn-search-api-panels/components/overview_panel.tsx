@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiFlexGroup,
@@ -41,14 +41,14 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
   return (
     <>
       <EuiSpacer size="xxl" />
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
         {leftPanelContent && <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>}
         <EuiFlexItem grow={4}>
-          <EuiPanel color="subdued" {...overviewPanelProps}>
-            <EuiTitle>
+          <EuiPanel paddingSize="none" color="subdued" {...overviewPanelProps}>
+            <EuiTitle size="s">
               <h2>{title}</h2>
             </EuiTitle>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
             {description && <EuiText>{description}</EuiText>}
             {children}
             {links && links.length > 0 ? (
@@ -59,11 +59,14 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 {links.map(({ label, href }, index) => (
-                  <EuiText size="s" key={`overviewPanel.link.${index}`}>
-                    <EuiLink key={index} href={href} target="_blank">
-                      {label}
-                    </EuiLink>
-                  </EuiText>
+                  <Fragment key={`overviewPanel.link.${index}`}>
+                    <EuiText size="s">
+                      <EuiLink key={index} href={href} target="_blank">
+                        {label}
+                      </EuiLink>
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                  </Fragment>
                 ))}
               </>
             ) : null}

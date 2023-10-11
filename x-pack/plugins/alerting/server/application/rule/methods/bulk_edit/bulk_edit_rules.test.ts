@@ -102,6 +102,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 const paramsModifier = jest.fn();
 
@@ -239,6 +241,7 @@ describe('bulkEdit()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -737,6 +740,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -2352,6 +2356,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validLegacyConsumers: [],
       });
@@ -2397,6 +2402,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validLegacyConsumers: [],
       });
