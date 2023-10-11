@@ -24,7 +24,7 @@ const TIMESTAMP_COLUMN_NAME = '@timestamp';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165650
 describe.skip(
-  `Discover Datagrid Cell Actions`,
+  `ESQL Datagrid Cell Actions`,
   {
     tags: ['@ess'],
   },

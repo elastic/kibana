@@ -30,7 +30,7 @@ const DEFAULT_ESQL_QUERY =
   'from .alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-* | limit 10';
 
 describe(
-  'Discover State',
+  'Timeline Discover ESQL State',
   {
     tags: ['@ess'],
   },

@@ -34,7 +34,7 @@ const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 describe(
-  'Basic discover search and filter operations',
+  'Basic esql search and filter operations',
   {
     tags: ['@ess'],
   },
