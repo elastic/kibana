@@ -20,6 +20,10 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type {
+  AssetManagerPublicPluginSetup,
+  AssetManagerPublicPluginStart,
+} from '@kbn/assetManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -107,6 +111,7 @@ export interface ConfigSchema {
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
+  assetManager: AssetManagerPublicPluginSetup;
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
@@ -119,6 +124,7 @@ export interface ObservabilityPublicPluginsSetup {
 
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assetManager: AssetManagerPublicPluginStart;
   cases: CasesUiStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;

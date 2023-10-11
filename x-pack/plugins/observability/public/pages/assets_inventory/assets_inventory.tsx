@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
+import { Asset } from '@kbn/assetManager-plugin/common/types_api';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect, useState } from 'react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 
 const TestBox: React.FC = ({ children }) => (
   <div style={{ padding: 20, border: '1px solid magenta' }}>{children}</div>
@@ -16,6 +26,20 @@ const TestBox: React.FC = ({ children }) => (
 
 export function AssetsInventoryPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
+  const { services } = useKibana<ObservabilityPublicPluginsStart>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hosts, setHosts] = useState<Asset[]>([]);
+
+  useEffect(() => {
+    async function retrieve() {
+      setIsLoading(true);
+      const { hosts } = await services.assetManager.publicAssetsClient.getHosts({ from: 'now-1d' });
+      setHosts(hosts);
+      setIsLoading(false);
+    }
+    retrieve();
+  }, [services]);
+
   return (
     <ObservabilityPageTemplate
       data-test-subj="assetsInventoryPageWithData"
@@ -23,23 +47,75 @@ export function AssetsInventoryPage() {
         pageTitle: (
           <>
             {i18n.translate('xpack.observability.assetsInventoryTitle', {
-              defaultMessage: 'Assets Inventory',
+              defaultMessage: 'Hosts Inventory',
             })}{' '}
           </>
         ),
       }}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <TestBox>Area 1</TestBox>
+          <TestBox>Unified search box</TestBox>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <TestBox>Area 2</TestBox>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <TestBox>
+            <div style={{ width: '100px' }}>Sidebar area</div>
+          </TestBox>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <TestBox>Area 3, Table</TestBox>
+        <EuiFlexItem style={{ height: '75vh' }}>
+          {isLoading ? <EuiProgress /> : <AssetsTable assets={hosts} />}
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
+  );
+}
+
+function isAssetKey(asset: Asset | undefined, key: string): key is keyof Asset {
+  return typeof asset !== 'undefined' && key in asset;
+}
+
+type ColumnDef = { id: keyof Asset } & EuiDataGridColumn;
+
+function AssetsTable({ assets }: { assets: Asset[] }) {
+  const columns: ColumnDef[] = [
+    {
+      id: '@timestamp',
+      displayAsText: 'Last Seen',
+      schema: 'datetime',
+    },
+    {
+      id: 'asset.ean',
+      displayAsText: 'EAN',
+    },
+    {
+      id: 'asset.kind',
+      displayAsText: 'Kind',
+    },
+    {
+      id: 'cloud.provider',
+      displayAsText: 'Cloud Provider',
+    },
+    {
+      id: 'cloud.region',
+      displayAsText: 'CSP Region',
+    },
+  ];
+
+  return (
+    <EuiDataGrid
+      aria-label="Assets table grid"
+      columns={columns}
+      columnVisibility={{
+        visibleColumns: ['@timestamp', 'asset.ean', 'asset.kind', 'cloud.provider', 'cloud.region'],
+        setVisibleColumns: () => {},
+      }}
+      rowCount={Math.min(assets.length, 100)}
+      renderCellValue={({ rowIndex, columnId }) => {
+        return isAssetKey(assets[rowIndex], columnId) ? `${assets[rowIndex][columnId]}` : null;
+      }}
+    />
   );
 }
