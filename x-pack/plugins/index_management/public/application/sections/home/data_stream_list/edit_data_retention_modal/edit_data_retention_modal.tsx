@@ -83,33 +83,6 @@ export const timeUnits = [
       }
     ),
   },
-  {
-    value: 'ms',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.millisecondsLabel',
-      {
-        defaultMessage: 'milliseconds',
-      }
-    ),
-  },
-  {
-    value: 'micros',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.microsecondsLabel',
-      {
-        defaultMessage: 'microseconds',
-      }
-    ),
-  },
-  {
-    value: 'nanos',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.nanosecondsLabel',
-      {
-        defaultMessage: 'nanoseconds',
-      }
-    ),
-  },
 ];
 
 const configurationFormSchema: FormSchema = {
