@@ -26,8 +26,13 @@ import {
   patchAddRemoveAssigneesCasesRequest,
   patchAssigneesCasesRequest,
   patchCasesRequest,
+  patchAddCustomFieldsToOriginalCasesRequest,
+  patchUpdateCustomFieldsCasesRequest,
   patchRemoveAssigneesCasesRequest,
   patchTagsCasesRequest,
+  patchUpdateResetCustomFieldsCasesRequest,
+  patchNewCustomFieldConfAdded,
+  patchCustomFieldConfRemoved,
 } from '../mocks';
 import { AttachmentType } from '../../../../common/types/domain';
 
@@ -217,6 +222,306 @@ describe('UserActionPersister', () => {
           isMock: false,
         })
       );
+    });
+
+    describe('customFields', () => {
+      it('creates the correct user actions when adding a new custom field to a case without custom fields', async () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchAddCustomFieldsToOriginalCasesRequest,
+            user: testUser,
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "1": Array [
+              Object {
+                "eventDetails": Object {
+                  "action": "update",
+                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "getMessage": [Function],
+                  "savedObjectId": "1",
+                  "savedObjectType": "cases",
+                },
+                "parameters": Object {
+                  "attributes": Object {
+                    "action": "update",
+                    "created_at": "2022-01-09T22:00:00.000Z",
+                    "created_by": Object {
+                      "email": "elastic@elastic.co",
+                      "full_name": "Elastic User",
+                      "username": "elastic",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "customFields": Array [
+                        Object {
+                          "key": "string_custom_field_1",
+                          "type": "text",
+                          "value": "this is a text field value",
+                        },
+                      ],
+                    },
+                    "type": "customFields",
+                  },
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+        `);
+      });
+
+      it('creates the correct user actions when updating an existing custom field', async () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchUpdateCustomFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "1": Array [
+              Object {
+                "eventDetails": Object {
+                  "action": "update",
+                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "getMessage": [Function],
+                  "savedObjectId": "1",
+                  "savedObjectType": "cases",
+                },
+                "parameters": Object {
+                  "attributes": Object {
+                    "action": "update",
+                    "created_at": "2022-01-09T22:00:00.000Z",
+                    "created_by": Object {
+                      "email": "elastic@elastic.co",
+                      "full_name": "Elastic User",
+                      "username": "elastic",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "customFields": Array [
+                        Object {
+                          "key": "string_custom_field_1",
+                          "type": "text",
+                          "value": "updated value",
+                        },
+                      ],
+                    },
+                    "type": "customFields",
+                  },
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+        `);
+      });
+
+      it('creates the correct user actions when updating and resetting custom fields', async () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchUpdateResetCustomFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "1": Array [
+              Object {
+                "eventDetails": Object {
+                  "action": "update",
+                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "getMessage": [Function],
+                  "savedObjectId": "1",
+                  "savedObjectType": "cases",
+                },
+                "parameters": Object {
+                  "attributes": Object {
+                    "action": "update",
+                    "created_at": "2022-01-09T22:00:00.000Z",
+                    "created_by": Object {
+                      "email": "elastic@elastic.co",
+                      "full_name": "Elastic User",
+                      "username": "elastic",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "customFields": Array [
+                        Object {
+                          "key": "string_custom_field_1",
+                          "type": "text",
+                          "value": null,
+                        },
+                      ],
+                    },
+                    "type": "customFields",
+                  },
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                },
+              },
+              Object {
+                "eventDetails": Object {
+                  "action": "update",
+                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "getMessage": [Function],
+                  "savedObjectId": "1",
+                  "savedObjectType": "cases",
+                },
+                "parameters": Object {
+                  "attributes": Object {
+                    "action": "update",
+                    "created_at": "2022-01-09T22:00:00.000Z",
+                    "created_by": Object {
+                      "email": "elastic@elastic.co",
+                      "full_name": "Elastic User",
+                      "username": "elastic",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "customFields": Array [
+                        Object {
+                          "key": "string_custom_field_2",
+                          "type": "text",
+                          "value": "new custom field 2",
+                        },
+                      ],
+                    },
+                    "type": "customFields",
+                  },
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+        `);
+      });
+
+      it('should create a user action only for the updated field and not for the added configuration', async () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchNewCustomFieldConfAdded,
+            user: testUser,
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "1": Array [
+              Object {
+                "eventDetails": Object {
+                  "action": "update",
+                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "getMessage": [Function],
+                  "savedObjectId": "1",
+                  "savedObjectType": "cases",
+                },
+                "parameters": Object {
+                  "attributes": Object {
+                    "action": "update",
+                    "created_at": "2022-01-09T22:00:00.000Z",
+                    "created_by": Object {
+                      "email": "elastic@elastic.co",
+                      "full_name": "Elastic User",
+                      "username": "elastic",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "customFields": Array [
+                        Object {
+                          "key": "string_custom_field_1",
+                          "type": "text",
+                          "value": "new value",
+                        },
+                      ],
+                    },
+                    "type": "customFields",
+                  },
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+        `);
+      });
+
+      it('should create a user action only for the field that got updated and not for the removed configuration', async () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchCustomFieldConfRemoved,
+            user: testUser,
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "1": Array [
+              Object {
+                "eventDetails": Object {
+                  "action": "update",
+                  "descriptiveAction": "case_user_action_update_case_custom_fields",
+                  "getMessage": [Function],
+                  "savedObjectId": "1",
+                  "savedObjectType": "cases",
+                },
+                "parameters": Object {
+                  "attributes": Object {
+                    "action": "update",
+                    "created_at": "2022-01-09T22:00:00.000Z",
+                    "created_by": Object {
+                      "email": "elastic@elastic.co",
+                      "full_name": "Elastic User",
+                      "username": "elastic",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "customFields": Array [
+                        Object {
+                          "key": "string_custom_field_1",
+                          "type": "text",
+                          "value": "new value",
+                        },
+                      ],
+                    },
+                    "type": "customFields",
+                  },
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+        `);
+      });
     });
   });
 });

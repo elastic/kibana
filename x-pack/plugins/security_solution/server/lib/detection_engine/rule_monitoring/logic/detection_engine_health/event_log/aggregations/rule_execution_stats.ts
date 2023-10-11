@@ -13,35 +13,46 @@ import type {
   NumberOfDetectedGaps,
   NumberOfExecutions,
   NumberOfLoggedMessages,
-  RuleExecutionStats,
+  HealthOverviewStats,
   TopMessages,
+  RuleExecutionStatus,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   RuleExecutionEventType,
-  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
   LogLevel,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 import type { RawData } from '../../../utils/normalization';
 import * as f from '../../../event_log/event_log_fields';
+import {
+  ALERTING_PROVIDER,
+  RULE_EXECUTION_LOG_PROVIDER,
+} from '../../../event_log/event_log_constants';
 
 export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
 
 export const getRuleExecutionStatsAggregation = (
-  aggregationContext: RuleExecutionStatsAggregationLevel
+  aggregationLevel: RuleExecutionStatsAggregationLevel
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   return {
-    totalExecutions: {
-      cardinality: {
-        field: f.RULE_EXECUTION_UUID,
-      },
-    },
     executeEvents: {
       filter: {
-        term: { [f.EVENT_ACTION]: 'execute' },
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: ALERTING_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: 'execute' } },
+            { term: { [f.EVENT_CATEGORY]: 'siem' } },
+          ],
+        },
       },
       aggs: {
+        totalExecutions: {
+          cardinality: {
+            field: f.RULE_EXECUTION_UUID,
+          },
+        },
         executionDurationMs: {
           percentiles: {
             field: f.RULE_EXECUTION_TOTAL_DURATION_MS,
@@ -62,18 +73,15 @@ export const getRuleExecutionStatsAggregation = (
       filter: {
         bool: {
           filter: [
-            {
-              term: {
-                [f.EVENT_ACTION]: RuleExecutionEventType['status-change'],
-              },
-            },
+            { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventType['status-change'] } },
           ],
           must_not: [
             {
               terms: {
                 [f.RULE_EXECUTION_STATUS]: [
-                  RuleExecutionStatus.running,
-                  RuleExecutionStatus['going to run'],
+                  RuleExecutionStatusEnum.running,
+                  RuleExecutionStatusEnum['going to run'],
                 ],
               },
             },
@@ -90,7 +98,12 @@ export const getRuleExecutionStatsAggregation = (
     },
     executionMetricsEvents: {
       filter: {
-        term: { [f.EVENT_ACTION]: RuleExecutionEventType['execution-metrics'] },
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventType['execution-metrics'] } },
+          ],
+        },
       },
       aggs: {
         gaps: {
@@ -125,10 +138,17 @@ export const getRuleExecutionStatsAggregation = (
     },
     messageContainingEvents: {
       filter: {
-        terms: {
-          [f.EVENT_ACTION]: [
-            RuleExecutionEventType['status-change'],
-            RuleExecutionEventType.message,
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
+            {
+              terms: {
+                [f.EVENT_ACTION]: [
+                  RuleExecutionEventType['status-change'],
+                  RuleExecutionEventType.message,
+                ],
+              },
+            },
           ],
         },
       },
@@ -138,7 +158,7 @@ export const getRuleExecutionStatsAggregation = (
             field: f.LOG_LEVEL,
           },
         },
-        ...(aggregationContext === 'whole-interval'
+        ...(aggregationLevel === 'whole-interval'
           ? {
               errors: {
                 filter: {
@@ -178,13 +198,13 @@ export const getRuleExecutionStatsAggregation = (
 export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,
   aggregationLevel: RuleExecutionStatsAggregationLevel
-): RuleExecutionStats => {
-  const totalExecutions = aggregations.totalExecutions || {};
+): HealthOverviewStats => {
   const executeEvents = aggregations.executeEvents || {};
   const statusChangeEvents = aggregations.statusChangeEvents || {};
   const executionMetricsEvents = aggregations.executionMetricsEvents || {};
   const messageContainingEvents = aggregations.messageContainingEvents || {};
 
+  const totalExecutions = executeEvents.totalExecutions || {};
   const executionDurationMs = executeEvents.executionDurationMs || {};
   const scheduleDelayNs = executeEvents.scheduleDelayNs || {};
   const executionsByStatus = statusChangeEvents.executionsByStatus || {};
@@ -223,9 +243,9 @@ const normalizeNumberOfExecutions = (
   return {
     total: Number(totalExecutions.value || 0),
     by_outcome: {
-      succeeded: getStatusCount(RuleExecutionStatus.succeeded),
-      warning: getStatusCount(RuleExecutionStatus['partial failure']),
-      failed: getStatusCount(RuleExecutionStatus.failed),
+      succeeded: getStatusCount(RuleExecutionStatusEnum.succeeded),
+      warning: getStatusCount(RuleExecutionStatusEnum['partial failure']),
+      failed: getStatusCount(RuleExecutionStatusEnum.failed),
     },
   };
 };

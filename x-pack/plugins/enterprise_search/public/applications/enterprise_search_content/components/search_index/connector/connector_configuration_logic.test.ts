@@ -20,11 +20,15 @@ import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 const DEFAULT_VALUES = {
   configState: {},
-  configView: { categories: [], unCategorizedItems: [] },
+  configView: {
+    advancedConfigurations: [],
+    categories: [],
+    unCategorizedItems: [],
+  },
   index: null,
   isEditing: false,
   localConfigState: {},
-  localConfigView: { categories: [], unCategorizedItems: [] },
+  localConfigView: { advancedConfigurations: [], categories: [], unCategorizedItems: [] },
   shouldStartInEditMode: false,
 };
 
@@ -89,6 +93,7 @@ describe('ConnectorConfigurationLogic', () => {
           },
         },
         configView: {
+          advancedConfigurations: [],
           categories: [],
           unCategorizedItems: [
             {
@@ -151,6 +156,7 @@ describe('ConnectorConfigurationLogic', () => {
           },
         },
         configView: {
+          advancedConfigurations: [],
           categories: [],
           unCategorizedItems: [
             {
@@ -554,6 +560,26 @@ describe('ConnectorConfigurationLogic', () => {
             },
           },
           configView: {
+            advancedConfigurations: [
+              {
+                default_value: '',
+                depends_on: [],
+                display: DisplayType.TEXTBOX,
+                is_valid: true,
+                key: 'restricted',
+                label: 'Restricted',
+                options: [],
+                order: 3,
+                required: false,
+                sensitive: true,
+                tooltip: '',
+                type: FieldType.STRING,
+                ui_restrictions: ['advanced'],
+                validations: [],
+                validation_errors: [],
+                value: 'I am restricted',
+              },
+            ],
             categories: [
               {
                 configEntries: [
@@ -763,6 +789,27 @@ describe('ConnectorConfigurationLogic', () => {
             },
           },
           localConfigView: {
+            advancedConfigurations: [
+              {
+                default_value: '',
+                depends_on: [],
+                display: DisplayType.TEXTBOX,
+                is_valid: true,
+                key: 'restricted',
+                label: 'Restricted',
+                options: [],
+                order: 3,
+                required: false,
+                sensitive: true,
+                tooltip: '',
+                type: FieldType.STRING,
+                ui_restrictions: ['advanced'],
+                validations: [],
+                validation_errors: [],
+                value: 'I am restricted',
+              },
+            ],
+
             categories: [
               {
                 key: 'category',
@@ -811,6 +858,7 @@ describe('ConnectorConfigurationLogic', () => {
                 validation_errors: [],
                 value: 'fourthBar',
               },
+
               {
                 default_value: '',
                 depends_on: [{ field: 'bar', value: 'fafa' }],
@@ -862,6 +910,7 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
           configView: {
+            advancedConfigurations: [],
             categories: [],
             unCategorizedItems: [
               {
@@ -906,6 +955,7 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
           configView: {
+            advancedConfigurations: [],
             categories: [],
             unCategorizedItems: [
               {
@@ -935,6 +985,7 @@ describe('ConnectorConfigurationLogic', () => {
           isEditing: true,
           localConfigState: connectorIndex.connector.configuration,
           localConfigView: {
+            advancedConfigurations: [],
             categories: [],
             unCategorizedItems: [
               {
