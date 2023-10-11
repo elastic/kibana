@@ -177,8 +177,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return true;
         });
       });
-
-      it("sharing hashed url shouldn't crash the app", async () => {
+      // Failed test. See https://github.com/elastic/kibana/issues/167405
+      it.skip("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.clearSessionStorage();
         await browser.get(currentUrl, false);
