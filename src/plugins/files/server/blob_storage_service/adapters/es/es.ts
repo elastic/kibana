@@ -38,14 +38,21 @@ interface UploadOptions {
 }
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
-  private static defaultSemaphore: Semaphore;
+  private static defaultUploadSemaphore: Semaphore;
+  private static defaultDownloadSemaphore: Semaphore;
 
   /**
-   * Call this function once to globally set a concurrent upload limit for
+   * Call this function once to globally set the concurrent transfer (upload/download) limit for
    * all {@link ElasticsearchBlobStorageClient} instances.
    */
-  public static configureConcurrentUpload(capacity: number) {
-    this.defaultSemaphore = new Semaphore(capacity);
+  public static configureConcurrentTransfers(capacity: number | [number, number]) {
+    if (Array.isArray(capacity)) {
+      this.defaultUploadSemaphore = new Semaphore(capacity[0]);
+      this.defaultDownloadSemaphore = new Semaphore(capacity[1]);
+    } else {
+      this.defaultUploadSemaphore = new Semaphore(capacity);
+      this.defaultDownloadSemaphore = new Semaphore(capacity);
+    }
   }
 
   constructor(
@@ -57,11 +64,23 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
      * Override the default concurrent upload limit by passing in a different
      * semaphore
      */
-    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultSemaphore,
+    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultUploadSemaphore,
+    /**
+     * Override the default concurrent download limit by passing in a different
+     * semaphore
+     */
+    private readonly downloadSemaphore = ElasticsearchBlobStorageClient.defaultDownloadSemaphore,
     /** Indicates that the index provided is an alias (changes how content is retrieved internally) */
     private readonly indexIsAlias: boolean = false
   ) {
-    assert(this.uploadSemaphore, `No default semaphore provided and no semaphore was passed in.`);
+    assert(
+      this.uploadSemaphore,
+      `No default semaphore provided and no semaphore was passed in for uploads.`
+    );
+    assert(
+      this.downloadSemaphore,
+      `No default semaphore provided and no semaphore was passed in for downloads.`
+    );
   }
 
   /**
@@ -187,7 +206,11 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     // right after uploading it, we refresh the index before downloading the file.
     await this.esClient.indices.refresh({ index: this.index });
 
-    return this.getReadableContentStream(id, size);
+    return lastValueFrom(
+      defer(this.getReadableContentStream.bind(this, id, size)).pipe(
+        this.downloadSemaphore.acquire()
+      )
+    );
   }
 
   public async delete(id: string): Promise<void> {
