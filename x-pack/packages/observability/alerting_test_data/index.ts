@@ -13,3 +13,6 @@ export { createRule } from './src/create_rule';
 export { scenario1 } from './src/scenarios/custom_threshold_log_count';
 export { scenario2 } from './src/scenarios/custom_threshold_log_count_groupby';
 export { scenario3 } from './src/scenarios/custom_threshold_log_count_nodata';
+export { scenario4 } from './src/scenarios/custom_threshold_metric_avg';
+export { scenario5 } from './src/scenarios/custom_threshold_metric_avg_groupby';
+export { scenario6 } from './src/scenarios/custom_threshold_metric_avg_nodata';

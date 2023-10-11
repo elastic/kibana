@@ -19,8 +19,11 @@ var createIndexConnector = require('@kbn/observability-alerting-test-data').crea
 var scenario1 = require('@kbn/observability-alerting-test-data').scenario1;
 var scenario2 = require('@kbn/observability-alerting-test-data').scenario2;
 var scenario3 = require('@kbn/observability-alerting-test-data').scenario3;
+var scenario4 = require('@kbn/observability-alerting-test-data').scenario4;
+var scenario5 = require('@kbn/observability-alerting-test-data').scenario5;
+var scenario6 = require('@kbn/observability-alerting-test-data').scenario6;
 
-var senarios = [scenario1, scenario2, scenario3];
+var senarios = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6];
 
 async function run() {
   console.log('Creating index connector - start');
