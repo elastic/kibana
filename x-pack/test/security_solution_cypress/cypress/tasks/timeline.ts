@@ -142,7 +142,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 
 export const gotToEsqlTab = () => {
   recurse(
-    () => cy.get(ESQL_TAB).click(),
+    () => cy.get(ESQL_TAB).should('be.visible').click({ force: true }),
     ($el) => expect($el).to.have.class('euiTab-isSelected'),
     {
       delay: 500,
@@ -314,8 +314,8 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
   cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
+  cy.wait(500);
+  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click({ force: true });
 };
 
 export const openCreateTimelineOptionsPopover = () => {
