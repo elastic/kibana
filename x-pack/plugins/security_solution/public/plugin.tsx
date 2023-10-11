@@ -57,6 +57,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -84,6 +85,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  readonly configSettings: ConfigSettings;
   private queryService: QueryService = new QueryService();
   private nowProvider: NowProvider = new NowProvider();
 
@@ -92,6 +94,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.experimentalFeatures = parseExperimentalConfigValue(
       this.config.enableExperimental || []
     ).features;
+    this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
@@ -185,6 +188,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...coreStart,
         ...startPlugins,
         ...this.contract.getStartServices(),
+        configSettings: this.configSettings,
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         setHeaderActionMenu: params.setHeaderActionMenu,
