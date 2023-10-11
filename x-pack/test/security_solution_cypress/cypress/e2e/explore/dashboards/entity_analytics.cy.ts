@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
@@ -41,7 +42,7 @@ import {
   openUserRiskTableFilterAndSelectTheLowOption,
 } from '../../../tasks/user_risk';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/filter_group';
@@ -182,7 +183,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
       describe('With alerts data', () => {
         before(() => {
-          createRule(getNewRule());
+          createRule<QueryRule>(getNewRule());
         });
 
         beforeEach(() => {
@@ -270,7 +271,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
       describe('With alerts data', () => {
         before(() => {
-          createRule(getNewRule());
+          createRule<QueryRule>(getNewRule());
         });
 
         beforeEach(() => {
@@ -403,7 +404,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
       describe('With alerts data', () => {
         before(() => {
-          createRule(getNewRule());
+          createRule<QueryRule>(getNewRule());
         });
 
         beforeEach(() => {
@@ -496,7 +497,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
       describe('With alerts data', () => {
         before(() => {
-          createRule(getNewRule());
+          createRule<QueryRule>(getNewRule());
         });
 
         beforeEach(() => {

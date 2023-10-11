@@ -17,6 +17,7 @@ import type {
 
 import type {
   IndexPatternArray,
+  DataViewId,
   InvestigationGuide,
   InvestigationFields,
   RuleDescription,
@@ -30,6 +31,7 @@ import type {
 interface RuleFields {
   defaultIndexPatterns: IndexPatternArray;
   falsePositives: RuleFalsePositiveArray;
+  dataViewId: DataViewId;
   investigationGuide: InvestigationGuide;
   investigationFields: InvestigationFields;
   referenceUrls: RuleReferenceArray;
@@ -44,6 +46,8 @@ interface RuleFields {
   threat: Threat;
   threatSubtechnique: ThreatSubtechnique;
   threatTechnique: ThreatTechnique;
+  author: string[];
+  license: string;
 }
 
 export const ruleFields: RuleFields = {
@@ -58,8 +62,9 @@ export const ruleFields: RuleFields = {
     'winlogbeat-*',
     '-*elastic-cloud-logs-*',
   ],
+  dataViewId: 'security-solution-default',
   falsePositives: ['False1', 'False2'],
-  investigationGuide: '# test markdown',
+  investigationGuide: 'test markdown',
   investigationFields: {
     field_names: ['agent.hostname'],
   },
@@ -90,4 +95,6 @@ export const ruleFields: RuleFields = {
     name: 'OS Credential Dumping',
     reference: 'https://attack.mitre.org/techniques/T1003',
   },
+  author: ['moi'],
+  license: 'aLicense',
 };

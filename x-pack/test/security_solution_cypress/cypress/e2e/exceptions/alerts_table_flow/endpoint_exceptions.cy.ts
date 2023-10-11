@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
@@ -16,7 +17,6 @@ import {
 import { login } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
   addExceptionEntryFieldValueValue,
@@ -37,6 +37,7 @@ import {
   goToEndpointExceptionsTab,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -56,7 +57,7 @@ describe.skip(
       deleteAlertsAndRules();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule<QueryRule>(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

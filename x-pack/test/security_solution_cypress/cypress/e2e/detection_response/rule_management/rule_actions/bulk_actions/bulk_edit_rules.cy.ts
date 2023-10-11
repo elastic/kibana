@@ -6,6 +6,15 @@
  */
 
 import {
+  EqlRule,
+  EsqlRule,
+  MachineLearningRule,
+  NewTermsRule,
+  QueryRule,
+  ThreatMatchRule,
+  ThresholdRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
   RULES_TAGS_POPOVER_BTN,
@@ -132,18 +141,25 @@ describe(
       deleteAlertsAndRules();
       preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
       cy.task('esArchiverResetKibana');
-      createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
-      createRule(
-        getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule', enabled: false })
+      createRule<QueryRule>(
+        getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false })
       );
-      createRule(
+      createRule<EqlRule>(
+        getEqlRule({
+          ...defaultRuleData,
+          rule_id: '2',
+          name: 'New EQL Rule',
+          enabled: false,
+        })
+      );
+      createRule<MachineLearningRule>(
         getMachineLearningRule({
           name: 'New ML Rule Test',
           tags: ['test-default-tag-1', 'test-default-tag-2'],
           enabled: false,
         })
       );
-      createRule(
+      createRule<ThreatMatchRule>(
         getNewThreatIndicatorRule({
           ...defaultRuleData,
           rule_id: '4',
@@ -151,7 +167,7 @@ describe(
           enabled: false,
         })
       );
-      createRule(
+      createRule<ThresholdRule>(
         getNewThresholdRule({
           ...defaultRuleData,
           rule_id: '5',
@@ -159,7 +175,7 @@ describe(
           enabled: false,
         })
       );
-      createRule(
+      createRule<NewTermsRule>(
         getNewTermsRule({
           ...defaultRuleData,
           rule_id: '6',
@@ -693,7 +709,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
     preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
     cy.task('esArchiverResetKibana');
 
-    createRule(
+    createRule<EsqlRule>(
       getEsqlRule({
         tags: ['test-default-tag-1', 'test-default-tag-2'],
         enabled: false,

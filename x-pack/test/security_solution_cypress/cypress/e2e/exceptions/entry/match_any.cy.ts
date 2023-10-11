@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 
-import { RULE_STATUS } from '../../../screens/create_new_rule';
+import { RULE_STATUS } from '../../../screens/rule_details';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login } from '../../../tasks/login';
@@ -17,6 +18,7 @@ import {
   enablesRule,
   waitForTheRuleToBeExecuted,
   goToAlertsTab,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
@@ -28,7 +30,6 @@ import {
 import { CONFIRM_BTN } from '../../../screens/exceptions';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { ALERTS_COUNT } from '../../../screens/alerts';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -41,7 +42,7 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    createRule(
+    createRule<QueryRule>(
       getNewRule({
         index: ['exceptions-*'],
         enabled: false,

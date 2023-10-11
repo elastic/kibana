@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { SELECTED_ALERTS } from '../../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
@@ -16,7 +17,7 @@ import {
   selectAllEvents,
   selectFirstPageEvents,
 } from '../../../tasks/common/event_table';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login } from '../../../tasks/login';
@@ -36,7 +37,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
 
   context('Alerts', { tags: ['@brokenInServerless'] }, () => {
     before(() => {
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
     });
 
     beforeEach(() => {

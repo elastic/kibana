@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { openJsonTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_right_panel_json_tab';
@@ -14,7 +15,7 @@ import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 
 describe(
   'Alert details expandable flyout right panel json tab',
@@ -23,7 +24,7 @@ describe(
     beforeEach(() => {
       cleanKibana();
       login();
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();

@@ -7,6 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERTS_URL } from '../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { ruleDetailsUrl } from '../../urls/rule_details';
@@ -84,7 +85,7 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+            createRule<QueryRule>(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
               loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
             );
           });
@@ -133,7 +134,7 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+            createRule<QueryRule>(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
               loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
             );
           });
@@ -182,7 +183,7 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+            createRule<QueryRule>(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
               loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
             );
           });

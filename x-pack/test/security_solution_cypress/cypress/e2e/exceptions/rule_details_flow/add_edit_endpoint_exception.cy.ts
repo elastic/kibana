@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -71,7 +72,7 @@ describe(
     describe('without exception items', () => {
       beforeEach(() => {
         createEndpointExceptionList().then((response) => {
-          createRule(
+          createRule<QueryRule>(
             getNewRule({
               query: 'event.code:*',
               index: ['auditbeat*'],
@@ -151,7 +152,7 @@ describe(
             os_types: ['windows'],
           });
 
-          createRule(
+          createRule<QueryRule>(
             getNewRule({
               name: 'Rule with exceptions',
               query: 'event.code:*',

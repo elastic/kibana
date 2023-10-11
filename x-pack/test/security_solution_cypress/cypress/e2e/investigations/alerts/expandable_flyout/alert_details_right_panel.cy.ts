@@ -7,6 +7,7 @@
 
 import { upperFirst } from 'lodash';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
@@ -65,7 +66,7 @@ import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 
 // FLAKY: https://github.com/elastic/kibana/issues/168317
 describe.skip('Alert details expandable flyout right panel', () => {
@@ -74,7 +75,7 @@ describe.skip('Alert details expandable flyout right panel', () => {
   beforeEach(() => {
     cleanKibana();
     login();
-    createRule(rule);
+    createRule<QueryRule>(rule);
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

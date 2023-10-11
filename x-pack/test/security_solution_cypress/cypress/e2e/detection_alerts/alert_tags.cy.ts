@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../objects/rule';
 import {
   clickAlertTag,
@@ -17,7 +18,7 @@ import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/rule_details';
 import {
   ALERTS_TABLE_ROW_LOADER,
   MIXED_ALERT_TAG,
@@ -36,7 +37,7 @@ describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless']
     login();
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-    createRule(getNewRule({ rule_id: 'new custom rule' }));
+    createRule<QueryRule>(getNewRule({ rule_id: 'new custom rule' }));
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });

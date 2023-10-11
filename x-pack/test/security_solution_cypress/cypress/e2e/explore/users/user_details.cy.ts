@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_FLYOUT } from '../../../screens/alerts_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { refreshPage } from '../../../tasks/security_header';
@@ -29,7 +30,7 @@ describe('user details flyout', () => {
 
   it('shows user detail flyout from alert table', () => {
     visit(ALERTS_URL);
-    createRule(getNewRule({ query: 'user.name:*' }));
+    createRule<QueryRule>(getNewRule({ query: 'user.name:*' }));
     refreshPage();
     waitForAlertsToPopulate();
 

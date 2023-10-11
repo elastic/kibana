@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
 import {
@@ -61,7 +62,7 @@ import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
@@ -77,7 +78,7 @@ describe(
     beforeEach(() => {
       cleanKibana();
       login();
-      createRule(rule);
+      createRule<QueryRule>(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();

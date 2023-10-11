@@ -22,7 +22,7 @@ import {
   fillDefineCustomRuleAndContinue,
   fillRuleAction,
   fillScheduleRuleAndContinue,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';

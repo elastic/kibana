@@ -10,10 +10,7 @@ import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '@kbn/security-solution-plugin/common/constants';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { rootRequest } from '../common';
@@ -29,10 +26,8 @@ export const findAllRules = () => {
   });
 };
 
-export const createRule = (
-  rule: RuleCreateProps
-): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
-  return rootRequest<RuleResponse>({
+export const createRule = <T>(rule: RuleCreateProps): Cypress.Chainable<Cypress.Response<T>> => {
+  return rootRequest<T>({
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,

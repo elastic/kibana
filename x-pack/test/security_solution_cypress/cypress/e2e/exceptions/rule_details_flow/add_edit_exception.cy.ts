@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
@@ -25,6 +26,7 @@ import {
   searchForExceptionItem,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
+  waitForAlertsToPopulate,
 } from '../../../tasks/rule_details';
 import {
   addExceptionConditions,
@@ -56,7 +58,6 @@ import {
   createExceptionListItem,
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
@@ -107,7 +108,7 @@ describe(
             ],
           });
 
-          createRule(
+          createRule<QueryRule>(
             getNewRule({
               query: 'agent.name:*',
               index: ['exceptions*'],
@@ -252,7 +253,7 @@ describe(
 
     describe('rule without existing exceptions', () => {
       beforeEach(() => {
-        createRule(
+        createRule<QueryRule>(
           getNewRule({
             query: 'agent.name:*',
             index: ['exceptions*'],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   goToRuleDetailsOf,
   expectManagementTableRules,
@@ -69,7 +70,7 @@ describe(
       resetRulesTableState();
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
-      createRule(
+      createRule<QueryRule>(
         getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false })
       ).then((response) => {
         createRuleExceptionItem(response.body.id, [

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ThreatMatchRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
@@ -44,9 +45,11 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
 
   beforeEach(() => {
     login();
-    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
-      (rule) => visitRuleDetailsPage(rule.body.id)
-    );
+    createRule<ThreatMatchRule>({
+      ...getNewThreatIndicatorRule(),
+      rule_id: 'rule_testing',
+      enabled: true,
+    }).then((rule) => visitRuleDetailsPage(rule.body.id));
   });
 
   // TODO: https://github.com/elastic/kibana/issues/161539

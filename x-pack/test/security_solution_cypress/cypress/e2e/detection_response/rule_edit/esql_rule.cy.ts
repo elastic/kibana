@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EsqlRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getEsqlRule } from '../../../objects/rule';
 
 import { ESQL_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../screens/rule_details';
 
-import { ESQL_QUERY_BAR, ESQL_QUERY_BAR_EXPAND_BTN } from '../../../screens/create_new_rule';
+import { ESQL_QUERY_BAR, ESQL_QUERY_BAR_EXPAND_BTN } from '../../../screens/rule_creation';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 
@@ -20,14 +21,13 @@ import {
   clearEsqlQueryBar,
   fillEsqlQueryBar,
   fillOverrideEsqlRuleName,
-  goToAboutStepTab,
   expandAdvancedSettings,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 
 import { editFirstRule } from '../../../tasks/alerts_detection_rules';
 
-import { saveEditedRule } from '../../../tasks/edit_rule';
+import { goToAboutStepTab, saveEditedRule } from '../../../tasks/rule_edit';
 import { visit } from '../../../tasks/navigation';
 
 const rule = getEsqlRule();
@@ -42,7 +42,7 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(rule);
+    createRule<EsqlRule>(rule);
     login();
   });
 

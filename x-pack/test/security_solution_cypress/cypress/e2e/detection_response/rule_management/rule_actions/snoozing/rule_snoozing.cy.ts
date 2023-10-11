@@ -6,7 +6,10 @@
  */
 
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type {
+  QueryRule,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
@@ -33,11 +36,14 @@ import {
   duplicateFirstRule,
   importRules,
 } from '../../../../../tasks/alerts_detection_rules';
-import { goToActionsStepTab } from '../../../../../tasks/create_new_rule';
 import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
-import { saveEditedRule, visitEditRulePage } from '../../../../../tasks/edit_rule';
+import {
+  saveEditedRule,
+  visitEditRulePage,
+  goToActionsStepTab,
+} from '../../../../../tasks/rule_edit';
 import { DISABLED_SNOOZE_BADGE } from '../../../../../screens/rule_snoozing';
 import { TOOLTIP } from '../../../../../screens/common';
 
@@ -54,7 +60,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('ensures the rule is snoozed on the rules management page, rule details page and rule editing page', () => {
-    createRule(getNewRule({ name: 'Test on all pages', enabled: false }));
+    createRule<QueryRule>(getNewRule({ name: 'Test on all pages', enabled: false }));
 
     visitRulesManagementTable();
     disableAutoRefresh();
@@ -79,7 +85,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Rules management table', () => {
     it('snoozes a rule without actions for 3 hours', () => {
-      createRule(getNewRule({ name: 'Test rule without actions', enabled: false }));
+      createRule<QueryRule>(getNewRule({ name: 'Test rule without actions', enabled: false }));
 
       visitRulesManagementTable();
       disableAutoRefresh();
@@ -137,7 +143,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('ensures snooze settings persist after page reload', () => {
-      createRule(getNewRule({ name: 'Test persistence', enabled: false }));
+      createRule<QueryRule>(getNewRule({ name: 'Test persistence', enabled: false }));
 
       visitRulesManagementTable();
       disableAutoRefresh();
@@ -158,7 +164,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('ensures a duplicated rule is not snoozed', () => {
-      createRule(getNewRule({ name: 'Test rule', enabled: false }));
+      createRule<QueryRule>(getNewRule({ name: 'Test rule', enabled: false }));
 
       visitRulesManagementTable();
       disableAutoRefresh();
@@ -220,13 +226,15 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Handling errors', () => {
     it('shows an error if unable to load snooze settings', () => {
-      createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
-        cy.intercept('GET', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
-          statusCode: 500,
-        });
+      createRule<QueryRule>(getNewRule({ name: 'Test rule', enabled: false })).then(
+        ({ body: rule }) => {
+          cy.intercept('GET', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
+            statusCode: 500,
+          });
 
-        visitRuleDetailsPage(rule.id);
-      });
+          visitRuleDetailsPage(rule.id);
+        }
+      );
 
       cy.get(DISABLED_SNOOZE_BADGE).trigger('mouseover');
 
@@ -234,11 +242,13 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('shows an error if unable to save snooze settings', () => {
-      createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
-        cy.intercept('POST', internalAlertingSnoozeRule(rule.id), { forceNetworkError: true });
+      createRule<QueryRule>(getNewRule({ name: 'Test rule', enabled: false })).then(
+        ({ body: rule }) => {
+          cy.intercept('POST', internalAlertingSnoozeRule(rule.id), { forceNetworkError: true });
 
-        visitRuleDetailsPage(rule.id);
-      });
+          visitRuleDetailsPage(rule.id);
+        }
+      );
 
       snoozeRule('3 days');
 
@@ -275,8 +285,8 @@ function createRuleWithActions(
 
 function createSnoozedRule(
   ruleParams: Parameters<typeof createRule>[0]
-): Cypress.Chainable<Cypress.Response<RuleResponse>> {
-  return createRule(ruleParams).then((response) => {
+): Cypress.Chainable<Cypress.Response<QueryRule>> {
+  return createRule<QueryRule>(ruleParams).then((response) => {
     const createdRule = response.body;
     const oneDayInMs = 24 * 60 * 60 * 1000;
 

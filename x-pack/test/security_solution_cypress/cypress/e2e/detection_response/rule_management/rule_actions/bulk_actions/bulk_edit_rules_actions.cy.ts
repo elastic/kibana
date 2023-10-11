@@ -8,6 +8,13 @@
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
+  MachineLearningRule,
+  NewTermsRule,
+  QueryRule,
+  ThreatMatchRule,
+  ThresholdRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
   MISSING_PRIVILEGES_CALLOUT,
   waitForCallOutToBeShown,
 } from '../../../../../tasks/common/callouts';
@@ -103,7 +110,7 @@ describe(
           },
         ];
 
-        createRule(
+        createRule<QueryRule>(
           getNewRule({
             rule_id: '1',
             name: ruleNameToAssert,
@@ -114,20 +121,24 @@ describe(
         );
       });
 
-      createRule(getEqlRule({ rule_id: '2', name: 'New EQL Rule', enabled: false }));
-      createRule(
+      createRule<QueryRule>(getEqlRule({ rule_id: '2', name: 'New EQL Rule', enabled: false }));
+      createRule<MachineLearningRule>(
         getMachineLearningRule({ rule_id: '3', name: 'New ML Rule Test', enabled: false })
       );
-      createRule(
+      createRule<ThreatMatchRule>(
         getNewThreatIndicatorRule({
           rule_id: '4',
           name: 'Threat Indicator Rule Test',
           enabled: false,
         })
       );
-      createRule(getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule', enabled: false }));
-      createRule(getNewTermsRule({ rule_id: '6', name: 'New Terms Rule', enabled: false }));
-      createRule(
+      createRule<ThresholdRule>(
+        getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule', enabled: false })
+      );
+      createRule<NewTermsRule>(
+        getNewTermsRule({ rule_id: '6', name: 'New Terms Rule', enabled: false })
+      );
+      createRule<QueryRule>(
         getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test', enabled: false })
       );
 

@@ -6,6 +6,7 @@
  */
 import { encode } from '@kbn/rison';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getTimeline } from '../../../objects/timeline';
 
 import { TIMELINE_HEADER } from '../../../screens/timeline';
@@ -15,7 +16,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../../tasks/common';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
 
 import { login } from '../../../tasks/login';
@@ -35,7 +36,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
       return response.body.data.persistTimeline.timeline.savedObjectId;
     });
 
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });

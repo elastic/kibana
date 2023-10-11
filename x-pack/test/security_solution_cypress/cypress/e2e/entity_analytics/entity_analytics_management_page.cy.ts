@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,
@@ -53,7 +54,7 @@ describe(
 
     beforeEach(() => {
       login();
-      createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
+      createRule<QueryRule>(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
       deleteRiskEngineConfiguration();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });

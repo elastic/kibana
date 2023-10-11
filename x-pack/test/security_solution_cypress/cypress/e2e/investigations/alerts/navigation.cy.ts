@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { expandFirstAlert, waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
@@ -30,7 +31,7 @@ describe.skip('Alert Details Page Navigation', { tags: ['@ess', '@serverless'] }
     before(() => {
       cleanKibana();
       login();
-      createRule({ ...rule, rule_id: 'rule1' });
+      createRule<QueryRule>({ ...rule, rule_id: 'rule1' });
     });
 
     describe('context menu', () => {

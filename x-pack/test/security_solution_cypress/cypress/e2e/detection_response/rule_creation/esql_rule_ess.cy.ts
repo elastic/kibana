@@ -14,9 +14,9 @@ import {
   RULE_NAME_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../screens/create_new_rule';
+import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../screens/rule_creation';
 
-import { getDetails, goBackToRulesTable } from '../../../tasks/rule_details';
+import { getDetails } from '../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -28,11 +28,12 @@ import {
   fillEsqlQueryBar,
   fillAboutSpecificEsqlRuleAndContinue,
   createRuleWithoutEnabling,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   before(() => {
@@ -67,7 +68,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
 
       // ensures newly created rule is displayed in table
-      goBackToRulesTable();
+      openRuleManagementPageViaBreadcrumbs();
 
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 

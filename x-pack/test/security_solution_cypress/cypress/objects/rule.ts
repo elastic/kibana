@@ -36,7 +36,7 @@ export const getIndexPatterns = (): string[] => [
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
-const getMitre1 = (): Threat => ({
+export const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
     name: getMockThreatData().tactic.name,
@@ -65,7 +65,7 @@ const getMitre1 = (): Threat => ({
   ],
 });
 
-const getMitre2 = (): Threat => ({
+export const getMitre2 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
     name: getMockThreatData().tactic.name,
@@ -88,28 +88,28 @@ const getMitre2 = (): Threat => ({
   ],
 });
 
-const getSeverityOverride1 = (): SeverityMappingItem => ({
+export const getSeverityOverride1 = (): SeverityMappingItem => ({
   field: 'host.name',
   value: 'host',
   operator: 'equals',
   severity: 'low',
 });
 
-const getSeverityOverride2 = (): SeverityMappingItem => ({
+export const getSeverityOverride2 = (): SeverityMappingItem => ({
   field: '@timestamp',
   value: '10/02/2020',
   operator: 'equals',
   severity: 'medium',
 });
 
-const getSeverityOverride3 = (): SeverityMappingItem => ({
+export const getSeverityOverride3 = (): SeverityMappingItem => ({
   field: 'host.geo.name',
   value: 'atack',
   operator: 'equals',
   severity: 'high',
 });
 
-const getSeverityOverride4 = (): SeverityMappingItem => ({
+export const getSeverityOverride4 = (): SeverityMappingItem => ({
   field: 'agent.type',
   value: 'auditbeat',
   operator: 'equals',
@@ -119,21 +119,10 @@ const getSeverityOverride4 = (): SeverityMappingItem => ({
 export const getDataViewRule = (
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
 ): QueryRuleCreateProps => ({
-  type: 'query',
+  ...getSimpleCustomQueryRule(),
   query: 'host.name: *',
   data_view_id: 'auditbeat-2022',
   name: 'New Data View Rule',
-  description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 
@@ -286,11 +275,6 @@ export const getNewOverrideRule = (
   description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
   severity_mapping: [
     getSeverityOverride1(),
     getSeverityOverride2(),
@@ -302,9 +286,8 @@ export const getNewOverrideRule = (
   ],
   rule_name_override: 'agent.type',
   timestamp_override: '@timestamp',
-  interval: '100m',
-  from: 'now-50000h',
-  max_signals: 100,
+  interval: '5m',
+  from: 'now-10m',
   ...rewrites,
 });
 
@@ -350,8 +333,8 @@ export const getNewTermsRule = (
   note: '# test markdown',
   new_terms_fields: ['host.name'],
   history_window_start: 'now-51000h',
-  interval: '100m',
-  from: 'now-50000h',
+  interval: '10m',
+  from: 'now-50h',
   max_signals: 100,
   ...rewrites,
 });
@@ -390,14 +373,8 @@ export const getEqlRule = (
   description: 'New EQL rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
   interval: '100m',
   from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 
@@ -458,14 +435,8 @@ export const getEqlSequenceRule = (
   description: 'New EQL rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
   interval: '100m',
   from: 'now-50000h',
-  max_signals: 100,
   ...rewrites,
 });
 
@@ -517,9 +488,21 @@ export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', '
 
 export const getEditedRule = (): QueryRuleCreateProps =>
   getExistingRule({
+    index: ['auditbeat*'],
+    query: '*:*',
+    name: 'Edited Rule Name',
+    risk_score: 75,
+    note: 'Updated investigation guide',
+    author: ['New author'],
+    investigation_fields: {
+      field_names: ['agent.name'],
+    },
     severity: 'medium',
     description: 'Edited Rule description',
     tags: [...(getExistingRule().tags || []), 'edited'],
+    references: ['http://example.com/', 'https://example.com/'],
+    false_positives: ['False1', 'False2'],
+    threat: [getMitre1(), getMitre2()],
   });
 
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {

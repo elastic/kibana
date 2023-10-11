@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -41,7 +42,7 @@ describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
     visit(ALERTS_URL);
     waitForAlerts();
     switchAlertTableToEventRenderedView();

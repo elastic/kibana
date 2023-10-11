@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT } from '../../screens/alerts';
 import {
@@ -38,7 +39,7 @@ describe(
 
     beforeEach(() => {
       login();
-      createRule(getNewRule({ rule_id: 'new custom rule' }));
+      createRule<QueryRule>(getNewRule({ rule_id: 'new custom rule' }));
       visitWithTimeRange(ALERTS_URL);
       selectAlertsHistogram();
     });

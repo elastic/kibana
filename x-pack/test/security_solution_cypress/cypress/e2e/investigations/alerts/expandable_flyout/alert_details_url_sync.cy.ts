@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../../objects/rule';
 import { cleanKibana } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -22,7 +23,7 @@ describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () =
   beforeEach(() => {
     cleanKibana();
     login();
-    createRule(rule);
+    createRule<QueryRule>(rule);
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

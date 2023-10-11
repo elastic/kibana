@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import {
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION,
@@ -33,7 +34,7 @@ import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 
 describe(
   'Alert details expandable flyout rule preview panel',
@@ -44,7 +45,7 @@ describe(
     beforeEach(() => {
       cleanKibana();
       login();
-      createRule(rule);
+      createRule<QueryRule>(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();

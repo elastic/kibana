@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -24,7 +25,11 @@ import {
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
 import { login } from '../../../../tasks/login';
-import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
+import {
+  goToExceptionsTab,
+  visitRuleDetailsPage,
+  waitForAlertsToPopulate,
+} from '../../../../tasks/rule_details';
 
 import { deleteAlertsAndRules } from '../../../../tasks/common';
 import {
@@ -34,7 +39,6 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../../screens/exceptions';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
@@ -51,7 +55,7 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule<QueryRule>(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForAlertsToPopulate();
     });

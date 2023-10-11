@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../objects/rule';
 import {
   HOST_RISK_HEADER_COLIMN,
@@ -18,7 +19,7 @@ import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/rule_details';
 import {
   expandFirstAlert,
   scrollAlertTableColumnIntoView,
@@ -55,7 +56,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
         deleteAlertsAndRules();
-        createRule(getNewRule({ rule_id: 'rule1' }));
+        createRule<QueryRule>(getNewRule({ rule_id: 'rule1' }));
         login();
         deleteRiskEngineConfiguration();
         visitWithTimeRange(ALERTS_URL);
@@ -98,7 +99,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         deleteAlertsAndRules();
-        createRule(getNewRule({ rule_id: 'rule1' }));
+        createRule<QueryRule>(getNewRule({ rule_id: 'rule1' }));
         login();
         enableRiskEngine();
         visitWithTimeRange(ALERTS_URL);

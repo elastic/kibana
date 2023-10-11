@@ -6,12 +6,13 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 
 import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
@@ -30,7 +31,7 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
     login();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });

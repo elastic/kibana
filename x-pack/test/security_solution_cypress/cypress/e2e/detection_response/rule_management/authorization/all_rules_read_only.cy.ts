@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { getNewRule } from '../../../../objects/rule';
@@ -30,7 +31,7 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
+    createRule<QueryRule>(getNewRule({ rule_id: '1', enabled: false }));
   });
 
   beforeEach(() => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ANALYZER_NODE } from '../../../screens/alerts';
 
 import { openAnalyzerForFirstAlertInTimeline } from '../../../tasks/alerts';
@@ -13,7 +14,7 @@ import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
 import { setStartDate } from '../../../tasks/date_picker';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/rule_details';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -21,7 +22,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule());
+    createRule<QueryRule>(getNewRule());
   });
 
   beforeEach(() => {

@@ -7,6 +7,7 @@
 
 import path from 'path';
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
   TOASTER_BODY,
@@ -74,7 +75,9 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
     // Prevent installation of whole prebuilt rules package, use mock prebuilt rules instead
     preventPrebuiltRulesPackageInstallation();
     visit(RULES_MANAGEMENT_URL);
-    createRule(getNewRule({ name: 'Rule to export', enabled: false })).as('ruleResponse');
+    createRule<QueryRule>(getNewRule({ name: 'Rule to export', enabled: false })).as(
+      'ruleResponse'
+    );
   });
 
   it('exports a custom rule', function () {
@@ -87,7 +90,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
 
   it('creates an importable file from executed rule', () => {
     // Rule needs to be enabled to make sure it has been executed so rule's SO contains runtime fields like `execution_summary`
-    createRule(getNewRule({ name: 'Enabled rule to export', enabled: true }));
+    createRule<QueryRule>(getNewRule({ name: 'Enabled rule to export', enabled: true }));
     waitForRuleExecution('Enabled rule to export');
 
     exportRule('Enabled rule to export');
@@ -148,7 +151,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) =>
-        createRule(
+        createRule<QueryRule>(
           getNewRule({
             name: 'rule with exceptions',
             exceptions_list: [

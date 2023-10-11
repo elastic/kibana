@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const EDIT_SUBMIT_BUTTON = '[data-test-subj="ruleEditSubmitButton"]';
-export const BACK_TO_RULE_DETAILS = '[data-test-subj="ruleEditBackToRuleDetails"]';
+import { ACTIONS_EDIT_TAB } from '../../../screens/rule_edit';
+
+export const goToActionsStepTab = () => {
+  cy.get(ACTIONS_EDIT_TAB).click({ force: true });
+};

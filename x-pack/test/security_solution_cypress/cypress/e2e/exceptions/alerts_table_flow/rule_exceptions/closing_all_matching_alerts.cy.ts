@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -12,7 +12,7 @@ import {
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
-import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
+import { visitRuleDetailsPage, waitForAlertsToPopulate } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -39,7 +39,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
 
     login();
     postDataView('exceptions-*');
-    createRule(
+    createRule<QueryRule>(
       getNewRule({
         query: 'agent.name:*',
         data_view_id: 'exceptions-*',

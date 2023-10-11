@@ -59,13 +59,13 @@ import {
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
-import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
+import { EDIT_SUBMIT_BUTTON } from '../screens/rule_edit';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
-import { goToActionsStepTab } from './create_new_rule';
 import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
+import { goToActionsStepTab } from './rule_edit';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 

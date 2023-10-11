@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRule } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
@@ -16,7 +17,7 @@ import { createRule } from '../../tasks/api_calls/rules';
 
 import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/rule_details';
 import { createField } from '../../tasks/create_runtime_field';
 import { openAlertsFieldBrowser } from '../../tasks/alerts';
 import { deleteRuntimeField } from '../../tasks/sourcerer';
@@ -42,7 +43,7 @@ describe(
 
     it('adds field to alert table', () => {
       visitWithTimeRange(ALERTS_URL);
-      createRule(getNewRule());
+      createRule<QueryRule>(getNewRule());
       refreshPage();
       waitForAlertsToPopulate();
       openAlertsFieldBrowser();
