@@ -69,12 +69,12 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
         data?.data.map((syncJob) => {
           return {
             ...syncJob,
-            duration: syncJob.completed_at
-              ? moment.duration(moment(syncJob.completed_at).diff(moment(syncJob.created_at)))
-              : syncJob.started_at
-              ? moment.duration(moment(new Date()).diff(moment(syncJob.started_at)))
+            duration: syncJob.started_at
+              ? moment.duration(
+                  moment(syncJob.completed_at || new Date()).diff(moment(syncJob.started_at))
+                )
               : undefined,
-            lastSync: syncJob.completed_at ?? syncJob.created_at,
+            lastSync: syncJob.completed_at,
           };
         }) ?? [],
     ],
