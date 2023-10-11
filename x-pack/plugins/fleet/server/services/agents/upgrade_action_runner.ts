@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
-import { isAgentUpgradeable } from '../../../common/services';
+import { hasAgentBeenUpgradedRecently, isAgentUpgradeable } from '../../../common/services';
 
 import type { Agent } from '../../types';
 
@@ -78,7 +78,8 @@ export async function upgradeBatch(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
       const isNotAllowed =
-        !options.force && !isAgentUpgradeable(agent, latestAgentVersion, options.version);
+        hasAgentBeenUpgradedRecently(agent) ||
+        (!options.force && !isAgentUpgradeable(agent, latestAgentVersion, options.version));
       if (isNotAllowed) {
         throw new FleetError(`Agent ${agent.id} is not upgradeable`);
       }
