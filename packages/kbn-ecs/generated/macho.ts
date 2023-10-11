@@ -39,7 +39,7 @@ export interface EcsMacho {
   /**
    * List of imported element names and types.
    */
-  imports?: Record<string, unknown>;
+  imports?: Record<string, unknown> | Array<Record<string, unknown>>;
   /**
    * Shannon entropy calculation from the list of imported element names and types.
    */
@@ -52,7 +52,7 @@ export interface EcsMacho {
    * An array containing an object for each section of the Mach-O file.
    * The keys that should be present in these objects are defined by sub-fields underneath `macho.sections.*`.
    */
-  sections?: Record<string, unknown>;
+  sections?: Record<string, unknown> | Array<Record<string, unknown>>;
   /**
    * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
    * This is a Mach-O implementation of the Windows PE imphash

@@ -16,11 +16,11 @@ export interface EcsDns {
    * The main keys that should be present in these objects are defined by ECS. Records that have more information may contain more keys than what ECS defines.
    * Not all DNS data sources give all details about DNS answers. At minimum, answer objects must contain the `data` key. If more information is available, map as much of it to ECS as possible, and add any additional fields to the answer objects as custom fields.
    */
-  answers?: Array<Record<string, unknown>>;
+  answers?: Record<string, unknown> | Array<Record<string, unknown>>;
   /**
    * Array of 2 letter DNS header flags.
    */
-  header_flags?: string[];
+  header_flags?: string | string[];
   /**
    * The DNS packet identifier assigned by the program that generated the query. The identifier is copied to the response.
    */
@@ -65,7 +65,7 @@ export interface EcsDns {
    * Array containing all IPs seen in `answers.data`.
    * The `answers` array can be difficult to use, because of the variety of data formats it can contain. Extracting all IP addresses seen in there to `dns.resolved_ip` makes it possible to index them as IP addresses, and makes them easier to visualize and query for.
    */
-  resolved_ip?: string[];
+  resolved_ip?: string | string[];
   /**
    * The DNS response code.
    */

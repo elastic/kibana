@@ -15,7 +15,7 @@ export interface EcsProcess {
    * Array of process arguments, starting with the absolute path to the executable.
    * May be filtered to protect sensitive information.
    */
-  args?: string[];
+  args?: string | string[];
   /**
    * Length of the process.args array.
    * This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
@@ -91,7 +91,28 @@ export interface EcsProcess {
     /**
      * List of exported element names and types.
      */
-    exports?: Array<Record<string, unknown>>;
+    exports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * A hash of the Go language imports in an ELF file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+     */
+    go_import_hash?: string;
+    /**
+     * List of imported Go language element names and types.
+     */
+    go_imports?: Record<string, unknown>;
+    /**
+     * Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_var_entropy?: number;
+    /**
+     * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+     */
+    go_stripped?: boolean;
     header?: {
       /**
        * Version of the ELF Application Binary Interface (ABI).
@@ -128,23 +149,36 @@ export interface EcsProcess {
     };
 
     /**
+     * A hash of the imports in an ELF file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is an ELF implementation of the Windows PE imphash.
+     */
+    import_hash?: string;
+    /**
      * List of imported element names and types.
      */
-    imports?: Array<Record<string, unknown>>;
+    imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_var_entropy?: number;
     /**
      * An array containing an object for each section of the ELF file.
      * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
      */
-    sections?: Array<Record<string, unknown>>;
+    sections?: Record<string, unknown> | Array<Record<string, unknown>>;
     /**
      * An array containing an object for each segment of the ELF file.
      * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
      */
-    segments?: Array<Record<string, unknown>>;
+    segments?: Record<string, unknown> | Array<Record<string, unknown>>;
     /**
      * List of shared libraries used by this ELF object.
      */
-    shared_libraries?: string[];
+    shared_libraries?: string | string[];
     /**
      * telfhash symbol hash for ELF file.
      */
@@ -166,7 +200,7 @@ export interface EcsProcess {
      * Array of process arguments, starting with the absolute path to the executable.
      * May be filtered to protect sensitive information.
      */
-    args?: string[];
+    args?: string | string[];
     /**
      * Length of the process.args array.
      * This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
@@ -268,12 +302,22 @@ export interface EcsProcess {
          * The time the process started.
          */
         start?: string;
+        /**
+         * Virtual process id.
+         * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+         */
+        vpid?: number;
       };
 
       /**
        * The time the process started.
        */
       start?: string;
+      /**
+       * Virtual process id.
+       * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+       */
+      vpid?: number;
     };
 
     /**
@@ -363,6 +407,11 @@ export interface EcsProcess {
     };
 
     /**
+     * Virtual process id.
+     * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+     */
+    vpid?: number;
+    /**
      * The working directory of the process.
      */
     working_directory?: string;
@@ -372,7 +421,7 @@ export interface EcsProcess {
    * Array of environment variable bindings. Captured from a snapshot of the environment at the time of execution.
    * May be filtered to protect sensitive information.
    */
-  env_vars?: string[];
+  env_vars?: string | string[];
   /**
    * Absolute path to the process executable.
    */
@@ -387,7 +436,7 @@ export interface EcsProcess {
      * Array of process arguments, starting with the absolute path to the executable.
      * May be filtered to protect sensitive information.
      */
-    args?: string[];
+    args?: string | string[];
     /**
      * Length of the process.args array.
      * This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
@@ -517,6 +566,11 @@ export interface EcsProcess {
     };
 
     /**
+     * Virtual process id.
+     * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+     */
+    vpid?: number;
+    /**
      * The working directory of the process.
      */
     working_directory?: string;
@@ -564,6 +618,57 @@ export interface EcsProcess {
    * This field only appears on the top level process object, which is the process that wrote the output or read the input.
    */
   io?: Record<string, unknown>;
+  macho?: {
+    /**
+     * A hash of the Go language imports in a Mach-O file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+     */
+    go_import_hash?: string;
+    /**
+     * List of imported Go language element names and types.
+     */
+    go_imports?: Record<string, unknown>;
+    /**
+     * Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_var_entropy?: number;
+    /**
+     * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+     */
+    go_stripped?: boolean;
+    /**
+     * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is a synonym for symhash.
+     */
+    import_hash?: string;
+    /**
+     * List of imported element names and types.
+     */
+    imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_var_entropy?: number;
+    /**
+     * An array containing an object for each section of the Mach-O file.
+     * The keys that should be present in these objects are defined by sub-fields underneath `macho.sections.*`.
+     */
+    sections?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is a Mach-O implementation of the Windows PE imphash
+     */
+    symhash?: string;
+  };
+
   /**
    * Process name.
    * Sometimes called program name or similar.
@@ -574,7 +679,7 @@ export interface EcsProcess {
      * Array of process arguments, starting with the absolute path to the executable.
      * May be filtered to protect sensitive information.
      */
-    args?: string[];
+    args?: string | string[];
     /**
      * Length of the process.args array.
      * This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
@@ -650,7 +755,28 @@ export interface EcsProcess {
       /**
        * List of exported element names and types.
        */
-      exports?: Array<Record<string, unknown>>;
+      exports?: Record<string, unknown> | Array<Record<string, unknown>>;
+      /**
+       * A hash of the Go language imports in an ELF file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+       */
+      go_import_hash?: string;
+      /**
+       * List of imported Go language element names and types.
+       */
+      go_imports?: Record<string, unknown>;
+      /**
+       * Shannon entropy calculation from the list of Go imports.
+       */
+      go_imports_names_entropy?: number;
+      /**
+       * Variance for Shannon entropy calculation from the list of Go imports.
+       */
+      go_imports_names_var_entropy?: number;
+      /**
+       * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+       */
+      go_stripped?: boolean;
       header?: {
         /**
          * Version of the ELF Application Binary Interface (ABI).
@@ -687,23 +813,36 @@ export interface EcsProcess {
       };
 
       /**
+       * A hash of the imports in an ELF file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * This is an ELF implementation of the Windows PE imphash.
+       */
+      import_hash?: string;
+      /**
        * List of imported element names and types.
        */
-      imports?: Array<Record<string, unknown>>;
+      imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+      /**
+       * Shannon entropy calculation from the list of imported element names and types.
+       */
+      imports_names_entropy?: number;
+      /**
+       * Variance for Shannon entropy calculation from the list of imported element names and types.
+       */
+      imports_names_var_entropy?: number;
       /**
        * An array containing an object for each section of the ELF file.
        * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
        */
-      sections?: Array<Record<string, unknown>>;
+      sections?: Record<string, unknown> | Array<Record<string, unknown>>;
       /**
        * An array containing an object for each segment of the ELF file.
        * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
        */
-      segments?: Array<Record<string, unknown>>;
+      segments?: Record<string, unknown> | Array<Record<string, unknown>>;
       /**
        * List of shared libraries used by this ELF object.
        */
-      shared_libraries?: string[];
+      shared_libraries?: string | string[];
       /**
        * telfhash symbol hash for ELF file.
        */
@@ -755,6 +894,11 @@ export interface EcsProcess {
        * The time the process started.
        */
       start?: string;
+      /**
+       * Virtual process id.
+       * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+       */
+      vpid?: number;
     };
 
     hash?: {
@@ -794,6 +938,57 @@ export interface EcsProcess {
      * Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.
      */
     interactive?: boolean;
+    macho?: {
+      /**
+       * A hash of the Go language imports in a Mach-O file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+       */
+      go_import_hash?: string;
+      /**
+       * List of imported Go language element names and types.
+       */
+      go_imports?: Record<string, unknown>;
+      /**
+       * Shannon entropy calculation from the list of Go imports.
+       */
+      go_imports_names_entropy?: number;
+      /**
+       * Variance for Shannon entropy calculation from the list of Go imports.
+       */
+      go_imports_names_var_entropy?: number;
+      /**
+       * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+       */
+      go_stripped?: boolean;
+      /**
+       * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * This is a synonym for symhash.
+       */
+      import_hash?: string;
+      /**
+       * List of imported element names and types.
+       */
+      imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+      /**
+       * Shannon entropy calculation from the list of imported element names and types.
+       */
+      imports_names_entropy?: number;
+      /**
+       * Variance for Shannon entropy calculation from the list of imported element names and types.
+       */
+      imports_names_var_entropy?: number;
+      /**
+       * An array containing an object for each section of the Mach-O file.
+       * The keys that should be present in these objects are defined by sub-fields underneath `macho.sections.*`.
+       */
+      sections?: Record<string, unknown> | Array<Record<string, unknown>>;
+      /**
+       * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * This is a Mach-O implementation of the Windows PE imphash
+       */
+      symhash?: string;
+    };
+
     /**
      * Process name.
      * Sometimes called program name or similar.
@@ -817,10 +1012,48 @@ export interface EcsProcess {
        */
       file_version?: string;
       /**
+       * A hash of the Go language imports in a PE file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+       */
+      go_import_hash?: string;
+      /**
+       * List of imported Go language element names and types.
+       */
+      go_imports?: Record<string, unknown>;
+      /**
+       * Shannon entropy calculation from the list of Go imports.
+       */
+      go_imports_names_entropy?: number;
+      /**
+       * Variance for Shannon entropy calculation from the list of Go imports.
+       */
+      go_imports_names_var_entropy?: number;
+      /**
+       * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+       */
+      go_stripped?: boolean;
+      /**
        * A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
        * Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.
        */
       imphash?: string;
+      /**
+       * A hash of the imports in a PE file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+       * This is a synonym for imphash.
+       */
+      import_hash?: string;
+      /**
+       * List of imported element names and types.
+       */
+      imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+      /**
+       * Shannon entropy calculation from the list of imported element names and types.
+       */
+      imports_names_entropy?: number;
+      /**
+       * Variance for Shannon entropy calculation from the list of imported element names and types.
+       */
+      imports_names_var_entropy?: number;
       /**
        * Internal name of the file, provided at compile-time.
        */
@@ -834,6 +1067,11 @@ export interface EcsProcess {
        * Internal product name of the file, provided at compile-time.
        */
       product?: string;
+      /**
+       * An array containing an object for each section of the PE file.
+       * The keys that should be present in these objects are defined by sub-fields underneath `pe.sections.*`.
+       */
+      sections?: Record<string, unknown> | Array<Record<string, unknown>>;
     };
 
     /**
@@ -905,6 +1143,17 @@ export interface EcsProcess {
     };
 
     thread?: {
+      capabilities?: {
+        /**
+         * This is the set of capabilities used by the kernel to perform permission checks for the thread.
+         */
+        effective?: string | string[];
+        /**
+         * This is a limiting superset for the effective capabilities that the thread may assume.
+         */
+        permitted?: string | string[];
+      };
+
       /**
        * Thread ID.
        */
@@ -940,6 +1189,11 @@ export interface EcsProcess {
     };
 
     /**
+     * Virtual process id.
+     * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+     */
+    vpid?: number;
+    /**
      * The working directory of the process.
      */
     working_directory?: string;
@@ -963,10 +1217,48 @@ export interface EcsProcess {
      */
     file_version?: string;
     /**
+     * A hash of the Go language imports in a PE file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+     */
+    go_import_hash?: string;
+    /**
+     * List of imported Go language element names and types.
+     */
+    go_imports?: Record<string, unknown>;
+    /**
+     * Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_var_entropy?: number;
+    /**
+     * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+     */
+    go_stripped?: boolean;
+    /**
      * A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
      * Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.
      */
     imphash?: string;
+    /**
+     * A hash of the imports in a PE file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is a synonym for imphash.
+     */
+    import_hash?: string;
+    /**
+     * List of imported element names and types.
+     */
+    imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_var_entropy?: number;
     /**
      * Internal name of the file, provided at compile-time.
      */
@@ -980,6 +1272,11 @@ export interface EcsProcess {
      * Internal product name of the file, provided at compile-time.
      */
     product?: string;
+    /**
+     * An array containing an object for each section of the PE file.
+     * The keys that should be present in these objects are defined by sub-fields underneath `pe.sections.*`.
+     */
+    sections?: Record<string, unknown> | Array<Record<string, unknown>>;
   };
 
   /**
@@ -996,7 +1293,7 @@ export interface EcsProcess {
      * Array of process arguments, starting with the absolute path to the executable.
      * May be filtered to protect sensitive information.
      */
-    args?: string[];
+    args?: string | string[];
     /**
      * Length of the process.args array.
      * This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
@@ -1057,7 +1354,7 @@ export interface EcsProcess {
      * Array of process arguments, starting with the absolute path to the executable.
      * May be filtered to protect sensitive information.
      */
-    args?: string[];
+    args?: string | string[];
     /**
      * Length of the process.args array.
      * This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
@@ -1126,12 +1423,22 @@ export interface EcsProcess {
          * The time the process started.
          */
         start?: string;
+        /**
+         * Virtual process id.
+         * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+         */
+        vpid?: number;
       };
 
       /**
        * The time the process started.
        */
       start?: string;
+      /**
+       * Virtual process id.
+       * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+       */
+      vpid?: number;
     };
 
     /**
@@ -1221,6 +1528,11 @@ export interface EcsProcess {
     };
 
     /**
+     * Virtual process id.
+     * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+     */
+    vpid?: number;
+    /**
      * The working directory of the process.
      */
     working_directory?: string;
@@ -1242,6 +1554,17 @@ export interface EcsProcess {
   };
 
   thread?: {
+    capabilities?: {
+      /**
+       * This is the set of capabilities used by the kernel to perform permission checks for the thread.
+       */
+      effective?: string | string[];
+      /**
+       * This is a limiting superset for the effective capabilities that the thread may assume.
+       */
+      permitted?: string | string[];
+    };
+
     /**
      * Thread ID.
      */
@@ -1276,6 +1599,11 @@ export interface EcsProcess {
     name?: string;
   };
 
+  /**
+   * Virtual process id.
+   * The process id within a pid namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within.
+   */
+  vpid?: number;
   /**
    * The working directory of the process.
    */
