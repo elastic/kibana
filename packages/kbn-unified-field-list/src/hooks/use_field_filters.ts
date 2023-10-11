@@ -58,7 +58,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   const docLinks = services.core.docLinks;
 
   return useMemo(() => {
-    const fieldSearchHighlight = nameFilter.toLowerCase();
+    const fieldSearchHighlight = nameFilter.trim().toLowerCase();
     return {
       fieldSearchHighlight,
       fieldListFiltersProps: {
@@ -75,10 +75,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
       onFilterField:
         fieldSearchHighlight?.length || selectedFieldTypes.length > 0
           ? (field: T) => {
-              if (
-                fieldSearchHighlight?.trim() &&
-                !fieldNameWildcardMatcher(field, fieldSearchHighlight)
-              ) {
+              if (fieldSearchHighlight && !fieldNameWildcardMatcher(field, fieldSearchHighlight)) {
                 return false;
               }
               if (selectedFieldTypes.length > 0) {
