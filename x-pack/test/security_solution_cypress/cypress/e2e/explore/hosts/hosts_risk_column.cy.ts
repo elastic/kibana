@@ -41,7 +41,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', { tags: ['@ess', '@brokenInServerless'] }, () => {
+  describe('with new risk score', () => {
     before(() => {
       cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.name]

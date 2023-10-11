@@ -75,7 +75,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', { tags: ['@ess', '@brokenInServerless'] }, () => {
+  describe('with new risk score', () => {
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
