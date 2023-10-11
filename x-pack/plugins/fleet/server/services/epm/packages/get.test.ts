@@ -514,7 +514,9 @@ test: invalid manifest
     it('should filter packages configured in xpack.fleet.internal.registry.excludePackages', async () => {
       const mockContract = createAppContextStartContractMock({
         internal: {
-          excludePackages: ['nginx'],
+          registry: {
+            excludePackages: ['nginx'],
+          },
         },
       } as any);
       appContextService.start(mockContract);
