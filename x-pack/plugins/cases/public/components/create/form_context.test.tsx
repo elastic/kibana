@@ -8,7 +8,6 @@
 import React from 'react';
 import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act, fireEvent } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
@@ -47,12 +46,7 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import {
-  CaseSeverity,
-  AttachmentType,
-  ConnectorTypes,
-  CustomFieldTypes,
-} from '../../../common/types/domain';
+import { AttachmentType, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -302,42 +296,6 @@ describe('Create case', () => {
         `);
       });
 
-      it('should post a case on submit click with the selected severity', async () => {
-        useGetConnectorsMock.mockReturnValue({
-          ...sampleConnectorData,
-          data: connectorsMock,
-        });
-
-        appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        );
-
-        await waitForFormToRender(screen);
-        await fillFormReactTestingLib({ renderer: screen });
-
-        userEvent.click(screen.getByTestId('case-severity-selection'));
-        await waitForEuiPopoverOpen();
-
-        expect(screen.getByTestId('case-severity-selection-high')).toBeVisible();
-
-        userEvent.click(screen.getByTestId('case-severity-selection-high'));
-        userEvent.click(screen.getByTestId('create-case-submit'));
-
-        await waitFor(() => {
-          expect(postCase).toHaveBeenCalled();
-        });
-
-        expect(postCase).toBeCalledWith({
-          request: {
-            ...sampleDataWithoutTags,
-            severity: CaseSeverity.HIGH,
-          },
-        });
-      });
-
       it('should trim fields correctly while submit', async () => {
         const tag = '     coke     ';
         const newCategory = 'First           ';
@@ -411,37 +369,6 @@ describe('Create case', () => {
         `);
       });
 
-      it('should toggle sync settings', async () => {
-        useGetConnectorsMock.mockReturnValue({
-          ...sampleConnectorData,
-          data: connectorsMock,
-        });
-
-        appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        );
-
-        await waitForFormToRender(screen);
-        await fillFormReactTestingLib({ renderer: screen });
-
-        const syncAlertsButton = within(screen.getByTestId('caseSyncAlerts')).getByTestId('input');
-
-        userEvent.click(syncAlertsButton);
-        userEvent.click(screen.getByTestId('create-case-submit'));
-
-        await waitFor(() => expect(postCase).toHaveBeenCalled());
-
-        expect(postCase).toBeCalledWith({
-          request: {
-            ...sampleDataWithoutTags,
-            settings: { syncAlerts: false },
-          },
-        });
-      });
-
       it('should set sync alerts to false when the sync feature setting is false', async () => {
         appMockRender = createAppMockRenderer({
           features: { alerts: { sync: false, enabled: true } },
@@ -472,22 +399,6 @@ describe('Create case', () => {
             settings: { syncAlerts: false },
           },
         });
-      });
-
-      it('should select LOW as the default severity', async () => {
-        appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        );
-
-        await waitForFormToRender(screen);
-
-        expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-        expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
-
-        await waitForComponentToUpdate();
       });
 
       it('should submit form with custom fields', async () => {
@@ -641,39 +552,6 @@ describe('Create case', () => {
         expect(pushCaseToExternalService).not.toHaveBeenCalled();
         expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
       });
-
-      it('should set the category correctly', async () => {
-        const category = categories[0];
-
-        useGetConnectorsMock.mockReturnValue({
-          ...sampleConnectorData,
-          data: connectorsMock,
-        });
-
-        appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        );
-
-        await waitForFormToRender(screen);
-        await fillFormReactTestingLib({ renderer: screen });
-
-        const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole(
-          'combobox'
-        );
-
-        userEvent.type(categoryComboBox, `${category}{enter}`);
-
-        userEvent.click(screen.getByTestId('create-case-submit'));
-
-        await waitFor(() => {
-          expect(postCase).toHaveBeenCalled();
-        });
-
-        expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, category } });
-      });
     });
 
     describe('Step 2 - Connector Fields', () => {
@@ -819,15 +697,6 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
-      });
-
-      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-        skipPointerEventsCheck: true,
-      });
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {

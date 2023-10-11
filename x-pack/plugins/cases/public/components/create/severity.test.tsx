@@ -31,11 +31,13 @@ const MockHookWrapperComponent: React.FC = ({ children }) => {
 
   return <Form form={form}>{children}</Form>;
 };
+
 describe('Severity form field', () => {
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
   });
+
   it('renders', () => {
     const result = appMockRender.render(
       <MockHookWrapperComponent>
@@ -65,10 +67,15 @@ describe('Severity form field', () => {
         <Severity isLoading={false} />
       </MockHookWrapperComponent>
     );
+
     expect(result.getByTestId('caseSeverity')).toBeTruthy();
+
     userEvent.click(result.getByTestId('case-severity-selection'));
+
     await waitForEuiPopoverOpen();
+
     userEvent.click(result.getByTestId('case-severity-selection-high'));
+
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ severity: 'high' });
     });
