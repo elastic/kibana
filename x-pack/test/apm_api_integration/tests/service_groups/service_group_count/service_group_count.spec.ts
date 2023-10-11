@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {

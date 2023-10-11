@@ -9,7 +9,7 @@ import { Client, errors } from '@elastic/elasticsearch';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
