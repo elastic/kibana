@@ -68,6 +68,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
@@ -154,6 +155,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
         close: jest.fn(),
