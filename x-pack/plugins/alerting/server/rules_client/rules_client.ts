@@ -42,11 +42,14 @@ import {
   BulkDeleteRulesRequestBody,
 } from '../application/rule/methods/bulk_delete';
 import {
+  bulkDisableRules,
+  BulkDisableRulesRequestBody,
+} from '../application/rule/methods/bulk_disable';
+import {
   bulkEditRules,
   BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEnableRules } from './methods/bulk_enable';
-import { bulkDisableRules } from './methods/bulk_disable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
 import { disable } from './methods/disable';
@@ -151,7 +154,8 @@ export class RulesClient {
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
-  public bulkDisableRules = (options: BulkOptions) => bulkDisableRules(this.context, options);
+  public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
+    bulkDisableRules(this.context, options);
 
   public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
 

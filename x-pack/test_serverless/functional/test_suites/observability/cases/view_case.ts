@@ -482,7 +482,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             {
               key: 'valid_key_1',
               type: CustomFieldTypes.TEXT,
-              value: ['this is a text field value'],
+              value: 'this is a text field value',
             },
             {
               key: 'valid_key_2',
