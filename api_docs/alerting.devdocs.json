@@ -3785,7 +3785,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
+              ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",

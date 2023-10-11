@@ -27140,6 +27140,17 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.INPUTS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INPUTS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.INFO_PATTERN_DEPRECATED",
             "type": "string",
             "tags": [],

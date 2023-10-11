@@ -938,7 +938,7 @@
             "label": "serverlessClients",
             "description": [],
             "signature": [
-              "{ readonly goApiReference: string; readonly goGettingStarted: string; readonly httpApis: string; readonly httpApiReferences: string; readonly jsApiReference: string; readonly jsGettingStarted: string; readonly phpApiReference: string; readonly phpGettingStarted: string; readonly pythonApiReference: string; readonly pythonGettingStarted: string; readonly pythonReferences: string; readonly rubyApiReference: string; readonly rubyGettingStarted: string; }"
+              "{ readonly clientLib: string; readonly goApiReference: string; readonly goGettingStarted: string; readonly httpApis: string; readonly httpApiReferences: string; readonly jsApiReference: string; readonly jsGettingStarted: string; readonly phpApiReference: string; readonly phpGettingStarted: string; readonly pythonApiReference: string; readonly pythonGettingStarted: string; readonly pythonReferences: string; readonly rubyApiReference: string; readonly rubyGettingStarted: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -953,6 +953,20 @@
             "description": [],
             "signature": [
               "{ readonly gettingStartedExplore: string; readonly gettingStartedIngest: string; readonly gettingStartedSearch: string; readonly integrations: string; readonly integrationsBeats: string; readonly integrationsConnectorClient: string; readonly integrationsLogstash: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.serverlessSecurity",
+            "type": "Object",
+            "tags": [],
+            "label": "serverlessSecurity",
+            "description": [],
+            "signature": [
+              "{ readonly apiKeyPrivileges: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
