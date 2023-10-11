@@ -57,6 +57,7 @@ import {
   type SeriesType,
   type PersistedState,
   visualizationTypes,
+  SeriesTypesByOrientation,
 } from './types';
 import {
   getPersistableState,
@@ -968,6 +969,17 @@ export const getXyVisualization = ({
   getVisualizationInfo(state, frame) {
     return getVisualizationInfo(state, frame, paletteService, fieldFormats);
   },
+
+  getDisplayOptions(state) {
+    const chartType = getChartType(state);
+    if (!chartType) {
+      return {};
+    }
+    return {
+      aspectRatio:
+        SeriesTypesByOrientation[chartType] === 'vertical' ? { x: 16, y: 9 } : { x: 9, y: 16 },
+    };
+  },
 });
 
 const getMappedAccessors = ({
@@ -1008,6 +1020,15 @@ const getMappedAccessors = ({
   return mappedAccessors;
 };
 
+function getChartType(state: XYState): SeriesType | undefined {
+  for (const layer of state.layers) {
+    if (isDataLayer(layer)) {
+      return layer.seriesType;
+    }
+  }
+  return undefined;
+}
+
 function getVisualizationInfo(
   state: XYState,
   frame: Partial<FramePublicAPI> | undefined,
@@ -1018,12 +1039,11 @@ function getVisualizationInfo(
   const visualizationLayersInfo = state.layers.map((layer) => {
     const palette = [];
     const dimensions = [];
-    let chartType: SeriesType | undefined;
+    const chartType: SeriesType | undefined = getChartType(state);
     let icon;
     let label;
 
     if (isDataLayer(layer)) {
-      chartType = layer.seriesType;
       const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
       icon = layerVisType?.icon;
       label = layerVisType?.fullLabel || layerVisType?.label;

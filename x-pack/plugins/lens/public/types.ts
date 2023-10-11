@@ -978,6 +978,7 @@ export interface VisualizationType {
 export interface VisualizationDisplayOptions {
   noPanelTitle?: boolean;
   noPadding?: boolean;
+  aspectRatio?: { x: number; y: number };
 }
 
 interface VisualizationStateFromContextChangeProps {
@@ -1293,7 +1294,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /**
    * Gets custom display options for showing the visualization.
    */
-  getDisplayOptions?: () => VisualizationDisplayOptions;
+  getDisplayOptions?: (state: T) => VisualizationDisplayOptions;
 
   /**
    * Get RenderEventCounters events for telemetry

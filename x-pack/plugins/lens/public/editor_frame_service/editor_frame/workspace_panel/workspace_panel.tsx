@@ -653,6 +653,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
       getUserMessages={getUserMessages}
+      hasSomethingToRender={localState.expressionToRender !== null}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>

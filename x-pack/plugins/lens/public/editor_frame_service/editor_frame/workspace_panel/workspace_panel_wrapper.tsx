@@ -32,8 +32,8 @@ import {
   selectAutoApplyEnabled,
   selectVisualizationState,
 } from '../../../state_management';
-import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
+import { WorkspaceTitle } from './title';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
@@ -48,6 +48,7 @@ export interface WorkspacePanelWrapperProps {
   isFullscreen: boolean;
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
+  hasSomethingToRender: boolean;
 }
 
 export function VisualizationToolbar(props: {
@@ -98,6 +99,7 @@ export function WorkspacePanelWrapper({
   datasourceMap,
   isFullscreen,
   getUserMessages,
+  hasSomethingToRender,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
@@ -107,8 +109,11 @@ export function WorkspacePanelWrapper({
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
-  const aspectRatio = { x: 9, y: 16 };
-  // const aspectRatio = { x: 2, y: 1 };
+  const displayOptions = hasSomethingToRender
+    ? activeVisualization?.getDisplayOptions?.(visualizationState)
+    : undefined;
+
+  const aspectRatio = displayOptions?.aspectRatio;
 
   return (
     <EuiPageTemplate
@@ -187,6 +192,7 @@ export function WorkspacePanelWrapper({
           </EuiFlexGroup>
         </EuiPageTemplate.Section>
       )}
+
       <EuiPageTemplate.Section
         grow={true}
         paddingSize="none"
@@ -196,6 +202,7 @@ export function WorkspacePanelWrapper({
         className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
+        css={{ height: '100%' }}
         color="transparent"
       >
         <EuiFlexGroup
@@ -209,7 +216,12 @@ export function WorkspacePanelWrapper({
             grow={false}
             css={{
               flexGrow: 0,
-              ...(aspectRatio.y > aspectRatio.x
+              ...(!aspectRatio
+                ? {
+                    height: '100%',
+                    width: '100%',
+                  }
+                : aspectRatio.y > aspectRatio.x
                 ? {
                     height: '100%',
                     width: 'auto',
@@ -218,7 +230,7 @@ export function WorkspacePanelWrapper({
                     height: 'auto',
                     width: '100%',
                   }),
-              aspectRatio: `${aspectRatio.x}/${aspectRatio.y}`,
+              aspectRatio: aspectRatio ? `${aspectRatio.x}/${aspectRatio.y}` : undefined,
             }}
           >
             <WorkspaceTitle />
