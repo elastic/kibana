@@ -19,7 +19,7 @@ import type { AgentMetrics } from './fetch_agent_metrics';
 
 export class FleetMetricsTask {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '0.0.7';
+  private taskVersion = '0.0.8';
   private taskType = 'Fleet-Metrics-Task';
   private wasStarted: boolean = false;
   private interval = '1m';

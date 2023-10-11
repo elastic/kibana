@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import { AGENTS_INDEX } from '../../../common';
 
