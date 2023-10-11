@@ -111,7 +111,6 @@ export class FleetMetricsTask {
             updating: agents.updating,
             unhealthy: agents.unhealthy,
             inactive: agents.inactive,
-            unhealthy_reason: agentMetrics.unhealthy_reason,
             upgrading_step: agentMetrics.upgrading_step,
           },
         },

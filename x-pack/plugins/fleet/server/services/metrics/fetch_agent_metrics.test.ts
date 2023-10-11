@@ -76,11 +76,6 @@ describe('fetchAgentMetrics', () => {
           count: 1,
         },
       ],
-      unhealthy_reason: {
-        input: 0,
-        other: 0,
-        output: 0,
-      },
       upgrading_step: {
         downloading: 0,
         extracting: 0,

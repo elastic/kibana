@@ -108,11 +108,6 @@ describe('fleet metrics task', () => {
           unhealthy: 1,
           inactive: 1,
         },
-        unhealthy_reason: {
-          input: 2,
-          output: 2,
-          other: 1,
-        },
         upgrading_step: {
           scheduled: 1,
           requested: 1,
@@ -155,11 +150,6 @@ describe('fleet metrics task', () => {
                 updating: 1,
                 unhealthy: 1,
                 inactive: 1,
-                unhealthy_reason: {
-                  input: 2,
-                  output: 2,
-                  other: 1,
-                },
                 upgrading_step: {
                   scheduled: 1,
                   requested: 1,
