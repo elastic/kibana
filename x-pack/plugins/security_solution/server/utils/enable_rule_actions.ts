@@ -5,9 +5,21 @@
  * 2.0.
  */
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import {
+  IndexConnectorTypeId,
+  SlackWebhookConnectorTypeId,
+  EmailConnectorTypeId,
+} from '@kbn/stack-connectors-plugin/server/connector_types';
+import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+
+const INTERNAL_RULE_ACTIONS = [
+  IndexConnectorTypeId,
+  SlackWebhookConnectorTypeId,
+  EmailConnectorTypeId,
+];
 
 /**
  * enable rule actions based on AppFeature Config
@@ -20,8 +32,9 @@ export const enableRuleActions = ({
   appFeatures: AppFeaturesService;
 }) => {
   if (appFeatures.isEnabled(AppFeatureSecurityKey.externalRuleActions)) {
-    actions.setEnabledConnectorTypes(['*']);
+    // enables all rule actions
+    actions.setEnabledConnectorTypes([EnabledActionTypes.Any]);
   } else {
-    actions.setEnabledConnectorTypes(['.email', '.slack', '.index']);
+    actions.setEnabledConnectorTypes(INTERNAL_RULE_ACTIONS);
   }
 };
