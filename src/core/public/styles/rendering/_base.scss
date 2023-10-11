@@ -58,7 +58,7 @@
 
 // Set a body CSS variable for the app container to use - calculates the total
 // height of all fixed headers + the sticky action menu toolbar
-.kbnBody--projectActionMenuVisible {
+.kbnBody--hasProjectActionMenu {
   --kbnAppHeadersOffset: calc(var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight));
 
   &.kbnBody--hasHeaderBanner {
@@ -73,7 +73,7 @@
     --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
   }
 
-  &.kbnBody--projectActionMenuVisible {
+  &.kbnBody--hasProjectActionMenu {
     --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
   }
 }

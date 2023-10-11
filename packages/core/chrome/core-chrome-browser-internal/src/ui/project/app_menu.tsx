@@ -29,6 +29,7 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
         display: flex;
         justify-content: end;
         align-items: center;
+        padding: 0 ${euiTheme.size.s};
         height: var(--kbnProjectHeaderAppActionMenuHeight, ${euiTheme.size.xxxl});
         margin-bottom: -${euiTheme.border.width.thin};
         /* fixates the elements position in the viewport, removes the element from the flow of the page */
