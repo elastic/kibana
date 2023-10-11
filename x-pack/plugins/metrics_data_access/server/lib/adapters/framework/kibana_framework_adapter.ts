@@ -35,8 +35,8 @@ export class KibanaFramework {
   public router: IRouter<RequestHandlerContext>;
   private core: CoreSetup<MetricsDataPluginStartDeps>;
 
-  constructor(core: CoreSetup<MetricsDataPluginStartDeps>) {
-    this.router = core.http.createRouter();
+  constructor(core: CoreSetup<MetricsDataPluginStartDeps>, router: IRouter<RequestHandlerContext>) {
+    this.router = router;
     this.core = core;
   }
 
