@@ -15,7 +15,7 @@ const DEFAULT_OUTPUT_PATH = 'target/plugin_so_types_snapshot.json';
 
 run(
   async ({ log, flagsReader, procRunner }) => {
-    const outputPath = flagsReader.getPositionals()[0] || DEFAULT_OUTPUT_PATH;
+    const outputPath = flagsReader.string('outputPath') || DEFAULT_OUTPUT_PATH;
 
     const result = await takeSnapshot({ outputPath, log });
 
@@ -26,7 +26,7 @@ run(
     };
   },
   {
-    usage: [process.argv0, scriptName, '[outputPath]'].join(' '),
+    usage: [process.argv0, scriptName, 'snapshot', '[--outputPath <outputPath>]'].join(' '),
     description: `Takes a snapshot of all Kibana plugin Saved Object migrations' information, in a JSON format.`,
     flags: {
       string: ['outputPath'],
