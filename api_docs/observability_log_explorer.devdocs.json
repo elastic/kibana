@@ -46,8 +46,8 @@
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.LogExplorerNavigationParams",
-            "text": "LogExplorerNavigationParams"
+            "section": "def-common.DatasetLocatorParams",
+            "text": "DatasetLocatorParams"
           },
           ">"
         ],
@@ -114,10 +114,10 @@
                 "pluginId": "@kbn/deeplinks-observability",
                 "scope": "common",
                 "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.LogExplorerNavigationParams",
-                "text": "LogExplorerNavigationParams"
+                "section": "def-common.DatasetLocatorParams",
+                "text": "DatasetLocatorParams"
               },
-              ") => Promise<{ app: string; path: string; state: {}; }>"
+              ") => Promise<{ app: string; path: string; state: { origin?: { id: \"application-log-onboarding\"; } | undefined; }; }>"
             ],
             "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
             "deprecated": false,
@@ -126,7 +126,7 @@
               {
                 "parentPluginId": "observabilityLogExplorer",
                 "id": "def-common.AllDatasetsLocatorDefinition.getLocation.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
@@ -135,8 +135,8 @@
                     "pluginId": "@kbn/deeplinks-observability",
                     "scope": "common",
                     "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                    "section": "def-common.LogExplorerNavigationParams",
-                    "text": "LogExplorerNavigationParams"
+                    "section": "def-common.DatasetLocatorParams",
+                    "text": "DatasetLocatorParams"
                   }
                 ],
                 "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
@@ -249,7 +249,7 @@
                 "section": "def-common.SingleDatasetLocatorParams",
                 "text": "SingleDatasetLocatorParams"
               },
-              ") => Promise<{ app: string; path: string; state: {}; }>"
+              ") => Promise<{ app: string; path: string; state: { origin?: { id: \"application-log-onboarding\"; } | undefined; }; }>"
             ],
             "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
             "deprecated": false,
@@ -316,8 +316,8 @@
                 "pluginId": "@kbn/deeplinks-observability",
                 "scope": "common",
                 "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.LogExplorerNavigationParams",
-                "text": "LogExplorerNavigationParams"
+                "section": "def-common.DatasetLocatorParams",
+                "text": "DatasetLocatorParams"
               },
               ">"
             ],

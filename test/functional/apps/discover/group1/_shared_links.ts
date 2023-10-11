@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167405
-  describe.skip('shared links', function describeIndexTests() {
+  describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
     async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
@@ -174,6 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const resolvedTime = await PageObjects.timePicker.getTimeConfig();
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
+          await toasts.dismissAllToasts();
           return true;
         });
       });
