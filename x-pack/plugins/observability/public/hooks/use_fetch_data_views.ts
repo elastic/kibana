@@ -28,11 +28,7 @@ export function useFetchDataViews({ name = '', size = 20 }: Params): UseFetchDat
   const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchDataViews', search],
     queryFn: async () => {
-      try {
-        return await dataViews.find(search, size);
-      } catch (error) {
-        throw new Error(`Something went wrong. Error: ${error}`);
-      }
+      return dataViews.find(search, size);
     },
   });
 

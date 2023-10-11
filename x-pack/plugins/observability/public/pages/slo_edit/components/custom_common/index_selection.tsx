@@ -35,16 +35,15 @@ export function IndexSelection() {
   });
 
   useEffect(() => {
-    if (dataViews.length > 0) {
+    if (!isDataViewsLoading) {
       setDataViewOptions(createDataViewOptions(dataViews));
     }
-  }, [dataViews]);
+  }, [isDataViewsLoading, dataViews]);
 
   useEffect(() => {
-    if (indices.length === 0) {
-      setIndexPatternOption(undefined);
-    } else if (!!searchValue) {
+    if (!!searchValue) {
       const searchPattern = searchValue.endsWith('*') ? searchValue : `${searchValue}*`;
+      const hasMatchingIndices = indices.length > 0;
 
       setIndexPatternOption({
         label: i18n.translate(
@@ -54,33 +53,32 @@ export function IndexSelection() {
         options: [
           {
             value: searchPattern,
-            label: i18n.translate(
-              'xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternFoundLabel',
-              {
-                defaultMessage:
-                  '{searchPattern} (match {num, plural, one {# index} other {# indices}})',
-                values: {
-                  searchPattern,
-                  num: indices.length,
-                },
-              }
-            ),
+            label: hasMatchingIndices
+              ? i18n.translate(
+                  'xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternFoundLabel',
+                  {
+                    defaultMessage:
+                      '{searchPattern} (match {num, plural, one {# index} other {# indices}})',
+                    values: { searchPattern, num: indices.length },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.observability.slo.sloEdit.indexSelection.indexPatternNoMatchLabel',
+                  { defaultMessage: '{searchPattern}', values: { searchPattern } }
+                ),
           },
         ],
       });
+    } else {
+      setIndexPatternOption(undefined);
     }
-  }, [indices.length, searchValue]);
+  }, [indices, searchValue]);
 
-  const onDataViewSearchChange = useMemo(
-    () => debounce((value: string) => setSearchValue(value), 300),
-    []
-  );
+  const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
 
   const placeholder = i18n.translate(
     'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
-    {
-      defaultMessage: 'Select a Data View or use an index pattern',
-    }
+    { defaultMessage: 'Select a Data View or use an index pattern' }
   );
 
   return (
@@ -90,9 +88,7 @@ export function IndexSelection() {
       })}
       helpText={i18n.translate(
         'xpack.observability.slo.sloEdit.customKql.indexSelection.helpText',
-        {
-          defaultMessage: 'Use * to broaden your query.',
-        }
+        { defaultMessage: 'Use * to broaden your query.' }
       )}
       isInvalid={getFieldState('indicator.params.index').invalid}
     >
