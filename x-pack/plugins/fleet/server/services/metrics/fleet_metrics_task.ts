@@ -17,13 +17,16 @@ import { appContextService } from '../app_context';
 
 import type { AgentMetrics } from './fetch_agent_metrics';
 
+export const TYPE = 'Fleet-Metrics-Task';
+export const VERSION = '0.0.9';
+const TITLE = 'Fleet Metrics Task';
+const TIMEOUT = '1m';
+const SCOPE = ['fleet'];
+const INTERVAL = '1m';
+
 export class FleetMetricsTask {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '0.0.8';
-  private taskType = 'Fleet-Metrics-Task';
   private wasStarted: boolean = false;
-  private interval = '1m';
-  private timeout = '1m';
   private abortController = new AbortController();
   private esClient?: ElasticsearchClient;
 
@@ -32,14 +35,14 @@ export class FleetMetricsTask {
     fetchAgentMetrics: (abortController: AbortController) => Promise<AgentMetrics | undefined>
   ) {
     taskManager.registerTaskDefinitions({
-      [this.taskType]: {
-        title: 'Fleet Metrics Task',
-        timeout: this.timeout,
+      [TYPE]: {
+        title: TITLE,
+        timeout: TIMEOUT,
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return withSpan({ name: this.taskType, type: 'metrics' }, () =>
+              return withSpan({ name: TYPE, type: 'metrics' }, () =>
                 this.runTask(taskInstance, () => fetchAgentMetrics(this.abortController))
               );
             },
@@ -148,7 +151,7 @@ export class FleetMetricsTask {
   };
 
   private get taskId() {
-    return `${this.taskType}-${this.taskVersion}`;
+    return `${TYPE}:${VERSION}`;
   }
 
   public async start(taskManager: TaskManagerStartContract, esClient: ElasticsearchClient) {
@@ -167,11 +170,11 @@ export class FleetMetricsTask {
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,
-        taskType: this.taskType,
+        taskType: TYPE,
         schedule: {
-          interval: this.interval,
+          interval: INTERVAL,
         },
-        scope: ['fleet'],
+        scope: SCOPE,
         state: {},
         params: {},
       });
