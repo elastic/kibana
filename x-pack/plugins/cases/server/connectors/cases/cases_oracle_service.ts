@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import { CryptoService } from './crypto_service';
 import type { OracleKey, OracleRecord } from './types';
+import { sortGroupDefinition } from './util';
 
 type OracleRecordWithoutId = Omit<OracleRecord, 'id'>;
 
@@ -30,7 +32,14 @@ export class CasesOracleService {
   }
 
   public getRecordId({ ruleId, spaceId, owner, groupingDefinition }: OracleKey): string {
-    const payload = `${ruleId}:${spaceId}:${owner}:${groupingDefinition}`;
+    const initialPayload = `${ruleId}:${spaceId}:${owner}`;
+
+    if (groupingDefinition == null || isEmpty(groupingDefinition)) {
+      return this.cryptoService.getHash(initialPayload);
+    }
+
+    const sortedGroupingDefinition = sortGroupDefinition(groupingDefinition);
+    const payload = `${initialPayload}:${sortedGroupingDefinition}`;
 
     return this.cryptoService.getHash(payload);
   }

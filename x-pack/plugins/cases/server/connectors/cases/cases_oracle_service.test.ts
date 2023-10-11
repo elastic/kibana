@@ -39,6 +39,23 @@ describe('CasesOracleService', () => {
 
       expect(service.getRecordId({ ruleId, spaceId, owner, groupingDefinition })).toEqual(hex);
     });
+
+    it('sorts the grouping definition correctly', async () => {
+      const ruleId = 'test-rule-id';
+      const spaceId = 'default';
+      const owner = 'cases';
+      const groupingDefinition = 'host.ip=0.0.0.1&agent.id=8a4f500d';
+      const sortedGroupingDefinition = 'agent.id=8a4f500d&host.ip=0.0.0.1';
+
+      const payload = `${ruleId}:${spaceId}:${owner}:${sortedGroupingDefinition}`;
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getRecordId({ ruleId, spaceId, owner, groupingDefinition })).toEqual(hex);
+    });
   });
 
   describe('getRecord', () => {

@@ -20,7 +20,7 @@ export interface OracleKey {
   ruleId: string;
   spaceId: string;
   owner: string;
-  groupingDefinition: string;
+  groupingDefinition?: string;
 }
 
 export interface OracleRecord {
