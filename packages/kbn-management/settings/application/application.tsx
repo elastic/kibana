@@ -48,25 +48,22 @@ function getQueryParam(url: string) {
  */
 export const SettingsApplication = () => {
   const { addUrlToHistory } = useServices();
-  const fields = useFields();
-  const [filteredFields, setFilteredFields] = useState(fields);
-
-  const categorizedFields = categorizeFields(fields);
-  const categories = Object.keys(categorizedFields);
 
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));
 
+  const allFields = useFields();
+  const filteredFields = useFields(query);
+
   const onQueryChange: QueryInputProps['onQueryChange'] = (newQuery = Query.parse('')) => {
     setQuery(newQuery);
-
-    const newFields = Query.execute(newQuery, fields);
-    setFilteredFields(newFields);
 
     const search = addQueryParam(window.location.href, 'query', newQuery.text);
     addUrlToHistory(search);
   };
 
+  const categorizedFields = categorizeFields(allFields);
+  const categories = Object.keys(categorizedFields);
   const categoryCounts: { [category: string]: number } = {};
   for (const category of categories) {
     categoryCounts[category] = categorizedFields[category].count;
