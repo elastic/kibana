@@ -21,13 +21,13 @@ import { AlertingAuthorization } from '../../../../authorization/alerting_author
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
-  enabledRuleForBulkDelete1,
-  enabledRuleForBulkDelete2,
-  enabledRuleForBulkDelete3,
+  enabledRuleForBulkOps1,
+  enabledRuleForBulkOps2,
+  enabledRuleForBulkOps3,
   returnedRuleForBulkDelete1,
   returnedRuleForBulkDelete2,
   returnedRuleForBulkDelete3,
-  siemRuleForBulkDelete1,
+  siemRuleForBulkOps1,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 
@@ -106,11 +106,7 @@ describe('bulkDelete', () => {
 
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = {
-      saved_objects: [
-        enabledRuleForBulkDelete1,
-        enabledRuleForBulkDelete2,
-        enabledRuleForBulkDelete3,
-      ],
+      saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3],
     }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -178,9 +174,10 @@ describe('bulkDelete', () => {
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
-      [enabledRuleForBulkDelete1, enabledRuleForBulkDelete2, enabledRuleForBulkDelete3].map(
-        ({ id }) => ({ id, type: 'alert' })
-      ),
+      [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3].map(({ id }) => ({
+        id,
+        type: 'alert',
+      })),
       undefined
     );
 
@@ -223,25 +220,25 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete1, enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       });
 
@@ -287,19 +284,19 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete1, enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRuleForBulkDelete2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       });
 
@@ -464,20 +461,16 @@ describe('bulkDelete', () => {
           close: jest.fn(),
           find: function* asyncGenerator() {
             yield {
-              saved_objects: [
-                enabledRuleForBulkDelete1,
-                enabledRuleForBulkDelete2,
-                siemRuleForBulkDelete1,
-              ],
+              saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, siemRuleForBulkOps1],
             };
           },
         });
 
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: enabledRuleForBulkDelete1.id, type: 'alert', success: true },
-          { id: enabledRuleForBulkDelete2.id, type: 'alert', success: true },
-          { id: siemRuleForBulkDelete1.id, type: 'alert', success: true },
+          { id: enabledRuleForBulkOps1.id, type: 'alert', success: true },
+          { id: enabledRuleForBulkOps2.id, type: 'alert', success: true },
+          { id: siemRuleForBulkOps1.id, type: 'alert', success: true },
         ],
       });
 
@@ -485,19 +478,19 @@ describe('bulkDelete', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: enabledRuleForBulkDelete1.id,
+        ruleId: enabledRuleForBulkOps1.id,
         skipActionsValidation: true,
-        attributes: enabledRuleForBulkDelete1.attributes,
+        attributes: enabledRuleForBulkOps1.attributes,
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: enabledRuleForBulkDelete2.id,
+        ruleId: enabledRuleForBulkOps2.id,
         skipActionsValidation: true,
-        attributes: enabledRuleForBulkDelete2.attributes,
+        attributes: enabledRuleForBulkOps2.attributes,
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: siemRuleForBulkDelete1.id,
+        ruleId: siemRuleForBulkOps1.id,
         skipActionsValidation: true,
-        attributes: siemRuleForBulkDelete1.attributes,
+        attributes: siemRuleForBulkOps1.attributes,
       });
     });
   });
