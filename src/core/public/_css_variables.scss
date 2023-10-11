@@ -7,8 +7,6 @@
   --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
   // height of the action menu in the header in serverless projects
   --kbnProjectHeaderAppActionMenuHeight: #{$euiSize * 3};
-  // total height of all fixed headers for the app container in serverless projects, dynamically changes based on whether the banner or action menu is present
-  --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
 }
 
 // Quick note: This shouldn't be mixed with Sass variable declarations,
