@@ -74,7 +74,7 @@ export interface ReportingServerInfo {
   hostname: string;
 }
 
-interface CommonReportingSetup {
+export interface CommonReportingSetup {
   registerExportTypes: () => void;
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls

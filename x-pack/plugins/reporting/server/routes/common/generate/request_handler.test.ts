@@ -21,14 +21,10 @@ import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mo
 import { ReportingCore } from '../../..';
 import { Report, ReportingStore } from '../../../lib/store';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import {
-  ReportingJobResponse,
-  ReportingRequestHandlerContext,
-  ReportingSetup,
-} from '../../../types';
+import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
 import { RequestHandler } from './request_handler';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated/printable_pdf';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
+import { CommonReportingSetup, TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 
 jest.mock('@kbn/reporting-common/crypto', () => ({
   cryptoFactory: () => ({
@@ -95,7 +91,7 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = Promise.resolve({} as ReportingSetup);
+    mockContext.reporting = Promise.resolve({} as CommonReportingSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,

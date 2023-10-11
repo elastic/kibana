@@ -24,6 +24,7 @@ export type {
   JobParamsDownloadCSV,
   ReportingRequestHandlerContext,
   JobId,
+  CommonReportingSetup,
 } from './types';
 export type { LocatorParams, UrlOrUrlLocatorTuple, IlmPolicyStatusResponse } from './url';
 export { ExportType } from './export_type';

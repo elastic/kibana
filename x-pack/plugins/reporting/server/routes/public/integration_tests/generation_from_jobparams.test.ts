@@ -10,7 +10,7 @@ import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import rison from '@kbn/rison';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { PdfExportType } from 'packages/kbn-reporting/export_types/printable_pdf_v2';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -27,6 +27,7 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerGenerationRoutesPublic } from '../generate_from_jobparams';
+import { CommonReportingSetup } from '@kbn/reporting-common';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -58,7 +59,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart()
+      () => reportingMock.createStart() as unknown as CommonReportingSetup
     );
 
     const mockSetupDeps = createMockPluginSetup({
