@@ -30,8 +30,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-// FIXME: Test needs to be refactored for serverless so that it uses a standard set of users that are also available in serverless
-describe('Artifacts pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Artifacts pages', { tags: ['@ess'] }, () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
