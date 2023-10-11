@@ -20,10 +20,12 @@ export interface EditConfigPanelProps {
   datasourceMap: DatasourceMap;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensByValueInput['attributes'];
-  /** Callback for updating the visualization and datasources state.
-   * Visualization type, title and query should be given if they have changed
-   */
-  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
+  /** Callback for updating the visualization and datasources state.*/
+  updatePanelState: (
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) => void;
   updateSuggestion?: (attrs: TypedLensByValueInput['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensByValueInput['attributes']) => void;

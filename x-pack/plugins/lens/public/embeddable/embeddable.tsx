@@ -741,7 +741,11 @@ export class Embeddable
    * Gets the Lens embeddable's datasource and visualization states
    * updates the embeddable input
    */
-  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+  async updateVisualization(
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
@@ -763,7 +767,7 @@ export class Embeddable
         ),
         visualizationState,
         activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[this.activeVisualizationId]
+          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
           : undefined,
       });
       const attrs = {
@@ -774,6 +778,7 @@ export class Embeddable
           datasourceStates,
         },
         references,
+        visualizationType: visualizationType ?? viz.visualizationType,
       };
 
       /**

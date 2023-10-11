@@ -20,7 +20,7 @@ import { extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions, getLensAttributes } from './helpers';
+import { getSuggestions } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 
 export function LensEditConfigurationFlyout({
@@ -314,17 +314,6 @@ export function LensEditConfigurationFlyout({
               nowProvider={startDependencies.data.nowProvider}
               showOnlyIcons
               wrapSuggestions
-              customSwitchSuggestionAction={(suggestion) => {
-                const attrs = getLensAttributes({
-                  filters: [],
-                  query: attributes.state.query,
-                  suggestion,
-                  references: attributes.references,
-                  adHocDataViews: attributes.state.adHocDataViews,
-                });
-                updateSuggestion?.(attrs);
-                setCurrentAttributes?.(attrs);
-              }}
             />
           </div>
         </>

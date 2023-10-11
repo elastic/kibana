@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
@@ -89,22 +88,12 @@ export const getLensAttributes = ({
   query,
   suggestion,
   dataView,
-  references,
-  adHocDataViews,
 }: {
   filters: Filter[];
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
-  references?: SavedObjectReference[];
-  adHocDataViews?: Record<string, DataViewSpec>;
 }) => {
-  let adHocDataViewsObj = adHocDataViews;
-  if (!adHocDataViews && dataView && dataView.id && !dataView.isPersisted()) {
-    adHocDataViewsObj = {
-      [dataView.id]: dataView.toSpec(false),
-    };
-  }
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -124,7 +113,7 @@ export const getLensAttributes = ({
       : i18n.translate('xpack.lens.config.suggestion.title', {
           defaultMessage: 'New suggestion',
         }),
-    references: references ?? [
+    references: [
       {
         id: dataView?.id ?? '',
         name: `textBasedLanguages-datasource-layer-suggestion`,
@@ -136,9 +125,11 @@ export const getLensAttributes = ({
       filters,
       query,
       visualization,
-      ...(adHocDataViewsObj && {
-        adHocDataViews: adHocDataViewsObj,
-      }),
+      ...(dataView &&
+        dataView.id &&
+        !dataView.isPersisted() && {
+          adHocDataViews: { [dataView.id]: dataView.toSpec(false) },
+        }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];

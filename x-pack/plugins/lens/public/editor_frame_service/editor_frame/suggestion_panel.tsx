@@ -67,7 +67,6 @@ import {
   selectFrameDatasourceAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-import type { Suggestion } from '../../types';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -104,7 +103,6 @@ export interface SuggestionPanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   getUserMessages?: UserMessagesGetter;
-  customSwitchSuggestionAction?: (s: Suggestion) => void;
   nowProvider: DataPublicPluginStart['nowProvider'];
   core: CoreStart;
   showOnlyIcons?: boolean;
@@ -251,7 +249,6 @@ export function SuggestionPanel({
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
-  customSwitchSuggestionAction,
   nowProvider,
   core,
   showOnlyIcons,
@@ -498,11 +495,7 @@ export function SuggestionPanel({
                     rollbackToCurrentVisualization();
                   } else {
                     setLastSelectedSuggestion(index);
-                    if (customSwitchSuggestionAction) {
-                      customSwitchSuggestionAction(suggestion);
-                    } else {
-                      switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
-                    }
+                    switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
                   }
                 }}
                 selected={index === lastSelectedSuggestion}

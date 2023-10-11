@@ -49,7 +49,11 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
-type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => void;
+type UpdaterType = (
+  datasourceState: unknown,
+  visualizationState: unknown,
+  visualizationType?: string
+) => void;
 
 // exported for testing
 export const updatingMiddleware =
@@ -73,7 +77,12 @@ export const updatingMiddleware =
       if (initExisting.match(action) || initEmpty.match(action)) {
         return;
       }
-      updater(datasourceStates[activeDatasourceId].state, visualization.state);
+
+      updater(
+        datasourceStates[activeDatasourceId].state,
+        visualization.state,
+        visualization.activeId
+      );
     }
   };
 

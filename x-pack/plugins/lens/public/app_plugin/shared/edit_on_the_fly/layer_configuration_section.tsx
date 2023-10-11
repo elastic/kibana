@@ -14,6 +14,7 @@ import { createIndexPatternService } from '../../../data_views_service/service';
 import { useLensDispatch, updateIndexPatterns } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
+import { useLensSelector } from '../../../state_management';
 
 export function LayerConfiguration({
   attributes,
@@ -27,7 +28,9 @@ export function LayerConfiguration({
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
-  const activeVisualization = visualizationMap[attributes.visualizationType];
+  const { visualization } = useLensSelector((state) => state.lens);
+  const activeVisualization =
+    visualizationMap[visualization.activeId ?? attributes.visualizationType];
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
