@@ -28,6 +28,12 @@
     "@kbn/datemath",
     "@kbn/es-types",
     "@kbn/config-schema",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/observability-shared-plugin",
+    "@kbn/i18n-react",
+    "@kbn/logging",
+    "@kbn/core-http-request-handler-context-server"
   ]
 }
