@@ -37,7 +37,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('Risk Engine - Risk Scoring Task', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/168424
+  describe.skip('Risk Engine - Risk Scoring Task', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -93,7 +94,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        describe('initializing the risk engine', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/168415
+        describe.skip('initializing the risk engine', () => {
           beforeEach(async () => {
             await riskEngineRoutes.init();
           });
