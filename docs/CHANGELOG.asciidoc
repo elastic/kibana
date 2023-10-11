@@ -123,6 +123,8 @@ Discover::
 * Adds resize support to the Discover field list sidebar ({kibana-pull}167066[#167066]).
 Elastic Security::
 For the Elastic Security 8.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Enterprise Search::
+For the Elastic Enterprise Search 8.11.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 Fleet::
 * Set env variable `ELASTIC_NETINFO:false` in {kib} ({kibana-pull}166156[#166156]).
 * Added restart upgrade action ({kibana-pull}166154[#166154]).
@@ -166,9 +168,7 @@ APM::
 * Adds time range to event metadata API ({kibana-pull}167132[#167132]).
 * New settings to control CO2 calculation ({kibana-pull}166637[#166637]).
 * Adds permissions for "input-only" package ({kibana-pull}166234[#166234]).
-
-* .es-query and .observability.rules.threshold RBAC ({kibana-pull}166032[#166032]). <-- dunno
-
+* Adds selecting the consumer based on the authorized consumers when a user is creating an ES Query threshold rule ({kibana-pull}166032[#166032]).
 * Migrate Ace based `EuiCodeEditor` to Monaco based code editor ({kibana-pull}165951[#165951]).
 * Mobile UI crash widget added ({kibana-pull}163527[#163527]).
 Cases::
@@ -183,6 +183,8 @@ Discover::
 * Fixes unified search for long field inputs ({kibana-pull}166024[#166024]).
 Elastic Security::
 For the Elastic Security 8.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Enterprise Search::
+For the Elastic Enterprise Search 8.11.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 Fleet::
 * Adds sidebar navigation showing headings extracted from the readme ({kibana-pull}167216[#167216]).
 Lens & Visualizations::
@@ -237,6 +239,8 @@ Dashboard::
 * Generate new panel IDs on Dashboard clone ({kibana-pull}166299[#166299]).
 Elastic Security::
 For the Elastic Security 8.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Enterprise Search::
+For the Elastic Enterprise Search 8.11.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 Fleet::
 * Vastly improve performance of Fleet final pipeline's date formatting logic for `event.ingested` ({kibana-pull}167318[#167318]).
 Lens & Visualizations::
