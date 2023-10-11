@@ -40,35 +40,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       pathname,
       search,
     });
-  // const getKibanaUrl = (pathname?: string, search?: string) => {
-  //   return url.format({
-  //     protocol: 'http:',
-  //     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-  //     port: process.env.TEST_KIBANA_PORT || '5620',
-  //     pathname,
-  //     search,
-  //   });
-  // };
 
-  // const waitForUrlToBeWithTimeout = async (pathname?: string, search?: string, time?: number) => {
-  //   const expectedUrl = getKibanaUrl(pathname, search);
-  //   return await retry.waitForWithTimeout('navigates to app root', time ?? 3000, async () => {
-  //     return (await browser.getCurrentUrl()) === expectedUrl;
-  //   });
-  // };
-
-  // Try using Dashboard implementations
-  // intension: Use navigateToAppFromAppsMenu rather than appsMenu.clickLink directly,
+  // Inspired by Dashboard implementations
+  // intention: Use navigateToAppFromAppsMenu rather than appsMenu.clickLink directly,
   async function navigateToAppFromAppsMenu(title: string) {
     await retry.try(async () => {
       await appsMenu.clickLink(title);
-      //
-      // try using if plain clickLink doesn't work:
-      //
-      // await appsMenu.clickLink(title, {
-      //   category: 'recentlyViewed',
-      //   closeCollapsibleNav: true,
-      // });
       await waitUntilLoadingIsDone();
       const currentUrl = await browser.getCurrentUrl();
       if (!currentUrl.includes('app/foo/home')) {
@@ -89,8 +66,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
   describe('ui applications', function describeIndexTests() {
-    console.log('STARTING CORE APPLICATIONS FTR TESTS!!!!!!!!!');
-    debugger;
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
@@ -98,12 +73,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('starts on home page', async () => {
-      console.log('DOES IT START ON THE HOME PAGE?????');
       await testSubjects.existOrFail('fooAppHome');
     });
 
     it('redirects and renders correctly regardless of trailing slash', async () => {
-      console.log('STARTING: redirects and renders correctly regardless of trailing slash');
       await navigateTo(`/app/foo`);
       await waitForUrlToBe('/app/foo/home');
       await testSubjects.existOrFail('fooAppHome');
@@ -113,7 +86,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('navigates to its own pages', async () => {
-      debugger;
       // Go to page A
       await testSubjects.click('fooNavPageA');
       await waitForUrlToBe('/app/foo/page-a');
@@ -121,8 +93,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.existOrFail('fooAppPageA');
 
       // Go to home page
-      debugger;
-      console.log('DO WE NAVIGATE BACK TO HOME?');
       await testSubjects.click('fooNavHome');
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
@@ -130,7 +100,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('can use the back button to navigate within an app', async () => {
-      debugger;
       await browser.goBack();
       await waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
@@ -139,20 +108,15 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     // this is the one that's causing the failures
     it('navigates to app root when navlink is clicked', async () => {
-      debugger;
-      console.log("DO WE NAVIGATE BACK TO HOME IN THE TEST THAT'S CAUSING ISSUES?");
       await testSubjects.click('fooNavHome');
-      debugger;
-      console.log('now trying to navigate to the app root, named Foo');
 
       // await appsMenu.clickLink('Foo');
       navigateToAppFromAppsMenu('Foo');
-      console.log('THE TEST CLICKED THE LINK, DOES THE URL AND UI CHANGE AT ALL?');
 
       // await waitForUrlToBeWithTimeout('/app/foo/home'); // fix https://github.com/elastic/kibana/issues/166677 timeout failure
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
-      console.log('DID WE NAVIGATE BACK TO HOME?');
+
       await testSubjects.existOrFail('fooAppHome');
     });
 
