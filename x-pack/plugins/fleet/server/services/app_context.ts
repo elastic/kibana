@@ -62,6 +62,7 @@ class AppContextService {
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
   private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
   private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'] = '';
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -86,6 +87,7 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
+    this.kibanaInstanceId = appContext.kibanaInstanceId;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
@@ -207,6 +209,10 @@ class AppContextService {
 
   public getKibanaBranch() {
     return this.kibanaBranch;
+  }
+
+  public getKibanaInstanceId() {
+    return this.kibanaInstanceId;
   }
 
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {

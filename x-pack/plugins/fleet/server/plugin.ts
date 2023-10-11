@@ -169,6 +169,7 @@ export interface FleetAppContext {
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
+  kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -253,6 +254,7 @@ export class FleetPlugin
   private isProductionMode: FleetAppContext['isProductionMode'];
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
@@ -273,6 +275,7 @@ export class FleetPlugin
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.kibanaInstanceId = this.initializerContext.env.instanceUuid;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
@@ -497,6 +500,7 @@ export class FleetPlugin
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,

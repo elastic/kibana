@@ -19,7 +19,7 @@ import type { AgentMetrics } from './fetch_agent_metrics';
 
 export class FleetMetricsTask {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '0.0.5';
+  private taskVersion = '0.0.7';
   private taskType = 'Fleet-Metrics-Task';
   private wasStarted: boolean = false;
   private interval = '1m';
@@ -78,8 +78,26 @@ export class FleetMetricsTask {
         return;
       }
       const { agents_per_version: agentsPerVersion, agents } = agentMetrics;
+      const clusterInfo = await this.esClient.info();
+      const getCommonFields = (dataset: string) => {
+        return {
+          data_stream: {
+            dataset,
+            type: 'metrics',
+            namespace: 'default',
+          },
+          service: {
+            id: appContextService.getKibanaInstanceId(),
+            version: appContextService.getKibanaVersion(),
+          },
+          cluster: {
+            id: clusterInfo?.cluster_uuid ?? '',
+          },
+        };
+      };
       const agentStatusDoc = {
         '@timestamp': new Date().toISOString(),
+        ...getCommonFields('fleet_server.agent_status'),
         fleet: {
           agents: {
             total: agents.total_all_statuses,
@@ -97,31 +115,31 @@ export class FleetMetricsTask {
       };
       appContextService
         .getLogger()
-        .debug('Agent status metrics: ' + JSON.stringify(agentStatusDoc));
-      // this.esClient?.create({
-      //   index: 'metrics-fleet_server.agent_status-default',
-      //   id: uuidv4(),
-      //   body: agentStatusDoc,
-      // });
+        .trace('Agent status metrics: ' + JSON.stringify(agentStatusDoc));
+      await this.esClient.index({
+        index: 'metrics-fleet_server.agent_status-default',
+        body: agentStatusDoc,
+      });
 
-      appContextService
-        .getLogger()
-        .debug('Agent versions metrics: ' + JSON.stringify(agentsPerVersion));
-      // agentsPerVersion.forEach((byVersion) => {
-      //   this.esClient?.create({
-      //     index: 'metrics-fleet_server.agent_versions-default',
-      //     id: uuidv4(),
-      //     body: {
-      //       '@timestamp': new Date().toISOString(),
-      //       fleet: {
-      //         agent: {
-      //           version: byVersion.version,
-      //           count: byVersion.count,
-      //         },
-      //       },
-      //     },
-      //   });
-      // });
+      for (const byVersion of agentsPerVersion) {
+        const agentVersionsDoc = {
+          '@timestamp': new Date().toISOString(),
+          ...getCommonFields('fleet_server.agent_versions'),
+          fleet: {
+            agent: {
+              version: byVersion.version,
+              count: byVersion.count,
+            },
+          },
+        };
+        appContextService
+          .getLogger()
+          .trace('Agent versions metrics: ' + JSON.stringify(agentVersionsDoc));
+        await this.esClient.index({
+          index: 'metrics-fleet_server.agent_versions-default',
+          body: agentVersionsDoc,
+        });
+      }
     } catch (error) {
       appContextService
         .getLogger()
