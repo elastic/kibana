@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../screens/alerts';
 import { waitForEndpointAlerts } from '../tasks/alerts';
@@ -16,7 +15,7 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endp
 import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
 import type { PolicyData, ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import { login } from '../tasks/login';
+import { login, ROLE } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
@@ -29,7 +28,7 @@ describe(
     let createdHost: CreateAndEnrollEndpointHostResponse;
 
     beforeEach(() => {
-      login(SECURITY_SERVERLESS_ROLE_NAMES.soc_manager);
+      login(ROLE.soc_manager);
       getEndpointIntegrationVersion().then((version) => {
         createAgentPolicyTask(version, 'alerts test').then((data) => {
           indexedPolicy = data;
