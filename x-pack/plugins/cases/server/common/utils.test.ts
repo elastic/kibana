@@ -99,7 +99,7 @@ describe('common utils', () => {
     {
       key: 'string_custom_field_1',
       type: CustomFieldTypes.TEXT as const,
-      value: ['this is a text field value', 'this is second'],
+      value: 'this is a text field value',
     },
   ];
 
@@ -324,10 +324,7 @@ describe('common utils', () => {
             Object {
               "key": "string_custom_field_1",
               "type": "text",
-              "value": Array [
-                "this is a text field value",
-                "this is second",
-              ],
+              "value": "this is a text field value",
             },
           ],
           "description": "A description",
@@ -607,10 +604,7 @@ describe('common utils', () => {
                 Object {
                   "key": "string_custom_field_1",
                   "type": "text",
-                  "value": Array [
-                    "this is a text field value",
-                    "this is second",
-                  ],
+                  "value": "this is a text field value",
                 },
               ],
               "description": "This is a brand new case of a bad meanie defacing data",
@@ -938,10 +932,7 @@ describe('common utils', () => {
             Object {
               "key": "string_custom_field_1",
               "type": "text",
-              "value": Array [
-                "this is a text field value",
-                "this is second",
-              ],
+              "value": "this is a text field value",
             },
           ],
           "description": "This is a brand new case of a bad meanie defacing data",
