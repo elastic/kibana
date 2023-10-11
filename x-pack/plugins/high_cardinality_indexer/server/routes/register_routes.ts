@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { CoreSetup } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { getGlobalHighCardinalityIndexerServerRouteRepository } from './get_global_observability_ai_assistant_route_repository';
-import type { ObservabilityAIAssistantRouteHandlerResources } from './types';
+import { getGlobalHighCardinalityIndexerServerRouteRepository } from './get_global_high_cardinality_indexer_route_repository';
+import type { HighCardinalityIndexerRouteHandlerResources } from './types';
 
 export function registerServerRoutes({
   core,
@@ -17,10 +17,7 @@ export function registerServerRoutes({
 }: {
   core: CoreSetup;
   logger: Logger;
-  dependencies: Omit<
-    ObservabilityAIAssistantRouteHandlerResources,
-    'request' | 'context' | 'logger' | 'params'
-  >;
+  dependencies: Omit<HighCardinalityIndexerRouteHandlerResources, 'request' | 'context' | 'params'>;
 }) {
   registerRoutes({
     core,

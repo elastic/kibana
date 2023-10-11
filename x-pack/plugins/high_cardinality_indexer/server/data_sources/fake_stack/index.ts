@@ -1,10 +1,25 @@
-import { isArray } from 'lodash';
-import { generateEvent as generateAdminConsole, kibanaAssets as kibanaAssetsAdminConsole } from './admin_console/index';
-import { generateEvent as generateMongoDB, kibanaAssets as kibanaAssetsMongoDB } from './mongodb';
-import { generateEvent as generateMessageProcessor, kibanaAssets as kibanaAssetsMessageProcessor } from './message_processor';
-import { generateEvent as generateNginxProxy, kibanaAssets as kibanaAssetsNginxProxy } from './nginx_proxy';
-import { GeneratorFunction } from '../../types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
+import { isArray } from 'lodash';
+import {
+  generateEvent as generateAdminConsole,
+  kibanaAssets as kibanaAssetsAdminConsole,
+} from './admin_console';
+import { generateEvent as generateMongoDB, kibanaAssets as kibanaAssetsMongoDB } from './mongodb';
+import {
+  generateEvent as generateMessageProcessor,
+  kibanaAssets as kibanaAssetsMessageProcessor,
+} from './message_processor';
+import {
+  generateEvent as generateNginxProxy,
+  kibanaAssets as kibanaAssetsNginxProxy,
+} from './nginx_proxy';
+import { GeneratorFunction } from '../../types';
 
 import { indexTemplate as adminConsoleIndexTemplate } from './admin_console/ecs';
 import { indexTemplate as messageProcessorIndexTemplate } from './message_processor/ecs';
@@ -30,7 +45,7 @@ export const kibanaAssets = [
   kibanaAssetsMongoDB,
   kibanaAssetsMessageProcessor,
   kibanaAssetsNginxProxy,
-  `${__dirname}/assets/transaction_rates.ndjson`
+  `${__dirname}/assets/transaction_rates.ndjson`,
 ];
 
 export const generteEvent: GeneratorFunction = (config, schedule, index, timestamp) => {
@@ -42,6 +57,6 @@ export const generteEvent: GeneratorFunction = (config, schedule, index, timesta
     ...(isArray(adminConsoleEvents) ? adminConsoleEvents : [adminConsoleEvents]),
     ...(isArray(mongodbEvents) ? mongodbEvents : [mongodbEvents]),
     ...(isArray(messageProcessorEvents) ? messageProcessorEvents : [messageProcessorEvents]),
-    ...(isArray(nginxProxyEvents) ? nginxProxyEvents: [nginxProxyEvents]),
+    ...(isArray(nginxProxyEvents) ? nginxProxyEvents : [nginxProxyEvents]),
   ];
 };

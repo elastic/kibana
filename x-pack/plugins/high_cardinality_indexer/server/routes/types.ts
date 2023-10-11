@@ -8,6 +8,7 @@
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import { QueueRegistry } from '../queue/queue_registry';
 import type {
   HighCardinalityIndexerPluginSetupDependencies,
   HighCardinalityIndexerPluginStartDependencies,
@@ -21,6 +22,8 @@ export interface HighCardinalityIndexerRouteHandlerResources {
   request: KibanaRequest;
   context: HighCardinalityIndexerRequestHandlerContext;
   logger: Logger;
+
+  queueRegistry: QueueRegistry;
   plugins: {
     [key in keyof HighCardinalityIndexerPluginSetupDependencies]: {
       setup: Required<HighCardinalityIndexerPluginSetupDependencies>[key];

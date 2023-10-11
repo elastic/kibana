@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
+import { QueueRegistry } from './queue/queue_registry';
 
 import { registerServerRoutes } from './routes/register_routes';
 import { HighCardinalityIndexerRouteHandlerResources } from './routes/types';
@@ -21,12 +22,13 @@ export class HighCardinalityIndexerPlugin
   implements
     Plugin<
       HighCardinalityIndexerPluginSetup,
-      HighCardinalityIndexerPluginStart,
+      void,
       HighCardinalityIndexerPluginSetupDependencies,
       HighCardinalityIndexerPluginStartDependencies
     >
 {
   logger: Logger;
+
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
   }
@@ -37,43 +39,6 @@ export class HighCardinalityIndexerPlugin
     >,
     plugins: HighCardinalityIndexerPluginSetupDependencies
   ): HighCardinalityIndexerPluginSetup {
-    // plugins.features.registerKibanaFeature({
-    //   id: OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
-    //   name: i18n.translate('xpack.observabilityAiAssistant.featureRegistry.featureName', {
-    //     defaultMessage: 'Observability AI Assistant',
-    //   }),
-    //   order: 8600,
-    //   category: DEFAULT_APP_CATEGORIES.observability,
-    //   app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-    //   catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-    //   minimumLicense: 'enterprise',
-    //   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
-    //   privileges: {
-    //     all: {
-    //       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-    //       api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant'],
-    //       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-    //       savedObject: {
-    //         all: [
-    //           ACTION_SAVED_OBJECT_TYPE,
-    //           ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-    //           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    //         ],
-    //         read: [],
-    //       },
-    //       ui: ['show'],
-    //     },
-    //     read: {
-    //       disabled: true,
-    //       savedObject: {
-    //         all: [],
-    //         read: [],
-    //       },
-    //       ui: [],
-    //     },
-    //   },
-    // });
-
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -87,21 +52,22 @@ export class HighCardinalityIndexerPlugin
       };
     }) as HighCardinalityIndexerRouteHandlerResources['plugins'];
 
+    const queueRegistry = new QueueRegistry();
+
     registerServerRoutes({
       core,
       logger: this.logger,
       dependencies: {
+        logger: this.logger,
         plugins: routeHandlerPlugins,
+        queueRegistry,
       },
     });
 
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    plugins: HighCardinalityIndexerPluginStartDependencies
-  ): HighCardinalityIndexerPluginStart {
-    return {};
-  }
+  start() {}
+
+  stop() {}
 }

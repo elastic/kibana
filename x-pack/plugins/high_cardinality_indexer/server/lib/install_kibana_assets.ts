@@ -1,32 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import fs from 'fs';
-import FormData from 'form-data';
-import axios, { AxiosBasicCredentials } from 'axios';
-import { logger } from './logger';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isError } from 'lodash';
 
-export async function installKibanaAssets(filePath: string, kibanaUrl: string, userPassObject: AxiosBasicCredentials) {
+export async function installKibanaAssets({
+  filePath,
+  logger,
+  soClient,
+}: {
+  filePath: string;
+  logger: Logger;
+  soClient: SavedObjectsClientContract;
+}) {
   try {
-    // Create a readable stream for the file
-    const fileStream = fs.createReadStream(filePath);
+    try {
+      // Read the NDJSON file synchronously and parse it into an object
+      const ndjsonData = fs.readFileSync(filePath, 'utf8').split('\n');
 
-    // Create the multipart/form-data request body with the file content
-    const formData = new FormData();
-    formData.append('file', fileStream);
+      const objects = [];
+      for (const line of ndjsonData) {
+        if (line.trim() === '') continue; // Skip empty lines
 
-    // Send the saved objects to Kibana using the _import API
-    const response = await axios.post(`${kibanaUrl}/api/saved_objects/_import?overwrite=true`, formData, {
-      headers: {
-        ...formData.getHeaders(),
-        'kbn-xsrf': 'true',
-      },
-      auth: userPassObject
-    });
+        try {
+          const parsedObject = JSON.parse(line);
+          objects.push(parsedObject);
+        } catch (error) {
+          logger.error('Error parsing JSON:', error);
+        }
+      }
 
-    logger.info(`Imported ${response.data.successCount} saved objects from "${filePath}" into Kibana`);
-    return response.data;
+      await soClient.bulkCreate(objects, { overwrite: true });
+
+      logger.info(`Imported  saved objects from "${filePath}"`);
+    } catch (error) {
+      logger.error('Error reading or parsing JSON file:', error);
+    }
   } catch (error) {
     if (isError(error)) {
-      logger.error(`Error importing saved objects from "${filePath}" into Kibana: ${error.message}`);
+      logger.error(
+        `Error importing saved objects from "${filePath}" into Kibana: ${error.message}`
+      );
     }
     throw error;
   }

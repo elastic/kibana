@@ -1,10 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { faker } from '@faker-js/faker';
 import lodash from 'lodash';
 
 export interface User {
   id: string;
   name: string;
-  roles: string[]
+  roles: string[];
 }
 
 const { sample } = lodash;
@@ -30,7 +37,7 @@ export function createUser(): User {
   return {
     id: userName,
     name: `${firstName} ${lastName}`,
-    roles: [ sample(['admin', 'customer']) as string ]
+    roles: [sample(['admin', 'customer']) as string],
   };
 }
 
@@ -45,4 +52,3 @@ export function getLoggedInUser(): User {
   loginUser(newUser);
   return newUser;
 }
-

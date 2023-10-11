@@ -6,10 +6,12 @@
  */
 
 import { createRoutes } from './create/route';
+import { queueRoutes } from './queue/route';
 
 export function getGlobalHighCardinalityIndexerServerRouteRepository() {
   return {
     ...createRoutes,
+    ...queueRoutes,
   };
 }
 

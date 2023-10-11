@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { faker } from '@faker-js/faker';
 import { sample, range, memoize } from 'lodash';
 import { GeneratorFunction } from '../../types';
@@ -27,8 +34,8 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         name: `host-${index}`,
         mac: ['00-00-5E-00-53-23', '00-00-5E-00-53-24'],
         network: {
-          name: `network-${index}`
-        }
+          name: `network-${index}`,
+        },
       },
       event: {
         module: 'system',
@@ -44,14 +51,14 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           total: {
             norm: {
               pct: randomBetween(),
-            }
+            },
           },
           user: {
             pct: randomBetween(1, 4),
           },
           system: {
             pct: randomBetween(1, 4),
-          }
+          },
         },
         load: {
           1: randomBetween(1, 4),
@@ -60,21 +67,21 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           actual: {
             used: {
               pct: randomBetween(1, 4),
-            }
-          }
+            },
+          },
         },
         filesystem: {
           used: {
             pct: randomBetween(1, 4),
-          }
-        }
+          },
+        },
       },
       metricset: {
         period: interval,
       },
       container: {
         id: `container-${index}`,
-        name: 'container-name'
+        name: 'container-name',
       },
     },
     {
@@ -89,8 +96,8 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           },
           egress: {
             bytes: parseInt(faker.random.numeric(3), 10),
-          }
-        }
+          },
+        },
       },
       event: {
         module: 'system',
@@ -108,15 +115,15 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           },
           out: {
             bytes: generateNetworkData(timestamp.toISOString()),
-          }
-        }
+          },
+        },
       },
       metricset: {
         period: interval,
       },
       container: {
         id: `container-${index}`,
-        name: 'container-name'
+        name: 'container-name',
       },
     },
     {
@@ -125,8 +132,8 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
       host: {
         name: `host-${index}`,
         network: {
-          name: `network-${index}`
-        }
+          name: `network-${index}`,
+        },
       },
       event: {
         module: 'system',
@@ -144,18 +151,17 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           },
           out: {
             bytes: generateNetworkData(timestamp.toISOString()),
-          }
-        }
+          },
+        },
       },
       metricset: {
         period: interval,
       },
       container: {
         id: `container-${index}`,
-        name: 'container-name'
+        name: 'container-name',
       },
-    }
+    },
   ];
   return replaceMetricsWithShapes(timestamp, schedule, docs);
 };
-

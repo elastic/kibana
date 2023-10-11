@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { GeneratorFunction, Dataset, IndexTemplateDef } from '../types';
 import {
   FAKE_HOSTS,
@@ -5,8 +12,8 @@ import {
   FAKE_EC2,
   FAKE_K8S,
   FAKE_APM_LATENCY,
-  FAKE_STACK
-} from '../constants';
+  FAKE_STACK,
+} from '../../common/constants';
 
 import * as fakeLogs from './fake_logs';
 import * as fakeK8S from './fake_k8s';

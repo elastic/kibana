@@ -1,10 +1,27 @@
-import { sample, set } from 'lodash';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { sample } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { Moment } from 'moment';
 import { faker } from '@faker-js/faker';
 import { ADMIN_CONSOLE_HOSTS, DOMAINS } from '../../../common/constants';
-import { Moment } from 'moment';
 import { User } from '../login_cache';
 
-export function createEvent(timestamp: Moment, source: string, method: string, path: string, user: User, level: 'ERROR' | 'INFO' = 'INFO', statusCode = 200, overrides?: Record<string, unknown>) {
+export function createEvent(
+  timestamp: Moment,
+  source: string,
+  method: string,
+  path: string,
+  user: User,
+  level: 'ERROR' | 'INFO' = 'INFO',
+  statusCode = 200,
+  overrides?: Record<string, unknown>
+) {
   const domain = sample(DOMAINS);
   const port = 6000;
   const full = `https://${source}.${domain}:${port}${path}`;
@@ -16,22 +33,22 @@ export function createEvent(timestamp: Moment, source: string, method: string, p
     host: { name: sample(ADMIN_CONSOLE_HOSTS) },
     log: {
       level,
-      logger: source
+      logger: source,
     },
     server: {
-      port
+      port,
     },
     http: {
       request: {
         bytes: parseInt(faker.random.numeric(4), 10),
         method,
-        mime_type: 'application/json'
+        mime_type: 'application/json',
       },
       response: {
         status_code: statusCode,
         mime_type: 'application/json',
         bytes: parseInt(faker.random.numeric(3), 10),
-      }
+      },
     },
     url: {
       domain,
@@ -43,13 +60,14 @@ export function createEvent(timestamp: Moment, source: string, method: string, p
     },
     user,
     user_agent: {
-      original: userAgent
-    }
+      original: userAgent,
+    },
   };
 
-  return overrides != null ? Object.keys(overrides).reduce((acc, key) => {
-    const value = overrides[key];
-    return set(acc, key, value);
-  }, baseEvent) : baseEvent;
+  return overrides != null
+    ? Object.keys(overrides).reduce((acc, key) => {
+        const value = overrides[key];
+        return set(acc, key, value);
+      }, baseEvent)
+    : baseEvent;
 }
-

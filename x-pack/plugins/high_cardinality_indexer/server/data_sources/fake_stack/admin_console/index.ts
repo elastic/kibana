@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { createStartupEvents } from './lib/events/startup';
 import { login } from './lib/events/login';
 import { loginError } from './lib/events/login_error';
@@ -24,17 +31,11 @@ const GOOD_EVENT_TEMPLATES: EventTemplate = [
   [editUser, 20],
 ];
 
-const BAD_EVENT_TEMPLATES: EventTemplate = [
-  [mongodbConnectionError, 1],
-];
+const BAD_EVENT_TEMPLATES: EventTemplate = [[mongodbConnectionError, 1]];
 
-const INTERNAL_ERRORS_EVENT_TEMPLATES: EventTemplate = [
-  [internalError, 1],
-];
+const INTERNAL_ERRORS_EVENT_TEMPLATES: EventTemplate = [[internalError, 1]];
 
-const CONNECTION_TIMEOUT_EVENT_TEMPLATES: EventTemplate = [
-  [qaDeployedToProduction, 1],
-];
+const CONNECTION_TIMEOUT_EVENT_TEMPLATES: EventTemplate = [[qaDeployedToProduction, 1]];
 
 function getTemplate(name: string) {
   if (name === 'bad') {
@@ -64,5 +65,4 @@ export const generateEvent: GeneratorFunction = (_config, schedule, _index, time
   const events = fn(schedule, timestamp).flat();
 
   return [...startupEvents, ...events];
-
 };

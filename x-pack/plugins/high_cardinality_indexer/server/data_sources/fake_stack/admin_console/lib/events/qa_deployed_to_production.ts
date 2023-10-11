@@ -1,8 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { faker } from '@faker-js/faker';
 import { sample } from 'lodash';
 import { ADMIN_CONSOLE, ADMIN_CONSOLE_QA_HOSTS, DOMAINS } from '../../../common/constants';
 import { getLoggedInUser } from '../login_cache';
 import { EventFunction } from '../../../../../types';
-import { faker } from '@faker-js/faker';
 import { createUpstreamTimeout } from '../../../nginx_proxy/lib/events/create_upstream_timedout';
 import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
 
@@ -14,7 +21,12 @@ interface Endpoint {
 }
 
 const ENDPOINTS: Endpoint[] = [
-  { path: '/api/listCustomers', method: 'GET', action: 'listCustomers', category: 'administrative' },
+  {
+    path: '/api/listCustomers',
+    method: 'GET',
+    action: 'listCustomers',
+    category: 'administrative',
+  },
   { path: '/api/viewUsers', method: 'GET', action: 'viewUsers', category: 'administrative' },
   { path: '/api/deleteUser', method: 'POST', action: 'deleteUser', category: 'administrative' },
   { path: '/api/createUser', method: 'POST', action: 'createUser', category: 'administrative' },
@@ -32,11 +44,25 @@ export const qaDeployedToProduction: EventFunction = (_schedule, timestamp) => {
   const userAgent = faker.internet.userAgent();
 
   return [
-    ...createUpstreamTimeout(timestamp, method, path, `${ADMIN_CONSOLE}.${domain}`, `${host}:${port}`, user.id),
-    ...createNginxLog(timestamp, method, 502, 0, path, `https://${ADMIN_CONSOLE}.${domain}`, userAgent, `${ADMIN_CONSOLE}.${domain}`, `${host}:${port}`, user.id)
+    ...createUpstreamTimeout(
+      timestamp,
+      method,
+      path,
+      `${ADMIN_CONSOLE}.${domain}`,
+      `${host}:${port}`,
+      user.id
+    ),
+    ...createNginxLog(
+      timestamp,
+      method,
+      502,
+      0,
+      path,
+      `https://${ADMIN_CONSOLE}.${domain}`,
+      userAgent,
+      `${ADMIN_CONSOLE}.${domain}`,
+      `${host}:${port}`,
+      user.id
+    ),
   ];
 };
-
-
-
-

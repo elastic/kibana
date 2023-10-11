@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { sample, random } from 'lodash';
 import { faker } from '@faker-js/faker';
 import { ADMIN_CONSOLE, DOMAINS } from '../../../common/constants';
@@ -8,7 +15,7 @@ export const internalError: EventFunction = (_schedule, timestamp) => {
   const user = {
     id: 'superuser',
     name: 'Superuser',
-    roles: [ 'admin' ]
+    roles: ['admin'],
   };
   const hackerNoun = faker.helpers.slugify(faker.hacker.noun());
   const domain = sample(DOMAINS) as string;
@@ -35,10 +42,8 @@ export const internalError: EventFunction = (_schedule, timestamp) => {
         username: user.id,
       },
       user_agent: {
-        original: 'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 637FCK3D'
-      }
-    })
+        original: 'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 637FCK3D',
+      },
+    }),
   ];
 };
-
-

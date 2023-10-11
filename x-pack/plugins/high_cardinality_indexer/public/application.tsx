@@ -9,6 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import type { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -36,14 +37,14 @@ export function Application({
         <KibanaContextProvider
           services={{
             ...coreStart,
-            plugins: {
-              start: pluginsStart,
-            },
+            ...pluginsStart,
           }}
         >
           <RedirectAppLinks coreStart={coreStart}>
             <coreStart.i18n.Context>
-              <MainRoute />
+              <Router history={history}>
+                <MainRoute />
+              </Router>
             </coreStart.i18n.Context>
           </RedirectAppLinks>
         </KibanaContextProvider>

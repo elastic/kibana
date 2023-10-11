@@ -15,12 +15,7 @@ import {
   FAKE_K8S,
   FAKE_APM_LATENCY,
   FAKE_STACK,
-} from './constants';
-
-export interface Doc extends Record<string, unknown> {
-  namespace: string;
-  '@timestamp': Moment | string;
-}
+} from '../common/constants';
 
 export const DatasetRT = rt.keyof({
   [FAKE_HOSTS]: null,
@@ -105,19 +100,6 @@ export const ParsedScheduleRT = rt.intersection([
 export type ParsedSchedule = rt.TypeOf<typeof ParsedScheduleRT>;
 
 export const ConfigRT = rt.type({
-  elasticsearch: rt.type({
-    host: rt.string,
-    username: rt.string,
-    password: rt.string,
-    apiKey: rt.string,
-    installKibanaUser: rt.boolean,
-  }),
-  kibana: rt.type({
-    host: rt.string,
-    username: rt.string,
-    password: rt.string,
-    installAssets: rt.boolean,
-  }),
   indexing: rt.type({
     dataset: DatasetRT,
     interval: rt.number,
@@ -127,13 +109,12 @@ export const ConfigRT = rt.type({
     reduceWeekendTrafficBy: rt.number,
   }),
   schedule: rt.array(ScheduleRT),
+  installAssets: rt.boolean,
 });
 
 export type Config = rt.TypeOf<typeof ConfigRT>;
 
 export const PartialConfigRT = rt.partial({
-  elasticsearch: rt.partial(ConfigRT.props.elasticsearch.props),
-  kibana: rt.partial(ConfigRT.props.kibana.props),
   indexing: rt.partial(ConfigRT.props.indexing.props),
   schedule: rt.array(ScheduleRT),
 });

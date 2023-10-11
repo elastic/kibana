@@ -118,6 +118,7 @@
     "@emotion/serialize": "^1.1.2",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
+    "@faker-js/faker": "^7.6.0",
     "@grpc/grpc-js": "^1.6.8",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",

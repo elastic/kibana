@@ -1,10 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { createStartupEvents } from './lib/events/startup';
 import { good } from './lib/events/good';
 import { bad } from './lib/events/bad';
 import { badHost } from './lib/events/bad_host';
 import { weightedSample } from '../common/weighted_sample';
 
-import { Doc, GeneratorFunction, EventFunction, EventTemplate } from '../../../types';
+import type { GeneratorFunction, EventFunction, EventTemplate } from '../../../types';
+import type { Doc } from '../../../../common/types';
 
 let firstRun = true;
 
@@ -12,12 +20,10 @@ export const kibanaAssets = `${__dirname}/assets/message_processor.ndjson`;
 
 const GOOD_EVENT_TEMPLATES: EventTemplate = [
   [good, 99],
-  [bad, 1]
+  [bad, 1],
 ];
 
-const BAD_EVENT_TEMPLATES: EventTemplate = [
-  [badHost(true), 1]
-];
+const BAD_EVENT_TEMPLATES: EventTemplate = [[badHost(true), 1]];
 
 function getTemplate(name: string) {
   if (name === 'bad') {
@@ -39,4 +45,3 @@ export const generateEvent: GeneratorFunction = (_config, schedule, _index, time
 
   return [...startupEvents, ...events];
 };
-
