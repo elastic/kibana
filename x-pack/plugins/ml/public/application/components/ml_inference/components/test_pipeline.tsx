@@ -62,6 +62,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const [simulatePipelineError, setSimulatePipelineError] = useState<undefined | string>();
   const [sourceIndexMissingError, setSourceIndexMissingError] = useState<undefined | string>();
   const [sampleDocsString, setSampleDocsString] = useState<string>('');
+  const [lastFetchedSampleDocsString, setLastFetchedSampleDocsString] = useState<string>('');
   const [isValid, setIsValid] = useState<boolean>(true);
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
   const {
@@ -122,28 +123,50 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
     setIsValid(valid);
   };
 
-  const getSampleDocs = useCallback(async () => {
-    let records: IngestSimulateDocument[] = [];
-    let resp;
+  const getDocs = useCallback(
+    async (body: any) => {
+      let records: IngestSimulateDocument[] = [];
+      let resp;
+      try {
+        resp = await esSearch(body);
 
-    try {
-      resp = await esSearch({
-        index: sourceIndex,
-        body: {
-          size: 1,
-        },
-      });
-
-      if (resp && resp.hits.total.value > 0) {
-        records = resp.hits.hits;
+        if (resp && resp.hits.total.value > 0) {
+          records = resp.hits.hits;
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
-    setSampleDocsString(JSON.stringify(records, null, 2));
-    setIsValid(true);
-  }, [sourceIndex, esSearch]);
+      setSampleDocsString(JSON.stringify(records, null, 2));
+      setLastFetchedSampleDocsString(JSON.stringify(records, null, 2));
+      setIsValid(true);
+    },
+    [esSearch]
+  );
+
+  const getSampleDoc = useCallback(async () => {
+    getDocs({
+      index: sourceIndex,
+      body: {
+        size: 1,
+      },
+    });
+  }, [getDocs, sourceIndex]);
+
+  const getRandomSampleDoc = useCallback(async () => {
+    getDocs({
+      index: sourceIndex,
+      body: {
+        size: 1,
+        query: {
+          function_score: {
+            query: { match_all: {} },
+            random_score: {},
+          },
+        },
+      },
+    });
+  }, [getDocs, sourceIndex]);
 
   useEffect(
     function checkSourceIndexExists() {
@@ -158,16 +181,16 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         ensureSourceIndexExists();
       }
     },
-    [sourceIndex, getSampleDocs, sourceIndexMissingError]
+    [sourceIndex, sourceIndexMissingError]
   );
 
   useEffect(
     function fetchSampleDocsFromSource() {
       if (sourceIndex && sourceIndexMissingError === undefined) {
-        getSampleDocs();
+        getSampleDoc();
       }
     },
-    [sourceIndex, getSampleDocs, sourceIndexMissingError]
+    [sourceIndex, getSampleDoc, sourceIndexMissingError]
   );
 
   return (
@@ -306,12 +329,24 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={getSampleDocs}
+                  onClick={() => setSampleDocsString(lastFetchedSampleDocsString)}
                   disabled={sampleDocsString === ''}
                 >
                   {i18n.translate(
                     'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.resetSampleDocsButton',
-                    { defaultMessage: 'Reset sample docs' }
+                    { defaultMessage: 'Reset' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={getRandomSampleDoc}
+                  disabled={sampleDocsString === ''}
+                >
+                  {i18n.translate(
+                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.reloadSampleDocsButton',
+                    { defaultMessage: 'Reload' }
                   )}
                 </EuiButtonEmpty>
               </EuiFlexItem>
