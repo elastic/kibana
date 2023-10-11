@@ -49,13 +49,13 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { loginWithUser } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
-describe.skip('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
@@ -72,7 +72,7 @@ describe.skip('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
-    loginWithUser({ username: 'elastic', password: 'changeme' });
+    login();
     visit(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
@@ -105,8 +105,12 @@ describe.skip('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
       'have.text',
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', this.mycase.reporter);
-    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', this.mycase.reporter);
+    cy.get(CASE_DETAILS_USERNAMES)
+      .eq(REPORTER)
+      .should('have.text', Cypress.env('ELASTICSEARCH_USERNAME'));
+    cy.get(CASE_DETAILS_USERNAMES)
+      .eq(PARTICIPANTS)
+      .should('have.text', Cypress.env('ELASTICSEARCH_USERNAME'));
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
 
     EXPECTED_METRICS.forEach((metric) => {
