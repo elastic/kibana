@@ -12,6 +12,7 @@ import {
   asDuration,
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
+  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -24,6 +25,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -38,7 +40,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
   RULE_TYPES_CONFIG,
@@ -108,7 +109,9 @@ export function registerTransactionDurationRuleType({
       context: transactionDurationActionVariables,
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: APM_SERVER_FEATURE_ID,
+    producer: apmConfig.rules.useO11yFeatureIdAsOwner
+      ? observabilityFeatureId
+      : APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ params: ruleParams, services, spaceId }) => {

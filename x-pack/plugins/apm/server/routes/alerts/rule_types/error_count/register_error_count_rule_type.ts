@@ -10,6 +10,7 @@ import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
@@ -18,6 +19,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import {
@@ -34,7 +36,6 @@ import {
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatErrorCountReason,
   RULE_TYPES_CONFIG,
@@ -75,6 +76,7 @@ export const errorCountActionVariables = [
 export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
+  apmConfig,
   basePath,
   getApmIndices,
   logger,
@@ -96,7 +98,9 @@ export function registerErrorCountRuleType({
         context: errorCountActionVariables,
       },
       category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: APM_SERVER_FEATURE_ID,
+      producer: apmConfig.rules.useO11yFeatureIdAsOwner
+        ? observabilityFeatureId
+        : APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({

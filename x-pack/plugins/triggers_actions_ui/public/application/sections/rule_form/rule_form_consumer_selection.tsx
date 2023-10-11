@@ -121,13 +121,13 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
   }, []);
 
   useEffect(() => {
-    if (formattedSelectOptions.length === 1) {
-      onChange(formattedSelectOptions[0].value as RuleCreationValidConsumer);
+    if (consumers.length === 1) {
+      onChange(consumers[0] as RuleCreationValidConsumer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formattedSelectOptions]);
+  }, [consumers]);
 
-  if (formattedSelectOptions.length <= 1) {
+  if (consumers.length <= 1) {
     return null;
   }
   return (

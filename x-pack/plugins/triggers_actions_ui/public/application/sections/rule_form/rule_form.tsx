@@ -400,6 +400,16 @@ export const RuleForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
 
+  useEffect(() => {
+    if (ruleTypeModel) {
+      const ruleType = ruleTypes.find((rt) => rt.id === ruleTypeModel.id);
+      if (ruleType && useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
+        setConsumer(ruleType.producer as RuleCreationValidConsumer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleTypeModel, ruleTypes]);
+
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context

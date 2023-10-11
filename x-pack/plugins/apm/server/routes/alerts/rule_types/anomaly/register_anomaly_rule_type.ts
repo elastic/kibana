@@ -12,6 +12,7 @@ import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
@@ -21,6 +22,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_SEVERITY,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -43,7 +45,7 @@ import {
 } from '../../../../../common/environment_filter_values';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
-  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
@@ -63,6 +65,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 export function registerAnomalyRuleType({
   alerting,
   alertsLocator,
+  apmConfig,
   getApmIndices,
   basePath,
   logger,
@@ -94,7 +97,9 @@ export function registerAnomalyRuleType({
         ],
       },
       category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: 'apm',
+      producer: apmConfig.rules.useO11yFeatureIdAsOwner
+        ? observabilityFeatureId
+        : APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ params, services, spaceId, startedAt }) => {

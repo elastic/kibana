@@ -55,7 +55,7 @@ export function registerRuleTypes(
     ruleDataClientSLO
   );
   alertingPlugin.registerType(
-    sloBurnRateRuleType(createLifecycleRuleExecutorSLO, basePath, alertsLocator)
+    sloBurnRateRuleType(createLifecycleRuleExecutorSLO, basePath, config, alertsLocator)
   );
 
   // Threshold RULE

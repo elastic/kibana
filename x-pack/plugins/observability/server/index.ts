@@ -60,6 +60,12 @@ const configSchema = schema.object({
   compositeSlo: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
+  slo: schema.object({
+    rules: schema.object({
+      useO11yFeatureIdAsOwner: schema.boolean({ defaultValue: false }),
+    }),
+  }),
 });
 
 export const config: PluginConfigDescriptor = {

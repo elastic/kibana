@@ -22,6 +22,11 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
+## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
+xpack.observability.createO11yGenericFeatureId: true
+xpack.apm.rules.useO11yFeatureIdAsOwner: true
+xpack.observability.slo.rules.useO11yFeatureIdAsOwner: true
+
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 

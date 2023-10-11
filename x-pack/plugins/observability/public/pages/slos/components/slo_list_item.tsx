@@ -276,6 +276,7 @@ export function SloListItem({
           onClose={() => {
             setIsAddRuleFlyoutOpen(false);
           }}
+          useRuleProducer
         />
       ) : null}
 

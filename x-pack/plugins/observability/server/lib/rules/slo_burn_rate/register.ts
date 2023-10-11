@@ -14,7 +14,12 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AlertsLocatorParams, observabilityPaths, sloFeatureId } from '../../../../common';
+import {
+  AlertsLocatorParams,
+  observabilityFeatureId,
+  observabilityPaths,
+  sloFeatureId,
+} from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -27,6 +32,7 @@ import {
 
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
+import { ObservabilityConfig } from '../../..';
 
 const durationSchema = schema.object({
   value: schema.number(),
@@ -47,6 +53,7 @@ type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 export function sloBurnRateRuleType(
   createLifecycleRuleExecutor: CreateLifecycleExecutor,
   basePath: IBasePath,
+  config: ObservabilityConfig,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
   return {
@@ -63,7 +70,7 @@ export function sloBurnRateRuleType(
     defaultActionGroupId: ALERT_ACTION.id,
     actionGroups: [ALERT_ACTION, HIGH_PRIORITY_ACTION, MEDIUM_PRIORITY_ACTION, LOW_PRIORITY_ACTION],
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: sloFeatureId,
+    producer: config.slo.rules.useO11yFeatureIdAsOwner ? observabilityFeatureId : sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(getRuleExecutor({ basePath, alertsLocator })),
