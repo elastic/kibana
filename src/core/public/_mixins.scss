@@ -2,5 +2,9 @@
   // The `--kbnAppHeadersOffset` CSS variable is automatically updated by
   // styles/rendering/_base.scss, based on whether the Kibana chrome has a
   // header banner, app menu, and is visible or hidden
-  height: calc(100vh - var(--kbnAppHeadersOffset, 0) - #{$additionalOffset});
+  height: calc(
+    100vh
+    - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
+    - #{$additionalOffset}
+  );
 }
