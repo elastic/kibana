@@ -15,10 +15,7 @@ import {
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
 
-import {
-  LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD,
-  RANDOM_SAMPLER_SEED,
-} from '../../../common/constants';
+import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../../../common/constants';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
@@ -168,7 +165,7 @@ export const fetchSignificantTermPValues = async (
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
 
-      if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD) {
+      if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD) {
         result.push({
           key: `${fieldName}:${String(bucket.key)}`,
           type: SIGNIFICANT_TERM_TYPE.KEYWORD,
