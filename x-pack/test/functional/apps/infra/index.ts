@@ -28,6 +28,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./logs_source_configuration'));
       loadTestFile(require.resolve('./link_to'));
       loadTestFile(require.resolve('./log_stream'));
+      loadTestFile(require.resolve('./ml_job_id_formats/tests'));
     });
   });
 };

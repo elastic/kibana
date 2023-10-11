@@ -206,6 +206,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   return (
     <LogsPageTemplate
+      data-test-subj="logEntryRateResultsPage"
       hasData={logViewStatus?.index !== 'missing'}
       pageHeader={{
         pageTitle,
