@@ -23,4 +23,7 @@ export { InspectorPublicPlugin as Plugin } from './plugin';
 export * from './types';
 export * from '../common/adapters';
 
-export { LOCAL_CLUSTER_KEY, getLocalClusterDetails } from './views/requests/components/details/clusters_view/local_cluster';
+export {
+  LOCAL_CLUSTER_KEY,
+  getLocalClusterDetails,
+} from './views/requests/components/details/clusters_view/local_cluster';

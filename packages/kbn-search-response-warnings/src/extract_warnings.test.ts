@@ -102,7 +102,7 @@ describe('extract search response warnings', () => {
           },
         } as estypes.SearchResponse,
         mockInspectorService,
-        mockRequestAdapter,
+        mockRequestAdapter
       );
 
       expect(warnings).toEqual([]);
