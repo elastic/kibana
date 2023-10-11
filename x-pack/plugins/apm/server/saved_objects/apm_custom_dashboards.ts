@@ -17,7 +17,7 @@ export const apmCustomDashboards: SavedObjectsType = {
   mappings: {
     properties: {
       dashboardSavedObjectId: { type: 'keyword' },
-      kuery: { type: 'text' },
+      kuery: { type: 'keyword' },
       serviceEnvironmentFilterEnabled: { type: 'boolean' },
       serviceNameFilterEnabled: { type: 'boolean' },
     },

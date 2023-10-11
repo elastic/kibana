@@ -1500,15 +1500,20 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ savedObjectsClient }) => {
       const response = await savedObjectsClient.find<SavedApmCustomDashboard>({
         type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        page: 1,
-        perPage: 500,
-        sortField: 'updated_at',
-        sortOrder: 'desc',
         namespaces: ['*'],
+        aggs: {
+          kueries: {
+            terms: {
+              field: `${APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE}.attributes.kuery`,
+            },
+          },
+        },
       });
 
-      const kueryNodes = response.saved_objects.map(
-        ({ attributes: { kuery } }) => fromKueryExpression(kuery ?? '')
+      const kueryBuckets = response?.aggregations?.kueries?.buckets ?? [];
+
+      const kueryNodes = kueryBuckets.map(({ key }) =>
+        fromKueryExpression(key)
       );
 
       const kueryFields = getKueryFields(kueryNodes);
