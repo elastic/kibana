@@ -9,7 +9,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { cloneDeep } from 'lodash';
 
 export const mockEncryptedSO = (
-  data: any = { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] }
+  data: any = [{ attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] }]
 ) => {
   const result = cloneDeep(data);
   return {
