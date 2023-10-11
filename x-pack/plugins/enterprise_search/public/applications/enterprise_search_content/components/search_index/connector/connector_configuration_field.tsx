@@ -34,13 +34,9 @@ import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_co
 
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
-import {
-  ConnectorConfigurationLogic,
-  ConfigEntryView,
-  ensureStringType,
-  ensureBooleanType,
-} from './connector_configuration_logic';
+import { ConnectorConfigurationLogic, ConfigEntryView } from './connector_configuration_logic';
 import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
+import { ensureBooleanType, ensureStringType } from './utils/connector_configuration_utils';
 
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntryView;
