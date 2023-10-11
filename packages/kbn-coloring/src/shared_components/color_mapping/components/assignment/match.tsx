@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -26,6 +26,13 @@ export const Match: React.FC<{
   specialTokens: Map<unknown, string>;
   assignmentValuesCounter: Map<string | string[], number>;
 }> = ({ index, rule, updateValue, editable, options, specialTokens, assignmentValuesCounter }) => {
+  const duplicateWarning = i18n.translate(
+    'coloring.colorMapping.assignments.duplicateCategoryWarning',
+    {
+      defaultMessage:
+        'This category has already been assigned a different color. Only the first matching assignment will be used.',
+    }
+  );
   const selectedOptions =
     rule.type === 'auto'
       ? []
@@ -36,7 +43,9 @@ export const Match: React.FC<{
             value: rule.values,
             append:
               (assignmentValuesCounter.get(rule.values) ?? 0) > 1 ? (
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+                <EuiToolTip position="bottom" content={duplicateWarning}>
+                  <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+                </EuiToolTip>
               ) : undefined,
           },
         ]
@@ -47,7 +56,9 @@ export const Match: React.FC<{
             value,
             append:
               (assignmentValuesCounter.get(value) ?? 0) > 1 ? (
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+                <EuiToolTip position="bottom" content={duplicateWarning}>
+                  <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+                </EuiToolTip>
               ) : undefined,
           };
         });

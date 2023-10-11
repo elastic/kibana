@@ -25,7 +25,7 @@ const loadDetectionsPage = (role: ROLES) => {
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Alerts timeline', { tags: ['@ess'] }, () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
