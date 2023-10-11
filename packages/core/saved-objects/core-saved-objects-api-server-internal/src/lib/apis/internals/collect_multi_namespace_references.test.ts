@@ -467,7 +467,10 @@ describe('collectMultiNamespaceReferences', () => {
       const params = setup([obj1, obj2]);
       mockMgetResults({ found: true }, { found: false }); // results for obj1 and obj2
 
-      await collectMultiNamespaceReferences({ ...params, options: { purpose: 'updateObjectsSpaces' } });
+      await collectMultiNamespaceReferences({
+        ...params,
+        options: { purpose: 'updateObjectsSpaces' },
+      });
       expect(mockFindSharedOriginObjects).toHaveBeenCalledTimes(1);
       expect(mockFindSharedOriginObjects).toHaveBeenCalledWith(
         expect.anything(),

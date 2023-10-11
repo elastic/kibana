@@ -174,23 +174,23 @@ describe('findSharedOriginObjects', () => {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-1.id"
+                            type: 'literal',
+                            value: 'type-1.id',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-1:id-1"
-                          }
+                            type: 'literal',
+                            value: 'type-1:id-1',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
-                      }
+                        function: 'is',
+                        type: 'function',
+                      },
                     ],
-                    function: "not",
-                    type: "function"
+                    function: 'not',
+                    type: 'function',
                   }),
-                ])
+                ]),
               }),
               expect.objectContaining({
                 arguments: expect.arrayContaining([
@@ -200,23 +200,23 @@ describe('findSharedOriginObjects', () => {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-2.id"
+                            type: 'literal',
+                            value: 'type-2.id',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-2:id-2"
-                          }
+                            type: 'literal',
+                            value: 'type-2:id-2',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
-                      }
+                        function: 'is',
+                        type: 'function',
+                      },
                     ],
-                    function: "not",
-                    type: "function"
+                    function: 'not',
+                    type: 'function',
                   }),
-                ])
+                ]),
               }),
               expect.objectContaining({
                 arguments: expect.arrayContaining([
@@ -226,31 +226,31 @@ describe('findSharedOriginObjects', () => {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-3.id"
+                            type: 'literal',
+                            value: 'type-3.id',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-3:id-3"
-                          }
+                            type: 'literal',
+                            value: 'type-3:id-3',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
-                      }
+                        function: 'is',
+                        type: 'function',
+                      },
                     ],
-                    function: "not",
-                    type: "function"
+                    function: 'not',
+                    type: 'function',
                   }),
-                ])
-              })
-            ])
-          })
+                ]),
+              }),
+            ]),
+          }),
         }),
         undefined,
         { disableExtensions: true }
       );
-    })
+    });
 
     it('calls createPointInTimeFinder without redundant filter when object does not have an origin ID', async () => {
       const objects = [obj1, { ...obj2, origin: undefined }, obj3];
@@ -268,39 +268,39 @@ describe('findSharedOriginObjects', () => {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-1.id"
+                            type: 'literal',
+                            value: 'type-1.id',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-1:origin-1"
-                          }
+                            type: 'literal',
+                            value: 'type-1:origin-1',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
+                        function: 'is',
+                        type: 'function',
                       },
                       {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-1.originId"
+                            type: 'literal',
+                            value: 'type-1.originId',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "origin-1"
-                          }
+                            type: 'literal',
+                            value: 'origin-1',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
-                      }
+                        function: 'is',
+                        type: 'function',
+                      },
                     ],
-                    function: "or",
-                    type: "function"
+                    function: 'or',
+                    type: 'function',
                   }),
-                ])
+                ]),
               }),
               expect.objectContaining({
                 arguments: expect.arrayContaining([
@@ -308,19 +308,19 @@ describe('findSharedOriginObjects', () => {
                     arguments: [
                       {
                         isQuoted: false,
-                        type: "literal",
-                        value: "type-2.originId"
+                        type: 'literal',
+                        value: 'type-2.originId',
                       },
                       {
                         isQuoted: false,
-                        type: "literal",
-                        value: "id-2"
-                      }
+                        type: 'literal',
+                        value: 'id-2',
+                      },
                     ],
-                    function: "is",
-                    type: "function"
-                  })
-                ])
+                    function: 'is',
+                    type: 'function',
+                  }),
+                ]),
               }),
               expect.objectContaining({
                 arguments: expect.arrayContaining([
@@ -330,46 +330,46 @@ describe('findSharedOriginObjects', () => {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-3.id"
+                            type: 'literal',
+                            value: 'type-3.id',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-3:origin-3"
-                          }
+                            type: 'literal',
+                            value: 'type-3:origin-3',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
+                        function: 'is',
+                        type: 'function',
                       },
                       {
                         arguments: [
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "type-3.originId"
+                            type: 'literal',
+                            value: 'type-3.originId',
                           },
                           {
                             isQuoted: false,
-                            type: "literal",
-                            value: "origin-3"
-                          }
+                            type: 'literal',
+                            value: 'origin-3',
+                          },
                         ],
-                        function: "is",
-                        type: "function"
-                      }
+                        function: 'is',
+                        type: 'function',
+                      },
                     ],
-                    function: "or",
-                    type: "function"
+                    function: 'or',
+                    type: 'function',
                   }),
-                ])
+                ]),
               }),
-            ])
-          })
+            ]),
+          }),
         }),
         undefined,
         { disableExtensions: true }
       );
-    })
+    });
   });
 });
