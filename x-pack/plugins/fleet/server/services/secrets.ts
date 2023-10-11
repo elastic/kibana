@@ -563,9 +563,9 @@ export async function isSecretStorageEnabled(
 
   // now check the flag in settings to see if the fleet server requirement has already been met
   // once the requirement has been met, secrets are always on
-  const settings = await settingsService.getSettings(soClient);
+  const settings = await settingsService.getSettingsOrUndefined(soClient);
 
-  if (settings.secret_storage_requirements_met) {
+  if (settings && settings.secret_storage_requirements_met) {
     logger.debug('Secrets storage already met, turned on is settings');
     return true;
   }
