@@ -54,8 +54,6 @@ export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
-  previousStart: string;
-  previousEnd: string;
 }
 
 export interface ReturnUpdateReduxTime {
@@ -118,8 +116,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           kql: kqlQuery,
           start: newStart,
           timelineId,
-          previousStart: start,
-          previousEnd: end,
         });
         const currentStart = formatDate(newStart);
         const currentEnd = isQuickSelection
@@ -173,8 +169,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
             kql: kqlQuery,
             start: newStart,
             timelineId,
-            previousStart: start,
-            previousEnd: end,
           });
           const newRecentlyUsedRanges = [
             { start: newStart, end: newEnd },
@@ -190,7 +184,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           setRecentlyUsedRanges(newRecentlyUsedRanges);
         }
       },
-      [updateReduxTime, id, kqlQuery, timelineId, recentlyUsedRanges, start, end]
+      [updateReduxTime, id, kqlQuery, timelineId, recentlyUsedRanges]
     );
 
     const endDate = toStr != null ? toStr : new Date(end).toISOString();
@@ -262,55 +256,49 @@ export const dispatchUpdateReduxTime =
     kql,
     start,
     timelineId,
-    previousStart,
-    previousEnd,
   }: UpdateReduxTime): ReturnUpdateReduxTime => {
-    const hasTimeRangeChanged = previousStart !== start || previousEnd !== end;
-
-    if (hasTimeRangeChanged) {
-      const fromDate = formatDate(start);
-      let toDate = formatDate(end, { roundUp: true });
-      if (isQuickSelection) {
-        if (end === start) {
-          dispatch(
-            inputsActions.setAbsoluteRangeDatePicker({
-              id,
-              fromStr: start,
-              toStr: end,
-              from: fromDate,
-              to: toDate,
-            })
-          );
-        } else {
-          dispatch(
-            inputsActions.setRelativeRangeDatePicker({
-              id,
-              fromStr: start,
-              toStr: end,
-              from: fromDate,
-              to: toDate,
-            })
-          );
-        }
-      } else {
-        toDate = formatDate(end);
+    const fromDate = formatDate(start);
+    let toDate = formatDate(end, { roundUp: true });
+    if (isQuickSelection) {
+      if (end === start) {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             id,
-            from: formatDate(start),
-            to: formatDate(end),
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
           })
         );
-      }
-      if (timelineId != null) {
+      } else {
         dispatch(
-          timelineActions.updateRange({
-            id: timelineId,
-            start: fromDate,
-            end: toDate,
+          inputsActions.setRelativeRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
           })
         );
       }
+    } else {
+      toDate = formatDate(end);
+      dispatch(
+        inputsActions.setAbsoluteRangeDatePicker({
+          id,
+          from: formatDate(start),
+          to: formatDate(end),
+        })
+      );
+    }
+    if (timelineId != null) {
+      dispatch(
+        timelineActions.updateRange({
+          id: timelineId,
+          start: fromDate,
+          end: toDate,
+        })
+      );
     }
     if (kql && kql.refetch) {
       return {
