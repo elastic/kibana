@@ -65,9 +65,4 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
       soClient: this.savedObjectsClient,
     });
   }
-
-  async getExistingIndices(indices: string[]) {
-    // does this ever get called? confused
-    return indices;
-  }
 }
