@@ -19,11 +19,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./update_actions'));
     loadTestFile(require.resolve('./check_privileges'));
     loadTestFile(require.resolve('./create_index'));
-    loadTestFile(require.resolve('./create_rules'));
     loadTestFile(require.resolve('./preview_rules'));
     loadTestFile(require.resolve('./create_rules_bulk'));
     loadTestFile(require.resolve('./create_new_terms'));
-    loadTestFile(require.resolve('./create_rule_exceptions'));
     loadTestFile(require.resolve('./delete_rules'));
     loadTestFile(require.resolve('./delete_rules_bulk'));
     loadTestFile(require.resolve('./export_rules'));
