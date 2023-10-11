@@ -1,8 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { set } from 'lodash';
 import { Moment } from 'moment';
 import { MESSAGE_PROCESSOR } from '../../../common/constants';
 
-export function createBaseEvent(timestamp: Moment, level: 'ERROR' | 'INFO', host: string, message: string, accepted?: number, processed?: number, latency?: { values: number[], counts: number[] }, outcome?: 'success' | 'failure') {
+export function createBaseEvent(
+  timestamp: Moment,
+  level: 'ERROR' | 'INFO',
+  host: string,
+  message: string,
+  accepted?: number,
+  processed?: number,
+  latency?: { values: number[]; counts: number[] },
+  outcome?: 'success' | 'failure'
+) {
   const event = {
     namespace: MESSAGE_PROCESSOR,
     '@timestamp': timestamp.toISOString(),
