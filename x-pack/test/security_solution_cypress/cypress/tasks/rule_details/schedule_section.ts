@@ -24,9 +24,10 @@ export const confirmRuleDetailsSchedule = (
   rule: RuleResponse | QueryRuleCreateProps | EqlRuleCreateProps | NewTermsRuleCreateProps
 ) => {
   const lookbackTime = getHumanizedDuration(
-    (rule.from = ruleFields.ruleIntervalFrom),
-    (rule.interval = ruleFields.ruleInterval)
+    rule.from ?? ruleFields.ruleIntervalFrom,
+    rule.interval ?? ruleFields.ruleInterval
   );
+
   cy.get(SCHEDULE_DETAILS).within(() => {
     getDetails(RUNS_EVERY_DETAILS).should('have.text', rule.interval);
     getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', lookbackTime);

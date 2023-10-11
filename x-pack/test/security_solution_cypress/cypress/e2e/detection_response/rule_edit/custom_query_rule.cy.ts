@@ -37,7 +37,7 @@ import {
 } from '../../../tasks/rule_details';
 import { CreateRulePropsRewrites } from '../../../objects/types';
 
-describe('Edit custom query rule', { tags: ['@ess', '@serverless'] }, () => {
+describe('Custom query rule - rule edit', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we

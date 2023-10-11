@@ -33,8 +33,9 @@ import {
   confirmRuleDetailsSchedule,
 } from '../../../tasks/rule_details';
 
-describe('Edit rule overrides', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule overrides - rule edit', { tags: ['@ess', '@serverless'] }, () => {
   const originalRule = getNewOverrideRule({ enabled: false });
+  // Fill any specific values you want tested,
   const ruleEdits: CreateRulePropsRewrites<QueryRuleCreateProps> = {
     severity_mapping: [
       {

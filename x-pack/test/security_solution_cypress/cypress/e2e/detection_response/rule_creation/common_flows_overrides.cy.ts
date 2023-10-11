@@ -26,6 +26,7 @@ import {
   fillRuleNameOverride,
   expandAdvancedSettings,
   fillRulCustomQuery,
+  fillScheduleRule,
 } from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
@@ -50,7 +51,7 @@ import {
 } from '../../../objects/rule';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 
-describe('Common rule creation override field flows', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule override fields - rule creation', { tags: ['@ess', '@serverless'] }, () => {
   // Explicitly listing out properties to be tested
   const rule = getNewRule({
     author: undefined,
@@ -74,7 +75,7 @@ describe('Common rule creation override field flows', { tags: ['@ess', '@serverl
     risk_score_mapping: [
       { field: 'destination.port', value: '', operator: 'equals', risk_score: undefined },
     ],
-    rule_name_override: 'agent.name',
+    rule_name_override: 'agent.type',
     timestamp_override: 'event.start',
   });
   beforeEach(() => {
@@ -102,6 +103,7 @@ describe('Common rule creation override field flows', { tags: ['@ess', '@serverl
     fillTimestampOverride(rule.timestamp_override);
     cy.get(ABOUT_CONTINUE_BTN).click();
 
+    fillScheduleRule(rule.interval, rule.from);
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
     cy.log('expect about step to repopulate');
@@ -120,7 +122,9 @@ describe('Common rule creation override field flows', { tags: ['@ess', '@serverl
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
+    // Rule name override
     cy.get(ALERT_GRID_CELL).contains('auditbeat');
+    // Severity override
     cy.get(ALERT_GRID_CELL).contains('critical');
     cy.get(ALERT_GRID_CELL).contains('80');
 

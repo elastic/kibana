@@ -18,8 +18,9 @@ import { checkEQLQueryDetails } from '../../../tasks/rule_details';
 import { editEQLRuleQuery, saveEditedRule, visitEditRulePage } from '../../../tasks/rule_edit';
 import { CreateRulePropsRewrites } from '../../../objects/types';
 
-describe('EQL rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
+describe('EQL rules - rule edit', { tags: ['@ess', '@serverless'] }, () => {
   const originalRule = getEqlRule({ enabled: false });
+  // Fill any specific values you want tested,
   const ruleEdits: CreateRulePropsRewrites<EqlRuleCreateProps> = {
     query: 'any where process.name == "newValue"',
   };

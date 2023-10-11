@@ -29,7 +29,7 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('Create new terms rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('New terms rules - rule creation', { tags: ['@ess', '@serverless'] }, () => {
   // Fill any new terms specific values you want tested,
   // common values across rules can be tested in ./common_flows.cy.ts
   const rule = getNewTermsRule({

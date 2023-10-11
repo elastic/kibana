@@ -18,7 +18,7 @@ import { checkDataViewDetails, confirmAlertSuppressionDetails } from '../../../t
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 import { visit } from '../../../tasks/navigation';
 
-describe('Custom query rule details', { tags: ['@ess', '@serverless'] }, () => {
+describe('Custom query rule - rule details', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we

@@ -28,7 +28,7 @@ import {
   checkRuleDetailsRuleTimestampOverride,
 } from '../../../tasks/rule_details';
 
-describe('Rule overrides rule details', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule overrides - rule details', { tags: ['@ess', '@serverless'] }, () => {
   // Fill any override specific values you want tested,
   // common values across rules can be tested in ./common_flows.cy.ts
   const rule = getSimpleCustomQueryRule({
@@ -43,6 +43,7 @@ describe('Rule overrides rule details', { tags: ['@ess', '@serverless'] }, () =>
     ],
     rule_name_override: 'agent.name',
     timestamp_override: 'event.start',
+    enabled: false,
   });
 
   beforeEach(() => {

@@ -27,8 +27,9 @@ import {
   checkQueryDetails,
 } from '../../../tasks/rule_details';
 
-describe('Edit new terms rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('New terms rules - rule edit', { tags: ['@ess', '@serverless'] }, () => {
   const originalRule = getNewTermsRule({ enabled: false });
+  // Fill any specific values you want tested,
   const ruleEdits: CreateRulePropsRewrites<NewTermsRuleCreateProps> = {
     query: 'agent.name:*',
     new_terms_fields: ['agent.name'],

@@ -16,7 +16,7 @@ import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
-describe('EQL rule details', { tags: ['@ess', '@serverless'] }, () => {
+describe('EQL rules - rule details', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();

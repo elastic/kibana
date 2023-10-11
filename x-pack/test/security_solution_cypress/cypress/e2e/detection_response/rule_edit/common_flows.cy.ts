@@ -52,8 +52,9 @@ import {
 } from '../../../tasks/rule_edit';
 import { CreateRulePropsRewrites } from '../../../objects/types';
 
-describe('Common rule edit flows', { tags: ['@ess', '@serverless'] }, () => {
+describe('Common rule flows - rule edit', { tags: ['@ess', '@serverless'] }, () => {
   const originalRule = getExistingRule({ rule_id: 'rule1', enabled: false });
+  // Fill any specific values you want tested,
   const ruleEdits: CreateRulePropsRewrites<QueryRuleCreateProps> = {
     index: ['auditbeat*'],
     query: '*:*',

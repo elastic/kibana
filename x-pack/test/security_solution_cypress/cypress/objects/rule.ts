@@ -286,6 +286,8 @@ export const getNewOverrideRule = (
   ],
   rule_name_override: 'agent.type',
   timestamp_override: '@timestamp',
+  interval: '5m',
+  from: 'now-10m',
   ...rewrites,
 });
 

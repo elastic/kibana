@@ -30,14 +30,14 @@ import { visit } from '../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('Create EQL rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('EQL rules - rule creation', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
     visit(CREATE_RULE_URL);
   });
 
-  describe('Detection rules, EQL', () => {
+  describe('Non sequence EQL rule', () => {
     const rule = getEqlRule();
 
     it('Creates and enables a new EQL rule', function () {

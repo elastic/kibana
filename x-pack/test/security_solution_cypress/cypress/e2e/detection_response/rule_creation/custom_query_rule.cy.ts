@@ -31,7 +31,7 @@ import {
 } from '../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
+describe('Custom query rule - rule creations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();

@@ -22,7 +22,7 @@ import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
-describe('New Terms rule details', { tags: ['@ess', '@serverless'] }, () => {
+describe('New Terms rule - rule details', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewTermsRule();
 
   beforeEach(() => {
