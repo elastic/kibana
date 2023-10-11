@@ -9,7 +9,7 @@
 import { escapeRegExp, memoize } from 'lodash';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
-  const trimmedGlob = glob.trim();
+  const trimmedGlob = glob.trim().toLowerCase();
   let globRegex = trimmedGlob
     .split(/[* ]+/) // wildcard or space as a separator
     .map(escapeRegExp)
@@ -41,3 +41,23 @@ export const fieldNameWildcardMatcher = (
   const regExp = makeRegEx(fieldSearchHighlight);
   return (!!field.displayName && regExp.test(field.displayName)) || regExp.test(field.name);
 };
+
+/**
+ * Get `highlight` string to be used together with `EuiHighlight`
+ * @param displayName
+ * @param fieldSearchHighlight
+ */
+export function getFieldSearchMatchingHighlight(
+  displayName: string,
+  fieldSearchHighlight?: string
+): string {
+  const searchHighlight = (fieldSearchHighlight || '').trim();
+  if (
+    (searchHighlight.includes('*') || searchHighlight.includes(' ')) &&
+    fieldNameWildcardMatcher({ name: displayName }, searchHighlight)
+  ) {
+    return displayName;
+  }
+
+  return searchHighlight;
+}
