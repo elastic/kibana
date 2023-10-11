@@ -54,7 +54,7 @@ export async function getLaunchesByLocation({
     launches: {
       filter: { term: { ['labels.lifecycle_state']: 'created' } },
       aggs: {
-        launchesByLocation: {
+        byLocation: {
           terms: {
             field: locationField,
           },
@@ -62,48 +62,52 @@ export async function getLaunchesByLocation({
       },
     },
   };
-  const response = await apmEventClient.search('get_mobile_location_launches', {
-    apm: {
-      events: [ProcessorEvent.transaction],
-    },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+
+  const response = await apmEventClient.logEventSearch(
+    'get_mobile_location_launches',
+    {
+      apm: {
+        events: [ProcessorEvent.event],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
+      body: {
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...rangeQuery(startWithOffset, endWithOffset),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
           },
-          aggs,
         },
-        ...aggs,
+        aggs: {
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+            },
+            aggs,
+          },
+          ...aggs,
+        },
       },
-    },
-  });
+    }
+  );
+
   return {
-    location: response.aggregations?.launches?.launchesByLocation?.buckets[0]
+    location: response.aggregations?.launches?.byLocation?.buckets[0]
       ?.key as string,
     value:
-      response.aggregations?.launches?.launchesByLocation?.buckets[0]
-        ?.doc_count ?? 0,
+      response.aggregations?.launches?.byLocation?.buckets[0]?.doc_count ?? 0,
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,
         y:
-          response.aggregations?.launches?.launchesByLocation?.buckets[0]
-            ?.doc_count ?? 0,
+          response.aggregations?.launches?.byLocation?.buckets[0]?.doc_count ??
+          0,
       })) ?? [],
   };
 }

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SpanRaw } from '../raw/span_raw';
+import { EventRaw } from '../raw/event_raw';
 import { Agent } from './fields/agent';
 
-export interface Span extends SpanRaw {
+export interface Event extends EventRaw {
   agent: Agent;
 }

@@ -10,4 +10,5 @@ export enum ProcessorEvent {
   error = 'error',
   metric = 'metric',
   span = 'span',
+  event = 'event',
 }

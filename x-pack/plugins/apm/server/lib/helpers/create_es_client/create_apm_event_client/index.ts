@@ -11,11 +11,12 @@ import type {
   FieldCapsResponse,
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
-  TermsEnumResponse,
   TermsEnumRequest,
+  TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { ESFilter } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
@@ -26,6 +27,7 @@ import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { Event } from '../../../../../typings/es_schemas/ui/event';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,
@@ -61,6 +63,7 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
+  event: Event;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
@@ -183,6 +186,49 @@ export class APMEventClient {
       ...(forceSyntheticSourceForThisRequest
         ? { force_synthetic_source: true }
         : {}),
+    };
+
+    return this.callAsyncWithDebug({
+      cb: (opts) =>
+        this.esClient.search(searchParams, opts) as unknown as Promise<{
+          body: TypedSearchResponse<TParams>;
+        }>,
+      operationName,
+      params: searchParams,
+      requestType: 'search',
+    });
+  }
+
+  async logEventSearch<TParams extends APMEventESSearchRequest>(
+    operationName: string,
+    params: TParams
+  ): Promise<TypedSearchResponse<TParams>> {
+    const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
+
+    const filters: ESFilter[] = [
+      {
+        terms: {
+          ['event.kind']: ['event'],
+        },
+      },
+    ];
+
+    const searchParams = {
+      ...omit(params, 'apm', 'body'),
+      index,
+      body: {
+        ...params.body,
+        query: {
+          bool: {
+            filter: filters,
+            must: compact([params.body.query]),
+          },
+        },
+      },
+      ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+      ignore_unavailable: true,
+      preference: 'any',
+      expand_wildcards: ['open' as const, 'hidden' as const],
     };
 
     return this.callAsyncWithDebug({

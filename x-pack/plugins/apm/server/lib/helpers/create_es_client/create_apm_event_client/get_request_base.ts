@@ -10,7 +10,6 @@ import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { uniq } from 'lodash';
 import { ApmDataSource } from '../../../../../common/data_source';
-import {} from '../../../../../common/document_type';
 import { PROCESSOR_EVENT } from '../../../../../common/es_fields/apm';
 import {
   getConfigForDocumentType,
@@ -22,6 +21,7 @@ const processorEventIndexMap = {
   [ProcessorEvent.span]: 'span',
   [ProcessorEvent.metric]: 'metric',
   [ProcessorEvent.error]: 'error',
+  [ProcessorEvent.event]: 'event',
 } as const;
 
 export function processorEventsToIndex(

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {APMBaseDoc} from './apm_base_doc';
-import {TimestampUs} from './fields/timestamp_us';
+import { APMBaseDoc } from './apm_base_doc';
+import { TimestampUs } from './fields/timestamp_us';
 
 export interface Processor {
-  name: 'log';
-  event: 'log';
+  name: 'event';
+  event: 'event';
 }
 
-export interface LogRaw extends APMBaseDoc {
+export interface EventRaw extends APMBaseDoc {
   processor: Processor;
   timestamp: TimestampUs;
   transaction?: {
@@ -23,5 +23,9 @@ export interface LogRaw extends APMBaseDoc {
   };
   log: {
     message?: string;
+  };
+  event: {
+    action: string;
+    category: string;
   };
 }
