@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-/**
- * The p-value threshold to be used for statistically significant items.
- */
-export const LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD = 0.02;
+export const LOG_RATE_ANALYSIS_SETTINGS = {
+  /**
+   * The p-value threshold to be used for statistically significant items.
+   */
+  P_VALUE_THRESHOLD: 0.02,
+  /**
+   * The minimum support value to be used for the frequent item sets aggration.
+   */
+  FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT: 0.001,
+} as const;
 
 /**
  * For the technical preview of Log Rate Analysis we use a hard coded seed.

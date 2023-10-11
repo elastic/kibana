@@ -7,45 +7,90 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ACCESSIBILITY_CATEGORY,
+  AUTOCOMPLETE_CATEGORY,
+  BANNER_CATEGORY,
+  DISCOVER_CATEGORY,
+  ENTERPRISE_SEARCH_CATEGORY,
+  GENERAL_CATEGORY,
+  MACHINE_LEARNING_CATEGORY,
+  NOTIFICATIONS_CATEGORY,
+  OBSERVABILITY_CATEGORY,
+  PRESENTATION_LAB_CATEGORY,
+  REPORTING_CATEGORY,
+  ROLLUPS_CATEGORY,
+  SEARCH_CATEGORY,
+  SECURITY_SOLUTION_CATEGORY,
+  TIMELION_CATEGORY,
+  VISUALIZATION_CATEGORY,
+} from './const';
 
 const upperFirst = (str = '') => str.replace(/^./, (strng) => strng.toUpperCase());
 
 const names: Record<string, string> = {
-  general: i18n.translate('management.settings.categoryNames.generalLabel', {
+  [GENERAL_CATEGORY]: i18n.translate('management.settings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),
-  machineLearning: i18n.translate('management.settings.categoryNames.machineLearningLabel', {
-    defaultMessage: 'Machine Learning',
-  }),
-  observability: i18n.translate('management.settings.categoryNames.observabilityLabel', {
+  [MACHINE_LEARNING_CATEGORY]: i18n.translate(
+    'management.settings.categoryNames.machineLearningLabel',
+    {
+      defaultMessage: 'Machine Learning',
+    }
+  ),
+  [OBSERVABILITY_CATEGORY]: i18n.translate('management.settings.categoryNames.observabilityLabel', {
     defaultMessage: 'Observability',
   }),
-  timelion: i18n.translate('management.settings.categoryNames.timelionLabel', {
+  [TIMELION_CATEGORY]: i18n.translate('management.settings.categoryNames.timelionLabel', {
     defaultMessage: 'Timelion',
   }),
-  notifications: i18n.translate('management.settings.categoryNames.notificationsLabel', {
+  [NOTIFICATIONS_CATEGORY]: i18n.translate('management.settings.categoryNames.notificationsLabel', {
     defaultMessage: 'Notifications',
   }),
-  visualizations: i18n.translate('management.settings.categoryNames.visualizationsLabel', {
-    defaultMessage: 'Visualizations',
-  }),
-  discover: i18n.translate('management.settings.categoryNames.discoverLabel', {
+  [VISUALIZATION_CATEGORY]: i18n.translate(
+    'management.settings.categoryNames.visualizationsLabel',
+    {
+      defaultMessage: 'Visualization',
+    }
+  ),
+  [DISCOVER_CATEGORY]: i18n.translate('management.settings.categoryNames.discoverLabel', {
     defaultMessage: 'Discover',
   }),
-  dashboard: i18n.translate('management.settings.categoryNames.dashboardLabel', {
-    defaultMessage: 'Dashboard',
-  }),
-  reporting: i18n.translate('management.settings.categoryNames.reportingLabel', {
+  [REPORTING_CATEGORY]: i18n.translate('management.settings.categoryNames.reportingLabel', {
     defaultMessage: 'Reporting',
   }),
-  search: i18n.translate('management.settings.categoryNames.searchLabel', {
+  [SEARCH_CATEGORY]: i18n.translate('management.settings.categoryNames.searchLabel', {
     defaultMessage: 'Search',
   }),
-  securitySolution: i18n.translate('management.settings.categoryNames.securitySolutionLabel', {
-    defaultMessage: 'Security Solution',
+  [SECURITY_SOLUTION_CATEGORY]: i18n.translate(
+    'management.settings.categoryNames.securitySolutionLabel',
+    {
+      defaultMessage: 'Security Solution',
+    }
+  ),
+  [ENTERPRISE_SEARCH_CATEGORY]: i18n.translate(
+    'management.settings.categoryNames.enterpriseSearchLabel',
+    {
+      defaultMessage: 'Enterprise Search',
+    }
+  ),
+  [PRESENTATION_LAB_CATEGORY]: i18n.translate(
+    'management.settings.categoryNames.presentationLabLabel',
+    {
+      defaultMessage: 'Presentation Labs',
+    }
+  ),
+  [ACCESSIBILITY_CATEGORY]: i18n.translate('management.settings.categoryNames.accessibilityLabel', {
+    defaultMessage: 'Accessibility',
   }),
-  enterpriseSearch: i18n.translate('management.settings.categoryNames.enterpriseSearchLabel', {
-    defaultMessage: 'Enterprise Search',
+  [AUTOCOMPLETE_CATEGORY]: i18n.translate('management.settings.categoryNames.autocompleteLabel', {
+    defaultMessage: 'Autocomplete',
+  }),
+  [BANNER_CATEGORY]: i18n.translate('management.settings.categoryNames.bannerLabel', {
+    defaultMessage: 'Banner',
+  }),
+  [ROLLUPS_CATEGORY]: i18n.translate('management.settings.categoryNames.rollupsLabel', {
+    defaultMessage: 'Rollups',
   }),
 };
 
