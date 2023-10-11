@@ -90,7 +90,7 @@ cases.
 
 For hosted {kib} on {ess}:
 
-. Add the email addresses to the {cloud}/ec-organizations-notifications-domain-allowlist.html[notifications domain allowlist].
+. Add the email domains to the {cloud}/ec-organizations-notifications-domain-allowlist.html[notifications domain allowlist].
 +
 --
 You do not need to take any more steps to configure an email connector or update
