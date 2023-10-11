@@ -29,7 +29,7 @@ export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProp
       <EuiToolTip content={customDescription} data-test-subj="fieldDescriptionIconButton">
         <EuiIcon
           type="iInCircle"
-          aria-label={i18n.translate('unifiedFieldList.fieldDescriptionIconButtonTitle', {
+          aria-label={i18n.translate('fieldUtils.fieldDescriptionIconButtonTitle', {
             defaultMessage: 'Custom field description',
           })}
           size="m"
