@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['common', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
@@ -46,8 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
       // create rollup data
       log.info(`loading ${testIndex} index...`);
       await esArchiver.loadIfNeeded(testArchive);
