@@ -9,11 +9,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
 import { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
-import { getSetupInstructions } from '../../lib/setup/get_setup_instructions';
+import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
 import { handleRouteHandlerError } from '../../utils/handle_route_error_handler';
 import { getClient } from '../compat';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
+import { getSelfManagedInstructions } from './get_self_managed_instructions';
 
 export function registerSetupRoute({
   router,
@@ -163,16 +164,30 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const apmServerHost = dependencies.setup.cloud?.apm?.url;
         const stackVersion = dependencies.stackVersion;
-        const setupInstructions = await getSetupInstructions({
-          packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
-          soClient: (await context.core).savedObjects.client,
-          apmServerHost,
-          stackVersion,
-        });
+        const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
+        if (isCloudEnabled) {
+          if (!dependencies.start.fleet) {
+            const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
+            logger.error(msg);
+            return response.custom({
+              statusCode: 500,
+              body: { message: msg },
+            });
+          }
 
-        return response.ok({ body: setupInstructions });
+          const apmServerHost = dependencies.setup.cloud?.apm?.url;
+          const setupInstructions = await getCloudSetupInstructions({
+            packagePolicyClient: dependencies.start.fleet?.packagePolicyService,
+            soClient: (await context.core).savedObjects.client,
+            apmServerHost,
+            stackVersion,
+          });
+
+          return response.ok({ body: setupInstructions });
+        }
+
+        return response.ok({ body: getSelfManagedInstructions({ stackVersion }) });
       } catch (error) {
         return handleRouteHandlerError({
           error,

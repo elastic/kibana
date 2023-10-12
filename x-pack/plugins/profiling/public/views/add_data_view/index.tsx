@@ -417,9 +417,10 @@ EOF`}
               <EuiText>
                 <FormattedMessage
                   id="xpack.profiling.tabs.symbols.step3.replace"
-                  defaultMessage="Replace {es_token} etc. with the actual values. You can pass {help} to obtain a list of other arguments."
+                  defaultMessage="Replace {symbolizer_url}, {es_token} etc. with the actual values. You can pass {help} to obtain a list of other arguments."
                   values={{
                     es_token: <EuiCode>{`<ES token>`}</EuiCode>,
+                    symbolizer_url: <EuiCode>{`<Symbolizer URL>`}</EuiCode>,
                     help: <EuiCode>--help</EuiCode>,
                   }}
                 />
