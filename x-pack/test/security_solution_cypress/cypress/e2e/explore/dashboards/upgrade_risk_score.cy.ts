@@ -36,7 +36,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', () => {
+describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -44,7 +44,7 @@ describe('Upgrade risk scores', () => {
     createRule(getNewRule({ rule_id: 'rule1' }));
   });
 
-  describe('show upgrade risk button', { tags: ['@ess', '@serverless'] }, () => {
+  describe('show upgrade risk button', () => {
     beforeEach(() => {
       login();
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
