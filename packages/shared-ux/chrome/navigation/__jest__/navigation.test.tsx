@@ -10,8 +10,8 @@
  * ******************************** NOTE  ******************************************************
  * The tests in this file both test the <Navigation /> and the <DefaultNavigation /> components
  * in integration. The latter is a wrapper around the former, building the Navigation from a tree definition.
- * Except from the way they intantiate the test are identical.
- * Component integration testing means that we don't test unit the internal components individually
+ * Except from the way they intantiate, the test are identical.
+ * Component integration testing means that we don't unit test the internal components individually
  * (implementation details) but we test the exposed component as a user would use it.
  * **********************************************************************************************
  */
@@ -77,7 +77,7 @@ describe('Chrome navigation component integrationi tests', () => {
   });
 
   describe('builds custom navigation tree', () => {
-    test.only('render reference UI and build the navigation tree', async () => {
+    test('render reference UI and build the navigation tree', async () => {
       const onProjectNavigationChange: jest.MockedFunction<ProjectNavigationChangeListener> =
         jest.fn();
 
@@ -172,6 +172,7 @@ describe('Chrome navigation component integrationi tests', () => {
                     "group1",
                     "item1",
                   ],
+                  "sideNavStatus": "visible",
                   "title": "Item 1",
                 },
                 Object {
@@ -185,6 +186,7 @@ describe('Chrome navigation component integrationi tests', () => {
                     "group1",
                     "item2",
                   ],
+                  "sideNavStatus": "visible",
                   "title": "Item 2",
                 },
                 Object {
@@ -201,6 +203,7 @@ describe('Chrome navigation component integrationi tests', () => {
                         "group1A",
                         "item1",
                       ],
+                      "sideNavStatus": "visible",
                       "title": "Group 1A Item 1",
                     },
                     Object {
@@ -218,6 +221,7 @@ describe('Chrome navigation component integrationi tests', () => {
                             "group1A_1",
                             "item1",
                           ],
+                          "sideNavStatus": "visible",
                           "title": "Group 1A_1 Item 1",
                         },
                       ],
@@ -231,6 +235,7 @@ describe('Chrome navigation component integrationi tests', () => {
                         "group1A",
                         "group1A_1",
                       ],
+                      "sideNavStatus": "visible",
                       "title": "Group1A_1",
                     },
                   ],
@@ -243,6 +248,7 @@ describe('Chrome navigation component integrationi tests', () => {
                     "group1",
                     "group1A",
                   ],
+                  "sideNavStatus": "visible",
                   "title": "Group1A",
                 },
               ],
@@ -254,6 +260,7 @@ describe('Chrome navigation component integrationi tests', () => {
               "path": Array [
                 "group1",
               ],
+              "sideNavStatus": "visible",
               "title": "",
               "type": "navGroup",
             },
@@ -300,6 +307,7 @@ describe('Chrome navigation component integrationi tests', () => {
                     "group1",
                     "item1",
                   ],
+                  "sideNavStatus": "visible",
                   "title": "Item 1",
                 },
                 Object {
@@ -313,6 +321,7 @@ describe('Chrome navigation component integrationi tests', () => {
                     "group1",
                     "item2",
                   ],
+                  "sideNavStatus": "visible",
                   "title": "Item 2",
                 },
                 Object {
@@ -329,6 +338,7 @@ describe('Chrome navigation component integrationi tests', () => {
                         "group1A",
                         "item1",
                       ],
+                      "sideNavStatus": "visible",
                       "title": "Group 1A Item 1",
                     },
                     Object {
@@ -346,6 +356,7 @@ describe('Chrome navigation component integrationi tests', () => {
                             "group1A_1",
                             "item1",
                           ],
+                          "sideNavStatus": "visible",
                           "title": "Group 1A_1 Item 1",
                         },
                       ],
@@ -359,6 +370,7 @@ describe('Chrome navigation component integrationi tests', () => {
                         "group1A",
                         "group1A_1",
                       ],
+                      "sideNavStatus": "visible",
                       "title": "Group1A_1",
                     },
                   ],
@@ -371,6 +383,7 @@ describe('Chrome navigation component integrationi tests', () => {
                     "group1",
                     "group1A",
                   ],
+                  "sideNavStatus": "visible",
                   "title": "Group1A",
                 },
               ],
@@ -382,6 +395,7 @@ describe('Chrome navigation component integrationi tests', () => {
               "path": Array [
                 "group1",
               ],
+              "sideNavStatus": "visible",
               "title": "",
             },
           ]
@@ -389,7 +403,7 @@ describe('Chrome navigation component integrationi tests', () => {
       }
     });
 
-    test.only('should read the title from deeplink, prop or React children', async () => {
+    test('should read the title from deeplink, prop or React children', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         ...navLinksMock,
         {
