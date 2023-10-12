@@ -2862,7 +2862,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -2993,7 +2993,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -3036,7 +3036,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"left\" | \"right\" | \"bottom\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -3084,7 +3084,7 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -9993,7 +9993,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"above\" | \"below\" | \"auto\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -10862,7 +10862,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"bottom\" | \"auto\""
+          "\"right\" | \"left\" | \"bottom\" | \"auto\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -11141,7 +11141,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -11272,7 +11272,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
