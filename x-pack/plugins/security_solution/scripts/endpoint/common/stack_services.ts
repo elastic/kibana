@@ -11,7 +11,6 @@ import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
-import nodeFetch from 'node-fetch';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
@@ -19,7 +18,7 @@ import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
-import { getLocalhostRealIp } from './localhost_services';
+import { getLocalhostRealIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
@@ -117,16 +116,16 @@ export const createRuntimeServices = async ({
   let password = _password;
 
   if (asSuperuser) {
-    await waitForKibana(kibanaUrl);
-    const tmpEsClient = createEsClient({
-      url: elasticsearchUrl,
+    const tmpKbnClient = createKbnClient({
+      url: kibanaUrl,
       username,
       password,
-      log,
       noCertForSsl,
+      log,
     });
 
-    const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
+    await waitForKibana(tmpKbnClient);
+    const isServerlessEs = await isServerlessKibanaFlavor(tmpKbnClient);
 
     if (isServerlessEs) {
       log?.warning(
@@ -137,7 +136,15 @@ export const createRuntimeServices = async ({
       username = 'system_indices_superuser';
       password = 'changeme';
     } else {
-      const superuserResponse = await createSecuritySuperuser(tmpEsClient);
+      const superuserResponse = await createSecuritySuperuser(
+        createEsClient({
+          url: elasticsearchUrl,
+          username: esUsername ?? username,
+          password: esPassword ?? password,
+          log,
+          noCertForSsl,
+        })
+      );
 
       ({ username, password } = superuserResponse);
 
@@ -295,34 +302,21 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
 };
 
 export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
-  return kbnClient
-    .request<StatusResponse>({
-      method: 'GET',
-      path: '/api/status',
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
+  return (await kbnClient.status.get().catch(catchAxiosErrorFormatAndThrow)) as StatusResponse;
 };
 
 /**
  * Checks to ensure Kibana is up and running
- * @param kbnUrl
+ * @param kbnClient
  */
-export const waitForKibana = async (kbnUrl: string): Promise<void> => {
-  const url = (() => {
-    const u = new URL(kbnUrl);
-    // This API seems to be available even if user is not authenticated
-    u.pathname = '/api/status';
-    return u.toString();
-  })();
-
+export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
     async () => {
-      const response = await nodeFetch(url);
+      const response = await kbnClient.status.get();
 
-      if (response.status !== 200) {
+      if (response.status.overall.level !== 'available') {
         throw new Error(
-          `Kibana not available. Returned: [${response.status}]: ${response.statusText}`
+          `Kibana not available. [status.overall.level: ${response.status.overall.level}]`
         );
       }
     },

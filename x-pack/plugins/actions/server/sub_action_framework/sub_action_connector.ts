@@ -118,6 +118,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     method = 'get',
     responseSchema,
     headers,
+    timeout,
     ...config
   }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
     try {
@@ -138,6 +139,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(headers as AxiosHeaders),
+        timeout,
       });
 
       this.validateResponse(responseSchema, res.data);

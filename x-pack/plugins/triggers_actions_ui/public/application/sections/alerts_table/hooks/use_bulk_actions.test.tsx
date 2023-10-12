@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useBulkActions, useBulkAddToCaseActions } from './use_bulk_actions';
+import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 
@@ -43,6 +43,7 @@ describe('bulk action hooks', () => {
   const refresh = jest.fn();
   const clearSelection = jest.fn();
   const openNewCase = jest.fn();
+  const setIsBulkActionsLoading = jest.fn();
 
   const openExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
     getAttachments({ theCase: { id: caseId } });
@@ -295,14 +296,40 @@ describe('bulk action hooks', () => {
     });
   });
 
+  describe('useBulkUntrackActions', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    it('should not how the bulk actions when the user lacks any observability permissions', () => {
+      mockKibana.mockImplementation(() => ({
+        services: {
+          application: { capabilities: {} },
+        },
+      }));
+      const { result } = renderHook(
+        () => useBulkUntrackActions({ setIsBulkActionsLoading, refresh, clearSelection }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+  });
+
   describe('useBulkActions', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockKibana.mockImplementation(() => ({ services: { cases: mockCaseService } }));
+      mockKibana.mockImplementation(() => ({
+        services: {
+          cases: mockCaseService,
+          application: { capabilities: { infrastructure: { show: true } } },
+        },
+      }));
       mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
     });
 
-    it('appends the case bulk actions', async () => {
+    it('appends the case and untrack bulk actions', async () => {
       const { result } = renderHook(
         () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh }),
         {
@@ -329,6 +356,14 @@ describe('bulk action hooks', () => {
                 "disabledLabel": "Add to existing case",
                 "key": "attach-existing-case",
                 "label": "Add to existing case",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "mark-as-untracked",
+                "disableOnQuery": true,
+                "disabledLabel": "Mark as untracked",
+                "key": "mark-as-untracked",
+                "label": "Mark as untracked",
                 "onClick": [Function],
               },
             ],

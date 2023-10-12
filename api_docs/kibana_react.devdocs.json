@@ -2979,19 +2979,11 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/incomplete_results_modal/open_incomplete_results_modal_button.tsx"
+            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/incomplete_results_modal/open_incomplete_results_modal_button.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/fetch/handle_warnings.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/fetch/handle_warnings.tsx"
+            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
           },
           {
             "plugin": "data",
@@ -3700,14 +3692,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/global_header/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/global_header/index.tsx"
           },
           {
             "plugin": "synthetics",
@@ -5774,7 +5758,7 @@
         "label": "POSITIONS",
         "description": [],
         "signature": [
-          "(\"none\" | \"left\" | \"right\" | \"center\")[]"
+          "(\"none\" | \"right\" | \"left\" | \"center\")[]"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -5820,7 +5804,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"left\" | \"right\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"right\" | \"left\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
