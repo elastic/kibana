@@ -7,7 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -37,7 +37,7 @@ describe('handleWarnings', () => {
         inspector: {} as unknown as InspectorStart,
         notifications,
         theme: {} as unknown as ThemeServiceStart,
-      }
+      },
     });
 
     expect(notifications.toasts.addWarning).toBeCalledTimes(0);
@@ -59,7 +59,7 @@ describe('handleWarnings', () => {
         inspector: {} as unknown as InspectorStart,
         notifications,
         theme: {} as unknown as ThemeServiceStart,
-      }
+      },
     });
 
     expect(notifications.toasts.addWarning).toBeCalledTimes(1);
@@ -83,7 +83,7 @@ describe('handleWarnings', () => {
         inspector: {} as unknown as InspectorStart,
         notifications,
         theme: {} as unknown as ThemeServiceStart,
-      }
+      },
     });
 
     expect(callbackMock).toBeCalledTimes(1);
@@ -108,7 +108,7 @@ describe('handleWarnings', () => {
         inspector: {} as unknown as InspectorStart,
         notifications,
         theme: {} as unknown as ThemeServiceStart,
-      }
+      },
     });
 
     expect(callbackMock).toBeCalledTimes(1);
