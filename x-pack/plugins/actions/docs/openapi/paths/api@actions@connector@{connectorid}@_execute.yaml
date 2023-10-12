@@ -1,6 +1,6 @@
 post:
   summary: Runs a connector.
-  operationId: runConnectorWithSpaceId
+  operationId: runConnector
   description: >
     You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
     You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
@@ -10,13 +10,12 @@ post:
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          $ref: '../components/schemas/run_connector_request.yaml' 
+          $ref: '../components/schemas/run_connector_request.yaml'
         examples:
           runIndexConnectorRequest:
             $ref: '../components/examples/run_index_connector_request.yaml'
