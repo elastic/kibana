@@ -62,6 +62,36 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for Records (Lens
 />
 `;
 
+exports[`UnifiedFieldList <FieldItemButton /> renders properly for search with spaces 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview script date: date",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+  dataTestSubj="field-script date-showDetails"
+  fieldIcon={
+    <WrappedFieldIcon
+      scripted={true}
+      type="date"
+    />
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-script date"
+      search="script date"
+      title="script date"
+    >
+      script date
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-script date"
+  size="s"
+/>
+`;
+
 exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based column field 1`] = `
 <FieldButton
   buttonProps={
