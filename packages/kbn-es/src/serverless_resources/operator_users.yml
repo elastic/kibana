@@ -2,7 +2,6 @@ operator:
   - usernames:
       [
         'elastic_serverless',
-        'system_indices_superuser',
         't1_analyst',
         't2_analyst',
         't3_analyst',

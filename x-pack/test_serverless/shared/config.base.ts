@@ -28,7 +28,7 @@ export default async () => {
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
     elasticsearch: {
-      ...esTestConfig.getUrlParts(),
+      ...esTestConfig.getUrlParts(kibanaTestSuperuserServerless),
       protocol: 'https',
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },

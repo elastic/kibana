@@ -11,7 +11,7 @@ import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import { Config } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import { InheritedFtrProviderContext } from '../../../../services';
@@ -96,8 +96,8 @@ async function getApmApiClient({ svlSharedConfig }: { svlSharedConfig: Config })
   const kibanaServer = svlSharedConfig.get('servers.kibana');
   const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
 
-  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username;
-  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password;
+  const username = svlSharedConfig.get('servers.kibana.username');
+  const password = svlSharedConfig.get('servers.kibana.password');
 
   const url = format({
     ...kibanaServer,

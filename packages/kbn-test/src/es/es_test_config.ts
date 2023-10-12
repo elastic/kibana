@@ -10,6 +10,10 @@ import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Url from 'url';
 import { systemIndicesSuperuser } from '../kbn';
 
+interface UserAuth {
+  username: string;
+  password: string;
+}
 class EsTestConfig {
   getVersion() {
     return process.env.TEST_ES_BRANCH || pkg.version;
@@ -35,7 +39,7 @@ class EsTestConfig {
     return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
   }
 
-  getUrlParts() {
+  getUrlParts(user: UserAuth = systemIndicesSuperuser) {
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
       const testEsUrl = Url.parse(process.env.TEST_ES_URL);
@@ -55,8 +59,8 @@ class EsTestConfig {
       };
     }
 
-    const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
-    const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
+    const username = process.env.TEST_ES_USERNAME || user.username;
+    const password = process.env.TEST_ES_PASSWORD || user.password;
 
     const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
 

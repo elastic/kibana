@@ -11,7 +11,6 @@ import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface User {
@@ -24,6 +23,7 @@ export interface User {
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
+  const config = getService('config');
 
   const superUser: User = {
     username: 'superuser',
@@ -34,7 +34,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const defaultUser = {
     email: null,
     full_name: null,
-    username: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username,
+    username: config.get('servers.kibana.username'),
   };
 
   /**

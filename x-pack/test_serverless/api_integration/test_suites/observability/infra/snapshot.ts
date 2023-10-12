@@ -10,7 +10,6 @@ import type {
   SnapshotNodeResponse,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { DATES, ARCHIVE_NAME } from './constants';
@@ -18,11 +17,12 @@ import { DATES, ARCHIVE_NAME } from './constants';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const config = getService('config');
   const fetchSnapshot = async (
     body: SnapshotRequest
   ): Promise<SnapshotNodeResponse | undefined> => {
-    const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-    const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
+    const username = config.get('servers.kibana.username');
+    const password = config.get('servers.kibana.password');
     const response = await supertest
       .post('/api/metrics/snapshot')
       .set('kbn-xsrf', 'foo')

@@ -11,7 +11,6 @@ import type {
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api';
 
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { DATES, ARCHIVE_NAME } from './constants';
@@ -24,8 +23,9 @@ const timeRange = {
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
+  const config = getService('config');
+  const username = config.get('servers.kibana.username');
+  const password = config.get('servers.kibana.password');
 
   const fetchInfraHosts = async (
     body: GetInfraMetricsRequestBodyPayload

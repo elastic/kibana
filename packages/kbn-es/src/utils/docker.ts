@@ -35,7 +35,6 @@ import {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from './serverless_file_realm';
-import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
 interface ImageOptions {
@@ -643,8 +642,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   );
 
   log.success(`Serverless ES cluster running.
-  Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
-    SYSTEM_INDICES_SUPERUSER
+  Login with username ${chalk.bold.cyan(
+    ELASTIC_SERVERLESS_SUPERUSER
   )} and password ${chalk.bold.magenta(ELASTIC_SERVERLESS_SUPERUSER_PASSWORD)}
   Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
