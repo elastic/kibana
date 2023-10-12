@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
+import { Meta, Story } from '@storybook/react';
+import React, { FC, useState } from 'react';
+import { ErrorBoundary, ErrorBoundaryProvider } from '../..';
+import mdx from '../../README.mdx';
+import { ErrorBoundaryStorybookMock } from '../../mocks/src/storybook';
+
+const storybookMock = new ErrorBoundaryStorybookMock();
+
+export default {
+  title: 'Errors/Error Boundary',
+  description:
+    'This is the Kibana Error Boundary. Use this to put a boundary around React components that may throw errors when rendering.',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
+} as Meta;
+
+const Template: FC = ({ children }) => {
+  return (
+    <EuiPageTemplate>
+      <EuiPageTemplate.Header pageTitle="Welcome to my page" />
+      <EuiPageTemplate.Section grow={true}>{children}</EuiPageTemplate.Section>
+      <EuiPageTemplate.Section grow={false}>
+        <EuiLink>Contact us</EuiLink>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+  );
+};
+
+export const ErrorInCallout: Story = () => {
+  const BadComponent = () => {
+    const [hasError, setHasError] = useState(false);
+
+    if (hasError) {
+      throw new Error('This is an error to show in a callout!');
+    }
+
+    const clickedForError = action('clicked for error');
+    const handleClick = () => {
+      clickedForError();
+      setHasError(true);
+    };
+
+    return <EuiButton onClick={handleClick}>Click for error</EuiButton>;
+  };
+
+  const services = storybookMock.getServices();
+
+  return (
+    <Template>
+      <ErrorBoundaryProvider {...services}>
+        <ErrorBoundary>
+          <BadComponent />
+        </ErrorBoundary>
+      </ErrorBoundaryProvider>
+    </Template>
+  );
+};
