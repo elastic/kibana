@@ -11,8 +11,7 @@ The Security Solution plugin aims at having a single instance of the expandable 
 ## Notes
 
 The structure of the `flyout` folder is intended to work as follows:
-- top level folders refer to the _type_ of flyout (for example alert details, event details, user, host, rule, cases...) and would contain all the panels for that flyout _type_.
-- each of these top level folders can be organized the way you want, but we recommend following a similar structure to the one we have for the `document_details` flyout type:
+- multiple top level folders referring to the _type_ of flyout (for example document details, user, host, rule, cases...) and would contain all the panels for that flyout _type_. Each of these top level folders can be organized the way you want, but we recommend following a similar structure to the one we have for the `document_details` flyout type, where the `right`, `left` and `preview` folders correspond to the panels displayed in the right, left and preview flyout sections respectively. The `shared` folder contains any shared components/hooks/services/helpers that are used within the other folders.
 ```
 document_details
 └─── right
@@ -20,9 +19,12 @@ document_details
 └─── preview
 └─── shared
 ```
-Where the `right`, `left` and `preview` folders correspond to the panels displayed in the right, left and preview sections respectively. The `shared` folder contains any shared components/hooks/services/helpers that are used within the other folders. 
+- one top level `shared` folder containing all the components/hooks/services/helpers that are used across multiple flyout types. Putting code in this folder should be very deliberate, and should follow some guidelines:
+  - code built in isolation (meaning that it should not be built with a specific flyout type or usage in mind)
+  - extensively tested
+  - components should have storybook stories
 
-The `flyout` folder structure should look like this:
+The `flyout` folder structure should therefore look like this:
 ```
 flyout
 │   index.tsx
@@ -30,11 +32,6 @@ flyout
 │   README.md    
 │
 └─── document_details
-│   └─── right
-│   └─── left
-│   └─── preview
-│
-└─── event_details
 │   └─── right
 │   └─── left
 │   └─── preview
@@ -52,10 +49,3 @@ flyout
 └─── shared
     └─── components
 ```
-
-Where the top level `shared` folder contains all the components/hooks/services/helpers that are used accross multiple flyout types.
-
-Putting code in this folder should be very deliberate, and should follow some guidelines:
-- built in isolation (meaning that it should not be built with a specific flyout type or situation in mind)
-- extensively tested
-- components should have storybook stories
