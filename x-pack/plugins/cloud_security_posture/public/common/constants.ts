@@ -86,6 +86,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS AWS',
         }),
         icon: 'logoAWS',
+        testId: 'cisAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
@@ -110,6 +111,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         disabled: false,
         isBeta: true,
         icon: 'logoAzure',
+        testId: 'cisAzureTestId',
       },
     ],
   },

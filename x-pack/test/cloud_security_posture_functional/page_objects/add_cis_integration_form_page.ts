@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -15,23 +13,6 @@ export function AddCisIntegrationFormPageProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
-  const retry = getService('retry');
-  const supertest = getService('supertest');
-  const log = getService('log');
-
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
 
   const cisGcp = {
     getIntegrationFormEntirePage: () => testSubjects.find('dataCollectionSetupStep'),
@@ -63,7 +44,7 @@ export function AddCisIntegrationFormPageProvider({
     isPostInstallGoogleCloudShellModal: async (isOrg: boolean, orgID?: string, prjID?: string) => {
       const googleCloudShellModal = await testSubjects.find('postInstallGoogleCloudShellModal');
       const googleCloudShellModalVisibleText = await googleCloudShellModal.getVisibleText();
-      const stringProjectId = `cloud config set project ${prjID ? `${prjID}` : '<PROJECT_ID>'}`;
+      const stringProjectId = prjID ? prjID : '<PROJECT_ID>';
       const stringOrganizationId = orgID ? `ORG_ID=${orgID}` : 'ORG_ID=<ORGANIZATION_ID>';
       const orgIdExist = googleCloudShellModalVisibleText.includes(stringOrganizationId);
       const prjIdExist = googleCloudShellModalVisibleText.includes(stringProjectId);
@@ -97,6 +78,5 @@ export function AddCisIntegrationFormPageProvider({
   return {
     cisGcp,
     navigateToAddIntegrationCspmPage,
-    waitForPluginInitialized,
   };
 }
