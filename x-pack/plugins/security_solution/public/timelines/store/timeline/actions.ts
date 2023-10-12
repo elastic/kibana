@@ -281,3 +281,5 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
+
+export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');

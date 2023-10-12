@@ -79,6 +79,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
               ...titleAndDescription,
             })
           );
+          dispatch(timelineActions.saveTimeline({ id: timelineId }));
         }
 
         return Promise.resolve();

@@ -61,6 +61,7 @@ import {
   clearEventsLoading,
   updateSavedSearchId,
   setIsDiscoverSavedSearchLoaded,
+  setChanged,
 } from './actions';
 
 import {
@@ -549,6 +550,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         isDiscoverSavedSearchLoaded,
+      },
+    },
+  }))
+  .case(setChanged, (state, { id, changed }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        changed,
       },
     },
   }))

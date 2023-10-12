@@ -55,35 +55,14 @@ import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import * as i18n from '../../pages/translations';
 
 import {
-  applyKqlFilterQuery,
-  addProvider,
-  dataProviderEdited,
-  removeColumn,
-  removeProvider,
-  updateColumns,
-  updateEqlOptions,
-  updateDataProviderEnabled,
-  updateDataProviderExcluded,
-  updateDataProviderType,
-  updateKqlMode,
-  updateProviders,
-  updateRange,
-  updateSort,
-  upsertColumn,
-  updateDataView,
   updateTimeline,
-  updateTitleAndDescription,
   updateAutoSaveMsg,
-  setExcludedRowRendererIds,
-  setFilters,
-  setSavedQueryId,
   startTimelineSaving,
   endTimelineSaving,
   createTimeline,
-  addTimeline,
   showCallOutUnauthorizedMsg,
+  addTimeline,
   saveTimeline,
-  updateSavedSearchId,
 } from './actions';
 import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -94,34 +73,6 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import type { ActionTimeline, TimelineEpicDependencies } from './types';
 import type { TimelineInput } from '../../../../common/search_strategy';
-
-const timelineActionsType = [
-  applyKqlFilterQuery.type,
-  addProvider.type,
-  addTimeline.type,
-  dataProviderEdited.type,
-  removeProvider.type,
-  saveTimeline.type,
-  setExcludedRowRendererIds.type,
-  setFilters.type,
-  setSavedQueryId.type,
-  updateDataProviderEnabled.type,
-  updateDataProviderExcluded.type,
-  updateDataProviderType.type,
-  updateEqlOptions.type,
-  updateKqlMode.type,
-  updateProviders.type,
-  updateTitleAndDescription.type,
-
-  updateDataView.type,
-  removeColumn.type,
-  updateColumns.type,
-  updateSort.type,
-  updateRange.type,
-  upsertColumn.type,
-
-  updateSavedSearchId.type,
-];
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');
@@ -182,7 +133,7 @@ export const createTimelineEpic =
             myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
             return getOr(false, 'payload.savedTimeline', action);
           } else if (
-            timelineActionsType.includes(action.type) &&
+            action.type === saveTimeline.type &&
             !timelineObj.isLoading &&
             isItAtimelineAction(timelineId)
           ) {
@@ -225,7 +176,7 @@ export const createTimelineEpic =
               timeline$,
               allTimelineQuery$
             );
-          } else if (timelineActionsType.includes(action.type)) {
+          } else if (action.type === saveTimeline.type) {
             return from(
               persistTimeline({
                 timelineId,
@@ -278,6 +229,7 @@ export const createTimelineEpic =
                         timeline: {
                           ...savedTimeline,
                           updated: response.timeline.updated ?? undefined,
+                          changed: false,
                           savedObjectId: response.timeline.savedObjectId,
                           version: response.timeline.version,
                           status: response.timeline.status ?? TimelineStatus.active,
