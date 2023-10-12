@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { QueryDelaySettingsResponseV1 } from '../../../response';
+import type { TypeOf } from '@kbn/config-schema';
+import { queryDelaySettingsResponseSchemaV1 } from '../../../response';
 
-export interface GetQueryDelaySettingsResponse {
-  body: QueryDelaySettingsResponseV1;
-}
+export type GetQueryDelaySettingsResponse = TypeOf<typeof queryDelaySettingsResponseSchemaV1>;
