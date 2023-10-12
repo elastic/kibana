@@ -55,6 +55,7 @@ guided_onboarding.enabled: false
 xpack.canvas.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
+xpack.screenshotting.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false

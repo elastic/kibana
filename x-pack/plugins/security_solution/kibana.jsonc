@@ -52,7 +52,8 @@
       "discover",
       "notifications",
       "savedObjects",
-      "savedSearch"
+      "savedSearch",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [
       "cloudExperiments",
