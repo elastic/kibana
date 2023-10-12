@@ -178,6 +178,7 @@
     "@kbn/openapi-generator",
     "@kbn/es",
     "@kbn/react-kibana-mount",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/stack-connectors-plugin",
+    "@kbn/unified-doc-viewer-plugin"
   ]
 }

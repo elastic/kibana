@@ -330,46 +330,54 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
           <EuiSpacer size="l" />
           {renderVersionToDeployPicker()}
-
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-            <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
-              <h5>
-                {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {
-                  defaultMessage: 'Note',
-                })}
-              </h5>
-            </EuiTitle>
-            <EuiIconTip
-              position="right"
-              content={
-                <>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
-                    defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
-                  />
-                </>
-              }
-            />
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          {canWritePolicyManagement ? (
-            <EuiTextArea
-              value={note}
-              disabled={getNoteInProgress || createNoteInProgress}
-              onChange={(e) => setNote(e.target.value)}
-              fullWidth
-              rows={3}
-              placeholder={i18n.translate(
-                'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
-                {
-                  defaultMessage: 'Add relevant information about update here',
-                }
+          {(canWritePolicyManagement || note) && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+                <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
+                  <h5>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.protectionUpdates.note.label',
+                      {
+                        defaultMessage: 'Note',
+                      }
+                    )}
+                  </h5>
+                </EuiTitle>
+                <EuiIconTip
+                  position="right"
+                  content={
+                    <>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
+                        defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
+                      />
+                    </>
+                  }
+                />
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              {canWritePolicyManagement ? (
+                <EuiTextArea
+                  value={note}
+                  disabled={getNoteInProgress || createNoteInProgress}
+                  onChange={(e) => setNote(e.target.value)}
+                  fullWidth
+                  rows={3}
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
+                    {
+                      defaultMessage: 'Add relevant information about update here',
+                    }
+                  )}
+                  data-test-subj={'protection-updates-manifest-note'}
+                />
+              ) : (
+                <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>
+                  {note}
+                </EuiText>
               )}
-              data-test-subj={'protection-updates-manifest-note'}
-            />
-          ) : (
-            <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>{note}</EuiText>
+            </>
           )}
         </>
       );
