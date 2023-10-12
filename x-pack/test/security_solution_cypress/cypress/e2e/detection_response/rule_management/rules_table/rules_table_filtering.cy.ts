@@ -29,7 +29,11 @@ import {
 import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
-describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// security_exception: action [indices:data/write/delete/byquery] is unauthorized for user
+// [elastic_serverless] with effective roles [superuser] on restricted indices
+// [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics]
+describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

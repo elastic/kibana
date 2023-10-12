@@ -27,7 +27,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const filterBar = getService('filterBar');
   const dataViewTitle = 'logstash-2015.09.22';
 
-  describe('Field stats', () => {
+  // accessing restricted / system indices directly does not work in serverless
+  // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user
+  // [elastic_serverless] with effective roles [superuser] on restricted indices
+  // [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics]
+  describe.skip('Field stats', () => {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();

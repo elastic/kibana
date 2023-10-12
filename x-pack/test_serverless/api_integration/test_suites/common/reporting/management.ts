@@ -22,7 +22,11 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
 
-  describe('Reporting Management', function () {
+  // accessing restricted / system indices directly does not work in serverless
+  // security_exception: action [indices:admin/create/delete] is unauthorized for user
+  // [elastic_serverless] with effective roles [superuser] on restricted indices
+  // [.reporting-2020.04.19]
+  describe.skip('Reporting Management', function () {
     const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
 
     beforeEach(async () => {

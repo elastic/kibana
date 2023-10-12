@@ -19,7 +19,11 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('GET /internal/cloud_security_posture/status', () => {
+  // accessing restricted / system indices directly does not work in serverless
+  // security_exception: action [indices:admin/delete] is unauthorized for user
+  // [elastic_serverless] with effective roles [superuser] on restricted indices
+  // [.fleet-actions-7]
+  describe.skip('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST', () => {
