@@ -64,6 +64,7 @@ export const createCustomThresholdRule = async (
         params: {
           documents: [
             {
+              ruleName: '{{rule.name}}',
               ruleType: '{{rule.type}}',
               alertDetailsUrl: '{{context.alertDetailsUrl}}',
               reason: '{{context.reason}}',

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable no-restricted-syntax */
 require('@babel/register')({
   extensions: ['.ts', '.js'],
   presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
@@ -13,6 +14,10 @@ require('@babel/register')({
 
 var createCustomThresholdRule =
   require('@kbn/observability-alerting-test-data').createCustomThresholdRule;
+var createApmFailedTransactionRateRule =
+  require('@kbn/observability-alerting-test-data').createApmFailedTransactionRateRule;
+var createApmErrorCountRule =
+  require('@kbn/observability-alerting-test-data').createApmErrorCountRule;
 var createDataView = require('@kbn/observability-alerting-test-data').createDataView;
 var createIndexConnector = require('@kbn/observability-alerting-test-data').createIndexConnector;
 
@@ -40,6 +45,14 @@ async function run() {
     await createCustomThresholdRule(actionId, scenario.dataView.id, scenario.ruleParams);
     console.log('Creating Custom threshold rule - finished - name: ', scenario.ruleParams.name);
   }
+
+  console.log('Creating APM error count rule - start');
+  await createApmErrorCountRule(actionId);
+  console.log('Creating APM error count rule - finished');
+
+  console.log('Creating APM failed transaction rate rule - start');
+  await createApmFailedTransactionRateRule(actionId);
+  console.log('Creating APM failed transaction rate rule - finished');
 }
 
 run();
