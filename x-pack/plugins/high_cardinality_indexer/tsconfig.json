@@ -8,8 +8,9 @@
     "common/**/*",
     "public/**/*",
     "typings/**/*",
+    "server/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -22,7 +23,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/server-route-repository",
-    "@kbn/rule-registry-plugin",
+    "@kbn/rule-registry-plugin"
   ],
   "exclude": ["target/**/*"]
 }

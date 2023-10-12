@@ -40,7 +40,6 @@ export const qaDeployedToProduction: EventFunction = (_schedule, timestamp) => {
   const host = sample(ADMIN_CONSOLE_QA_HOSTS) as string;
   const domain = sample(DOMAINS) as string;
   const port = 3333;
-  const full = `https://${ADMIN_CONSOLE}.${domain}:${port}${path}`;
   const userAgent = faker.internet.userAgent();
 
   return [

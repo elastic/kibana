@@ -9,9 +9,9 @@ import lodash from 'lodash';
 import { faker } from '@faker-js/faker';
 import { v4 } from 'uuid';
 import { Moment } from 'moment';
+import { Doc } from '../../../../../../common/types';
 import { createBaseEvent } from './create_base_event';
 import { MONGODB_HOSTS } from '../../../common/constants';
-import { Doc } from '../../../../../types';
 
 const { memoize, sample } = lodash;
 
@@ -41,8 +41,8 @@ export function createMongoObject(obj: object) {
     return JSON.stringify(value);
   }
 
-  function stringifyObject(obj: object) {
-    return `{ _id: ObjectId("${generateRandomHexString(20)}"), ${Object.entries(obj)
+  function stringifyObject(object: object) {
+    return `{ _id: ObjectId("${generateRandomHexString(20)}"), ${Object.entries(object)
       .map(([key, value]) => `${key}: ${stringifyValue(value)}`)
       .join(', ')} }`;
   }

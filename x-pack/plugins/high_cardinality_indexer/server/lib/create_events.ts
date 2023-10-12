@@ -48,9 +48,7 @@ export class CreateEvents {
   private logger: Logger | undefined;
   private config: Config | undefined;
   private schedule: ParsedSchedule | undefined;
-  private end: Moment | false | undefined;
   private currentTimestamp: Moment | undefined;
-  private continueIndexing: boolean | undefined;
 
   private paused: boolean | undefined = false;
   private queue: QueueObject<Doc> | undefined = undefined;
@@ -94,9 +92,7 @@ export class CreateEvents {
   }) {
     this.config = config;
     this.schedule = schedule;
-    this.end = end;
     this.currentTimestamp = currentTimestamp;
-    this.continueIndexing = continueIndexing;
     this.queue = createQueue({ client: this.client!, config, logger: this.logger! });
 
     const eventsPerCycle = this.schedule.eventsPerCycle ?? this.config.indexing.eventsPerCycle;
@@ -177,116 +173,9 @@ export class CreateEvents {
 
     this.config = undefined;
     this.schedule = undefined;
-    this.end = undefined;
     this.currentTimestamp = undefined;
-    this.continueIndexing = undefined;
 
     this.paused = undefined;
     this.queue = undefined;
   }
 }
-// export async function createEvents({
-//   config,
-//   client,
-//   schedule,
-//   end,
-//   currentTimestamp,
-//   continueIndexing = false,
-//   logger,
-// }: {
-//   config: Config;
-//   client: ElasticsearchClient;
-//   schedule: ParsedSchedule;
-//   end: Moment | false;
-//   currentTimestamp: Moment;
-//   continueIndexing: boolean;
-//   logger: Logger;
-// }): Promise<void> {
-//   logger.info('CREATE QUEUE');
-
-//   const queue = createQueue({ client, config, logger });
-
-//   if (
-//     !queue.paused &&
-//     schedule.delayInMinutes &&
-//     schedule.delayEveryMinutes &&
-//     currentTimestamp.minute() % schedule.delayEveryMinutes === 0
-//   ) {
-//     logger.info('Pausing queue');
-
-//     queue.pause();
-
-//     setTimeout(() => {
-//       logger.info('Resuming queue');
-//       queue.resume();
-//     }, schedule.delayInMinutes * 60 * 1000);
-//   }
-
-//   const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;
-//   const interval = schedule.interval ?? config.indexing.interval;
-//   const calculateEventsPerCycle = createEventsPerCycleFn(schedule, eventsPerCycle, logger);
-//   const totalEvents = calculateEventsPerCycle(currentTimestamp);
-
-//   if (totalEvents > 0) {
-//     let epc = schedule.randomness
-//       ? random(
-//           Math.round(totalEvents - totalEvents * schedule.randomness),
-//           Math.round(totalEvents + totalEvents * schedule.randomness)
-//         )
-//       : totalEvents;
-
-//     if (config.indexing.reduceWeekendTrafficBy && isWeekendTraffic(currentTimestamp)) {
-//       logger.info(
-//         `Reducing traffic from ${epc} to ${epc * (1 - config.indexing.reduceWeekendTrafficBy)}`
-//       );
-//       epc = epc * (1 - config.indexing.reduceWeekendTrafficBy);
-//     }
-
-//     range(epc)
-//       .map((i) => {
-//         const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
-
-//         const eventTimestamp = moment(
-//           random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
-//         );
-
-//         return generateEvent(config, schedule, i, eventTimestamp);
-//       })
-//       .flat()
-//       .forEach((event) => queue.push(event));
-
-//     await queue.drain();
-//   } else {
-//     logger.info('Indexing 0 documents. Took: 0, latency: 0, indexed: 0');
-//   }
-
-//   const endTs = end === false ? moment() : end;
-
-//   if (currentTimestamp.isBefore(endTs)) {
-//     return createEvents({
-//       client,
-//       config,
-//       schedule,
-//       end,
-//       currentTimestamp: currentTimestamp.add(interval, 'ms'),
-//       continueIndexing,
-//       logger,
-//     });
-//   }
-
-//   if (currentTimestamp.isSameOrAfter(endTs) && continueIndexing) {
-//     await wait(interval, logger);
-
-//     return createEvents({
-//       client,
-//       config,
-//       schedule,
-//       end,
-//       currentTimestamp: currentTimestamp.add(interval, 'ms'),
-//       continueIndexing,
-//       logger,
-//     });
-//   }
-
-//   logger.info(`Indexing complete for ${schedule.template} events.`);
-// }

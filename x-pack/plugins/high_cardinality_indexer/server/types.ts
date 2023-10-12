@@ -16,6 +16,7 @@ import {
   FAKE_APM_LATENCY,
   FAKE_STACK,
 } from '../common/constants';
+import { Doc } from '../common/types';
 
 export const DatasetRT = rt.keyof({
   [FAKE_HOSTS]: null,
