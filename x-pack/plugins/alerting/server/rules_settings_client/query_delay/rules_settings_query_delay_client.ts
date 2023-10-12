@@ -167,7 +167,7 @@ export class RulesSettingsQueryDelayClient {
         return await this.createSettings();
       }
       this.logger.error(
-        `Failed to persist query delay rules setting for current space. Error: ${e}`
+        `Failed to get query delay rules setting for current space. Error: ${e}`
       );
       throw e;
     }
