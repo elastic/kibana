@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
       });
       await PageObjects.settings.navigateTo();
 

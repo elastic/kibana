@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
             '{ "from": "2019-04-27T23:56:51.374Z", "to": "2019-08-23T16:18:51.821Z"}',
-          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+          defaultDataView: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
       });
       after('clean up archives', async () => {
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
             '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
-          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+          defaultDataView: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');

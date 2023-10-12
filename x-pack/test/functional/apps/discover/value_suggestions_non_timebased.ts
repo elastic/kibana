@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
       );
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'without-timefield' });
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': false,
       });
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('defaultDataView');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 

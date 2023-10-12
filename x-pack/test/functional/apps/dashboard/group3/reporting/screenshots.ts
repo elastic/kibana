@@ -30,7 +30,7 @@ export default function ({
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.load(ecommerceSOPath);
     await kibanaServer.uiSettings.replace({
-      defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+      defaultDataView: '5193f870-d861-11e9-a311-0fa548c5f953',
     });
   };
   const unloadEcommerce = async () => {
@@ -179,7 +179,7 @@ export default function ({
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
-          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+          defaultDataView: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
         });
 
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');

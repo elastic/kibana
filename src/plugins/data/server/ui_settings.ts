@@ -163,13 +163,13 @@ export function getUiSettings(
         unmapped_type: schema.string(),
       }),
     },
-    defaultIndex: {
-      name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
+    defaultDataView: {
+      name: i18n.translate('data.advancedSettings.defaultDataViewTitle', {
         defaultMessage: 'Default data view',
       }),
       value: null,
       type: 'string',
-      description: i18n.translate('data.advancedSettings.defaultIndexText', {
+      description: i18n.translate('data.advancedSettings.defaultDataViewText', {
         defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
       schema: schema.nullable(schema.string()),

@@ -332,7 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.info(`updating settings to use the "${tsdbDataView}" dataView...`);
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
-        defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
+        defaultDataView: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
       });
     });

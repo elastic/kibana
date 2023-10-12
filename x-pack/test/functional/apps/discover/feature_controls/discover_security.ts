@@ -428,7 +428,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        await kibanaServer.uiSettings.unset('defaultIndex');
+        await kibanaServer.uiSettings.unset('defaultDataView');
         await esSupertest
           .post('/_aliases')
           .send({

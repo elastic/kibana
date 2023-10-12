@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
+import { DEFAULT_DATA_VIEW_ID } from '@kbn/management-settings-ids';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
@@ -92,7 +93,7 @@ export const IndexPatternTable = ({
     () =>
       new DataViewTableController({
         services: { dataViews },
-        config: { defaultDataView: uiSettings.get('defaultIndex') },
+        config: { defaultDataView: uiSettings.get(DEFAULT_DATA_VIEW_ID) },
       })
   );
 

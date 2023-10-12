@@ -13,6 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_DATA_VIEW_ID } from '@kbn/management-settings-ids';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS } from '../constants';
@@ -72,7 +73,7 @@ export const CreateEditField = withRouter(
         <>
           <IndexHeader
             indexPattern={indexPattern}
-            defaultIndex={uiSettings.get('defaultIndex')}
+            defaultIndex={uiSettings.get(DEFAULT_DATA_VIEW_ID)}
             canSave={dataViews.getCanSaveSync()}
           />
           <EuiSpacer size={'l'} />

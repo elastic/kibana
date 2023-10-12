@@ -20,7 +20,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard_async/async_search'
       );
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
     });
 

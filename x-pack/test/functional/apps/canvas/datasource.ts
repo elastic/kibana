@@ -31,7 +31,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       );
 
       await kibanaServer.uiSettings.update({
-        defaultIndex: 'kibana_sample_data_flights',
+        defaultDataView: 'kibana_sample_data_flights',
       });
 
       // create new test workpad

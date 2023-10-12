@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       {
         'timepicker:timeDefaults':
           '{  "from": "2015-09-01T00:00:00.000Z",  "to": "2015-10-01T00:00:00.000Z"}',
-        defaultIndex: 'd1bd6c84-d9d0-56fb-8a72-63fe60020920',
+        defaultDataView: 'd1bd6c84-d9d0-56fb-8a72-63fe60020920',
       },
       { space: 'another-space' }
     );

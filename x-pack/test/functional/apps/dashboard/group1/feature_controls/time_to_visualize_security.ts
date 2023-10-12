@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       await kbnServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
       });
 
       // ensure we're logged out so we can login as the appropriate users

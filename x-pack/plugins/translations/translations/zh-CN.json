@@ -1348,8 +1348,6 @@
     "data.advancedSettings.courier.requestPreferenceSessionId": "会话 ID",
     "data.advancedSettings.courier.requestPreferenceText": "允许您设置用于处理搜索请求的分片。\n          <ul>\n            <li><strong>{sessionId}</strong>：限制操作在相同分片上执行所有搜索请求。\n              这有利于在各个请求之间复用分片缓存。</li>\n            <li><strong>{custom}</strong>：允许您定义自己的首选项。\n              使用 <strong>'courier:customRequestPreference'</strong> 定制首选项值。</li>\n            <li><strong>{none}</strong>：表示不设置首选项。\n              这可能会提供更佳的性能，因为请求可以在所有分片副本上进行分配。\n              不过，结果可能会不一致，因为不同的分片可能处于不同的刷新状态。</li>\n          </ul>",
     "data.advancedSettings.courier.requestPreferenceTitle": "请求首选项",
-    "data.advancedSettings.defaultIndexText": "未设置数据视图时，供 Discover 和可视化使用。",
-    "data.advancedSettings.defaultIndexTitle": "默认数据视图",
     "data.advancedSettings.docTableHighlightText": "在 Discover 和已保存搜索仪表板中突出显示结果。处理大文档时，突出显示会使请求变慢。",
     "data.advancedSettings.docTableHighlightTitle": "突出显示结果",
     "data.advancedSettings.histogram.barTargetText": "在日期和数值直方图中使用“auto”时间间隔时尝试生成大约此数目的存储桶",

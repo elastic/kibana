@@ -16,7 +16,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   describe('Discover', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 

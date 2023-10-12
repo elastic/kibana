@@ -15,7 +15,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('lens search sessions', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
     });
 
     after(async () => {

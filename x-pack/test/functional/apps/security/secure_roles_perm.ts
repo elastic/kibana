@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
       );
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
 

@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('Starting pre_calculated_histogram before method');
       await esArchiver.load('x-pack/test/functional/es_archives/pre_calculated_histogram');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'test-histogram' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'test-histogram' });
     });
 
     after(function () {

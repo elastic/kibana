@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
-        await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+        await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash*' });
       }
     );
 
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after('set back default index pattern', async () => {
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
     });
 
     after('clean-up custom time range on panel', async () => {

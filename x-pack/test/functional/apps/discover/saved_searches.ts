@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
     'doc_table:legacy': false,
   };
 

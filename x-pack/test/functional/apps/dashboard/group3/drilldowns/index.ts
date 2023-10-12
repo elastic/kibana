@@ -20,7 +20,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
       );
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
     });
 
     after(async () => {

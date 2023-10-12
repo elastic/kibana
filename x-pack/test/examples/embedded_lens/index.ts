@@ -21,7 +21,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       ); // need at least one index pattern
       await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
       });
     });
 

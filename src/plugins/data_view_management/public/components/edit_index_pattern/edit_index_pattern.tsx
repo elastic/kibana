@@ -28,6 +28,7 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
+import { DEFAULT_DATA_VIEW_ID } from '@kbn/management-settings-ids';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -76,7 +77,7 @@ export const EditIndexPattern = withRouter(
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
-    const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
+    const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get(DEFAULT_DATA_VIEW_ID));
     const [tags, setTags] = useState<
       Array<{ key: string; 'data-test-subj': string; name: string }>
     >([]);

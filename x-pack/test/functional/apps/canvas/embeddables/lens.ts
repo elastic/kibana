@@ -24,7 +24,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await esArchiver.load(archives.es);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(archives.kbn);
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-lens' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-lens' });
       await PageObjects.canvas.goToListingPage();
       await PageObjects.canvas.createNewWorkpad();
     });

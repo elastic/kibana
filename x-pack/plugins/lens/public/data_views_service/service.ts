@@ -126,6 +126,6 @@ export const createIndexPatternService = ({
     },
     ensureIndexPattern: (args) =>
       ensureIndexPattern({ onError: showLoadingDataViewError, dataViews, ...args }),
-    getDefaultIndex: () => core.uiSettings.get('defaultIndex'),
+    getDefaultIndex: () => core.uiSettings.get('defaultDataView'),
   };
 };

@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
       });
       await PageObjects.settings.navigateTo();
       await PageObjects.rollup.clickRollupJobsTab();

@@ -56,7 +56,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
-        defaultIndex: indexPatternString,
+        defaultDataView: indexPatternString,
         'dateFormat:tz': 'UTC',
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
