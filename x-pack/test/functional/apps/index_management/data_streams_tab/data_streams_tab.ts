@@ -12,8 +12,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const toasts = getService('toasts');
   const log = getService('log');
-  const dataStreams = getService('dataStreams');
   const browser = getService('browser');
+  const es = getService('es');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
@@ -23,15 +23,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await log.debug('Creating required data stream');
       try {
-        await dataStreams.createDataStream(
-          TEST_DS_NAME,
-          {
-            '@timestamp': {
-              type: 'date',
+        await es.cluster.putComponentTemplate({
+          name: `${TEST_DS_NAME}_mapping`,
+          template: {
+            settings: { mode: undefined },
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+              },
+            },
+            lifecycle: {
+              // @ts-ignore-next-line
+              enabled: true,
             },
           },
-          false
-        );
+        });
+
+        await es.indices.putIndexTemplate({
+          name: `${TEST_DS_NAME}_index_template`,
+          index_patterns: [TEST_DS_NAME],
+          data_stream: {},
+          composed_of: [`${TEST_DS_NAME}_mapping`],
+          _meta: {
+            description: `Template for ${TEST_DS_NAME} testing index`,
+          },
+        });
+
+        await es.indices.createDataStream({
+          name: TEST_DS_NAME,
+        });
       } catch (e) {
         log.debug('[Setup error] Error creating test data stream');
         throw e;
@@ -49,7 +71,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Cleaning up created data stream');
 
       try {
-        await dataStreams.deleteDataStream(TEST_DS_NAME);
+        await es.indices.deleteDataStream({ name: TEST_DS_NAME });
+        await es.indices.deleteIndexTemplate({
+          name: `${TEST_DS_NAME}_index_template`,
+        });
+        await es.cluster.deleteComponentTemplate({
+          name: `${TEST_DS_NAME}_mapping`,
+        });
       } catch (e) {
         log.debug('[Teardown error] Error deleting test data stream');
         throw e;

@@ -148,18 +148,16 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     const getManagementDetails = () => {
       const managementDetails = [];
 
-      if (lifecycle) {
-        managementDetails.push({
-          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
-            defaultMessage: 'Data retention',
-          }),
-          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
-            defaultMessage: 'The amount of time to retain the data in the data stream.',
-          }),
-          content: getLifecycleValue(lifecycle),
-          dataTestSubj: 'dataRetentionDetail',
-        });
-      }
+      managementDetails.push({
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
+          defaultMessage: 'Data retention',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
+          defaultMessage: 'The amount of time to retain the data in the data stream.',
+        }),
+        content: getLifecycleValue(lifecycle),
+        dataTestSubj: 'dataRetentionDetail',
+      });
 
       if (ilmPolicyName) {
         managementDetails.push({
