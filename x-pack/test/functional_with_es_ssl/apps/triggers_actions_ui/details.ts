@@ -420,8 +420,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168027
-    describe.skip('Edit rule with deleted connector', function () {
+    describe('Edit rule with deleted connector', function () {
       const testRunUuid = uuidv4();
 
       afterEach(async () => {
