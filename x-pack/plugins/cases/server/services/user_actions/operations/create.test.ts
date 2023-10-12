@@ -257,9 +257,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "this is a text field value",
-                          ],
+                          "value": "this is a text field value",
                         },
                       ],
                     },
@@ -311,9 +309,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "updated value",
-                          ],
+                          "value": "updated value",
                         },
                       ],
                     },
@@ -403,9 +399,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_2",
                           "type": "text",
-                          "value": Array [
-                            "new custom field 2",
-                          ],
+                          "value": "new custom field 2",
                         },
                       ],
                     },
@@ -457,9 +451,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "new value",
-                          ],
+                          "value": "new value",
                         },
                       ],
                     },
@@ -511,9 +503,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "new value",
-                          ],
+                          "value": "new value",
                         },
                       ],
                     },
