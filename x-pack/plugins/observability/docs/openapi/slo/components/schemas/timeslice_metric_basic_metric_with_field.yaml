@@ -16,7 +16,7 @@ properties:
     example: sum
     enum: [sum, avg, min, max, std_deviation, last_value, cardinality]
   field:
-    description: The field of the metric. Required for sum, avg, max, min, std_deviation, last_value, percentile
+    description: The field of the metric.
     type: string
     example: processor.processed
   filter:

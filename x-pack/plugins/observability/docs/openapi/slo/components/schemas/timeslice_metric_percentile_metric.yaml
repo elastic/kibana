@@ -12,12 +12,12 @@ properties:
     example: A
     pattern: "^[A-Z]$"
   aggregation:
-    description: The aggregation type of the metric. Only valid option is "sum"
+    description: The aggregation type of the metric. Only valid option is "percentile"
     type: string
-    example: sum
-    enum: [sum, avg, min, max, std_deviation, last_value, cardinality]
+    example: percentile
+    enum: [percentile]
   field:
-    description: The field of the metric. Required for sum, avg, max, min, std_deviation, last_value, percentile
+    description: The field of the metric.
     type: string
     example: processor.processed
   percentile:
