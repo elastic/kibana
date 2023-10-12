@@ -208,7 +208,7 @@ export const commandDefinitions: CommandDefinition[] = [
     description: i18n.translate('monaco.esql.definitions.mvExpandDoc', {
       defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
     }),
-    examples: ['row a=[1,2,3], b="b", j=["a","b"] | mv_expand a'],
+    examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
     signature: {
       multipleParams: false,

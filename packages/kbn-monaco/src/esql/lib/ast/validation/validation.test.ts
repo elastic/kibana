@@ -23,7 +23,7 @@ import capitalize from 'lodash/capitalize';
 
 function getCallbackMocks() {
   return {
-    getFields: jest.fn(async ({ sourcesOnly }) =>
+    getFieldsFor: jest.fn(async ({ sourcesOnly }) =>
       sourcesOnly
         ? [
             ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
@@ -32,6 +32,10 @@ function getCallbackMocks() {
             })),
             { name: 'any#Char$ field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
+            {
+              name: `listField`,
+              type: `list`,
+            },
           ]
         : [
             { name: 'otherField', type: 'string' },
@@ -489,10 +493,20 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | mv_expand ', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
-    testErrorsAndWarnings('from a | mv_expand a', []);
-    testErrorsAndWarnings('from a | mv_expand a, b', [
+    testErrorsAndWarnings('from a | mv_expand stringField', [
+      'Mv_expand only supports list type values, found [stringField] of type string',
+    ]);
+
+    testErrorsAndWarnings(`from a | mv_expand listField`, []);
+
+    testErrorsAndWarnings('from a | mv_expand listField, b', [
       'SyntaxError: expected {<EOF>, PIPE} but found ","',
     ]);
+
+    testErrorsAndWarnings('row a = "a" | mv_expand a', [
+      'Mv_expand only supports list type values, found [a] of type string',
+    ]);
+    testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
   });
 
   describe('rename', () => {
@@ -583,6 +597,7 @@ describe('validation logic', () => {
   });
 
   describe('where', () => {
+    testErrorsAndWarnings('from a | where b', ['Unknown column [b]']);
     for (const cond of ['true', 'false']) {
       testErrorsAndWarnings(`from a | where ${cond}`, []);
       testErrorsAndWarnings(`from a | where NOT ${cond}`, []);
@@ -1156,7 +1171,7 @@ describe('validation logic', () => {
       const { ast } = getAstAndErrors(`row a = 1 | eval a`);
       const callbackMocks = getCallbackMocks();
       await validateAst(ast, callbackMocks);
-      expect(callbackMocks.getFields).not.toHaveBeenCalled();
+      expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
@@ -1171,7 +1186,7 @@ describe('validation logic', () => {
       const { ast } = getAstAndErrors(` `);
       const callbackMocks = getCallbackMocks();
       await validateAst(ast, callbackMocks);
-      expect(callbackMocks.getFields).not.toHaveBeenCalled();
+      expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
@@ -1181,8 +1196,8 @@ describe('validation logic', () => {
       await validateAst(ast, callbackMocks);
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
       expect(callbackMocks.getPolicies).toHaveBeenCalled();
-      expect(callbackMocks.getFields).toHaveBeenCalledTimes(1);
-      expect(callbackMocks.getFields).toHaveBeenLastCalledWith({
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
+      expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
         customQuery: `from enrichIndex1 | keep otherField, yetAnotherField`,
       });
     });
@@ -1193,8 +1208,8 @@ describe('validation logic', () => {
       await validateAst(ast, callbackMocks);
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-      expect(callbackMocks.getFields).toHaveBeenCalledTimes(1);
-      expect(callbackMocks.getFields).toHaveBeenLastCalledWith({
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
+      expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
         sourcesOnly: true,
       });
     });
@@ -1205,8 +1220,8 @@ describe('validation logic', () => {
       await validateAst(ast, callbackMocks);
       expect(callbackMocks.getSources).toHaveBeenCalled();
       expect(callbackMocks.getPolicies).toHaveBeenCalled();
-      expect(callbackMocks.getFields).toHaveBeenCalledTimes(2);
-      expect(callbackMocks.getFields).toHaveBeenLastCalledWith({
+      expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(2);
+      expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
         customQuery: `from enrichIndex1 | keep otherField, yetAnotherField`,
       });
     });

@@ -8,7 +8,7 @@
 
 import { uniqBy } from 'lodash';
 import capitalize from 'lodash/capitalize';
-import { ESQLCustomAutocompleteCallbacks } from '../../autocomplete/types';
+import type { ESQLCallbacks } from '../../autocomplete/types';
 import { nonNullable } from '../ast_walker';
 import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
 import {
@@ -486,23 +486,24 @@ function validateColumnForCommand(
   references: ReferenceMaps
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
-  const commandDef = getCommandDefinition(commandName);
-  if (commandName === 'row' && !references.variables.has(column.name)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownColumn',
-        values: {
-          name: column.name,
-        },
-        locations: column.location,
-      })
-    );
+
+  if (['from', 'show', 'limit'].includes(commandName)) {
+    return messages;
   }
-  if (
-    ['keep', 'drop', 'eval', 'stats', 'rename', 'dissect', 'grok', 'sort', 'enrich'].includes(
-      commandName
-    )
-  ) {
+  const commandDef = getCommandDefinition(commandName);
+  if (commandName === 'row') {
+    if (!references.variables.has(column.name)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unknownColumn',
+          values: {
+            name: column.name,
+          },
+          locations: column.location,
+        })
+      );
+    }
+  } else {
     const columnRef = getColumnHit(column.name, references);
     if (columnRef) {
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
@@ -618,6 +619,7 @@ function getAssignRightHandSideType(item: ESQLAstItem, fields: Map<string, ESQLR
       const fnDefinition = getFunctionDefinition(firstArg.name);
       return fnDefinition?.signatures[0].returnType;
     }
+    return firstArg.type;
   }
 }
 
@@ -733,7 +735,7 @@ function collectVariables(
 
 async function retrieveFields(
   commands: ESQLCommand[],
-  callbacks?: ESQLCustomAutocompleteCallbacks
+  callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
   if (!callbacks || commands.length < 1) {
     return new Map();
@@ -741,13 +743,13 @@ async function retrieveFields(
   if (commands[0].name === 'row') {
     return new Map();
   }
-  const fields = (await callbacks.getFields?.({ sourcesOnly: true })) || [];
+  const fields = (await callbacks.getFieldsFor?.({ sourcesOnly: true })) || [];
   return createMapFromList(fields);
 }
 
 async function retrievePolicies(
   commands: ESQLCommand[],
-  callbacks?: ESQLCustomAutocompleteCallbacks
+  callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
   if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
     return new Map();
@@ -758,7 +760,7 @@ async function retrievePolicies(
 
 async function retrieveSources(
   commands: ESQLCommand[],
-  callbacks?: ESQLCustomAutocompleteCallbacks
+  callbacks?: ESQLCallbacks
 ): Promise<Set<string>> {
   if (!callbacks || commands.length < 1) {
     return new Set();
@@ -803,7 +805,7 @@ function validateFieldsShadowing(
 async function retrievePoliciesFields(
   commands: ESQLCommand[],
   policies: Map<string, ESQLPolicy>,
-  callbacks?: ESQLCustomAutocompleteCallbacks
+  callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
   if (!callbacks) {
     return new Map();
@@ -824,7 +826,7 @@ async function retrievePoliciesFields(
     .flatMap(({ sourceIndices }) => sourceIndices)
     .join(', ')} | keep ${fullPolicies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
 
-  const fields = (await callbacks.getFields?.({ customQuery })) || [];
+  const fields = (await callbacks.getFieldsFor?.({ customQuery })) || [];
   return createMapFromList(fields);
 }
 
@@ -836,7 +838,7 @@ async function retrievePoliciesFields(
  */
 export async function validateAst(
   ast: ESQLAst,
-  callbacks?: ESQLCustomAutocompleteCallbacks
+  callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 

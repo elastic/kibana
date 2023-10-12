@@ -296,7 +296,8 @@ export function isEqualType(
   }
   if (item.type === 'list') {
     const listType = `${item.values[0].literalType}[]`;
-    return argType === listType;
+    // argType = 'list' means any list value is ok
+    return argType === item.type || argType === listType;
   }
   if (item.type === 'function') {
     if (isSupportedFunction(item.name, parentCommand).supported) {
