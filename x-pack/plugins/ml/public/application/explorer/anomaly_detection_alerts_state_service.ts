@@ -22,6 +22,7 @@ import {
   ALERT_UUID,
   ALERT_TIME_RANGE,
   ALERT_RULE_NAME,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { getSeverityColor } from '@kbn/ml-anomaly-utils';
@@ -43,6 +44,7 @@ export interface AnomalyDetectionAlert {
   end_timestamp: number;
   ruleName: string;
   color: string;
+  alertStatus: string;
 }
 
 export class AnomalyDetectionAlertsStateService extends StateService {
@@ -55,10 +57,43 @@ export class AnomalyDetectionAlertsStateService extends StateService {
   ) {
     super();
     this._init();
+
+    this.selectedAlerts$ = combineLatest([
+      this._aadAlerts$,
+      this._anomalyTimelineStateServices.getSelectedCells$().pipe(map((cells) => cells?.times)),
+    ]).pipe(
+      map(([alerts, selectedTimes]) => {
+        if (!Array.isArray(selectedTimes)) return null;
+
+        return alerts.filter(
+          (alert) =>
+            alert.anomalyTimestamp >= selectedTimes[0] * 1000 &&
+            alert.anomalyTimestamp <= selectedTimes[1] * 1000
+        );
+      })
+    );
   }
 
   public readonly anomalyDetectionAlerts$: Observable<AnomalyDetectionAlert[]> =
     this._aadAlerts$.asObservable();
+
+  public readonly selectedAlerts$: Observable<AnomalyDetectionAlert[] | null>;
+
+  public readonly countByStatus$: Observable<Record<string, number>> = this._aadAlerts$.pipe(
+    map((alerts) => {
+      return alerts.reduce(
+        (acc, alert) => {
+          if (!isDefined(acc[alert.alertStatus])) {
+            acc[alert.alertStatus] = 0;
+          } else {
+            acc[alert.alertStatus]++;
+          }
+          return acc;
+        },
+        { active: 0, recovered: 0 } as Record<string, number>
+      );
+    })
+  );
 
   protected _initSubscriptions(): Subscription {
     const subscription = new Subscription();
@@ -125,6 +160,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
                     timestamp: Number(gte),
                     end_timestamp: Number(lte),
                     color: getSeverityColor(anomalyScore),
+                    alertStatus: fields[ALERT_STATUS][0],
                   };
                 })
                 .filter(isDefined)

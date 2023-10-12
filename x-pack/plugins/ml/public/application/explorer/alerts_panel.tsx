@@ -7,7 +7,12 @@
 
 import React, { type FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiInMemoryTable,
+  EuiNotificationBadge,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,6 +26,7 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 export const AlertsPanel: FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
+  const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
   const durationLabel = i18n.translate('xpack.ml.explorer.alerts.alertsDuration', {
     defaultMessage: 'Duration',
   });
@@ -28,6 +34,9 @@ export const AlertsPanel: FC = () => {
     useAnomalyExplorerContext();
 
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$);
+  const selectedAlertsData = useObservable(anomalyDetectionAlertsStateService.selectedAlerts$);
+  const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
+
   const annotationXDomain = useObservable(anomalyTimelineStateService.timeDomain$);
 
   const swimlaneContainerWidth = useObservable(
@@ -39,6 +48,41 @@ export const AlertsPanel: FC = () => {
     defaultMessage: 'Anomaly time',
   });
 
+  const columns: Array<EuiBasicTableColumn<AnomalyDetectionAlert>> = [
+    {
+      field: 'ruleName',
+      name: 'Rule name',
+      sortable: true,
+      truncateText: false,
+    },
+    {
+      field: 'jobId',
+      name: 'Job ID',
+      sortable: true,
+      truncateText: false,
+    },
+    {
+      field: 'anomalyTimestamp',
+      name: 'Anomaly time',
+      sortable: true,
+      truncateText: false,
+      render: (value: number) => dateFormatter(value),
+    },
+    {
+      field: 'timestamp',
+      name: 'Triggered at',
+      sortable: true,
+      truncateText: false,
+      render: (value: number) => dateFormatter(value),
+    },
+    {
+      name: 'Duration',
+      truncateText: false,
+      render: (value: AnomalyDetectionAlert) =>
+        durationFormatter(value.end_timestamp - value.timestamp),
+    },
+  ];
+
   return (
     <>
       <CollapsiblePanel
@@ -47,6 +91,16 @@ export const AlertsPanel: FC = () => {
         header={
           <FormattedMessage id="xpack.ml.explorer.alertsPanel.header" defaultMessage="Alerts" />
         }
+        headerItems={Object.entries(countByStatus ?? {}).map(([status, count]) => {
+          return (
+            <>
+              {status}{' '}
+              <EuiNotificationBadge size="m" color={count > 0 ? 'accent' : 'subdued'}>
+                {count}
+              </EuiNotificationBadge>
+            </>
+          );
+        })}
       >
         {annotationXDomain && alertsData ? (
           <>
@@ -146,6 +200,9 @@ export const AlertsPanel: FC = () => {
             </MlTooltipComponent>
             <EuiSpacer size="m" />
           </>
+        ) : null}
+        {selectedAlertsData && selectedAlertsData.length > 0 ? (
+          <EuiInMemoryTable columns={columns} items={selectedAlertsData} />
         ) : null}
       </CollapsiblePanel>
       <EuiSpacer size="m" />
