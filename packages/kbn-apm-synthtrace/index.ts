@@ -18,7 +18,6 @@ export { AssetsSynthtraceEsClient } from './src/lib/assets/assets_synthtrace_es_
 export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
 
 export {
-  appendTransformsToDefaultApmPipeline,
   addObserverVersionTransform,
   deleteSummaryFieldTransform,
 } from './src/lib/utils/transform_helpers';
