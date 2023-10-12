@@ -77,7 +77,7 @@ export interface AuthenticationTypeAnalyticsEvent {
  */
 interface CommonReportFields {
   type: string;
-  age: number;
+  age?: number;
   body: {};
 }
 
@@ -118,7 +118,7 @@ const cspViolation: EventTypeOpts<CSPViolationEvent> = {
       type: 'text',
       _meta: {
         description: 'Type of the Kibana authentication provider.',
-        optional: false,
+        optional: true,
       },
     },
     documentURL: {
@@ -225,7 +225,7 @@ const permissionsPolicyViolation: EventTypeOpts<PermissionsPolicyViolationEvent>
       type: 'text',
       _meta: {
         description: 'Type of the Kibana authentication provider.',
-        optional: false,
+        optional: true,
       },
     },
     featureId: {
