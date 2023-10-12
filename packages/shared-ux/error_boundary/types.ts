@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ErrorService } from '@kbn/shared-ux-error-service';
+import { ErrorService } from './src/error_service';
 import { ToastsService } from './src/toasts_service';
 
 export interface ErrorBoundaryUIServices {
@@ -26,6 +26,7 @@ export interface ErrorBoundaryServices extends ErrorBoundaryUIServices {
  * Kibana dependencies required to render this component.
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ErrorBoundaryKibanaDependencies {
   // TODO analytics
 }
