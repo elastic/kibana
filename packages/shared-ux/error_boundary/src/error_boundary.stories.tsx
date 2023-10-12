@@ -68,34 +68,34 @@ export const ErrorInToast: Story = () => {
     id: string;
     firstName: string | null | undefined;
     lastName: string;
-    github: string;
+    action: string;
   }> = [];
 
   users.push({
     id: 'user-123',
     firstName: 'Rodger',
     lastName: 'Turcotte',
-    github: 'Rodger.Turcotte',
+    action: 'Rodger.Turcotte',
   });
   users.push({
     id: 'user-345',
     firstName: 'Bella',
     lastName: 'Cremin',
-    github: 'Bella23',
+    action: 'Bella23',
   });
   users.push({
     id: 'user-678',
     firstName: 'Layne',
     lastName: 'Franecki',
-    github: 'The_Real_Layne_2',
+    action: 'The_Real_Layne_2',
   });
 
   const columns: Array<EuiBasicTableColumn<typeof users[number]>> = [
     { field: 'firstName', name: 'First Name' },
     { field: 'lastName', name: 'Last Name' },
     {
-      field: 'github',
-      name: 'Github',
+      field: 'action',
+      name: 'Action',
       render: () => (
         <ErrorBoundary>
           <BadComponent />

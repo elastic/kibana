@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { EuiGlobalToastList } from '@elastic/eui';
 import React, { FC, useContext } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import * as Rx from 'rxjs';
 
-import { ErrorBoundaryKibanaDependencies, ErrorBoundaryServices } from '../types';
+import { ErrorBoundaryKibanaDependencies, ErrorBoundaryServices, Toasts } from '../types';
 import { ErrorService } from './error_service';
 import { ToastsService } from './toasts_service';
 
 const Context = React.createContext<ErrorBoundaryServices | null>(null);
+
+const StatefulToastList = ({ toasts$ }: { toasts$: Rx.Observable<Toasts> }) => {
+  const toasts = useObservable(toasts$);
+  return <EuiGlobalToastList toasts={toasts} dismissToast={() => {}} toastLifeTimeMs={9000} />;
+};
 
 /**
  * A Context Provider for Jest and Storybooks
@@ -26,6 +34,7 @@ export const ErrorBoundaryProvider: FC<ErrorBoundaryServices> = ({
   return (
     <Context.Provider value={{ reloadWindow, errorService, toastsService }}>
       {children}
+      <StatefulToastList toasts$={toastsService.toasts$} />
     </Context.Provider>
   );
 };
@@ -38,14 +47,20 @@ export const ErrorBoundaryKibanaProvider: FC<ErrorBoundaryKibanaDependencies> = 
   // ...dependencies
 }) => {
   const reloadWindow = () => window.location.reload();
+  const toastsService = new ToastsService({ reloadWindow });
 
   const value: ErrorBoundaryServices = {
     reloadWindow,
     errorService: new ErrorService(),
-    toastsService: new ToastsService({ reloadWindow }),
+    toastsService,
   };
 
-  return <Context.Provider value={value}>{children}</Context.Provider>;
+  return (
+    <Context.Provider value={value}>
+      {children}
+      <StatefulToastList toasts$={toastsService.toasts$} />
+    </Context.Provider>
+  );
 };
 
 /**

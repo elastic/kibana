@@ -9,9 +9,7 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiGlobalToastList, EuiGlobalToastListProps } from '@elastic/eui';
-
-import { ErrorBoundaryServices } from '../types';
+import { ErrorBoundaryServices, Toasts } from '../types';
 import { useErrorBoundary } from './error_boundary_services';
 import { ErrorCallout, ErrorInline } from './toasts_service';
 
@@ -30,7 +28,7 @@ interface ErrorBoundaryProps {
   /**
    * List of toasts to pass to the EuiGlobalToastList
    */
-  toasts?: EuiGlobalToastListProps['toasts'];
+  toasts?: Toasts;
   /**
    *
    */
@@ -52,9 +50,9 @@ class ErrorBoundaryInternal extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
     this.setState(() => {
-      this.props.errorService.onError(error); // capture telemetry
+      // this.props.errorService.onError(error); // capture telemetry
       if (this.state.messageAs === 'toast') {
-        this.props.toastsService.addError(error); // error *might* need to be shown in toast
+        this.props.toastsService.addError(error);
       }
       return { error, errorInfo };
     });
@@ -63,7 +61,6 @@ class ErrorBoundaryInternal extends React.Component<
   render() {
     if (this.state.error != null) {
       const { error, errorInfo } = this.state;
-
       const { errorComponentName } = this.props.errorService.getErrorComponentName(errorInfo);
 
       if (this.state.messageAs === 'callout') {
@@ -87,12 +84,6 @@ class ErrorBoundaryInternal extends React.Component<
             name={errorComponentName}
             reloadWindow={this.props.reloadWindow}
           />
-          {/* DOM ref for toasts list */}
-          <EuiGlobalToastList
-            toasts={this.props.toasts}
-            dismissToast={() => {}}
-            toastLifeTimeMs={9000}
-          />
         </>
       );
     }
@@ -104,6 +95,6 @@ class ErrorBoundaryInternal extends React.Component<
 
 export const ErrorBoundary = (props: ErrorBoundaryProps) => {
   const services = useErrorBoundary();
-  const toasts = useObservable(services.toastsService.toasts);
+  const toasts = useObservable(services.toastsService.toasts$);
   return <ErrorBoundaryInternal {...props} {...services} toasts={toasts} />;
 };
