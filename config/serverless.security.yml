@@ -2,6 +2,7 @@
 
 ## Disable plugins
 enterpriseSearch.enabled: false
+newsfeed.enabled: true
 xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observabilityLogExplorer.enabled: false
