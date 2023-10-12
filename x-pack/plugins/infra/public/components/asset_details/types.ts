@@ -94,6 +94,5 @@ export interface RouteState {
 export type DataViewOrigin = 'logs' | 'metrics';
 
 export enum INTEGRATION_NAME {
-  nginx = 'nginx',
   kubernetes = 'kubernetes',
 }
