@@ -9,7 +9,7 @@
 import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { getUniqueNodeId } from '../../../utils';
+import { nodePathToString } from '../../../utils';
 import { DefaultContent } from './default_content';
 import { ContentProvider, PanelNavNode } from './types';
 
@@ -54,7 +54,7 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider, activeNode
       return null;
     }
 
-    const provided = contentProvider?.(getUniqueNodeId(selectedNode));
+    const provided = contentProvider?.(nodePathToString(selectedNode));
 
     if (!provided) {
       return <DefaultContent selectedNode={selectedNode} />;

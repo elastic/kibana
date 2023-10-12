@@ -109,7 +109,7 @@ function validateNodeProps<
   link,
   href,
   cloudLink,
-  openPanel,
+  renderAs,
   appendHorizontalRule,
   isGroup,
 }: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>) {
@@ -123,7 +123,7 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
     );
   }
-  if (openPanel && !link) {
+  if (renderAs === 'panelOpener' && !link) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. If "openPanel" is provided, a "link" must also be provided.`
     );

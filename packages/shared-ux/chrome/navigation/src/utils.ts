@@ -19,7 +19,7 @@ export function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');
 }
 
-export function getUniqueNodeId<T extends { path?: string[]; id: string } | null>(
+export function nodePathToString<T extends { path?: string[]; id: string } | null>(
   node?: T
 ): T extends { path?: string[]; id: string } ? string : undefined {
   if (!node) return undefined as T extends { path?: string[]; id: string } ? string : undefined;
