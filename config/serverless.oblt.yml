@@ -51,3 +51,4 @@ telemetry.labels.serverless: observability
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'observability'

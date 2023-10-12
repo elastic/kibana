@@ -59,5 +59,8 @@
       "file": "datafeed_rare_error_code.json",
       "job_id": "rare_error_code"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

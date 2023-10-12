@@ -83,5 +83,8 @@
       "file": "datafeed_suspicious_login_activity.json",
       "job_id": "suspicious_login_activity"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

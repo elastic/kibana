@@ -15,6 +15,7 @@ import type { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
+import { Config, filterConfigs } from './data_recognizer';
 
 const callAs = () => Promise.resolve({ body: {} });
 
@@ -35,7 +36,8 @@ describe('ML - data recognizer', () => {
     } as unknown as SavedObjectsClientContract,
     { find: jest.fn() } as unknown as DataViewsService,
     {} as MLSavedObjectService,
-    { headers: { authorization: '' } } as unknown as KibanaRequest
+    { headers: { authorization: '' } } as unknown as KibanaRequest,
+    null
   );
 
   describe('jobOverrides', () => {
@@ -92,6 +94,49 @@ describe('ML - data recognizer', () => {
           id: 'pre-test-job',
         },
       ]);
+    });
+
+    it('should filter configs', () => {
+      const configs = [
+        {
+          module: { tags: ['security'] },
+        },
+        {
+          module: { tags: ['security', 'observability'] },
+        },
+        {
+          module: { tags: ['security', 'logs'] },
+        },
+        {
+          module: { tags: ['search'] },
+        },
+        {
+          module: { tags: [] },
+        },
+        {
+          module: { tags: [] },
+        },
+        {
+          module: {},
+        },
+      ] as unknown as Config[];
+
+      const c1 = filterConfigs(configs, null, []);
+      expect(c1.length).toBe(7);
+      const c2 = filterConfigs(configs, 'security', []);
+      expect(c2.length).toBe(6);
+      const c3 = filterConfigs(configs, null, ['search']);
+      expect(c3.length).toBe(1);
+      const c4 = filterConfigs(configs, 'security', ['search']);
+      expect(c4.length).toBe(0);
+      const c5 = filterConfigs(configs, 'observability', ['search']);
+      expect(c5.length).toBe(0);
+      const c6 = filterConfigs(configs, 'observability', ['security']);
+      expect(c6.length).toBe(1);
+      const c7 = filterConfigs(configs, null, ['missing']);
+      expect(c7.length).toBe(0);
+      const c8 = filterConfigs(configs, 'missing' as any, []);
+      expect(c8.length).toBe(3);
     });
   });
 });

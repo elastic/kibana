@@ -40,3 +40,4 @@ xpack.painless_lab.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: true
+xpack.ml.compatibleModuleType: 'search'

@@ -15,10 +15,11 @@ import type {
 } from '@kbn/core/server';
 
 import moment from 'moment';
-import { merge } from 'lodash';
+import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
@@ -75,7 +76,7 @@ function isFileBasedModule(arg: unknown): arg is FileBasedModule {
   return isPopulatedObject(arg) && Array.isArray(arg.jobs) && arg.jobs[0]?.file !== undefined;
 }
 
-interface Config {
+export interface Config {
   dirName?: string;
   module: FileBasedModule | Module;
   isSavedObject: boolean;
@@ -116,6 +117,8 @@ export class DataRecognizer {
   private _jobsService: ReturnType<typeof jobServiceProvider>;
   private _resultsService: ReturnType<typeof resultsServiceProvider>;
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
+  private _compatibleModuleType: CompatibleModule | null;
+  private _moduleTypeFilters: string[];
 
   /**
    * A temporary cache of configs loaded from disk and from save object service.
@@ -139,7 +142,9 @@ export class DataRecognizer {
     savedObjectsClient: SavedObjectsClientContract,
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
-    request: KibanaRequest
+    request: KibanaRequest,
+    compatibleModuleType: CompatibleModule | null,
+    moduleTypeFilters?: string[]
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -151,6 +156,8 @@ export class DataRecognizer {
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
+    this._compatibleModuleType = compatibleModuleType;
+    this._moduleTypeFilters = moduleTypeFilters ?? [];
   }
 
   // list all directories under the given directory
@@ -189,7 +196,7 @@ export class DataRecognizer {
       return this._configCache;
     }
 
-    const configs: Config[] = [];
+    const localConfigs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
       dirs.map(async (dir) => {
@@ -202,7 +209,7 @@ export class DataRecognizer {
 
         if (file !== undefined) {
           try {
-            configs.push({
+            localConfigs.push({
               dirName: dir,
               module: JSON.parse(file),
               isSavedObject: false,
@@ -219,7 +226,11 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    this._configCache = [...configs, ...savedObjectConfigs];
+    this._configCache = filterConfigs(
+      [...localConfigs, ...savedObjectConfigs],
+      this._compatibleModuleType,
+      this._moduleTypeFilters
+    );
 
     return this._configCache;
   }
@@ -1395,7 +1406,9 @@ export function dataRecognizerFactory(
   savedObjectsClient: SavedObjectsClientContract,
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
-  request: KibanaRequest
+  request: KibanaRequest,
+  compatibleModuleType: CompatibleModule | null,
+  moduleTypeFilters?: string[]
 ) {
   return new DataRecognizer(
     client,
@@ -1403,6 +1416,43 @@ export function dataRecognizerFactory(
     savedObjectsClient,
     dataViewsService,
     mlSavedObjectService,
-    request
+    request,
+    compatibleModuleType,
+    moduleTypeFilters
   );
+}
+
+export function filterConfigs(
+  configs: Config[],
+  compatibleModuleType: CompatibleModule | null,
+  moduleTypeFilters: string[]
+) {
+  let filteredConfigs: Config[] = [];
+  if (compatibleModuleType === null && moduleTypeFilters.length === 0) {
+    filteredConfigs = configs;
+  } else {
+    const filteredForCompatibleModule =
+      compatibleModuleType === null
+        ? configs
+        : configs.filter(({ module }) => {
+            if (module.tags === undefined || module.tags.length === 0) {
+              // if the module has no tags, it is compatible with all serverless projects
+              return true;
+            }
+            return module.tags.includes(compatibleModuleType!);
+          });
+    const filteredForModuleTypeFilters =
+      moduleTypeFilters.length === 0
+        ? filteredForCompatibleModule
+        : filteredForCompatibleModule.filter(({ module }) => {
+            if (module.tags === undefined || module.tags.length === 0) {
+              // a tag filter has been specified when calling the endpoint therefore
+              // if the module has no tags, it should be filtered out from the results
+              return false;
+            }
+            return intersection(module.tags, moduleTypeFilters).length > 0;
+          });
+    filteredConfigs = filteredForModuleTypeFilters;
+  }
+  return filteredConfigs;
 }
