@@ -1,12 +1,9 @@
 get:
   summary: Retrieves a list of all connector types.
-  operationId: getConnectorTypesInSpace
-  description: >
-    You do not need any Kibana feature privileges to run this API.
+  operationId: getConnectorTypes
   tags:
     - connectors
   parameters:
-    - $ref: '../components/parameters/space_id.yaml'
     - in: query
       name: feature_id
       description: A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).
@@ -30,7 +27,7 @@ get:
                   example: true
                 enabled_in_config:
                   type: boolean
-                  description: Indicates whether the connector type is enabled in the Kibana `.yml` file.
+                  description: Indicates whether the connector type is enabled in the Kibana configuration file.
                   example: true
                 enabled_in_license:
                   type: boolean
@@ -38,6 +35,9 @@ get:
                   example: true
                 id:
                   $ref: '../components/schemas/connector_types.yaml'
+                is_system_action_type:
+                  type: boolean
+                  example: false
                 minimum_license_required:
                   type: string
                   description: The license that is required to use the connector type.
@@ -48,16 +48,16 @@ get:
                   example: Index
                 supported_feature_ids:
                   type: array
-                  description: The Kibana features that are supported by the connector type.
+                  description: The features that are supported by the connector type.
                   items:
                     $ref: '../components/schemas/features.yaml'
                   example:
                     - alerting
-                    - uptime
+                    - cases
                     - siem
           examples:
-            getConnectorTypesResponse:
-              $ref: '../components/examples/get_connector_types_response.yaml'
+            getConnectorTypesServerlessResponse:
+              $ref: '../components/examples/get_connector_types_serverless_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
   servers:
