@@ -413,6 +413,7 @@ export const DocViewerTable = ({
           onChange={handleOnChange}
           placeholder={searchPlaceholder}
           value={searchText}
+          data-test-subj="unifiedDocViewerFieldsSearchInput"
         />
       </EuiFlexItem>
 
