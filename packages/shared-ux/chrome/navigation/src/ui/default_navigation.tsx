@@ -131,16 +131,11 @@ function serializeNode<
     children?: NonEmptyArray<{ id?: string; link?: LinkId }>;
   },
   LinkId extends AppDeepLinkId = AppDeepLinkId
->(item: T): T & { id: string } {
-  let id = item.id ?? item.link;
+>(item: T, index: number, depth = 0): T & { id: string } {
+  // IF no "id" is provided we will generate a unique id
+  const id = item.id ?? `node-${depth}-${index}`;
 
-  // IF no "id" nor "link" is provided we will generate a unique id
-  // Note: this should never happen for an "item" node as one of the 2 are required or an error is thrown
-  // This auto-generated id is thus is mainly for "groups".
-  if (!id) {
-    id = generateUniqueNodeId();
-  }
-  const serializedChildren = item.children?.map(serializeNode);
+  const serializedChildren = item.children?.map((_item, i) => serializeNode(_item, i, depth + 1));
 
   return {
     ...item,
@@ -152,9 +147,9 @@ function serializeNode<
 const serializeNavigationTree = (navTree: NavigationTreeDefinition): NavigationTreeDefinition => {
   const serialized: NavigationTreeDefinition = { ...navTree };
 
-  const serialize = (item: RootNavigationItemDefinition) => {
+  const serialize = (item: RootNavigationItemDefinition, index: number) => {
     if (item.type === 'recentlyAccessed') return item;
-    return serializeNode(item);
+    return serializeNode(item, index);
   };
 
   if (navTree.body) {
