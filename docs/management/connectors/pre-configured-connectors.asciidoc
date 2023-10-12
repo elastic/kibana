@@ -24,6 +24,7 @@ predefined, including the connector name and ID.
 
 Add `xpack.actions.preconfigured` settings to your `kibana.yml` file. The
 settings vary depending on which type of connector you're adding.
+Refer to <<preconfigured-connector-settings>>.
 
 This example shows a valid configuration for a Slack connector and a Webhook
 connector:
@@ -137,7 +138,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 [[preconfigured-bedrock-configuration]]
 ==== AWS Bedrock connectors
 
-The following example creates a <<bedrock-action-type,AWS Bedrock connector>>:
+The following example creates an <<bedrock-action-type,AWS Bedrock connector>>:
 
 [source,text]
 --
