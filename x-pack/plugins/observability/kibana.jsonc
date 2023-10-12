@@ -32,6 +32,7 @@
       "unifiedSearch",
       "visualizations",
       "dashboard",
+      "expressions",
     ],
     "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
     "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "stackAlerts", "spaces"],
