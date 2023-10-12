@@ -113,6 +113,7 @@ export const validatePermissions = async (
 export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
   'xpack.synthetics.noAccess.publicLocations',
   {
-    defaultMessage: "You don't have permission to use Elastic managed global locations.",
+    defaultMessage:
+      "You don't have permission to use Elastic managed global locations. Please contact your Kibana administrator.",
   }
 );
