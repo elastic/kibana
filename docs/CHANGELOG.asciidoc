@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.10.4>>
+* <<release-notes-8.10.3>>
 * <<release-notes-8.10.2>>
 * <<release-notes-8.10.1>>
 * <<release-notes-8.10.0>>
@@ -50,6 +52,66 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.10.4]]
+== {kib} 8.10.4
+
+The 8.10.4 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.10.4]]
+=== Bug Fixes
+Elastic Security::
+For the Elastic Security 8.10.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes validation errors in KQL queries ({kibana-pull}168329[#168329]).
+
+[[release-notes-8.10.3]]
+== {kib} 8.10.3
+
+[float]
+[[security-update-8.10.3]]
+=== Security updates
+
+* **Kibana heap buffer overflow vulnerability**
++
+On Sept 11, 2023, Google Chrome announced CVE-2023-4863, described as “Heap buffer overflow in libwebp in Google Chrome prior to 116.0.5845.187 and libwebp 1.3.2 allowed a remote attacker to perform an out of bounds memory write via a crafted HTML page”. Kibana includes a bundled version of headless Chromium that is only used for Kibana’s reporting capabilities and which is affected by this vulnerability. An exploit for Kibana has not been identified, however as a resolution, the bundled version of Chromium is updated in this release.
++
+The issue is resolved in 8.10.3.
++
+For more information, see our related
+https://discuss.elastic.co/t/kibana-8-10-3-7-17-14-security-update/344735[security
+announcement].
+
+[float]
+[[enhancement-v8.10.3]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 8.10.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.10.3]]
+=== Bug Fixes
+Dashboard::
+* Fixes an error the panel descriptions weren't retrieved from the right method ({kibana-pull}166825[#166825]).
+Discover::
+* Soften saved search content management response `sort` schema ({kibana-pull}166886[#166886]).
+Elastic Security::
+For the Elastic Security 8.10.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Enterprise Search::
+For the Elastic Enterprise Search 8.10.3 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+Fleet::
+* Fixes incorrect index template used from the data stream name ({kibana-pull}166941[#166941]).
+* Increase package install max timeout limit and add concurrency control to rollovers ({kibana-pull}166775[#166775]).
+* Fixes bulk action dropdown ({kibana-pull}166475[#166475]).
+Machine Learning::
+* AIOps: Fixes render loop when using a saved search ({kibana-pull}166934[#166934]).
+Monitoring::
+* Convert node roles into array ({kibana-pull}167628[#167628]).
+Observability::
+* Fixes a set up process error in Universal Profiling ({kibana-pull}167068[#167068]).
+Uptime::
+* Fixes an error when updating browser monitor in a project ({kibana-pull}168064[#168064]).
+
 [[release-notes-8.10.2]]
 == {kib} 8.10.2
 
