@@ -8,10 +8,10 @@
 import { TypeOf } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
-import { rRuleSchema } from '../../../r_rule';
+import { rRuleRequestSchema } from '../../../r_rule';
 
 export const validateSnoozeSchedule = (schedule: {
-  rRule: TypeOf<typeof rRuleSchema>;
+  rRule: TypeOf<typeof rRuleRequestSchema>;
   duration: number;
 }) => {
   const intervalIsDaily = schedule.rRule.freq === Frequency.DAILY;
