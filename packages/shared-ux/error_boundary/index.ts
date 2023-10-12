@@ -7,4 +7,4 @@
  */
 
 export { ErrorBoundary } from './src/error_boundary';
-export { ErrorBoundaryKibanaProvider, ErrorBoundaryProvider } from './src/services';
+export { ErrorBoundaryKibanaProvider, ErrorBoundaryProvider } from './src/error_boundary_services';

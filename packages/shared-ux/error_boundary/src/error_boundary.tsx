@@ -9,70 +9,17 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import {
-  EuiAccordion,
-  EuiButton,
-  EuiCallOut,
-  EuiCode,
-  EuiCodeBlock,
-  EuiGlobalToastList,
-  EuiGlobalToastListProps,
-  EuiPanel,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListProps } from '@elastic/eui';
 
 import { ErrorBoundaryServices } from '../types';
-import { useErrorBoundary } from './services';
+import { useErrorBoundary } from './error_boundary_services';
+import { ErrorCallout, ErrorInline } from './toasts_service';
 
 interface ErrorBoundaryState {
   error: null | Error;
   errorInfo: null | Partial<React.ErrorInfo>;
 }
 
-interface ErrorCalloutProps {
-  error: Error;
-  errorInfo: Partial<React.ErrorInfo> | null;
-  name: string | null;
-  reloadWindow: () => void;
-}
-
-// move out
-const ErrorCallout = (props: ErrorCalloutProps) => {
-  const { error, errorInfo, name: errorComponentName, reloadWindow } = props;
-  const errorBoundaryAccordionId = useGeneratedHtmlId({ prefix: 'errorBoundaryAccordion' });
-  return (
-    <EuiCallOut title="A fatal error was encountered" color="danger" iconType="error">
-      <p>Try refreshing this page.</p>
-      <EuiAccordion id={errorBoundaryAccordionId} buttonContent="Show detail">
-        <EuiPanel paddingSize="m">
-          <EuiCodeBlock>
-            {errorComponentName && (
-              <p>
-                An error occurred in <EuiCode>{errorComponentName}</EuiCode>
-              </p>
-            )}
-            {error?.message && <p>{error.message}</p>}
-            {errorInfo?.componentStack}
-          </EuiCodeBlock>
-        </EuiPanel>
-      </EuiAccordion>
-      <EuiSpacer />
-      <p>
-        <EuiButton color="danger" fill={true} onClick={reloadWindow}>
-          Refresh
-        </EuiButton>
-      </p>
-    </EuiCallOut>
-  );
-};
-
-// move out
-const ErrorInline = (_props: ErrorCalloutProps) => {
-  return <EuiCallOut color="danger" iconType="error" title="Error: unable to load." />;
-};
-
-// keep
 interface ErrorBoundaryProps {
   /**
    * Consumers may control how error message is presented: either as a toast message or a callout. Default is a

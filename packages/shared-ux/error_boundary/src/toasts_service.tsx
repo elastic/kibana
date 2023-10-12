@@ -6,11 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastListProps } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCallOut,
+  EuiCode,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiGlobalToastListProps,
+  EuiPanel,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ErrorBoundaryUIServices } from '../types';
 
@@ -25,6 +37,7 @@ interface ErrorToastTextProps {
 export const errorToastTitle = i18n.translate('sharedUXPackages.error_boundary.toastError.title', {
   defaultMessage: 'A fatal error was encountered.',
 });
+
 export const ErrorToastText = ({ reloadWindow }: ErrorToastTextProps) => {
   return (
     <EuiFlexGroup direction="column">
@@ -63,6 +76,46 @@ export const ErrorToastText = ({ reloadWindow }: ErrorToastTextProps) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+export interface ErrorCalloutProps {
+  error: Error;
+  errorInfo: Partial<React.ErrorInfo> | null;
+  name: string | null;
+  reloadWindow: () => void;
+}
+
+export const ErrorCallout = (props: ErrorCalloutProps) => {
+  const { error, errorInfo, name: errorComponentName, reloadWindow } = props;
+  const errorBoundaryAccordionId = useGeneratedHtmlId({ prefix: 'errorBoundaryAccordion' });
+  return (
+    <EuiCallOut title="A fatal error was encountered" color="danger" iconType="error">
+      <p>Try refreshing this page.</p>
+      <EuiAccordion id={errorBoundaryAccordionId} buttonContent="Show detail">
+        <EuiPanel paddingSize="m">
+          <EuiCodeBlock>
+            {errorComponentName && (
+              <p>
+                An error occurred in <EuiCode>{errorComponentName}</EuiCode>
+              </p>
+            )}
+            {error?.message && <p>{error.message}</p>}
+            {errorInfo?.componentStack}
+          </EuiCodeBlock>
+        </EuiPanel>
+      </EuiAccordion>
+      <EuiSpacer />
+      <p>
+        <EuiButton color="danger" fill={true} onClick={reloadWindow}>
+          Refresh
+        </EuiButton>
+      </p>
+    </EuiCallOut>
+  );
+};
+
+export const ErrorInline = (_props: ErrorCalloutProps) => {
+  return <EuiCallOut color="danger" iconType="error" title="Error: unable to load." />;
 };
 
 export class ToastsService {
