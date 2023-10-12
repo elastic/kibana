@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { openAlertDetailsView } from '../../tasks/alert_details_actions';
+import { openAlertDetailsView } from '../../screens/alerts';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';

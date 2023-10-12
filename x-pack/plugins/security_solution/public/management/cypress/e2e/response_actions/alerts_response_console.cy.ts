@@ -11,8 +11,8 @@ import {
   openAlertDetailsView,
   openInvestigateInTimelineView,
   openResponderFromEndpointAlertDetails,
-  verifyResponderIsOpen,
-} from '../../tasks/alert_details_actions';
+} from '../../screens/alerts';
+import { ensureOnResponder } from '../../screens/responder';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -94,7 +94,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       openAlertDetailsView();
 
       openResponderFromEndpointAlertDetails();
-      verifyResponderIsOpen();
+      ensureOnResponder();
     });
 
     it('should open responder from timeline view alert details flyout', () => {
@@ -106,7 +106,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       openInvestigateInTimelineView();
       openAlertDetailsView();
       openResponderFromEndpointAlertDetails();
-      verifyResponderIsOpen();
+      ensureOnResponder();
     });
   });
 });

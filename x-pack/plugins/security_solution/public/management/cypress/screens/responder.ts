@@ -30,7 +30,7 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
   };
 };
 
-const ensureOnResponder = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
+export const ensureOnResponder = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
   return cy.getByTestSubj<HTMLDivElement>(TEST_SUBJ.responderPage).should('exist');
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { openAlertDetailsView } from '../../tasks/alert_details_actions';
+import { openAlertDetailsView } from '../../screens/alerts';
 import { getEndpointListPath } from '../../../common/routing';
 import {
   checkEndpointIsIsolated,

@@ -7,7 +7,7 @@
 
 /* eslint-disable cypress/no-unnecessary-waiting */
 
-import { openAlertDetailsView } from './alert_details_actions';
+import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
 

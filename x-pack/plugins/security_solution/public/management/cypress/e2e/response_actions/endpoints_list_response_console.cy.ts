@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { verifyResponderIsOpen } from '../../tasks/alert_details_actions';
+import { ensureOnResponder } from '../../screens/responder';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -63,7 +63,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     it('should open responder', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
-      verifyResponderIsOpen();
+      ensureOnResponder();
     });
   });
 });

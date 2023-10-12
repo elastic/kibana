@@ -11,8 +11,8 @@ import {
   addAlertToCase,
   openAlertDetailsView,
   openResponderFromEndpointAlertDetails,
-  verifyResponderIsOpen,
-} from '../../tasks/alert_details_actions';
+} from '../../screens/alerts';
+import { ensureOnResponder } from '../../screens/responder';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -114,7 +114,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         closeAllToasts();
         openCaseAlertDetails(caseAlertId);
         openResponderFromEndpointAlertDetails();
-        verifyResponderIsOpen();
+        ensureOnResponder();
       });
     });
   });
