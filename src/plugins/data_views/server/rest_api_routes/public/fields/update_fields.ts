@@ -13,6 +13,7 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../../common/schemas';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
 import { DataViewSpecRestResponse } from '../../route_types';
 import type {
@@ -108,7 +109,7 @@ const fieldUpdateSchema = schema.object({
     schema.nullable(
       schema.string({
         minLength: 1,
-        maxLength: 1_000,
+        maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
       })
     )
   ),

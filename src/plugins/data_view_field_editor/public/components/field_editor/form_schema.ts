@@ -8,12 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '@kbn/data-views-plugin/common';
 import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import type { PreviewState } from '../preview/types';
 
-const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
+const { containsCharsField, emptyField, numberGreaterThanField, maxLengthField } = fieldValidators;
 const i18nTexts = {
   invalidScriptErrorMessage: i18n.translate(
     'indexPatternFieldEditor.editor.form.scriptEditorPainlessValidationMessage',
@@ -112,7 +112,7 @@ export const schema = {
   },
   customDescription: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.customDescriptionLabel', {
-      defaultMessage: 'Field description',
+      defaultMessage: 'Custom description',
     }),
     validations: [
       {
@@ -124,6 +124,19 @@ export const schema = {
             }
           )
         ),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+          message: i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.customDescriptionMaxLengthErrorMessage',
+            {
+              values: { length: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH },
+              defaultMessage:
+                'The length of the description is too long. The maximum length is {length} characters.',
+            }
+          ),
+        }),
       },
     ],
   },

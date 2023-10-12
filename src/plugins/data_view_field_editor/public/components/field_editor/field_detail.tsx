@@ -39,7 +39,8 @@ const geti18nTexts = (): {
     description: i18n.translate(
       'indexPatternFieldEditor.editor.form.customDescriptionDescription',
       {
-        defaultMessage: 'Create a description for your field.',
+        defaultMessage:
+          'Add a description for the field. It will be displayed next to the field on Discover, Lens, and Data View Management pages.',
       }
     ),
   },
@@ -93,6 +94,17 @@ export const FieldDetail = ({}) => {
         <CustomLabelField />
       </FormRow>
 
+      {/* Set custom description */}
+      <FormRow
+        title={i18nTexts.customDescription.title}
+        description={i18nTexts.customDescription.description}
+        formFieldPath="__meta__.isCustomDescriptionVisible"
+        data-test-subj="customDescriptionRow"
+        withDividerRule
+      >
+        <CustomDescriptionField />
+      </FormRow>
+
       {/* Set value */}
       {fieldTypeToProcess === 'runtime' && (
         <FormRow
@@ -119,17 +131,6 @@ export const FieldDetail = ({}) => {
 
       {/* Advanced settings */}
       <AdvancedParametersSection>
-        {/* Set custom description */}
-        <FormRow
-          title={i18nTexts.customDescription.title}
-          description={i18nTexts.customDescription.description}
-          formFieldPath="__meta__.isCustomDescriptionVisible"
-          data-test-subj="customDescriptionRow"
-          withDividerRule
-        >
-          <CustomDescriptionField />
-        </FormRow>
-
         {/* Popularity score (higher value means it will be positioned higher in the fields list) */}
         <FormRow
           title={i18nTexts.popularity.title}

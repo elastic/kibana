@@ -840,10 +840,7 @@ export class DataView implements DataViewBase {
 
     // Apply configuration to the field
     this.setFieldCustomLabel(fieldName, config.customLabel);
-
-    if (config.customDescription || config.customDescription === null) {
-      this.setFieldCustomDescription(fieldName, config.customDescription);
-    }
+    this.setFieldCustomDescription(fieldName, config.customDescription);
 
     if (config.popularity || config.popularity === null) {
       this.setFieldCount(fieldName, config.popularity);
