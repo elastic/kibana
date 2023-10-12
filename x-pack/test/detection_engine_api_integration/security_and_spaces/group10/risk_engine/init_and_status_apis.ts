@@ -35,6 +35,10 @@ export default ({ getService }: FtrProviderContext) => {
       await cleanRiskEngineConfig({ kibanaServer });
       await deleteRiskEngineTask({ es, log });
       await deleteAllRiskScores(log, es);
+      await clearTransforms({
+        es,
+        log,
+      });
     });
 
     afterEach(async () => {
