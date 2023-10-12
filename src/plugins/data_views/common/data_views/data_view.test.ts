@@ -368,6 +368,20 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
 
+    test('add and remove a custom label from a runtime field', () => {
+      const newField = 'new_field_test';
+      indexPattern.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        customLabel: 'test1',
+      });
+      expect(indexPattern.getFieldByName(newField)?.customLabel).toEqual('test1');
+      indexPattern.setFieldCustomLabel(newField, 'test2');
+      expect(indexPattern.getFieldByName(newField)?.customLabel).toEqual('test2');
+      indexPattern.setFieldCustomLabel(newField, undefined);
+      expect(indexPattern.getFieldByName(newField)?.customLabel).toBeUndefined();
+      indexPattern.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', () => {
       const fieldCount = indexPattern.fields.length;
       indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
