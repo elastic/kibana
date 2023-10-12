@@ -12,7 +12,7 @@ import { RegisterServicesParams } from '../register_services';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
 
-interface SetupStateParams {
+export interface SetupStateParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   spaceId?: string;
