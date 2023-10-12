@@ -23,7 +23,6 @@ export class GraphStorage extends SOContentStorage<GraphCrudTypes> {
     super({
       savedObjectType: SO_TYPE,
       cmServicesDefinition,
-      enableMSearch: true,
       allowedSavedObjectAttributes: [
         'title',
         'description',

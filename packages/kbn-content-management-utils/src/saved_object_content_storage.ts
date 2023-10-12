@@ -137,6 +137,12 @@ export interface SOContentStorageConstructorParams<Types extends CMCrudTypes> {
   createArgsToSoCreateOptions?: CreateArgsToSoCreateOptions<Types>;
   updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
+  /**
+   * MSearch is a feature that allows searching across multiple content types
+   * (for example, could be used in a general content finder or the like)
+   *
+   * defaults to false
+   */
   enableMSearch?: boolean;
   mSearchAdditionalSearchFields?: string[];
 
