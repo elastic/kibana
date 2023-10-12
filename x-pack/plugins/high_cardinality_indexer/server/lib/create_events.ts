@@ -8,13 +8,14 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import moment, { Moment } from 'moment';
 import { isNumber, random, range } from 'lodash';
+import { QueueObject } from 'async';
+import { Doc } from '../../common/types';
 import { Config, EventsPerCycle, EventsPerCycleTransitionDefRT, ParsedSchedule } from '../types';
 import { generateEvents } from '../data_sources';
 import { createQueue } from './queue';
 import { wait } from './wait';
 import { isWeekendTraffic } from './is_weekend';
 import { createExponentialFunction, createLinearFunction, createSineFunction } from './data_shapes';
-import { QueueRegistry } from '../queue/queue_registry';
 
 function createEventsPerCycleFn(
   schedule: ParsedSchedule,
@@ -42,112 +43,250 @@ function createEventsPerCycleFn(
     EventsPerCycleTransitionDefRT.is(eventsPerCycle) ? eventsPerCycle.end : eventsPerCycle;
 }
 
-export async function createEvents({
-  config,
-  client,
-  schedule,
-  end,
-  currentTimestamp,
-  continueIndexing = false,
-  logger,
-  queueRegistry,
-}: {
-  config: Config;
-  client: ElasticsearchClient;
-  schedule: ParsedSchedule;
-  end: Moment | false;
-  currentTimestamp: Moment;
-  continueIndexing: boolean;
-  logger: Logger;
-  queueRegistry: QueueRegistry;
-}): Promise<void> {
-  const queue = createQueue({ client, config, logger, queueRegistry });
+export class CreateEvents {
+  private client: ElasticsearchClient | undefined;
+  private logger: Logger | undefined;
+  private config: Config | undefined;
+  private schedule: ParsedSchedule | undefined;
+  private end: Moment | false | undefined;
+  private currentTimestamp: Moment | undefined;
+  private continueIndexing: boolean | undefined;
 
-  queueRegistry.registerQueue(queue);
+  private paused: boolean | undefined = false;
+  private queue: QueueObject<Doc> | undefined = undefined;
 
-  if (
-    !queue.paused &&
-    schedule.delayInMinutes &&
-    schedule.delayEveryMinutes &&
-    currentTimestamp.minute() % schedule.delayEveryMinutes === 0
-  ) {
-    logger.info('Pausing queue');
+  constructor({ client, logger }: { client: ElasticsearchClient; logger: Logger }) {
+    this.client = client;
+    this.logger = logger;
+  }
+  pause() {
+    if (
+      this.queue &&
+      !this.paused &&
+      this.schedule?.delayInMinutes &&
+      this.schedule?.delayEveryMinutes &&
+      this.currentTimestamp &&
+      this.currentTimestamp.minute() % this.schedule.delayEveryMinutes === 0
+    ) {
+      this.logger?.info('Pausing queue');
 
-    queue.pause();
+      this.queue.pause();
 
-    setTimeout(() => {
-      logger.info('Resuming queue');
-      queue.resume();
-    }, schedule.delayInMinutes * 60 * 1000);
+      setTimeout(() => {
+        this.logger?.info('Resuming queue');
+        this.queue?.resume();
+      }, this.schedule.delayInMinutes * 60 * 1000);
+    }
   }
 
-  const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;
-  const interval = schedule.interval ?? config.indexing.interval;
-  const calculateEventsPerCycle = createEventsPerCycleFn(schedule, eventsPerCycle, logger);
-  const totalEvents = calculateEventsPerCycle(currentTimestamp);
+  async start({
+    config,
+    schedule,
+    end,
+    currentTimestamp,
+    continueIndexing,
+  }: {
+    config: Config;
+    schedule: ParsedSchedule;
+    end: Moment | false;
+    currentTimestamp: Moment;
+    continueIndexing: boolean;
+  }) {
+    this.config = config;
+    this.schedule = schedule;
+    this.end = end;
+    this.currentTimestamp = currentTimestamp;
+    this.continueIndexing = continueIndexing;
+    this.queue = createQueue({ client: this.client!, config, logger: this.logger! });
 
-  if (totalEvents > 0) {
-    let epc = schedule.randomness
-      ? random(
-          Math.round(totalEvents - totalEvents * schedule.randomness),
-          Math.round(totalEvents + totalEvents * schedule.randomness)
-        )
-      : totalEvents;
+    const eventsPerCycle = this.schedule.eventsPerCycle ?? this.config.indexing.eventsPerCycle;
+    const interval = this.schedule.interval ?? this.config.indexing.interval;
+    const calculateEventsPerCycle = createEventsPerCycleFn(
+      this.schedule,
+      eventsPerCycle,
+      this.logger!
+    );
+    const totalEvents = calculateEventsPerCycle(currentTimestamp);
 
-    if (config.indexing.reduceWeekendTrafficBy && isWeekendTraffic(currentTimestamp)) {
-      logger.info(
-        `Reducing traffic from ${epc} to ${epc * (1 - config.indexing.reduceWeekendTrafficBy)}`
-      );
-      epc = epc * (1 - config.indexing.reduceWeekendTrafficBy);
+    if (totalEvents > 0) {
+      let epc = schedule.randomness
+        ? random(
+            Math.round(totalEvents - totalEvents * schedule.randomness),
+            Math.round(totalEvents + totalEvents * schedule.randomness)
+          )
+        : totalEvents;
+
+      if (config.indexing.reduceWeekendTrafficBy && isWeekendTraffic(currentTimestamp)) {
+        this.logger?.info(
+          `Reducing traffic from ${epc} to ${epc * (1 - config.indexing.reduceWeekendTrafficBy)}`
+        );
+        epc = epc * (1 - config.indexing.reduceWeekendTrafficBy);
+      }
+
+      range(epc)
+        .map((i) => {
+          const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
+
+          const eventTimestamp = moment(
+            random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
+          );
+
+          return generateEvent(config, schedule, i, eventTimestamp);
+        })
+        .flat()
+        .forEach((event) => this.queue?.push(event));
+
+      await this.queue.drain();
+    } else {
+      this.logger?.info('Indexing 0 documents. Took: 0, latency: 0, indexed: 0');
     }
 
-    range(epc)
-      .map((i) => {
-        const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
+    const endTs = end === false ? moment() : end;
 
-        const eventTimestamp = moment(
-          random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
-        );
+    if (currentTimestamp.isBefore(endTs)) {
+      this.start({
+        config,
+        schedule,
+        end,
+        currentTimestamp: currentTimestamp.add(interval, 'ms'),
+        continueIndexing,
+      });
+    }
 
-        return generateEvent(config, schedule, i, eventTimestamp);
-      })
-      .flat()
-      .forEach((event) => queue.push(event));
+    if (currentTimestamp.isSameOrAfter(endTs) && continueIndexing && this.logger) {
+      await wait(interval, this.logger);
 
-    await queue.drain();
-  } else {
-    logger.info('Indexing 0 documents. Took: 0, latency: 0, indexed: 0');
+      this.start({
+        config,
+        schedule,
+        end,
+        currentTimestamp: currentTimestamp.add(interval, 'ms'),
+        continueIndexing,
+      });
+    }
+
+    this.logger?.info(`Indexing complete for ${schedule.template} events.`);
   }
 
-  const endTs = end === false ? moment() : end;
+  stop() {
+    this.queue?.kill();
+    this.queue = undefined;
 
-  if (currentTimestamp.isBefore(endTs)) {
-    return createEvents({
-      client,
-      config,
-      schedule,
-      end,
-      currentTimestamp: currentTimestamp.add(interval, 'ms'),
-      continueIndexing,
-      logger,
-      queueRegistry,
-    });
+    this.client = undefined;
+    this.logger = undefined;
+
+    this.config = undefined;
+    this.schedule = undefined;
+    this.end = undefined;
+    this.currentTimestamp = undefined;
+    this.continueIndexing = undefined;
+
+    this.paused = undefined;
+    this.queue = undefined;
   }
-
-  if (currentTimestamp.isSameOrAfter(endTs) && continueIndexing) {
-    await wait(interval, logger);
-
-    return createEvents({
-      client,
-      config,
-      schedule,
-      end,
-      currentTimestamp: currentTimestamp.add(interval, 'ms'),
-      continueIndexing,
-      logger,
-      queueRegistry,
-    });
-  }
-
-  logger.info(`Indexing complete for ${schedule.template} events.`);
 }
+// export async function createEvents({
+//   config,
+//   client,
+//   schedule,
+//   end,
+//   currentTimestamp,
+//   continueIndexing = false,
+//   logger,
+// }: {
+//   config: Config;
+//   client: ElasticsearchClient;
+//   schedule: ParsedSchedule;
+//   end: Moment | false;
+//   currentTimestamp: Moment;
+//   continueIndexing: boolean;
+//   logger: Logger;
+// }): Promise<void> {
+//   logger.info('CREATE QUEUE');
+
+//   const queue = createQueue({ client, config, logger });
+
+//   if (
+//     !queue.paused &&
+//     schedule.delayInMinutes &&
+//     schedule.delayEveryMinutes &&
+//     currentTimestamp.minute() % schedule.delayEveryMinutes === 0
+//   ) {
+//     logger.info('Pausing queue');
+
+//     queue.pause();
+
+//     setTimeout(() => {
+//       logger.info('Resuming queue');
+//       queue.resume();
+//     }, schedule.delayInMinutes * 60 * 1000);
+//   }
+
+//   const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;
+//   const interval = schedule.interval ?? config.indexing.interval;
+//   const calculateEventsPerCycle = createEventsPerCycleFn(schedule, eventsPerCycle, logger);
+//   const totalEvents = calculateEventsPerCycle(currentTimestamp);
+
+//   if (totalEvents > 0) {
+//     let epc = schedule.randomness
+//       ? random(
+//           Math.round(totalEvents - totalEvents * schedule.randomness),
+//           Math.round(totalEvents + totalEvents * schedule.randomness)
+//         )
+//       : totalEvents;
+
+//     if (config.indexing.reduceWeekendTrafficBy && isWeekendTraffic(currentTimestamp)) {
+//       logger.info(
+//         `Reducing traffic from ${epc} to ${epc * (1 - config.indexing.reduceWeekendTrafficBy)}`
+//       );
+//       epc = epc * (1 - config.indexing.reduceWeekendTrafficBy);
+//     }
+
+//     range(epc)
+//       .map((i) => {
+//         const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
+
+//         const eventTimestamp = moment(
+//           random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
+//         );
+
+//         return generateEvent(config, schedule, i, eventTimestamp);
+//       })
+//       .flat()
+//       .forEach((event) => queue.push(event));
+
+//     await queue.drain();
+//   } else {
+//     logger.info('Indexing 0 documents. Took: 0, latency: 0, indexed: 0');
+//   }
+
+//   const endTs = end === false ? moment() : end;
+
+//   if (currentTimestamp.isBefore(endTs)) {
+//     return createEvents({
+//       client,
+//       config,
+//       schedule,
+//       end,
+//       currentTimestamp: currentTimestamp.add(interval, 'ms'),
+//       continueIndexing,
+//       logger,
+//     });
+//   }
+
+//   if (currentTimestamp.isSameOrAfter(endTs) && continueIndexing) {
+//     await wait(interval, logger);
+
+//     return createEvents({
+//       client,
+//       config,
+//       schedule,
+//       end,
+//       currentTimestamp: currentTimestamp.add(interval, 'ms'),
+//       continueIndexing,
+//       logger,
+//     });
+//   }
+
+//   logger.info(`Indexing complete for ${schedule.template} events.`);
+// }

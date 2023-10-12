@@ -7,7 +7,7 @@
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
-import { QueueRegistry } from './queue/queue_registry';
+import { JobRegistry } from './jobs/job_registry';
 
 import { registerServerRoutes } from './routes/register_routes';
 import { HighCardinalityIndexerRouteHandlerResources } from './routes/types';
@@ -52,7 +52,7 @@ export class HighCardinalityIndexerPlugin
       };
     }) as HighCardinalityIndexerRouteHandlerResources['plugins'];
 
-    const queueRegistry = new QueueRegistry();
+    const jobRegistry = new JobRegistry();
 
     registerServerRoutes({
       core,
@@ -60,7 +60,7 @@ export class HighCardinalityIndexerPlugin
       dependencies: {
         logger: this.logger,
         plugins: routeHandlerPlugins,
-        queueRegistry,
+        jobRegistry,
       },
     });
 

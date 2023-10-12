@@ -12,8 +12,8 @@ import { installDatasetAssets } from '../../lib/install_assets';
 import { indexSchedule } from '../../lib/index_schedule';
 import { type Config, DatasetRT, ScheduleRT } from '../../types';
 
-const createRoute = createHighCardinalityIndexerServerRoute({
-  endpoint: 'POST /internal/high_cardinality_indexer/_create',
+const createJobRoute = createHighCardinalityIndexerServerRoute({
+  endpoint: 'POST /internal/high_cardinality_indexer/job/_create',
   options: {},
   params: t.type({
     body: t.type({
@@ -30,7 +30,7 @@ const createRoute = createHighCardinalityIndexerServerRoute({
   handler: async ({
     context,
     logger,
-    queueRegistry,
+    jobRegistry,
     params: {
       body: {
         concurrency,
@@ -67,7 +67,7 @@ const createRoute = createHighCardinalityIndexerServerRoute({
 
       await installDatasetAssets({ config, logger, soClient });
 
-      await indexSchedule({ client, config, logger, queueRegistry });
+      await indexSchedule({ client, config, logger, jobRegistry });
       logger.info(`Success!`);
       return { success: true };
     } catch (error) {
@@ -76,6 +76,34 @@ const createRoute = createHighCardinalityIndexerServerRoute({
   },
 });
 
-export const createRoutes = {
-  ...createRoute,
+const getJobStatusRoute = createHighCardinalityIndexerServerRoute({
+  endpoint: 'GET /internal/high_cardinality_indexer/job/_status',
+  options: {},
+  handler: async ({ logger, jobRegistry }): Promise<{ isRunning: boolean }> => {
+    const isRunning = jobRegistry.getStatus();
+    logger.info(`Getting job status...`);
+    return { isRunning };
+  },
+});
+
+const stopJobRoute = createHighCardinalityIndexerServerRoute({
+  endpoint: 'GET /internal/high_cardinality_indexer/job/_stop',
+  options: {},
+  handler: async ({ logger, jobRegistry }): Promise<{ success: true }> => {
+    logger.info(`Stopping...`);
+
+    try {
+      jobRegistry.stop();
+      logger.info(`Stopped indexing.`);
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  },
+});
+
+export const jobRoutes = {
+  ...createJobRoute,
+  ...getJobStatusRoute,
+  ...stopJobRoute,
 };

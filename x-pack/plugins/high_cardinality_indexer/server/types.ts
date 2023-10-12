@@ -92,7 +92,7 @@ export const ParsedScheduleRT = rt.intersection([
   rt.type({
     template: rt.string,
     start: rt.number,
-    end: rt.union([rt.boolean, rt.number]),
+    end: rt.union([rt.number, rt.boolean]),
   }),
   PartialScheduleBaseRT,
 ]);

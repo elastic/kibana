@@ -24,8 +24,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { QueueObject } from 'async';
-import type { Doc } from '../../common/types';
 import { useKibana } from '../hooks/use_kibana';
 import {
   FAKE_HOSTS,
@@ -35,6 +33,19 @@ import {
   FAKE_LOGS,
   FAKE_STACK,
 } from '../../common/constants';
+
+const DEFAULT_FORM_SETTINGS = {
+  concurrency: 5,
+  dataset: FAKE_LOGS,
+  eventsPerCycle: 500,
+  interval: 600,
+  payloadSize: 10000,
+  reduceWeekendTrafficBy: 0,
+  installAssets: false,
+  scheduleTemplate: 'good',
+  scheduleStart: 'now',
+  scheduleEnd: 'false',
+};
 
 export function MainRoute() {
   const {
@@ -49,46 +60,33 @@ export function MainRoute() {
   const [serverIsIndexing, setServerIsIndexing] = useState(false);
 
   const getStatus = useCallback(async () => {
-    const queues = await http.get<Array<QueueObject<Doc>>>(
-      '/internal/high_cardinality_indexer/queue/_status'
+    const { isRunning } = await http.get<{ isRunning: boolean }>(
+      '/internal/high_cardinality_indexer/job/_status'
     );
-    if (queues.length > 0 && !serverIsIndexing) {
+    if (isRunning) {
       setServerIsIndexing(true);
       setIsLoading(true);
     }
 
-    if (queues.length === 0 && serverIsIndexing && !isLoading) {
+    if (!isRunning) {
       setServerIsIndexing(false);
       setIsLoading(false);
     }
-  }, [http, isLoading, serverIsIndexing]);
-
-  useInterval(() => {
-    getStatus();
-  }, 10000);
+  }, [http]);
 
   useEffect(() => {
     getStatus();
   }, [getStatus]);
 
-  const defaultFormData = {
-    concurrency: 5,
-    dataset: FAKE_LOGS,
-    eventsPerCycle: 10000,
-    interval: 6000,
-    payloadSize: 10000,
-    reduceWeekendTrafficBy: 0,
-    installAssets: false,
-    scheduleTemplate: 'good',
-    scheduleStart: 'now',
-    scheduleEnd: 'false',
-  };
+  useInterval(() => {
+    getStatus();
+  }, 15000);
 
-  const [formData, setFormData] = useState(defaultFormData);
+  const [formData, setFormData] = useState(DEFAULT_FORM_SETTINGS);
 
   const handleChangeFormField = (
     value: string | number | boolean | undefined,
-    id: keyof typeof defaultFormData
+    id: keyof typeof DEFAULT_FORM_SETTINGS
   ) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
@@ -111,15 +109,15 @@ export function MainRoute() {
     };
 
     http
-      .post('/internal/high_cardinality_indexer/_create', {
+      .post('/internal/high_cardinality_indexer/job/_create', {
         body: JSON.stringify(payload),
       })
       .then(() => {
         setIsLoading(false);
-        toasts.addSuccess('Successfully completed indexing');
+        toasts.addSuccess('Successfully created job');
       })
       .catch((e) => {
-        toasts.addError(e, { title: 'Something went wrong while indexing' });
+        toasts.addError(e, { title: 'Something went wrong while creating job' });
       })
       .finally(() => {
         setIsLoading(false);
@@ -128,7 +126,7 @@ export function MainRoute() {
 
   const handleStopIndexing = async () => {
     const response = await http.get<{ success: boolean }>(
-      '/internal/high_cardinality_indexer/queue/_stop'
+      '/internal/high_cardinality_indexer/job/_stop'
     );
 
     if (response.success) {
@@ -216,21 +214,6 @@ export function MainRoute() {
               <EuiSpacer size="xxl" />
 
               <EuiFormRow
-                label={i18n.translate('xpack.highCardinalityIndexer.form.eventsPerCycle', {
-                  defaultMessage: 'Events per cycle',
-                })}
-              >
-                <EuiFieldNumber
-                  name="eventsPerCycle"
-                  disabled={isLoading || serverIsIndexing}
-                  value={formData.eventsPerCycle}
-                  onChange={(e) =>
-                    handleChangeFormField(Number(e.currentTarget.value), 'eventsPerCycle')
-                  }
-                />
-              </EuiFormRow>
-
-              <EuiFormRow
                 label={i18n.translate('xpack.highCardinalityIndexer.form.payloadSize', {
                   defaultMessage: 'Payload size',
                 })}
@@ -241,6 +224,21 @@ export function MainRoute() {
                   value={formData.payloadSize}
                   onChange={(e) =>
                     handleChangeFormField(Number(e.currentTarget.value), 'payloadSize')
+                  }
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.eventsPerCycle', {
+                  defaultMessage: 'Events per cycle',
+                })}
+              >
+                <EuiFieldNumber
+                  name="eventsPerCycle"
+                  disabled={isLoading || serverIsIndexing}
+                  value={formData.eventsPerCycle}
+                  onChange={(e) =>
+                    handleChangeFormField(Number(e.currentTarget.value), 'eventsPerCycle')
                   }
                 />
               </EuiFormRow>

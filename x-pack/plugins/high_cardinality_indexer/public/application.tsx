@@ -14,7 +14,7 @@ import type { History } from 'history';
 import type { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { HighCardinalityIndexerPluginStartDependencies } from './types';
-import { MainRoute } from './components/MainRoute';
+import { MainRoute } from './components/main_route';
 
 export function Application({
   coreStart,

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { createRoutes } from './create/route';
-import { queueRoutes } from './queue/route';
+import { jobRoutes } from './job/route';
 
 export function getGlobalHighCardinalityIndexerServerRouteRepository() {
   return {
-    ...createRoutes,
-    ...queueRoutes,
+    ...jobRoutes,
   };
 }
 

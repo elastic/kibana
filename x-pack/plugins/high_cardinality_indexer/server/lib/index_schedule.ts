@@ -7,13 +7,22 @@
 
 import moment, { Moment } from 'moment';
 import { isNumber, isString } from 'lodash';
-// import parser from 'datemath-parse'; // need a replacement library
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Config, ParsedSchedule, Schedule } from '../types';
-import { createEvents } from './create_events';
-import { QueueRegistry } from '../queue/queue_registry';
+import { JobRegistry } from '../jobs/job_registry';
 
-const parser = { parse: () => {} };
+// Fake parser, add a real one
+const parser = {
+  parse: (time: string, now: Moment, isEnd: boolean) => {
+    if (time === 'false') return false;
+
+    if (isEnd) {
+      const timeValueWithoutUnit = Number(time.replace('m', ''));
+      return now.add(timeValueWithoutUnit, 'minutes').valueOf();
+    }
+    return now.valueOf();
+  },
+};
 
 // Needs work!
 const parseSchedule =
@@ -21,27 +30,27 @@ const parseSchedule =
   (schedule: Schedule): ParsedSchedule => {
     const startTs = isNumber(schedule.start)
       ? schedule.start
-      : parser.parse(schedule.start, now.valueOf(), false);
+      : parser.parse(schedule.start, now, false);
 
     const endTs = isNumber(schedule.end)
       ? schedule.end
       : isString(schedule.end)
-      ? parser.parse(schedule.end, now.valueOf(), true)
+      ? parser.parse(schedule.end, now, true)
       : false;
 
-    return { ...schedule, start: startTs, end: endTs };
+    return { ...schedule, start: startTs as number, end: endTs };
   };
 
 export async function indexSchedule({
   client,
   config,
   logger,
-  queueRegistry,
+  jobRegistry,
 }: {
   client: ElasticsearchClient;
   config: Config;
   logger: Logger;
-  queueRegistry: QueueRegistry;
+  jobRegistry: JobRegistry;
 }) {
   const now = moment();
   const compiledSchedule = config.schedule.map(parseSchedule(now));
@@ -70,7 +79,7 @@ export async function indexSchedule({
       }`
     );
 
-    await createEvents({
+    jobRegistry.start({
       client,
       config,
       schedule,
@@ -78,7 +87,6 @@ export async function indexSchedule({
       currentTimestamp: startTs.clone().add(interval, 'ms'),
       continueIndexing: schedule.end === false,
       logger,
-      queueRegistry,
     });
   }
 }

@@ -11,7 +11,6 @@ import { omit } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Doc } from '../../common/types';
 import type { Config } from '../types';
-import type { QueueRegistry } from '../queue/queue_registry';
 
 type CargoQueue = ReturnType<typeof cargoQueue<Doc, Error>>;
 let queue: CargoQueue;
@@ -20,12 +19,10 @@ export const createQueue = ({
   client,
   config,
   logger,
-  queueRegistry,
 }: {
   client: ElasticsearchClient;
   config: Config;
   logger: Logger;
-  queueRegistry: QueueRegistry;
 }): CargoQueue => {
   queue = cargoQueue<Doc, Error>(
     (docs, callback) => {
@@ -56,6 +53,7 @@ export const createQueue = ({
               Date.now() - startTs
             }, indexed: ${docs.length}`
           );
+          return callback();
         })
         .catch((error) => {
           logger.error(error);
