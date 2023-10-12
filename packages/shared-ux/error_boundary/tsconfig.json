@@ -21,9 +21,5 @@
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-theme-browser"
   ]
 }
