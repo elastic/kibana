@@ -52,6 +52,7 @@ export const TimelineKPIs2 = React.memo(
           kpis === null ? getEmptyValue() : numeral(kpis.destinationIpCount).format(kpiFormat),
       };
     }, [kpis]);
+
     const formattedKpiToolTips = useMemo(() => {
       return {
         process: numeral(kpis?.processCount).format(defaultNumberFormat),

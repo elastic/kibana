@@ -19,9 +19,10 @@ import { useTimelineAddToCaseAction } from '../add_to_case_button';
 
 interface Props {
   timelineId: string;
+  showIcons: number;
 }
 
-export const TimelineContextMenu = ({ timelineId }: Props) => {
+export const TimelineContextMenu = ({ timelineId, showIcons }: Props) => {
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
 
   const toggleContextMenu = useCallback(() => {

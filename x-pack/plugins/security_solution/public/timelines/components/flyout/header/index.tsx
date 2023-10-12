@@ -180,6 +180,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
   const { euiTheme } = useEuiTheme();
 
+  const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
+
   return (
     <EuiPanel
       borderRadius="none"
@@ -191,6 +193,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
+        <TimelineContextMenu timelineId={timelineId} showIcons={2} />
         <ActiveTimelinesContainer grow={false}>
           <ActiveTimelines
             timelineId={timelineId}
@@ -201,14 +204,21 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             updated={updated}
           />
         </ActiveTimelinesContainer>
-        <TimelineContextMenu timelineId={timelineId} />
         {/* <EditTimelineButton timelineId={timelineId} initialFocus="title" /> */}
         {/* <AddToFavoritesButton timelineId={timelineId} /> */}
         {/* <AddToCaseButton timelineId={timelineId} /> */}
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+          >
             <EuiFlexItem grow={false}>
               <TimelineKPIs2 kpis={kpis} isLoading={loading} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {!isUnsaved ? <AddToCaseButton timelineId={timelineId} /> : null}
             </EuiFlexItem>
             {show && (activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
               <EuiFlexItem grow={false}>
