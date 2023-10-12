@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
   openAlertDetailsView,
@@ -33,7 +32,6 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   beforeEach(() => {
     login();
-    disableExpandableFlyoutAdvancedSettings();
   });
 
   before(() => {

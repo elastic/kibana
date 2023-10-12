@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
   addAlertToCase,
@@ -34,7 +34,6 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   beforeEach(() => {
     login();
-    disableExpandableFlyoutAdvancedSettings();
   });
 
   before(() => {
@@ -110,12 +109,12 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
 
       cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
         const caseAlertId = res?.body.userActions[1].id;
-
         closeAllToasts();
         openCaseAlertDetails(caseAlertId);
-        openResponderFromEndpointAlertDetails();
-        ensureOnResponder();
       });
+
+      openResponderFromEndpointAlertDetails();
+      ensureOnResponder();
     });
   });
 });
