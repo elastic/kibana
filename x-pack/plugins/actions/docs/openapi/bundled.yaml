@@ -110,21 +110,7 @@ paths:
         '401':
           $ref: '#/components/responses/401'
         '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+          $ref: '#/components/responses/404'
       servers:
         - url: https://localhost:5601
     post:

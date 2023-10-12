@@ -86,6 +86,23 @@ paths:
           $ref: '#/components/responses/404'
       servers:
         - url: https://localhost:5601
+    delete:
+      summary: Deletes a connector.
+      operationId: deleteConnector
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/connector_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+      servers:
+        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorId
