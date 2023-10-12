@@ -12,7 +12,13 @@ const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
 const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'header', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'header',
+    'unifiedFieldList',
+    'svlCommonPage',
+  ]);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
@@ -21,9 +27,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const filterBar = getService('filterBar');
   const dataViewTitle = 'logstash-2015.09.22';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165882
-  describe.skip('Field stats', () => {
+  describe('Field stats', () => {
     before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.login();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -59,8 +66,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/165797
-    describe.skip('field distribution', () => {
+    describe('field distribution', () => {
       before(async () => {
         await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
       });
