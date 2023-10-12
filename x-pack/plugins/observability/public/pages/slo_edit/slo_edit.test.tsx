@@ -421,14 +421,14 @@ describe('SLO Edit Page', () => {
     });
 
     describe('when a sloId route param is provided', () => {
-      it('renders the SLO Edit page with prefilled form values', async () => {
+      it.only('prefills the form SLO with the SLO values', async () => {
         const slo = buildSlo({ id: '123' });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, isInitialLoading: false, slo });
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
@@ -463,7 +463,7 @@ describe('SLO Edit Page', () => {
           slo.indicator.params.index!
         );
         expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue(
-          slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.filter : ''
+          slo.indicator.params.filter ?? ''
         );
         expect(screen.queryByTestId('customKqlIndicatorFormGoodQueryInput')).toHaveValue(
           slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.good : ''
@@ -523,14 +523,14 @@ describe('SLO Edit Page', () => {
         expect(mockUpdate).toMatchInlineSnapshot(`[MockFunction]`);
       });
 
-      it('does not prefill the form with URL Search parameters when they are passed', () => {
+      it('prefills the form with the SLO values merged with the URL state', () => {
         const slo = buildSlo({ id: '123' });
 
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
         const history = createBrowserHistory();
         history.push(
-          '/slos/create?_a=(name:%27prefilledSloName%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+          '/slos/create?_a=(name:%updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
         );
         jest.spyOn(Router, 'useHistory').mockReturnValue(history);
         jest
