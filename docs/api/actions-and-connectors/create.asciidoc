@@ -9,7 +9,7 @@ Creates a connector.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification].
 ====
 
 [[create-connector-api-request]]
