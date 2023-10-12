@@ -7,8 +7,8 @@
 
 import { JobParamsDownloadCSV } from '@kbn/reporting-common';
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated'
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv' 
+import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
