@@ -14,5 +14,5 @@ export type UpdateQueryDelaySettingsRequestBody = TypeOf<
 >;
 
 export interface UpdateQueryDelaySettingsResponse {
-  body: QueryDelaySettingsResponseV1 | undefined;
+  body: QueryDelaySettingsResponseV1;
 }

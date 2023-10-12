@@ -107,6 +107,10 @@ export class RulesSettingsQueryDelayClient {
           version,
         }
       );
+
+      if (!result.attributes.queryDelay) {
+        throw new Error('Query delay settings are undefined');
+      }
       return result.attributes.queryDelay;
     } catch (e) {
       const errorMessage = 'savedObjectsClient errored trying to update query delay settings';

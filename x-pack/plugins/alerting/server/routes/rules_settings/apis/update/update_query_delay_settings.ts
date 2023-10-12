@@ -40,9 +40,7 @@ export const updateQueryDelaySettingsRoute = (
         const updatedQueryDelaySettings = await rulesSettingsClient.queryDelay().update(body);
 
         const response: UpdateQueryDelaySettingsResponseV1 = {
-          body:
-            updatedQueryDelaySettings &&
-            transformQueryDelaySettingsToResponseV1(updatedQueryDelaySettings),
+          body: transformQueryDelaySettingsToResponseV1(updatedQueryDelaySettings),
         };
 
         return res.ok(response);
