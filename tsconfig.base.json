@@ -988,6 +988,8 @@
       "@kbn/management-settings-utilities/*": ["packages/kbn-management/settings/utilities/*"],
       "@kbn/management-storybook-config": ["packages/kbn-management/storybook/config"],
       "@kbn/management-storybook-config/*": ["packages/kbn-management/storybook/config/*"],
+      "@kbn/management-storybook-demo": ["packages/kbn-management/storybook_demo"],
+      "@kbn/management-storybook-demo/*": ["packages/kbn-management/storybook_demo/*"],
       "@kbn/management-test-plugin": ["test/plugin_functional/plugins/management_test_plugin"],
       "@kbn/management-test-plugin/*": ["test/plugin_functional/plugins/management_test_plugin/*"],
       "@kbn/mapbox-gl": ["packages/kbn-mapbox-gl"],
