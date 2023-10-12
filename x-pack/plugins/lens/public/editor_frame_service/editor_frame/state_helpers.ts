@@ -40,7 +40,10 @@ import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
 
-const COLOR_MAPPING: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_DEFAULT
+// there are 2 ways of coloring, the color mapping where the user can map specific colors to
+// specific terms, and the palette assignment where the colors are assinged automatically
+// by a palette with rotating the colors
+const COLORING_METHOD: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_DEFAULT
   ? {
       type: 'legacyPalette',
       value: {
@@ -304,7 +307,7 @@ export function initializeVisualization({
         () => '',
         visualizationState.state,
         // initialize a new visualization with the color mapping off
-        COLOR_MAPPING,
+        COLORING_METHOD,
         annotationGroups,
         references
       ) ?? visualizationState.state
