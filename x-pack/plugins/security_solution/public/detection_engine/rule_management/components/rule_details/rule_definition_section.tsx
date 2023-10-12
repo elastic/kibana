@@ -48,6 +48,7 @@ import { MlJobsDescription } from '../../../../detections/components/rules/ml_jo
 import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { TechnicalPreviewBadge } from '../../../../detections/components/rules/technical_preview_badge';
 import { BadgeList } from './badge_list';
 import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
@@ -212,7 +213,7 @@ const getRuleTypeDescription = (ruleType: Type) => {
     case 'eql':
       return descriptionStepI18n.EQL_TYPE_DESCRIPTION;
     case 'esql':
-      return <TitleWithTechnicalPreviewBadge title={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
+      return <TechnicalPreviewBadge label={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
     case 'threat_match':
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
@@ -311,11 +312,11 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   return <EuiText size="s">{description}</EuiText>;
 };
 
-interface TitleWithTechnicalPreviewBadgeProps {
+interface AlertSuppressionTitleProps {
   title: string;
 }
 
-const TitleWithTechnicalPreviewBadge = ({ title }: TitleWithTechnicalPreviewBadgeProps) => {
+const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
   const license = useLicense();
 
   return <AlertSuppressionTechnicalPreviewBadge label={title} license={license} />;
@@ -542,17 +543,17 @@ const prepareDefinitionSectionListItems = (
 
   if ('alert_suppression' in rule && rule.alert_suppression) {
     definitionSectionListItems.push({
-      title: <TitleWithTechnicalPreviewBadge title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />,
+      title: <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />,
       description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
     });
 
     definitionSectionListItems.push({
-      title: <TitleWithTechnicalPreviewBadge title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />,
+      title: <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />,
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
     });
 
     definitionSectionListItems.push({
-      title: <TitleWithTechnicalPreviewBadge title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />,
+      title: <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />,
       description: (
         <MissingFieldsStrategy
           missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
