@@ -6,13 +6,11 @@ steps:
   - label: ":pipeline::kibana::seedling: Trigger SLO check"
     trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
     build:
-      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production-canary.yaml)"
       env:
-        TARGET_ENV: production
+        TARGET_ENV: production-canary
         CHECK_SLO: true
         CHECK_SLO_TAG: kibana
-        CHECK_SLO_WAITING_PERIOD: 10m
-        CHECK_SLO_BURN_RATE_THRESHOLD: 0.1
     soft_fail: true
 
   - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
