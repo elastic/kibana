@@ -68,15 +68,10 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           indexNames: selectedPatterns,
           show,
           timelineType,
-        })
-      );
-
-      dispatch(
-        timelineActions.setTimelineUpdatedAt({
-          id: TimelineId.active,
           updated: undefined,
         })
       );
+
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
       dispatch(appActions.addNotes({ notes: [] }));
 

@@ -42,7 +42,6 @@ import {
   updateSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
-  setTimelineUpdatedAt,
   toggleDetailPanel,
   setEventsLoading,
   removeColumn,
@@ -381,16 +380,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           ...(state.timelineById[id].eqlOptions ?? {}),
           [field]: value,
         },
-      },
-    },
-  }))
-  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        updated,
       },
     },
   }))

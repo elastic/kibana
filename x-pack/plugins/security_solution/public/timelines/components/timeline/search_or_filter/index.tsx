@@ -21,7 +21,6 @@ import type { KqlMode, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
-import type { SerializedFilterQuery } from '../../../../../common/types/timeline';
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -142,13 +141,6 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  applyKqlFilterQuery: ({ id, filterQuery }: { id: string; filterQuery: SerializedFilterQuery }) =>
-    dispatch(
-      timelineActions.applyKqlFilterQuery({
-        id,
-        filterQuery,
-      })
-    ),
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) =>
     dispatch(timelineActions.updateKqlMode({ id, kqlMode })),
   setSavedQueryId: ({ id, savedQueryId }: { id: string; savedQueryId: string | null }) =>
@@ -158,7 +150,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
