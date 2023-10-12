@@ -13,7 +13,7 @@ import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
 import { ChatCollapsedItems } from './chat_collapsed_items';
 import type { Feedback } from '../feedback_buttons';
-import type { Message } from '../../../common';
+import { type Message, MessageRole } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
 
@@ -115,6 +115,25 @@ const consolidateCollapsedItems = (items: ChatTimelineItem[]) => {
       } else {
         currentGroup = [item];
         result.push(currentGroup);
+      }
+      if (item.loading) {
+        result.push({
+          id: '',
+          actions: {
+            canCopy: true,
+            canEdit: false,
+            canGiveFeedback: false,
+            canRegenerate: false,
+          },
+          display: {
+            collapsed: false,
+            hide: false,
+          },
+          content: '',
+          loading: true,
+          role: MessageRole.Assistant,
+          title: '',
+        });
       }
     } else {
       result.push(item);
