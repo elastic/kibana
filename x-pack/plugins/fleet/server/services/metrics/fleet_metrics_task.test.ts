@@ -50,10 +50,7 @@ describe('fleet metrics task', () => {
     const [{ elasticsearch }] = await mockCore.getStartServices();
     esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
     mockFetchAgentMetrics = jest.fn();
-    mockTask = new FleetMetricsTask(
-      mockTaskManagerSetup,
-      async (abortController: AbortController) => mockFetchAgentMetrics()
-    );
+    mockTask = new FleetMetricsTask(mockTaskManagerSetup, async () => mockFetchAgentMetrics());
   });
 
   afterEach(() => {
@@ -81,22 +78,7 @@ describe('fleet metrics task', () => {
       esClient.info.mockResolvedValue({
         cluster_uuid: 'cluster1',
       } as any);
-    });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
-
-    const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {
-      const mockTaskManagerStart = tmStartMock();
-      await mockTask.start(mockTaskManagerStart, esClient);
-      const createTaskRunner =
-        mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
-      return taskRunner.run();
-    };
-
-    it('should publish agent metrics', async () => {
       mockFetchAgentMetrics.mockResolvedValue({
         agents: {
           total_all_statuses: 10,
@@ -123,7 +105,22 @@ describe('fleet metrics task', () => {
           },
         ],
       });
+    });
 
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {
+      const mockTaskManagerStart = tmStartMock();
+      await mockTask.start(mockTaskManagerStart, esClient);
+      const createTaskRunner =
+        mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
+      const taskRunner = createTaskRunner({ taskInstance });
+      return taskRunner.run();
+    };
+
+    it('should publish agent metrics', async () => {
       await runTask();
 
       expect(esClient.index).toHaveBeenCalledWith(
@@ -188,6 +185,34 @@ describe('fleet metrics task', () => {
         ],
         refresh: true,
       });
+    });
+
+    it('should log errors from bulk create', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            create: {
+              error: {
+                reason: 'error from es',
+              },
+            },
+          },
+          {
+            create: {
+              error: {
+                reason: 'error from es',
+              },
+            },
+          },
+        ],
+      } as any);
+
+      await runTask();
+
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        'Error occurred while publishing Fleet metrics: Error: error from es'
+      );
     });
   });
 });
