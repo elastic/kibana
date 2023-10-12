@@ -10,7 +10,6 @@ xpack.legacy_uptime.enabled: false
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
-xpack.observability.unsafe.thresholdRule.enabled: false
 
 ## Configure plugins
 

@@ -67,11 +67,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
-            // TODO: Add this check when https://github.com/elastic/kibana/pull/167978 is merged
-            //   const CreateRuleButtonExist = await testSubjects.exists(
-            //     'infraAssetDetailsCreateAlertsRuleButton'
-            //   );
-            //   expect(CreateRuleButtonExist).to.be(false);
+            const CreateRuleButtonExist = await testSubjects.exists(
+              'infraAssetDetailsCreateAlertsRuleButton'
+            );
+            expect(CreateRuleButtonExist).to.be(false);
           });
 
           it('should render 12 charts in the Metrics section', async () => {
