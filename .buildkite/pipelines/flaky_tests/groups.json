@@ -25,6 +25,14 @@
       "name": "[Serverless] Security Solution Explore - Cypress"
     },
     {
+      "key": "cypress/defend_workflows",
+      "name": "Security Solution Defend Workflows - Cypress"
+    },
+    {
+      "key": "cypress/defend_workflows_serverless",
+      "name": "[Serverless] Security Solution Defend Workflows - Cypress"
+    },
+    {
       "key": "cypress/osquery_cypress",
       "name": "Osquery - Cypress"
     },
