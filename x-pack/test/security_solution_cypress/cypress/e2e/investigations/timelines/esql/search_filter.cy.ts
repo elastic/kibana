@@ -23,7 +23,7 @@ import {
   addFieldToTable,
   convertNBSPToSP,
 } from '../../../../tasks/discover';
-import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
+import { createNewTimeline, gotToEsqlTab } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -33,11 +33,9 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-// Failing: See https://github.com/elastic/kibana/issues/167186
 describe(
-  'Basic discover search and filter operations',
+  'Basic esql search and filter operations',
   {
-    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
     tags: ['@ess'],
   },
   () => {
@@ -45,7 +43,7 @@ describe(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
@@ -62,7 +60,7 @@ describe(
     });
 
     context('navigation', () => {
-      it('should removed the query when back is pressed after adding a query', () => {
+      it('should remove the query when back is pressed after adding a query', () => {
         addDiscoverEsqlQuery(esqlQuery);
         submitDiscoverSearchBar();
         cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {

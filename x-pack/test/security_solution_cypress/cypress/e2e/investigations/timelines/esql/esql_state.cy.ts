@@ -20,11 +20,7 @@ import {
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import {
-  createNewTimeline,
-  gotToDiscoverTab,
-  openActiveTimeline,
-} from '../../../../tasks/timeline';
+import { createNewTimeline, gotToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
@@ -34,9 +30,8 @@ const DEFAULT_ESQL_QUERY =
   'from .alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-* | limit 10';
 
 describe(
-  'Discover State',
+  'Timeline Discover ESQL State',
   {
-    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
     tags: ['@ess'],
   },
   () => {
@@ -44,7 +39,7 @@ describe(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
     it('should not allow the dataview to be changed', () => {
@@ -60,7 +55,7 @@ describe(
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
 
       verifyDiscoverEsqlQuery(esqlQuery);
     });
@@ -70,7 +65,7 @@ describe(
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('exist');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('exist');
     });
