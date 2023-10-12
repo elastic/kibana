@@ -9,6 +9,7 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
@@ -151,6 +152,32 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
         },
       ]
     : [];
+
+export const buildAlertAssigneesFilter = (assigneesIds: string[]): Filter[] => {
+  if (!assigneesIds.length) {
+    return [];
+  }
+  const combinedQuery = {
+    bool: {
+      should: assigneesIds.map((id) => ({
+        term: {
+          [ALERT_WORKFLOW_ASSIGNEE_IDS]: id,
+        },
+      })),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: combinedQuery,
+    },
+  ];
+};
 
 export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...tableDefaults,

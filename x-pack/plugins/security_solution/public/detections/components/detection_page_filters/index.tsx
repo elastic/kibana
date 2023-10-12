@@ -9,7 +9,9 @@ import type { ComponentProps } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FilterGroupLoading } from '../../../common/components/filter_group/loading';
 import { useKibana } from '../../../common/lib/kibana';
@@ -20,7 +22,10 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 type FilterItemSetProps = Omit<
   ComponentProps<typeof FilterGroup>,
   'initialControls' | 'dataViewId'
->;
+> & {
+  assignees: string[];
+  onAssigneesChange: (users: string[]) => void;
+};
 
 const SECURITY_ALERT_DATA_VIEW = {
   id: 'security_solution_alerts_dv',
@@ -28,8 +33,9 @@ const SECURITY_ALERT_DATA_VIEW = {
 };
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
-  const { onFilterChange, ...restFilterItemGroupProps } = props;
+  const { assignees, onAssigneesChange, onFilterChange, ...restFilterItemGroupProps } = props;
 
+  const { euiTheme } = useEuiTheme();
   const {
     indexPattern: { title },
     dataViewId,
@@ -89,12 +95,31 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
   }
 
   return (
-    <FilterGroup
-      dataViewId={SECURITY_ALERT_DATA_VIEW.id}
-      onFilterChange={filterChangesHandler}
-      initialControls={initialFilterControls}
-      {...restFilterItemGroupProps}
-    />
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <span
+          css={css`
+            border-right: ${euiTheme.border.thin};
+            padding-right: ${euiTheme.size.l};
+          `}
+        >
+          <EuiFilterGroup compressed>
+            <FilterByAssigneesPopover
+              existingAssigneesIds={assignees}
+              onUsersChange={onAssigneesChange}
+            />
+          </EuiFilterGroup>
+        </span>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <FilterGroup
+          dataViewId={SECURITY_ALERT_DATA_VIEW.id}
+          onFilterChange={filterChangesHandler}
+          initialControls={initialFilterControls}
+          {...restFilterItemGroupProps}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
