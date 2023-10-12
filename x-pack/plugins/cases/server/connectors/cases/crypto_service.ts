@@ -16,7 +16,11 @@ export class CryptoService {
     return hash.digest('hex');
   }
 
-  public stringifyDeterministically(obj: Record<string, unknown>) {
+  public stringifyDeterministically(obj?: Record<string, unknown>): string | null {
+    if (obj == null) {
+      return null;
+    }
+
     return stringify(obj);
   }
 }

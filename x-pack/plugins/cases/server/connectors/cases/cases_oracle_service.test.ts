@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { CasesOracleService } from './cases_oracle_service';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import { isEmpty, set } from 'lodash';
 
 describe('CasesOracleService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -57,6 +58,90 @@ describe('CasesOracleService', () => {
 
       expect(service.getRecordId({ ruleId, spaceId, owner, grouping })).toEqual(hex);
     });
+
+    it('return the record ID correctly without grouping', async () => {
+      const ruleId = 'test-rule-id';
+      const spaceId = 'default';
+      const owner = 'cases';
+
+      const payload = `${ruleId}:${spaceId}:${owner}`;
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getRecordId({ ruleId, spaceId, owner })).toEqual(hex);
+    });
+
+    it('return the record ID correctly with empty grouping', async () => {
+      const ruleId = 'test-rule-id';
+      const spaceId = 'default';
+      const owner = 'cases';
+      const grouping = {};
+
+      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}`;
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getRecordId({ ruleId, spaceId, owner, grouping })).toEqual(hex);
+    });
+
+    it('return the record ID correctly without rule', async () => {
+      const spaceId = 'default';
+      const owner = 'cases';
+      const grouping = { 'host.ip': '0.0.0.1' };
+
+      const payload = `${spaceId}:${owner}:${stringify(grouping)}`;
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getRecordId({ spaceId, owner, grouping })).toEqual(hex);
+    });
+
+    it('throws an error when the ruleId and the grouping is missing', async () => {
+      const spaceId = 'default';
+      const owner = 'cases';
+
+      expect(() => service.getRecordId({ spaceId, owner })).toThrowErrorMatchingInlineSnapshot(
+        `"ruleID or grouping is required"`
+      );
+    });
+
+    it.each(['ruleId', 'spaceId', 'owner'])(
+      'return the record ID correctly with empty string for %s',
+      async (key) => {
+        const getPayloadValue = (value: string) => (isEmpty(value) ? '' : `${value}:`);
+
+        const params = {
+          ruleId: 'test-rule-id',
+          spaceId: 'default',
+          owner: 'cases',
+        };
+
+        const grouping = { 'host.ip': '0.0.0.1' };
+
+        set(params, key, '');
+
+        const payload = `${getPayloadValue(params.ruleId)}${getPayloadValue(
+          params.spaceId
+        )}${getPayloadValue(params.owner)}${stringify(grouping)}`;
+
+        const hash = createHash('sha256');
+
+        hash.update(payload);
+
+        const hex = hash.digest('hex');
+
+        expect(service.getRecordId({ ...params, grouping })).toEqual(hex);
+      }
+    );
   });
 
   describe('getRecord', () => {

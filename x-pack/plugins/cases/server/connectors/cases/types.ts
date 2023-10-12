@@ -17,7 +17,7 @@ export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
 export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;
 
 export interface OracleKey {
-  ruleId: string;
+  ruleId?: string;
   spaceId: string;
   owner: string;
   grouping?: Record<string, string>;

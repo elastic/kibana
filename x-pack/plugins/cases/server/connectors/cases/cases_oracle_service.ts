@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import { CryptoService } from './crypto_service';
@@ -31,14 +30,18 @@ export class CasesOracleService {
   }
 
   public getRecordId({ ruleId, spaceId, owner, grouping }: OracleKey): string {
-    const initialPayload = `${ruleId}:${spaceId}:${owner}`;
-
-    if (grouping == null || isEmpty(grouping)) {
-      return this.cryptoService.getHash(initialPayload);
+    if (grouping == null && ruleId == null) {
+      throw new Error('ruleID or grouping is required');
     }
 
-    const stringifiedAndSortedGrouping = this.cryptoService.stringifyDeterministically(grouping);
-    const payload = `${initialPayload}:${stringifiedAndSortedGrouping}`;
+    const payload = [
+      ruleId,
+      spaceId,
+      owner,
+      this.cryptoService.stringifyDeterministically(grouping),
+    ]
+      .filter(Boolean)
+      .join(':');
 
     return this.cryptoService.getHash(payload);
   }
