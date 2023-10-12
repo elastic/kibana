@@ -6,8 +6,8 @@
  */
 
 import React, { FC } from 'react';
-import { BannerConfiguration } from '../../common';
 import { Markdown } from '@kbn/shared-ux-markdown';
+import { BannerConfiguration } from '../../common';
 
 import './banner.scss';
 

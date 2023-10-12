@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import * as md from '@kbn/shared-ux-markdown';
 
-const Markdown: React.FC<{markdown: string}> = ({ markdown }) => {
+const Markdown: React.FC<{ markdown: string }> = ({ markdown }) => {
   return <md.Markdown markdownContent={markdown} readOnly />;
 };
 
