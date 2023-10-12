@@ -117,7 +117,7 @@ Cases::
 * Adds custom fields in Cases ({kibana-pull}167016[#167016]).
 Dashboard::
 * Redesigned the "copy panel to Dashboard" process with a new modal and the ability to retain panel dimensions ({kibana-pull}166991[#166991]).
-* Adds a new "Links" panel in technical preview, this Links panel allows to linking multiple Dashboards together with fast navigation that retains users' context ({kibana-pull}166896[#166896]).
+* Adds a new "Links" panel in technical preview, this Links panel allows linking multiple Dashboards together with fast navigation that retains users' context ({kibana-pull}166896[#166896]).
 * Moves Dashboard view mode to local storage, which means all Dashboards now open in the last-used view mode by default ({kibana-pull}166523[#166523]).
 * Adds a read only state for Managed Dashboards ({kibana-pull}166204[#166204]).
 Discover::
