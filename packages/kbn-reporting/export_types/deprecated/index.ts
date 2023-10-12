@@ -7,3 +7,4 @@
  */
 
 export { PdfV1ExportType } from './printable_pdf';
+export type { JobParamsPDFDeprecated } from './printable_pdf'

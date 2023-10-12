@@ -7,3 +7,4 @@
  */
 
 export { PngExportType } from './png_v2';
+export type { JobParamsPNGV2 } from './types'

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../types';
+import { CommonReportingSetup } from "@kbn/reporting-common/types";
+
 
 export const reportingMock = {
-  createStart: (): ReportingStart => ({
+  createStart: (): CommonReportingSetup => ({
     usesUiCapabilities: () => false,
     registerExportTypes: () => {},
-    getSpaceId: jest.fn(),
-    getScreenshots: jest.fn(),
   }),
 };

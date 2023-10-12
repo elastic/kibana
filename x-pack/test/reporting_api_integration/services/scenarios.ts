@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { JobParamsDownloadCSV } from '@kbn/reporting-common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png';
+import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated'
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv' 
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
-import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
-import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNGV2 } from '@kbn/reporting-plugin/server/export_types/png_v2/types';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
