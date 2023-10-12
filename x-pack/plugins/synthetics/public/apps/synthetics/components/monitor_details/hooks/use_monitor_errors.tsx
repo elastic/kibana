@@ -120,9 +120,13 @@ export function useMonitorErrors(monitorIdArg?: string) {
       (hits[0]?._source as Ping).monitor?.status === 'down' &&
       !!errorStates?.length;
 
+    const upStatesSortedAsc = upStates.sort(
+      (a, b) => Number(new Date(a['@timestamp'])) - Number(new Date(b['@timestamp']))
+    );
+
     return {
       errorStates,
-      upStates,
+      upStates: upStatesSortedAsc,
       loading,
       data,
       hasActiveError,
