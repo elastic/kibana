@@ -144,7 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('shared links with state in sessionStorage', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/167405
+    describe.skip('shared links with state in sessionStorage', async () => {
       let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
