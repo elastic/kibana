@@ -510,6 +510,36 @@ test: invalid manifest
       });
       expect(packages.find((item) => item.id === 'fleet_server')).toBeUndefined();
     });
+
+    it('should filter packages configured in xpack.fleet.internal.registry.excludePackages', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          registry: {
+            excludePackages: ['nginx'],
+          },
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'nginx',
+            attributes: {
+              name: 'nginx',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'nginx')).toBeUndefined();
+    });
   });
 
   describe('getInstalledPackages', () => {
