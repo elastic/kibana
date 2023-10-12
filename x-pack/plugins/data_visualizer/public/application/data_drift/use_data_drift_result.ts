@@ -400,7 +400,7 @@ const fetchComparisonDriftedData = async ({
 
   const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
 
-  // Ssince aggregation is not able to split the values into distinct 5% intervals,
+  // Since aggregation is not able to split the values into distinct 5% intervals,
   // this breaks our assumption of uniform distributed fractions in the`ks_test`.
   // So, to fix this in the general case, we need to run an additional ranges agg to get the doc count for the ranges
   // that we get from the percentiles aggregation
