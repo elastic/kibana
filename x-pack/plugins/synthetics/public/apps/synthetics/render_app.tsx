@@ -62,11 +62,11 @@ export function renderApp(
         links: [
           {
             linkType: 'documentation',
-            href: `${docLinks.links.observability.monitorUptime}`, // TODO: Include synthetics link
+            href: `${docLinks.links.observability.monitorUptimeSynthetics}`,
           },
           {
             linkType: 'discuss',
-            href: 'https://discuss.elastic.co/c/uptime', // TODO: Include synthetics link
+            href: 'https://discuss.elastic.co/c/uptime', // Redirects to https://discuss.elastic.co/c/observability/synthetics/75
           },
         ],
       }),
