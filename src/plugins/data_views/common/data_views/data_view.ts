@@ -839,9 +839,7 @@ export class DataView implements DataViewBase {
     }
 
     // Apply configuration to the field
-    if (config.customLabel || config.customLabel === null) {
-      this.setFieldCustomLabel(fieldName, config.customLabel);
-    }
+    this.setFieldCustomLabel(fieldName, config.customLabel);
 
     if (config.customDescription || config.customDescription === null) {
       this.setFieldCustomDescription(fieldName, config.customDescription);

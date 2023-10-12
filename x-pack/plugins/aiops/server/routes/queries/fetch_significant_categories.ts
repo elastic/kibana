@@ -14,7 +14,7 @@ import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 
 import type { Category } from '../../../common/api/log_categorization/types';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
-import { LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD } from '../../../common/constants';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../common/constants';
 
 import { fetchCategories } from './fetch_categories';
 import { fetchCategoryCounts } from './fetch_category_counts';
@@ -42,16 +42,39 @@ export const fetchSignificantCategories = async (
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) => {
-  // To make sure we have the same categories for both baseline and deviation,
-  // we do an initial query that spans across baseline start and deviation end.
-  // We could update this to query the exact baseline AND deviation range, but
-  // wanted to avoid the refactor here and it should be good enough for a start.
+  // Filter that includes docs from both the baseline and deviation time range.
+  const baselineOrDeviationFilter = {
+    bool: {
+      should: [
+        {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.baselineMin,
+              lte: params.baselineMax,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.deviationMin,
+              lte: params.deviationMax,
+              format: 'epoch_millis',
+            },
+          },
+        },
+      ],
+    },
+  };
+
   const categoriesOverall = await fetchCategories(
     esClient,
     params,
     fieldNames,
-    params.baselineMin,
-    params.deviationMax,
+    undefined,
+    undefined,
+    baselineOrDeviationFilter,
     logger,
     sampleProbability,
     emitError,
@@ -117,7 +140,7 @@ export const fetchSignificantCategories = async (
       const pValue = criticalTableLookup(chiSquared, 1);
       const score = Math.log(pValue);
 
-      if (pValue <= LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD && observed > expected) {
+      if (pValue <= LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD && observed > expected) {
         significantCategories.push({
           key,
           fieldName,
