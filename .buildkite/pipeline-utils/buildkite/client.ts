@@ -24,11 +24,59 @@ export interface BuildkiteGroup {
   steps: BuildkiteStep[];
 }
 
-export interface BuildkiteStep {
+export type BuildkiteStep = BuildkiteCommandStep | BuildkiteInputStep;
+
+export interface BuildkiteCommandStep {
   command: string;
   label: string;
   parallelism?: number;
   agents: {
+    queue: string;
+  };
+  timeout_in_minutes?: number;
+  key?: string;
+  depends_on?: string | string[];
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
+  env?: { [key: string]: string };
+}
+
+interface BuildkiteInputTextField {
+  text: string;
+  key: string;
+  hint?: string;
+  required?: boolean;
+  default?: string;
+}
+
+interface BuildkiteInputSelectField {
+  select: string;
+  key: string;
+  hint?: string;
+  required?: boolean;
+  default?: string;
+  multiple?: boolean;
+  options: Array<{
+    label: string;
+    value: string;
+  }>;
+}
+
+export interface BuildkiteInputStep {
+  input: {
+    prompt: string;
+    fields: Array<BuildkiteInputTextField | BuildkiteInputSelectField>;
+    if?: string;
+    allow_dependency_failure?: boolean;
+    branches?: string;
+  };
+  label: string;
+  parallelism?: number;
+  agents?: {
     queue: string;
   };
   timeout_in_minutes?: number;

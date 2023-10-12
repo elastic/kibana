@@ -1,0 +1,21 @@
+## Creates deployment@<timestamp> tag on Kibana
+agents:
+ queue: kibana-default
+env:
+  SKIP_KIBANA_BOOTSTRAP: "true"
+
+steps:
+  - label: "Collect Kibana commit data"
+    command: ts-node .buildkite/scripts/serverless/collect_kibana_commit_data.ts commits.json 20
+    key: collect_data
+
+  - label: "Collect input"
+    command: ts-node .buildkite/scripts/serverless/collect_input.ts commits.json
+    key: collect_input
+    depends_on: collect_data
+
+  - wait: ~
+
+  - label: ":ship: Create Deployment Tag"
+    command: .buildkite/scripts/serverless/create_deployment_tag.sh
+    depends_on: select_commit
