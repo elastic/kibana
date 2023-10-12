@@ -90,7 +90,7 @@ describe('ALL - Custom space', () => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-              cy.contains('action_data.queryselect * from uptime');
+              cy.contains('action_data{ "query": "select * from uptime;"');
             });
           });
       });
