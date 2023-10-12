@@ -17,6 +17,7 @@ import {
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
   cleanRiskEngineConfig,
+  clearTransforms,
 } from './utils';
 import { dataGeneratorFactory } from '../../../utils/data_generator';
 
@@ -53,6 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteRiskScoreIndices({ log, es });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+      await clearTransforms({ es, log });
     });
 
     describe('Risk engine not enabled', () => {
@@ -108,6 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteRiskScoreIndices({ log, es });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await clearTransforms({ es, log });
       });
 
       it('should return riskEngineMetrics with expected values', async () => {
