@@ -61,6 +61,18 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
       await testSubjects.click('infraCreateMLJobsButtonCreateMlJobButton');
     },
 
+    async canRecreateJob() {
+      const createJobButton = await testSubjects.find(
+        'infraRecreateMLJobsButtonRecreateMlJobsButton'
+      );
+      const disabled = await createJobButton.getAttribute('disabled');
+      return disabled !== 'true';
+    },
+
+    async recreateJob() {
+      await testSubjects.click('infraRecreateMLJobsButtonRecreateMlJobsButton');
+    },
+
     async jobCreationDone() {
       return await testSubjects.exists('infraProcessStepViewResultsButton');
     },

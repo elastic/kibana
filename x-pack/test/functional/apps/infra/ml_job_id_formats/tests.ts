@@ -17,6 +17,9 @@ import {
   legacyCategoriesCountJob,
 } from './ml_job_configs';
 
+const anomalyDetectorsPattern =
+  /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/;
+
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -52,10 +55,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
 
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
@@ -75,10 +75,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': undefined,
@@ -97,10 +94,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': 'hashed',
@@ -121,10 +115,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': 'legacy',
@@ -143,10 +134,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': undefined,
@@ -165,10 +153,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': 'legacy',
@@ -189,10 +174,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': 'hashed',
@@ -211,10 +193,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
         });
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
         assertIdFormats(requests[0].url, {
           'log-entry-rate': 'legacy',
@@ -252,10 +231,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           async () => await logsUi.logEntryRatePage.jobCreationDone()
         );
 
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
 
         assertIdFormats(requests[requests.length - 1].url, {
@@ -293,10 +269,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           async () => await logsUi.logEntryRatePage.jobCreationDone()
         );
 
-        const requests = await requestTracker.getRequests(
-          /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/,
-          2000
-        );
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
         expect(requests).not.to.be.empty();
 
         assertIdFormats(requests[requests.length - 1].url, {
@@ -308,15 +281,43 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await mlJobHelper.deleteMlJobs([legacyRateJob, hashedCategoriesCountJob]);
       });
 
-      // it('recreate legacy format job', () => {
-      //   // create one legacy and one hashed job
-      //   // try to recreate the legacy job and verify that it swaps the format to use
-      // });
+      it('migrate legacy job', async () => {
+        await mlJobHelper.createMlJobs([legacyRateJob, hashedCategoriesCountJob]);
+        await logsUi.logEntryRatePage.navigateTo();
+        await requestTracker.install();
 
-      // it('recreate hashed format job', () => {
-      //   // create one legacy and one hashed job
-      //   // try to recreate the hashed job and verify that the calls are made but no format changes are made
-      // });
+        await retry.try(async () => {
+          expect(await logsUi.logEntryRatePage.getResultsScreen()).to.be.ok();
+        });
+
+        await logsUi.logEntryRatePage.manageMlJobs();
+        await retry.try(async () => {
+          expect(await logsUi.logEntryRatePage.getSetupFlyout()).to.be.ok();
+        });
+
+        await logsUi.logEntryRatePage.startRateJobCreation();
+        await retry.waitFor(
+          'Recreate ML job button is enabled',
+          async () => await logsUi.logEntryRatePage.canRecreateJob()
+        );
+
+        await logsUi.logEntryRatePage.recreateJob();
+        await retry.waitFor(
+          'ML job recreated',
+          async () => await logsUi.logEntryRatePage.jobCreationDone()
+        );
+
+        const requests = await requestTracker.getRequests(anomalyDetectorsPattern, 2000);
+        expect(requests).not.to.be.empty();
+
+        assertIdFormats(requests[requests.length - 1].url, {
+          'log-entry-rate': 'hashed',
+          'log-entry-categories-count': 'hashed',
+        });
+
+        await requestTracker.uninstall();
+        await mlJobHelper.deleteMlJobs([hashedRateJob, hashedCategoriesCountJob]);
+      });
     });
   });
 };
