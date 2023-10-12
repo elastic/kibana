@@ -31,12 +31,12 @@ export function IndexSelection() {
     name: searchValue,
   });
 
-  const opts: Option[] = [];
+  const options: Option[] = [];
   if (!isDataViewsLoading && dataViews.length > 0) {
-    opts.push(createDataViewsOption(dataViews));
+    options.push(createDataViewsOption(dataViews));
   }
   if (!isIndicesLoading && !!searchValue) {
-    opts.push(createIndexPatternOption(searchValue, indices));
+    options.push(createIndexPatternOption(searchValue, indices));
   }
 
   const onSearchChange = debounce((value: string) => setSearchValue(value), 300);
@@ -78,7 +78,7 @@ export function IndexSelection() {
 
               field.onChange('');
             }}
-            options={opts}
+            options={options}
             onSearchChange={onSearchChange}
             selectedOptions={
               !!field.value
