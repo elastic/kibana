@@ -67,6 +67,6 @@ export function hasAgentBeenUpgradedRecently(agent: Agent) {
   }
 
   const elaspedSinceUpgradeInMillis = Date.now() - Date.parse(agent.upgraded_at);
-  const upgradeCooldownInMin = 10;
-  return elaspedSinceUpgradeInMillis / 6e4 < upgradeCooldownInMin;
+  const UPGRADE_COOLDOWN_IN_MIN = 10;
+  return elaspedSinceUpgradeInMillis / 6e4 < UPGRADE_COOLDOWN_IN_MIN;
 }
