@@ -10,14 +10,11 @@ import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 
-import { EuiCollapsibleNavItem } from '@elastic/eui';
-import { useNavigation as useServices } from '../services';
 import { generateUniqueNodeId } from '../utils';
 import { Navigation } from './components';
 import type {
   GroupDefinition,
   PresetDefinition,
-  ItemDefinition,
   NavigationTreeDefinition,
   NonEmptyArray,
   ProjectNavigationDefinition,
@@ -29,8 +26,6 @@ import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
 import type { ContentProvider } from './components/panel';
-// TODO: Following PR will clean up this import and the duplicate "serializeNavNode" here and below
-import { serializeNavNode } from './components/navigation_section_ui';
 
 const isPresetDefinition = (
   item: RootNavigationItemDefinition | NodeDefinition
@@ -161,37 +156,6 @@ const serializeNavigationTree = (navTree: NavigationTreeDefinition): NavigationT
   return serialized;
 };
 
-const TopLevelItem: FC<{ definition: ItemDefinition | NodeDefinition }> = ({ definition }) => {
-  const { navigateToUrl } = useServices();
-
-  return (
-    <Navigation.Item {...definition} unstyled>
-      {(navNode) => {
-        const {
-          navNode: { id, title, icon, href },
-        } = serializeNavNode(navNode);
-        return (
-          <EuiCollapsibleNavItem
-            id={id}
-            title={title ?? ''}
-            icon={icon}
-            iconProps={{ size: 'm' }}
-            data-test-subj={`nav-item-${id}`}
-            linkProps={{
-              href,
-              onClick: (e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigateToUrl(href);
-              },
-            }}
-          />
-        );
-      }}
-    </Navigation.Item>
-  );
-};
-
 const renderItems = (
   items: Array<RootNavigationItemDefinition | NodeDefinition> = [],
   path: string[] = []
@@ -215,16 +179,7 @@ const renderItems = (
         </Navigation.Group>
       );
     }
-
-    // At this stage we render the leaves of the tree (the actual links)
-    // If we are at the root level we need to render an EuiAcc, otherwise we don't render
-    // any component as the actual rendering occurs inside the NavigationSectionUI component
-    const isTopLevel = path.length === 0;
-    return isTopLevel ? (
-      <TopLevelItem definition={item} key={id} />
-    ) : (
-      <Navigation.Item {...item} key={id} />
-    );
+    return <Navigation.Item {...item} key={id} />;
   });
 };
 

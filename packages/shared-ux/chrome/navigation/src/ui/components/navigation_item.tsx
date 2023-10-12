@@ -9,10 +9,12 @@
 import React, { Fragment, useEffect, useMemo } from 'react';
 
 import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { EuiCollapsibleNavItem } from '@elastic/eui';
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
 import type { NodeProps, NodePropsEnhanced } from '../types';
 import { useNavigation } from './navigation';
+import { serializeNavNode } from './navigation_section_ui';
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -27,7 +29,7 @@ function NavigationItemComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
-  const { cloudLinks } = useNavigationServices();
+  const { cloudLinks, navigateToUrl } = useNavigationServices();
   const navigationContext = useNavigation();
   const navNodeRef = React.useRef<ChromeProjectNavigationNode | null>(null);
 
@@ -68,6 +70,27 @@ function NavigationItemComp<
     return <Fragment>{navNode.title}</Fragment>;
   }
 
+  if (navNode.path.length === 1) {
+    // This is a top level item (link with no children)
+    const { navNode: serializedNavNode } = serializeNavNode(navNode);
+    return (
+      <EuiCollapsibleNavItem
+        id={serializedNavNode.id}
+        title={serializedNavNode.title}
+        icon={serializedNavNode.icon}
+        iconProps={{ size: 'm' }}
+        data-test-subj={`nav-item-${serializedNavNode.id}`}
+        linkProps={{
+          href: serializedNavNode.href,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateToUrl(serializedNavNode.href);
+          },
+        }}
+      />
+    );
+  }
   // We don't render anything in the UI for this component. It is only used to **register** the node
   // in the useEffect() above that will in turn update the parent "childrenNodes" state which is
   // then used as "items" for the EuiCollapsibleNavItem component.

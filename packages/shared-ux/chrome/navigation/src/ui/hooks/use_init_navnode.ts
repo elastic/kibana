@@ -174,7 +174,7 @@ function createInternalNavNode<
   return {
     ...navNode,
     id,
-    path: path ?? [id],
+    path: path ?? [],
     title: title ?? '',
     deepLink,
     href,
