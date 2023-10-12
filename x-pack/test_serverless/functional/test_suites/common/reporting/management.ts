@@ -29,6 +29,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Reporting Management app', function () {
+    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
+    this.tags('failsOnMKI');
     const savedObjectsArchive = 'test/functional/fixtures/kbn_archiver/discover';
 
     const job: JobParamsCsvFromSavedObject = {
