@@ -84,6 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.clickCancelSpaceCreation();
     });
 
+    // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
     describe('Create Space B and Verify', async () => {
       it('a11y test for delete space button', async () => {
         await PageObjects.spaceSelector.clickCreateSpace();
