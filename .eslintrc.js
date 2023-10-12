@@ -606,6 +606,8 @@ module.exports = {
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
+        'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
+        'x-pack/test/security_solution_api_integration/**/config*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',

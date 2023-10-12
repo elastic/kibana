@@ -65,7 +65,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Risk engine enabled', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168429
+    describe.skip('Risk engine enabled', () => {
       let hostId: string;
       let userId: string;
 
