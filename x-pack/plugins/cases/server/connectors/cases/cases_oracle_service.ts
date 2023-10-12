@@ -10,7 +10,6 @@ import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import { CryptoService } from './crypto_service';
 import type { OracleKey, OracleRecord, OracleRecordCreateRequest } from './types';
-import { sortGroupDefinition } from './util';
 
 type OracleRecordWithoutId = Omit<OracleRecord, 'id'>;
 
@@ -31,15 +30,15 @@ export class CasesOracleService {
     this.cryptoService = new CryptoService();
   }
 
-  public getRecordId({ ruleId, spaceId, owner, groupingDefinition }: OracleKey): string {
+  public getRecordId({ ruleId, spaceId, owner, grouping }: OracleKey): string {
     const initialPayload = `${ruleId}:${spaceId}:${owner}`;
 
-    if (groupingDefinition == null || isEmpty(groupingDefinition)) {
+    if (grouping == null || isEmpty(grouping)) {
       return this.cryptoService.getHash(initialPayload);
     }
 
-    const sortedGroupingDefinition = sortGroupDefinition(groupingDefinition);
-    const payload = `${initialPayload}:${sortedGroupingDefinition}`;
+    const stringifiedAndSortedGrouping = this.cryptoService.stringifyDeterministically(grouping);
+    const payload = `${initialPayload}:${stringifiedAndSortedGrouping}`;
 
     return this.cryptoService.getHash(payload);
   }
@@ -56,9 +55,9 @@ export class CasesOracleService {
   }
 
   public async createRecord(payload: OracleRecordCreateRequest): Promise<OracleRecord> {
-    const { ruleId, spaceId, owner, groupingDefinition } = payload;
+    const { ruleId, spaceId, owner, grouping } = payload;
     const { caseIds } = payload;
-    const recordId = this.getRecordId({ ruleId, spaceId, owner, groupingDefinition });
+    const recordId = this.getRecordId({ ruleId, spaceId, owner, grouping });
 
     this.log.debug(`Creating oracle record with ID: ${recordId}`);
 

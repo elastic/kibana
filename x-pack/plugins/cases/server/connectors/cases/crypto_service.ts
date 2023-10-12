@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import stringify from 'json-stable-stringify';
 
 export class CryptoService {
   public getHash(payload: string): string {
@@ -13,5 +14,9 @@ export class CryptoService {
 
     hash.update(payload);
     return hash.digest('hex');
+  }
+
+  public stringifyDeterministically(obj: Record<string, unknown>) {
+    return stringify(obj);
   }
 }

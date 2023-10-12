@@ -16,26 +16,36 @@ describe('CryptoService', () => {
     service = new CryptoService();
   });
 
-  it('returns the sha256 of a payload correctly', async () => {
-    const payload = 'my payload';
-    const hash = createHash('sha256');
+  describe('getHash', () => {
+    it('returns the sha256 of a payload correctly', async () => {
+      const payload = 'my payload';
+      const hash = createHash('sha256');
 
-    hash.update(payload);
+      hash.update(payload);
 
-    const hex = hash.digest('hex');
+      const hex = hash.digest('hex');
 
-    expect(service.getHash(payload)).toEqual(hex);
+      expect(service.getHash(payload)).toEqual(hex);
+    });
+
+    it('creates a new instance of the hash function on each call', async () => {
+      const payload = 'my payload';
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getHash(payload)).toEqual(hex);
+      expect(service.getHash(payload)).toEqual(hex);
+    });
   });
 
-  it('creates a new instance of the hash function on each call', async () => {
-    const payload = 'my payload';
-    const hash = createHash('sha256');
-
-    hash.update(payload);
-
-    const hex = hash.digest('hex');
-
-    expect(service.getHash(payload)).toEqual(hex);
-    expect(service.getHash(payload)).toEqual(hex);
+  describe('stringifyDeterministically', () => {
+    it('deterministically stringifies an object', async () => {
+      expect(
+        service.stringifyDeterministically({ 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' })
+      ).toEqual('{"agent.id":"8a4f500d","host.ip":"0.0.0.1"}');
+    });
   });
 });

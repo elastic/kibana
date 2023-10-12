@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import stringify from 'json-stable-stringify';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -28,33 +29,33 @@ describe('CasesOracleService', () => {
       const ruleId = 'test-rule-id';
       const spaceId = 'default';
       const owner = 'cases';
-      const groupingDefinition = 'host.ip=0.0.0.1';
+      const grouping = { 'host.ip': '0.0.0.1' };
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${groupingDefinition}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
 
       const hex = hash.digest('hex');
 
-      expect(service.getRecordId({ ruleId, spaceId, owner, groupingDefinition })).toEqual(hex);
+      expect(service.getRecordId({ ruleId, spaceId, owner, grouping })).toEqual(hex);
     });
 
     it('sorts the grouping definition correctly', async () => {
       const ruleId = 'test-rule-id';
       const spaceId = 'default';
       const owner = 'cases';
-      const groupingDefinition = 'host.ip=0.0.0.1&agent.id=8a4f500d';
-      const sortedGroupingDefinition = 'agent.id=8a4f500d&host.ip=0.0.0.1';
+      const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
+      const sortedGrouping = { 'agent.id': '8a4f500d', 'host.ip': '0.0.0.1' };
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${sortedGroupingDefinition}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(sortedGrouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
 
       const hex = hash.digest('hex');
 
-      expect(service.getRecordId({ ruleId, spaceId, owner, groupingDefinition })).toEqual(hex);
+      expect(service.getRecordId({ ruleId, spaceId, owner, grouping })).toEqual(hex);
     });
   });
 
@@ -88,7 +89,7 @@ describe('CasesOracleService', () => {
     const ruleId = 'test-rule-id';
     const spaceId = 'default';
     const owner = 'cases';
-    const groupingDefinition = 'host.ip=0.0.0.1';
+    const grouping = { 'host.ip': '0.0.0.1' };
     const caseIds = ['test-case-id'];
 
     const oracleSO = {
@@ -114,7 +115,7 @@ describe('CasesOracleService', () => {
         ruleId,
         spaceId,
         owner,
-        groupingDefinition,
+        grouping,
         caseIds,
       });
 
@@ -126,7 +127,7 @@ describe('CasesOracleService', () => {
         ruleId,
         spaceId,
         owner,
-        groupingDefinition,
+        grouping,
       };
 
       const id = service.getRecordId(keyParams);
