@@ -7,7 +7,7 @@
 
 import { logger } from 'elastic-apm-node';
 
-import type { SavedObjectsModelUnsafeTransformChange } from '@kbn/core-saved-objects-server';
+import type { SavedObjectModelTransformationContext, SavedObjectsModelUnsafeTransformChange } from '@kbn/core-saved-objects-server';
 
 import { getCreateEsoModelVersion } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
@@ -27,7 +27,7 @@ describe('create ESO model version', () => {
     type: 'known-type-1',
     attributesToEncrypt: new Set(['firstAttr', 'secondAttr']),
   };
-  const context = { log: logger, modelVersion: 1 };
+  const context:SavedObjectModelTransformationContext = { log: logger, modelVersion: 1, namespaceType: 'single'  };
   const encryptionSavedObjectService = encryptedSavedObjectsServiceMock.create();
 
   it('throws if the types are not compatible', async () => {
