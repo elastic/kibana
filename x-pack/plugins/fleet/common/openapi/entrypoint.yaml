@@ -46,6 +46,8 @@ paths:
     $ref: paths/epm@get_file.yaml
   '/epm/packages/{pkgName}/stats':
     $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
+  '/epm/templates/{pkgName}/{pkgVersion}/inputs':
+    $ref: 'paths/epm@templates@{pkg_name}@{pkg_version}@inputs.yaml'
 
   # Agent endpoints
   /agents/setup:

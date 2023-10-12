@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { ORIGINAL_EVENT_ID } from '../constants/field_names';
+import { ANCESTOR_ID } from '../constants/field_names';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../helpers';
 
@@ -47,7 +47,7 @@ export const useFetchRelatedAlertsBySameSourceEvent = ({
   scopeId,
 }: UseFetchRelatedAlertsBySameSourceEventParams): UseFetchRelatedAlertsBySameSourceEventResult => {
   const { loading, error, count, alertIds } = useAlertPrevalence({
-    field: ORIGINAL_EVENT_ID,
+    field: ANCESTOR_ID,
     value: originalEventId,
     isActiveTimelines: isActiveTimeline(scopeId),
     signalIndexName: null,
