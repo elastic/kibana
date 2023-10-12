@@ -217,8 +217,10 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 maxDate={today}
                 minDate={cutoffDate}
                 onChange={(date) => {
-                  setSelectedDate(date || today);
-                  setManifestVersion(date?.format(internalDateFormat) || 'latest');
+                  if (date && date.isAfter(cutoffDate)) {
+                    setSelectedDate(date || today);
+                    setManifestVersion(date?.format(internalDateFormat) || 'latest');
+                  }
                 }}
               />
             </div>
