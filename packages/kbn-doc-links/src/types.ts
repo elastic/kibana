@@ -416,6 +416,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsAlerting: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;

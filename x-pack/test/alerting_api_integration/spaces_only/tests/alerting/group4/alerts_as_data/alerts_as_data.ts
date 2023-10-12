@@ -62,11 +62,14 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     'kibana.alert.rule.execution.uuid',
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/167945
-  describe.skip('alerts as data', () => {
+  describe('alerts as data', () => {
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await es.deleteByQuery({ index: alertsAsDataIndex, query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
     });
 
     it('should write alert docs during rule execution', async () => {
