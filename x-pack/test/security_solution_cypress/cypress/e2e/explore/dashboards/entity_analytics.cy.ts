@@ -69,7 +69,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
     deleteRiskEngineConfiguration();
   });
 
-  describe('legcay risk score', () => {
+  describe('legacy risk score', () => {
     describe('Without data', () => {
       beforeEach(() => {
         login();
