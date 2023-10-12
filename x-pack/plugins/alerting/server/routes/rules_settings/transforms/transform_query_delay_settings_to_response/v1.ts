@@ -12,10 +12,12 @@ export const transformQueryDelaySettingsToResponse = (
   settings: RulesSettingsQueryDelay
 ): QueryDelaySettingsResponseV1 => {
   return {
-    delay: settings.delay,
-    created_by: settings.createdBy,
-    updated_by: settings.updatedBy,
-    created_at: settings.createdAt,
-    updated_at: settings.updatedAt,
+    body: {
+      delay: settings.delay,
+      created_by: settings.createdBy,
+      updated_by: settings.updatedBy,
+      created_at: settings.createdAt,
+      updated_at: settings.updatedAt,
+    },
   };
 };

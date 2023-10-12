@@ -29,9 +29,9 @@ export const getQueryDelaySettingsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
         const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
-        const response: GetQueryDelaySettingsResponseV1 = {
-          body: transformQueryDelaySettingsToResponseV1(queryDelaySettings),
-        };
+        const response: GetQueryDelaySettingsResponseV1 =
+          transformQueryDelaySettingsToResponseV1(queryDelaySettings);
+
         return res.ok(response);
       })
     )
