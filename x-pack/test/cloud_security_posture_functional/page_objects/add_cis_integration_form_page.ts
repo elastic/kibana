@@ -40,22 +40,19 @@ export function AddCisIntegrationFormPageProvider({
 
     getIntegrationFormEditPage: () => testSubjects.find('editPackagePolicy_page'),
 
-    findOptionInPage: async (page: 'add' | 'edit', text: string) => {
+    findOptionInPage: async (text: string) => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const optionToBeClicked = await testSubjects.find(text);
       return await optionToBeClicked;
     },
 
     clickOptionButton: async (text: string) => {
-      const optionToBeClicked = await cisGcp.findOptionInPage('add', text);
+      const optionToBeClicked = await cisGcp.findOptionInPage(text);
       await optionToBeClicked.click();
     },
 
     clickSaveButton: async () => {
-      const optionToBeClicked = await cisGcp.findOptionInPage(
-        'add',
-        'createPackagePolicySaveButton'
-      );
+      const optionToBeClicked = await cisGcp.findOptionInPage('createPackagePolicySaveButton');
       await optionToBeClicked.click();
     },
 

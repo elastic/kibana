@@ -13,6 +13,9 @@ const GCP_ORGANIZATION_TEST_ID = 'gcpOrganizationAccountTestId';
 const GCP_SINGLE_ACCOUNT_TEST_ID = 'gcpSingleAccountTestId';
 const GCP_CLOUD_SHELL_TEST_ID = 'gcpGoogleCloudShellOptionTestId';
 const GCP_MANUAL_TEST_ID = 'gcpManualOptionTestId';
+const PRJ_ID_TEST_ID = 'project_id_test_id';
+const ORG_ID_TEST_ID = 'organization_id_test_id';
+const CREDENTIALS_TYPE_TEST_ID = 'credentials_type_test_id';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -42,27 +45,19 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegrationGcp.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
         await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
         /* Check for existing fields. In Manual, Credential field should be visible */
-        expect((await cisIntegrationGcp.checkGcpFieldExist('project_id_test_id')) === 1).to.be(
+        expect((await cisIntegrationGcp.checkGcpFieldExist(PRJ_ID_TEST_ID)) === 1).to.be(true);
+        expect((await cisIntegrationGcp.checkGcpFieldExist(ORG_ID_TEST_ID)) === 1).to.be(true);
+        expect((await cisIntegrationGcp.checkGcpFieldExist(CREDENTIALS_TYPE_TEST_ID)) === 1).to.be(
           true
         );
-        expect((await cisIntegrationGcp.checkGcpFieldExist('organization_id_test_id')) === 1).to.be(
-          true
-        );
-        expect(
-          (await cisIntegrationGcp.checkGcpFieldExist('credentials_type_test_id')) === 1
-        ).to.be(true);
 
         await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         /* Check for existing fields. In Google Cloud Shell, Credential field should NOT be visible */
-        expect((await cisIntegrationGcp.checkGcpFieldExist('project_id_test_id')) === 1).to.be(
+        expect((await cisIntegrationGcp.checkGcpFieldExist(PRJ_ID_TEST_ID)) === 1).to.be(true);
+        expect((await cisIntegrationGcp.checkGcpFieldExist(ORG_ID_TEST_ID)) === 1).to.be(true);
+        expect((await cisIntegrationGcp.checkGcpFieldExist(CREDENTIALS_TYPE_TEST_ID)) === 0).to.be(
           true
         );
-        expect((await cisIntegrationGcp.checkGcpFieldExist('organization_id_test_id')) === 1).to.be(
-          true
-        );
-        expect(
-          (await cisIntegrationGcp.checkGcpFieldExist('credentials_type_test_id')) === 0
-        ).to.be(true);
       });
 
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value', async () => {
