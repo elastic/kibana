@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Readable, Transform } from 'stream';
-import { ApmSynthtraceEsClient } from '../apm/client/apm_synthtrace_es_client';
+import { Transform } from 'stream';
 
 export function addObserverVersionTransform(observerVersion: string) {
   return new Transform({
@@ -31,18 +30,4 @@ export function deleteSummaryFieldTransform() {
       callback(null, chunk);
     },
   });
-}
-
-export function appendTransformsToDefaultApmPipeline(
-  synthtrace: ApmSynthtraceEsClient,
-  transforms: Transform[]
-) {
-  return (base: Readable) => {
-    // @ts-expect-error
-    const defaultPipeline: NodeJS.ReadableStream = synthtrace.getDefaultPipeline()(base);
-
-    return transforms.reduce((acc, transform) => {
-      return acc.pipe(transform);
-    }, defaultPipeline) as Transform;
-  };
 }

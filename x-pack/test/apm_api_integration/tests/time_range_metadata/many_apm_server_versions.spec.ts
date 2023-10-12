@@ -19,6 +19,7 @@ import {
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { pipeline, Readable } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiClient } from '../../common/config';
 
@@ -225,9 +226,22 @@ function generateTraceDataForService({
         .success()
     );
 
-  const transforms = isLegacy
-    ? [addObserverVersionTransform('8.5.0'), deleteSummaryFieldTransform()]
-    : [];
+  const apmPipeline = (base: Readable) => {
+    // @ts-expect-error
+    const defaultPipeline: NodeJS.ReadableStream = synthtrace.getDefaultPipeline()(base);
 
-  return synthtrace.index(events, transforms);
+    return pipeline(
+      defaultPipeline,
+      addObserverVersionTransform('8.5.0'),
+      deleteSummaryFieldTransform(),
+      (err) => {
+        if (err) {
+          // eslint-disable-next-line no-console
+          console.error(err);
+        }
+      }
+    );
+  };
+
+  return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
 }
