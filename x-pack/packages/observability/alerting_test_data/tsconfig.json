@@ -18,6 +18,5 @@
   "kbn_references": [
     "@kbn/observability-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/apm-plugin"
   ]
 }
