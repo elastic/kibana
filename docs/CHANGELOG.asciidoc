@@ -105,6 +105,7 @@ This updates all instances of vulnerability.package to the ECS standard package 
 {kib} 8.11.0 adds the following new and notable features.
 
 Alerting::
+* Adds support for the new ES|QL language for {es} query rules ({kibana-pull}165973[#165973]).
 * Elasticsearch query rule can select multiple group-by terms ({kibana-pull}166146[#166146]).
 * Adds a Log tab to the Observability Rules page ({kibana-pull}165115[#165115]).
 APM::
@@ -115,9 +116,9 @@ APM::
 Cases::
 * Adds custom fields in Cases ({kibana-pull}167016[#167016]).
 Dashboard::
-* Copy panel refactor ({kibana-pull}166991[#166991]).
-* Make links panel available under technical preview ({kibana-pull}166896[#166896]).
-* Store view mode in local storage ({kibana-pull}166523[#166523]).
+* Redesigned the "copy panel to Dashboard" process with a new modal and the ability to retain panel dimensions ({kibana-pull}166991[#166991]).
+* Adds a new "Links" panel in technical preview, this Links panel allows to linking multiple Dashboards together with fast navigation that retains users' context ({kibana-pull}166896[#166896]).
+* Moves Dashboard view mode to local storage, which means all Dashboards now open in the last-used view mode by default ({kibana-pull}166523[#166523]).
 * Adds a read only state for Managed Dashboards ({kibana-pull}166204[#166204]).
 Discover::
 * Adds resize support to the Discover field list sidebar ({kibana-pull}167066[#167066]).
@@ -131,7 +132,7 @@ Fleet::
 * Adds ability to set a proxy for agent binary source ({kibana-pull}164168[#164168]).
 * Adds ability to set a proxy for agent download source ({kibana-pull}164078[#164078]).
 Lens & Visualizations::
-* Adds color mapping for categorical dimensions in *Lens* available under technical preview, and enabled on new visualizations by default ({kibana-pull}162389[#162389]).
+* Adds color mapping for categorical dimensions in *Lens* available under technical preview ({kibana-pull}162389[#162389]).
 * Inline editing of **Lens** panels on a dashboard or canvas ({kibana-pull}166169[#166169]).
 * Individual annotation editing from library ({kibana-pull}163346[#163346]).
 Logs::
@@ -140,14 +141,15 @@ Machine Learning::
 * Adds support for the ELSER v2 download in the Trained Models UI ({kibana-pull}167407[#167407]).
 * Adds data drift detection workflow from Trained Models to Data comparison view ({kibana-pull}162853[#162853]).
 Management::
+* Supports for viewing and editing data retention per data stream in Index Management is available under technical preview ({kibana-pull}167006[#167006]).
 * Index details can now be viewed on a new index details page in Index Management ({kibana-pull}165705[#165705]).
-* Adds support for enriched policies ({kibana-pull}164080[#164080]).
+* Supports for managing, executing, and deleting enrich policies in Index Management ({kibana-pull}164080[#164080]).
 Platform::
 * ES|QL, a new query language, is available under technical preview in Discover and Dashboards ({kibana-pull}146971[#146971]).
 Querying & Filtering::
 * Saved queries can now be shared between multiple spaces ({kibana-pull}163436[#163436]).
 Uptime::
-* Discover document viewer has been added to the summary table ({kibana-pull}163926[#163926]).
+* Adds a document viewer to the summary pings table ({kibana-pull}163926[#163926]).
 
 For more information about the features introduced in 8.11.0, refer to <<whats-new,What's new in 8.11>>.
 
@@ -176,49 +178,50 @@ Cases::
 Dashboard::
 * Focus on a single panel while disabling all other panels ({kibana-pull}165417[#165417]).
 * Adds filter details to panel settings ({kibana-pull}162913[#162913]).
+* Adds support for date fields in the options list controls ({kibana-pull}164362[#164362]).
 Discover::
 * Redesign for the grid, panels and sidebar ({kibana-pull}165866[#165866]).
 * Set data table row height to auto-fit by default ({kibana-pull}164218[#164218]).
 * Allow fetching more documents on Discover page ({kibana-pull}163784[#163784]).
-* Fixes unified search for long field inputs ({kibana-pull}166024[#166024]).
 Elastic Security::
 For the Elastic Security 8.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Enterprise Search::
 For the Elastic Enterprise Search 8.11.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 Fleet::
 * Adds sidebar navigation showing headings extracted from the readme ({kibana-pull}167216[#167216]).
+Inspector::
+* Clusters tab added under Inspector ({kibana-pull}166025[#166025]).
+* Open incomplete response warning in Inspector ({kibana-pull}167205[#167205]).
 Lens & Visualizations::
 * Other bucket defaults to false for top values greater than equal 1000 in *Lens* ({kibana-pull}167141[#167141]).
 * Adds support for decimals in percentiles in *Lens* ({kibana-pull}165703[#165703]).
-* Support date fields in options list ({kibana-pull}164362[#164362]).
 Machine Learning::
-* Update ELSER version for Elastic Assistant ({kibana-pull}167522[#167522]).
-* Retain `created_by` setting when exporting anomaly detection jobs ({kibana-pull}167319[#167319]).
-* Improved wording of awaiting ML nodes messages ({kibana-pull}167306[#167306]).
-* Adding `created_by` job property for the advanced wizard ({kibana-pull}167021[#167021]).
+* Updates ELSER version for Elastic Assistant ({kibana-pull}167522[#167522]).
+* Retains `created_by` setting when exporting anomaly detection jobs ({kibana-pull}167319[#167319]).
+* Improves the wording of awaiting ML nodes messages ({kibana-pull}167306[#167306]).
+* Adds `created_by` job property for the advanced wizard ({kibana-pull}167021[#167021]).
 * Trained model testing: only show indices with supported fields ({kibana-pull}166490[#166490]).
 * Alerts as data integration for Anomaly Detection rule type ({kibana-pull}166349[#166349]).
-* Data Frame Analytics Trained models: add ability to reindex after pipeline creation success ({kibana-pull}166312[#166312]).
+* Data Frame Analytics Trained models: adds the ability to reindex after pipeline creation ({kibana-pull}166312[#166312]).
+* Adds Create a data view button to index or saved search selector in ML pages and Transforms management ({kibana-pull}166668[#166668]).
 * Improvements to UX of adding ML embeddables to a dashboard ({kibana-pull}165714[#165714]).
-* AIOps: Support text fields in log rate analysis ({kibana-pull}165124[#165124]).
+* AIOps: Supports text fields in log rate analysis ({kibana-pull}165124[#165124]).
 * Data Frame Analytics creation wizard: adds ability to add custom URLs to jobs ({kibana-pull}164520[#164520]).
 Management::
 * Adds Create a data view button to index or saved search selector in ML pages and Transforms management ({kibana-pull}166668[#166668]).
-* Improve loading behavior of Transform ({kibana-pull}166320[#166320]).
-* Clusters tab added under Inspector ({kibana-pull}166025[#166025]).
-* Index details can now be viewed on a new index details page in Index Management ({kibana-pull}165705[#165705]).
+* Improve loading behavior of Transforms list if stats request is slow or is not available ({kibana-pull}166320[#166320]).
 * Adds support for PATCH requests in Console ({kibana-pull}165634[#165634]).
 * Improves autocomplete to suggest knn in search query ({kibana-pull}165531[#165531]).
 * Improves display for long descriptions in Transforms ({kibana-pull}165149[#165149]).
-* Improve transform list reloading behavior in Transforms ({kibana-pull}164296[#164296]).
-Observability::
-* ES|QL query generation ({kibana-pull}166041[#166041]).
-Presentation::
-* Open incomplete response warning in Inspector ({kibana-pull}167205[#167205]).
+* Improve transform list reloading behavior ({kibana-pull}164296[#164296]).
+Maps::
 * Allow by value styling for EMS boundary fields ({kibana-pull}166306[#166306]).
 * Adds support for `geo_shape` fields as the entity geospatial field when creating tracking containment alerts ({kibana-pull}164100[#164100]).
+Observability::
+* ES|QL query generation ({kibana-pull}166041[#166041]).
 Querying & Filtering::
 * New "Saved Query Management" privilege to allow saving queries across Kibana ({kibana-pull}166937[#166937]).
+* Improvements to the filter builder inputs for long fields ({kibana-pull}166024[#166024]).
 Uptime::
 * Added ability to hide public locations ({kibana-pull}164863[#164863]).
 
@@ -249,12 +252,13 @@ Lens & Visualizations::
 * Show icons/titles instead of previews in suggestions panel in *Lens* ({kibana-pull}166808[#166808]).
 * Consider root level filters buckets correctly when building other terms bucket ({kibana-pull}165656[#165656]).
 * Prevent user to use decimals for custom Percentile rank function in Top values in *Lens* ({kibana-pull}165616[#165616]).
-* Fixes settings tabs when in dark mode ({kibana-pull}165614[#165614]).
+* Fixes the Graph application settings tab when in dark mode ({kibana-pull}165614[#165614]).
 * Fixes Visualize List search and CRUD operations via content management ({kibana-pull}165485[#165485]).
 Logs::
 * Use correct ML API to query blocking tasks ({kibana-pull}167779[#167779]).
 Machine Learning::
-* AIOps: Fixing log pattern analysis sparkles and chart ({kibana-pull}168337[#168337]).
+* AIOps: Fixes log pattern analysis sparklines and chart ({kibana-pull}168337[#168337]).
+* AIOps: Fixes Data View runtime fields support in the Change point detection UI ({kibana-pull}168249[#168249]).
 * Fixes anomaly charts when partition field contains an empty string ({kibana-pull}168102[#168102]).
 * Data Frame analytics outlier detection results: ensure scatterplot matrix adheres to bounding box ({kibana-pull}167941[#167941]).
 * Fixes Anomaly charts embeddable fails to load if partition value is empty string ({kibana-pull}167827[#167827]).
