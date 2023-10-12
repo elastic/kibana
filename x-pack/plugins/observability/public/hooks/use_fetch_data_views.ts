@@ -21,7 +21,7 @@ interface Params {
   size?: number;
 }
 
-export function useFetchDataViews({ name = '', size = 5 }: Params): UseFetchDataViewsResponse {
+export function useFetchDataViews({ name = '', size = 10 }: Params): UseFetchDataViewsResponse {
   const { dataViews } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
