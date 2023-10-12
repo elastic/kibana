@@ -28,6 +28,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import {
   createAlertsIndex,
   getRule,
@@ -51,6 +52,7 @@ import {
   getEqlRuleForAlertTesting,
   SAMPLE_PREBUILT_RULES,
   deleteAllAlerts,
+  updateUsername,
 } from '../../../utils';
 
 import {
@@ -71,14 +73,20 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@serverless @ess role_based_rule_exceptions_workflows', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(path);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(path);
     });
 
     describe('creating rules with exceptions', () => {
@@ -113,10 +121,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-
+          const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
           const rule = await createRule(supertest, log, ruleWithException);
           const expected = {
-            ...getSimpleRuleOutput(),
+            ...expectedRule,
             exceptions_list: [
               {
                 id,
@@ -155,9 +163,10 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithException);
           await waitForRuleSuccess({ supertest, log, id: rule.id });
           const bodyToCompare = removeServerGeneratedProperties(rule);
+          const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
           const expected = {
-            ...getSimpleRuleOutput(),
+            ...expectedRule,
             enabled: true,
             exceptions_list: [
               {
@@ -494,7 +503,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('t1_analyst', () => {
+      describe('@brokenInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -526,11 +535,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('tests with auditbeat data', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load(path);
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload(path);
         });
 
         beforeEach(async () => {

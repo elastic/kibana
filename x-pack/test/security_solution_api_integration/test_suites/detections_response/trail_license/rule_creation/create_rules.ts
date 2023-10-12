@@ -56,6 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
