@@ -18,7 +18,11 @@ import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema }
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultFleetErrorHandler } from '../../errors';
-import { hasAgentBeenUpgradedRecently, isAgentUpgradeable } from '../../../common/services';
+import {
+  hasAgentBeenUpgradedRecently,
+  isAgentUpgradeable,
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
+} from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
@@ -71,7 +75,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       return response.customError({
         statusCode: 400,
         body: {
-          message: `agent ${request.params.agentId} was upgraded less than 10 minutes ago`,
+          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago`,
         },
       });
     }

@@ -11,6 +11,8 @@ import semverGt from 'semver/functions/gt';
 
 import type { Agent } from '../types';
 
+export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
+
 export function isAgentUpgradeable(
   agent: Agent,
   latestAgentVersion: string,
@@ -67,6 +69,5 @@ export function hasAgentBeenUpgradedRecently(agent: Agent) {
   }
 
   const elaspedSinceUpgradeInMillis = Date.now() - Date.parse(agent.upgraded_at);
-  const UPGRADE_COOLDOWN_IN_MIN = 10;
-  return elaspedSinceUpgradeInMillis / 6e4 < UPGRADE_COOLDOWN_IN_MIN;
+  return elaspedSinceUpgradeInMillis / 6e4 < AGENT_UPGRADE_COOLDOWN_IN_MIN;
 }
