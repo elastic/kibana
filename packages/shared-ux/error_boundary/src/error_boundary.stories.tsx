@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiPageTemplate,
+} from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import { Meta, Story } from '@storybook/react';
 import React, { FC, useState } from 'react';
@@ -58,12 +64,55 @@ export const ErrorInToast: Story = () => {
 
   const services = storybookMock.getServices();
 
-  return (
-    <Template>
-      <ErrorBoundaryProvider {...services}>
+  const users: Array<{
+    id: string;
+    firstName: string | null | undefined;
+    lastName: string;
+    github: string;
+  }> = [];
+
+  users.push({
+    id: 'user-123',
+    firstName: 'Rodger',
+    lastName: 'Turcotte',
+    github: 'Rodger.Turcotte',
+  });
+  users.push({
+    id: 'user-345',
+    firstName: 'Bella',
+    lastName: 'Cremin',
+    github: 'Bella23',
+  });
+  users.push({
+    id: 'user-678',
+    firstName: 'Layne',
+    lastName: 'Franecki',
+    github: 'The_Real_Layne_2',
+  });
+
+  const columns: Array<EuiBasicTableColumn<typeof users[number]>> = [
+    { field: 'firstName', name: 'First Name' },
+    { field: 'lastName', name: 'Last Name' },
+    {
+      field: 'github',
+      name: 'Github',
+      render: () => (
         <ErrorBoundary>
           <BadComponent />
         </ErrorBoundary>
+      ),
+    },
+  ];
+
+  return (
+    <Template>
+      <ErrorBoundaryProvider {...services}>
+        <EuiBasicTable
+          tableCaption="Demo of EuiBasicTable"
+          items={users}
+          rowHeader="firstName"
+          columns={columns}
+        />
       </ErrorBoundaryProvider>
     </Template>
   );
