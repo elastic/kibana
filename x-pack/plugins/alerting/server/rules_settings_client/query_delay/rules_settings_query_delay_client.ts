@@ -25,6 +25,7 @@ import {
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { queryDelaySchema } from '../schemas';
 
 const verifyQueryDelaySettings = (settings: RulesSettingsQueryDelayProperties) => {
   const { delay } = settings;
@@ -77,6 +78,7 @@ export class RulesSettingsQueryDelayClient {
 
   private async updateWithOCC(newQueryDelayProperties: RulesSettingsQueryDelayProperties) {
     try {
+      queryDelaySchema.validate(newQueryDelayProperties);
       verifyQueryDelaySettings(newQueryDelayProperties);
     } catch (e) {
       this.logger.error(
@@ -107,6 +109,10 @@ export class RulesSettingsQueryDelayClient {
           version,
         }
       );
+
+      if (!result.attributes.queryDelay) {
+        throw new Error('Query delay settings are undefined');
+      }
       return result.attributes.queryDelay;
     } catch (e) {
       const errorMessage = 'savedObjectsClient errored trying to update query delay settings';
@@ -166,9 +172,7 @@ export class RulesSettingsQueryDelayClient {
         this.logger.info('Creating new default query delay rules settings for current space.');
         return await this.createSettings();
       }
-      this.logger.error(
-        `Failed to persist query delay rules setting for current space. Error: ${e}`
-      );
+      this.logger.error(`Failed to get query delay rules setting for current space. Error: ${e}`);
       throw e;
     }
   }

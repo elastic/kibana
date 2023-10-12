@@ -198,13 +198,16 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           />
         )}
         {queryDelaySettings && (
-          <RulesSettingsQueryDelaySection
-            onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
-            settings={queryDelaySettings}
-            canWrite={canWriteQueryDelaySettings}
-            canShow={canShowQueryDelaySettings}
-            hasError={hasQueryDelayError}
-          />
+          <>
+            <EuiSpacer />
+            <RulesSettingsQueryDelaySection
+              onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
+              settings={queryDelaySettings}
+              canWrite={canWriteQueryDelaySettings}
+              canShow={canShowQueryDelaySettings}
+              hasError={hasQueryDelayError}
+            />
+          </>
         )}
       </>
     );

@@ -26,6 +26,7 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
 } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { flappingSchema } from '../schemas';
 
 const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingProperties) => {
   const { lookBackWindow, statusChangeThreshold } = flappingSettings;
@@ -90,6 +91,7 @@ export class RulesSettingsFlappingClient {
 
   private async updateWithOCC(newFlappingProperties: RulesSettingsFlappingProperties) {
     try {
+      flappingSchema.validate(newFlappingProperties);
       verifyFlappingSettings(newFlappingProperties);
     } catch (e) {
       this.logger.error(
@@ -174,7 +176,7 @@ export class RulesSettingsFlappingClient {
         this.logger.info('Creating new default flapping rules settings for current space.');
         return await this.createSettings();
       }
-      this.logger.error(`Failed to persist flapping rules setting for current space. Error: ${e}`);
+      this.logger.error(`Failed to get flapping rules setting for current space. Error: ${e}`);
       throw e;
     }
   }
