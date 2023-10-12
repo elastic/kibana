@@ -43,6 +43,7 @@ export function useTabs({
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const { metricsDataAccess } = services;
+  const metricsClient = metricsDataAccess?.metricsClient;
   const HostMetricsTable = metricsDataAccess?.HostMetricsTable;
   const ContainerMetricsTable = metricsDataAccess?.ContainerMetricsTable;
   const PodMetricsTable = metricsDataAccess?.PodMetricsTable;
@@ -91,7 +92,11 @@ export function useTabs({
     <>
       <EuiSpacer />
       {ContainerMetricsTable &&
-        ContainerMetricsTable({ timerange, filterClauseDsl: containersFilter })}
+        ContainerMetricsTable({
+          timerange,
+          metricsClient,
+          filterClauseDsl: containersFilter,
+        })}
     </>
   );
 
@@ -99,7 +104,11 @@ export function useTabs({
     <>
       <EuiSpacer />
       {PodMetricsTable &&
-        PodMetricsTable({ timerange, filterClauseDsl: podsFilter })}
+        PodMetricsTable({
+          timerange,
+          metricsClient,
+          filterClauseDsl: podsFilter,
+        })}
     </>
   );
 
@@ -107,7 +116,11 @@ export function useTabs({
     <>
       <EuiSpacer />
       {HostMetricsTable &&
-        HostMetricsTable({ timerange, filterClauseDsl: hostsFilter })}
+        HostMetricsTable({
+          timerange,
+          metricsClient,
+          filterClauseDsl: hostsFilter,
+        })}
     </>
   );
 
