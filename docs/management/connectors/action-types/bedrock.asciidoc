@@ -30,7 +30,6 @@ AWS Bedrock connectors have the following configuration properties:
 Name::      The name of the connector.
 API URL::   The AWS Bedrock request URL.
 Default model:: The GAI model for AWS Bedrock to use. Current support is for the Anthropic Claude models, defaulting to Claude 2. The model can be set on a per request basis by including a "model" parameter alongside the request body.
-Region::   The AWS Bedrock request URL.
 Access Key::   The AWS access key for authentication.
 Secret::   The secret for authentication.
 
