@@ -2,6 +2,10 @@
 # Incorporate any necessary additional logic to validate the service's integrity.
 # A failure in this pipeline build will prevent further progression to the subsequent stage.
 
+# DEPRECATION NOTICE:
+# PRODUCTION WILL SOON BE SPLIT INTO "CANARY" AND "NONCANARY" AND THIS FILE WILL BE DELETED.
+# ENSURE ANY CHANGE MADE TO THIS FILE IS REFLECTED IN THOSE FILES AS WELL.
+
 steps:
   - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
     trigger: "ess-k8s-production-e2e-tests" # https://buildkite.com/elastic/ess-k8s-production-e2e-tests
