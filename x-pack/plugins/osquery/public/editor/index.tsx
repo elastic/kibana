@@ -27,14 +27,13 @@ const editorOptions = {
   automaticLayout: true,
 };
 const MIN_HEIGHT = 100;
-export const OsqueryEditor: React.FC<OsqueryEditorProps> = ({
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
   onChange,
   commands,
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
-
   useDebounce(
     () => {
       onChange(editorValue);
@@ -88,3 +87,5 @@ export const OsqueryEditor: React.FC<OsqueryEditorProps> = ({
     />
   );
 };
+
+export const OsqueryEditor = React.memo(OsqueryEditorComponent);
