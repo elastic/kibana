@@ -107,6 +107,48 @@
         }
       ]
     },
+    "/api/actions/connectors": {
+      "get": {
+        "summary": "Retrieves all connectors.",
+        "operationId": "getConnectors",
+        "tags": [
+          "connectors"
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/connector_response_properties"
+                  }
+                },
+                "examples": {
+                  "getConnectorsResponse": {
+                    "$ref": "#/components/examples/get_connectors_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/api/actions/connector_types": {
       "get": {
         "summary": "Retrieves a list of all connector types.",
@@ -1998,7 +2040,7 @@
       },
       "is_preconfigured": {
         "type": "boolean",
-        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.",
+        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. \n",
         "example": false
       },
       "is_system_action": {
@@ -2006,11 +2048,15 @@
         "description": "Indicates whether the connector is used for system actions.",
         "example": false
       },
+      "referenced_by_count": {
+        "type": "integer",
+        "description": "Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated. This property is returned only by the get all connectors API.\n",
+        "example": 2
+      },
       "connector_response_properties_cases_webhook": {
         "title": "Connector request properties for a Webhook - Case Management connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2047,6 +2093,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2054,7 +2103,6 @@
         "title": "Connector response properties for a D3 Security connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2091,6 +2139,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2098,7 +2149,6 @@
         "title": "Connector response properties for an email connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2135,6 +2185,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2142,7 +2195,6 @@
         "title": "Connector response properties for an index connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2179,6 +2231,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2186,7 +2241,6 @@
         "title": "Connector response properties for a Jira connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2223,6 +2277,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2230,7 +2287,6 @@
         "title": "Connector response properties for an Opsgenie connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2267,6 +2323,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2274,7 +2333,6 @@
         "title": "Connector response properties for a PagerDuty connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2311,6 +2369,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2318,7 +2379,6 @@
         "title": "Connector response properties for a IBM Resilient connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2355,6 +2415,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2362,7 +2425,6 @@
         "title": "Connector response properties for a server log connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2400,6 +2462,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2407,7 +2472,6 @@
         "title": "Connector response properties for a ServiceNow ITSM connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2444,6 +2508,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2451,7 +2518,6 @@
         "title": "Connector response properties for a ServiceNow ITOM connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2488,6 +2554,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2495,7 +2564,6 @@
         "title": "Connector response properties for a ServiceNow SecOps connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2532,6 +2600,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2572,6 +2643,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2612,6 +2686,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2619,7 +2696,6 @@
         "title": "Connector response properties for a Swimlane connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2656,6 +2732,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2699,6 +2778,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2706,7 +2788,6 @@
         "title": "Connector response properties for a Tines connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2743,6 +2824,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2750,7 +2834,6 @@
         "title": "Connector response properties for a Torq connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2787,6 +2870,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2794,7 +2880,6 @@
         "title": "Connector response properties for a Webhook connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2831,6 +2916,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -2838,7 +2926,6 @@
         "title": "Connector response properties for an xMatters connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -2875,6 +2962,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3126,6 +3216,35 @@
           "is_missing_secrets": false,
           "is_system_action": false
         }
+      },
+      "get_connectors_response": {
+        "summary": "A list of connectors",
+        "value": [
+          {
+            "id": "preconfigured-email-connector",
+            "name": "my-preconfigured-email-notification",
+            "connector_type_id": ".email",
+            "is_preconfigured": true,
+            "is_deprecated": false,
+            "referenced_by_count": 0,
+            "is_system_action": false
+          },
+          {
+            "id": "e07d0c80-8b8b-11ed-a780-3b746c987a81",
+            "name": "my-index-connector",
+            "config": {
+              "index": "test-index",
+              "refresh": false,
+              "executionTimeField": null
+            },
+            "connector_type_id": ".index",
+            "is_preconfigured": false,
+            "is_deprecated": false,
+            "referenced_by_count": 2,
+            "is_missing_secrets": false,
+            "is_system_action": false
+          }
+        ]
       },
       "get_connector_types_generativeai_response": {
         "summary": "A list of connector types for the `generativeAI` feature.",

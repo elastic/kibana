@@ -62,6 +62,30 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/actions/connectors:
+    get:
+      summary: Retrieves all connectors.
+      operationId: getConnectors
+      tags:
+        - connectors
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/connector_response_properties'
+              examples:
+                getConnectorsResponse:
+                  $ref: '#/components/examples/get_connectors_response'
+        '401':
+          $ref: '#/components/responses/401'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -1499,17 +1523,22 @@ components:
       example: false
     is_preconfigured:
       type: boolean
-      description: Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
+      description: |
+        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
       example: false
     is_system_action:
       type: boolean
       description: Indicates whether the connector is used for system actions.
       example: false
+    referenced_by_count:
+      type: integer
+      description: |
+        Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated. This property is returned only by the get all connectors API.
+      example: 2
     connector_response_properties_cases_webhook:
       title: Connector request properties for a Webhook - Case Management connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1537,11 +1566,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_d3security:
       title: Connector response properties for a D3 Security connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1569,11 +1599,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_email:
       title: Connector response properties for an email connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1601,11 +1632,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_index:
       title: Connector response properties for an index connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1633,11 +1665,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_jira:
       title: Connector response properties for a Jira connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1665,11 +1698,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_opsgenie:
       title: Connector response properties for an Opsgenie connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1697,11 +1731,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_pagerduty:
       title: Connector response properties for a PagerDuty connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1729,11 +1764,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_resilient:
       title: Connector response properties for a IBM Resilient connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1761,11 +1797,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_serverlog:
       title: Connector response properties for a server log connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1794,11 +1831,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_servicenow:
       title: Connector response properties for a ServiceNow ITSM connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1826,11 +1864,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_servicenow_itom:
       title: Connector response properties for a ServiceNow ITOM connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1858,11 +1897,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_servicenow_sir:
       title: Connector response properties for a ServiceNow SecOps connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1890,6 +1930,8 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_slack_api:
       title: Connector response properties for a Slack connector
       type: object
@@ -1919,6 +1961,8 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_slack_webhook:
       title: Connector response properties for a Slack connector
       type: object
@@ -1948,11 +1992,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_swimlane:
       title: Connector response properties for a Swimlane connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -1980,6 +2025,8 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_teams:
       title: Connector response properties for a Microsoft Teams connector
       type: object
@@ -2011,11 +2058,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_tines:
       title: Connector response properties for a Tines connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -2043,11 +2091,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_torq:
       title: Connector response properties for a Torq connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -2075,11 +2124,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_webhook:
       title: Connector response properties for a Webhook connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -2107,11 +2157,12 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties_xmatters:
       title: Connector response properties for an xMatters connector
       type: object
       required:
-        - config
         - connector_type_id
         - id
         - is_deprecated
@@ -2139,6 +2190,8 @@ components:
         name:
           type: string
           description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/referenced_by_count'
     connector_response_properties:
       title: Connector response properties
       description: The properties vary depending on the connector type.
@@ -2314,6 +2367,28 @@ components:
         is_deprecated: false
         is_missing_secrets: false
         is_system_action: false
+    get_connectors_response:
+      summary: A list of connectors
+      value:
+        - id: preconfigured-email-connector
+          name: my-preconfigured-email-notification
+          connector_type_id: .email
+          is_preconfigured: true
+          is_deprecated: false
+          referenced_by_count: 0
+          is_system_action: false
+        - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
+          name: my-index-connector
+          config:
+            index: test-index
+            refresh: false
+            executionTimeField: null
+          connector_type_id: .index
+          is_preconfigured: false
+          is_deprecated: false
+          referenced_by_count: 2
+          is_missing_secrets: false
+          is_system_action: false
     get_connector_types_generativeai_response:
       summary: A list of connector types for the `generativeAI` feature.
       value:

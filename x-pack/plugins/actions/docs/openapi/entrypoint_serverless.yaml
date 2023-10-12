@@ -19,8 +19,8 @@ paths:
     $ref: 'paths/api@actions@connector.yaml'
   #  '/api/actions/connector/{connectorId}':
   #   $ref: 'paths/api@actions@connector@{connectorid}.yaml'
-  #  '/api/actions/connectors':
-  #   $ref: paths/api@actions@connectors.yaml
+  '/api/actions/connectors':
+    $ref: paths/api@actions@connectors.yaml
   '/api/actions/connector_types':
     $ref: paths/api@actions@connector_types.yaml
 components:
