@@ -123,7 +123,7 @@ export class ToastsService {
 
   constructor(private services: ErrorBoundaryUIServices) {}
 
-  public get toasts() {
+  public get toasts$() {
     return this._toasts.asObservable();
   }
 

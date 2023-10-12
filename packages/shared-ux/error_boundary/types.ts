@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { EuiGlobalToastListProps } from '@elastic/eui';
 import { ErrorService } from './src/error_service';
 import { ToastsService } from './src/toasts_service';
 
 export interface ErrorBoundaryUIServices {
   reloadWindow: () => void;
 }
+
+export type Toasts = EuiGlobalToastListProps['toasts'];
 
 /**
  * Services that are consumed internally in this component.
