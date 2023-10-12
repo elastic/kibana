@@ -17,6 +17,8 @@ export type {
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
+  PanelComponentProps,
+  PanelContent,
 } from './src/ui';
 
 export type { NavigationServices } from './types';

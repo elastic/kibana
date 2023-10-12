@@ -341,10 +341,6 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
   );
 };
 
-const CustomPanelContent = () => {
-  return <EuiText>This is a custom component to render in the panel.</EuiText>;
-};
-
 const panelContentProvider: ContentProvider = (id: string) => {
   if (id === 'example_projet.group:openpanel1') {
     return; // Use default title & content
@@ -353,7 +349,14 @@ const panelContentProvider: ContentProvider = (id: string) => {
   if (id === 'example_projet.group:openpanel2') {
     // Custom content
     return {
-      content: <CustomPanelContent />,
+      content: ({ closePanel }) => {
+        return (
+          <div>
+            <EuiText>This is a custom component to render in the panel.</EuiText>
+            <EuiButton onClick={() => closePanel()}>Close panel</EuiButton>
+          </div>
+        );
+      },
     };
   }
 

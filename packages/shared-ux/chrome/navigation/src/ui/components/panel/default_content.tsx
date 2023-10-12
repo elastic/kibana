@@ -57,12 +57,15 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
 }
 
 interface Props {
-  activeNode: PanelNavNode;
+  /** The selected node is the node in the main panel that opens the Panel */
+  selectedNode: PanelNavNode;
 }
 
-export const DefaultContent: FC<Props> = ({ activeNode }) => {
-  const filteredChildren = activeNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
-  const serializedChildren = serializeChildren({ ...activeNode, children: filteredChildren });
+export const DefaultContent: FC<Props> = ({ selectedNode }) => {
+  const filteredChildren = selectedNode.children?.filter(
+    (child) => child.sideNavStatus !== 'hidden'
+  );
+  const serializedChildren = serializeChildren({ ...selectedNode, children: filteredChildren });
   const totalChildren = serializedChildren?.length ?? 0;
   const firstGroupTitle = serializedChildren?.[0]?.title;
   const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
@@ -70,12 +73,12 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
       <EuiFlexItem>
-        {typeof activeNode.title === 'string' ? (
+        {typeof selectedNode.title === 'string' ? (
           <EuiTitle size="xxs">
-            <h2>{activeNode.title}</h2>
+            <h2>{selectedNode.title}</h2>
           </EuiTitle>
         ) : (
-          activeNode.title
+          selectedNode.title
         )}
       </EuiFlexItem>
 

@@ -7,6 +7,7 @@
  */
 
 export { Navigation } from './components';
+export type { PanelContent, PanelComponentProps } from './components';
 
 export { DefaultNavigation } from './default_navigation';
 
