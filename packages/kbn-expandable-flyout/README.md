@@ -9,13 +9,15 @@ The flyout is composed of 3 sections:
 - a left wider section to show more details
 - a preview section, that overlays the right section. This preview section can display multiple panels one after the other and displays a `Back` button
 
+> Run `yarn storybook expandable_flyout` to take a quick look at the expandable flyout in action
+
 ## Design decisions
 
 The expandable-flyout package is designed to render a single flyout for an entire plugin. While displaying multiple flyouts might be feasible, it will be a bit complicated, and we recommend instead to build multiple panels, with each their own context to manage their data (for example, take a look at the Security Solution [setup](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout)).
 
 The expandable-flyout is making some strict UI design decisions:
 - when in collapsed mode (i.e. when only the right/preview section is open), the flyout's width is fixed to the EUI `s` size
-- when in expanded mode (i.e. when the left section is opened), the flyout's width is fixed to the EUI `l` size 
+- when in expanded mode (i.e. when the left section is opened), the flyout's width is fixed to the EUI `l` size. Internally the right, left and preview sections' widths are set to a hardcoded percentage (40%, 60$ and 40% respectively)
 
 ## Package API
 
