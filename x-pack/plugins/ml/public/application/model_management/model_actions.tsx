@@ -538,7 +538,7 @@ export function useModelActions({
         isPrimary: true,
         available: isTestable,
         onClick: (item) => {
-          if (isDfaTrainedModel(item)) {
+          if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
             onDfaTestAction(item);
           } else {
             onTestAction(item);
