@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable, Subscription } from 'rxjs';
 import { map, startWith, switchMap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
@@ -57,7 +57,8 @@ export class AnomalyDetectionAlertsStateService extends StateService {
     this._init();
   }
 
-  public readonly anomalyDetectionAlerts$ = this._aadAlerts$.asObservable();
+  public readonly anomalyDetectionAlerts$: Observable<AnomalyDetectionAlert[]> =
+    this._aadAlerts$.asObservable();
 
   protected _initSubscriptions(): Subscription {
     const subscription = new Subscription();

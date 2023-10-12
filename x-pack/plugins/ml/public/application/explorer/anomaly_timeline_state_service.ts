@@ -49,6 +49,12 @@ interface SwimLanePagination {
   viewByPerPage: number;
 }
 
+export interface TimeDomain {
+  min: number;
+  max: number;
+  minInterval: number;
+}
+
 /**
  * Service for managing anomaly timeline state.
  */
@@ -86,6 +92,18 @@ export class AnomalyTimelineStateService extends StateService {
 
   private _timeBounds$: Observable<TimeRangeBounds>;
   private _refreshSubject$: Observable<Refresh>;
+
+  /** Time domain of the currently active swim lane */
+  public readonly timeDomain$: Observable<TimeDomain | null> = this._overallSwimLaneData$.pipe(
+    map((data) => {
+      if (!data) return null;
+      return {
+        min: data.earliest * 1000,
+        max: data.latest * 1000,
+        minInterval: data.interval * 1000,
+      };
+    })
+  );
 
   constructor(
     private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
