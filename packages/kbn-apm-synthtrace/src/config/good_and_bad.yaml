@@ -1,0 +1,11 @@
+schedule:
+  # Start with good events
+  - template: "good"
+    start: "now-7d"
+    end: "now-1d"
+  - template: "bad"
+    start: "now-1d"
+    end: "now-1d+45m"
+  - template: "good"
+    start: "now-1d+45m"
+    end: false

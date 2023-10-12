@@ -12,6 +12,27 @@ import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run_synthtrace';
 
+function getParseConfigFile(flags: RunCliFlags) {
+  const { config, _ } = flags;
+  if (config) {
+    const parsedConfig = (config || _[0]) as string;
+    const configPath = [
+      path.resolve(parsedConfig),
+      path.resolve(`${parsedConfig}.ts`),
+      path.resolve(__dirname, '../../config', parsedConfig),
+      path.resolve(__dirname, '../../config', `${parsedConfig}.yaml`),
+    ].find((p) => existsSync(p));
+
+    if (configPath) {
+      // eslint-disable-next-line no-console
+      console.log(`Loading configuration from ${configPath}`);
+      return configPath;
+    }
+
+    throw new Error(`Could not find configuration file: "${configPath}"`);
+  }
+}
+
 function getParsedFile(flags: RunCliFlags) {
   const { file, _ } = flags;
   const parsedFile = (file || _[0]) as string;
@@ -40,6 +61,7 @@ function getParsedFile(flags: RunCliFlags) {
 export function parseRunCliFlags(flags: RunCliFlags) {
   const { logLevel } = flags;
   const parsedFile = getParsedFile(flags);
+  const parsedConfigFile = getParseConfigFile(flags);
 
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {
@@ -73,6 +95,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,
+    config: parsedConfigFile,
   };
 }
 

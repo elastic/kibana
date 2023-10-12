@@ -1469,6 +1469,7 @@
     "cypress-real-events": "^1.10.3",
     "cypress-recurse": "^1.35.2",
     "date-fns": "^2.29.3",
+    "datemath-parser": "^1.0.6",
     "debug": "^2.6.9",
     "delete-empty": "^2.0.0",
     "dependency-check": "^4.1.0",
@@ -1614,6 +1615,7 @@
     "webpack-sources": "^1.4.1",
     "xml-crypto": "^3.0.1",
     "xmlbuilder": "13.0.2",
+    "yaml": "^2.3.0",
     "yargs": "^15.4.1"
   }
 }

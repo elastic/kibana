@@ -14315,6 +14315,13 @@ dateformat@^4.5.1:
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-4.6.3.tgz#556fa6497e5217fedb78821424f8a1c22fa3f4b5"
   integrity sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==
 
+datemath-parser@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/datemath-parser/-/datemath-parser-1.0.6.tgz#d527dabf8541b3da1b661d81c16c328f3b9a8dc5"
+  integrity sha512-TEB1YBiGnLAn8lG8ZRf88NCHEERo04xdi1zVGSb//X4nQZs9yqLX7ZM2Ra1PIx+ivnT6j596c8p9QmUX4Y+ddg==
+  dependencies:
+    moment "^2.22.2"
+
 dayjs@1.10.7, dayjs@^1.10.4:
   version "1.10.7"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.10.7.tgz#2cf5f91add28116748440866a0a1d26f3a6ce468"
@@ -22595,7 +22602,7 @@ moment-timezone@^0.5.43:
   dependencies:
     moment "^2.29.4"
 
-moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
+moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.22.2, moment@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
@@ -31439,6 +31446,11 @@ yaml@^2.2.1, yaml@^2.2.2:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.3.1.tgz#02fe0975d23cd441242aa7204e09fc28ac2ac33b"
   integrity sha512-2eHWfjaoXgTBC2jNM1LRef62VQa0umtvRiDSk6HSzW7RvS5YtkabJrwYLLEKWBc8a5U2PTSCs+dJjUTJdlHsWQ==
+
+yaml@^2.3.0:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.3.2.tgz#f522db4313c671a0ca963a75670f1c12ea909144"
+  integrity sha512-N/lyzTPaJasoDmfV7YTrYCI0G/3ivm/9wdG0aHuheKowWQwGTsK0Eoiw6utmzAnI6pkJa0DUVygvp3spqqEKXg==
 
 yargs-parser@20.2.4, yargs-parser@^20.2.2, yargs-parser@^20.2.3:
   version "20.2.4"

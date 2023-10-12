@@ -1,0 +1,4 @@
+schedule:
+  - template: "good"
+    start: "now-7d"
+    end: "now-1d"

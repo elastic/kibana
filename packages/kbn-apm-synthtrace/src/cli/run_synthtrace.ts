@@ -66,6 +66,10 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
+    .positional('config', {
+      describe: 'Scenario configurations',
+      string: true,
+    })
     .showHelpOnFail(false);
 }
 
