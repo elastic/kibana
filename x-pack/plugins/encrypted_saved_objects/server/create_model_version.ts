@@ -102,9 +102,7 @@ function createMergedUnsafeTransformFn(
   return (document, context) => {
     const { type, id, originId } = document;
 
-    const descriptorNamespace = context.namespaceType === 'single'
-        ? document.namespace
-        : undefined;
+    const descriptorNamespace = context.namespaceType === 'single' ? document.namespace : undefined;
     const encryptionDescriptor = { id, type, namespace: descriptorNamespace };
 
     // Note about isTypeBeingConverted: false
