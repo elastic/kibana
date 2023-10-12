@@ -200,65 +200,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
     });
 
-    describe('#Landing page', () => {
-      beforeEach(async () => {
-        await setHostViewEnabled(false);
-      });
-
-      afterEach(async () => {
-        await setHostViewEnabled(true);
-      });
-
-      describe('User with read permission', () => {
-        beforeEach(async () => {
-          await loginWithReadOnlyUser();
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-
-        afterEach(async () => {
-          await logoutAndDeleteReadOnlyUser();
-        });
-
-        it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-          const landingPageDisabled =
-            await pageObjects.infraHostsView.getHostsLandingPageDisabled();
-          const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
-          const parsedUrl = new URL(learnMoreDocsUrl);
-
-          expect(parsedUrl.host).to.be('www.elastic.co');
-          expect(parsedUrl.pathname).to.be('/guide/en/kibana/current/kibana-privileges.html');
-          expect(landingPageDisabled).to.contain(
-            'Your user role doesn’t have sufficient privileges to enable this feature'
-          );
-        });
-      });
-
-      describe('Admin user', () => {
-        beforeEach(async () => {
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-
-        it('as an admin, should see an enable button when the hosts view is disabled', async () => {
-          const landingPageEnableButton =
-            await pageObjects.infraHostsView.getHostsLandingPageEnableButton();
-          const landingPageEnableButtonText = await landingPageEnableButton.getVisibleText();
-          expect(landingPageEnableButtonText).to.eql('Enable hosts view');
-        });
-
-        it('as an admin, should be able to enable the hosts view feature', async () => {
-          await pageObjects.infraHostsView.clickEnableHostViewButton();
-
-          const titleElement = await find.byCssSelector('h1');
-          const title = await titleElement.getVisibleText();
-
-          expect(title).to.contain('Hosts');
-        });
-      });
-    });
-
     describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
