@@ -5,23 +5,23 @@
  * 2.0.
  */
 import { v4 } from 'uuid';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup } from './lib';
-import { RecoveredActionGroup } from '../../../common';
-import { RegistryRuleType } from '../../rule_type_registry';
+import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { RecoveredActionGroup } from '../../../../../common';
+import { RegistryRuleType } from '../../../../rule_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
