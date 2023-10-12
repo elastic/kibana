@@ -236,7 +236,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
           {
             id: 'group:settings-2',
             title: 'Settings as nav Item',
-            renderAs: 'item',
+            renderAs: 'item', // Render just like any other item, even if it has children
             children: [
               {
                 link: 'group:settings.logs',
