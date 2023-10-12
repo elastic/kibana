@@ -7,14 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-// import type {
-//   IScopedClusterClient,
-//   KibanaRequest,
-//   SavedObjectsClientContract,
-// } from '@kbn/core/server';
-// import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { type CompatibleModule, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-// import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';
 import {
@@ -25,126 +18,6 @@ import {
   setupModuleBodySchema,
 } from './schemas/modules';
 import type { RouteInitialization } from '../types';
-// import type { MlClient } from '../lib/ml_client';
-// import type { MLSavedObjectService } from '../saved_objects';
-
-// function recognize(
-//   client: IScopedClusterClient,
-//   mlClient: MlClient,
-//   savedObjectsClient: SavedObjectsClientContract,
-//   dataViewsService: DataViewsService,
-//   mlSavedObjectService: MLSavedObjectService,
-//   request: KibanaRequest,
-//   compatibleModuleType: CompatibleModule | null,
-//   indexPatternTitle: string
-// ) {
-//   const dr = dataRecognizerFactory(
-//     client,
-//     mlClient,
-//     savedObjectsClient,
-//     dataViewsService,
-//     mlSavedObjectService,
-//     request,
-//     compatibleModuleType
-//   );
-//   return dr.findMatches(indexPatternTitle);
-// }
-
-// function getModule(
-//   client: IScopedClusterClient,
-//   mlClient: MlClient,
-//   savedObjectsClient: SavedObjectsClientContract,
-//   dataViewsService: DataViewsService,
-//   mlSavedObjectService: MLSavedObjectService,
-//   request: KibanaRequest,
-//   compatibleModuleType: CompatibleModule | null,
-//   moduleId?: string
-// ) {
-//   const dr = dataRecognizerFactory(
-//     client,
-//     mlClient,
-//     savedObjectsClient,
-//     dataViewsService,
-//     mlSavedObjectService,
-//     request,
-//     compatibleModuleType
-//   );
-//   if (moduleId === undefined) {
-//     return dr.listModules();
-//   } else {
-//     return dr.getModule(moduleId);
-//   }
-// }
-
-// function setup(
-//   client: IScopedClusterClient,
-//   mlClient: MlClient,
-//   savedObjectsClient: SavedObjectsClientContract,
-//   dataViewsService: DataViewsService,
-//   mlSavedObjectService: MLSavedObjectService,
-//   request: KibanaRequest,
-//   compatibleModuleType: CompatibleModule | null,
-//   moduleId: string,
-//   prefix?: string,
-//   groups?: string[],
-//   indexPatternName?: string,
-//   query?: any,
-//   useDedicatedIndex?: boolean,
-//   startDatafeed?: boolean,
-//   start?: number,
-//   end?: number,
-//   jobOverrides?: JobOverride | JobOverride[],
-//   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
-//   estimateModelMemory?: boolean,
-//   applyToAllSpaces?: boolean
-// ) {
-//   const dr = dataRecognizerFactory(
-//     client,
-//     mlClient,
-//     savedObjectsClient,
-//     dataViewsService,
-//     mlSavedObjectService,
-//     request,
-//     compatibleModuleType
-//   );
-//   return dr.setup(
-//     moduleId,
-//     prefix,
-//     groups,
-//     indexPatternName,
-//     query,
-//     useDedicatedIndex,
-//     startDatafeed,
-//     start,
-//     end,
-//     jobOverrides,
-//     datafeedOverrides,
-//     estimateModelMemory,
-//     applyToAllSpaces
-//   );
-// }
-
-// function dataRecognizerJobsExist(
-//   client: IScopedClusterClient,
-//   mlClient: MlClient,
-//   savedObjectsClient: SavedObjectsClientContract,
-//   dataViewsService: DataViewsService,
-//   mlSavedObjectService: MLSavedObjectService,
-//   request: KibanaRequest,
-//   compatibleModuleType: CompatibleModule | null,
-//   moduleId: string
-// ) {
-//   const dr = dataRecognizerFactory(
-//     client,
-//     mlClient,
-//     savedObjectsClient,
-//     dataViewsService,
-//     mlSavedObjectService,
-//     request,
-//     compatibleModuleType
-//   );
-//   return dr.dataRecognizerJobsExist(moduleId);
-// }
 
 /**
  * Recognizer routes.
@@ -214,16 +87,7 @@ export function dataRecognizer(
             const types = request.query.types?.split(',');
             const soClient = (await context.core).savedObjects.client;
             const dataViewsService = await getDataViewsService();
-            // const results = await recognize(
-            //   client,
-            //   mlClient,
-            //   soClient,
-            //   dataViewService,
-            //   mlSavedObjectService,
-            //   request,
-            //   compatibleModuleType,
-            //   indexPatternTitle
-            // );
+
             const dr = dataRecognizerFactory(
               client,
               mlClient,
@@ -390,16 +254,7 @@ export function dataRecognizer(
             }
             const soClient = (await context.core).savedObjects.client;
             const dataViewsService = await getDataViewsService();
-            // const results = await getModule(
-            //   client,
-            //   mlClient,
-            //   soClient,
-            //   dataViewService,
-            //   mlSavedObjectService,
-            //   request,
-            //   compatibleModuleType,
-            //   moduleId
-            // );
+
             const dr = dataRecognizerFactory(
               client,
               mlClient,
@@ -413,11 +268,6 @@ export function dataRecognizer(
 
             const results =
               moduleId === undefined ? await dr.listModules() : await dr.getModule(moduleId);
-            // if (moduleId === undefined) {
-            //   return dr.listModules();
-            // } else {
-            //   return dr.getModule(moduleId);
-            // }
 
             return response.ok({ body: results });
           } catch (e) {
@@ -615,28 +465,6 @@ export function dataRecognizer(
             const soClient = (await context.core).savedObjects.client;
             const dataViewsService = await getDataViewsService();
 
-            // const result = await setup(
-            //   client,
-            //   mlClient,
-            //   soClient,
-            //   dataViewService,
-            //   mlSavedObjectService,
-            //   request,
-            //   compatibleModuleType,
-            //   moduleId,
-            //   prefix,
-            //   groups,
-            //   indexPatternName,
-            //   query,
-            //   useDedicatedIndex,
-            //   startDatafeed,
-            //   start,
-            //   end,
-            //   jobOverrides,
-            //   datafeedOverrides,
-            //   estimateModelMemory,
-            //   applyToAllSpaces
-            // );
             const dr = dataRecognizerFactory(
               client,
               mlClient,
@@ -753,16 +581,7 @@ export function dataRecognizer(
             const { moduleId } = request.params;
             const soClient = (await context.core).savedObjects.client;
             const dataViewsService = await getDataViewsService();
-            // const result = await dataRecognizerJobsExist(
-            //   client,
-            //   mlClient,
-            //   soClient,
-            //   dataViewService,
-            //   mlSavedObjectService,
-            //   request,
-            //   compatibleModuleType,
-            //   moduleId
-            // );
+
             const dr = dataRecognizerFactory(
               client,
               mlClient,

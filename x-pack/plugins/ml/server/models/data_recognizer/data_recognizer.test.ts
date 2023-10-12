@@ -15,7 +15,7 @@ import type { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
-import { Config, filterConfigs } from './data_recognizer';
+import { type Config, filterConfigs } from './data_recognizer';
 
 const callAs = () => Promise.resolve({ body: {} });
 
