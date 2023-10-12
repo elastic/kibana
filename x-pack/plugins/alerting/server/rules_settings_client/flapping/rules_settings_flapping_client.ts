@@ -26,6 +26,7 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
 } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { flappingSchema } from '../schemas';
 
 const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingProperties) => {
   const { lookBackWindow, statusChangeThreshold } = flappingSettings;
@@ -90,6 +91,7 @@ export class RulesSettingsFlappingClient {
 
   private async updateWithOCC(newFlappingProperties: RulesSettingsFlappingProperties) {
     try {
+      flappingSchema.validate(newFlappingProperties);
       verifyFlappingSettings(newFlappingProperties);
     } catch (e) {
       this.logger.error(
