@@ -64,5 +64,6 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/reporting-common",
   ]
 }
