@@ -27,7 +27,7 @@ export interface SortState<T> {
 
 export const useMetricIndices = ({ metricsClient }: { metricsClient: MetricsDataClient }) => {
   const [metricIndices, setMetricIndices] = useState<
-    { metricIndices: string; metricIndicesStatus: string } | undefined
+    { metricIndices: string; metricIndicesExist: boolean } | undefined
   >(undefined);
 
   const [metricIndicesRequest, getMetricIndices] = useTrackedPromise(
@@ -57,7 +57,7 @@ export const useMetricIndices = ({ metricsClient }: { metricsClient: MetricsData
     isLoading,
     isUninitialized,
     errorMessage: hasFailedLoading ? `${metricIndicesRequest.value}` : undefined,
-    metricIndicesStatus: metricIndices?.metricIndicesStatus,
+    metricIndicesExist: metricIndices?.metricIndicesExist,
     metricIndices: metricIndices?.metricIndices,
   };
 };
@@ -97,7 +97,7 @@ export const useInfrastructureNodeMetrics = <T>(
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const {
     metricIndices,
-    metricIndicesStatus,
+    metricIndicesExist,
     isLoading: metricIndicesLoading,
     errorMessage: metricIndicesError,
   } = useMetricIndices({ metricsClient });
@@ -164,14 +164,14 @@ export const useInfrastructureNodeMetrics = <T>(
     () =>
       errors.length > 0
         ? { state: 'error', errors }
-        : metricIndicesStatus == null
+        : metricIndicesExist == null
         ? { state: 'unknown' }
-        : !metricIndicesStatus
+        : !metricIndicesExist
         ? { state: 'no-indices' }
         : nodes.length <= 0
         ? { state: 'empty-indices' }
         : { state: 'data', currentPageIndex, pageCount, rows: nodes },
-    [currentPageIndex, errors, metricIndicesStatus, nodes, pageCount]
+    [currentPageIndex, errors, metricIndicesExist, nodes, pageCount]
   );
 
   return {

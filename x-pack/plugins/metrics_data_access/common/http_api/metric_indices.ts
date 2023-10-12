@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 
 export const MetricIndicesAPIResponseRT = rt.type({
   metricIndices: rt.string,
-  metricIndicesStatus: rt.string,
+  metricIndicesExist: rt.boolean,
 });
 
 export type MetricIndicesAPIResponse = rt.TypeOf<typeof MetricIndicesAPIResponseRT>;

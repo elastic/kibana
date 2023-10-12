@@ -57,7 +57,7 @@ export function initMetricIndicesRoute<T extends RequestHandlerContext>({
       const metricIndices = await metricsClient.getMetricIndices({ savedObjectsClient });
       const metricIndicesStatus = await getIndexStatus(esClient, metricIndices);
       return res.ok({
-        body: { metricIndices, metricIndicesStatus },
+        body: { metricIndices, metricIndicesExist: metricIndicesStatus !== 'missing' },
       });
     }
   );

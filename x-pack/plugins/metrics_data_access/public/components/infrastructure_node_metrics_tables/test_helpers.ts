@@ -19,10 +19,8 @@ export type NodeMetricsTableFetchMock = (
   options: HttpFetchOptions
 ) => Promise<DataResponseMock>;
 
-export function createStartServicesAccessorMock(fetchMock: NodeMetricsTableFetchMock) {
+export function createStartServicesAccessorMock() {
   const core = coreMock.createStart();
-  // @ts-expect-error core.http.fetch has overloads, Jest/TypeScript only picks the first definition when mocking
-  core.http.fetch.mockImplementation(fetchMock);
   core.i18n.Context.mockImplementation(I18nProvider as () => JSX.Element);
 
   const coreProvidersPropsMock: CoreProvidersProps = {
@@ -38,7 +36,11 @@ export function createStartServicesAccessorMock(fetchMock: NodeMetricsTableFetch
   };
 }
 
-export function createMetricsClientMock() {
-  const core = coreMock.createStart();
-  return new MetricsDataClient(core.http);
+export function createMetricsClientMock(metricsExplorerData: any) {
+  return {
+    metricsIndices: jest
+      .fn()
+      .mockResolvedValue({ metricIndices: 'metrics-*', metricIndicesExist: true }),
+    metricsExplorer: jest.fn().mockResolvedValue(metricsExplorerData),
+  } as unknown as MetricsDataClient;
 }

@@ -21,7 +21,7 @@ export class MetricsDataClient {
   }
 
   async metricsIndices() {
-    return this.http.get<{ metricIndices: string; metricIndicesStatus: string }>(
+    return this.http.get<{ metricIndices: string; metricIndicesExist: boolean }>(
       '/api/metrics/indices'
     );
   }

@@ -8,6 +8,7 @@
 import { useContainerMetricsTable } from './use_container_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react-hooks';
+import { createMetricsClientMock } from '../test_helpers';
 
 jest.mock('../shared', () => ({
   ...jest.requireActual('../shared'),
@@ -36,6 +37,7 @@ describe('useContainerMetricsTable hook', () => {
       useContainerMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
         filterClauseDsl,
+        metricsClient: createMetricsClientMock(),
       })
     );
 
