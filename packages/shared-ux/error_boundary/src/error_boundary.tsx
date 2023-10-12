@@ -18,6 +18,7 @@ import { ErrorCallout, ErrorInline } from './toasts_service';
 interface ErrorBoundaryState {
   error: null | Error;
   errorInfo: null | Partial<React.ErrorInfo>;
+  messageAs: 'callout' | 'toast';
 }
 
 interface ErrorBoundaryProps {
@@ -41,13 +42,20 @@ class ErrorBoundaryInternal extends React.Component<
   ErrorBoundaryState
 > {
   constructor(props: ErrorBoundaryProps & ErrorBoundaryServices) {
-    super({ ...props, as: props.as === 'callout' ? props.as : 'toast' }); // set `as` to 'toast' if undefined
-    this.state = { error: null, errorInfo: null };
+    super(props);
+    this.state = {
+      error: null,
+      errorInfo: null,
+      messageAs: props.as === 'callout' ? props.as : 'toast',
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
     this.setState(() => {
-      this.props.toastsService.addError(error);
+      this.props.errorService.onError(error); // capture telemetry
+      if (this.state.messageAs === 'toast') {
+        this.props.toastsService.addError(error); // error *might* need to be shown in toast
+      }
       return { error, errorInfo };
     });
   }
@@ -55,11 +63,10 @@ class ErrorBoundaryInternal extends React.Component<
   render() {
     if (this.state.error != null) {
       const { error, errorInfo } = this.state;
-      this.props.errorService.onError(error); // capture telemetry
 
       const { errorComponentName } = this.props.errorService.getErrorComponentName(errorInfo);
 
-      if (this.props.as === 'callout') {
+      if (this.state.messageAs === 'callout') {
         // display error message in a "loud" container
         return (
           <ErrorCallout
