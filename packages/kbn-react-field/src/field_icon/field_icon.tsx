@@ -32,6 +32,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | '_source'
     | 'point'
     | 'shape'
+    | 'sparse_vector'
     | 'string'
     | string
     | 'nested'
@@ -69,6 +70,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
+  sparse_vector: { iconType: 'tokenDenseVector' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },

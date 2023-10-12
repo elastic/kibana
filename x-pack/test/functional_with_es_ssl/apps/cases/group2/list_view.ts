@@ -21,6 +21,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('cases list', () => {
     before(async () => {
@@ -573,6 +574,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAllToastsWithChecks();
+      });
+
       describe('Status', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
