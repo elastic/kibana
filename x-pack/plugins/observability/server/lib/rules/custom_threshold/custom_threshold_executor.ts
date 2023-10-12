@@ -127,6 +127,7 @@ export const createMetricThresholdExecutor = ({
       executionId,
       spaceId,
       rule: { id: ruleId },
+      getTimeRange,
     } = options;
 
     const { criteria } = params;
@@ -191,6 +192,8 @@ export const createMetricThresholdExecutor = ({
       throw new Error('The selected data view does not have a timestamp field');
     }
 
+    // Calculate initial start and end date with no time window, as each criteria has it's own time window
+    const { dateStart, dateEnd } = getTimeRange();
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -199,8 +202,8 @@ export const createMetricThresholdExecutor = ({
       compositeSize,
       alertOnGroupDisappear,
       logger,
+      { end: dateEnd, start: dateStart },
       state.lastRunTimestamp,
-      { end: startedAt.valueOf() },
       convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 
