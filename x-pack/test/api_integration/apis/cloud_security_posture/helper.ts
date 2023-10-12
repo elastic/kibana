@@ -47,7 +47,8 @@ export async function createPackagePolicy(
   policyTemplate: string,
   input: string,
   deployment: string,
-  posture: string
+  posture: string,
+  packageName: string = 'cloud_security_posture-1'
 ) {
   const version = '1.3.0';
   const title = 'Security Posture Management';
@@ -74,7 +75,7 @@ export async function createPackagePolicy(
     .set('kbn-xsrf', 'xxxx')
     .send({
       force: true,
-      name: 'cloud_security_posture-1',
+      name: packageName,
       description: '',
       namespace: 'default',
       policy_id: agentPolicyId,

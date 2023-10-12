@@ -39,12 +39,6 @@ import { DataSearchProgress } from '../../data_search_progress';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
 
-const LOGS_SYSTEM_MESSAGE = {
-  content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
-    concisely as possible.`,
-  role: MessageRole.System,
-};
-
 export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
   onCloseFlyout: () => void;
@@ -146,10 +140,6 @@ export const LogEntryFlyout = ({
     return [
       {
         '@timestamp': now,
-        message: LOGS_SYSTEM_MESSAGE,
-      },
-      {
-        '@timestamp': now,
         message: {
           role: MessageRole.User,
           content: `I'm looking at a log entry. Can you explain me what the log message means? Where it could be coming from, whether it is expected and whether it is an issue. Here's the context, serialized: ${JSON.stringify(
@@ -170,10 +160,6 @@ export const LogEntryFlyout = ({
     const message = logEntry.fields.find((field) => field.field === 'message')?.value[0];
 
     return [
-      {
-        '@timestamp': now,
-        message: LOGS_SYSTEM_MESSAGE,
-      },
       {
         '@timestamp': now,
         message: {
