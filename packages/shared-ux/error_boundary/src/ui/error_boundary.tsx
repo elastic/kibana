@@ -9,9 +9,9 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { ErrorBoundaryServices, Toasts } from '../types';
-import { useErrorBoundary } from './error_boundary_services';
-import { ErrorCallout, ErrorInline } from './toasts_service';
+import { ErrorBoundaryServices, Toasts } from '../../types';
+import { useErrorBoundary } from '../services/error_boundary_services';
+import { ErrorCallout, ErrorInline } from '../services/toasts_service';
 
 interface ErrorBoundaryState {
   error: null | Error;

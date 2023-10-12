@@ -7,8 +7,8 @@
  */
 
 import { EuiGlobalToastListProps } from '@elastic/eui';
-import { ErrorService } from './src/error_service';
-import { ToastsService } from './src/toasts_service';
+import { ErrorService } from './src/services/error_service';
+import { ToastsService } from './src/services/toasts_service';
 
 export interface ErrorBoundaryUIServices {
   reloadWindow: () => void;

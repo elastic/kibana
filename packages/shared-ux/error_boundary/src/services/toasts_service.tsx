@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ErrorBoundaryUIServices } from '../types';
+import { ErrorBoundaryUIServices } from '../../types';
 
 const DATA_TEST_SUBJ_PAGE_REFRESH_BUTTON = 'pageReloadButton';
 const DATA_TEST_SUBJ_PAGE_DETAILS_BUTTON = 'showDetailsButton';
