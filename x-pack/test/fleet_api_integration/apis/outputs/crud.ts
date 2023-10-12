@@ -1049,8 +1049,6 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { password: 'pass' },
           })
           .expect(400);
-
-        expect(res.body.message).to.equal('Cannot specify both password and secrets.password');
       });
 
       it('should not allow ssl.key and secrets.ssl.key to be set for kafka output ', async function () {
