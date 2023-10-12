@@ -139,7 +139,7 @@ describe('fleet metrics task', () => {
               namespace: 'default',
             },
             cluster: { id: 'cluster1' },
-            service: { id: '1', version: '8.99.0' },
+            agent: { id: '1', version: '8.99.0', type: 'kibana' },
             fleet: {
               agents: {
                 total: 10,
@@ -171,7 +171,7 @@ describe('fleet metrics task', () => {
               namespace: 'default',
             },
             cluster: { id: 'cluster1' },
-            service: { id: '1', version: '8.99.0' },
+            agent: { id: '1', version: '8.99.0', type: 'kibana' },
             fleet: {
               agent: {
                 version: '8.12.0',
@@ -193,7 +193,7 @@ describe('fleet metrics task', () => {
               namespace: 'default',
             },
             cluster: { id: 'cluster1' },
-            service: { id: '1', version: '8.99.0' },
+            agent: { id: '1', version: '8.99.0', type: 'kibana' },
             fleet: {
               agent: {
                 version: '8.11.0',

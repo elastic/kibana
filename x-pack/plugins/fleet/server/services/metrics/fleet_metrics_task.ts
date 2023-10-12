@@ -18,7 +18,7 @@ import { appContextService } from '../app_context';
 import type { AgentMetrics } from './fetch_agent_metrics';
 
 export const TYPE = 'Fleet-Metrics-Task';
-export const VERSION = '0.0.9';
+export const VERSION = '0.0.10';
 const TITLE = 'Fleet Metrics Task';
 const TIMEOUT = '1m';
 const SCOPE = ['fleet'];
@@ -89,9 +89,10 @@ export class FleetMetricsTask {
             type: 'metrics',
             namespace: 'default',
           },
-          service: {
+          agent: {
             id: appContextService.getKibanaInstanceId(),
             version: appContextService.getKibanaVersion(),
+            type: 'kibana',
           },
           cluster: {
             id: clusterInfo?.cluster_uuid ?? '',
