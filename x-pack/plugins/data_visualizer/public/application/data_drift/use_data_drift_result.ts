@@ -29,6 +29,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
+import type { AggregationsRangeBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 
@@ -362,6 +363,11 @@ const fetchReferenceBaselineData = async ({
     }
   }
 
+  console.log(`--@@Baseline request\n`, {
+    ...baselineRequest,
+    body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(baselineRequestAggs) },
+  });
+
   const baselineResponse = await dataSearch(
     {
       ...baselineRequest,
@@ -369,6 +375,8 @@ const fetchReferenceBaselineData = async ({
     },
     signal
   );
+
+  console.log(`--@@Baseline response\n`, baselineResponse);
 
   return baselineResponse;
 };
@@ -389,7 +397,15 @@ const fetchComparisonDriftedData = async ({
   baselineResponseAggs: object;
 }) => {
   const driftedRequest = { ...baseRequest };
+
   const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+
+  // Ssince aggregation is not able to split the values into distinct 5% intervals,
+  // this breaks our assumption of uniform distributed fractions in the`ks_test`.
+  // So, to fix this in the general case, we need to run an additional ranges agg to get the doc count for the ranges
+  // that we get from the percentiles aggregation
+  // and use it in the bucket_count_ks_test
+  const rangesRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
 
   for (const { field, type } of fields) {
     if (
@@ -410,19 +426,16 @@ const fetchComparisonDriftedData = async ({
           ranges.push({ from: percentiles[idx - 1], to: val });
         }
       });
-      // add range and bucket_count_ks_test to the request
-      driftedRequestAggs[`${field}_ranges`] = {
+      const rangeAggs = {
         range: {
           field,
           ranges,
         },
       };
-      driftedRequestAggs[`${field}_ks_test`] = {
-        bucket_count_ks_test: {
-          buckets_path: `${field}_ranges>_count`,
-          alternative: ['two_sided'],
-        },
-      };
+      // add range and bucket_count_ks_test to the request
+      rangesRequestAggs[`${field}_ranges`] = rangeAggs;
+      driftedRequestAggs[`${field}_ranges`] = rangeAggs;
+
       // add stats aggregation to the request
       driftedRequestAggs[`${field}_stats`] = {
         stats: {
@@ -441,6 +454,53 @@ const fetchComparisonDriftedData = async ({
     }
   }
 
+  console.log(`--@@Getting ranges\n`, {
+    ...driftedRequest,
+    body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
+  });
+  // Compute fractions based on results of ranges
+  const rangesResp = await dataSearch(
+    {
+      ...driftedRequest,
+      body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
+    },
+    signal
+  );
+
+  console.log(`--@@Ranges response\n`, rangesResp.aggregations);
+
+  for (const { field } of fields) {
+    if (rangesResp.aggregations[`${field}_ranges`]) {
+      const buckets = rangesResp.aggregations[`${field}_ranges`]
+        .buckets as AggregationsRangeBucketKeys[];
+
+      if (buckets) {
+        const totalSumOfAllBuckets = buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0);
+        const fractions = buckets.map((bucket) => ({
+          ...bucket,
+          fraction: bucket.doc_count / totalSumOfAllBuckets,
+        }));
+
+        console.log(
+          `--@@For field ${field}: fractions`,
+          fractions,
+          'totalSumOfAllBuckets',
+          totalSumOfAllBuckets
+        );
+
+        driftedRequestAggs[`${field}_ks_test`] = {
+          bucket_count_ks_test: {
+            buckets_path: `${field}_ranges>_count`,
+            alternative: ['two_sided'],
+            ...(totalSumOfAllBuckets > 0
+              ? { fractions: fractions.map((bucket) => Number(bucket.fraction.toFixed(3))) }
+              : {}),
+          },
+        };
+      }
+    }
+  }
+
   const driftedResp = await dataSearch(
     {
       ...driftedRequest,
@@ -448,6 +508,13 @@ const fetchComparisonDriftedData = async ({
     },
     signal
   );
+  console.log(`--@@Drifted request (with ks_test)\n`, {
+    ...driftedRequest,
+    body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(driftedRequestAggs) },
+  });
+
+  console.log(`--@@Drifted request (with ks_test) response\n`, driftedResp);
+
   return driftedResp;
 };
 
