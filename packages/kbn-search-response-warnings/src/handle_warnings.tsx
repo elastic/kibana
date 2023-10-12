@@ -12,7 +12,7 @@ import { estypes } from '@elastic/elasticsearch';
 import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
@@ -23,7 +23,7 @@ import { ViewWarningButton } from './components/view_warning_button';
 
 interface Services {
   i18n: I18nStart;
-  inspector: InspectorStartContract;
+  inspector: InspectorStart;
   notifications: NotificationsStart;
   theme: ThemeServiceStart;
 }
