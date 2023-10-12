@@ -7,17 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
-import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
+import { RulesSettingsProperties } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';
+import { updateQueryDelaySettings } from '../lib/rule_api/update_query_delay_settings';
 
-interface UseUpdateFlappingSettingsProps {
+interface UseUpdateRuleSettingsProps {
   onClose: () => void;
   onSave?: () => void;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
 }
 
-export const useUpdateFlappingSettings = (props: UseUpdateFlappingSettingsProps) => {
+export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
   const { onSave, onClose, setUpdatingRulesSettings } = props;
 
   const {
@@ -25,8 +26,17 @@ export const useUpdateFlappingSettings = (props: UseUpdateFlappingSettingsProps)
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = (flappingSettings: RulesSettingsFlappingProperties) => {
-    return updateFlappingSettings({ http, flappingSettings });
+  const mutationFn = async (settings: RulesSettingsProperties) => {
+    const updates = [];
+    if (settings.flapping) {
+      updates.push(updateFlappingSettings({ http, flappingSettings: settings.flapping }));
+    }
+
+    if (settings.queryDelay) {
+      updates.push(updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay }));
+    }
+
+    return await Promise.all(updates);
   };
 
   return useMutation({
