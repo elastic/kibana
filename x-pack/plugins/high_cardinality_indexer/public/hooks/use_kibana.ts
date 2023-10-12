@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-// import { CoreStart } from '@kbn/core/public';
-// import { useKibana } from '@kbn/kibana-react-plugin/public';
-// import { HighCardinalityIndexerPluginStartDependencies } from '../types';
-
-// export type StartServices<TAdditionalServices> = CoreStart & {
-//   plugins: { start: HighCardinalityIndexerPluginStartDependencies };
-// } & TAdditionalServices & {};
-// const useTypedKibana = <AdditionalServices extends object = {}>() =>
-//   useKibana<StartServices<AdditionalServices>>();
-
-// export { useTypedKibana as useKibana };
-
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HighCardinalityIndexerPluginStartDependencies } from '../types';

@@ -9,16 +9,19 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiPanel,
   EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { QueueObject } from 'async';
@@ -150,162 +153,174 @@ export function MainRoute() {
         ),
       }}
     >
-      <EuiText>
+      <EuiCallOut title="This is a development tool" iconType="gear" style={{ maxWidth: 800 }}>
         This app is used to index fake data into your cluster to aid testing of various use cases
-        <br />
         such as Alerting, Logs and Hosts.
-      </EuiText>
+      </EuiCallOut>
 
       <EuiSpacer size="xxl" />
 
-      {/* <EuiProgress value={} max={100} size="xs" /> */}
+      <EuiPanel style={{ maxWidth: 800 }} paddingSize="l">
+        <EuiTitle size="m">
+          <h2>Configure settings</h2>
+        </EuiTitle>
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiForm component="form">
-            <EuiFormRow label="Dataset">
-              <EuiSelect
-                hasNoInitialSelection
+        <EuiSpacer size="l" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiForm component="form">
+              <EuiFormRow label="Dataset">
+                <EuiSelect
+                  hasNoInitialSelection
+                  disabled={isLoading || serverIsIndexing}
+                  options={[
+                    { value: FAKE_HOSTS, text: FAKE_HOSTS },
+                    { value: FAKE_APM_LATENCY, text: FAKE_APM_LATENCY },
+                    { value: FAKE_EC2, text: FAKE_EC2 },
+                    { value: FAKE_K8S, text: FAKE_K8S },
+                    { value: FAKE_LOGS, text: FAKE_LOGS },
+                    { value: FAKE_STACK, text: FAKE_STACK },
+                  ]}
+                  value={formData.dataset}
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'dataset')}
+                />
+              </EuiFormRow>
+
+              <EuiSpacer size="m" />
+
+              <EuiSwitch
+                label="Install assets"
                 disabled={isLoading || serverIsIndexing}
-                options={[
-                  { value: FAKE_HOSTS, text: FAKE_HOSTS },
-                  { value: FAKE_APM_LATENCY, text: FAKE_APM_LATENCY },
-                  { value: FAKE_EC2, text: FAKE_EC2 },
-                  { value: FAKE_K8S, text: FAKE_K8S },
-                  { value: FAKE_LOGS, text: FAKE_LOGS },
-                  { value: FAKE_STACK, text: FAKE_STACK },
-                ]}
-                value={formData.dataset}
-                onChange={(e) => handleChangeFormField(e.currentTarget.value, 'dataset')}
+                checked={formData.installAssets}
+                onChange={(e) => handleChangeFormField(e.target.checked, 'installAssets')}
               />
-            </EuiFormRow>
+              <EuiSpacer size="xxl" />
 
-            <EuiSpacer size="m" />
+              <EuiFormRow label="Events per cycle">
+                <EuiFieldNumber
+                  name="eventsPerCycle"
+                  disabled={isLoading || serverIsIndexing}
+                  value={formData.eventsPerCycle}
+                  onChange={(e) =>
+                    handleChangeFormField(Number(e.currentTarget.value), 'eventsPerCycle')
+                  }
+                />
+              </EuiFormRow>
 
-            <EuiSwitch
-              label="Install assets"
-              disabled={isLoading || serverIsIndexing}
-              checked={formData.installAssets}
-              onChange={(e) => handleChangeFormField(e.target.checked, 'installAssets')}
-            />
-            <EuiSpacer size="xl" />
+              <EuiFormRow label="Payload size">
+                <EuiFieldNumber
+                  name="payloadSize"
+                  disabled={isLoading || serverIsIndexing}
+                  value={formData.payloadSize}
+                  onChange={(e) =>
+                    handleChangeFormField(Number(e.currentTarget.value), 'payloadSize')
+                  }
+                />
+              </EuiFormRow>
 
-            <EuiFormRow label="Events per cycle">
-              <EuiFieldNumber
-                name="eventsPerCycle"
-                disabled={isLoading || serverIsIndexing}
-                value={formData.eventsPerCycle}
-                onChange={(e) =>
-                  handleChangeFormField(Number(e.currentTarget.value), 'eventsPerCycle')
-                }
-              />
-            </EuiFormRow>
+              <EuiFormRow label="Concurrency">
+                <EuiFieldNumber
+                  name="concurrency"
+                  disabled={isLoading || serverIsIndexing}
+                  value={formData.concurrency}
+                  onChange={(e) =>
+                    handleChangeFormField(Number(e.currentTarget.value), 'concurrency')
+                  }
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiForm component="form">
+              <EuiFormRow label="Index interval">
+                <EuiFieldNumber
+                  name="interval"
+                  disabled={isLoading || serverIsIndexing}
+                  value={formData.interval}
+                  onChange={(e) => handleChangeFormField(Number(e.currentTarget.value), 'interval')}
+                />
+              </EuiFormRow>
 
-            <EuiFormRow label="Payload size">
-              <EuiFieldNumber
-                name="payloadSize"
-                disabled={isLoading || serverIsIndexing}
-                value={formData.payloadSize}
-                onChange={(e) =>
-                  handleChangeFormField(Number(e.currentTarget.value), 'payloadSize')
-                }
-              />
-            </EuiFormRow>
+              <EuiFormRow label="Reduce weekend traffic by">
+                <EuiFieldNumber
+                  name="reduceWeekendTrafficBy"
+                  value={formData.reduceWeekendTrafficBy}
+                  onChange={(e) =>
+                    handleChangeFormField(e.currentTarget.value, 'reduceWeekendTrafficBy')
+                  }
+                  disabled={isLoading || serverIsIndexing}
+                />
+              </EuiFormRow>
 
-            <EuiFormRow label="Concurrency">
-              <EuiFieldNumber
-                name="concurrency"
-                disabled={isLoading || serverIsIndexing}
-                value={formData.concurrency}
-                onChange={(e) =>
-                  handleChangeFormField(Number(e.currentTarget.value), 'concurrency')
-                }
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiForm component="form">
-            <EuiFormRow label="Index interval">
-              <EuiFieldNumber
-                name="interval"
-                disabled={isLoading || serverIsIndexing}
-                value={formData.interval}
-                onChange={(e) => handleChangeFormField(Number(e.currentTarget.value), 'interval')}
-              />
-            </EuiFormRow>
+              <EuiFormRow label="Schedule template">
+                <EuiSelect
+                  hasNoInitialSelection
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleTemplate')}
+                  options={[
+                    { value: 'good', text: 'good' },
+                    { value: 'bad', text: 'bad' },
+                  ]}
+                  value={formData.scheduleTemplate}
+                  disabled={isLoading || serverIsIndexing}
+                />
+              </EuiFormRow>
 
-            <EuiFormRow label="Reduce weekend traffic by">
-              <EuiFieldNumber
-                name="reduceWeekendTrafficBy"
-                value={formData.reduceWeekendTrafficBy}
-                onChange={(e) =>
-                  handleChangeFormField(e.currentTarget.value, 'reduceWeekendTrafficBy')
-                }
-                disabled={isLoading || serverIsIndexing}
-              />
-            </EuiFormRow>
+              <EuiFormRow label="Schedule start">
+                <EuiSelect
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleStart')}
+                  options={[
+                    { value: 'now', text: 'Now' },
+                    { value: '1m', text: '1 minute from now' },
+                    { value: '2m', text: '2 minutes from now' },
+                    { value: '5m', text: '5 minutes from now' },
+                    { value: '10m', text: '10 minutes from now' },
+                  ]}
+                  value={formData.scheduleStart}
+                  disabled={isLoading || serverIsIndexing}
+                />
+              </EuiFormRow>
 
-            <EuiFormRow label="Schedule template">
-              <EuiSelect
-                hasNoInitialSelection
-                onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleTemplate')}
-                options={[
-                  { value: 'good', text: 'good' },
-                  { value: 'bad', text: 'bad' },
-                ]}
-                value={formData.scheduleTemplate}
-                disabled={isLoading || serverIsIndexing}
-              />
-            </EuiFormRow>
+              <EuiFormRow label="Schedule end">
+                <EuiSelect
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleEnd')}
+                  options={[
+                    { value: 'false', text: 'Indefinitely' },
+                    { value: '1m', text: '1 minute from now' },
+                    { value: '2m', text: '2 minutes from now' },
+                    { value: '5m', text: '5 minutes from now' },
+                    { value: '10m', text: '10 minutes from now' },
+                  ]}
+                  value={formData.scheduleEnd}
+                  disabled={isLoading || serverIsIndexing}
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-            <EuiFormRow label="Schedule start">
-              <EuiSelect
-                onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleStart')}
-                options={[
-                  { value: 'now', text: 'Now' },
-                  { value: '1m', text: '1 minute from now' },
-                  { value: '2m', text: '2 minutes from now' },
-                  { value: '5m', text: '5 minutes from now' },
-                  { value: '10m', text: '10 minutes from now' },
-                ]}
-                value={formData.scheduleStart}
-                disabled={isLoading || serverIsIndexing}
-              />
-            </EuiFormRow>
+        <EuiSpacer size="m" />
 
-            <EuiFormRow label="Schedule end">
-              <EuiSelect
-                onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleEnd')}
-                options={[
-                  { value: 'false', text: 'Indefinitely' },
-                  { value: '1m', text: '1 minute from now' },
-                  { value: '2m', text: '2 minutes from now' },
-                  { value: '5m', text: '5 minutes from now' },
-                  { value: '10m', text: '10 minutes from now' },
-                ]}
-                value={formData.scheduleEnd}
-                disabled={isLoading || serverIsIndexing}
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiHorizontalRule />
 
-      <EuiSpacer size="xxl" />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButton fill isLoading={isLoading || serverIsIndexing} onClick={handleSubmitForm}>
-            {serverIsIndexing ? 'Indexing...' : 'Start indexing'}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton fill disabled={!serverIsIndexing} onClick={handleStopIndexing} color="danger">
-            Stop
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton fill isLoading={isLoading || serverIsIndexing} onClick={handleSubmitForm}>
+              {serverIsIndexing ? 'Indexing...' : 'Start indexing'}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              fill
+              disabled={!serverIsIndexing}
+              onClick={handleStopIndexing}
+              color="danger"
+            >
+              Stop
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
 
       <EuiSpacer size="l" />
     </ObservabilityPageTemplate>

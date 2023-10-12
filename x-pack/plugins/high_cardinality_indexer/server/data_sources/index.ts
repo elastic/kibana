@@ -22,7 +22,7 @@ import * as fakeEc2 from './fake_ec2';
 import * as fakeApmLatency from './fake_apm_latency';
 import * as fakeStack from './fake_stack';
 
-export const templates: Record<Dataset, object | object[]> = {
+export const templates: Record<Dataset, Record<string, any> | Array<Record<string, any>>> = {
   [FAKE_HOSTS]: [],
   [FAKE_LOGS]: [],
   [FAKE_EC2]: fakeEc2.template,

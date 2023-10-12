@@ -16,9 +16,10 @@ import { viewUsers } from './lib/events/view_user';
 import { deleteUser } from './lib/events/delete_user';
 import { createUser } from './lib/events/create_user';
 import { editUser } from './lib/events/edit_user';
-import { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
+import { EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
 import { qaDeployedToProduction } from './lib/events/qa_deployed_to_production';
 import { mongodbProxyTimeout } from './lib/events/mongodb_proxy_timeout';
+import type { Doc } from '../../../../common/types';
 
 const GOOD_EVENT_TEMPLATES: EventTemplate = [
   [mongodbProxyTimeout, 1],

@@ -24,12 +24,15 @@ function createEventsPerCycleFn(
   if (EventsPerCycleTransitionDefRT.is(eventsPerCycle) && isNumber(schedule.end)) {
     const startPoint = { x: schedule.start, y: eventsPerCycle.start };
     const endPoint = { x: schedule.end, y: eventsPerCycle.end };
+
     if (eventsPerCycle.method === 'exp') {
       return createExponentialFunction(startPoint, endPoint);
     }
+
     if (eventsPerCycle.method === 'sine') {
       return createSineFunction(startPoint, endPoint, eventsPerCycle.options?.period ?? 60);
     }
+
     return createLinearFunction(startPoint, endPoint);
   } else if (EventsPerCycleTransitionDefRT.is(eventsPerCycle) && schedule.end === false) {
     logger.warn('EventsPerCycle must be a number if the end value of schedule is false.');
@@ -69,7 +72,9 @@ export async function createEvents({
     currentTimestamp.minute() % schedule.delayEveryMinutes === 0
   ) {
     logger.info('Pausing queue');
+
     queue.pause();
+
     setTimeout(() => {
       logger.info('Resuming queue');
       queue.resume();
@@ -88,29 +93,34 @@ export async function createEvents({
           Math.round(totalEvents + totalEvents * schedule.randomness)
         )
       : totalEvents;
+
     if (config.indexing.reduceWeekendTrafficBy && isWeekendTraffic(currentTimestamp)) {
       logger.info(
         `Reducing traffic from ${epc} to ${epc * (1 - config.indexing.reduceWeekendTrafficBy)}`
       );
       epc = epc * (1 - config.indexing.reduceWeekendTrafficBy);
     }
+
     range(epc)
       .map((i) => {
         const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
+
         const eventTimestamp = moment(
           random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
         );
+
         return generateEvent(config, schedule, i, eventTimestamp);
       })
       .flat()
       .forEach((event) => queue.push(event));
+
     await queue.drain();
-    queueRegistry.stopQueues();
   } else {
     logger.info('Indexing 0 documents. Took: 0, latency: 0, indexed: 0');
   }
 
   const endTs = end === false ? moment() : end;
+
   if (currentTimestamp.isBefore(endTs)) {
     return createEvents({
       client,
@@ -123,8 +133,10 @@ export async function createEvents({
       queueRegistry,
     });
   }
+
   if (currentTimestamp.isSameOrAfter(endTs) && continueIndexing) {
     await wait(interval, logger);
+
     return createEvents({
       client,
       config,
@@ -136,5 +148,6 @@ export async function createEvents({
       queueRegistry,
     });
   }
+
   logger.info(`Indexing complete for ${schedule.template} events.`);
 }
