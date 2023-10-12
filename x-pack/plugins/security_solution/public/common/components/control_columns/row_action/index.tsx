@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { RightPanelKey } from '../../../../flyout/right';
 import type {
@@ -43,6 +44,8 @@ type Props = EuiDataGridCellValueElementProps & {
   setEventsDeleted: SetEventsDeleted;
   pageRowIndex: number;
   refetch?: () => void;
+  docs: DataTableRecord[];
+  setExpandedDoc: (doc: DataTableRecord | undefined) => void;
 };
 
 const RowActionComponent = ({
@@ -65,6 +68,8 @@ const RowActionComponent = ({
   setEventsDeleted,
   width,
   refetch,
+  docs,
+  setExpandedDoc,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
 
@@ -106,9 +111,13 @@ const RowActionComponent = ({
             id: eventId,
             indexName,
             scopeId: tableId,
+            rowIndex,
+            docs,
+            setExpandedDoc,
           },
         },
       });
+      setExpandedDoc(docs[rowIndex]);
     } else {
       dispatch(
         dataTableActions.toggleDetailPanel({
@@ -118,7 +127,18 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, isSecurityFlyoutEnabled, openFlyout, tabType, tableId]);
+  }, [
+    dispatch,
+    eventId,
+    indexName,
+    isSecurityFlyoutEnabled,
+    openFlyout,
+    tabType,
+    tableId,
+    rowIndex,
+    setExpandedDoc,
+    docs,
+  ]);
 
   const Action = controlColumn.rowCellRender;
 

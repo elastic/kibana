@@ -7,10 +7,11 @@
 
 import {
   dataTableActions,
-  DataTableComponent,
   defaultHeaders,
   getEventIdToDataMapping,
 } from '@kbn/securitysolution-data-table';
+import { DataView } from '@kbn/data-views-plugin/public';
+
 import type {
   SubsetDataTableModel,
   TableId,
@@ -23,16 +24,13 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type {
-  DeprecatedCellValueElementProps,
-  DeprecatedRowRenderer,
-  Direction,
-  EntityType,
-} from '@kbn/timelines-plugin/common';
+import type { Direction, EntityType, TimelineItem } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DataLoadingState } from '@kbn/unified-data-table';
+import { UnifiedDataTable } from '../unified_data_table';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
@@ -68,7 +66,7 @@ import {
   StyledEuiPanel,
 } from './styles';
 import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
-import { useTimelineEvents } from './use_timelines_events';
+import { useDataTableRows } from './use_data_table_rows';
 import { TableContext, EmptyTable, TableLoading } from './shared';
 import type { AlertWorkflowStatus } from '../../types';
 import { useQueryInspector } from '../page/manage_query';
@@ -77,12 +75,11 @@ import { checkBoxControlColumn, transformControlColumns } from '../control_colum
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
-import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 const storage = new Storage(localStorage);
-
+const REQUEST_SIZE = 50;
+const SAMPLE_SIZE = 1000;
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface EventsViewerProps {
@@ -151,7 +148,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       itemsPerPage,
       itemsPerPageOptions,
       sessionViewConfig,
-      showCheckboxes,
+      // showCheckboxes,
       sort,
       queryFields,
       selectAll,
@@ -162,10 +159,15 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
+  const showCheckboxes = false; // checkboxes are handled inside the unified data table
+
   const {
     uiSettings,
     data,
-    triggersActionsUi: { getFieldBrowser },
+    fieldFormats,
+    theme: themeService,
+    dataViewFieldEditor,
+    notifications: { toasts: toastNotifications },
   } = useKibana().services;
 
   const [tableView, setTableView] = useState<ViewSelection>(
@@ -181,28 +183,22 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     indexPattern,
     runtimeMappings,
     selectedPatterns,
-    dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
+    sourcererDataView,
   } = useSourcererDataView(sourcererScope);
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const dataView = useMemo(() => {
+    if (sourcererDataView != null) {
+      return new DataView({ spec: sourcererDataView, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [sourcererDataView, fieldFormats]);
 
   const { globalFullScreen } = useGlobalFullScreen();
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
-    dispatch(
-      dataTableActions.createDataTable({
-        columns,
-        dataViewId: selectedDataViewId,
-        defaultColumns,
-        id: tableId,
-        indexNames: indexNames ?? selectedPatterns,
-        itemsPerPage,
-        showCheckboxes,
-        sort,
-      })
-    );
     return () => {
       dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
       if (editorActionsRef.current) {
@@ -303,8 +299,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [sort]
   );
 
-  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
-    useTimelineEvents({
+  const [loading, { rows, loadMore, pageInfo, refetch, totalCount = 0, inspect }] =
+    useDataTableRows({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
       data,
@@ -315,7 +311,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       filterQuery,
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
-      limit: itemsPerPage,
+      limit: REQUEST_SIZE,
       runtimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
@@ -356,38 +352,20 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const showFullLoading = loading && !hasAlerts;
 
   const nonDeletedEvents = useMemo(
-    () => events.filter((e) => !deletedEventIds.includes(e._id)),
-    [deletedEventIds, events]
+    () => rows.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, rows]
   );
   useEffect(() => {
     setQuery({ id: tableId, inspect, loading, refetch });
   }, [inspect, loading, refetch, setQuery, tableId]);
 
-  // Clear checkbox selection when new events are fetched
-  useEffect(() => {
-    dispatch(dataTableActions.clearSelected({ id: tableId }));
-    dispatch(
-      dataTableActions.setDataTableSelectAll({
-        id: tableId,
-        selectAll: false,
-      })
-    );
-  }, [nonDeletedEvents, dispatch, tableId]);
-
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => {
+    (itemsChangedPerPage: number) => {
       dispatch(
         dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
       );
     },
     [tableId, dispatch]
-  );
-
-  const onChangePage = useCallback(
-    (page) => {
-      loadPage(page);
-    },
-    [loadPage]
   );
 
   const setEventsLoading = useCallback<SetEventsLoading>(
@@ -448,6 +426,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     }
   }, [isSelectAllChecked, onSelectPage, selectAll]);
 
+  const docs: DataTableRecord[] = useMemo(
+    () => timelineItemsToTableRecords(nonDeletedEvents),
+    [nonDeletedEvents]
+  );
+  const [expandedDoc, setExpanded] = useState<DataTableRecord | undefined>();
+  const setExpandedDoc = useCallback((doc?: DataTableRecord) => setExpanded(doc), [setExpanded]);
+
   const [transformedLeadingControlColumns] = useMemo(() => {
     return [
       showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
@@ -472,6 +457,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         setEventsLoading,
         setEventsDeleted,
         pageSize: itemsPerPage,
+        docs,
+        setExpandedDoc,
       })
     );
   }, [
@@ -493,6 +480,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     setEventsLoading,
     setEventsDeleted,
     itemsPerPage,
+    docs,
+    setExpandedDoc,
   ]);
 
   const alertBulkActions = useAlertBulkActions({
@@ -506,39 +495,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     bulkActions,
     selectedCount,
   });
-
-  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({
-    timelineID: tableId,
-    tabType: 'query',
-    enableHostDetailsFlyout: true,
-    enableIpDetailsFlyout: true,
-  });
-
-  const unitCountText = useMemo(
-    () => `${totalCountMinusDeleted.toLocaleString()} ${unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
-  );
-
-  const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
-    if (tableView === 'eventRenderedView') {
-      return {
-        defaultHeight: 'auto' as const,
-      };
-    }
-    return undefined;
-  }, [tableView]);
-
-  const pagination = useMemo(
-    () => ({
-      pageIndex: pageInfo.activePage,
-      pageSize: itemsPerPage,
-      pageSizeOptions: itemsPerPageOptions,
-      onChangeItemsPerPage,
-      onChangePage,
-    }),
-    [itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage, onChangePage, pageInfo.activePage]
-  );
 
   return (
     <>
@@ -573,41 +529,55 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                   />
 
                   {!hasAlerts && !loading && !graphOverlay && <EmptyTable />}
-                  {hasAlerts && (
+                  {hasAlerts && dataView && (
                     <FullWidthFlexGroupTable
                       $visible={!graphEventId && graphOverlay == null}
                       gutterSize="none"
                     >
                       <ScrollableFlexItem grow={1}>
-                        <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                          <DataTableComponent
-                            cellActionsTriggerId={cellActionsTriggerId}
-                            additionalControls={alertBulkActions}
-                            unitCountText={unitCountText}
-                            browserFields={browserFields}
-                            data={nonDeletedEvents}
-                            id={tableId}
-                            loadPage={loadPage}
-                            // TODO: migrate away from deprecated type
-                            renderCellValue={
-                              renderCellValue as (
-                                props: DeprecatedCellValueElementProps
-                              ) => React.ReactNode
-                            }
-                            // TODO: migrate away from deprecated type
-                            rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
-                            totalItems={totalCountMinusDeleted}
-                            bulkActions={bulkActions}
-                            fieldBrowserOptions={fieldBrowserOptions}
-                            hasCrudPermissions={hasCrudPermissions}
-                            leadingControlColumns={transformedLeadingControlColumns}
-                            pagination={pagination}
-                            isEventRenderedView={tableView === 'eventRenderedView'}
-                            rowHeightsOptions={rowHeightsOptions}
-                            getFieldBrowser={getFieldBrowser}
-                            getFieldSpec={getFieldSpec}
-                          />
-                        </StatefulEventContext.Provider>
+                        <UnifiedDataTable
+                          ariaLabelledBy="events-viewer"
+                          loadingState={
+                            loading ? DataLoadingState.loadingMore : DataLoadingState.loaded
+                          }
+                          cellActionsTriggerId={cellActionsTriggerId}
+                          externalAdditionalControls={alertBulkActions}
+                          dataView={dataView}
+                          columns={columns.map(({ id }) => id)}
+                          rows={docs}
+                          onFilter={() => {}}
+                          onSetColumns={() => {}}
+                          onFetchMoreRecords={loadMore}
+                          sampleSize={SAMPLE_SIZE}
+                          showTimeCol={false}
+                          sort={[]}
+                          useNewFieldsApi={false}
+                          onUpdateRowsPerPage={onChangeItemsPerPage}
+                          rowsPerPageState={itemsPerPage}
+                          rowsPerPageOptions={itemsPerPageOptions}
+                          // TODO: migrate away from deprecated type
+                          // renderCellValue={
+                          //   renderCellValue as (
+                          //     props: DeprecatedCellValueElementProps
+                          //   ) => React.ReactNode
+                          // }
+                          // TODO: migrate away from deprecated type
+                          // rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
+                          totalHits={totalCountMinusDeleted}
+                          externalControlColumns={transformedLeadingControlColumns}
+                          rowHeightState={2}
+                          services={{
+                            theme: themeService,
+                            fieldFormats,
+                            uiSettings,
+                            dataViewFieldEditor,
+                            toastNotifications,
+                            storage,
+                            data,
+                          }}
+                          setExpandedDoc={setExpandedDoc}
+                          expandedDoc={expandedDoc}
+                        />
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>
                   )}
@@ -634,3 +604,22 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer: React.FunctionComponent<EventsViewerProps> = connector(
   StatefulEventsViewerComponent
 );
+
+function timelineItemsToTableRecords(events: TimelineItem[]): DataTableRecord[] {
+  return events.map((event) => {
+    const dataRecord = event.data.reduce<Record<string, unknown>>((acc, { field, value }) => {
+      acc[field] = value;
+      return acc;
+    }, {});
+
+    return {
+      id: event._id,
+      raw: {
+        _id: event._id,
+        _index: event._index ?? '',
+        _source: dataRecord,
+      },
+      flattened: dataRecord,
+    };
+  });
+}

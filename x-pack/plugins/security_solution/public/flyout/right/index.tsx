@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { EventKind } from '../shared/constants/event_kinds';
 import { getField } from '../shared/utils';
 import { useRightPanelContext } from './context';
@@ -28,6 +29,9 @@ export interface RightPanelProps extends FlyoutPanelProps {
     id: string;
     indexName: string;
     scopeId: string;
+    rowIndex: number;
+    docs: DataTableRecord[];
+    setExpandedDoc: (doc: DataTableRecord | undefined) => void;
   };
 }
 
@@ -36,7 +40,8 @@ export interface RightPanelProps extends FlyoutPanelProps {
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
+  const { eventId, getFieldsData, indexName, scopeId, rowIndex, setExpandedDoc, docs } =
+    useRightPanelContext();
 
   // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
   const documentIsSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
@@ -58,6 +63,9 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
         id: eventId,
         indexName,
         scopeId,
+        rowIndex,
+        docs,
+        setExpandedDoc,
       },
     });
   };

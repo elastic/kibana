@@ -12,6 +12,7 @@ import React from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { addBuildingBlockStyle, getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   BrowserFields,
   TimelineItem,
@@ -49,6 +50,8 @@ export interface TransformColumnsProps {
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  docs: DataTableRecord[];
+  setExpandedDoc: (doc: DataTableRecord | undefined) => void;
 }
 
 export const transformControlColumns = ({
@@ -71,6 +74,8 @@ export const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
+  docs,
+  setExpandedDoc,
 }: TransformColumnsProps): EuiDataGridControlColumn[] => {
   return controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -142,6 +147,8 @@ export const transformControlColumns = ({
             width={width}
             setEventsLoading={setEventsLoading}
             setEventsDeleted={setEventsDeleted}
+            setExpandedDoc={setExpandedDoc}
+            docs={docs}
           />
         );
       },

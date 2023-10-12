@@ -6,9 +6,9 @@
  */
 
 import type { VFC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { NewChatById } from '@kbn/elastic-assistant';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPagination } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,7 +38,15 @@ export interface HeaderTitleProps {
  * Document details flyout right section header
  */
 export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) => {
-  const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+  const {
+    dataFormattedForFieldBrowser,
+    eventId,
+    indexName,
+    rowIndex,
+    setRowIndex,
+    setExpandedDoc,
+    docs,
+  } = useRightPanelContext();
   const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
@@ -47,6 +55,14 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
     _index: indexName,
     timestamp,
   });
+
+  const setPage = useCallback(
+    (pageIndex: number) => {
+      setRowIndex(pageIndex);
+      setExpandedDoc(docs[pageIndex]);
+    },
+    [setRowIndex, setExpandedDoc, docs]
+  );
 
   const showShareAlertButton = isAlert && alertDetailsLink;
 
@@ -115,6 +131,14 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
           <RiskScore />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {rowIndex !== -1 && (
+        <EuiPagination
+          pageCount={docs.length}
+          activePage={rowIndex}
+          onPageClick={setPage}
+          compressed
+        />
+      )}
     </>
   );
 });
