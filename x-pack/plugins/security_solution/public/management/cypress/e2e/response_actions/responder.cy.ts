@@ -30,7 +30,8 @@ describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverle
     closeResponderActionLogFlyout();
 
     // Global kibana nav bar should remain accessible
-    cy.getByTestSubj('toggleNavButton').should('be.visible');
+    // (the login user button seems to be common in both ESS and serverless)
+    cy.getByTestSubj('userMenuButton').should('be.visible');
 
     closeResponder();
   };

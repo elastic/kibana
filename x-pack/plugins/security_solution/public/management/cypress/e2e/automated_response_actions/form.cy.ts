@@ -21,7 +21,7 @@ import { login, ROLE } from '../../tasks/login';
 describe('Form', { tags: ['@ess', '@serverless'] }, () => {
   describe('User with no access can not create an endpoint response action', () => {
     before(() => {
-      login(ROLE.endpoint_policy_manager);
+      login(ROLE.rule_author);
     });
 
     it('no endpoint response action option during rule creation', () => {
@@ -36,7 +36,7 @@ describe('Form', { tags: ['@ess', '@serverless'] }, () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
     before(() => {
-      login(ROLE.soc_manager);
+      login(ROLE.t3_analyst);
     });
     after(() => {
       if (ruleId) {
@@ -96,7 +96,7 @@ describe('Form', { tags: ['@ess', '@serverless'] }, () => {
       });
     });
     beforeEach(() => {
-      login(ROLE.soc_manager);
+      login(ROLE.t3_analyst);
     });
     after(() => {
       cleanupRule(ruleId);
@@ -148,7 +148,7 @@ describe('Form', { tags: ['@ess', '@serverless'] }, () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
     before(() => {
-      login(ROLE.endpoint_policy_manager);
+      login(ROLE.rule_author);
     });
 
     it('response actions are disabled', () => {
@@ -168,7 +168,7 @@ describe('Form', { tags: ['@ess', '@serverless'] }, () => {
       loadRule().then((res) => {
         ruleId = res.id;
       });
-      login(ROLE.endpoint_policy_manager);
+      login(ROLE.rule_author);
     });
     after(() => {
       cleanupRule(ruleId);

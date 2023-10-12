@@ -16,7 +16,10 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe(
   'Policy List',
   {
-    tags: ['@ess', '@serverless'],
+    // Not supported in serverless!
+    // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+    // `internal/kibana/settings` is not accessible in serverless
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
