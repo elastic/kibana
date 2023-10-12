@@ -69,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'airline',
         legend: '19 categories',
         colorStats: [
-          { color: '#000000', percentage: 53 },
-          { color: '#54B399', percentage: 44 },
+          { color: '#000000', percentage: 49 },
+          { color: '#54B399', percentage: 50 },
         ],
       },
       {
@@ -87,8 +87,8 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'rt_airline_lower',
         legend: '19 categories',
         colorStats: [
-          { color: '#000000', percentage: 53 },
-          { color: '#54B399', percentage: 44 },
+          { color: '#000000', percentage: 49 },
+          { color: '#54B399', percentage: 50 },
         ],
       },
       {
