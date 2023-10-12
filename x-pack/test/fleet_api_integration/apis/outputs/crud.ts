@@ -1029,7 +1029,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should not allow password and secrets.password to be set for kafka output ', async function () {
-        const res = await supertest
+        await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
