@@ -27,9 +27,9 @@ export const modelAndDeploymentIdSchema = schema.object({
 
 export const threadingParamsSchema = schema.maybe(
   schema.object({
-    number_of_allocations: schema.number(),
-    threads_per_allocation: schema.number(),
-    priority: schema.oneOf([schema.literal('low'), schema.literal('normal')]),
+    number_of_allocations: schema.maybe(schema.number()),
+    threads_per_allocation: schema.maybe(schema.number()),
+    priority: schema.maybe(schema.oneOf([schema.literal('low'), schema.literal('normal')])),
     deployment_id: schema.maybe(schema.string()),
   })
 );

@@ -128,6 +128,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           fontSize="m"
           language={languageType || selectedLanguage.languageStyling || selectedLanguage.id}
           overflowHeight={500}
+          className="codeBoxCodeBlock"
         >
           {codeSnippet}
         </EuiCodeBlock>

@@ -26,7 +26,7 @@ import {
   TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -50,11 +50,7 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/ti
 import { TIMELINES_URL } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165661
-describe('Timeline Templates', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
