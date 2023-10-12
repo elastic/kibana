@@ -13,12 +13,14 @@ import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
+import { uniq } from 'lodash';
+
 import { appContextService } from '../app_context';
 
 import type { AgentMetrics } from './fetch_agent_metrics';
 
 export const TYPE = 'Fleet-Metrics-Task';
-export const VERSION = '0.0.10';
+export const VERSION = '0.0.12';
 const TITLE = 'Fleet Metrics Task';
 const TIMEOUT = '1m';
 const SCOPE = ['fleet'];
@@ -122,7 +124,12 @@ export class FleetMetricsTask {
       await this.esClient.index({
         index: 'metrics-fleet_server.agent_status-default',
         body: agentStatusDoc,
+        refresh: true,
       });
+
+      if (agentsPerVersion.length === 0) return;
+
+      const operations = [];
 
       for (const byVersion of agentsPerVersion) {
         const agentVersionsDoc = {
@@ -135,18 +142,30 @@ export class FleetMetricsTask {
             },
           },
         };
-        appContextService
-          .getLogger()
-          .trace('Agent versions metrics: ' + JSON.stringify(agentVersionsDoc));
-        await this.esClient.index({
-          index: 'metrics-fleet_server.agent_versions-default',
-          body: agentVersionsDoc,
-        });
+        operations.push(
+          {
+            create: {},
+          },
+          agentVersionsDoc
+        );
+      }
+
+      appContextService.getLogger().trace('Agent versions metrics: ' + JSON.stringify(operations));
+      const resp = await this.esClient.bulk({
+        operations,
+        refresh: true,
+        index: 'metrics-fleet_server.agent_versions-default',
+      });
+      if (resp.errors) {
+        const errors = uniq(
+          resp.items
+            .filter((item) => !!item.create?.error)
+            .map((item) => item.create?.error?.reason ?? '')
+        );
+        throw new Error(errors.join(', '));
       }
     } catch (error) {
-      appContextService
-        .getLogger()
-        .error('Error occurred while publishing Fleet metrics: ' + error);
+      appContextService.getLogger().warn('Error occurred while publishing Fleet metrics: ' + error);
     }
   };
 

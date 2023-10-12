@@ -126,9 +126,7 @@ describe('fleet metrics task', () => {
 
       await runTask();
 
-      expect(esClient.index).toHaveBeenCalledTimes(3);
-
-      expect(esClient.index.mock.calls[0][0]).toEqual(
+      expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           index: 'metrics-fleet_server.agent_status-default',
           body: expect.objectContaining({
@@ -160,49 +158,36 @@ describe('fleet metrics task', () => {
         })
       );
 
-      expect(esClient.index.mock.calls[1][0]).toEqual(
-        expect.objectContaining({
-          index: 'metrics-fleet_server.agent_versions-default',
-          body: expect.objectContaining({
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        index: 'metrics-fleet_server.agent_versions-default',
+        operations: [
+          { create: {} },
+          {
             '@timestamp': expect.any(String),
+            agent: { id: '1', type: 'kibana', version: '8.99.0' },
+            cluster: { id: 'cluster1' },
             data_stream: {
               dataset: 'fleet_server.agent_versions',
-              type: 'metrics',
               namespace: 'default',
+              type: 'metrics',
             },
-            cluster: { id: 'cluster1' },
-            agent: { id: '1', version: '8.99.0', type: 'kibana' },
-            fleet: {
-              agent: {
-                version: '8.12.0',
-                count: 3,
-              },
-            },
-          }),
-        })
-      );
-
-      expect(esClient.index.mock.calls[2][0]).toEqual(
-        expect.objectContaining({
-          index: 'metrics-fleet_server.agent_versions-default',
-          body: expect.objectContaining({
+            fleet: { agent: { count: 3, version: '8.12.0' } },
+          },
+          { create: {} },
+          {
             '@timestamp': expect.any(String),
+            agent: { id: '1', type: 'kibana', version: '8.99.0' },
+            cluster: { id: 'cluster1' },
             data_stream: {
               dataset: 'fleet_server.agent_versions',
-              type: 'metrics',
               namespace: 'default',
+              type: 'metrics',
             },
-            cluster: { id: 'cluster1' },
-            agent: { id: '1', version: '8.99.0', type: 'kibana' },
-            fleet: {
-              agent: {
-                version: '8.11.0',
-                count: 2,
-              },
-            },
-          }),
-        })
-      );
+            fleet: { agent: { count: 2, version: '8.11.0' } },
+          },
+        ],
+        refresh: true,
+      });
     });
   });
 });

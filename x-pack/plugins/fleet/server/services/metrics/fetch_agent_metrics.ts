@@ -14,6 +14,7 @@ import type { AgentPerVersion, AgentUsage } from '../../collectors/agent_collect
 import { getAgentUsage } from '../../collectors/agent_collectors';
 import { getInternalClients } from '../../collectors/helpers';
 import { appContextService } from '../app_context';
+import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 export interface AgentMetrics {
   agents: AgentUsage;
@@ -54,28 +55,30 @@ export const getAgentsPerVersion = async (
   abortController: AbortController
 ): Promise<AgentPerVersion[]> => {
   try {
-    const response = await esClient.search(
-      {
-        index: AGENTS_INDEX,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  active: 'true',
+    const response = await retryTransientEsErrors(() =>
+      esClient.search(
+        {
+          index: AGENTS_INDEX,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    active: 'true',
+                  },
                 },
-              },
-            ],
+              ],
+            },
+          },
+          size: 0,
+          aggs: {
+            versions: {
+              terms: { field: 'agent.version' },
+            },
           },
         },
-        size: 0,
-        aggs: {
-          versions: {
-            terms: { field: 'agent.version' },
-          },
-        },
-      },
-      { signal: abortController.signal }
+        { signal: abortController.signal }
+      )
     );
     return ((response?.aggregations?.versions as any).buckets ?? []).map((bucket: any) => ({
       version: bucket.key,
@@ -107,28 +110,30 @@ export const getUpgradingSteps = async (
     failed: 0,
   };
   try {
-    const response = await esClient.search(
-      {
-        index: AGENTS_INDEX,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  active: 'true',
+    const response = await retryTransientEsErrors(() =>
+      esClient.search(
+        {
+          index: AGENTS_INDEX,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    active: 'true',
+                  },
                 },
-              },
-            ],
+              ],
+            },
+          },
+          size: 0,
+          aggs: {
+            upgrade_details: {
+              terms: { field: 'upgrade_details.state' },
+            },
           },
         },
-        size: 0,
-        aggs: {
-          upgrade_details: {
-            terms: { field: 'upgrade_details.state' },
-          },
-        },
-      },
-      { signal: abortController.signal }
+        { signal: abortController.signal }
+      )
     );
     ((response?.aggregations?.upgrade_details as any).buckets ?? []).forEach((bucket: any) => {
       switch (bucket.key) {
