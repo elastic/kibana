@@ -14,7 +14,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/shared-ux-avatar-solution",
     "@kbn/shared-ux-card-no-data",
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/test-jest-helpers",
