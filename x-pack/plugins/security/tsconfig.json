@@ -62,6 +62,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-user-settings-server",
     "@kbn/remote-clusters-plugin",
+    "@kbn/analytics-client",
   ],
   "exclude": [
     "target/**/*",
