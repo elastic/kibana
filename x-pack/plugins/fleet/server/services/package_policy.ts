@@ -1861,16 +1861,23 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
   }
 }
 
-function getInputsWithStreamIds(
+// the option `allEnabled` is only used to generate inputs integration templates where everything is enabled by default
+// it shouldn't be used in the normal install flow
+export function getInputsWithStreamIds(
   packagePolicy: NewPackagePolicy,
-  packagePolicyId: string
+  packagePolicyId?: string,
+  allEnabled?: boolean
 ): PackagePolicy['inputs'] {
   return packagePolicy.inputs.map((input) => {
     return {
       ...input,
+      enabled: !!allEnabled ? true : input.enabled,
       streams: input.streams.map((stream) => ({
         ...stream,
-        id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}`,
+        enabled: !!allEnabled ? true : stream.enabled,
+        id: packagePolicyId
+          ? `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}`
+          : `${input.type}-${stream.data_stream.dataset}`,
       })),
     };
   });
