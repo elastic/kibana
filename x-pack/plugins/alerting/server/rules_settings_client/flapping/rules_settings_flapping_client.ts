@@ -174,7 +174,7 @@ export class RulesSettingsFlappingClient {
         this.logger.info('Creating new default flapping rules settings for current space.');
         return await this.createSettings();
       }
-      this.logger.error(`Failed to persist flapping rules setting for current space. Error: ${e}`);
+      this.logger.error(`Failed to get flapping rules setting for current space. Error: ${e}`);
       throw e;
     }
   }
