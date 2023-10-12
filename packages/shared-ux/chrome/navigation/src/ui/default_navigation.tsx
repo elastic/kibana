@@ -32,8 +32,6 @@ import type { ContentProvider } from './components/panel';
 // TODO: Following PR will clean up this import and the duplicate "serializeNavNode" here and below
 import { serializeNavNode } from './components/navigation_section_ui';
 
-let idCounter = 0;
-
 const isPresetDefinition = (
   item: RootNavigationItemDefinition | NodeDefinition
 ): item is PresetDefinition => {
@@ -198,13 +196,13 @@ const renderItems = (
   items: Array<RootNavigationItemDefinition | NodeDefinition> = [],
   path: string[] = []
 ) => {
-  return items.map((item) => {
+  return items.map((item, i) => {
     if (isPresetDefinition(item)) {
-      return <Navigation.Group preset={item.preset} key={item.preset} />;
+      return <Navigation.Group preset={item.preset} key={`${item.preset}-${i}`} />;
     }
 
     if (isRecentlyAccessedDefinition(item)) {
-      return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
+      return <RecentlyAccessed {...item} key={`recentlyAccessed-${i}`} />;
     }
 
     const { id = generateUniqueNodeId() } = item;
