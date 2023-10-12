@@ -200,9 +200,12 @@ const processTransformAssetsPerModule = (
       }
 
       // If there's already mappings set previously, append it to new
-      const previousMappings = packageAssets?.get('mappings') ?? {};
+      const previousMappings =
+        transformsSpecifications.get(transformModuleId)?.get('mappings') ?? {};
 
-      packageAssets?.set('mappings', { ...previousMappings, ...mappings });
+      transformsSpecifications.get(transformModuleId)?.set('mappings', {
+        properties: { ...previousMappings.properties, ...mappings.properties },
+      });
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
