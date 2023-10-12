@@ -15,4 +15,4 @@ export const plugin: PluginInitializer<MetricsDataPluginSetup, MetricsDataPlugin
   return new Plugin(context);
 };
 
-export type { MetricsDataPluginSetup };
+export type { MetricsDataPluginSetup, MetricsDataPluginStart };
