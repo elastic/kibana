@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type { HttpFetchOptions } from '@kbn/core/public';
 import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { MetricsExplorerSeries } from '../../../../common/http_api';
-import type {
-  DataResponseMock,
-  NodeMetricsTableFetchMock,
-  SourceResponseMock,
-} from '../test_helpers';
-import { createStartServicesAccessorMock } from '../test_helpers';
+import { createStartServicesAccessorMock, createMetricsClientMock } from '../test_helpers';
 import { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
 import { PodMetricsTable } from './pod_metrics_table';
@@ -50,25 +44,44 @@ describe('PodMetricsTable', () => {
     },
   };
 
-  const fetchMock = createFetchMock();
+  const mockData = {
+    series: [
+      createPod('358d96e3-026f-4440-a487-f6c2301884c0', 'some-pod', 76, 3671700000),
+      createPod('358d96e3-026f-4440-a487-f6c2301884c1', 'some-other-pod', 67, 716300000),
+    ],
+  };
+  const getMetricsClient = () => createMetricsClientMock(mockData);
 
   const loadingIndicatorTestId = 'metricsTableLoadingContent';
 
   describe('createLazyPodMetricsTable', () => {
     it('should lazily load and render the table', async () => {
-      const { fetch, getStartServices } = createStartServicesAccessorMock(fetchMock);
-      const LazyPodMetricsTable = createLazyPodMetricsTable(getStartServices);
+      const { getStartServices } = createStartServicesAccessorMock();
+      const metricsClient = getMetricsClient();
+      const LazyPodMetricsTable = createLazyPodMetricsTable(getStartServices()[0], metricsClient);
 
-      render(<LazyPodMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(
+        <LazyPodMetricsTable
+          timerange={timerange}
+          filterClauseDsl={filterClauseDsl}
+          metricsClient={metricsClient}
+        />
+      );
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).not.toBeInTheDocument();
 
       // Using longer time out since resolving dynamic import can be slow
       // https://github.com/facebook/jest/issues/10933
-      await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2), {
-        timeout: 10000,
-      });
+      await waitFor(
+        () => {
+          expect(metricsClient.metricsIndices).toHaveBeenCalledTimes(1);
+          expect(metricsClient.metricsExplorer).toHaveBeenCalledTimes(1);
+        },
+        {
+          timeout: 10000,
+        }
+      );
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).toBeInTheDocument();
@@ -77,25 +90,30 @@ describe('PodMetricsTable', () => {
 
   describe('IntegratedPodMetricsTable', () => {
     it('should render a single row of data', async () => {
-      const { coreProvidersPropsMock, fetch } = createStartServicesAccessorMock(fetchMock);
+      const { coreProvidersPropsMock } = createStartServicesAccessorMock();
+      const metricsClient = getMetricsClient();
 
       const { findByText } = render(
         <IntegratedPodMetricsTable
           timerange={timerange}
           filterClauseDsl={filterClauseDsl}
           sourceId="default"
+          metricsClient={metricsClient}
           {...coreProvidersPropsMock}
         />
       );
 
-      await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+      await waitFor(() => {
+        expect(metricsClient.metricsIndices).toHaveBeenCalledTimes(1);
+        expect(metricsClient.metricsExplorer).toHaveBeenCalledTimes(1);
+      });
 
       expect(await findByText(/some-pod/)).toBeInTheDocument();
     });
   });
 
   it('should render a loading indicator on first load', () => {
-    const { coreProvidersPropsMock } = createStartServicesAccessorMock(jest.fn());
+    const { coreProvidersPropsMock } = createStartServicesAccessorMock();
 
     const { queryByTestId } = render(
       <CoreProviders {...coreProvidersPropsMock}>
@@ -114,7 +132,7 @@ describe('PodMetricsTable', () => {
   });
 
   it('should render a prompt when indices are missing', () => {
-    const { coreProvidersPropsMock } = createStartServicesAccessorMock(jest.fn());
+    const { coreProvidersPropsMock } = createStartServicesAccessorMock();
 
     const { queryByTestId } = render(
       <CoreProviders {...coreProvidersPropsMock}>
@@ -132,37 +150,6 @@ describe('PodMetricsTable', () => {
     expect(queryByTestId('metricsTableLoadingContent')).toBeInTheDocument();
   });
 });
-
-function createFetchMock(): NodeMetricsTableFetchMock {
-  const sourceMock: SourceResponseMock = {
-    source: {
-      configuration: {
-        metricAlias: 'some-index-pattern',
-      },
-      status: {
-        metricIndicesExist: true,
-      },
-    },
-  };
-
-  const mockData: DataResponseMock = {
-    series: [
-      createPod('358d96e3-026f-4440-a487-f6c2301884c0', 'some-pod', 76, 3671700000),
-      createPod('358d96e3-026f-4440-a487-f6c2301884c1', 'some-other-pod', 67, 716300000),
-    ],
-  };
-
-  return (path: string, _options: HttpFetchOptions) => {
-    // options can be used to read body for filter clause
-    if (path === '/api/metrics/source/default') {
-      return Promise.resolve(sourceMock);
-    } else if (path === '/api/infra/metrics_explorer') {
-      return Promise.resolve(mockData);
-    }
-
-    throw new Error('Unexpected URL called in test');
-  };
-}
 
 function createPod(
   id: string,
