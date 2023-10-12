@@ -45,7 +45,7 @@ export function handleWarnings({
   requestAdapter: RequestAdapter;
   requestId?: string;
   response: estypes.SearchResponse;
-  services: Services
+  services: Services;
 }) {
   const warnings = extractWarnings(response, services.inspector, requestAdapter, requestId);
   if (warnings.length === 0) {

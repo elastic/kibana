@@ -247,7 +247,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       inspector,
       notifications,
       theme,
-    }
+    };
 
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,
