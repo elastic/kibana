@@ -230,7 +230,7 @@ describe('SyntheticsService', () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getOutput').mockRestore();
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO(null) as any;
+      serverMock.encryptedSavedObjects = mockEncryptedSO();
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -247,11 +247,13 @@ describe('SyntheticsService', () => {
       const { service, locations } = getMockedService();
       jest.spyOn(service, 'getOutput').mockRestore();
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO([
-        {
-          attributes: getFakePayload([locations[0]]),
-        },
-      ]) as any;
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        monitors: [
+          {
+            attributes: getFakePayload([locations[0]]),
+          },
+        ],
+      });
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -318,11 +320,13 @@ describe('SyntheticsService', () => {
     it('includes the license level flag on push configs requests', async () => {
       const { service, locations } = getMockedService();
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO([
-        {
-          attributes: getFakePayload([locations[0]]),
-        },
-      ]);
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        monitors: [
+          {
+            attributes: getFakePayload([locations[0]]),
+          },
+        ],
+      });
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -369,8 +373,10 @@ describe('SyntheticsService', () => {
           });
 
         serverMock.encryptedSavedObjects = mockEncryptedSO({
-          attributes: getFakePayload([locations[0]]),
-        }) as any;
+          monitors: {
+            attributes: getFakePayload([locations[0]]),
+          },
+        });
 
         (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -386,12 +392,14 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO([
-        {
-          attributes: { key: 'username', value: 'elastic' },
-          namespaces: ['*'],
-        },
-      ]);
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['*'],
+          },
+        ],
+      });
 
       const params = await service.getSyntheticsParams();
 
@@ -406,12 +414,14 @@ describe('SyntheticsService', () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getSyntheticsParams').mockReset();
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO([
-        {
-          attributes: { key: 'username', value: 'elastic' },
-          namespaces: ['*'],
-        },
-      ]);
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['*'],
+          },
+        ],
+      });
 
       const params = await service.getSyntheticsParams({ spaceId: 'default' });
 
@@ -428,12 +438,14 @@ describe('SyntheticsService', () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getSyntheticsParams').mockReset();
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO([
-        {
-          attributes: { key: 'username', value: 'elastic' },
-          namespaces: ['default'],
-        },
-      ]);
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['default'],
+          },
+        ],
+      });
 
       const params = await service.getSyntheticsParams({ spaceId: 'default' });
 
@@ -484,7 +496,7 @@ describe('SyntheticsService', () => {
         };
       });
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO(data);
+      serverMock.encryptedSavedObjects = mockEncryptedSO({ monitors: data });
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
