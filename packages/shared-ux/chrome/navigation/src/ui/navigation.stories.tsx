@@ -234,6 +234,35 @@ const navigationDefinition: ProjectNavigationDefinition = {
             title: 'Some other node',
           },
           {
+            id: 'group:settings-2',
+            title: 'Settings as nav Item',
+            renderAs: 'item',
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals - should NOT appear',
+                sideNavStatus: 'hidden', // Should not appear
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'Tracing',
+              },
+              {
+                id: 'seb.nestedGroup',
+                title: 'Nested group',
+                children: [],
+              },
+            ],
+          },
+          {
             id: 'group:settings',
             title: 'Settings',
             children: [
