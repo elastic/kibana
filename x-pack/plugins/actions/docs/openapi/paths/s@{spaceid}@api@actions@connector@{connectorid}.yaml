@@ -83,33 +83,7 @@ post:
     content:
       application/json:
         schema:
-          title: Create connector request body properties
-          description: The properties vary depending on the connector type.
-          oneOf:
-            - $ref: '../components/schemas/create_connector_request_bedrock.yaml'
-            - $ref: '../components/schemas/create_connector_request_cases_webhook.yaml'
-            - $ref: '../components/schemas/create_connector_request_d3security.yaml'
-            - $ref: '../components/schemas/create_connector_request_email.yaml'
-            - $ref: '../components/schemas/create_connector_request_genai.yaml'
-            - $ref: '../components/schemas/create_connector_request_index.yaml'
-            - $ref: '../components/schemas/create_connector_request_jira.yaml'
-            - $ref: '../components/schemas/create_connector_request_opsgenie.yaml'
-            - $ref: '../components/schemas/create_connector_request_pagerduty.yaml'
-            - $ref: '../components/schemas/create_connector_request_resilient.yaml'
-            - $ref: '../components/schemas/create_connector_request_serverlog.yaml'
-            - $ref: '../components/schemas/create_connector_request_servicenow.yaml'
-            - $ref: '../components/schemas/create_connector_request_servicenow_itom.yaml'
-            - $ref: '../components/schemas/create_connector_request_servicenow_sir.yaml'
-            - $ref: '../components/schemas/create_connector_request_slack_api.yaml'
-            - $ref: '../components/schemas/create_connector_request_slack_webhook.yaml'
-            - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
-            - $ref: '../components/schemas/create_connector_request_teams.yaml'
-            - $ref: '../components/schemas/create_connector_request_tines.yaml'
-            - $ref: '../components/schemas/create_connector_request_torq.yaml'
-            - $ref: '../components/schemas/create_connector_request_webhook.yaml'
-            - $ref: '../components/schemas/create_connector_request_xmatters.yaml'
-          discriminator:
-            propertyName: connector_type_id
+          $ref: '../components/schemas/create_connector_request.yaml'
         examples:
           createIndexConnectorRequest:
             $ref: '../components/examples/create_index_connector_request.yaml'
@@ -144,30 +118,7 @@ put:
     content:
       application/json:
         schema:
-          title: Update connector request body properties
-          description: The properties vary depending on the connector type.
-          oneOf:
-            - $ref: '../components/schemas/create_connector_request_bedrock.yaml'
-            - $ref: '../components/schemas/update_connector_request_cases_webhook.yaml'
-            - $ref: '../components/schemas/update_connector_request_d3security.yaml'
-            - $ref: '../components/schemas/update_connector_request_email.yaml'
-            - $ref: '../components/schemas/create_connector_request_genai.yaml'
-            - $ref: '../components/schemas/update_connector_request_index.yaml'  
-            - $ref: '../components/schemas/update_connector_request_jira.yaml'
-            - $ref: '../components/schemas/update_connector_request_opsgenie.yaml'
-            - $ref: '../components/schemas/update_connector_request_pagerduty.yaml' 
-            - $ref: '../components/schemas/update_connector_request_resilient.yaml'
-            - $ref: '../components/schemas/update_connector_request_serverlog.yaml'
-            - $ref: '../components/schemas/update_connector_request_servicenow.yaml'
-            - $ref: '../components/schemas/update_connector_request_servicenow_itom.yaml'
-            - $ref: '../components/schemas/update_connector_request_slack_api.yaml'
-            - $ref: '../components/schemas/update_connector_request_slack_webhook.yaml'
-            - $ref: '../components/schemas/update_connector_request_swimlane.yaml' 
-            - $ref: '../components/schemas/update_connector_request_teams.yaml'
-            - $ref: '../components/schemas/update_connector_request_tines.yaml'
-            - $ref: '../components/schemas/update_connector_request_torq.yaml'
-            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
-            - $ref: '../components/schemas/update_connector_request_xmatters.yaml'
+          $ref: '../components/schemas/update_connector_request.yaml'
         examples:
           updateIndexConnectorRequest:
             $ref: '../components/examples/update_index_connector_request.yaml'
@@ -179,21 +130,7 @@ put:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
     '400':
-      description: Indicates a bad request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              error: 
-                type: string
-                example: Bad Request
-              message:
-                type: string
-                example: "error validating action type config: [index]: expected value of type [string] but got [undefined]"
-              statusCode:
-                type: integer
-                example: 400
+      $ref: '../components/responses/401.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
     '404':

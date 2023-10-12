@@ -1,6 +1,7 @@
 title: Create connector request body properties
 description: The properties vary depending on the connector type.
 oneOf:
+  - $ref: 'create_connector_request_bedrock.yaml'
   - $ref: 'create_connector_request_cases_webhook.yaml'
   - $ref: 'create_connector_request_d3security.yaml'
   - $ref: 'create_connector_request_email.yaml'
