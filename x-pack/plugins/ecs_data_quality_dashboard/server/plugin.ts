@@ -30,7 +30,7 @@ export class EcsDataQualityDashboardPlugin
 
     // Register server side APIs
     getIndexMappingsRoute(router);
-    getIndexStatsRoute(router);
+    getIndexStatsRoute(router, this.logger);
     getUnallowedFieldValuesRoute(router);
     getILMExplainRoute(router);
     return {};
