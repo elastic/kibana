@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SetupRouteOptions } from '../types';
 import { MetricIndicesAPIResponse } from '../../../common/http_api/metric_indices';
 
@@ -26,7 +27,7 @@ function getIndexStatus(client: ElasticsearchClient, index: string) {
           return 'missing';
         }
 
-        if (response.hits?.total?.value > 0) {
+        if ((response.hits.total as SearchTotalHits).value > 0) {
           return 'available';
         }
 
