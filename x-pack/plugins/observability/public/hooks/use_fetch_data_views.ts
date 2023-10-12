@@ -21,7 +21,7 @@ interface Params {
   size?: number;
 }
 
-export function useFetchDataViews({ name = '', size = 20 }: Params): UseFetchDataViewsResponse {
+export function useFetchDataViews({ name = '', size = 5 }: Params): UseFetchDataViewsResponse {
   const { dataViews } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
@@ -30,6 +30,9 @@ export function useFetchDataViews({ name = '', size = 20 }: Params): UseFetchDat
     queryFn: async () => {
       return dataViews.find(search, size);
     },
+    retry: false,
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 
   return { isLoading, isError, isSuccess, data };

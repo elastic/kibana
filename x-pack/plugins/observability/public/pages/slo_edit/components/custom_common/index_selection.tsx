@@ -41,7 +41,7 @@ export function IndexSelection() {
   }, [isDataViewsLoading, dataViews]);
 
   useEffect(() => {
-    if (!!searchValue) {
+    if (!!searchValue && !isIndicesLoading) {
       const searchPattern = searchValue.endsWith('*') ? searchValue : `${searchValue}*`;
       const hasMatchingIndices = indices.length > 0;
 
@@ -69,17 +69,16 @@ export function IndexSelection() {
           },
         ],
       });
-    } else {
+    } else if (!searchValue) {
       setIndexPatternOption(undefined);
     }
-  }, [indices, searchValue]);
+  }, [indices, isIndicesLoading, searchValue]);
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
 
-  const placeholder = i18n.translate(
-    'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
-    { defaultMessage: 'Select a Data View or use an index pattern' }
-  );
+  const placeholder = i18n.translate('xpack.observability.slo.sloEdit.indexSelection.placeholder', {
+    defaultMessage: 'Select an index pattern',
+  });
 
   return (
     <EuiFormRow
