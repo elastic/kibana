@@ -12,6 +12,8 @@ export { DefaultNavigation, getPresets, Navigation } from './src/ui';
 
 export type {
   GroupDefinition,
+  PresetDefinition,
+  ItemDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
   ProjectNavigationDefinition,

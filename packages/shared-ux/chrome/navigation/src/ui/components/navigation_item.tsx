@@ -53,18 +53,25 @@ function NavigationItemComp<
     navNodeRef.current = navNode;
   }, [navNode]);
 
-  if (!navNode || !unstyled) {
+  if (!navNode) {
     return null;
   }
 
-  if (children) {
-    if (typeof children === 'function') {
-      return children(navNode);
+  if (unstyled) {
+    if (children) {
+      if (typeof children === 'function') {
+        return children(navNode);
+      }
+      return <>{children}</>;
     }
-    return <>{children}</>;
+
+    return <Fragment>{navNode.title}</Fragment>;
   }
 
-  return <Fragment>{navNode.title}</Fragment>;
+  // We don't render anything in the UI for this component. It is only used to **register** the node
+  // in the useEffect() above that will in turn update the parent "childrenNodes" state which is
+  // then used as "items" for the EuiCollapsibleNavItem component.
+  return null;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;

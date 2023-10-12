@@ -9,12 +9,13 @@
 import React, { FC, useEffect, useState } from 'react';
 
 import {
+  EuiAccordionProps,
   EuiCollapsibleNavItem,
   EuiCollapsibleNavItemProps,
   EuiCollapsibleNavSubItemProps,
   EuiTitle,
 } from '@elastic/eui';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode, NodeRenderAs } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
@@ -22,6 +23,86 @@ import { nodePathToString, isAbsoluteLink } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
+const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
+  Boolean(navNode.deepLink) || Boolean(navNode.href);
+
+const nodeHasChildren = (navNode: ChromeProjectNavigationNode) =>
+  navNode.children ? Boolean(navNode.children.length) : false;
+
+const getRenderAs = (navNode: ChromeProjectNavigationNode): NodeRenderAs | undefined => {
+  if (navNode.renderAs) return navNode.renderAs;
+
+  if (nodeHasLink(navNode) && !nodeHasChildren(navNode)) return 'item';
+
+  return undefined;
+};
+
+/**
+ * Predicate to determine if a node should be visible in the main side nav.
+ * If it is not visible it will be filtered out and not rendered.
+ */
+const itemIsVisible = (item: ChromeProjectNavigationNode) => {
+  if (item.sideNavStatus === 'hidden') return false;
+
+  const isGroupTitle = Boolean(item.isGroupTitle);
+  if (isGroupTitle) {
+    return true;
+  }
+
+  const hasLink = Boolean(item.deepLink) || Boolean(item.href);
+  if (hasLink) {
+    return true;
+  }
+
+  const hasChildren = Boolean(item.children?.length);
+  if (item.renderAs === 'item' && hasChildren) {
+    return true;
+  }
+
+  if (hasChildren) {
+    return item.children!.some(itemIsVisible);
+  }
+
+  return false;
+};
+
+const filterChildren = (
+  _children?: ChromeProjectNavigationNode[]
+): ChromeProjectNavigationNode[] | undefined => {
+  if (!_children) return undefined;
+
+  const filtered = _children.filter(itemIsVisible).map((child) => {
+    if (child.children) {
+      return {
+        ...child,
+        children: filterChildren(child.children),
+      };
+    }
+    return child;
+  });
+
+  return filtered.length === 0 ? undefined : filtered;
+};
+
+export const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
+  const serialized = {
+    ...navNode,
+    children: filterChildren(navNode.children),
+    href: navNode.deepLink?.url ?? navNode.href!,
+  };
+
+  serialized.renderAs = getRenderAs(serialized);
+
+  return {
+    navNode: serialized,
+    hasChildren: nodeHasChildren(serialized),
+    hasLink: nodeHasLink(serialized),
+    isItem: serialized.renderAs === 'item',
+  };
+};
+
+// TODO: There is quite a bit of duplicate logic in this function and what is inside the
+// NavigationSectionUI component. In following PR I will clean all this up.
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNode,
   {
@@ -84,7 +165,17 @@ const navigationNodeToEuiItem = (
     }
   };
 
-  const filteredChildren = item.children?.filter((child) => child.sideNavStatus !== 'hidden');
+  const items =
+    renderAs === 'item'
+      ? undefined
+      : item.children?.map((_item) =>
+          navigationNodeToEuiItem(_item, {
+            navigateToUrl,
+            openPanel,
+            closePanel,
+            isSideNavCollapsed,
+          })
+        );
 
   return {
     id,
@@ -97,14 +188,7 @@ const navigationNodeToEuiItem = (
     linkProps: { external: isExternal },
     onClick,
     href,
-    items: filteredChildren?.map((_item) =>
-      navigationNodeToEuiItem(_item, {
-        navigateToUrl,
-        openPanel,
-        closePanel,
-        isSideNavCollapsed,
-      })
-    ),
+    items,
     ['data-test-subj']: dataTestSubj,
     icon: item.icon,
     iconProps: { size: 's' },
@@ -113,11 +197,11 @@ const navigationNodeToEuiItem = (
 
 interface Props {
   navNode: ChromeProjectNavigationNode;
-  items?: ChromeProjectNavigationNode[];
 }
 
-export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
-  const { id, title, icon, isActive } = navNode;
+export const NavigationSectionUI: FC<Props> = ({ navNode: _navNode }) => {
+  const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
+  const { id, title, icon, isActive, href, renderAs } = navNode;
   const { navigateToUrl, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(!isActive);
@@ -125,82 +209,41 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   // but once the user manually expand a group we don't want to close it afterward automatically.
   const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
-  // If the item has no link and no children, we don't want to render it
-  const itemIsVisible = (item: ChromeProjectNavigationNode) => {
-    if (item.sideNavStatus === 'hidden') return false;
-
-    const isGroupTitle = Boolean(item.isGroupTitle);
-    if (isGroupTitle) {
-      return true;
-    }
-
-    const hasLink = Boolean(item.deepLink) || Boolean(item.href);
-    if (hasLink) {
-      return true;
-    }
-
-    const hasChildren = Boolean(item.children?.length);
-    if (item.renderAs === 'item' && hasChildren) {
-      return true;
-    }
-
-    if (hasChildren) {
-      return item.children!.some(itemIsVisible);
-    }
-
-    return false;
-  };
-
-  const filterItems = (_items: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode[] => {
-    return _items.filter(itemIsVisible).map((_item) => {
-      if (_item.children) {
-        return {
-          ..._item,
-          children: filterItems(_item.children),
-        };
-      }
-      return _item;
-    });
-  };
-
-  const filteredItems = filterItems(items);
-
-  const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
-  const groupIsVisible = filteredItems.length > 0;
-  // Group with a link and no children will be rendered as a link and not an EUI accordion
-  const groupHref = navNode.deepLink?.url ?? navNode.href!;
-
   useEffect(() => {
     if (doCollapseFromActiveState) {
       setIsCollapsed(!isActive);
     }
   }, [isActive, doCollapseFromActiveState]);
 
-  if (!groupHasLink && !groupIsVisible) {
+  if (!hasLink && !hasChildren) {
     return null;
   }
 
-  const propsForGroupAsItem: Partial<EuiCollapsibleNavItemProps> =
-    navNode.renderAs === 'item'
-      ? {
-          linkProps: {
-            href: groupHref,
-            onClick: (e: React.MouseEvent) => {
-              e.preventDefault();
-              e.stopPropagation();
-              navigateToUrl(groupHref);
-            },
-          },
-        }
-      : {};
+  const items = navNode.children?.map((item) =>
+    navigationNodeToEuiItem(item, {
+      navigateToUrl,
+      isSideNavCollapsed,
+      openPanel,
+      closePanel,
+    })
+  );
 
-  return (
-    <EuiCollapsibleNavItem
-      id={id}
-      title={title}
-      icon={icon}
-      iconProps={{ size: 'm' }}
-      accordionProps={{
+  const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
+    ? {
+        href,
+        onClick: (e: React.MouseEvent) => {
+          // TODO: here we might want to toggle the accordion, _IF_ we render as accordion
+          // Will be done in following PR
+          e.preventDefault();
+          e.stopPropagation();
+          navigateToUrl(href);
+        },
+      }
+    : undefined;
+
+  const accordionProps: Partial<EuiAccordionProps> | undefined = isItem
+    ? undefined
+    : {
         initialIsOpen: isActive,
         forceState: isCollapsed ? 'closed' : 'open',
         onToggle: (isOpen) => {
@@ -208,17 +251,18 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
           setDoCollapseFromActiveState(false);
         },
         ...navNode.accordionProps,
-      }}
+      };
+
+  return (
+    <EuiCollapsibleNavItem
+      id={id}
+      title={title}
+      icon={icon}
+      iconProps={{ size: 'm' }}
+      linkProps={linkProps}
+      accordionProps={accordionProps}
       data-test-subj={`nav-bucket-${id}`}
-      {...propsForGroupAsItem}
-      items={filteredItems.map((item) =>
-        navigationNodeToEuiItem(item, {
-          navigateToUrl,
-          isSideNavCollapsed,
-          openPanel,
-          closePanel,
-        })
-      )}
+      items={renderAs === 'item' ? undefined : items}
     />
   );
 };

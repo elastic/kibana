@@ -15,6 +15,8 @@ export { getPresets } from './nav_tree_presets';
 
 export type {
   GroupDefinition,
+  PresetDefinition,
+  ItemDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
   ProjectNavigationDefinition,

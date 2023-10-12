@@ -41,4 +41,5 @@ export type {
   ChromeProjectBreadcrumb,
   NodeDefinition,
   NodeDefinitionWithChildren,
+  RenderAs as NodeRenderAs,
 } from './project_navigation';

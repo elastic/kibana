@@ -20,14 +20,14 @@ import { CloudLinks } from '../../cloud_links';
 import { useNavigation as useNavigationServices } from '../../services';
 import { generateUniqueNodeId, isAbsoluteLink } from '../../utils';
 import { useNavigation } from '../components/navigation';
-import { NodeProps, NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
+import { NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
-function getIdFromNavigationNode<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
->({ id }: NodeProps<LinkId, Id, ChildrenId>): string {
+function getIdFromNavigationNode({
+  id: _id,
+  link,
+}: Pick<NodePropsEnhanced, 'id' | 'link' | 'isGroup'>): string {
+  const id = _id ?? link;
   return id ?? generateUniqueNodeId();
 }
 

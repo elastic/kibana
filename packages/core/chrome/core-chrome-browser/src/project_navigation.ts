@@ -51,6 +51,8 @@ export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'de
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
+export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
+
 type NonEmptyArray<T> = [T, ...T[]];
 
 export type GetIsActiveFn = (params: {
@@ -110,7 +112,7 @@ interface NodeDefinitionBase {
    * - item: renders the group as an item in the side nav
    * @default 'block'
    */
-  renderAs?: 'block' | 'accordion' | 'panelOpener' | 'item';
+  renderAs?: RenderAs;
   /**
    * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
    * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation

@@ -42,4 +42,5 @@ export type {
   ChromeSetProjectBreadcrumbsParams,
   NodeDefinition,
   NodeDefinitionWithChildren,
+  NodeRenderAs,
 } from './src';
