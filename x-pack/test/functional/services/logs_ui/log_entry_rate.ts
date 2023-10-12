@@ -28,5 +28,41 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
     async getNoDataScreen() {
       return await testSubjects.find('noDataPage');
     },
+
+    async startJobSetup() {
+      await testSubjects.click('infraLogEntryRateSetupContentMlSetupButton');
+    },
+
+    async manageMlJobs() {
+      await testSubjects.click('infraManageJobsButtonManageMlJobsButton');
+    },
+
+    async getSetupFlyout(): Promise<WebElementWrapper> {
+      return await testSubjects.find('infraLogAnalysisSetupFlyout');
+    },
+
+    async startRateJobCreation() {
+      const buttons = await testSubjects.findAll('infraCreateJobButtonButton');
+      await buttons[0].click();
+    },
+
+    async startCategoriesCountJobCreation() {
+      const buttons = await testSubjects.findAll('infraCreateJobButtonButton');
+      await buttons[1].click();
+    },
+
+    async canCreateJob() {
+      const createJobButton = await testSubjects.find('infraCreateMLJobsButtonCreateMlJobButton');
+      const disabled = await createJobButton.getAttribute('disabled');
+      return disabled !== 'true';
+    },
+
+    async createJob() {
+      await testSubjects.click('infraCreateMLJobsButtonCreateMlJobButton');
+    },
+
+    async jobCreationDone() {
+      return await testSubjects.exists('infraProcessStepViewResultsButton');
+    },
   };
 }
