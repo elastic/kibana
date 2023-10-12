@@ -14,4 +14,5 @@ export {
   deleteSavedObjectIndices,
   cleanSavedObjectIndices,
   createDefaultSpace,
+  isSavedObjectIndex,
 } from './kibana_index';

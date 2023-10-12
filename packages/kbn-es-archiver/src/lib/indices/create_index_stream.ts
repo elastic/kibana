@@ -19,7 +19,11 @@ import {
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
-import { cleanSavedObjectIndices, deleteSavedObjectIndices } from './kibana_index';
+import {
+  cleanSavedObjectIndices,
+  deleteSavedObjectIndices,
+  isSavedObjectIndex,
+} from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -124,6 +128,11 @@ export function createCreateIndexStream({
     const { index, settings, mappings, aliases } = record.value;
     const isKibanaTaskManager = index.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX);
     const isKibana = index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !isKibanaTaskManager;
+    const isSOIndex = isSavedObjectIndex(index);
+
+    if (isSOIndex) {
+      throw new Error(`esArchiver detected saved objects index: '${index}', aborting`);
+    }
 
     if (docsOnly) {
       return;
