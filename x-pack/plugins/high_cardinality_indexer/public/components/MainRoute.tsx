@@ -153,16 +153,28 @@ export function MainRoute() {
         ),
       }}
     >
-      <EuiCallOut title="This is a development tool" iconType="gear" style={{ maxWidth: 800 }}>
-        This app is used to index fake data into your cluster to aid testing of various use cases
-        such as Alerting, Logs and Hosts.
+      <EuiCallOut
+        title={i18n.translate('xpack.highCardinalityIndexer.callout.title', {
+          defaultMessage: 'This is a development tool',
+        })}
+        iconType="gear"
+        style={{ maxWidth: 800 }}
+      >
+        {i18n.translate('xpack.highCardinalityIndexer.callout.description', {
+          defaultMessage:
+            'This app is used to index fake data into your cluster to aid testing of various use cases such as Alerting, Logs and Hosts.',
+        })}
       </EuiCallOut>
 
       <EuiSpacer size="xxl" />
 
       <EuiPanel style={{ maxWidth: 800 }} paddingSize="l">
         <EuiTitle size="m">
-          <h2>Configure settings</h2>
+          <h2>
+            {i18n.translate('xpack.highCardinalityIndexer.configureSettings', {
+              defaultMessage: 'Configure settings',
+            })}
+          </h2>
         </EuiTitle>
 
         <EuiSpacer size="l" />
@@ -170,7 +182,11 @@ export function MainRoute() {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiForm component="form">
-              <EuiFormRow label="Dataset">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.dataset', {
+                  defaultMessage: 'Dataset',
+                })}
+              >
                 <EuiSelect
                   hasNoInitialSelection
                   disabled={isLoading || serverIsIndexing}
@@ -190,14 +206,20 @@ export function MainRoute() {
               <EuiSpacer size="m" />
 
               <EuiSwitch
-                label="Install assets"
+                label={i18n.translate('xpack.highCardinalityIndexer.form.installAssets', {
+                  defaultMessage: 'Install assets',
+                })}
                 disabled={isLoading || serverIsIndexing}
                 checked={formData.installAssets}
                 onChange={(e) => handleChangeFormField(e.target.checked, 'installAssets')}
               />
               <EuiSpacer size="xxl" />
 
-              <EuiFormRow label="Events per cycle">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.eventsPerCycle', {
+                  defaultMessage: 'Events per cycle',
+                })}
+              >
                 <EuiFieldNumber
                   name="eventsPerCycle"
                   disabled={isLoading || serverIsIndexing}
@@ -208,7 +230,11 @@ export function MainRoute() {
                 />
               </EuiFormRow>
 
-              <EuiFormRow label="Payload size">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.payloadSize', {
+                  defaultMessage: 'Payload size',
+                })}
+              >
                 <EuiFieldNumber
                   name="payloadSize"
                   disabled={isLoading || serverIsIndexing}
@@ -219,7 +245,11 @@ export function MainRoute() {
                 />
               </EuiFormRow>
 
-              <EuiFormRow label="Concurrency">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.concurrency', {
+                  defaultMessage: 'Concurrency',
+                })}
+              >
                 <EuiFieldNumber
                   name="concurrency"
                   disabled={isLoading || serverIsIndexing}
@@ -233,7 +263,11 @@ export function MainRoute() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiForm component="form">
-              <EuiFormRow label="Index interval">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.interval', {
+                  defaultMessage: 'Index interval',
+                })}
+              >
                 <EuiFieldNumber
                   name="interval"
                   disabled={isLoading || serverIsIndexing}
@@ -242,7 +276,11 @@ export function MainRoute() {
                 />
               </EuiFormRow>
 
-              <EuiFormRow label="Reduce weekend traffic by">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.reduceWeekendTrafficBy', {
+                  defaultMessage: 'Reduce weekend traffic by',
+                })}
+              >
                 <EuiFieldNumber
                   name="reduceWeekendTrafficBy"
                   value={formData.reduceWeekendTrafficBy}
@@ -253,7 +291,11 @@ export function MainRoute() {
                 />
               </EuiFormRow>
 
-              <EuiFormRow label="Schedule template">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.scheduleTemplate', {
+                  defaultMessage: 'Schedule template',
+                })}
+              >
                 <EuiSelect
                   hasNoInitialSelection
                   onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleTemplate')}
@@ -266,11 +308,20 @@ export function MainRoute() {
                 />
               </EuiFormRow>
 
-              <EuiFormRow label="Schedule start">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.scheduleStart', {
+                  defaultMessage: 'Schedule start',
+                })}
+              >
                 <EuiSelect
                   onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleStart')}
                   options={[
-                    { value: 'now', text: 'Now' },
+                    {
+                      value: 'now',
+                      text: i18n.translate('xpack.highCardinalityIndexer.form.schedule.times.now', {
+                        defaultMessage: 'Now',
+                      }),
+                    },
                     { value: '1m', text: '1 minute from now' },
                     { value: '2m', text: '2 minutes from now' },
                     { value: '5m', text: '5 minutes from now' },
@@ -281,11 +332,23 @@ export function MainRoute() {
                 />
               </EuiFormRow>
 
-              <EuiFormRow label="Schedule end">
+              <EuiFormRow
+                label={i18n.translate('xpack.highCardinalityIndexer.form.scheduleEnd', {
+                  defaultMessage: 'Schedule end',
+                })}
+              >
                 <EuiSelect
                   onChange={(e) => handleChangeFormField(e.currentTarget.value, 'scheduleEnd')}
                   options={[
-                    { value: 'false', text: 'Indefinitely' },
+                    {
+                      value: 'false',
+                      text: i18n.translate(
+                        'xpack.highCardinalityIndexer.form.schedule.times.indefinitely',
+                        {
+                          defaultMessage: 'Indefinitely',
+                        }
+                      ),
+                    },
                     { value: '1m', text: '1 minute from now' },
                     { value: '2m', text: '2 minutes from now' },
                     { value: '5m', text: '5 minutes from now' },
@@ -306,7 +369,13 @@ export function MainRoute() {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButton fill isLoading={isLoading || serverIsIndexing} onClick={handleSubmitForm}>
-              {serverIsIndexing ? 'Indexing...' : 'Start indexing'}
+              {serverIsIndexing
+                ? i18n.translate('xpack.highCardinalityIndexer.form.indexingInProgress', {
+                    defaultMessage: 'Indexing...',
+                  })
+                : i18n.translate('xpack.highCardinalityIndexer.form.startIndexing', {
+                    defaultMessage: 'Start indexing',
+                  })}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -316,7 +385,9 @@ export function MainRoute() {
               onClick={handleStopIndexing}
               color="danger"
             >
-              Stop
+              {i18n.translate('xpack.highCardinalityIndexer.form.stop', {
+                defaultMessage: 'Stop',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

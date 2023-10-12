@@ -35,6 +35,7 @@
     "xpack.globalSearchBar": ["plugins/global_search_bar"],
     "xpack.graph": ["plugins/graph"],
     "xpack.grokDebugger": "plugins/grokdebugger",
+    "xpack.highCardinalityIndexer": "plugins/high_cardinality_indexer",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",

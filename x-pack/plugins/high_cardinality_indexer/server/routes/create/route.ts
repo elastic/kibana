@@ -61,13 +61,12 @@ const createRoute = createHighCardinalityIndexerServerRoute({
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const soClient = (await context.core).savedObjects.client;
 
-      logger.info(`1. installTemplate`);
       await installTemplate({ client, config, logger });
-      logger.info(`2. installIndexTemplate`);
+
       await installIndexTemplate({ client, config, logger });
-      logger.info(`3. installDatasetAssets`);
+
       await installDatasetAssets({ config, logger, soClient });
-      logger.info(`4. indexSchedule`);
+
       await indexSchedule({ client, config, logger, queueRegistry });
       logger.info(`Success!`);
       return { success: true };
