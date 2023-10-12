@@ -36,15 +36,21 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 );
 const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`;
 
+const renderSuppressedAlerts = (alertSuppressionCount: number) =>
+  render(
+    <TestProviders>
+      <LeftPanelContext.Provider value={mockContextValue}>
+        <SuppressedAlerts
+          alertSuppressionCount={alertSuppressionCount}
+          dataAsNestedObject={mockDataAsNestedObject}
+        />
+      </LeftPanelContext.Provider>
+    </TestProviders>
+  );
+
 describe('<SuppressedAlerts />', () => {
   it('should render zero component correctly', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={mockContextValue}>
-          <SuppressedAlerts alertSuppressionCount={0} dataAsNestedObject={mockDataAsNestedObject} />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId } = renderSuppressedAlerts(0);
 
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toHaveTextContent('0 suppressed alert');
@@ -54,13 +60,7 @@ describe('<SuppressedAlerts />', () => {
   });
 
   it('should render single component correctly', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={mockContextValue}>
-          <SuppressedAlerts alertSuppressionCount={1} dataAsNestedObject={mockDataAsNestedObject} />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId } = renderSuppressedAlerts(1);
 
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toHaveTextContent('1 suppressed alert');
@@ -70,13 +70,7 @@ describe('<SuppressedAlerts />', () => {
   });
 
   it('should render multiple component correctly', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={mockContextValue}>
-          <SuppressedAlerts alertSuppressionCount={2} dataAsNestedObject={mockDataAsNestedObject} />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId } = renderSuppressedAlerts(2);
 
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toHaveTextContent('2 suppressed alerts');

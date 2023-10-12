@@ -87,7 +87,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xs" className="codeBoxPanel" data-test-subj="codeBlockControlsPanel">
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiThemeProvider colorMode="light">
               <EuiPopover
@@ -104,7 +104,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={codeSnippet}>
               {(copy) => (
-                <EuiButtonEmpty color="text" iconType="copy" size="s" onClick={copy}>
+                <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
                   {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
                     defaultMessage: 'Copy',
                   })}
@@ -127,6 +127,8 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           transparentBackground
           fontSize="m"
           language={languageType || selectedLanguage.languageStyling || selectedLanguage.id}
+          overflowHeight={500}
+          className="codeBoxCodeBlock"
         >
           {codeSnippet}
         </EuiCodeBlock>

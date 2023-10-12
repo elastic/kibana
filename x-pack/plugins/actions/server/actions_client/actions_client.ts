@@ -11,7 +11,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined } from 'lodash';
+import { omitBy, isUndefined, compact } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -24,8 +24,9 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
 import { ConnectorType } from '../application/connector/types';
+import { get } from '../application/connector/methods/get';
 import { getAll } from '../application/connector/methods/get_all';
 import { listTypes } from '../application/connector/methods/list_types';
 import {
@@ -60,7 +61,7 @@ import {
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
-  getBulkAuthorizationModeBySource,
+  bulkGetAuthorizationModeBySource,
   AuthorizationMode,
 } from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
@@ -396,7 +397,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get an action
+   * Get a connector
    */
   public async get({
     id,
@@ -405,79 +406,15 @@ export class ActionsClient {
     id: string;
     throwIfSystemAction?: boolean;
   }): Promise<ActionResult> {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === id
-    );
-
-    /**
-     * Getting system connector is not allowed
-     * if throwIfSystemAction is set to true.
-     * Default behavior is to throw
-     */
-    if (
-      foundInMemoryConnector !== undefined &&
-      foundInMemoryConnector.isSystemAction &&
-      throwIfSystemAction
-    ) {
-      throw Boom.notFound(`Connector ${id} not found`);
-    }
-
-    if (foundInMemoryConnector !== undefined) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-        })
-      );
-
-      return {
-        id,
-        actionTypeId: foundInMemoryConnector.actionTypeId,
-        name: foundInMemoryConnector.name,
-        isPreconfigured: foundInMemoryConnector.isPreconfigured,
-        isSystemAction: foundInMemoryConnector.isSystemAction,
-        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
-      };
-    }
-
-    const result = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.GET,
-        savedObject: { type: 'action', id },
-      })
-    );
-
-    return {
-      id,
-      actionTypeId: result.attributes.actionTypeId,
-      isMissingSecrets: result.attributes.isMissingSecrets,
-      name: result.attributes.name,
-      config: result.attributes.config,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+    return get({ context: this.context, id, throwIfSystemAction });
   }
 
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<FindConnectorResult[]> {
+  public async getAll({ includeSystemActions = false } = {}): Promise<
+    ConnectorWithExtraFindData[]
+  > {
     return getAll({ context: this.context, includeSystemActions });
   }
 
@@ -770,18 +707,16 @@ export class ActionsClient {
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
   ): Promise<ExecutionResponse> {
-    const sources: Array<ActionExecutionSource<unknown>> = [];
-    options.forEach((option) => {
-      if (option.source) {
-        sources.push(option.source);
-      }
-    });
+    const sources: Array<ActionExecutionSource<unknown>> = compact(
+      (options ?? []).map((option) => option.source)
+    );
 
-    const authCounts = await getBulkAuthorizationModeBySource(
+    const authModes = await bulkGetAuthorizationModeBySource(
+      this.context.logger,
       this.context.unsecuredSavedObjectsClient,
       sources
     );
-    if (authCounts[AuthorizationMode.RBAC] > 0) {
+    if (authModes[AuthorizationMode.RBAC] > 0) {
       /**
        * For scheduled executions the additional authorization check
        * for system actions (kibana privileges) will be performed
@@ -789,11 +724,11 @@ export class ActionsClient {
        */
       await this.context.authorization.ensureAuthorized({ operation: 'execute' });
     }
-    if (authCounts[AuthorizationMode.Legacy] > 0) {
+    if (authModes[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
         'bulkEnqueueExecution',
         this.context.usageCounter,
-        authCounts[AuthorizationMode.Legacy]
+        authModes[AuthorizationMode.Legacy]
       );
     }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);

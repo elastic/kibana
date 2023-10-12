@@ -21,7 +21,12 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import { UsageTracker } from './usage_tracker';
-import { EndpointDataLoadingError, retryOnError, wrapErrorAndRejectPromise } from './utils';
+import {
+  EndpointDataLoadingError,
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+  wrapErrorAndRejectPromise,
+} from './utils';
 
 const usageTracker = new UsageTracker({ dumpOnProcessExit: true });
 
@@ -165,13 +170,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
     return bulkResp[0] as BulkInstallPackageInfo;
   };
 
-  return retryOnError(
-    updatePackages,
-    ['no_shard_available_action_exception', 'illegal_index_shard_state_exception'],
-    logger,
-    5,
-    10000
-  )
+  return retryOnError(updatePackages, RETRYABLE_TRANSIENT_ERRORS, logger, 5, 10000)
     .then((result) => {
       usageRecord.set('success');
 

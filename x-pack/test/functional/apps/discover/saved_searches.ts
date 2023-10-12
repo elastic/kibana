@@ -45,18 +45,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/104578
-    describe.skip('Customize time range', () => {
+    describe('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.clickOpenAddPanel();
         await dashboardAddPanel.addSavedSearch('Ecommerce Data');
         expect(await dataGrid.getDocCount()).to.be(500);
 
         await panelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickToggleQuickMenuButton();
+        await dashboardCustomizePanel.enableCustomTimeRange();
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
 

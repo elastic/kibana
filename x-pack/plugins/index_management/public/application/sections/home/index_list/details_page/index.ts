@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DetailsPage as IndexDetailsPage, IndexDetailsSection } from './details_page';
+export { DetailsPage as IndexDetailsPage } from './details_page';

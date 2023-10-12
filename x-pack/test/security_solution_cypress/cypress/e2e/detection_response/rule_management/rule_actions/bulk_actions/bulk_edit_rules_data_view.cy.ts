@@ -35,7 +35,8 @@ import {
   getDetails,
   assertDetailsNotExist,
 } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../../tasks/common';
@@ -119,7 +120,7 @@ describe(
       createRule(TESTED_TERMS_RULE_DATA);
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA_2);
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       expectManagementTableRules([
@@ -271,7 +272,7 @@ describe(
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW);
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITHOUT_DATAVIEW);
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       expectManagementTableRules(['with dataview', 'no data view']);

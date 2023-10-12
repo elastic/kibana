@@ -203,6 +203,15 @@ describe('monitor availability', () => {
                     },
                   },
                   Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-2w",
@@ -246,7 +255,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
     });
@@ -385,6 +394,15 @@ describe('monitor availability', () => {
                     },
                   },
                   Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-23d",
@@ -397,7 +415,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
 
@@ -711,6 +729,15 @@ describe('monitor availability', () => {
                     },
                   },
                   Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-3M",
@@ -723,7 +750,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
 
@@ -814,6 +841,15 @@ describe('monitor availability', () => {
                       },
                     },
                     Object {
+                      "bool": Object {
+                        "must_not": Object {
+                          "exists": Object {
+                            "field": "run_once",
+                          },
+                        },
+                      },
+                    },
+                    Object {
                       "range": Object {
                         "@timestamp": Object {
                           "gte": "now-3M",
@@ -826,7 +862,7 @@ describe('monitor availability', () => {
               },
               "size": 0,
             },
-            "index": "heartbeat-8*,heartbeat-7*",
+            "index": "heartbeat-*",
           },
           Object {
             "meta": true,
@@ -941,6 +977,15 @@ describe('monitor availability', () => {
                     },
                   },
                   Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-3s",
@@ -964,7 +1009,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
     });

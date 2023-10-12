@@ -256,11 +256,8 @@
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": [
-        "eslint-plugin-cypress"
-      ],
       "matchPackagePatterns": [
-        "^cypress"
+        "cypress"
       ],
       "reviewers": [
         "Team:apm",
@@ -276,6 +273,23 @@
       "enabled": true
     },
     {
+      "groupName": "security solution modules",
+      "matchPackageNames": [
+        "zod",
+        "langchain"
+      ],
+      "reviewers": [
+        "Team: SecuritySolution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "platform security modules",
       "matchPackageNames": [
         "css.escape",
@@ -286,7 +300,8 @@
         "tough-cookie",
         "@types/tough-cookie",
         "xml-crypto",
-        "@types/xml-crypto"
+        "@types/xml-crypto",
+        "@kayahr/text-encoding"
       ],
       "reviewers": [
         "team:kibana-security"

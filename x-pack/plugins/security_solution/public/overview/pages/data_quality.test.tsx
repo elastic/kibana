@@ -8,7 +8,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { of } from 'rxjs';
 
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
@@ -16,7 +15,6 @@ import { DataQuality } from './data_quality';
 import { HOT, WARM, UNMANAGED } from './translations';
 
 const mockedUseKibana = mockUseKibana();
-const mockIsILMAvailable = of(true);
 
 jest.mock('../../common/components/landing_page');
 jest.mock('../../common/lib/kibana', () => {
@@ -51,7 +49,7 @@ jest.mock('../../common/lib/kibana', () => {
             useCasesAddToNewCaseFlyout: jest.fn(),
           },
         },
-        isILMAvailable$: mockIsILMAvailable,
+        configSettings: { ILMEnabled: true },
       },
     }),
     useUiSetting$: () => ['0,0.[000]'],
@@ -82,7 +80,7 @@ describe('DataQuality', () => {
   const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);

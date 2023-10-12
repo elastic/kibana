@@ -12,7 +12,10 @@ import {
   Plugin,
   Logger,
   IContextProvider,
+  KibanaRequest,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { once } from 'lodash';
 
 import {
   ElasticAssistantPluginSetup,
@@ -20,8 +23,15 @@ import {
   ElasticAssistantPluginStart,
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
+  GetElser,
 } from './types';
-import { postActionsConnectorExecuteRoute } from './routes';
+import {
+  deleteKnowledgeBaseRoute,
+  getKnowledgeBaseStatusRoute,
+  postActionsConnectorExecuteRoute,
+  postEvaluateRoute,
+  postKnowledgeBaseRoute,
+} from './routes';
 
 export class ElasticAssistantPlugin
   implements
@@ -39,13 +49,15 @@ export class ElasticAssistantPlugin
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ElasticAssistantPluginStart, unknown>
+    core: CoreSetup<ElasticAssistantPluginStart, unknown>,
+    logger: Logger
   ): IContextProvider<ElasticAssistantRequestHandlerContext, 'elasticAssistant'> => {
     return async function elasticAssistantRouteHandlerContext(context, request) {
       const [_, pluginsStart] = await core.getStartServices();
 
       return {
         actions: pluginsStart.actions,
+        logger,
       };
     };
   };
@@ -59,10 +71,27 @@ export class ElasticAssistantPlugin
       'elasticAssistant'
     >(
       'elasticAssistant',
-      this.createRouteHandlerContext(core as CoreSetup<ElasticAssistantPluginStart, unknown>)
+      this.createRouteHandlerContext(
+        core as CoreSetup<ElasticAssistantPluginStart, unknown>,
+        this.logger
+      )
     );
 
-    postActionsConnectorExecuteRoute(router);
+    const getElserId: GetElser = once(
+      async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
+        return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
+          .name;
+      }
+    );
+
+    // Knowledge Base
+    deleteKnowledgeBaseRoute(router);
+    getKnowledgeBaseStatusRoute(router, getElserId);
+    postKnowledgeBaseRoute(router, getElserId);
+    // Actions Connector Execute (LLM Wrapper)
+    postActionsConnectorExecuteRoute(router, getElserId);
+    // Evaluate
+    postEvaluateRoute(router, getElserId);
     return {
       actions: plugins.actions,
     };

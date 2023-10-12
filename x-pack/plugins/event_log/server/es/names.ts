@@ -14,14 +14,12 @@ export interface EsNames {
   indexTemplate: string;
 }
 
-export function getEsNames(baseName: string, kibanaVersion: string): EsNames {
-  const EVENT_LOG_VERSION_SUFFIX = `-${kibanaVersion.toLocaleLowerCase()}`;
+export function getEsNames(baseName: string): EsNames {
   const eventLogName = `${baseName}${EVENT_LOG_NAME_SUFFIX}`;
-  const eventLogNameWithVersion = `${eventLogName}${EVENT_LOG_VERSION_SUFFIX}`;
   return {
     base: baseName,
-    dataStream: eventLogNameWithVersion,
+    dataStream: `${eventLogName}-ds`,
     indexPattern: `${eventLogName}-*`,
-    indexTemplate: `${eventLogNameWithVersion}-template`,
+    indexTemplate: `${eventLogName}-template`,
   };
 }

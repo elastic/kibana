@@ -14,7 +14,7 @@ import { isInvestigateInResolverActionEnabled } from '../../../detections/compon
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../common/hooks/use_license';
 import { getField } from '../utils';
-import { ANCESTOR_ID } from '../constants/field_names';
+import { ANCESTOR_ID, RULE_PARAMETERS_INDEX } from '../constants/field_names';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
@@ -24,11 +24,11 @@ export interface UseShowRelatedAlertsByAncestryParams {
   /**
    * An object with top level fields from the ECS object
    */
-  dataAsNestedObject: Ecs | null;
+  dataAsNestedObject: Ecs;
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
 
 export interface UseShowRelatedAlertsByAncestryResult {
@@ -57,19 +57,13 @@ export const useShowRelatedAlertsByAncestry = ({
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
-  const hasProcessEntityInfo = isInvestigateInResolverActionEnabled(
-    dataAsNestedObject || undefined
-  );
+  const hasProcessEntityInfo = isInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const originalDocumentId = getField(getFieldsData(ANCESTOR_ID));
 
   // can't use getFieldsData here as the kibana.alert.rule.parameters is different and can be nested
   const originalDocumentIndex = useMemo(
-    () =>
-      find(
-        { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
-        dataFormattedForFieldBrowser
-      ),
+    () => find({ category: 'kibana', field: RULE_PARAMETERS_INDEX }, dataFormattedForFieldBrowser),
     [dataFormattedForFieldBrowser]
   );
 

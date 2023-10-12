@@ -17,6 +17,7 @@ import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
+import { createConfig } from './config';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -42,7 +43,7 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityConfig;
-  private cspmUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
   private readonly logger: Logger;
 
@@ -52,27 +53,28 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+    this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
+
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
-    // `plugins.forceEnableAllPlugins` flag is enabled).
+    // `plugins.forceEnableAllPlugins` flag is enabled. Should never happen in real scenarios.
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
     if (shouldRegister) {
       const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
       this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
       const appFeaturesConfigurator = getProductAppFeaturesConfigurator(
-        getProductAppFeatures(this.config.productTypes)
+        getProductAppFeatures(this.config.productTypes),
+        this.config
       );
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     }
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
-
-    this.cspmUsageReportingTask = new SecurityUsageReportingTask({
+    this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
       config: this.config,
       taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloudSetup,
+      cloudSetup: pluginsSetup.cloud,
       taskType: cloudSecurityMetringTaskProperties.taskType,
       taskTitle: cloudSecurityMetringTaskProperties.taskTitle,
       version: cloudSecurityMetringTaskProperties.version,
@@ -88,7 +90,10 @@ export class SecuritySolutionServerlessPlugin
       version: ENDPOINT_METERING_TASK.VERSION,
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloudSetup,
+      cloudSetup: pluginsSetup.cloud,
+      options: {
+        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
+      },
     });
 
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
@@ -96,11 +101,11 @@ export class SecuritySolutionServerlessPlugin
     return {};
   }
 
-  public start(_coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
-    const internalESClient = _coreStart.elasticsearch.client.asInternalUser;
-    const internalSOClient = _coreStart.savedObjects.createInternalRepository();
+  public start(coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
+    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalSOClient = coreStart.savedObjects.createInternalRepository();
 
-    this.cspmUsageReportingTask?.start({
+    this.cloudSecurityUsageReportingTask?.start({
       taskManager: pluginsSetup.taskManager,
       interval: cloudSecurityMetringTaskProperties.interval,
     });

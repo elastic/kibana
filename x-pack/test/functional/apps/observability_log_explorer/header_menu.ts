@@ -8,9 +8,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
   describe('Header menu', () => {
@@ -35,14 +37,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Discover fallback link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
       it('should render a button link ', async () => {
         const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
         expect(await discoverLink.isDisplayed()).to.be(true);
       });
 
       it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
-        // Set timerange to specific values to match data and retrieve config
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+        await retry.try(async () => {
+          await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
+          await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
+        });
+
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
 
         // Set query bar value
@@ -54,9 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
-            'All log datasets'
-          );
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
         });
 
         await retry.try(async () => {
@@ -74,6 +81,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+        });
+      });
+    });
+
+    describe('Add data link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
+      it('should render a button link ', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        expect(await onboardingLink.isDisplayed()).to.be(true);
+      });
+
+      it('should navigate to the observability onboarding overview page', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        onboardingLink.click();
+
+        await retry.try(async () => {
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/app/observabilityOnboarding`);
         });
       });
     });

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { API_VERSIONS } from '../../common/constants';
 
 import { createAgentDoc } from './agents';
+import { request } from './common';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
@@ -15,7 +15,7 @@ export async function setupFleetServer() {
   const policyId: string = FLEET_SERVER_POLICY_ID;
   let kibanaVersion: string;
 
-  cy.request({
+  request({
     method: 'POST',
     url: '/api/fleet/agent_policies',
     headers: { 'kbn-xsrf': 'xx' },
@@ -30,7 +30,7 @@ export async function setupFleetServer() {
     // 409 is expected if the policy already exists
     // this allows the test to be run repeatedly in dev
     if (response.status > 299 && response.status !== 409) {
-      throw new Error(`Failed to create Fleet Server policy: ${response.body.message}`);
+      throw new Error(`Failed to create Fleet Server policy: ${JSON.stringify(response.body)}`);
     }
   });
 
@@ -65,10 +65,9 @@ export function deleteFleetServer() {
 }
 
 export function setFleetServerHost(host = 'https://fleetserver:8220') {
-  cy.request({
+  request({
     method: 'POST',
     url: '/api/fleet/fleet_server_hosts',
-    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     body: {
       name: 'Default host',
       host_urls: [host],

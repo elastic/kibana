@@ -26,7 +26,7 @@ import {
 import { filter } from 'rxjs/operators';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {
@@ -103,15 +103,13 @@ describe('test useSavedSearch message generators', () => {
       if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
         expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
         expect(value.result).toStrictEqual([...initialRecords, ...moreRecords]);
-        expect(value.interceptedWarnings).toHaveLength(searchResponseWarningsMock.length);
+        expect(value.interceptedWarnings).toHaveLength(1);
         done();
       }
     });
     sendLoadingMoreFinishedMsg(documents$, {
       moreRecords,
-      interceptedWarnings: searchResponseWarningsMock.map((warning) => ({
-        originalWarning: warning,
-      })),
+      interceptedWarnings: [{ originalWarning: searchResponseIncompleteWarningLocalCluster }],
     });
   });
   test('sendLoadingMoreFinishedMsg after an exception', (done) => {
@@ -121,9 +119,7 @@ describe('test useSavedSearch message generators', () => {
     const documents$ = new BehaviorSubject<DataDocumentsMsg>({
       fetchStatus: FetchStatus.LOADING_MORE,
       result: initialRecords,
-      interceptedWarnings: searchResponseWarningsMock.map((warning) => ({
-        originalWarning: warning,
-      })),
+      interceptedWarnings: [{ originalWarning: searchResponseIncompleteWarningLocalCluster }],
     });
     documents$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.LOADING_MORE) {

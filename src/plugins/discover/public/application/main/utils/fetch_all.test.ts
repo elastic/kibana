@@ -25,7 +25,7 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchTextBased } from './fetch_text_based';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -296,9 +296,11 @@ describe('test fetchAll', () => {
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
 
-    const interceptedWarnings = searchResponseWarningsMock.map((warning) => ({
-      originalWarning: warning,
-    }));
+    const interceptedWarnings = [
+      {
+        originalWarning: searchResponseIncompleteWarningLocalCluster,
+      },
+    ];
 
     test('should add more records', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);

@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       /* then, create our testing dashboard */
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();

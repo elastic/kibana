@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { capitalize } from 'lodash';
 import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { LicenseService } from '../../../common/license';
@@ -15,11 +16,18 @@ export const validatePolicyAgainstLicense = (
   licenseService: LicenseService,
   logger: Logger
 ): void => {
-  if (!isEndpointPolicyValidForLicense(policyConfig, licenseService.getLicenseInformation())) {
+  const licenseInformation = licenseService.getLicenseInformation();
+  if (!isEndpointPolicyValidForLicense(policyConfig, licenseInformation)) {
     logger.warn('Incorrect license tier for paid policy fields');
     // The `statusCode` below is used by Fleet API handler to ensure that the proper HTTP code is used in the API response
-    const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
+    const licenseError: Error & { statusCode?: number; passThroughApi?: boolean } = new Error(
+      `${capitalize(
+        licenseInformation?.type || 'current'
+      )} license does not support this action. Please upgrade your license.`
+    );
     licenseError.statusCode = 403;
+    licenseError.passThroughApi = true;
+
     throw licenseError;
   }
 };

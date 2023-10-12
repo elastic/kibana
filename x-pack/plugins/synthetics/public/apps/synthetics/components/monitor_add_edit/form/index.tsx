@@ -18,7 +18,8 @@ export const MonitorForm: React.FC<{
   defaultValues?: SyntheticsMonitor;
   space?: string;
   readOnly?: boolean;
-}> = ({ children, defaultValues, space, readOnly = false }) => {
+  canUsePublicLocations?: boolean;
+}> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
@@ -43,7 +44,7 @@ export const MonitorForm: React.FC<{
       >
         {children}
         <EuiSpacer />
-        <ActionBar readOnly={readOnly} />
+        <ActionBar readOnly={readOnly} canUsePublicLocations={canUsePublicLocations} />
       </EuiForm>
       <Disclaimer />
     </FormProvider>

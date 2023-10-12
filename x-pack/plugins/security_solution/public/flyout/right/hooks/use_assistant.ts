@@ -31,7 +31,7 @@ export interface UseAssistantParams {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * Is true if the document is an alert
    */

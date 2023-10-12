@@ -17,6 +17,7 @@ jest.mock('../../services/toast_notification_service');
 jest.mock('../../contexts/ml/ml_notifications_context');
 jest.mock('../../contexts/kibana/use_field_formatter');
 jest.mock('../../components/saved_objects_warning');
+jest.mock('../../capabilities/check_capabilities');
 
 const getMockedTimefilter = () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryFreeExcludingCache: FormulaValueConfig = {
-  label: 'free',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.metric.label.free', {
+    defaultMessage: 'free',
+  }),
   value: 'average(system.memory.free)',
   format: {
     id: 'bytes',

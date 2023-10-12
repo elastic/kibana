@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ObservablityLogExplorerMainRoute } from '../routes/main';
-import { ObservabilityLogExplorerPluginStart, ObservabilityLogExplorerStartDeps } from '../types';
+import {
+  ObservabilityLogExplorerAppMountParameters,
+  ObservabilityLogExplorerPluginStart,
+  ObservabilityLogExplorerStartDeps,
+} from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 export const renderObservabilityLogExplorer = (
   core: CoreStart,
   pluginsStart: ObservabilityLogExplorerStartDeps,
   ownPluginStart: ObservabilityLogExplorerPluginStart,
-  appParams: AppMountParameters
+  appParams: ObservabilityLogExplorerAppMountParameters
 ) => {
   ReactDOM.render(
     <ObservabilityLogExplorerApp
@@ -40,7 +44,7 @@ export const renderObservabilityLogExplorer = (
 };
 
 export interface ObservabilityLogExplorerAppProps {
-  appParams: AppMountParameters;
+  appParams: ObservabilityLogExplorerAppMountParameters;
   core: CoreStart;
   plugins: ObservabilityLogExplorerStartDeps;
   pluginStart: ObservabilityLogExplorerPluginStart;
@@ -52,7 +56,6 @@ export const ObservabilityLogExplorerApp = ({
   plugins,
   pluginStart,
 }: ObservabilityLogExplorerAppProps) => {
-  const { logExplorer, observabilityShared, serverless } = plugins;
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -67,15 +70,7 @@ export const ObservabilityLogExplorerApp = ({
             <Route
               path="/"
               exact={true}
-              render={() => (
-                <ObservablityLogExplorerMainRoute
-                  appParams={appParams}
-                  core={core}
-                  logExplorer={logExplorer}
-                  observabilityShared={observabilityShared}
-                  serverless={serverless}
-                />
-              )}
+              render={() => <ObservablityLogExplorerMainRoute appParams={appParams} core={core} />}
             />
           </Routes>
         </Router>

@@ -26,7 +26,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ConfigSchema } from '..';
-import { customLogsRoutes } from '../components/app/custom_logs/wizard';
+import { customLogsRoutes } from '../components/app/custom_logs';
 import { systemLogsRoutes } from '../components/app/system_logs';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {

@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { ComponentTemplateListItem } from '../../shared_imports';
 
 import { setupEnvironment, pageHelpers } from './helpers';
@@ -18,6 +19,7 @@ const { setup } = pageHelpers.componentTemplateList;
 describe('<ComponentTemplateList />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: ComponentTemplateListTestBed;
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(async () => {
     await act(async () => {
@@ -25,6 +27,12 @@ describe('<ComponentTemplateList />', () => {
     });
 
     testBed.component.update();
+  });
+
+  test('updates the breadcrumbs to component templates', () => {
+    expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+      IndexManagementBreadcrumb.componentTemplates
+    );
   });
 
   describe('With component templates', () => {

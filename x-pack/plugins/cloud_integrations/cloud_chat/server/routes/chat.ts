@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import type { SecurityPluginSetup, AuthenticatedUser } from '@kbn/security-plugin/server';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../../common/constants';
-import type { GetChatUserDataResponseBody } from '../../common/types';
+import type { GetChatUserDataResponseBody, ChatVariant } from '../../common/types';
 import { generateSignedJwt } from '../util/generate_jwt';
 import { isTodayInDateWindow } from '../../common/util';
 
@@ -26,6 +26,8 @@ export const registerChatRoute = ({
   trialBuffer,
   security,
   isDev,
+  getChatVariant,
+  getChatDisabledThroughExperiments,
 }: {
   router: IRouter;
   chatIdentitySecret: string;
@@ -33,6 +35,12 @@ export const registerChatRoute = ({
   trialBuffer: number;
   security?: SecurityPluginSetup;
   isDev: boolean;
+  getChatVariant: () => Promise<ChatVariant>;
+  /**
+   * Returns true if chat is disabled in LaunchDarkly
+   * Meant to be used as a runtime kill switch
+   */
+  getChatDisabledThroughExperiments: () => Promise<boolean>;
 }) => {
   if (!security) {
     return;
@@ -78,11 +86,18 @@ export const registerChatRoute = ({
         });
       }
 
+      if (await getChatDisabledThroughExperiments()) {
+        return response.badRequest({
+          body: 'Chat is disabled through experiments',
+        });
+      }
+
       const token = generateSignedJwt(userId, chatIdentitySecret);
       const body: GetChatUserDataResponseBody = {
         token,
         email: userEmail,
         id: userId,
+        chatVariant: await getChatVariant(),
       };
       return response.ok({ body });
     }

@@ -34,8 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
-        '--csp.warnLegacyBrowsers=false',
         '--usageCollection.uiCounters.enabled=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
@@ -49,7 +47,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'alertDetailsPageEnabled',
           'chartEmbeddablesEnabled',
-          'discoverInTimeline',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',

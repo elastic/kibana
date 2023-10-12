@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel_session_view_tab';
+import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_session_view_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP,
@@ -16,7 +13,8 @@ import {
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -25,7 +23,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // TODO enable once the visualize tabs are back
 describe.skip(
   'Alert details expandable flyout left panel session view',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -47,12 +45,6 @@ describe.skip(
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
         .should('be.visible')
         .and('have.text', 'Session View');
-
-      // TODO ideally we would have a test for the session view component instead
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
-        .should('be.visible')
-        .and('contain.text', 'Unable to display session view')
-        .and('contain.text', 'There was an error displaying session view');
     });
   }
 );

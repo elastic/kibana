@@ -17,7 +17,7 @@ import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/consta
 const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat';
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
-export const ASSETS_SAMPLE_GRANULARITY = '124h';
+export const ASSETS_SAMPLE_GRANULARITY = '24h';
 export const THRESHOLD_MINUTES = 30;
 
 export const CSPM = CSPM_POLICY_TEMPLATE;

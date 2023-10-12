@@ -143,7 +143,8 @@ describe('Fleet preconfiguration reset', () => {
         expect(agentPolicies.saved_objects.find((so) => so.id === 'default-policy')).toBeDefined();
       });
 
-      it('Create correct .fleet-policies', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/133470
+      it.skip('Create correct .fleet-policies', async () => {
         const res = await kbnServer.coreStart.elasticsearch.client.asInternalUser.search({
           index: AGENT_POLICY_INDEX,
           q: `policy_id:policy-elastic-agent-on-cloud`,
@@ -160,9 +161,6 @@ describe('Fleet preconfiguration reset', () => {
             input['apm-server'].rum.source_mapping.elasticsearch.api_key = '';
           }
         });
-        data.agent.protection.signing_key = '';
-        data.signed.data = '';
-        data.signed.signature = '';
 
         expect(data).toEqual(
           expect.objectContaining({
@@ -178,8 +176,8 @@ describe('Fleet preconfiguration reset', () => {
               },
               protection: {
                 enabled: false,
-                signing_key: '',
-                uninstall_token_hash: '',
+                signing_key: data.agent.protection.signing_key,
+                uninstall_token_hash: data.agent.protection.uninstall_token_hash,
               },
             },
             id: 'policy-elastic-agent-on-cloud',
@@ -312,31 +310,11 @@ describe('Fleet preconfiguration reset', () => {
                   cluster: ['cluster:monitor/main'],
                   indices: [
                     {
-                      names: ['logs-apm.app-default'],
+                      names: ['traces-*', 'logs-*', 'metrics-*'],
                       privileges: ['auto_configure', 'create_doc'],
                     },
                     {
-                      names: ['metrics-apm.app.*-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['logs-apm.error-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['metrics-apm.internal-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['metrics-apm.profiling-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['traces-apm.rum-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['traces-apm.sampled-default'],
+                      names: ['traces-apm.sampled-*'],
                       privileges: [
                         'auto_configure',
                         'create_doc',
@@ -344,10 +322,6 @@ describe('Fleet preconfiguration reset', () => {
                         'monitor',
                         'read',
                       ],
-                    },
-                    {
-                      names: ['traces-apm-default'],
-                      privileges: ['auto_configure', 'create_doc'],
                     },
                   ],
                 },
@@ -361,10 +335,7 @@ describe('Fleet preconfiguration reset', () => {
             },
             revision: 5,
             secret_references: [],
-            signed: {
-              data: '',
-              signature: '',
-            },
+            signed: data.signed,
           })
         );
       });

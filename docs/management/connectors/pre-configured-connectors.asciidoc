@@ -58,7 +58,7 @@ Sensitive properties, such as passwords, can also be stored in the
 ==============================================
 
 [float]
-[[managing-pre-configured-connectors]]
+[[managing-preconfigured-connectors]]
 === View preconfigured connectors
 
 When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
@@ -71,7 +71,7 @@ image::images/preconfigured-connectors-managing.png[Connectors managing tab with
 Clicking a preconfigured connector shows the description, but not the configuration.
 
 [float]
-[[build-in-preconfigured-connectors]]
+[[built-in-preconfigured-connectors]]
 === Built-in preconfigured connectors
 
 {kib} provides the following built-in preconfigured connectors:
@@ -104,16 +104,26 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 ====
 
 [float]
+[[preconfigured-connector-examples]]
 === Examples
 
 * <<preconfigured-d3security-configuration>>
+* <<preconfigured-email-configuration>>
+* <<preconfigured-gen-ai-configuration>>
 * <<preconfigured-resilient-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
+* <<preconfigured-teams-configuration>>
 * <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
+* <<preconfigured-servicenow-itom-configuration>>
+* <<preconfigured-servicenow-configuration>>
+* <<preconfigured-servicenow-sir-configuration>>
 * <<preconfigured-slack-configuration>>
+* <<preconfigured-swimlane-configuration>>
+* <<preconfigured-torq-configuration>>
+* <<preconfigured-tines-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
@@ -137,6 +147,165 @@ xpack.actions.preconfigured:
 --
 <1> The D3 Security API request URL.
 <2> The D3 Security token.
+
+[float]
+[[preconfigured-email-configuration]]
+==== Email connectors
+
+The following example creates an <<email-action-type,email connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-email:
+    name: preconfigured-email-connector-type
+    actionTypeId: .email
+    config:
+      service: other <1>
+      from: testsender@test.com <2>
+      host: validhostname <3>
+      port: 8080 <4>
+      secure: false <5>
+      hasAuth: true <6>
+    secrets:
+      user: testuser <7>
+      password: passwordkeystorevalue <8>
+--
+
+<1> The name of the email service. If `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, the `host`, `port`, and `secure` properties are ignored. If `service` is `other`, the `host` and `port` properties must be defined. For more information on the `gmail` service value, refer to https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation]. If `service` is `exchange_server`, the `tenantId`, `clientId`, `clientSecret` 
+properties are required instead of `host` and `port`.
+<2> The email address for all emails sent with this connector. It must be specified in `user@host-name` format. 
+<3> The host name of the service provider.
+<4> The port to connect to on the service provider.
+<5> If true, the connection will use TLS when connecting to the service provider. 
+<6> If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+<7> A user name for authentication. Required if `hasAuth` is set to `true`.
+<8> A password for authentication. Should be stored in the <<creating-keystore,{kib} keystore>>. Required if `hasAuth` is set to `true`.
+
+
+[float]
+[[preconfigured-email-configuration-amazon-ses]]
+===== Amazon SES (Simple Email Service)
+
+Use the following email connector configuration to send email from the
+http://aws.amazon.com/ses[Amazon Simple Email Service] (SES) SMTP service:
+
+[source,text]
+--------------------------------------------------
+config:
+    service: ses
+    // `host`, `port` and `secure` have the following default values and do not need to set: 
+    // host: email-smtp.us-east-1.amazonaws.com <1>
+    // port: 465
+    // secure: true
+secrets:
+    user: <username>
+    password: <password>
+--------------------------------------------------
+<1> `config.host` varies depending on the region
+
+[float]
+[[preconfigured-email-configuration-gmail]]
+===== Gmail
+
+Use the following email connector configuration to send email from the https://mail.google.com[Gmail] SMTP service:
+
+[source,text]
+--------------------------------------------------
+  config:
+    service: gmail
+    // `host`, `port` and `secure` have the following default values and do not need to set: 
+    // host: smtp.gmail.com
+    // port: 465
+    // secure: true
+  secrets:
+    user: <username>
+    password: <password>
+--------------------------------------------------
+
+[float]
+[[preconfigured-email-configuration-exchange-basic-auth]]
+===== Microsoft Exchange with basic authentication
+
+deprecated:[7.16.0,"This Microsoft Exchange configuration is deprecated and will be removed later because Microsoft is deprecating basic authentication."]
+
+[source,text]
+--------------------------------------------------
+config:
+    service: other
+    host: <your exchange server>
+    port: 465
+    secure: true
+    from: <email address of service account> <1>
+secrets:
+    user: <email address of service account> <2>
+    password: <password>
+--------------------------------------------------
+<1> Some organizations configure Exchange to validate that the `from` field is a valid local email account.
+<2> Many organizations support use of your email address as your username. Check with your system administrator if you receive authentication-related failures.
+
+[float]
+[[preconfigured-email-configuration-exchange]]
+===== Microsoft Exchange with OAuth 2.0
+
+Use the following email connector configuration to send email from Microsoft Exchange:
+
+[source,text]
+--------------------------------------------------
+config:
+    service: exchange_server
+    clientId: <The Application (client) ID> <1>
+    tenantId: <The directory tenant ID, in GUID format.>
+    from: <email address of service account> <2>
+secrets:
+    clientSecret: <URL-encoded string>
+--------------------------------------------------
+<1> This application information is on the https://go.microsoft.com/fwlink/?linkid=2083908[Azure portal – App registrations].
+<2> Some organizations configure Exchange to validate that the `from` field is a valid local email account.
+
+[float]
+[[preconfigured-email-configuration-outlook]]
+===== Outlook.com
+
+Use the following email connector configuration to send email from the
+https://www.outlook.com/[Outlook.com] SMTP service:
+
+[source,text]
+--------------------------------------------------
+config:
+    service: outlook365
+    // `host`, `port` and `secure` have the following default values and do not need to set: 
+    // host: smtp.office365.com
+    // port: 587
+    // secure: false
+secrets:
+    user: <email.address>
+    password: <password>
+--------------------------------------------------
+
+[float]
+[[preconfigured-gen-ai-configuration]]
+==== OpenAI connectors
+
+The following example creates a <<openai-action-type,OpenAI connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-open-ai:
+    name: preconfigured-openai-connector-type
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://api.openai.com/v1/chat/completions <1>
+      apiProvider: 'OpenAI' <2>
+      defaultModel: gpt-4 <3>
+    secrets:
+      apiKey: superlongapikey <4>
+--
+<1> The OpenAI request URL
+<2> The OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
+<3> The default model to use for requests. This setting is optional and applicable only when `apiProvider` is `OpenAI`.
+<4> The OpenAI or Azure OpenAI API key for authentication.
 
 [float]
 [[preconfigured-resilient-configuration]]
@@ -276,6 +445,154 @@ xpack.actions.preconfigured:
     actionTypeId: .server-log
 --
 
+[float]
+[[preconfigured-servicenow-itom-configuration]]
+==== {sn-itom} connectors
+
+The following example creates a <<servicenow-itom-action-type,{sn-itom} connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow-itom:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/ <1>
+    secrets:
+      username: testuser <2>
+      password: passwordkeystorevalue <3>
+--
+<1> The ServiceNow instance URL.
+<2> A user name.
+<3> A password. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+The following example creates a {sn-itom} connector with OAuth authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
+    secrets:
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+--
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to your OAuth application.
+<4> The key identifier assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to your OAuth application.
+<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+
+[float]
+[[preconfigured-servicenow-configuration]]
+==== {sn-itsm} connectors
+
+The following example creates a <<servicenow-action-type,{sn-itsm} connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/ <1>
+      usesTableApi: false <2>
+    secrets:
+      username: testuser <3>
+      password: passwordkeystorevalue <4>
+--
+<1> The ServiceNow instance URL.
+<2> Specifies whether the connector uses the Table API or the Import Set API. If `usesTableApi` is `false`, the Elastic application should be installed in {sn}.
+<3> The user name.
+<4> The password. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+The following example creates a {sn-itsm} connector with OAuth authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
+    secrets:
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+--
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to your OAuth application.
+<4> The key ID assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to the OAuth application.
+<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+
+[float]
+[[preconfigured-servicenow-sir-configuration]]
+==== {sn-sir} connectors
+
+The following example creates a <<servicenow-sir-action-type,{sn-sir} connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow-sir:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow-sir
+    config:
+      apiUrl: https://example.service-now.com/ <1>
+      usesTableApi: false <2>
+    secrets:
+      username: testuser <3>
+      password: passwordkeystorevalue <4>
+--
+<1> The ServiceNow instance URL.
+<2> Specifies whether the connector uses the Table API or the Import Set API. If `usesTableApi` is false, the Elastic application should be installed in {sn}.
+<3> The user name.
+<4> The password. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>. 
+
+The following example creates a {sn-sir} connector with OAuth authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-sir
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true <1>
+      userIdentifierValue: testuser@email.com <2>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
+    secrets:
+      clientSecret: secretsecret <5>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+--
+<1> Specifies whether the connector uses basic or OAuth authentication.
+<2> The user identifier.
+<3> The client identifier assigned to the OAuth application.
+<4> The key ID assigned to the JWT verifier map of your OAuth application.
+<5> The client secret assigned to the OAuth application.
+<6> The RSA private key. If it has a password, you must also specify
+`privateKeyPassword`.
+
 
 [float]
 [[preconfigured-slack-configuration]]
@@ -308,6 +625,107 @@ xpack.actions.preconfigured:
 <1> The Slack bot user OAuth token.
 
 [float]
+[[preconfigured-swimlane-configuration]]
+==== Swimlane connectors
+
+The following example creates a <<swimlane-action-type,Swimlane connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-swimlane:
+    name: preconfigured-swimlane-connector-type
+    actionTypeId: .swimlane
+    config:
+      apiUrl: https://elastic.swimlaneurl.us <1>
+      appId: app-id <2>
+      mappings: <3>
+        alertIdConfig:
+          fieldType: text
+          id: agp4s
+          key: alert-id
+          name: Alert ID 
+        caseIdConfig:
+          fieldType: text
+          id: ae1mi
+          key: case-id
+          name: Case ID
+        caseNameConfig:
+          fieldType: text
+          id: anxnr
+          key: case-name
+          name: Case Name
+        commentsConfig:
+          fieldType: comments
+          id: au18d
+          key: comments
+          name: Comments
+        descriptionConfig:
+          fieldType: text 
+          id: ae1gd
+          key: description 
+          name: Description 
+        ruleNameConfig:
+          fieldType: text
+          id: avfsl
+          key: rule-name
+          name: Rule Name
+        severityConfig:
+          fieldType: text
+          id: a71ik
+          key: severity
+          name: severity
+    secrets:
+      apiToken: tokenkeystorevalue <4>
+--
+<1> The {swimlane} instance URL.
+<2> The {swimlane} application identifier.
+<3> Field mappings for properties such as the alert identifer, severity, and rule name.
+<4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+[float]
+[[preconfigured-tines-configuration]]
+==== Tines connectors
+
+The following example creates a <<tines-action-type,Tines connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+my-tines:
+    name: preconfigured-tines-connector-type
+    actionTypeId: .tines
+    config:
+      url: https://some-tenant-2345.tines.com <1>
+    secrets:
+      email: some.address@test.com <2>
+      token: ausergeneratedapitoken <3>
+--
+<1> The Tines tenant URL.
+<2> The email used to sign in to Tines.
+<3> The Tines API token.
+
+[float]
+[[preconfigured-torq-configuration]]
+==== Torq connectors
+
+The following example creates a <<torq-action-type,Torq connector>>:
+
+[source,yaml]
+--
+xpack.actions.preconfigured:
+  my-torq:
+    name: preconfigured-torq-connector-type
+    actionTypeId: .torq
+    config:
+      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook <1>
+    secrets:
+      token: mytorqtoken <2>
+--
+<1> The endpoint URL of the Elastic Security integration in Torq.
+<2> The secret of the webhook authentication header.
+
+[float]
 [[preconfigured-webhook-configuration]]
 ==== Webhook connectors
 
@@ -338,7 +756,6 @@ xpack.actions.preconfigured:
 <6> A valid password. Required if `hasAuth` is set to `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 NOTE: SSL authentication is not supported in preconfigured webhook connectors.
-
 
 [float]
 [[preconfigured-cases-webhook-configuration]]
@@ -398,7 +815,7 @@ The following example creates an <<xmatters-action-type,xMatters connector>> wit
 [source,text]
 --
 xpack.actions.preconfigured:
-my-xmatters:
+  my-xmatters:
     name: preconfigured-xmatters-connector-type
     actionTypeId: .xmatters
     config:

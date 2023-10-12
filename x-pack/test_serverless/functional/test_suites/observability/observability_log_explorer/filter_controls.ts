@@ -8,15 +8,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['observabilityLogExplorer']);
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
 
   describe('Filter controls customization', () => {
     before('initialize tests', async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await PageObjects.svlCommonPage.login();
     });
 
     after('clean up archives', async () => {
+      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 

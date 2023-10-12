@@ -5,6 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface IntegrationPackage {
@@ -98,6 +101,9 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
+const FROM = '2023-08-03T10:24:14.035Z';
+const TO = '2023-08-03T10:24:14.091Z';
+
 export function ObservabilityLogExplorerPageObject({
   getPageObjects,
   getService,
@@ -108,7 +114,12 @@ export function ObservabilityLogExplorerPageObject({
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
-  type NavigateToAppOptions = Parameters<typeof PageObjects['common']['navigateToApp']>[1];
+  type NavigateToAppOptions = Omit<
+    Parameters<typeof PageObjects['common']['navigateToApp']>[1],
+    'search'
+  > & {
+    search?: Record<string, string>;
+  };
 
   return {
     uninstallPackage: ({ name, version }: IntegrationPackage) => {
@@ -171,8 +182,19 @@ export function ObservabilityLogExplorerPageObject({
       };
     },
 
-    async navigateTo(options?: NavigateToAppOptions) {
-      return await PageObjects.common.navigateToApp('observabilityLogExplorer', options);
+    async navigateTo(options: NavigateToAppOptions = {}) {
+      const { search = {}, ...extraOptions } = options;
+      const composedSearch = querystring.stringify({
+        ...search,
+        _g: rison.encode({
+          time: { from: FROM, to: TO },
+        }),
+      });
+
+      return await PageObjects.common.navigateToApp('observabilityLogExplorer', {
+        search: composedSearch,
+        ...extraOptions,
+      });
     },
 
     getDatasetSelector() {
@@ -180,7 +202,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getDatasetSelectorButton() {
-      return testSubjects.find('datasetSelectorPopoverButton');
+      return testSubjects.find('datasetSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
     getDatasetSelectorContent() {
@@ -191,12 +213,36 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.find('datasetSelectorSearchControls');
     },
 
-    getDatasetSelectorContextMenu() {
-      return testSubjects.find('datasetSelectorContextMenu');
+    getIntegrationsContextMenu() {
+      return testSubjects.find('integrationsContextMenu');
     },
 
-    getDatasetSelectorContextMenuPanelTitle() {
-      return testSubjects.find('contextMenuPanelTitleButton');
+    getIntegrationsTab() {
+      return testSubjects.find('datasetSelectorIntegrationsTab');
+    },
+
+    getUncategorizedContextMenu() {
+      return testSubjects.find('uncategorizedContextMenu');
+    },
+
+    getUncategorizedTab() {
+      return testSubjects.find('datasetSelectorUncategorizedTab');
+    },
+
+    getDataViewsContextMenu() {
+      return testSubjects.find('dataViewsContextMenu');
+    },
+
+    getDataViewsContextMenuTitle(panelTitleNode: WebElementWrapper) {
+      return panelTitleNode.getVisibleText().then((title) => title.split('\n')[0]);
+    },
+
+    getDataViewsTab() {
+      return testSubjects.find('datasetSelectorDataViewsTab');
+    },
+
+    getPanelTitle(contextMenu: WebElementWrapper) {
+      return contextMenu.findByClassName('euiContextMenuPanelTitle');
     },
 
     async getDatasetSelectorButtonText() {
@@ -204,13 +250,12 @@ export function ObservabilityLogExplorerPageObject({
       return button.getVisibleText();
     },
 
-    async getCurrentPanelEntries() {
-      const contextMenu = await this.getDatasetSelectorContextMenu();
-      return contextMenu.findAllByClassName('euiContextMenuItem', 2000);
+    getPanelEntries(contextMenu: WebElementWrapper) {
+      return contextMenu.findAllByCssSelector('.euiContextMenuItem:not([disabled])', 2000);
     },
 
     getAllLogDatasetsButton() {
-      return testSubjects.find('allLogDatasets');
+      return testSubjects.find('datasetSelectorshowAllLogs');
     },
 
     getUnmanagedDatasetsButton() {
@@ -218,9 +263,9 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async getIntegrations() {
-      const content = await this.getDatasetSelectorContent();
+      const menu = await this.getIntegrationsContextMenu();
 
-      const nodes = await content.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
+      const nodes = await menu.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
       const integrations = await Promise.all(nodes.map((node) => node.getVisibleText()));
 
       return {
@@ -266,7 +311,7 @@ export function ObservabilityLogExplorerPageObject({
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       await searchField.clearValueWithKeyboard();
-      return searchField.type(name);
+      return searchField.type(name, { charByChar: true });
     },
 
     async clearSearchField() {
@@ -287,32 +332,18 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.existOrFail('datasetSelectorSkeleton');
     },
 
-    async assertNoIntegrationsPromptExists() {
-      const integrationStatus = await testSubjects.find('integrationStatusItem');
-      const promptTitle = await integrationStatus.findByTagName('h2');
+    async assertListStatusEmptyPromptExistsWithTitle(title: string) {
+      const [listStatus] = await testSubjects.findAll('datasetSelectorListStatusEmptyPrompt');
+      const promptTitle = await listStatus.findByTagName('h2');
 
-      expect(await promptTitle.getVisibleText()).to.be('No integrations found');
+      expect(await promptTitle.getVisibleText()).to.be(title);
     },
 
-    async assertNoIntegrationsErrorExists() {
-      const integrationStatus = await testSubjects.find('integrationsErrorPrompt');
-      const promptTitle = await integrationStatus.findByTagName('h2');
+    async assertListStatusErrorPromptExistsWithTitle(title: string) {
+      const listStatus = await testSubjects.find('datasetSelectorListStatusErrorPrompt');
+      const promptTitle = await listStatus.findByTagName('h2');
 
-      expect(await promptTitle.getVisibleText()).to.be('No integrations found');
-    },
-
-    async assertNoDataStreamsPromptExists() {
-      const integrationStatus = await testSubjects.find('emptyDatasetPrompt');
-      const promptTitle = await integrationStatus.findByTagName('h2');
-
-      expect(await promptTitle.getVisibleText()).to.be('No data streams found');
-    },
-
-    async assertNoDataStreamsErrorExists() {
-      const integrationStatus = await testSubjects.find('datasetErrorPrompt');
-      const promptTitle = await integrationStatus.findByTagName('h2');
-
-      expect(await promptTitle.getVisibleText()).to.be('No data streams found');
+      expect(await promptTitle.getVisibleText()).to.be(title);
     },
 
     getHeaderMenu() {
@@ -321,6 +352,10 @@ export function ObservabilityLogExplorerPageObject({
 
     getDiscoverFallbackLink() {
       return testSubjects.find('logExplorerDiscoverFallbackLink');
+    },
+
+    getOnboardingLink() {
+      return testSubjects.find('logExplorerOnboardingLink');
     },
 
     // Query Bar

@@ -29,6 +29,15 @@ export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQue
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
 
+type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
+  | {
+      text: string;
+    }
+  | {
+      texts: string[];
+    }
+);
+
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
@@ -50,9 +59,6 @@ export class ObservabilityAIAssistantService {
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
       kb: getResourceName('index-template-kb'),
-    },
-    ilmPolicy: {
-      conversations: getResourceName('ilm-policy-conversations'),
     },
     pipelines: {
       kb: getResourceName('kb-ingest-pipeline'),
@@ -101,23 +107,6 @@ export class ObservabilityAIAssistantService {
         create: false,
         name: this.resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
-      });
-
-      await esClient.ilm.putLifecycle({
-        name: this.resourceNames.ilmPolicy.conversations,
-        policy: {
-          phases: {
-            hot: {
-              min_age: '0s',
-              actions: {
-                rollover: {
-                  max_age: '90d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        },
       });
 
       await esClient.indices.putIndexTemplate({
@@ -258,18 +247,7 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  addToKnowledgeBase(
-    entries: Array<
-      | {
-          id: string;
-          text: string;
-        }
-      | {
-          id: string;
-          texts: string[];
-        }
-    >
-  ): void {
+  addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
         this.kbService!.queue(
@@ -281,6 +259,7 @@ export class ObservabilityAIAssistantService {
               confidence: 'high' as const,
               is_correction: false,
               labels: {
+                ...entry.labels,
                 document_id: entry.id,
               },
             };
@@ -305,5 +284,19 @@ export class ObservabilityAIAssistantService {
         );
         this.logger.error(error);
       });
+  }
+
+  addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
+    this.addToKnowledgeBase(
+      entries.map((entry) => {
+        return {
+          ...entry,
+          labels: {
+            ...entry.labels,
+            category: categoryId,
+          },
+        };
+      })
+    );
   }
 }
