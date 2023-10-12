@@ -13,4 +13,7 @@ echo "--- Serverless Security Second Quality Gate"
 cd x-pack/test/security_solution_cypress
 set +e
 
-CYPRESS_ELASTICSEARCH_URL=$TEST_ENV_ES_URL CYPRESS_BASE_URL=$TEST_ENV_KB_URL CYPRESS_ELASTICSEARCH_USERNAME=$TEST_ENV_USERNAME CYPRESS_ELASTICSEARCH_PASSWORD=$TEST_ENV_PWD CYPRESS_KIBANA_URL=$CYPRESS_BASE_URL yarn cypress:run:qa:serverless; status=$?; yarn junit:merge || :; exit $status
+VAULT_DEC_KEY=$(vault read -field=key secret/kibana-issues/dev/security-solution-qg-enc-key)
+ENV_PWD=$(echo $TEST_ENV_PWD | openssl aes-256-cbc -d -a -pass pass:$VAULT_DEC_KEY)
+
+CYPRESS_ELASTICSEARCH_URL=$TEST_ENV_ES_URL CYPRESS_BASE_URL=$TEST_ENV_KB_URL CYPRESS_ELASTICSEARCH_USERNAME=$TEST_ENV_USERNAME CYPRESS_ELASTICSEARCH_PASSWORD=$ENV_PWD CYPRESS_KIBANA_URL=$CYPRESS_BASE_URL yarn cypress:run:qa:serverless; status=$?; yarn junit:merge || :; exit $status
