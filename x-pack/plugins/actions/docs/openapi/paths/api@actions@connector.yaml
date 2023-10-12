@@ -1,8 +1,6 @@
 post:
   summary: Creates a connector.
   operationId: createConnector
-  description: >
-    You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   tags:
     - connectors
   parameters:
@@ -12,32 +10,7 @@ post:
     content:
       application/json:
         schema:
-          title: Create connector request body properties
-          description: The properties vary depending on the connector type.
-          oneOf:
-            - $ref: '../components/schemas/create_connector_request_cases_webhook.yaml'
-            - $ref: '../components/schemas/create_connector_request_d3security.yaml'
-            - $ref: '../components/schemas/create_connector_request_email.yaml'
-            - $ref: '../components/schemas/create_connector_request_genai.yaml'
-            - $ref: '../components/schemas/create_connector_request_index.yaml'
-            - $ref: '../components/schemas/create_connector_request_jira.yaml'
-            - $ref: '../components/schemas/create_connector_request_opsgenie.yaml'
-            - $ref: '../components/schemas/create_connector_request_pagerduty.yaml'
-            - $ref: '../components/schemas/create_connector_request_resilient.yaml'
-            - $ref: '../components/schemas/create_connector_request_serverlog.yaml'
-            - $ref: '../components/schemas/create_connector_request_servicenow.yaml'
-            - $ref: '../components/schemas/create_connector_request_servicenow_itom.yaml'
-            - $ref: '../components/schemas/create_connector_request_servicenow_sir.yaml'
-            - $ref: '../components/schemas/create_connector_request_slack_api.yaml'
-            - $ref: '../components/schemas/create_connector_request_slack_webhook.yaml'
-            - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
-            - $ref: '../components/schemas/create_connector_request_teams.yaml'
-            - $ref: '../components/schemas/create_connector_request_tines.yaml'
-            - $ref: '../components/schemas/create_connector_request_torq.yaml'
-            - $ref: '../components/schemas/create_connector_request_webhook.yaml'
-            - $ref: '../components/schemas/create_connector_request_xmatters.yaml'
-          discriminator:
-            propertyName: connector_type_id
+          $ref: '../components/schemas/create_connector_request.yaml'
         examples:
           createEmailConnectorRequest:
             $ref: '../components/examples/create_email_connector_request.yaml'

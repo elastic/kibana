@@ -57,7 +57,7 @@ get:
                     - siem
           examples:
             getConnectorTypesServerlessResponse:
-              $ref: '../components/examples/get_connector_types_serverless_response.yaml'
+              $ref: '../components/examples/get_connector_types_generativeai_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
   servers:
