@@ -233,6 +233,7 @@ const getSetupFormatOptions = (): Array<{
   id: SetupFormatGCP;
   label: string;
   disabled: boolean;
+  testId: string;
 }> => [
   {
     id: SETUP_ACCESS_CLOUD_SHELL,
@@ -240,6 +241,7 @@ const getSetupFormatOptions = (): Array<{
       defaultMessage: 'Google Cloud Shell',
     }),
     disabled: false,
+    testId: 'gcpGoogleCloudShellOptionTestId',
   },
   {
     id: SETUP_ACCESS_MANUAL,
@@ -247,6 +249,7 @@ const getSetupFormatOptions = (): Array<{
       defaultMessage: 'Manual',
     }),
     disabled: false,
+    testId: 'gcpManualOptionTestId',
   },
 ];
 
