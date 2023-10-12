@@ -10,13 +10,7 @@ import {
   type EuiDataGridControlColumn,
   type EuiDataGridCustomBodyProps,
   type EuiDataGridProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHideFor,
-  useEuiTheme,
-  EuiPanel,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -30,15 +24,6 @@ import { UnifiedDataTable, useColumns, DataLoadingState } from '@kbn/unified-dat
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DropType } from '@kbn/dom-drag-drop';
-import { DragDrop, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
-import type {
-  UnifiedFieldListSidebarContainerApi,
-  UnifiedFieldListSidebarContainerProps,
-} from '@kbn/unified-field-list';
-import { FieldsGroupNames, UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
-import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ExpandedDetailTimeline,
@@ -67,7 +52,7 @@ import { getDefaultControlColumn } from '../body/control_columns';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { Actions } from '../../../../common/components/header_actions/actions';
-import { getColumnHeader } from '../body/column_headers/helpers';
+import { getColumnHeaderUnified } from '../body/column_headers/helpers';
 import { eventIsPinned } from '../body/helpers';
 import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
 import { getFormattedFields } from '../body/renderers/formatted_field';
@@ -76,60 +61,9 @@ import { timelineBodySelector } from '../body/selectors';
 import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
 import { RowRendererId } from '../../../../../common/api/timeline';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
-import { StyledPageContentWrapper, StyledTimelineUnifiedDataTable, progressStyle } from './styles';
+import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
 import CustomGridBodyControls from './render_custom_body';
 import RowDetails from './row_details';
-import { DRAG_DROP_FIELD } from './translations';
-import { TimelineResizableLayout } from './resizable_layout';
-
-const DROP_PROPS = {
-  value: {
-    id: 'dscDropZoneTable',
-    humanData: {
-      label: DRAG_DROP_FIELD,
-    },
-  },
-  order: [1, 0, 0, 0],
-  types: ['field_add'] as DropType[],
-};
-
-const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
-  return {
-    originatingApp: 'security_solution',
-    localStorageKeyPrefix: 'securitySolution',
-    timeRangeUpdatesType: 'timefilter',
-    compressed: true,
-    showSidebarToggleButton: true,
-    disablePopularFields: false,
-    buttonAddFieldToWorkspaceProps: {
-      'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-        defaultMessage: 'Add field as column',
-      }),
-    },
-    buttonRemoveFieldFromWorkspaceProps: {
-      'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-        defaultMessage: 'Remove field from table',
-      }),
-    },
-    onOverrideFieldGroupDetails: (groupName) => {
-      if (groupName === FieldsGroupNames.AvailableFields) {
-        return {
-          helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
-            defaultMessage: 'Fields available for display in the table.',
-          }),
-        };
-      }
-    },
-    dataTestSubj: {
-      fieldListAddFieldButtonTestSubj: 'dataView-add-field_btn',
-      fieldListSidebarDataTestSubj: 'discover-sidebar',
-      fieldListItemStatsDataTestSubj: 'dscFieldStats',
-      fieldListItemDndDataTestSubjPrefix: 'dscFieldListPanelField',
-      fieldListItemPopoverDataTestSubj: 'discoverFieldListPanelPopover',
-      fieldListItemPopoverHeaderDataTestSubjPrefix: 'discoverFieldListPanel',
-    },
-  };
-};
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -152,6 +86,7 @@ interface Props {
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
   updatedAt: number;
+  isTextBasedQuery?: boolean;
 }
 
 export const TimelineDataTableComponent: React.FC<Props> = ({
@@ -171,9 +106,9 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   expandedDetail,
   onChangePage,
   updatedAt,
+  isTextBasedQuery = false,
 }) => {
   const dispatch = useDispatch();
-  const { euiTheme } = useEuiTheme();
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
@@ -182,9 +117,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     enableIpDetailsFlyout: true,
     tabType: activeTab,
   });
-
-  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
-    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   const {
     services: {
@@ -197,42 +129,40 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       application: { capabilities },
       theme,
       data: dataPluginContract,
-      uiActions,
-      charts,
-      docLinks,
     },
   } = useKibana();
 
-  const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
-    () => ({
-      fieldFormats,
-      dataViews,
-      dataViewFieldEditor,
-      data: dataPluginContract,
-      uiActions,
-      charts,
-      core: {
-        uiSettings,
-        docLinks,
-      } as CoreStart,
-    }),
-    [
-      fieldFormats,
-      dataViews,
-      dataViewFieldEditor,
-      dataPluginContract,
-      uiActions,
-      charts,
-      uiSettings,
-      docLinks,
-    ]
-  );
-
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const [fetchedPage, setFechedPage] = useState<number>(0);
   const trGroupRef = useRef<HTMLDivElement | null>(null);
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
-  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
+  const { browserFields, runtimeMappings, sourcererDataView } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
+  const dataView = useMemo(() => {
+    if (sourcererDataView != null) {
+      return new DataView({ spec: sourcererDataView, fieldFormats });
+    } else {
+      return undefined;
+    }
+  }, [sourcererDataView, fieldFormats]);
+  const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
+  const defaultColumns = useMemo(() => {
+    return columns.map((c) => c.id);
+  }, [columns]);
+  const tableSettings = useMemo(
+    () => ({
+      columns: columns.reduce((v, s) => {
+        if (s.initialWidth) {
+          v[s.id] = { width: s.initialWidth };
+        }
+        return v;
+      }, {} as Record<string, UnifiedDataTableSettingsColumn>),
+    }),
+    [columns]
+  );
 
   const {
     timeline: {
@@ -244,21 +174,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       pinnedEventIds,
     } = timelineDefaults,
   } = useSelector((state: State) => timelineBodySelector(state, timelineId));
-
-  const defaultColumns = useMemo(() => {
-    return columns.map((c) => c.id);
-  }, [columns]);
-  const { browserFields, runtimeMappings, sourcererDataView } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
-
-  const dataView = useMemo(() => {
-    if (sourcererDataView != null) {
-      return new DataView({ spec: sourcererDataView, fieldFormats });
-    } else {
-      return undefined;
-    }
-  }, [sourcererDataView, fieldFormats]);
 
   const onToggleShowNotes = useCallback((event: DataTableRecord) => {
     const eventId = event.id;
@@ -278,45 +193,42 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     });
   }, []);
 
-  const isEnterprisePlus = useLicense().isEnterprise();
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-
   // const { activeStep, isTourShown, incrementStep } = useTourContext();
 
   /* const isTourAnchor = useMemo(
-    () =>
-      isTourShown(SecurityStepId.alertsCases) &&
-      eventType === 'signal' &&
-      isDetectionsAlertsTable(timelineId) &&
-      ariaRowindex === 1,
-    [isTourShown, ariaRowindex, eventType, timelineId]
-  );
-  const onExpandEvent = useCallback(() => {
-    if (
-      isTourAnchor &&
-      activeStep === AlertsCasesTourSteps.expandEvent &&
-      isTourShown(SecurityStepId.alertsCases)
-    ) {
-      incrementStep(SecurityStepId.alertsCases);
-    }
-    onEventDetailsPanelOpened();
-  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);*/
+      () =>
+        isTourShown(SecurityStepId.alertsCases) &&
+        eventType === 'signal' &&
+        isDetectionsAlertsTable(timelineId) &&
+        ariaRowindex === 1,
+      [isTourShown, ariaRowindex, eventType, timelineId]
+    );
+    const onExpandEvent = useCallback(() => {
+      if (
+        isTourAnchor &&
+        activeStep === AlertsCasesTourSteps.expandEvent &&
+        isTourShown(SecurityStepId.alertsCases)
+      ) {
+        incrementStep(SecurityStepId.alertsCases);
+      }
+      onEventDetailsPanelOpened();
+    }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);*/
 
   /* const onRowSelected: OnRowSelected = useCallback(
-    ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-      dispatch(
-        timelineActions.setSelected({
-          id,
-          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
-          isSelected,
-          isSelectAllChecked:
-            isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
-        })
-      );
-    },
-    [data, dispatch, id, queryFields, selectedEventIds]
-  );*/
+      ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
+        dispatch(
+          timelineActions.setSelected({
+            id,
+            eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
+            isSelected,
+            isSelectAllChecked:
+              isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
+          })
+        );
+      },
+      [data, dispatch, id, queryFields, selectedEventIds]
+    );*/
+
   const discoverGridRows: Array<DataTableRecord & TimelineItem> = useMemo(
     () =>
       events.map(({ _id, _index, ecs, data }) => {
@@ -349,6 +261,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     },
     [dispatch, timelineId]
   );
+
+  // Event details
   const handleOnEventDetailPanelOpened = useCallback(
     (eventData: DataTableRecord & TimelineItem) => {
       const updatedExpandedDetail: ExpandedDetailType = {
@@ -371,6 +285,47 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
     },
     [dispatch, refetch, timelineId]
+  );
+
+  const handleOnPanelClosed = useCallback(() => {
+    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
+
+    if (
+      expandedDetail[TimelineTabs.query]?.panelView &&
+      timelineId === TimelineId.active &&
+      showExpandedDetails
+    ) {
+      activeTimeline.toggleExpandedDetail({});
+    }
+  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+
+  const renderDetailsPanel = useCallback(
+    () => (
+      <DetailsPanel
+        browserFields={browserFields}
+        handleOnPanelClosed={handleOnPanelClosed}
+        runtimeMappings={runtimeMappings}
+        tabType={TimelineTabs.query}
+        scopeId={timelineId}
+        isFlyoutView
+      />
+    ),
+    [browserFields, handleOnPanelClosed, runtimeMappings, timelineId]
+  );
+
+  const onSetExpandedDoc = useCallback(
+    (newDoc?: DataTableRecord) => {
+      if (newDoc) {
+        const timelineDoc = discoverGridRows.find((r) => r.id === newDoc.id);
+        setExpandedDoc(timelineDoc);
+        if (timelineDoc) {
+          handleOnEventDetailPanelOpened(timelineDoc);
+        }
+      } else {
+        setExpandedDoc(undefined);
+      }
+    },
+    [discoverGridRows, handleOnEventDetailPanelOpened]
   );
 
   const leadingControlColumns = useMemo(
@@ -467,6 +422,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
+  // Row renderers
   const enabledRowRenderers = useMemo(() => {
     if (
       excludedRowRendererIds &&
@@ -479,7 +435,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
   }, [excludedRowRendererIds, rowRenderers]);
 
-  const renderCustomGridBody = useCallback(
+  const getRowRendererBody = useCallback(
     ({
       Cell,
       visibleRowData,
@@ -499,18 +455,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     ),
     [discoverGridRows, enabledRowRenderers.length, showNotes, timelineId]
   );
-
-  const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
-
-    if (
-      expandedDetail[TimelineTabs.query]?.panelView &&
-      timelineId === TimelineId.active &&
-      showExpandedDetails
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   // The custom row details is actually a trailing control column cell with
   // a hidden header. This is important for accessibility and markup reasons
@@ -547,8 +491,9 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     ],
     [discoverGridRows, enabledRowRenderers, onToggleShowNotes, showNotes, timelineId]
   );
-  const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
-  const { onSetColumns, onAddColumn, onRemoveColumn } = useColumns({
+
+  // Columns management
+  const { onSetColumns } = useColumns({
     capabilities,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     dataView: dataView!,
@@ -558,7 +503,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
         onSort(newState.sort);
       } else {
         const columnsStates = newState.columns.map((columnId) =>
-          getColumnHeader(columnId, defaultHeaders)
+          getColumnHeaderUnified(columnId, defaultHeaders)
         );
         dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
       }
@@ -574,7 +519,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
         timelineActions.updateColumnWidth({
           columnId,
           id: timelineId,
-          width,
+          width, // initialWidth?
         })
       );
     },
@@ -588,8 +533,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [onColumnResize]
   );
 
-  const isTextBasedQuery = false;
-
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       if (dataView && filterManager) {
@@ -601,6 +544,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     },
     [filterManager, dataView, dataViews, capabilities]
   );
+
   const onChangeItemsPerPage = useCallback(
     (itemsChangedPerPage) =>
       dispatch(
@@ -609,78 +553,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const onSetExpandedDoc = useCallback(
-    (newDoc?: DataTableRecord) => {
-      if (newDoc) {
-        const timelineDoc = discoverGridRows.find((r) => r.id === newDoc.id);
-        setExpandedDoc(timelineDoc);
-        if (timelineDoc) {
-          handleOnEventDetailPanelOpened(timelineDoc);
-        }
-      } else {
-        setExpandedDoc(undefined);
-      }
-    },
-    [discoverGridRows, handleOnEventDetailPanelOpened]
-  );
-
-  const [{ dragging }] = useDragDropContext();
-  const draggingFieldName = dragging?.id;
-
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      dispatch(
-        timelineActions.upsertColumn({
-          column: getColumnHeader(columnId, defaultHeaders),
-          id: timelineId,
-          index: 1,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
-
-  const isDropAllowed = useMemo(() => {
-    if (!draggingFieldName || defaultColumns.includes(draggingFieldName)) {
-      return false;
-    }
-    return true;
-  }, [draggingFieldName, defaultColumns]);
-
-  const onDropFieldToTable = useCallback(() => {
-    if (draggingFieldName) {
-      onAddColumn(draggingFieldName);
-      onToggleColumn(draggingFieldName);
-    }
-  }, [draggingFieldName, onAddColumn, onToggleColumn]);
-
-  const tableSettings = useMemo(
-    () => ({
-      columns: columns.reduce((v, s) => {
-        if (s.initialWidth) {
-          v[s.id] = { width: s.initialWidth };
-        }
-        return v;
-      }, {} as Record<string, UnifiedDataTableSettingsColumn>),
-    }),
-    [columns]
-  );
-
-  const renderDetailsPanel = useCallback(
-    () => (
-      <DetailsPanel
-        browserFields={browserFields}
-        handleOnPanelClosed={handleOnPanelClosed}
-        runtimeMappings={runtimeMappings}
-        tabType={TimelineTabs.query}
-        scopeId={timelineId}
-        isFlyoutView
-      />
-    ),
-    [browserFields, handleOnPanelClosed, runtimeMappings, timelineId]
-  );
-
-  const customRenderers = useMemo(
+  const customColumnRenderers = useMemo(
     () =>
       getFormattedFields({
         dataTableRows: discoverGridRows,
@@ -690,7 +563,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [columns, discoverGridRows]
   );
 
-  const handleChangePageClick = useCallback(() => {
+  const handleFetchMoreRecords = useCallback(() => {
     onChangePage(fetchedPage + 1);
     setFechedPage(fetchedPage + 1);
   }, [fetchedPage, onChangePage]);
@@ -702,29 +575,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [columns, timelineId, updatedAt]
   );
 
-  const onAddFieldToWorkspace = useCallback(
-    (field: DataViewField) => {
-      onAddColumn(field.name);
-      onToggleColumn(field.name);
-    },
-    [onAddColumn, onToggleColumn]
-  );
-
-  const onRemoveFieldFromWorkspace = useCallback(
-    (field: DataViewField) => {
-      if (columns.some(({ id }) => id === field.name)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId: field.name,
-            id: timelineId,
-          })
-        );
-      }
-      onRemoveColumn(field.name);
-    },
-    [columns, dispatch, onRemoveColumn, timelineId]
-  );
-
   const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
 
   if (!dataView) {
@@ -732,143 +582,72 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   }
 
   return (
-    <div
-      ref={setSidebarContainer}
-      css={css`
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      `}
-    >
-      <TimelineResizableLayout
-        container={sidebarContainer}
-        unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
-        sidebarPanel={
-          <EuiFlexGroup
-            gutterSize="none"
-            css={css`
-              height: 100%;
-            `}
-          >
-            <EuiFlexItem>
-              <UnifiedFieldListSidebarContainer
-                showFieldList={true}
-                variant="responsive"
-                getCreationOptions={getCreationOptions}
-                services={fieldListSidebarServices}
-                dataView={dataView}
-                fullWidth
-                allFields={dataView.fields}
-                workspaceSelectedFieldNames={defaultColumns}
-                onAddFieldToWorkspace={onAddFieldToWorkspace}
-                onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                onAddFilter={onAddFilter}
-                onFieldEdited={async () => Promise.resolve(refetch())}
-              />
-            </EuiFlexItem>
-            <EuiHideFor sizes={['xs', 's']}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  border-right: ${euiTheme.border.thin};
-                `}
-              />
-            </EuiHideFor>
-          </EuiFlexGroup>
-        }
-        mainPanel={
-          <StyledPageContentWrapper>
-            <EuiPanel
-              role="main"
-              panelRef={setMainContainer}
-              paddingSize="none"
-              borderRadius="none"
-              hasShadow={false}
-              hasBorder={false}
-              color="transparent"
-            >
-              <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                <DragDrop
-                  draggable={false}
-                  dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
-                  value={DROP_PROPS.value}
-                  order={DROP_PROPS.order}
-                  onDrop={onDropFieldToTable}
-                >
-                  <DropOverlayWrapper isVisible={isDropAllowed}>
-                    <StyledTimelineUnifiedDataTable>
-                      {(dataLoadingState === DataLoadingState.loading ||
-                        dataLoadingState === DataLoadingState.loadingMore) && (
-                        <EuiProgress
-                          data-test-subj="discoverDataGridUpdating"
-                          size="xs"
-                          color="accent"
-                          css={progressStyle}
-                        />
-                      )}
-                      <DataGridMemoized
-                        ariaLabelledBy="timelineDocumentsAriaLabel"
-                        className={'udtTimeline'}
-                        columns={defaultColumns}
-                        expandedDoc={expandedDoc}
-                        dataView={dataView}
-                        loadingState={dataLoadingState}
-                        onFilter={onAddFilter as DocViewFilterFn}
-                        onResize={onResizeDataGrid}
-                        onSetColumns={onSetColumns}
-                        onSort={!isTextBasedQuery ? onSort : undefined}
-                        rows={discoverGridRows}
-                        sampleSize={SAMPLE_SIZE_SETTING}
-                        setExpandedDoc={onSetExpandedDoc}
-                        settings={tableSettings}
-                        showTimeCol={showTimeCol}
-                        isSortEnabled={true}
-                        sort={sortingColumns}
-                        rowHeightState={3}
-                        onUpdateRowHeight={() => {}}
-                        isPlainRecord={isTextBasedQuery}
-                        rowsPerPageState={itemsPerPage}
-                        onUpdateRowsPerPage={onChangeItemsPerPage}
-                        onFieldEdited={() => refetch()}
-                        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-                        services={{
-                          theme,
-                          fieldFormats,
-                          storage,
-                          toastNotifications: toastsService,
-                          uiSettings,
-                          dataViewFieldEditor,
-                          data: dataPluginContract,
-                        }}
-                        visibleCellActions={3}
-                        externalCustomRenderers={customRenderers}
-                        renderDocumentView={renderDetailsPanel}
-                        externalControlColumns={
-                          leadingControlColumns as unknown as EuiDataGridControlColumn[]
-                        }
-                        externalAdditionalControls={additionalControls}
-                        // trailingControlColumns={trailingControlColumns}
-                        // renderCustomGridBody={renderCustomGridBody}
-                        rowsPerPageOptions={itemsPerPageOptions}
-                        showFullScreenButton={false}
-                        useNewFieldsApi={true}
-                        maxDocFieldsDisplayed={50}
-                        consumer="timeline"
-                        totalHits={totalCount}
-                        onFetchMoreRecords={handleChangePageClick}
-                        configRowHeight={3}
-                        showMultiFields={true}
-                        cellActionsMetadata={cellActionsMetadata}
-                      />
-                    </StyledTimelineUnifiedDataTable>
-                  </DropOverlayWrapper>
-                </DragDrop>
-              </StatefulEventContext.Provider>
-            </EuiPanel>
-          </StyledPageContentWrapper>
-        }
-      />
-    </div>
+    <StatefulEventContext.Provider value={activeStatefulEventContext}>
+      <StyledTimelineUnifiedDataTable>
+        {(dataLoadingState === DataLoadingState.loading ||
+          dataLoadingState === DataLoadingState.loadingMore) && (
+          <EuiProgress
+            data-test-subj="discoverDataGridUpdating"
+            size="xs"
+            color="accent"
+            css={progressStyle}
+          />
+        )}
+
+        <DataGridMemoized
+          ariaLabelledBy="timelineDocumentsAriaLabel"
+          className={'udtTimeline'}
+          columns={defaultColumns}
+          expandedDoc={expandedDoc}
+          dataView={dataView}
+          loadingState={dataLoadingState}
+          onFilter={onAddFilter as DocViewFilterFn}
+          onResize={onResizeDataGrid}
+          onSetColumns={onSetColumns}
+          onSort={!isTextBasedQuery ? onSort : undefined}
+          rows={discoverGridRows}
+          sampleSize={SAMPLE_SIZE_SETTING}
+          setExpandedDoc={onSetExpandedDoc}
+          settings={tableSettings}
+          showTimeCol={showTimeCol}
+          isSortEnabled={true}
+          sort={sortingColumns}
+          rowHeightState={3}
+          onUpdateRowHeight={() => {}}
+          isPlainRecord={isTextBasedQuery}
+          rowsPerPageState={itemsPerPage}
+          onUpdateRowsPerPage={onChangeItemsPerPage}
+          onFieldEdited={() => refetch()}
+          cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+          services={{
+            theme,
+            fieldFormats,
+            storage,
+            toastNotifications: toastsService,
+            uiSettings,
+            dataViewFieldEditor,
+            data: dataPluginContract,
+          }}
+          visibleCellActions={3}
+          externalCustomRenderers={customColumnRenderers}
+          renderDocumentView={renderDetailsPanel}
+          externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
+          externalAdditionalControls={additionalControls}
+          // trailingControlColumns={trailingControlColumns}
+          // renderCustomGridBody={getRowRendererBody}
+          rowsPerPageOptions={itemsPerPageOptions}
+          showFullScreenButton={false}
+          useNewFieldsApi={true}
+          maxDocFieldsDisplayed={50}
+          consumer="timeline"
+          totalHits={totalCount}
+          onFetchMoreRecords={handleFetchMoreRecords}
+          configRowHeight={3}
+          showMultiFields={true}
+          cellActionsMetadata={cellActionsMetadata}
+        />
+      </StyledTimelineUnifiedDataTable>
+    </StatefulEventContext.Provider>
   );
 };
 

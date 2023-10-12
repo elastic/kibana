@@ -46,10 +46,7 @@ import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
-import {
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-} from '../timeline/body/constants';
+import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 
 import type {
   OpenTimelineResult,
@@ -67,6 +64,7 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -107,7 +105,7 @@ const parseString = (params: string) => {
   }
 };
 
-const setTimelineColumn = (col: ColumnHeaderResult) =>
+const setTimelineColumn = (col: ColumnHeaderResult, defaultHeadersValue: ColumnHeaderOptions[]) =>
   Object.entries(col).reduce<ColumnHeaderOptions>(
     (acc, [key, value]) => {
       if (key !== 'id' && value != null) {
@@ -119,7 +117,9 @@ const setTimelineColumn = (col: ColumnHeaderResult) =>
       columnHeaderType: defaultColumnHeaderType,
       id: col.id != null ? col.id : 'unknown',
       initialWidth:
-        col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+        col.id === '@timestamp'
+          ? DEFAULT_DATE_COLUMN_MIN_WIDTH
+          : defaultHeadersValue.find((defaultCol) => col.id === defaultCol.id)?.initialWidth,
     }
   );
 
@@ -254,13 +254,19 @@ export const getTimelineStatus = (
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
-  timelineType?: TimelineType
+  timelineType?: TimelineType,
+  useDiscoverComponentsInTimeline?: boolean
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineType.template;
+  const defaultHeadersValue = useDiscoverComponentsInTimeline ? defaultUdtHeaders : defaultHeaders;
+
   const timelineEntries = {
     ...timeline,
-    columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
-    defaultColumns: defaultHeaders,
+    columns:
+      timeline.columns != null
+        ? timeline.columns.map((col) => setTimelineColumn(col, defaultHeadersValue))
+        : defaultHeadersValue,
+    defaultColumns: defaultHeadersValue,
     dateRange:
       timeline.status === TimelineStatus.immutable &&
       timeline.timelineType === TimelineType.template
@@ -301,12 +307,18 @@ export const defaultTimelineToTimelineModel = (
 export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
-  timelineType?: TimelineType
+  timelineType?: TimelineType,
+  useDiscoverComponentsInTimeline?: boolean
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
+    timeline: defaultTimelineToTimelineModel(
+      timelineModel,
+      duplicate,
+      timelineType,
+      useDiscoverComponentsInTimeline
+    ),
   };
 };
 
@@ -328,6 +340,7 @@ export interface QueryTimelineById<TCache> {
   }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
   savedSearchId?: string;
+  useDiscoverComponentsInTimeline?: boolean; // temporary til fully migrate
 }
 
 export const queryTimelineById = <TCache>({
@@ -342,6 +355,7 @@ export const queryTimelineById = <TCache>({
   updateIsLoading,
   updateTimeline,
   savedSearchId,
+  useDiscoverComponentsInTimeline = false,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (timelineId == null) {
@@ -368,11 +382,11 @@ export const queryTimelineById = <TCache>({
         if (!data) return;
 
         const timelineToOpen = omitTypenameInTimeline(data.timeline);
-
         const { timeline, notes } = formatTimelineResultToModel(
           timelineToOpen,
           duplicate,
-          timelineType
+          timelineType,
+          useDiscoverComponentsInTimeline
         );
 
         if (onOpenTimeline != null) {

@@ -7,6 +7,22 @@
 
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
+  className: `${className}`,
+}))`
+  margin: 0;
+  width: 100%;
+  overflow: hidden;
+`;
+
+export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
+  className: `${className}`,
+}))`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  overflow: hidden;
+`;
 
 export const progressStyle = css`
   z-index: 2;
@@ -17,7 +33,7 @@ export const StyledPageContentWrapper = styled.div.attrs(({ className = '' }) =>
 }))`
   overflow: hidden; // Ensures horizontal scroll of table
   display: flex;
-  // flex-direction: column;
+  flex-direction: column;
   height: 100%;
 `;
 

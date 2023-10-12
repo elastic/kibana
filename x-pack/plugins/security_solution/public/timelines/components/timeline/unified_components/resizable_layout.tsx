@@ -25,13 +25,11 @@ export const TimelineResizableLayout = ({
   container,
   sidebarPanel,
   mainPanel,
-  // isSidebarCollapsed,
   unifiedFieldListSidebarContainerApi,
 }: {
   container: HTMLElement | null;
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
-  // isSidebarCollapsed: boolean;
   unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
 }) => {
   const [sidebarPanelNode] = useState(() =>
