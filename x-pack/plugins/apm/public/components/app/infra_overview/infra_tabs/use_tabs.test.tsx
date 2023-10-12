@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { shallow } from 'enzyme';
 
 const KibanaReactContext = createKibanaReactContext({
-  infra: {
+  metricsDataAccess: {
     HostMetricsTable: () => 'Host metrics table',
     ContainerMetricsTable: () => 'Container metrics table',
     PodMetricsTable: () => 'Pods metrics table',
