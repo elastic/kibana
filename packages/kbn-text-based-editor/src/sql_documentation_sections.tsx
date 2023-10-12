@@ -7,7 +7,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import * as md from '@kbn/shared-ux-markdown';
+
+const Markdown: React.FC<{markdown: string}> = ({ markdown }) => {
+  return <md.Markdown markdownContent={markdown} readOnly />;
+};
 
 export const initialSection = (
   <Markdown

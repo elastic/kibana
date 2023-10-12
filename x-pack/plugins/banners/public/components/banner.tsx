@@ -6,8 +6,8 @@
  */
 
 import React, { FC } from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { BannerConfiguration } from '../../common';
+import { Markdown } from '@kbn/shared-ux-markdown';
 
 import './banner.scss';
 
@@ -26,7 +26,7 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
       }}
     >
       <div className="eui-textTruncate" data-test-subj="bannerInnerWrapper">
-        <Markdown markdown={textContent} openLinksInNewTab={true} />
+        <Markdown readOnly markdownContent={textContent} openLinksInNewTab={true} />
       </div>
     </div>
   );
