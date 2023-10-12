@@ -33,12 +33,11 @@ import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type {
-  JobAppParamsPDF,
-  JobParamsPDFV2,
-  JobParamsPNGV2,
-} from '@kbn/reporting-plugin/common/types';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import { JobParamsPDFV2 } from '@kbn/reporting-common/types';
+import { LocatorParams } from '@kbn/reporting-common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png';
+import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
@@ -81,12 +80,14 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       });
   });
 
-  const getPDFJobParamsDefault = (): JobAppParamsPDF => {
+  const getPDFJobParamsDefault = (): JobParamsPDFDeprecated => {
     return {
       layout: { id: 'preserve_layout' },
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      browserTimezone: 'UTC',
+      version: '1',
     };
   };
 
@@ -103,15 +104,17 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     };
   };
 
-  const getPNGJobParamsDefaultV2 = (): JobParamsPNGV2 => {
+  const getPNGJobParamsDefaultV2 = (): JobParamsPDFV2 => {
     return {
       version: '8.0.0',
       layout: { id: 'preserve_layout' },
-      locatorParams: {
-        id: REPORTING_EXAMPLE_LOCATOR_ID,
-        version: '0.5.0',
-        params: { myTestState: {} },
-      },
+      locatorParams: [
+        {
+          id: REPORTING_EXAMPLE_LOCATOR_ID,
+          version: '0.5.0',
+          params: { myTestState: {} },
+        },
+      ] as unknown as LocatorParams[],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
       browserTimezone: moment.tz.guess(),

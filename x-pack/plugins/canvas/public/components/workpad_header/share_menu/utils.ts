@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JobAppParamsPDFV2 } from '@kbn/reporting-plugin/common/types';
+import { JobAppParamsPDFV2 } from '@kbn/reporting-common/types';
 import type { RedirectOptions } from '@kbn/share-plugin/public';
 import { CanvasAppLocatorParams, CANVAS_APP_LOCATOR } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
