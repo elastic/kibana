@@ -44,7 +44,7 @@ describe('useHostMetricsTable hook', () => {
       useHostMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
         filterClauseDsl,
-        metricsClient: createMetricsClientMock(),
+        metricsClient: createMetricsClientMock({}),
       })
     );
 
