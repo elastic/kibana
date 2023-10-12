@@ -46,7 +46,6 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'siem.newTermsRule',
         'siem.notifications',
         'slo.rules.burnRate',
-        'metrics.alert.anomaly',
         'logs.alert.document.count',
         'metrics.alert.inventory.threshold',
         'metrics.alert.threshold',
