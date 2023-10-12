@@ -62,6 +62,30 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/actions/connector/{connectorId}:
+    get:
+      summary: Retrieves a connector by ID.
+      operationId: getConnector
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/connector_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connector_response_properties'
+              examples:
+                getConnectorResponse:
+                  $ref: '#/components/examples/get_connector_response'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+      servers:
+        - url: https://localhost:5601
   /api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -167,6 +191,14 @@ components:
       name: kbn-xsrf
       description: Cross-site request forgery protection
       required: true
+    connector_id:
+      in: path
+      name: connectorId
+      description: An identifier for the connector.
+      required: true
+      schema:
+        type: string
+        example: df770e30-8b8b-11ed-a780-3b746c987a81
   schemas:
     config_properties_cases_webhook:
       title: Connector request properties for Webhook - Case Management connector
@@ -2367,6 +2399,17 @@ components:
         is_deprecated: false
         is_missing_secrets: false
         is_system_action: false
+    get_connector_response:
+      summary: Get connector details.
+      value:
+        id: df770e30-8b8b-11ed-a780-3b746c987a81
+        name: my_server_log_connector
+        config: {}
+        connector_type_id: .server-log
+        is_preconfigured: false
+        is_deprecated: false
+        is_missing_secrets: false
+        is_system_action: false
     get_connectors_response:
       summary: A list of connectors
       value:
@@ -2431,3 +2474,24 @@ components:
                 example: 401
                 enum:
                   - 401
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            title: Not found response
+            properties:
+              error:
+                type: string
+                example: Not Found
+                enum:
+                  - Not Found
+              message:
+                type: string
+                example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+              statusCode:
+                type: integer
+                example: 404
+                enum:
+                  - 404

@@ -1,6 +1,6 @@
 get:
   summary: Retrieves a connector by ID.
-  operationId: getConnector
+  operationId: getConnectorWithSpaceId
   description: >
     You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   tags:
@@ -21,27 +21,13 @@ get:
     '401':
       $ref: '../components/responses/401.yaml'
     '404':
-      description: Object is not found.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: Not Found
-              message:
-                type: string
-                example: "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
-              statusCode:
-                type: integer
-                example: 404
+      $ref: '../components/responses/404.yaml'
   servers:
     - url: https://localhost:5601
 
 delete:
   summary: Deletes a connector.
-  operationId: deleteConnector
+  operationId: deleteConnectorWithSpaceId
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
     WARNING: When you delete a connector, it cannot be recovered.
@@ -77,7 +63,7 @@ delete:
 
 post:
   summary: Creates a connector.
-  operationId: createConnectorId
+  operationId: createConnectorIdWithSpaceId
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   tags:
@@ -144,7 +130,7 @@ post:
 
 put:
   summary: Updates the attributes for a connector.
-  operationId: updateConnector
+  operationId: updateConnectorWithSpaceId
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   tags:

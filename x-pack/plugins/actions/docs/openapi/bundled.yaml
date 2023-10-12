@@ -69,7 +69,7 @@ paths:
   /s/{spaceId}/api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
-      operationId: getConnector
+      operationId: getConnectorWithSpaceId
       description: |
         You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
@@ -90,26 +90,12 @@ paths:
         '401':
           $ref: '#/components/responses/401'
         '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Not Found
-                  message:
-                    type: string
-                    example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
-                  statusCode:
-                    type: integer
-                    example: 404
+          $ref: '#/components/responses/404'
       servers:
         - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
-      operationId: deleteConnector
+      operationId: deleteConnectorWithSpaceId
       description: |
         You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.
       tags:
@@ -143,7 +129,7 @@ paths:
         - url: https://localhost:5601
     post:
       summary: Creates a connector.
-      operationId: createConnectorId
+      operationId: createConnectorIdWithSpaceId
       description: |
         You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
@@ -209,7 +195,7 @@ paths:
         - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
-      operationId: updateConnector
+      operationId: updateConnectorWithSpaceId
       description: |
         You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
@@ -3788,7 +3774,7 @@ components:
         is_missing_secrets: false
         is_system_action: false
     get_connector_response:
-      summary: A list of connector types
+      summary: Get connector details.
       value:
         id: df770e30-8b8b-11ed-a780-3b746c987a81
         name: my_server_log_connector
