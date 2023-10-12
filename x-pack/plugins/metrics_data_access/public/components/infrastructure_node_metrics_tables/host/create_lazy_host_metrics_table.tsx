@@ -17,7 +17,7 @@ export function createLazyHostMetricsTable(core: CoreStart, metricsClient: Metri
     timerange,
     filterClauseDsl,
     sourceId,
-  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => {
+  }: Omit<UseNodeMetricsTableOptions, 'metricsClient'> & Partial<SourceProviderProps>) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedHostMetricsTable

@@ -17,7 +17,7 @@ export function createLazyPodMetricsTable(core: CoreStart, metricsClient: Metric
     timerange,
     filterClauseDsl,
     sourceId,
-  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => {
+  }: Omit<UseNodeMetricsTableOptions, 'metricsClient'> & Partial<SourceProviderProps>) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedPodMetricsTable

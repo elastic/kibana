@@ -19,7 +19,7 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
     timerange,
     filterClauseDsl,
     sourceId,
-  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => {
+  }: Omit<UseNodeMetricsTableOptions, 'metricsClient'> & Partial<SourceProviderProps>) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedContainerMetricsTable
