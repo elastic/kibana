@@ -35,7 +35,6 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import PreviewChart from './components/preview_chart';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -43,6 +42,7 @@ import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
+import PreviewChart from './components/preview_chart/preview_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -481,7 +481,7 @@ export default function Expressions(props: Props) {
                 expression={e || {}}
                 dataView={derivedIndexPattern}
               >
-                <PreviewChart metricExpression={e} dataViewId={dataView.id} />
+                <PreviewChart metricExpression={e} dataViewId={dataView?.id} />
                 {/* Preview */}
                 {/* <ExpressionChart*/}
                 {/*  expression={e}*/}
