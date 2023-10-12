@@ -14,7 +14,7 @@ import { isInvestigateInResolverActionEnabled } from '../../../detections/compon
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../common/hooks/use_license';
 import { getField } from '../utils';
-import { ANCESTOR_ID } from '../constants/field_names';
+import { ANCESTOR_ID, RULE_PARAMETERS_INDEX } from '../constants/field_names';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
@@ -63,11 +63,7 @@ export const useShowRelatedAlertsByAncestry = ({
 
   // can't use getFieldsData here as the kibana.alert.rule.parameters is different and can be nested
   const originalDocumentIndex = useMemo(
-    () =>
-      find(
-        { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
-        dataFormattedForFieldBrowser
-      ),
+    () => find({ category: 'kibana', field: RULE_PARAMETERS_INDEX }, dataFormattedForFieldBrowser),
     [dataFormattedForFieldBrowser]
   );
 
