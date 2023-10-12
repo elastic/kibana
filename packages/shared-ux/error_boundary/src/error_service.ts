@@ -36,7 +36,7 @@ export class ErrorService {
   }
 
   onError(error: Error) {
-    error = error;
+    // TODO track errors in state
     // TODO: telemetry
   }
 }
