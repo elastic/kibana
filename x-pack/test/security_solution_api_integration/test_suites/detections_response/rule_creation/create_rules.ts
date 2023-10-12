@@ -17,9 +17,9 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detect
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -30,43 +30,50 @@ import {
   getSimpleMlRule,
   getSimpleMlRuleOutput,
   waitForRuleSuccess,
-  getRuleForSignalTesting,
-  getRuleForSignalTestingWithTimestampOverride,
+  getRuleForAlertTesting,
+  getRuleForAlertTestingWithTimestampOverride,
   waitForAlertToComplete,
-  waitForSignalsToBePresent,
-  getThresholdRuleForSignalTesting,
+  waitForAlertsToBePresent,
+  getThresholdRuleForAlertTesting,
   waitForRulePartialFailure,
   createRule,
   deleteAllAlerts,
-} from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import {
+  removeUUIDFromActions,
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
-} from '../../utils/get_rule_actions';
-import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
+  updateUsername,
+} from '../utils';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../common/services/security_solution';
+import { EsArchivePathBuilder } from '../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('create_rules', () => {
+  describe('@serverless @ess create_rules', () => {
     describe('creating rules', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -103,7 +110,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+          const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         /*
@@ -127,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         */
         it('should create a single rule with a rule_id and validate it ran successfully', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
           const { body } = await supertest
@@ -141,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
-          const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
+          const simpleRule = getRuleForAlertTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -171,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']),
+            ...getRuleForAlertTesting(['does-not-exist-*', 'auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
           const { body } = await supertest
@@ -198,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
           const expected = {
             actions: [],
             author: [],
-            created_by: 'elastic',
+            created_by: ELASTICSEARCH_USERNAME,
             description: 'Simple Rule Query',
             enabled: true,
             false_positives: [],
@@ -220,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
             setup: '',
             severity: 'high',
             severity_mapping: [],
-            updated_by: 'elastic',
+            updated_by: ELASTICSEARCH_USERNAME,
             tags: [],
             to: 'now',
             type: 'query',
@@ -249,7 +257,11 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-          expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+          const expectedRule = updateUsername(
+            getSimpleRuleOutputWithoutRuleId(),
+            ELASTICSEARCH_USERNAME
+          );
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         it('creates a single Machine Learning rule from a legacy ML Rule format', async () => {
@@ -265,7 +277,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+          const expectedRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         it('should create a single Machine Learning rule', async () => {
@@ -277,7 +290,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+          const expectedRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
@@ -418,7 +432,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('t1_analyst', () => {
+      describe('@brokenInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -442,7 +456,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('threshold validation', () => {
         it('should result in 400 error if no threshold-specific fields are provided', async () => {
-          const { threshold, ...rule } = getThresholdRuleForSignalTesting(['*']);
+          const { threshold, ...rule } = getThresholdRuleForAlertTesting(['*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -458,7 +472,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should result in 400 error if more than 3 threshold fields', async () => {
-          const rule = getThresholdRuleForSignalTesting(['*']);
+          const rule = getThresholdRuleForAlertTesting(['*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -479,7 +493,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should result in 400 error if threshold value is less than 1', async () => {
-          const rule = getThresholdRuleForSignalTesting(['*']);
+          const rule = getThresholdRuleForAlertTesting(['*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -501,7 +515,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should result in 400 error if cardinality is also an agg field', async () => {
-          const rule = getThresholdRuleForSignalTesting(['*']);
+          const rule = getThresholdRuleForAlertTesting(['*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -528,9 +542,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('missing timestamps', () => {
+    describe('@brokenInServerless missing timestamps', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
         // to edit these files run the following script
         // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
         await esArchiver.load(
@@ -549,7 +563,7 @@ export default ({ getService }: FtrProviderContext) => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
-        const simpleRule = getRuleForSignalTestingWithTimestampOverride(['myfakeindex-1']);
+        const simpleRule = getRuleForAlertTestingWithTimestampOverride(['myfakeindex-1']);
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -583,7 +597,7 @@ export default ({ getService }: FtrProviderContext) => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
-        const simpleRule = getRuleForSignalTestingWithTimestampOverride(['myfa*']);
+        const simpleRule = getRuleForAlertTestingWithTimestampOverride(['myfa*']);
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -597,7 +611,7 @@ export default ({ getService }: FtrProviderContext) => {
           log,
           id: bodyId,
         });
-        await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
+        await waitForAlertsToBePresent(supertest, log, 2, [bodyId]);
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
@@ -611,7 +625,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('per-action frequencies', () => {
+    describe('@brokenInServerless per-action frequencies', () => {
       const createSingleRule = async (rule: RuleCreateProps) => {
         const createdRule = await createRule(supertest, log, rule);
         createdRule.actions = removeUUIDFromActions(createdRule.actions);
@@ -629,8 +643,7 @@ export default ({ getService }: FtrProviderContext) => {
               simpleRule.actions = actionsWithoutFrequencies;
 
               const createdRule = await createSingleRule(simpleRule);
-
-              const expectedRule = getSimpleRuleOutput();
+              const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
               expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
                 ...action,
                 frequency: NOTIFICATION_DEFAULT_FREQUENCY,
@@ -652,8 +665,7 @@ export default ({ getService }: FtrProviderContext) => {
             simpleRule.actions = actionsWithoutFrequencies;
 
             const createdRule = await createSingleRule(simpleRule);
-
-            const expectedRule = getSimpleRuleOutput();
+            const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
             expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
               ...action,
               frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
@@ -683,8 +695,7 @@ export default ({ getService }: FtrProviderContext) => {
             simpleRule.actions = actionsWithFrequencies;
 
             const createdRule = await createSingleRule(simpleRule);
-
-            const expectedRule = getSimpleRuleOutput();
+            const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
             expectedRule.actions = actionsWithFrequencies;
 
             const rule = removeServerGeneratedProperties(createdRule);
@@ -704,8 +715,7 @@ export default ({ getService }: FtrProviderContext) => {
               simpleRule.actions = someActionsWithFrequencies;
 
               const createdRule = await createSingleRule(simpleRule);
-
-              const expectedRule = getSimpleRuleOutput();
+              const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
                 frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
@@ -727,8 +737,7 @@ export default ({ getService }: FtrProviderContext) => {
             simpleRule.actions = someActionsWithFrequencies;
 
             const createdRule = await createSingleRule(simpleRule);
-
-            const expectedRule = getSimpleRuleOutput();
+            const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
             expectedRule.actions = someActionsWithFrequencies.map((action) => ({
               ...action,
               frequency: action.frequency ?? {

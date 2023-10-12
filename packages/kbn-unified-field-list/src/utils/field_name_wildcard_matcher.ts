@@ -9,7 +9,18 @@
 import { escapeRegExp, memoize } from 'lodash';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
-  const globRegex = glob.split('*').map(escapeRegExp).join('.*');
+  const trimmedGlob = glob.trim();
+  let globRegex = trimmedGlob
+    .split(/[* ]+/) // wildcard or space as a separator
+    .map(escapeRegExp)
+    .join('.*');
+
+  // the search with spaces is less strict than with wildcard:
+  // we allow any start/ending of search results
+  if (trimmedGlob.includes(' ')) {
+    globRegex = '.*' + globRegex + '.*';
+  }
+
   return new RegExp(globRegex.includes('*') ? `^${globRegex}$` : globRegex, 'i');
 });
 
@@ -23,12 +34,10 @@ export const fieldNameWildcardMatcher = (
   field: { name: string; displayName?: string },
   fieldSearchHighlight: string
 ): boolean => {
-  if (!fieldSearchHighlight) {
+  if (!fieldSearchHighlight?.trim()) {
     return false;
   }
 
-  return (
-    (!!field.displayName && makeRegEx(fieldSearchHighlight).test(field.displayName)) ||
-    makeRegEx(fieldSearchHighlight).test(field.name)
-  );
+  const regExp = makeRegEx(fieldSearchHighlight);
+  return (!!field.displayName && regExp.test(field.displayName)) || regExp.test(field.name);
 };
