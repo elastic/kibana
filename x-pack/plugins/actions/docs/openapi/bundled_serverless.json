@@ -1,0 +1,248 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Connectors",
+    "description": "OpenAPI schema for connectors in Serverless projects",
+    "version": "0.1",
+    "contact": {
+      "name": "Connectors Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5601",
+      "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "connectors",
+      "description": "Connector APIs enable you to create and manage connectors."
+    }
+  ],
+  "paths": {
+    "/api/actions/connector_types": {
+      "get": {
+        "summary": "Retrieves a list of all connector types.",
+        "operationId": "getConnectorTypes",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "feature_id",
+            "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
+            "schema": {
+              "$ref": "#/components/schemas/features"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Get connector types response body properties",
+                  "description": "The properties vary for each connector type.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in Kibana.",
+                        "example": true
+                      },
+                      "enabled_in_config": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in the Kibana configuration file.",
+                        "example": true
+                      },
+                      "enabled_in_license": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled in the license.",
+                        "example": true
+                      },
+                      "id": {
+                        "$ref": "#/components/schemas/connector_types"
+                      },
+                      "is_system_action_type": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "minimum_license_required": {
+                        "type": "string",
+                        "description": "The license that is required to use the connector type.",
+                        "example": "basic"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the connector type.",
+                        "example": "Index"
+                      },
+                      "supported_feature_ids": {
+                        "type": "array",
+                        "description": "The features that are supported by the connector type.",
+                        "items": {
+                          "$ref": "#/components/schemas/features"
+                        },
+                        "example": [
+                          "alerting",
+                          "cases",
+                          "siem"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getConnectorTypesServerlessResponse": {
+                    "$ref": "#/components/examples/get_connector_types_serverless_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ApiKey"
+      }
+    },
+    "schemas": {
+      "features": {
+        "type": "string",
+        "description": "The feature that uses the connector.\n",
+        "enum": [
+          "alerting",
+          "cases",
+          "generativeAI",
+          "siem",
+          "uptime"
+        ]
+      },
+      "connector_types": {
+        "title": "Connector types",
+        "type": "string",
+        "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
+        "enum": [
+          ".cases-webhook",
+          ".d3security",
+          ".email",
+          ".gen-ai",
+          ".index",
+          ".jira",
+          ".opsgenie",
+          ".pagerduty",
+          ".resilient",
+          ".servicenow",
+          ".servicenow-itom",
+          ".servicenow-sir",
+          ".server-log",
+          ".slack",
+          ".slack_api",
+          ".swimlane",
+          ".teams",
+          ".tines",
+          ".torq",
+          ".webhook",
+          ".xmatters"
+        ],
+        "example": ".server-log"
+      }
+    },
+    "examples": {
+      "get_connector_types_serverless_response": {
+        "summary": "A list of connector types for the `generativeAI` feature.",
+        "value": [
+          {
+            "id": ".gen-ai",
+            "name": "OpenAI",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "enterprise",
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
+            "is_system_action_type": false
+          },
+          {
+            "id": ".bedrock",
+            "name": "AWS Bedrock",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "enterprise",
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
+            "is_system_action_type": false
+          }
+        ]
+      }
+    },
+    "responses": {
+      "401": {
+        "description": "Authorization information is missing or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "title": "Unauthorized response",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Unauthorized",
+                  "enum": [
+                    "Unauthorized"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "example": 401,
+                  "enum": [
+                    401
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
