@@ -58,7 +58,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   const docLinks = services.core.docLinks;
 
   return useMemo(() => {
-    const fieldSearchHighlight = nameFilter.toLowerCase();
+    const fieldSearchHighlight = nameFilter.trim().toLowerCase();
     return {
       fieldSearchHighlight,
       fieldListFiltersProps: {
