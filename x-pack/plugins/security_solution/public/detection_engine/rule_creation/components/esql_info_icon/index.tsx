@@ -14,8 +14,6 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 import { useKibana } from '../../../../common/lib/kibana';
 
-const POPOVER_WIDTH = 640;
-
 /**
  * Icon and popover that gives hint to users how to get started with ES|QL rules
  */
@@ -30,14 +28,9 @@ const EsqlInfoIconComponent = () => {
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText size="s">
         <Markdown
-          markdown={i18n.getTooltipContent(
-            docLinks.links.esql.statsBy,
-            // Docs team will provide actual link to a new page before release
-            // For now, it's just a mock
-            docLinks.links.esql.statsBy
-          )}
+          markdown={i18n.getTooltipContent(docLinks.links.securitySolution.createEsqlRuleType)}
         />
       </EuiText>
     </EuiPopover>
