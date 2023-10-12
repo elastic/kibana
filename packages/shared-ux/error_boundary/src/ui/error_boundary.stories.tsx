@@ -16,9 +16,9 @@ import {
 import { action } from '@storybook/addon-actions';
 import { Meta, Story } from '@storybook/react';
 import React, { FC, useState } from 'react';
-import { ErrorBoundary, ErrorBoundaryProvider } from '..';
-import mdx from '../README.mdx';
-import { ErrorBoundaryStorybookMock } from '../mocks/src/storybook';
+import { ErrorBoundary, ErrorBoundaryProvider } from '../..';
+import mdx from '../../README.mdx';
+import { ErrorBoundaryStorybookMock } from '../../mocks/src/storybook';
 
 const storybookMock = new ErrorBoundaryStorybookMock();
 

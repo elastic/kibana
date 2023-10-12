@@ -11,7 +11,7 @@ import React, { FC, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 
-import { ErrorBoundaryKibanaDependencies, ErrorBoundaryServices, Toasts } from '../types';
+import { ErrorBoundaryKibanaDependencies, ErrorBoundaryServices, Toasts } from '../../types';
 import { ErrorService } from './error_service';
 import { ToastsService } from './toasts_service';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ErrorService } from '../../src/error_service';
-import { ToastsService } from '../../src/toasts_service';
+import { ErrorService } from '../../src/services/error_service';
+import { ToastsService } from '../../src/services/toasts_service';
 import { ErrorBoundaryServices } from '../../types';
 
 export const getServicesMock = (): ErrorBoundaryServices => {
