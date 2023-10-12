@@ -224,7 +224,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, theme, uiSettings, chrome, application, notifications }: CoreStart,
+    { http, theme, uiSettings, chrome, application, notifications, i18n: i18nStart }: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -241,6 +241,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     http.addLoadingCountSource(loadingCount$);
 
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
+
+    const warningsServices = {
+      i18n: i18nStart,
+      inspector,
+      notifications,
+      theme,
+    }
 
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,
@@ -268,12 +275,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           handleWarnings({
             request: request.body as estypes.SearchRequest,
-            response: rawResponse,
-            theme,
-            requestId: request.id,
             requestAdapter,
-            inspectorService: inspector,
-            notificationService: notifications,
+            requestId: request.id,
+            response: rawResponse,
+            services: warningsServices,
           });
         }
         return response;
@@ -316,14 +321,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             return;
           }
           handleWarnings({
-            request: request.json as estypes.SearchRequest,
-            response: rawResponse,
-            theme,
             callback,
-            requestId: request.id,
+            request: request.json as estypes.SearchRequest,
             requestAdapter: adapter,
-            inspectorService: inspector,
-            notificationService: notifications,
+            requestId: request.id,
+            response: rawResponse,
+            services: warningsServices,
           });
         });
       },

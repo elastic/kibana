@@ -11,6 +11,7 @@ import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   SearchResponseIncompleteWarning,
@@ -20,30 +21,33 @@ import {
 import { extractWarnings } from './extract_warnings';
 import { ViewWarningButton } from './components/view_warning_button';
 
+interface Services {
+  i18n: I18nStart;
+  inspector: InspectorStartContract;
+  notifications: NotificationsStart;
+  theme: ThemeServiceStart;
+}
+
 /**
  * @internal
  * All warnings are expected to come from the same response.
  */
 export function handleWarnings({
-  request,
-  response,
-  theme,
   callback,
+  request,
   requestId,
   requestAdapter,
-  inspectorService,
-  notificationService,
+  response,
+  services,
 }: {
-  request: estypes.SearchRequest;
-  response: estypes.SearchResponse;
-  theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
-  requestId?: string;
+  request: estypes.SearchRequest;
   requestAdapter: RequestAdapter;
-  inspectorService: InspectorStartContract;
-  notificationService: NotificationsStart;
+  requestId?: string;
+  response: estypes.SearchResponse;
+  services: Services
 }) {
-  const warnings = extractWarnings(response, inspectorService, requestAdapter, requestId);
+  const warnings = extractWarnings(response, services.inspector, requestAdapter, requestId);
   if (warnings.length === 0) {
     return;
   }
@@ -62,13 +66,13 @@ export function handleWarnings({
   }
 
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
-  notificationService.toasts.addWarning({
+  services.notifications.toasts.addWarning({
     title: incompleteWarning.message,
     text: toMountPoint(
       <EuiTextAlign textAlign="right">
         <ViewWarningButton onClick={incompleteWarning.openInInspector} />
       </EuiTextAlign>,
-      { theme$: theme.theme$ }
+      { theme: services.theme, i18n: services.i18n }
     ),
   });
 }
