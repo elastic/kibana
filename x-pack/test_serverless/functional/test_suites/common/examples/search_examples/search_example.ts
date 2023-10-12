@@ -10,14 +10,17 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'svlCommonPage']);
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/165730
-  // FLAKY: https://github.com/elastic/kibana/issues/165735
   describe('Search example', () => {
+    before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.login();
+    });
+
     describe('with bfetch', () => {
       testSearchExample();
     });
@@ -83,7 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // failing because no toasts are displayed
+      // TODO: This test fails in Serverless because it relies on
+      // `error_query` which doesn't seem to be supported in Serverless
       it.skip('should handle warnings', async () => {
         await testSubjects.click('searchWithWarning');
         await retry.waitFor('', async () => {
