@@ -331,6 +331,7 @@ export class SavedSearchEmbeddable
           this.services.data,
           this.services.expressions,
           this.services.inspector,
+          this.abortController.signal,
           this.input.filters,
           this.input.query
         );

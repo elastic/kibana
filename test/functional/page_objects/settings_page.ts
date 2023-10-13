@@ -470,13 +470,19 @@ export class SettingsPageObject extends FtrService {
     await customDataViewIdInput.type(value);
   }
 
+  async allowHiddenClick() {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.click('allowHiddenField');
+  }
+
   async createIndexPattern(
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
     isStandardIndexPattern = true,
     customDataViewId?: string,
-    dataViewName?: string
+    dataViewName?: string,
+    allowHidden?: boolean
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -489,6 +495,11 @@ export class SettingsPageObject extends FtrService {
       } else {
         await this.clickAddNewIndexPatternButton();
       }
+
+      if (allowHidden) {
+        await this.allowHiddenClick();
+      }
+
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
