@@ -69,7 +69,7 @@ export function AddCisIntegrationFormPageProvider({
     chooseDropDown: async (selector: string, text: string) => {
       const test = await testSubjects.find(selector);
       await test.click();
-      await (await test.findByXpath(`//*[text()='${text}']`)).click();
+      await (await test.findByXpath(`//option[text()='${text}']`)).click();
     },
   };
 
