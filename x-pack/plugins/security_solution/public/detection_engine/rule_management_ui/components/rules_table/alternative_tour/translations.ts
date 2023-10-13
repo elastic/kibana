@@ -17,6 +17,7 @@ export const CREATE_RULE_TOUR_TITLE = i18n.translate(
 export const CREATE_RULE_TOUR_CONTENT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent.eql',
   {
-    defaultMessage: `EQL now allows you to specify events that should not occur in a sequence`,
+    defaultMessage:
+      'Use Elasticsearch Query Language (ES|QL) in new rule type to iteratively explore and transform your data.',
   }
 );
