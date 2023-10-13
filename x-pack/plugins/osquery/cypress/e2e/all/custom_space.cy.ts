@@ -20,7 +20,8 @@ const testSpaces = [
   { name: 'default', tags: ['@ess', '@serverless'] },
   { name: 'custom-spaces', tags: ['@ess'] },
 ];
-describe('ALL - Custom space', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/168742
+describe.skip('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
     describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
       let packName: string;
@@ -90,7 +91,7 @@ describe('ALL - Custom space', () => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-              cy.contains('action_data.queryselect * from uptime');
+              cy.contains('action_data{ "query": "select * from uptime;"');
             });
           });
       });

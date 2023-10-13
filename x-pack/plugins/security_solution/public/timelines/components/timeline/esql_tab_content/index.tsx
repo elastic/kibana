@@ -181,6 +181,10 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
     const latestState = getCombinedDiscoverSavedSearchState();
+    const index = latestState?.searchSource.getField('index');
+    /* when a new timeline is loaded, a new discover instance is loaded which first emits
+     * discover's initial state which is then updated in the saved search. We want to avoid that.*/
+    if (!index) return;
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
     debouncedUpdateSavedSearch(latestState, timelineId);

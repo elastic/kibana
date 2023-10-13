@@ -18,7 +18,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('GET /internal/cloud_security_posture/benchmark', () => {
+  describe('GET /internal/cloud_security_posture/benchmark', function () {
+    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
+    this.tags(['failsOnMKI']);
+
     let agentPolicyId: string;
     let agentPolicyId2: string;
     let agentPolicyId3: string;
