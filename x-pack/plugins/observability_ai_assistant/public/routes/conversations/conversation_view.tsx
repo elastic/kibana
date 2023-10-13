@@ -140,6 +140,7 @@ export function ConversationView() {
                 path: {},
                 query: {},
               });
+              setDisplayedMessages([displayedMessages[0]]);
             }}
             onClickDeleteConversation={(id) => {
               confirmDeleteFunction()
