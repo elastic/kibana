@@ -45,7 +45,10 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-describe('Related integrations', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// From the failure message it's not immediately clear, where this access is happening:
+// Error: Timed out while retrying, last result was: {false}
+describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [

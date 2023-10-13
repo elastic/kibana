@@ -51,7 +51,10 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// From the failure message it's not immediately clear, where this access is happening:
+// Error: Timed out while retrying, last result was: {false}
+describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

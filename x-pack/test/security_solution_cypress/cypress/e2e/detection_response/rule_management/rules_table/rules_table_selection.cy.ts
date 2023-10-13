@@ -34,7 +34,10 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-describe('Rules table: selection', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// From the failure message it's not immediately clear, where this access is happening:
+// Error: Timed out while retrying, last result was: {false}
+describe('Rules table: selection', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

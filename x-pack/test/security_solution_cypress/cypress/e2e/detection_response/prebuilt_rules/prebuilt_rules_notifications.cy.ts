@@ -31,7 +31,10 @@ const RULE_1 = createRuleAssetSavedObject({
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@serverless'] },
+  // accessing restricted / system indices directly does not work in serverless
+  // From the failure message it's not immediately clear, where this access is happening:
+  // Error: Timed out while retrying, last result was: {false}
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();

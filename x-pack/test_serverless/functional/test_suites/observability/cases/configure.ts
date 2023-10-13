@@ -20,9 +20,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
 
-  describe('Configure Case', function () {
-    //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
-    this.tags(['failsOnMKI']);
+  // accessing restricted / system indices directly does not work in serverless
+  // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user
+  // [elastic_serverless] with effective roles [superuser] on restricted indices
+  // [.kibana_alerting_cases]
+  describe.skip('Configure Case', function () {
     before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
