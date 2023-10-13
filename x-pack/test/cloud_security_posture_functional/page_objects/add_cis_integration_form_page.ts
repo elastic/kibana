@@ -65,6 +65,12 @@ export function AddCisIntegrationFormPageProvider({
       const test = await testSubjects.find(selector);
       await test.type(text);
     },
+
+    chooseDropDown: async (selector: string, text: string) => {
+      const test = await testSubjects.find(selector);
+      await test.click();
+      await (await test.findByXpath(`//*[text()='${text}']`)).click();
+    },
   };
 
   const navigateToAddIntegrationCspmPage = async () => {
