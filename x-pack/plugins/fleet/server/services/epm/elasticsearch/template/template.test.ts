@@ -1219,7 +1219,7 @@ describe('EPM template', () => {
     const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
     expect(() => {
       const processedFields = processFields(fields);
-      const mappings = generateMappings(processedFields);
+      generateMappings(processedFields);
     }).toThrow();
   });
 

@@ -300,6 +300,9 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? field.object_type;
             break;
           case 'group':
+            if (!field?.fields) {
+              break;
+            }
             const subFields = field.fields.map((subField) => ({
               ...subField,
               type: 'object',
