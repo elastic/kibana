@@ -32,6 +32,7 @@ export class VisualizationsStorage extends SOContentStorage<VisualizationCrudTyp
       allowedSavedObjectAttributes: [
         'title',
         'description',
+        'version',
         'visState',
         'kibanaSavedObjectMeta',
         'uiStateJSON',
