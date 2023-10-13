@@ -55,7 +55,7 @@ export function getModulesProvider(
               return dr.findMatches(...args);
             });
         },
-        async getModule(moduleId: string) {
+        async getModule(...args) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
@@ -70,7 +70,7 @@ export function getModulesProvider(
                 request,
                 compatibleModuleType
               );
-              return dr.getModule(moduleId);
+              return dr.getModule(...args);
             });
         },
         async listModules() {

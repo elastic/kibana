@@ -330,7 +330,7 @@ export class DataRecognizer {
       if (config.isSavedObject) {
         configs.push(config.module);
       } else {
-        configs.push(await this.getModule(config.module.id));
+        configs.push(await this.getModule(config.module.id, moduleTypeFilters));
       }
     }
     // casting return as Module[] so not to break external plugins who rely on this function
@@ -341,12 +341,11 @@ export class DataRecognizer {
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
-  public async getModule(id: string, prefix = ''): Promise<Module> {
-    // filter here????????????????????????????????????????????????????????????????????????
+  public async getModule(id: string, moduleTypeFilters?: string[], prefix = ''): Promise<Module> {
     let module: FileBasedModule | Module | null = null;
     let dirName: string | null = null;
 
-    const config = await this._findConfig(id);
+    const config = await this._findConfig(id, moduleTypeFilters);
     if (config !== undefined) {
       module = config.module;
       dirName = config.dirName ?? null;
@@ -480,7 +479,7 @@ export class DataRecognizer {
     applyToAllSpaces: boolean = false
   ) {
     // load the config from disk
-    const moduleConfig = await this.getModule(moduleId, jobPrefix);
+    const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
 
     if (indexPatternName === undefined && moduleConfig.defaultIndexPattern === undefined) {
       throw Boom.badRequest(

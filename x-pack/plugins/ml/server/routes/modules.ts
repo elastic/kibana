@@ -265,7 +265,9 @@ export function dataRecognizer(
             );
 
             const results =
-              moduleId === undefined ? await dr.listModules(types) : await dr.getModule(moduleId);
+              moduleId === undefined
+                ? await dr.listModules(types)
+                : await dr.getModule(moduleId, types);
 
             return response.ok({ body: results });
           } catch (e) {
