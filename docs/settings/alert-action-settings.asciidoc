@@ -267,7 +267,7 @@ For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI API provider
 A configuration URL that varies by connector:
 +
 --
-* For an <<bedrock-action-type,AWS Bedrock connector>>, specifies the AWS Bedrock request URL.
+* For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
@@ -331,7 +331,7 @@ For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string f
 The default model to use for requests, which varies by connector:
 +
 --
-* For an <<bedrock-action-type,AWS Bedrock connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-v2`.
+* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-v2`.
 * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 --
 
@@ -470,7 +470,7 @@ Sensitive configuration details, such as username, password, and keys, which are
 TIP: Sensitive properties, such as passwords, should be stored in the <<creating-keystore,{kib} keystore>>.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.accessKey`::
-For an <<bedrock-action-type,AWS Bedrock connector>>, specifies the AWS access key for authentication.
+For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS access key for authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.apikey`::
 An API key secret that varies by connector:
@@ -527,7 +527,7 @@ For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir
 For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.secret`::
-For an <<bedrock-action-type,AWS Bedrock connector>>, specifies the AWS secret for authentication.
+For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS secret for authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl`::
 For an <<xmatters-action-type,xMatters connector>> with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.

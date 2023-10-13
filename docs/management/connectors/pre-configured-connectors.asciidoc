@@ -136,9 +136,9 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 
 [float]
 [[preconfigured-bedrock-configuration]]
-==== AWS Bedrock connectors
+==== {bedrock} connectors
 
-The following example creates an <<bedrock-action-type,AWS Bedrock connector>>:
+The following example creates an <<bedrock-action-type,{bedrock} connector>>:
 
 [source,text]
 --
@@ -153,7 +153,7 @@ xpack.actions.preconfigured:
       accessKey: key-value <3>
       secret: secret-value <4>
 --
-<1> The AWS Bedrock request URL.
+<1> The {bedrock} request URL.
 <2> The default model to use for requests. Current support is for the Anthropic Claude models, defaulting to Claude 2.
 <3> The AWS access key for authentication.
 <4> The AWS secret for authentication.
