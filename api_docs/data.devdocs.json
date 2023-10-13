@@ -17051,6 +17051,24 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -25663,6 +25681,24 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -28341,7 +28377,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
+          ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",

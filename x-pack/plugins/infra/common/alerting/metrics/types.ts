@@ -12,18 +12,15 @@ import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/ty
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-export const METRIC_ANOMALY_ALERT_TYPE_ID = 'metrics.alert.anomaly';
 
 export enum InfraRuleType {
   MetricThreshold = 'metrics.alert.threshold',
   InventoryThreshold = 'metrics.alert.inventory.threshold',
-  Anomaly = 'metrics.alert.anomaly',
 }
 
 export interface InfraRuleTypeParams {
   [InfraRuleType.MetricThreshold]: MetricThresholdParams;
   [InfraRuleType.InventoryThreshold]: InventoryMetricConditions;
-  [InfraRuleType.Anomaly]: MetricAnomalyParams;
 }
 
 export enum Comparator {
