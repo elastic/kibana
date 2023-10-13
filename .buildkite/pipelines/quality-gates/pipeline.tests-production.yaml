@@ -24,11 +24,3 @@ steps:
         REGION_ID: aws-us-east-1
         NAME_PREFIX: ci_test_kibana-promotion_
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
-
-  - wait: ~
-
-  - label: ":judge::seedling: Trigger Manual Tests Phase"
-    command: "make -C /agent trigger-manual-verification-phase"
-    if: build.branch == "main"
-    agents:
-      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
