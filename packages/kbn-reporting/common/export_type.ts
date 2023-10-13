@@ -36,7 +36,7 @@ export interface BaseExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
-  screenshotting: ScreenshottingStart;
+  screenshotting?: ScreenshottingStart;
 }
 
 export abstract class ExportType<
