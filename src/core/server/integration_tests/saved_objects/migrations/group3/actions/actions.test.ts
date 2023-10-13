@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import path from 'path';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-migration-server-internal';
 import { runActionTestSuite } from './actions_test_suite';
@@ -16,6 +16,7 @@ const { startES } = createTestServers({
     es: {
       license: 'basic',
       esArgs: ['http.max_content_length=10Kb'],
+      dataArchive: path.join(__dirname, '../..', 'archives', '1m_dummy_so.zip'),
     },
   },
 });
