@@ -109,12 +109,9 @@ export const uxLocalUIFilterNames = Object.keys(
 
 export const uxLocalUIFilters = uxLocalUIFilterNames.reduce((acc, key) => {
   const field = uxFiltersByName[key];
-
-  return {
-    ...acc,
-    [key]: {
-      ...field,
-      name: key,
-    },
-  };
+  acc[key] = {
+    ...field,
+    name: key,
+  } as UxLocalUIFilter;
+  return acc;
 }, {} as UxLocalUIFilterMap);

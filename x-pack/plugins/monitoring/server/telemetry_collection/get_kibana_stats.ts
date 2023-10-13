@@ -26,6 +26,7 @@ export function rollUpTotals(
   const addOnTotal = addOn[field]?.total || 0;
   return { total: rolledUpTotal + addOnTotal };
 }
+
 export function rollUpIndices(rolledUp: ClusterUsageStats) {
   return rolledUp.indices + 1;
 }
@@ -115,13 +116,11 @@ export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>
     // e.g: we want `xpack.reporting` to just be `reporting`
     const plugins = { ...pluginsTop, ...xpack };
 
-    return {
-      ...accum,
-      [clusterUuid]: {
-        ...stats,
-        plugins,
-      },
+    accum[clusterUuid] = {
+      ...stats,
+      plugins,
     };
+    return accum;
   }, {} as ClustersUsageStats);
 }
 

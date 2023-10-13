@@ -14,8 +14,7 @@ import { buildObjectRecursive } from './build_object_recursive';
 import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildEcsObjects = (hit: EventHit): Ecs => {
-  const ecsFields = [...TIMELINE_EVENTS_FIELDS];
-  return ecsFields.reduce(
+  return TIMELINE_EVENTS_FIELDS.reduce(
     (acc, field) => {
       const nestedParentPath = getNestedParentPath(field, hit.fields);
       if (

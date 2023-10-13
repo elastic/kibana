@@ -821,7 +821,7 @@ const previewTransformHandler: RequestHandler<
         if (isMetaField || isKeywordDuplicate(fieldName, fieldNamesSet)) {
           return acc;
         }
-        acc[fieldName] = { ...fieldDefinition };
+        acc[fieldName] = fieldDefinition;
         return acc;
       }, {} as Record<string, { type: string }>);
 

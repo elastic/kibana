@@ -41,14 +41,10 @@ interface ErrorDetails {
 export const buildErrors = (modulesBucket: any[]): Products => {
   return (modulesBucket ?? []).reduce((module, { key, errors_by_dataset: errorsByDataset }) => {
     const datasets = buildMetricsets(errorsByDataset.buckets);
-    if (Object.keys(datasets).length === 0) {
-      return { ...module };
+    if (Object.keys(datasets).length > 0) {
+      module[key] = datasets;
     }
-
-    return {
-      ...module,
-      [key]: datasets,
-    };
+    return module;
   }, {} as Products);
 };
 
@@ -56,14 +52,10 @@ const buildMetricsets = (errorsByDataset: any[]): ErrorsByMetricset => {
   return (errorsByDataset ?? []).reduce((dataset, { key, latest_docs: latestDocs }) => {
     const errors = buildErrorMessages(latestDocs.hits.hits ?? []);
 
-    if (errors.length === 0) {
-      return { ...dataset };
+    if (errors.length > 0) {
+      dataset[key] = errors;
     }
-
-    return {
-      ...dataset,
-      [key]: errors,
-    };
+    return dataset;
   }, {} as ErrorsByMetricset);
 };
 
