@@ -12,13 +12,14 @@ import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ResizableLayoutDirection } from '../types';
+import { FixedPanelPosition, ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({
   className,
   direction,
   container,
+  fixedPanelPosition,
   fixedPanelSize,
   minFixedPanelSize,
   minFlexPanelSize,
@@ -33,6 +34,7 @@ export const PanelsResizable = ({
   className?: string;
   direction: ResizableLayoutDirection;
   container: HTMLElement | null;
+  fixedPanelPosition: FixedPanelPosition;
   fixedPanelSize: number;
   minFixedPanelSize: number;
   minFlexPanelSize: number;
@@ -194,8 +196,8 @@ export const PanelsResizable = ({
         height: 100%;
       `}
     >
-      {(EuiResizablePanel, EuiResizableButton) => (
-        <>
+      {(EuiResizablePanel, EuiResizableButton) => {
+        const fixedResizablePanel = (
           <EuiResizablePanel
             id={fixedPanelId}
             minSize={`${minFixedPanelSize}px`}
@@ -205,13 +207,8 @@ export const PanelsResizable = ({
           >
             {fixedPanel}
           </EuiResizablePanel>
-          <EuiResizableButton
-            className={resizeButtonClassName}
-            css={
-              resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss
-            }
-            data-test-subj={`${dataTestSubj}ResizableButton`}
-          />
+        );
+        const flexResizablePanel = (
           <EuiResizablePanel
             minSize={`${minFlexPanelSize}px`}
             size={panelSizes.flexPanelSizePct}
@@ -220,9 +217,31 @@ export const PanelsResizable = ({
           >
             {flexPanel}
           </EuiResizablePanel>
-          {resizeWithPortalsHackIsResizing ? <div css={resizeWithPortalsHackOverlayCss} /> : <></>}
-        </>
-      )}
+        );
+
+        return (
+          <>
+            {fixedPanelPosition === FixedPanelPosition.Start
+              ? fixedResizablePanel
+              : flexResizablePanel}
+            <EuiResizableButton
+              className={resizeButtonClassName}
+              css={
+                resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss
+              }
+              data-test-subj={`${dataTestSubj}ResizableButton`}
+            />
+            {fixedPanelPosition === FixedPanelPosition.End
+              ? fixedResizablePanel
+              : flexResizablePanel}
+            {resizeWithPortalsHackIsResizing ? (
+              <div css={resizeWithPortalsHackOverlayCss} />
+            ) : (
+              <></>
+            )}
+          </>
+        );
+      }}
     </EuiResizableContainer>
   );
 };

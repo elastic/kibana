@@ -11,7 +11,7 @@ import React from 'react';
 import { round } from 'lodash';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
-import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
+import { FixedPanelPosition, ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 import { getContainerSize, pixelsToPercent } from './utils';
 
 export interface ResizableLayoutProps {
@@ -31,6 +31,10 @@ export interface ResizableLayoutProps {
    * The parent container element, used to calculate the layout size
    */
   container: HTMLElement | null;
+  /**
+   * The position of the fixed panel, defaults to FixedPanelPosition.Start
+   */
+  fixedPanelPosition?: FixedPanelPosition;
   /**
    * Current size of the fixed panel in pixels
    */
@@ -72,6 +76,7 @@ const ResizableLayout = ({
   mode,
   direction,
   container,
+  fixedPanelPosition = FixedPanelPosition.Start,
   fixedPanelSize,
   minFixedPanelSize,
   minFlexPanelSize,
@@ -81,7 +86,7 @@ const ResizableLayout = ({
   ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
 }: ResizableLayoutProps) => {
-  const panelsProps = { className, fixedPanel, flexPanel };
+  const panelsProps = { className, fixedPanelPosition, fixedPanel, flexPanel };
   const [panelSizes, setPanelSizes] = useState(() => {
     if (!container) {
       return { fixedPanelSizePct: 0, flexPanelSizePct: 0 };

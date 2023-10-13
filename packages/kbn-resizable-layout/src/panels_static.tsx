@@ -10,18 +10,20 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { ResizableLayoutDirection } from '../types';
+import { FixedPanelPosition, ResizableLayoutDirection } from '../types';
 
 export const PanelsStatic = ({
   className,
   direction,
   hideFixedPanel,
   fixedPanel,
+  fixedPanelPosition,
   flexPanel,
 }: {
   className?: string;
   direction: ResizableLayoutDirection;
   hideFixedPanel?: boolean;
+  fixedPanelPosition: FixedPanelPosition;
   fixedPanel: ReactElement;
   flexPanel: ReactElement;
 }) => {
@@ -33,6 +35,8 @@ export const PanelsStatic = ({
   const flexPanelCss = css`
     overflow: auto;
   `;
+  const fixedPanelItem = !hideFixedPanel && <EuiFlexItem grow={false}>{fixedPanel}</EuiFlexItem>;
+  const flexPanelItem = <EuiFlexItem css={flexPanelCss}>{flexPanel}</EuiFlexItem>;
 
   return (
     <EuiFlexGroup
@@ -45,8 +49,8 @@ export const PanelsStatic = ({
         height: 100%;
       `}
     >
-      {!hideFixedPanel && <EuiFlexItem grow={false}>{fixedPanel}</EuiFlexItem>}
-      <EuiFlexItem css={flexPanelCss}>{flexPanel}</EuiFlexItem>
+      {fixedPanelPosition === FixedPanelPosition.Start ? fixedPanelItem : flexPanelItem}
+      {fixedPanelPosition === FixedPanelPosition.End ? fixedPanelItem : flexPanelItem}
     </EuiFlexGroup>
   );
 };
