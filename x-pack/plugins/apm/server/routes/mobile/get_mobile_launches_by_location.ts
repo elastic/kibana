@@ -52,7 +52,9 @@ export async function getLaunchesByLocation({
 
   const aggs = {
     launches: {
-      filter: { term: { ['labels.lifecycle_state']: 'created' } },
+      filter: {
+        terms: { ['labels.lifecycle_state']: ['created', 'active'] },
+      },
       aggs: {
         byLocation: {
           terms: {
