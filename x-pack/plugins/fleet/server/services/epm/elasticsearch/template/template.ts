@@ -304,7 +304,7 @@ function _generateMappings(
               ...subField,
               type: 'object',
               object_type: subField.object_type ?? subField.type,
-            }))
+            }));
             _generateMappings(subFields, {
               ...ctx,
               groupFieldName: ctx.groupFieldName
