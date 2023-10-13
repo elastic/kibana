@@ -9,11 +9,13 @@
 import React from 'react';
 import { ErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
-import { ErrorCallout } from './error_messages';
+import { ErrorCallout, RefresherPrompt } from './error_messages';
 
 interface ErrorBoundaryState {
   error: null | Error;
   errorInfo: null | Partial<React.ErrorInfo>;
+  componentName: null | string;
+  isFatal: null | boolean;
 }
 
 interface ErrorBoundaryProps {
@@ -29,30 +31,43 @@ class ErrorBoundaryInternal extends React.Component<
     this.state = {
       error: null,
       errorInfo: null,
+      componentName: null,
+      isFatal: null,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
-    this.props.errorService.onError(error);
+    const { name, isFatal } = this.props.errorService.registerError(error, errorInfo);
     this.setState(() => {
-      return { error, errorInfo };
+      return { error, errorInfo, componentName: name, isFatal };
     });
   }
 
   render() {
     if (this.state.error != null) {
-      const { error, errorInfo } = this.state;
-      const { errorComponentName } = this.props.errorService.getErrorComponentName(errorInfo);
+      const { error, errorInfo, componentName, isFatal } = this.state;
 
-      // display error message in a "loud" container
-      return (
-        <ErrorCallout
-          error={error}
-          errorInfo={errorInfo}
-          name={errorComponentName}
-          reloadWindow={this.props.reloadWindow}
-        />
-      );
+      if (isFatal === false) {
+        // display error message in a "soft" container
+        return (
+          <RefresherPrompt
+            error={error}
+            errorInfo={errorInfo}
+            name={componentName}
+            reloadWindow={this.props.reloadWindow}
+          />
+        );
+      } else {
+        // display error message in a "loud" container
+        return (
+          <ErrorCallout
+            error={error}
+            errorInfo={errorInfo}
+            name={componentName}
+            reloadWindow={this.props.reloadWindow}
+          />
+        );
+      }
     }
 
     // not in error state

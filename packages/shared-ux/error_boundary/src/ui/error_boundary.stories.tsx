@@ -39,12 +39,46 @@ const Template: FC = ({ children }) => {
   );
 };
 
-export const ErrorInCallout: Story = () => {
+export const FatalErrorInCallout: Story = () => {
   const BadComponent = () => {
     const [hasError, setHasError] = useState(false);
 
     if (hasError) {
       throw new Error('This is an error to show in a callout!');
+    }
+
+    const clickedForError = action('clicked for error');
+    const handleClick = () => {
+      clickedForError();
+      setHasError(true);
+    };
+
+    return <EuiButton onClick={handleClick}>Click for error</EuiButton>;
+  };
+
+  const services = storybookMock.getServices();
+
+  return (
+    <Template>
+      <ErrorBoundaryProvider {...services}>
+        <ErrorBoundary>
+          <BadComponent />
+        </ErrorBoundary>
+      </ErrorBoundaryProvider>
+    </Template>
+  );
+};
+
+export const RecoverableErrorInCallout: Story = () => {
+  const BadComponent = () => {
+    const [hasError, setHasError] = useState(false);
+
+    if (hasError) {
+      const error = new Error();
+      error.name = 'ChunkLoadError';
+      error.message = 'Loading chunk 1234 failed.\\n';
+      error.name = 'ChunkLoadError';
+      throw error;
     }
 
     const clickedForError = action('clicked for error');

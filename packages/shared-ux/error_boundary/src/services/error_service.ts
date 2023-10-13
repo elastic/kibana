@@ -8,11 +8,27 @@
 
 import React from 'react';
 
+const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;
+
+/**
+ * Kibana Error Boundary Services: Error Service
+ * Each Error Boundary tracks an instance of this class
+ * @internal
+ */
 export class ErrorService {
+  /**
+   * Determines if the error fallback UI should appear as an apologetic but promising "Refresh" button,
+   * or treated with "danger" coloring and include a detailed error message.
+   */
+  private getIsFatal(error: Error) {
+    const isChunkLoadError = MATCH_CHUNK_LOADERROR.test(error.name);
+    return !isChunkLoadError; // "ChunkLoadError" is recoverable by refreshing the page
+  }
+
   /**
    * Derive the name of the component that threw the error
    */
-  public getErrorComponentName(errorInfo: Partial<React.ErrorInfo> | null) {
+  private getErrorComponentName(errorInfo: Partial<React.ErrorInfo> | null) {
     let errorComponentName: string | null = null;
     const stackLines = errorInfo?.componentStack?.split('\n');
     const errorIndicator = /^    at (\S+).*/;
@@ -32,12 +48,28 @@ export class ErrorService {
       }
     }
 
-    return { errorComponentName };
+    return errorComponentName;
   }
 
-  onError(error: Error) {
-    // TODO: determine if error is fatal
-    // TODO: track event for telemetry
-    error = error;
+  public registerError(
+    error: Error,
+    errorInfo: Partial<React.ErrorInfo> | null
+  ): ErrorServiceError {
+    const isFatal = this.getIsFatal(error);
+    const name = this.getErrorComponentName(errorInfo);
+
+    return {
+      error,
+      errorInfo,
+      isFatal,
+      name,
+    };
   }
+}
+
+interface ErrorServiceError {
+  error: Error;
+  errorInfo?: Partial<React.ErrorInfo> | null;
+  name: string | null;
+  isFatal: boolean;
 }

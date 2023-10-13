@@ -14,6 +14,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiCodeBlock,
+  EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
   useGeneratedHtmlId,
@@ -52,5 +53,22 @@ export const ErrorCallout = (props: ErrorCalloutProps) => {
         </EuiButton>
       </p>
     </EuiCallOut>
+  );
+};
+
+export const RefresherPrompt = (props: ErrorCalloutProps) => {
+  const { reloadWindow } = props;
+  return (
+    <EuiEmptyPrompt
+      iconType="broom"
+      title={<h2>Sorry, please refresh</h2>}
+      body={<p>An error occurred when trying to load a part of the page. Please try refreshing.</p>}
+      color="primary"
+      actions={
+        <EuiButton fill={true} onClick={reloadWindow}>
+          Refresh
+        </EuiButton>
+      }
+    />
   );
 };
