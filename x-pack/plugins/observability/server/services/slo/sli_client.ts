@@ -25,6 +25,7 @@ import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 import { InternalQueryError } from '../../errors';
+import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 
 export interface SLIClient {
   fetchSLIDataFrom(
@@ -55,13 +56,14 @@ export class DefaultSLIClient implements SLIClient {
       a.duration.isShorterThan(b.duration) ? 1 : -1
     );
     const longestLookbackWindow = sortedLookbackWindows[0];
-    const longestDateRange = getLookbackDateRange(longestLookbackWindow.duration);
+    const delayInSeconds = getDelayInSecondsFromSLO(slo);
+    const longestDateRange = getLookbackDateRange(longestLookbackWindow.duration, delayInSeconds);
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
-        aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
+        aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows, delayInSeconds),
       });
 
       return handleWindowedResult(result.aggregations, lookbackWindows);
@@ -71,7 +73,7 @@ export class DefaultSLIClient implements SLIClient {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
-        aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
+        aggs: toLookbackWindowsSlicedAggregationsQuery(sortedLookbackWindows, delayInSeconds),
       });
 
       return handleWindowedResult(result.aggregations, lookbackWindows);
@@ -110,14 +112,24 @@ function commonQuery(
   };
 }
 
-function toLookbackWindowsAggregationsQuery(sortedLookbackWindow: LookbackWindow[]) {
+function toLookbackWindowsAggregationsQuery(
+  sortedLookbackWindow: LookbackWindow[],
+  delayInSeconds = 0
+) {
   return sortedLookbackWindow.reduce<Record<string, AggregationsAggregationContainer>>(
     (acc, lookbackWindow) => ({
       ...acc,
       [lookbackWindow.name]: {
         date_range: {
           field: '@timestamp',
-          ranges: [{ from: `now-${lookbackWindow.duration.format()}/m`, to: 'now/m' }],
+          ranges: [
+            {
+              from: `now-${lookbackWindow.duration.format()}${
+                delayInSeconds > 0 ? '-' + delayInSeconds + 's' : ''
+              }/m`,
+              to: `now${delayInSeconds > 0 ? '-' + delayInSeconds + 's' : ''}/m`,
+            },
+          ],
         },
         aggs: {
           good: { sum: { field: 'slo.numerator' } },
@@ -129,7 +141,10 @@ function toLookbackWindowsAggregationsQuery(sortedLookbackWindow: LookbackWindow
   );
 }
 
-function toLookbackWindowsSlicedAggregationsQuery(slo: SLO, lookbackWindows: LookbackWindow[]) {
+function toLookbackWindowsSlicedAggregationsQuery(
+  lookbackWindows: LookbackWindow[],
+  delayInSeconds = 0
+) {
   return lookbackWindows.reduce<Record<string, AggregationsAggregationContainer>>(
     (acc, lookbackWindow) => ({
       ...acc,
@@ -138,8 +153,10 @@ function toLookbackWindowsSlicedAggregationsQuery(slo: SLO, lookbackWindows: Loo
           field: '@timestamp',
           ranges: [
             {
-              from: `now-${lookbackWindow.duration.format()}/m`,
-              to: 'now/m',
+              from: `now-${lookbackWindow.duration.format()}${
+                delayInSeconds > 0 ? '-' + delayInSeconds + 's' : ''
+              }/m`,
+              to: `now${delayInSeconds > 0 ? '-' + delayInSeconds + 's' : ''}/m`,
             },
           ],
         },
@@ -192,9 +209,9 @@ function handleWindowedResult(
   return indicatorDataPerLookbackWindow;
 }
 
-function getLookbackDateRange(duration: Duration): { from: Date; to: Date } {
+function getLookbackDateRange(duration: Duration, delayInSeconds = 0): { from: Date; to: Date } {
   const unit = toMomentUnitOfTime(duration.unit);
-  const now = moment.utc().startOf('minute');
+  const now = moment.utc().subtract(delayInSeconds, 'seconds').startOf('minute');
   const from = now.clone().subtract(duration.value, unit);
   const to = now.clone();
 
