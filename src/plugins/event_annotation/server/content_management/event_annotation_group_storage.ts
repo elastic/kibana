@@ -23,6 +23,7 @@ export class EventAnnotationGroupStorage extends SOContentStorage<EventAnnotatio
     super({
       savedObjectType: EVENT_ANNOTATION_GROUP_TYPE,
       cmServicesDefinition,
+      enableMSearch: true,
       allowedSavedObjectAttributes: [
         'title',
         'description',
