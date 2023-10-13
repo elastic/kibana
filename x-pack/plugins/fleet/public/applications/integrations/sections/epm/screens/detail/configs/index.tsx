@@ -30,10 +30,8 @@ interface ConfigsProps {
 
 export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   const { notifications, docLinks } = useStartServices();
-  const pkgName = packageInfo.name;
-  const pkgVersion = packageInfo.version;
-  // @ts-ignore-line
-  const notInstalled = !packageInfo?.installationInfo;
+  const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
+  const notInstalled = packageInfo.status !== 'installing';
 
   const {
     data: configs,
@@ -63,7 +61,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                   id="xpack.fleet.epm.InputTemplates.mainText"
                   defaultMessage="View sample configurations for each of the {name} integration's data streams below. Copy/paste this YML into your {elasticAgentYml} file or into a file within your {inputsDir} directory. For more information, see the {userGuideLink}"
                   values={{
-                    name: `${pkgName}`,
+                    name: pkgTitle,
                     elasticAgentYml: <EuiCode>elastic-agent.yml</EuiCode>,
                     inputsDir: <EuiCode>inputs.d</EuiCode>,
                     userGuideLink: (
