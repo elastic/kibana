@@ -15,16 +15,15 @@ import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
+import type { ESQLCallbacks } from './lib/ast/autocomplete/types';
+import { getLanguageProviders } from './lib/monaco';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
-let astGeneratorUtility: CustomLangModuleType['getLanguageProvider'];
-
-export const ESQLLang: CustomLangModuleType = {
+export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
-    const { ESQLTokensProvider, createAstGenerator } = await import('./lib/monaco');
-    astGeneratorUtility = createAstGenerator;
+    const { ESQLTokensProvider } = await import('./lib/monaco');
 
     workerProxyService.setup(ESQL_LANG_ID);
 
@@ -50,8 +49,5 @@ export const ESQLLang: CustomLangModuleType = {
       { open: '"', close: '"' },
     ],
   },
-
-  getLanguageProvider(callbacks) {
-    return astGeneratorUtility?.(callbacks);
-  },
+  ...getLanguageProviders(),
 };

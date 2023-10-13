@@ -36,7 +36,13 @@ export interface CommandBaseDefinition {
     multipleParams: boolean;
     // innerType here is useful to drill down the type in case of "column"
     // i.e. column of type string
-    params: Array<{ name: string; type: string; optional?: boolean; innerType?: string }>;
+    params: Array<{
+      name: string;
+      type: string;
+      optional?: boolean;
+      innerType?: string;
+      values?: string[];
+    }>;
   };
 }
 

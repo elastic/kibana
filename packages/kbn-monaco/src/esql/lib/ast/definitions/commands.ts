@@ -66,7 +66,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b'],
     signature: {
       multipleParams: true,
-      params: [{ name: 'expression', type: 'any' }],
+      params: [{ name: 'expression', type: 'function' }],
     },
     options: [byOption],
   },
@@ -153,8 +153,8 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [
         { name: 'column', type: 'column' },
-        { name: 'direction', type: 'string', optional: true },
-        { name: 'nulls', type: 'string', optional: true },
+        { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
+        { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
       ],
     },
   },

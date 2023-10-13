@@ -7,32 +7,58 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { monaco } from '../../../../monaco_imports';
+import { monaco } from '../../../../monaco_imports';
+import type { AutocompleteCommandDefinition, ESQLCallbacks } from './types';
+import { nonNullable } from '../ast_walker';
+import {
+  getColumnHit,
+  getCommandDefinition,
+  getCommandOption,
+  getFunctionDefinition,
+  isColumnItem,
+  isFunctionItem,
+  isIncompleteItem,
+  isLiteralItem,
+  isOptionItem,
+  isSourceItem,
+  monacoPositionToOffset,
+} from '../shared/helpers';
+import { collectVariables } from '../shared/variables';
+import {
+  ESQLAst,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLSingleAstItem,
+} from '../types';
+import type { ESQLPolicy, ESQLRealField, ESQLVariable } from '../validation/types';
+import {
+  commandAutocompleteDefinitions,
+  getAssignmentDefinitionCompletitionItem,
+  getBuiltinCompatibleFunctionDefinition,
+  mathCommandDefinition,
+  pipeCompleteItem,
+} from './completeItems';
 import {
   buildFieldsDefinitions,
+  buildPoliciesDefinitions,
   buildSourcesDefinitions,
-  pipeDefinition,
-  processingCommandsDefinitions,
-  sourceCommandsDefinitions,
-} from '../../autocomplete/autocomplete_definitions';
-import {
+  buildNewVarDefinition,
+  buildNoPoliciesAvailableDefinition,
   getCompatibleFunctionDefinition,
-  mathCommandDefinition,
-} from '../../autocomplete/autocomplete_definitions/functions_commands';
-import {
-  AutocompleteCommandDefinition,
-  ESQLCustomAutocompleteCallbacks,
-} from '../../autocomplete/types';
-import { commandDefinitions } from '../definitions/commands';
-import {
-  getCommandOrOptionsSignature,
+  buildMatchingFieldsDefinition,
   getCompatibleLiterals,
-  getFunctionSignatures,
-} from '../definitions/helpers';
-import { getFunctionDefinition, monacoPositionToOffset } from '../helpers';
-import { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../types';
+  buildConstantsDefinitions,
+} from './factories';
 
 const EDITOR_MARKER = 'marker_esql_editor';
+
+type GetSourceFn = () => Promise<AutocompleteCommandDefinition[]>;
+type GetFieldsByTypeFn = (type: string | string[]) => Promise<AutocompleteCommandDefinition[]>;
+type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
+type GetPoliciesFn = () => Promise<AutocompleteCommandDefinition[]>;
+type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
   for (const node of nodes) {
@@ -84,8 +110,21 @@ function getContext(innerText: string, ast: ESQLAst, offset: number) {
       return { type: 'list' as const, command, node };
     }
     if (node.type === 'function') {
-      //   // command ... fn( <here> )
+      // command ... fn( <here> )
       return { type: 'function' as const, command, node };
+    }
+    if (node.type === 'option') {
+      // command ... by <here>
+      return { type: 'option' as const, command, node };
+    }
+  }
+  if (command && command.args.length) {
+    const lastArg = command.args[command.args.length - 1];
+    if (
+      isOptionItem(lastArg) &&
+      (lastArg.incomplete || !lastArg.args.length || handleEnrichWithClause(lastArg))
+    ) {
+      return { type: 'option' as const, command, node: lastArg };
     }
   }
   if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
@@ -93,19 +132,26 @@ function getContext(innerText: string, ast: ESQLAst, offset: number) {
     return { type: 'newCommand' as const, command: undefined, node: undefined };
   }
 
-  if (['eval', 'stats', 'where'].includes(command.name)) {
-    // command a ... <here> OR command a = ... <here>
-    return { type: 'expression' as const, command, node };
-  }
-  if (['from', 'keep', 'drop'].includes(command.name)) {
-    return { type: 'identifier' as const, command, node };
-  }
+  // command a ... <here> OR command a = ... <here>
+  return { type: 'expression' as const, command, node };
+}
 
-  return { type: 'unknown' as const, command, node };
+// The enrich with clause it a bit tricky to detect, so it deserves a specific check
+function handleEnrichWithClause(option: ESQLCommandOption) {
+  const fnArg = isFunctionItem(option.args[0]) ? option.args[0] : undefined;
+  if (fnArg) {
+    if (fnArg.name === '=' && isColumnItem(fnArg.args[0]) && fnArg.args[1]) {
+      const assignValue = fnArg.args[1];
+      if (Array.isArray(assignValue) && isColumnItem(assignValue[0])) {
+        return fnArg.args[0].name === assignValue[0].name;
+      }
+    }
+  }
+  return false;
 }
 
 function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
-  const finalSuggestions = [pipeDefinition];
+  const finalSuggestions = [pipeCompleteItem];
   if (comma) {
     finalSuggestions.push({
       label: ',',
@@ -118,15 +164,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
     });
   }
   return finalSuggestions;
-}
-
-function getOptions(command: ESQLCommand): AutocompleteCommandDefinition[] {
-  if (command.args.some((arg) => !Array.isArray(arg) && arg.type === 'option')) {
-    return [];
-  }
-  // get possible options for the given command
-  // console.log('Options!');
-  return [];
 }
 
 function getLastCharFromTrimmed(text: string) {
@@ -147,98 +184,14 @@ export function getSignatureHelp(
   context: monaco.languages.SignatureHelpContext,
   astProvider: (text: string | undefined) => { ast: ESQLAst }
 ): monaco.languages.SignatureHelpResult {
-  const innerText = model.getValue();
-  const offset = monacoPositionToOffset(innerText, position);
-  let finalText = innerText;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  if (
-    context.triggerCharacter === ',' ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText[offset - 2]) || isComma(innerText[offset - 2])))
-  ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
-  }
-
-  const { ast } = astProvider(finalText);
-
-  const triggerContext = getContext(innerText, ast, offset);
-  if (triggerContext.type === 'function') {
-    const fnDefinition = getFunctionDefinition(triggerContext.node.name);
-    if (fnDefinition) {
-      const argIndex = Math.max(triggerContext.node.args.length - 1, 0);
-      const fullSignatures = getFunctionSignatures(fnDefinition);
-      return {
-        value: {
-          // remove the documentation
-          signatures: [
-            {
-              label: fullSignatures[0].declaration,
-              documentation: {
-                value: fnDefinition.description,
-              },
-              parameters: fnDefinition.signatures[0].params.map(({ name, type, optional }) => ({
-                label: name,
-                documentation: optional
-                  ? i18n.translate('monaco.esql.signatureHelp.optionalArgument', {
-                      defaultMessage: '{type}. Optional argument.',
-                      values: {
-                        type: Array.isArray(type) ? type.join(', ') : type,
-                      },
-                    })
-                  : '',
-              })),
-            },
-          ],
-          activeParameter: argIndex,
-          activeSignature: 0,
-        },
-        dispose: () => {},
-      };
-    }
-  } else if (triggerContext.command) {
-    const command = commandDefinitions.find(({ name }) => name === triggerContext.command.name)!;
-    const parameters = [
-      ...command.signature.params.map(({ name, type }) => {
-        return { label: name, documentation: type !== 'any' ? '' : type };
-      }),
-      ...command.options.flatMap(({ name, signature, optional }) => {
-        const option = [{ label: name, documentation: optional ? 'Optional' : '' }];
-        for (const arg of signature.params) {
-          option.push({
-            label: arg.name,
-            documentation: `${arg.optional ? 'Optional.' : ''}${arg.type}`,
-          });
-        }
-        return option;
-      }),
-    ];
-    const realArg = triggerContext.command.args[triggerContext.command.args.length - 1];
-    const argIndex =
-      realArg && !Array.isArray(realArg) && realArg.type === 'option'
-        ? command.signature.params.length + 1
-        : triggerContext.command.args.length;
-    return {
-      value: {
-        signatures: [
-          {
-            label: getCommandOrOptionsSignature(command),
-            documentation: command.examples![0],
-            parameters,
-          },
-        ],
-        activeParameter: command.signature.multipleParams
-          ? argIndex % command.signature.params.length
-          : argIndex,
-        activeSignature: 0,
-      },
-      dispose: () => {},
-    };
-  }
   return {
     value: { signatures: [], activeParameter: 0, activeSignature: 0 },
     dispose: () => {},
   };
+}
+
+function isSourceCommand({ label }: AutocompleteCommandDefinition) {
+  return ['from', 'row', 'show'].includes(String(label));
 }
 
 export async function suggest(
@@ -246,7 +199,7 @@ export async function suggest(
   position: monaco.Position,
   context: monaco.languages.CompletionContext,
   astProvider: (text: string | undefined) => { ast: ESQLAst },
-  resourceRetriever?: ESQLCustomAutocompleteCallbacks
+  resourceRetriever?: ESQLCallbacks
 ): Promise<AutocompleteCommandDefinition[]> {
   const innerText = model.getValue();
   const offset = monacoPositionToOffset(innerText, position);
@@ -264,62 +217,110 @@ export async function suggest(
 
   const { ast } = astProvider(finalText);
 
-  const triggerContext = getContext(innerText, ast, offset);
-  const getFieldsByType = getFieldsByTypeRetriever(resourceRetriever);
+  const astContext = getContext(innerText, ast, offset);
+  const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(resourceRetriever);
   const getSources = getSourcesRetriever(resourceRetriever);
+  const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
-  if (triggerContext.type === 'newCommand') {
+  // console.log({ finalText, innerText, astContext, ast, offset });
+  if (astContext.type === 'newCommand') {
     // propose main commands here
     // filter source commands if already defined
-    const suggestions = sourceCommandsDefinitions.concat(processingCommandsDefinitions);
-    if (ast.length) {
-      return suggestions.filter((def) => !sourceCommandsDefinitions.includes(def));
+    const suggestions = commandAutocompleteDefinitions;
+    if (!ast.length) {
+      return suggestions.filter(isSourceCommand);
     }
-    return suggestions;
+    return suggestions.filter((def) => !isSourceCommand(def));
   }
-  if (triggerContext.type === 'identifier') {
-    return getIdentifierSuggestions(innerText, triggerContext.command, getSources, getFieldsByType);
+
+  if (astContext.type === 'expression') {
+    // suggest next possible argument, or option
+    // otherwise a variable
+    return getExpressionSuggestionsByType(
+      innerText,
+      ast,
+      astContext,
+      getSources,
+      getFieldsByType,
+      getFieldsMap,
+      getPolicies
+    );
   }
-  if (triggerContext.type === 'expression') {
-    // const types = triggerContext.command.args.length ? triggerContext.command.args[0]. : ['any'];
-    // return getAllSuggestionsByType();
-    return [];
+  if (astContext.type === 'option') {
+    return getOptionArgsSuggestions(
+      innerText,
+      ast,
+      astContext.node,
+      astContext.command,
+      getFieldsByType,
+      getFieldsMap,
+      getPolicyMetadata
+    );
   }
-  if (triggerContext.type === 'list') {
-    // behave like an expression but without assign
-    return [];
-  }
-  if (triggerContext.type === 'function') {
+  if (astContext.type === 'function') {
     // behave like list
     return getFunctionArgsSuggestions(
-      model,
-      position,
-      triggerContext.node,
-      triggerContext.command,
+      innerText,
+      astContext.node,
+      astContext.command,
       getFieldsByType
     );
   }
 
   // console.log({ ast, triggerContext });
-  throw Error(`Where am I?`);
+  // throw Error(`Where am I?`);
+  return [];
 }
 
-function getFieldsByTypeRetriever(resourceRetriever?: ESQLCustomAutocompleteCallbacks) {
-  return async (expectedType: string | string[] = 'any') => {
-    const types = Array.isArray(expectedType) ? expectedType : [expectedType];
-    const fieldsOfType = await resourceRetriever?.getFields?.();
-    return buildFieldsDefinitions(
-      fieldsOfType
-        ?.filter(({ type }) => {
-          const ts = Array.isArray(type) ? type : [type];
-          return ts.some((t) => types[0] === 'any' || types.includes(t));
-        })
-        .map(({ name }) => name) || []
-    );
+function getFieldsByTypeRetriever(resourceRetriever?: ESQLCallbacks) {
+  const cacheFields = new Map<string, ESQLRealField>();
+  const getFields = async () => {
+    if (!cacheFields.size) {
+      const fieldsOfType = await resourceRetriever?.getFieldsFor?.();
+      for (const field of fieldsOfType || []) {
+        cacheFields.set(field.name, field);
+      }
+    }
+  };
+  return {
+    getFieldsByType: async (expectedType: string | string[] = 'any') => {
+      const types = Array.isArray(expectedType) ? expectedType : [expectedType];
+      await getFields();
+      return buildFieldsDefinitions(
+        Array.from(cacheFields.values())
+          ?.filter(({ type }) => {
+            const ts = Array.isArray(type) ? type : [type];
+            return ts.some((t) => types[0] === 'any' || types.includes(t));
+          })
+          .map(({ name }) => name) || []
+      );
+    },
+    getFieldsMap: async () => {
+      await getFields();
+      const cacheCopy = new Map<string, ESQLRealField>();
+      cacheFields.forEach((value, key) => cacheCopy.set(key, value));
+      return cacheCopy;
+    },
   };
 }
 
-function getSourcesRetriever(resourceRetriever?: ESQLCustomAutocompleteCallbacks) {
+function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
+  const getPolicies = async () => {
+    return (await resourceRetriever?.getPolicies?.()) || [];
+  };
+  return {
+    getPolicies: async () => {
+      const policies = await getPolicies();
+      return buildPoliciesDefinitions(policies);
+    },
+    getPolicyMetadata: async (policyName: string) => {
+      const policies = await getPolicies();
+      return policies.find(({ name }) => name === policyName);
+    },
+  };
+}
+
+function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     return buildSourcesDefinitions((await resourceRetriever?.getSources?.()) || []);
   };
@@ -330,22 +331,182 @@ const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
+function findNewVariable(variables: Map<string, ESQLVariable[]>) {
+  let autoGeneratedVariableCounter = 0;
+  let name = `var${autoGeneratedVariableCounter++}`;
+  while (variables.has(name)) {
+    name = `var${autoGeneratedVariableCounter++}`;
+  }
+  return name;
+}
+
+async function getExpressionSuggestionsByType(
+  innerText: string,
+  commands: ESQLCommand[],
+  {
+    command,
+    node,
+  }: {
+    command: ESQLCommand;
+    node: ESQLSingleAstItem | undefined;
+  },
+  getSources: GetSourceFn,
+  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsMap: GetFieldsMapFn,
+  getPolicies: GetPoliciesFn
+) {
+  const commandDef = getCommandDefinition(command.name);
+  // get the argument position
+  let argIndex = command.args.length;
+  const lastArg = command.args[Math.max(argIndex - 1, 0)];
+  if (isIncompleteItem(lastArg)) {
+    argIndex = Math.max(argIndex - 1, 0);
+  }
+  const isNewExpression = getLastCharFromTrimmed(innerText) === ',' || argIndex === 0;
+  const optionsAlreadyDeclared = (
+    command.args.filter((arg) => isOptionItem(arg)) as ESQLCommandOption[]
+  ).map(({ name }) => name);
+  const optionsAvailable = commandDef.options.filter(
+    ({ name }) => !optionsAlreadyDeclared.includes(name)
+  );
+  let argDef = commandDef.signature.params[argIndex];
+  if (!argDef && isNewExpression && commandDef.signature.multipleParams) {
+    argDef = commandDef.signature.params[0];
+  }
+  const lastValidArgDef = commandDef.signature.params[commandDef.signature.params.length - 1];
+
+  // console.log({
+  //   args: command.args,
+  //   argsLength: command.args.length,
+  //   commandDef,
+  //   argIndex,
+  //   lastArg,
+  //   argDef,
+  //   isNewExpression,
+  // });
+  const suggestions: AutocompleteCommandDefinition[] = [];
+  const fieldsMap: Map<string, ESQLRealField> = await (argDef &&
+  !isIncompleteItem(lastArg) &&
+  isColumnItem(lastArg)
+    ? getFieldsMap()
+    : new Map());
+  const anyVariables = collectVariables(commands, fieldsMap);
+  const canHaveAssignments = ['eval', 'stats', 'where', 'row'].includes(command.name);
+
+  if (canHaveAssignments && isNewExpression) {
+    suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
+  }
+  if (canHaveAssignments && !isNewExpression && lastArg && !isIncompleteItem(lastArg)) {
+    if (!argDef || lastValidArgDef.type !== 'function') {
+      if (isColumnItem(lastArg) || isLiteralItem(lastArg)) {
+        let argType = 'number';
+        if (isLiteralItem(lastArg)) {
+          argType = lastArg.literalType;
+        }
+        if (isColumnItem(lastArg)) {
+          const hit = getColumnHit(lastArg.name, { fields: fieldsMap, variables: anyVariables });
+          if (hit) {
+            argType = hit.type;
+          }
+        }
+        suggestions.push(...getBuiltinCompatibleFunctionDefinition(command.name, argType));
+      }
+    }
+    if (canHaveAssignments && lastValidArgDef?.type === 'function' && isColumnItem(lastArg)) {
+      suggestions.push(getAssignmentDefinitionCompletitionItem());
+    }
+  } else if (argDef) {
+    if (argDef.type === 'column' || argDef.type === 'any') {
+      suggestions.push(
+        ...(await getAllSuggestionsByType(
+          [argDef.innerType || 'any'],
+          command.name,
+          getFieldsByType,
+          {
+            functions: canHaveAssignments,
+            fields: true,
+            newVariables: false,
+          }
+        ))
+      );
+    }
+    if (argDef.values) {
+      suggestions.push(...buildConstantsDefinitions(argDef.values));
+    }
+    // @TODO: better handle the where command here
+    if (argDef.type === 'boolean' && command.name === 'where') {
+      suggestions.push(
+        ...(await getAllSuggestionsByType(['any'], command.name, getFieldsByType, {
+          functions: true,
+          fields: true,
+          newVariables: false,
+        }))
+      );
+    }
+    if (argDef.type === 'source') {
+      if (argDef.innerType === 'policy') {
+        const policies = await getPolicies();
+        suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
+      } else {
+        // @TODO: filter down the suggestions here based on other existing sources defined
+        suggestions.push(...(await getSources()));
+      }
+    }
+    if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
+      suggestions.push(...getCompatibleLiterals(command.name, [argDef.type], [argDef.name]));
+    }
+  }
+
+  const nonOptionArgs = command.args.filter(
+    (arg) => !isOptionItem(arg) && !Array.isArray(arg) && !arg.incomplete
+  );
+  const mandatoryArgsAlreadyPresent =
+    (commandDef.signature.multipleParams && nonOptionArgs.length > 1) ||
+    nonOptionArgs.length >=
+      commandDef.signature.params.filter(({ optional }) => !optional).length ||
+    (!argDef && lastValidArgDef?.type === 'function');
+
+  if (!isNewExpression && mandatoryArgsAlreadyPresent) {
+    if (optionsAvailable.length) {
+      suggestions.push(
+        ...optionsAvailable.map((option) => {
+          const completeItem: AutocompleteCommandDefinition = {
+            label: option.name,
+            insertText: option.name,
+            kind: 21,
+            detail: option.description,
+            sortText: 'D',
+          };
+          if (option.wrapped) {
+            completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
+            completeItem.insertTextRules =
+              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+          }
+          return completeItem;
+        })
+      );
+    }
+    suggestions.push(
+      ...getFinalSuggestions({
+        comma:
+          commandDef.signature.multipleParams &&
+          optionsAvailable.length === commandDef.options.length,
+      })
+    );
+  }
+  return suggestions;
+}
+
 async function getAllSuggestionsByType(
   types: string[],
   commandName: string,
-  getFieldsByType: (type: string | string[]) => Promise<AutocompleteCommandDefinition[]>,
+  getFieldsByType: GetFieldsByTypeFn,
   {
     functions,
     fields,
     newVariables,
   }: { functions: boolean; newVariables: boolean; fields: boolean }
 ): Promise<AutocompleteCommandDefinition[]> {
-  // if there's no content suggest a new variable, functions or fields
-  // if there's a single identifier but not assign, suggest assign or math operations
-  // if there's an assign already
-  //   * suggest math functions or pipes if at the end of something
-  //   * suggest options if supported
-  //   * suggest functions or fields by type if after a math operation
   const filteredFieldsByType = (await (fields
     ? getFieldsByType(types)
     : [])) as AutocompleteCommandDefinition[];
@@ -365,11 +526,10 @@ async function getAllSuggestionsByType(
 }
 
 async function getFunctionArgsSuggestions(
-  model: monaco.editor.ITextModel,
-  position: monaco.Position,
+  innerText: string,
   fn: ESQLFunction,
   command: ESQLCommand,
-  getFieldsByType: (type: string | string[]) => Promise<AutocompleteCommandDefinition[]>
+  getFieldsByType: GetFieldsByTypeFn
 ): Promise<AutocompleteCommandDefinition[]> {
   const fnDefinition = getFunctionDefinition(fn.name);
   if (fnDefinition) {
@@ -392,21 +552,95 @@ async function getFunctionArgsSuggestions(
   return mathCommandDefinition;
 }
 
-async function getIdentifierSuggestions(
+async function getOptionArgsSuggestions(
   innerText: string,
+  commands: ESQLCommand[],
+  option: ESQLCommandOption,
   command: ESQLCommand,
-  getSources: () => Promise<AutocompleteCommandDefinition[]>,
-  getFieldsByType: (type: string | string[]) => Promise<AutocompleteCommandDefinition[]>
-): Promise<AutocompleteCommandDefinition[]> {
-  // does the command has arguments?
-  if (command.args.length) {
-    if (getLastCharFromTrimmed(innerText) !== ',') {
-      return getFinalSuggestions({ comma: true }).concat(getOptions(command));
+  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsMaps: GetFieldsMapFn,
+  getPolicyMetadata: GetPolicyMetadataFn
+) {
+  const optionDef = getCommandOption(option.name);
+  const suggestions = [];
+  if (command.name === 'enrich') {
+    if (option.name === 'on') {
+      const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
+      if (policyName) {
+        const [policyMetadata, fieldsMap] = await Promise.all([
+          getPolicyMetadata(policyName),
+          getFieldsMaps(),
+        ]);
+        if (policyMetadata) {
+          suggestions.push(
+            ...buildMatchingFieldsDefinition(
+              policyMetadata.matchField,
+              Array.from(fieldsMap.keys())
+            )
+          );
+        }
+      }
+    }
+    if (option.name === 'with') {
+      let argIndex = option.args.length;
+      const lastArg = option.args[Math.max(argIndex - 1, 0)];
+      if (isIncompleteItem(lastArg)) {
+        argIndex = Math.max(argIndex - 1, 0);
+      }
+      const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
+      if (policyName) {
+        const [policyMetadata, fieldsMap] = await Promise.all([
+          getPolicyMetadata(policyName),
+          getFieldsMaps(),
+        ]);
+        const isNewExpression = getLastCharFromTrimmed(innerText) === ',' || argIndex === 0;
+        const anyVariables = collectVariables(commands, fieldsMap);
+
+        if (isNewExpression) {
+          suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
+          if (policyMetadata) {
+            suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
+          }
+        }
+        if (!isNewExpression && lastArg && !isIncompleteItem(lastArg)) {
+          suggestions.push(...getBuiltinCompatibleFunctionDefinition(command.name, 'any'));
+        }
+      }
     }
   }
-  if (command.name === 'from') {
-    // find out possible arguments for the command
-    return getSources();
+  if (optionDef && !suggestions.length) {
+    const argIndex = Math.max(option.args.length - 1, 0);
+    const types = [optionDef.signature.params[argIndex].type].filter(nonNullable);
+    suggestions.push(
+      ...(await getAllSuggestionsByType(types, command.name, getFieldsByType, {
+        functions: false,
+        fields: true,
+        newVariables: false,
+      }))
+    );
   }
-  return getFieldsByType('any');
+  return suggestions;
 }
+
+// async function getIdentifierSuggestions(
+//   innerText: string,
+//   command: ESQLCommand,
+//   getSources: GetSourceFn,
+//   getFieldsByType: GetFieldsByTypeFn
+// ): Promise<AutocompleteCommandDefinition[]> {
+//   // does the command has arguments?
+//   const commandDef = getCommandDefinition(command.name);
+//   if (
+//     commandDef.signature.params.filter(({ optional }) => !optional).length <= command.args.length &&
+//     !command.incomplete
+//   ) {
+//     if (getLastCharFromTrimmed(innerText) !== ',') {
+//       return getFinalSuggestions({ comma: true }).concat(getOptions(command));
+//     }
+//   }
+//   if (command.name === 'from') {
+//     // find out possible arguments for the command
+//     return getSources();
+//   }
+//   return getFieldsByType('any');
+// }

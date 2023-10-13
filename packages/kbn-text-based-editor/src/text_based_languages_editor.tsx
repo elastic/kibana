@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import {
   SQLLang,
@@ -14,14 +14,13 @@ import {
   ESQL_LANG_ID,
   ESQL_THEME_ID,
   ESQLLang,
-  ESQLCustomAutocompleteCallbacks,
+  type ESQLCallbacks,
 } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
-import type { SerializedEnrichPolicy } from '@kbn/index-management-plugin/common';
 import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopover,
@@ -109,7 +108,6 @@ const languageId = (language: string) => {
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
-let currentCursorContent = '';
 let lines = 1;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
@@ -151,14 +149,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: errors ? parseErrors(errors, code) : [],
     warnings: warning ? parseWarning(warning) : [],
   });
-  const [editorLanguageProvider, setLanguageProvider] = useState<
-    | {
-        validate: Function;
-        getSuggestions: () => monaco.languages.CompletionItemProvider;
-        getSignatureHelp?: () => monaco.languages.SignatureHelpProvider;
-      }
-    | undefined
-  >(undefined);
 
   const onTextLangQuerySubmitWrapped = useCallback(() => {
     setCodeStateOnSubmission(code);
@@ -168,7 +158,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
-  const policiesRef = useRef<SerializedEnrichPolicy[]>([]);
+  const codeRef = useRef<string>('');
 
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
@@ -279,12 +269,53 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     updateLinesFromModel = true;
   }, []);
 
+  const esqlCallbacks: ESQLCallbacks = useMemo(
+    () => ({
+      getSources: async () => {
+        return await getIndicesForAutocomplete(dataViews);
+      },
+      getFieldsFor: async (options = {}) => {
+        const pipes = codeRef.current.split('|');
+        pipes?.pop();
+        const validContent =
+          ('customQuery' in options && options.customQuery) ??
+          ('sourcesOnly' in options && options.sourcesOnly)
+            ? pipes[0]
+            : pipes?.join('|');
+        if (validContent) {
+          // ES|QL with limit 0 returns only the columns and is more performant
+          const esqlQuery = {
+            esql: `${validContent} | limit 0`,
+          };
+          try {
+            const table = await fetchFieldsFromESQL(esqlQuery, expressions);
+            return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+          } catch (e) {
+            // no action yet
+          }
+        }
+        return [];
+      },
+      getPolicies: async (ctx) => {
+        const { data: policies, error } =
+          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
+        if (error || !policies) {
+          return [];
+        }
+        return policies.map(({ type, query: policyQuery, ...rest }) => rest);
+      },
+    }),
+    [dataViews, expressions, indexManagementApiService]
+  );
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
-      if (!editorModel.current || !editorLanguageProvider) return;
+      if (!editorModel.current || language !== 'esql') return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } =
-        await editorLanguageProvider.validate(editorModel.current);
+      const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
+        codeRef.current,
+        esqlCallbacks
+      );
       const markers = [];
 
       if (parserErrors.length) {
@@ -293,13 +324,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (parserWarnings.length) {
         markers.push(...parserWarnings);
       }
-      if (markers.length && active) {
+      if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
         return;
       }
     },
-    [editorLanguageProvider]
+    [esqlCallbacks, language]
   );
 
   useDebounceWithOptions(
@@ -309,11 +340,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (errors || warning) {
           const parsedErrors = parseErrors(errors || [], code);
           const parsedWarning = parseWarning(warning || '');
-          setEditorMessages({ errors: parsedErrors, warnings: parsedWarning });
+          setEditorMessages({
+            errors: parsedErrors,
+            warnings: parsedErrors.length ? [] : parsedWarning,
+          });
           monaco.editor.setModelMarkers(
             editorModel.current,
             'Unified search',
-            parsedErrors.concat(parsedWarning)
+            parsedErrors.length ? parsedErrors : parsedWarning
           );
           return;
         }
@@ -324,40 +358,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         console.log({ error });
       });
       return () => (subscription.active = false);
-      // if (errors && errors.length && code === codeWhenSubmitted) {
-      //   const parsedErrors = parseErrors(errors, code);
-      //   setEditorMessages({ errors: parsedErrors, warnings: [] });
-      //   monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
-      // } else if (code && editorLanguageProvider) {
-      //   monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      //   const { warnings: parserWarnings, errors: parserErrors } = editorLanguageProvider.validate(
-      //     editorModel.current
-      //   );
-      //   const markers = [];
-
-      //   if (parserErrors.length) {
-      //     markers.push(...parserErrors);
-      //   }
-      //   if (parserWarnings.length) {
-      //     markers.push(...parserWarnings);
-      //   }
-      //   if (markers.length) {
-      //     setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
-      //     monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
-      //     return;
-      //   }
-      //   if (warning) {
-      //     const parsedWarning = parseWarning(warning);
-      //     setEditorMessages({ errors: [], warnings: parsedWarning });
-      //   } else {
-      //     setEditorMessages({ errors: [], warnings: [] });
-      //   }
-      //   monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      // }
     },
     { skipFirstRender: false },
     256,
     [errors, warning, code]
+  );
+
+  const suggestionProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getSuggestionProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
   );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
@@ -458,84 +467,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       getDocumentation();
     }
   }, [language, documentationSections]);
-
-  const getSources: ESQLCustomAutocompleteCallbacks['getSources'] = useCallback(async () => {
-    return await getIndicesForAutocomplete(dataViews);
-  }, [dataViews]);
-
-  const getFields: ESQLCustomAutocompleteCallbacks['getFields'] = useCallback(
-    async ({ sourceOnly, customQuery } = {}) => {
-      const pipes = currentCursorContent?.split('|');
-      pipes?.pop();
-      const validContent = customQuery ?? (sourceOnly ? pipes[0] : pipes?.join('|'));
-      if (validContent) {
-        // ES|QL with limit 0 returns only the columns and is more performant
-        const esqlQuery = {
-          esql: `${validContent} | limit 0`,
-        };
-        try {
-          const table = await fetchFieldsFromESQL(esqlQuery, expressions);
-          return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
-        } catch (e) {
-          // no action yet
-        }
-      }
-      return [];
-    },
-    [expressions]
-  );
-
-  const getPolicies: ESQLCustomAutocompleteCallbacks['getPolicies'] = useCallback(
-    async (ctx) => {
-      const { data: policies, error } =
-        (await indexManagementApiService?.getAllEnrichPolicies()) || {};
-      policiesRef.current = policies || [];
-      if (error || !policies) {
-        return [];
-      }
-      return policies.map(({ type, query: policyQuery, ...rest }) => rest);
-    },
-    [indexManagementApiService]
-  );
-
-  const getPolicyFields: ESQLCustomAutocompleteCallbacks['getPolicyFields'] = useCallback(
-    async (ctx) =>
-      policiesRef.current
-        .filter(({ name }) => ctx.userDefinedVariables.policy.includes(name))
-        .flatMap(({ enrichFields }) => enrichFields),
-    []
-  );
-
-  const getPolicyMatchingField: ESQLCustomAutocompleteCallbacks['getPolicyMatchingField'] =
-    useCallback(
-      async (ctx) => {
-        // try to load the list if none is present yet but
-        // at least one policy is declared in the userDefinedVariables
-        // (this happens if the user pastes an ESQL statement with the policy name in it)
-        if (!policiesRef.current.length && ctx.userDefinedVariables.policyIdentifiers.length) {
-          await getPolicies(ctx);
-        }
-        const matchingField = policiesRef.current.find(({ name }) =>
-          ctx.userDefinedVariables.policy.includes(name)
-        )?.matchField;
-        return matchingField ? [matchingField] : [];
-      },
-      [getPolicies]
-    );
-
-  useEffect(() => {
-    if (language === 'esql') {
-      setLanguageProvider(
-        ESQLLang.getLanguageProvider?.({
-          getSources,
-          getFields,
-          getPolicies,
-          getPolicyFields,
-          getPolicyMatchingField,
-        })
-      );
-    }
-  }, [getFields, getPolicies, getPolicyFields, getPolicyMatchingField, getSources, language]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -751,8 +682,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
-                      suggestionProvider={editorLanguageProvider?.getSuggestions()}
-                      signatureProvider={editorLanguageProvider?.getSignatureHelp?.()}
+                      suggestionProvider={suggestionProvider}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;
@@ -776,7 +706,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             endColumn: currentPosition?.column ?? 1,
                           });
                           if (content) {
-                            currentCursorContent = content || editor.getValue();
+                            codeRef.current = content || editor.getValue();
                           }
                         });
 

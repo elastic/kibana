@@ -11,34 +11,16 @@ import { monaco } from '../../../monaco_imports';
 import { getParser } from '../antlr_facade';
 import { AstListener } from '../ast/ast_factory';
 import { getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
-import { offsetToRowColumn } from '../ast/helpers';
+import { offsetToRowColumn } from '../ast/shared/helpers';
 import { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';
-import { ESQLCustomAutocompleteCallbacks } from '../autocomplete/types';
+import type { ESQLCallbacks } from '../ast/autocomplete/types';
 import { ESQLErrorListener } from './esql_error_listener';
 
 const ROOT_STATEMENT = 'singleStatement';
 
-function createParserListener(debug: boolean = false) {
+function createParserListener() {
   const parserListener = new AstListener();
-  if (debug) {
-    let indentation = 0;
-    for (const prop of Object.getOwnPropertyNames(AstListener.prototype)) {
-      // @ts-expect-error
-      if (typeof parserListener[prop] === 'function' && /^(enter|exit)/.test(prop)) {
-        // @ts-expect-error
-        const oldFn = parserListener[prop];
-        // @ts-expect-error
-        parserListener[prop] = (...args) => {
-          indentation = Math.max(indentation + (/^exit/.test(prop) ? -1 : 0), 0);
-          // eslint-disable-next-line no-console
-          console.log(`${Array(indentation).fill('\t').join('')}${prop}`);
-          indentation = indentation + (/^enter/.test(prop) ? 1 : 0);
-          return oldFn?.bind(parserListener)(...args);
-        };
-      }
-    }
-  }
   return parserListener;
 }
 
@@ -57,12 +39,12 @@ function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: 
       endColumn: endPosition.column + 1,
       endLineNumber: endPosition.lineNumber,
       severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
-      source: 'client' as const,
+      _source: 'client' as const,
     };
   });
 }
 
-export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) {
+export function getLanguageProviders() {
   const getAst = (text: string | undefined) => {
     if (!text) {
       return { ast: [], errors: [] };
@@ -80,15 +62,14 @@ export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) 
   return {
     // used for debugging purposes only
     getAst,
-    validate: async (model: monaco.editor.ITextModel) => {
-      const code = model.getValue();
+    validate: async (code: string, callbacks?: ESQLCallbacks) => {
       const { ast } = getAst(code);
       const { errors, warnings } = await validateAst(ast, callbacks);
       const monacoErrors = wrapAsMonacoMessage('error', code, errors);
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };
     },
-    getSignatureHelp: (): monaco.languages.SignatureHelpProvider => {
+    getSignatureHelp: (callbacks?: ESQLCallbacks): monaco.languages.SignatureHelpProvider => {
       return {
         signatureHelpTriggerCharacters: [' ', '('],
         provideSignatureHelp(
@@ -101,7 +82,7 @@ export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) 
         },
       };
     },
-    getSuggestions: (): monaco.languages.CompletionItemProvider => {
+    getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
       return {
         triggerCharacters: [',', '(', '=', ' '], // [',', '.', '(', '=', ' '],
         async provideCompletionItems(

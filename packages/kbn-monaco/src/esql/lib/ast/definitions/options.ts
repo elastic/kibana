@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isLiteralItem } from '../helpers';
+import { isLiteralItem } from '../shared/helpers';
 import { ESQLCommandOption, ESQLMessage } from '../types';
 import { CommandOptionsDefinition } from './types';
 
@@ -103,20 +103,3 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
     return messages;
   },
 };
-
-export function getCommandOption(name: CommandOptionsDefinition['name']) {
-  switch (name) {
-    case 'by':
-      return byOption;
-    case 'metadata':
-      return metadataOption;
-    case 'as':
-      return asOption;
-    case 'on':
-      return onOption;
-    case 'with':
-      return withOption;
-    default:
-      return;
-  }
-}

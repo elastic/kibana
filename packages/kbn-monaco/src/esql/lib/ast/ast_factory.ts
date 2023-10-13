@@ -115,9 +115,6 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitFromCommand(ctx: FromCommandContext) {
-    // if (ctx.exception) {
-    //   this.errors.push(createError(ctx.exception));
-    // }
     const commandAst = createCommand('from', ctx);
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
@@ -125,6 +122,8 @@ export class AstListener implements ESQLParserListener {
     if (metadataContext) {
       const option = createOption(metadataContext.METADATA().text.toLowerCase(), metadataContext);
       commandAst.args.push(option);
+      // skip for the moment as there's no easy way to get meta fields right now
+      // option.args.push(...collectAllColumnIdentifiers(metadataContext));
     }
   }
 
@@ -133,9 +132,6 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEvalCommand(ctx: EvalCommandContext) {
-    // if (ctx.exception) {
-    //   this.errors.push(createError(ctx.exception));
-    // }
     const commandAst = createCommand('eval', ctx);
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllFieldsStatements(ctx.fields()));
@@ -148,7 +144,7 @@ export class AstListener implements ESQLParserListener {
   exitStatsCommand(ctx: StatsCommandContext) {
     const command = createCommand('stats', ctx);
     this.ast.push(command);
-    command.args.push(...collectAllFieldsStatements(ctx.fields()), visitByOption(ctx));
+    command.args.push(...collectAllFieldsStatements(ctx.fields()), ...visitByOption(ctx));
   }
 
   /**
@@ -156,14 +152,13 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitLimitCommand(ctx: LimitCommandContext) {
-    // if (ctx.exception) {
-    //   this.errors.push(createError(ctx.exception));
-    // }
-
     const command = createCommand('limit', ctx);
     this.ast.push(command);
     if (ctx.tryGetToken(esql_parser.INTEGER_LITERAL, 0)) {
-      command.args.push(createLiteral('number', ctx.INTEGER_LITERAL()));
+      const literal = createLiteral('number', ctx.INTEGER_LITERAL());
+      if (literal) {
+        command.args.push(literal);
+      }
     }
   }
 

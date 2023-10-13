@@ -23,18 +23,19 @@ export interface CompleteLangModuleType extends LangModuleType {
   validation$: () => Observable<LangValidation>;
 }
 
-export interface CustomLangModuleType extends LangModuleType {
+export interface LanguageProvidersModule<Deps = unknown> {
+  validate: (
+    code: string,
+    callbacks?: Deps
+  ) => Promise<{ errors: monaco.editor.IMarkerData[]; warnings: monaco.editor.IMarkerData[] }>;
+  getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
+  getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
+}
+
+export interface CustomLangModuleType<Deps = unknown>
+  extends Omit<LangModuleType, 'getSuggestionProvider'>,
+    LanguageProvidersModule<Deps> {
   onLanguage: () => void;
-  getLanguageProvider: <Deps = unknown>(
-    deps: Deps
-  ) => {
-    getAst: Function;
-    validate: (
-      model: monaco.editor.ITextModel,
-      position: monaco.Position
-    ) => Promise<{ errors: object[]; warnings: object[] }>;
-    getSuggestions: () => monaco.languages.CompletionItemProvider;
-  };
 }
 
 export interface EditorError {

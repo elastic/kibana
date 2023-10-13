@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { buildConstantsDefinitions } from '../../autocomplete/autocomplete_definitions';
-import { AutocompleteCommandDefinition } from '../../autocomplete/types';
-import { chronoLiterals, timeLiterals } from './literals';
 import { CommandDefinition, CommandOptionsDefinition, FunctionDefinition } from './types';
 
 export function getCommandOrOptionsSignature({
@@ -44,6 +41,45 @@ export function getFunctionSignatures(
   }));
 }
 
+export function getCommandSignature(
+  { name, signature, options, examples }: CommandDefinition,
+  { withTypes }: { withTypes: boolean } = { withTypes: true }
+) {
+  return {
+    declaration: `${name} ${printCommandArguments(signature, withTypes)} ${options.map(
+      (option) =>
+        `${option.wrapped ? option.wrapped[0] : ''}${option.name} ${printCommandArguments(
+          option.signature,
+          withTypes
+        )}${option.wrapped ? option.wrapped[1] : ''}`
+    )}`,
+    examples,
+  };
+}
+
+function printCommandArguments(
+  { multipleParams, params }: CommandDefinition['signature'],
+  withTypes: boolean
+): string {
+  return `${params.map((arg) => printCommandArgument(arg, withTypes)).join(', `')}${
+    multipleParams
+      ? ` ,[...${params.map((arg) => printCommandArgument(arg, withTypes)).join(', `')}]`
+      : ''
+  }`;
+}
+
+function printCommandArgument(
+  param: CommandDefinition['signature']['params'][number],
+  withTypes: boolean
+): string {
+  if (!withTypes) {
+    return param.name || '';
+  }
+  return `${param.name}${param.optional ? ':?' : ':'} ${param.type}${
+    param.innerType ? `{${param.innerType}}` : ''
+  }`;
+}
+
 export function printArguments(
   {
     name,
@@ -62,29 +98,4 @@ export function printArguments(
     return name;
   }
   return `${name}${optional ? ':?' : ':'} ${Array.isArray(type) ? type.join(' | ') : type}`;
-}
-
-function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeLiterals.filter(({ name }) => {
-    const result = /s$/.test(name);
-    return unit > 1 ? result : !result;
-  });
-  return filteredTimeLiteral.map(({ name }) => name);
-}
-
-export function getCompatibleLiterals(commandName: string, types: string[]) {
-  const suggestions: AutocompleteCommandDefinition[] = [];
-  if (types.includes('number') && commandName === 'limit') {
-    // suggest 10/50/100
-    suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
-  }
-  if (types.includes('time_literal')) {
-    // filter plural for now and suggest only unit + singular
-
-    suggestions.push(...buildConstantsDefinitions(getUnitDuration(1))); // i.e. 1 year
-  }
-  if (types.includes('chrono_literal')) {
-    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY
-  }
-  return suggestions;
 }

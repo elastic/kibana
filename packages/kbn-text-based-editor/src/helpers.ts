@@ -12,15 +12,7 @@ import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-export interface MonacoMessage {
-  message: string;
-  startColumn: number;
-  startLineNumber: number;
-  endColumn: number;
-  endLineNumber: number;
-  severity: monaco.MarkerSeverity;
-  source?: 'client';
-}
+export type MonacoMessage = monaco.editor.IMarkerData;
 
 export const useDebounceWithOptions = (
   fn: Function,

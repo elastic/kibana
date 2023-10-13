@@ -21,7 +21,7 @@ import type {
   AutocompleteCommandDefinition,
   ESQLCustomAutocompleteCallbacks,
   UserDefinedVariables,
-} from '../autocomplete/types';
+} from '../ast/autocomplete/types';
 import type { ESQLWorker } from '../../worker/esql_worker';
 
 export class ESQLCompletionAdapter implements monaco.languages.CompletionItemProvider {
@@ -94,6 +94,7 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
     model: monaco.editor.IReadOnlyModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> {
+    console.log('Not here');
     const lines = model.getLineCount();
 
     const currentLineChars = model.getValueInRange({

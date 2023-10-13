@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../../monaco_imports';
-import { statsAggregationFunctionDefinitions } from './definitions/aggs';
-import { builtinFunctions } from './definitions/builtin';
-import { commandDefinitions } from './definitions/commands';
-import { evalFunctionsDefinitions } from './definitions/functions';
-import { getFunctionSignatures } from './definitions/helpers';
-import { chronoLiterals, timeLiterals } from './definitions/literals';
-import { CommandDefinition, FunctionDefinition, SignatureArgType } from './definitions/types';
+import { monaco } from '../../../../monaco_imports';
+import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { builtinFunctions } from '../definitions/builtin';
+import { commandDefinitions } from '../definitions/commands';
+import { evalFunctionsDefinitions } from '../definitions/functions';
+import { getFunctionSignatures } from '../definitions/helpers';
+import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { byOption, metadataOption, asOption, onOption, withOption } from '../definitions/options';
+import {
+  CommandDefinition,
+  CommandOptionsDefinition,
+  FunctionDefinition,
+  SignatureArgType,
+} from '../definitions/types';
 import {
   ESQLAstItem,
   ESQLColumn,
@@ -23,11 +29,11 @@ import {
   ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
-} from './types';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from './validation/types';
+} from '../types';
+import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
-  return !Array.isArray(arg) && arg.type === 'function';
+  return arg && !Array.isArray(arg) && arg.type === 'function';
 }
 
 export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
@@ -35,7 +41,7 @@ export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
 }
 
 export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
-  return !Array.isArray(arg) && arg.type === 'source';
+  return arg && !Array.isArray(arg) && arg.type === 'source';
 }
 
 export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
@@ -56,6 +62,10 @@ export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
 
 export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionItem(arg) && arg.name !== '=';
+}
+
+export function isIncompleteItem(arg: ESQLAstItem): boolean {
+  return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
 // from linear offset to Monaco position
@@ -147,6 +157,27 @@ export function getCommandDefinition(name: string): CommandDefinition {
   return buildCommandLookup().get(name.toLowerCase())!;
 }
 
+export function getAllCommands() {
+  return Array.from(buildCommandLookup().values());
+}
+
+export function getCommandOption(name: CommandOptionsDefinition['name']) {
+  switch (name) {
+    case 'by':
+      return byOption;
+    case 'metadata':
+      return metadataOption;
+    case 'as':
+      return asOption;
+    case 'on':
+      return onOption;
+    case 'with':
+      return withOption;
+    default:
+      return;
+  }
+}
+
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {
   if (item.literalType !== 'string') {
     return argTypes === item.literalType;
@@ -159,7 +190,7 @@ function compareLiteralType(argTypes: string, item: ESQLLiteral) {
 
 export function getColumnHit(
   columnName: string,
-  { fields, variables }: ReferenceMaps,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>,
   position?: number
 ): ESQLRealField | ESQLVariable | undefined {
   return fields.get(columnName) || variables.get(columnName)?.[0];
@@ -323,4 +354,27 @@ export function isEqualType(
   if (item.type === 'source') {
     return item.sourceType === argType;
   }
+}
+
+export function endsWithOpenBracket(text: string) {
+  return /\($/.test(text);
+}
+
+export function isDateFunction(fnName: string) {
+  // TODO: improve this and rely in signature in the future
+  return ['to_datetime', 'date_trunc', 'date_parse'].includes(fnName.toLowerCase());
+}
+
+export function getDateMathOperation() {
+  return builtinFunctions.filter(({ name }) => ['+', '-'].includes(name));
+}
+
+export function getDurationItemsWithQuantifier(quantifier: number = 1) {
+  return timeLiterals
+    .filter(({ name }) => !/s$/.test(name))
+    .map(({ name, ...rest }) => ({
+      label: `${quantifier} ${name}`,
+      insertText: `${quantifier} ${name}`,
+      ...rest,
+    }));
 }

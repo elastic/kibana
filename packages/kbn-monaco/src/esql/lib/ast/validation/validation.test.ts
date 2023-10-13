@@ -988,6 +988,22 @@ describe('validation logic', () => {
       []
     );
 
+    testErrorsAndWarnings('from a | stats numberField + 1', ['Stats does not support function +']);
+
+    testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
+      'Stats does not support function +',
+    ]);
+
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
+      ['Stats does not support function +']
+    );
+
+    testErrorsAndWarnings('from a | stats avg(numberField) by avg(numberField)', [
+      'Unknown column [avg]',
+      'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
+    ]);
+
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
       for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
@@ -1164,6 +1180,19 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy with var0 = otherField | eval var0`, []);
+  });
+
+  describe('shadowing', () => {
+    testErrorsAndWarnings(
+      'from a | eval stringField = 5',
+      [],
+      ['Column [stringField] of type string has been overwritten as new type: number']
+    );
+    testErrorsAndWarnings(
+      'from a | eval numberField = "5"',
+      [],
+      ['Column [numberField] of type number has been overwritten as new type: string']
+    );
   });
 
   describe('callbacks', () => {
