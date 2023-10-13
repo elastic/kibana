@@ -103,12 +103,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: true,
-  /*
-   *
-   * Enables Discover embedded within timeline
-   *
-   * */
-  discoverInTimeline: true,
 
   /**
    * disables ES|QL rules

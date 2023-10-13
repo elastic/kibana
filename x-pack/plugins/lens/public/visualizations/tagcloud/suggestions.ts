@@ -7,10 +7,10 @@
 
 import { partition } from 'lodash';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { getColorMappingDefaults } from '../../utils';
 
 export function getSuggestions({
   table,
@@ -50,7 +50,7 @@ export function getSuggestions({
           valueAccessor: metrics[0].columnId,
           ...DEFAULT_STATE,
           colorMapping: !mainPalette
-            ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+            ? getColorMappingDefaults()
             : mainPalette?.type === 'colorMapping'
             ? mainPalette.value
             : undefined,
