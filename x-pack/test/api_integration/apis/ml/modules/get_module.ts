@@ -35,13 +35,30 @@ const moduleIds = [
   'uptime_heartbeat',
 ];
 
+const securityModuleIds = [
+  'security_auth',
+  'security_cloudtrail',
+  'security_linux_v3',
+  'security_network',
+  'security_packetbeat',
+  'security_windows_v3',
+];
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  async function executeGetModuleRequest(module: string, user: USER, rspCode: number) {
+  async function executeGetModuleRequest(
+    module: string,
+    moduleTypes: string[],
+    user: USER,
+    rspCode: number
+  ) {
     const { body, status } = await supertest
       .get(`/internal/ml/modules/get_module/${module}`)
+      .query({
+        types: moduleTypes.length ? moduleTypes.join(',') : undefined,
+      })
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(rspCode, status, body);
@@ -55,16 +72,24 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('lists all modules', async () => {
-      const rspBody = await executeGetModuleRequest('', USER.ML_POWERUSER, 200);
+      const rspBody = await executeGetModuleRequest('', [], USER.ML_POWERUSER, 200);
       expect(rspBody).to.be.an(Array);
 
       const responseModuleIds = rspBody.map((module: { id: string }) => module.id);
       expect(responseModuleIds).to.eql(moduleIds);
     });
 
+    it('lists all security modules', async () => {
+      const rspBody = await executeGetModuleRequest('', ['security'], USER.ML_POWERUSER, 200);
+      expect(rspBody).to.be.an(Array);
+
+      const responseModuleIds = rspBody.map((module: { id: string }) => module.id);
+      expect(responseModuleIds).to.eql(securityModuleIds);
+    });
+
     for (const moduleId of moduleIds) {
       it(`loads module ${moduleId}`, async () => {
-        const rspBody = await executeGetModuleRequest(moduleId, USER.ML_POWERUSER, 200);
+        const rspBody = await executeGetModuleRequest(moduleId, [], USER.ML_POWERUSER, 200);
         expect(rspBody).to.be.an(Object);
 
         expect(rspBody).to.have.property('id').a('string');
