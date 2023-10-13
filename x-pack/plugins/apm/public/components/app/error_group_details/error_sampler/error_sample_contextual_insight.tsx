@@ -43,14 +43,6 @@ export function ErrorSampleContextualInsight({
       {
         '@timestamp': now,
         message: {
-          role: MessageRole.System,
-          content: `You are apm-gpt, a helpful assistant for performance analysis, optimisation and
-          root cause analysis of software. Answer as concisely as possible.`,
-        },
-      },
-      {
-        '@timestamp': now,
-        message: {
           role: MessageRole.User,
           content: `I'm an SRE. I am looking at an exception and trying to understand what it means.
 
