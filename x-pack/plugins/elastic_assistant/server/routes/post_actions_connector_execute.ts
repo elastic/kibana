@@ -7,6 +7,7 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { executeAction } from '../lib/langchain/execute';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
@@ -42,6 +43,14 @@ export const postActionsConnectorExecuteRoute = (
 
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        if (!request.body.assistantLangChain) {
+          const result = await executeAction({ actions, request, connectorId });
+          console.log('this is the reader', result.data);
+
+          return response.ok({
+            body: result,
+          });
+        }
 
         // convert the assistant messages to LangChain messages:
         const langChainMessages = getLangChainMessages(

@@ -56,44 +56,19 @@ export const fetchConnectorExecuteAction = async ({
 
   const requestBody = {
     params: {
-      subActionParams: { body: JSON.stringify(body), stream: true },
-      subAction: 'stream',
+      subActionParams: { ...body, stream: true },
+      subAction: 'invokeAI',
     },
+    assistantLangChain,
   };
 
   try {
-    const path = assistantLangChain
-      ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
-      : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
-
-    // http
-    //   .post<{
-    //     connector_id: string;
-    //     status: string;
-    //     data: string;
-    //     service_message?: string;
-    //   }>(path, {
-    //     // headers: {
-    //     //   'Content-Type': 'dont-compress-this',
-    //     // },
-    //     body: JSON.stringify(requestBody),
-    //     signal,
-    //     asResponse: true,
-    //     rawResponse: true,
-    //   })
-    //   .then((rez) => {
-    //     console.log('it worked', rez);
-    //   })
-    //   .catch((err) => {
-    //     console.log('it broke', err);
-    //   });
-
     const response = await http.fetch<{
       connector_id: string;
       status: string;
       data: string;
       service_message?: string;
-    }>(path, {
+    }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
       signal,
