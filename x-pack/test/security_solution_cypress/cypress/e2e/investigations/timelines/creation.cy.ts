@@ -18,7 +18,7 @@ import {
   TIMELINE_QUERY,
   TIMELINE_PANEL,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
-  SAVE_TIMELINE_BTN,
+  TIMELINE_SAVE_MODAL_OPEN_BUTTON,
   SAVE_TIMELINE_BTN_TOOLTIP,
 } from '../../../screens/timeline';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
@@ -99,8 +99,8 @@ describe('Timelines', (): void => {
       it('should not be able to create/update timeline ', () => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
-        cy.get(SAVE_TIMELINE_BTN).should('be.disabled');
-        cy.get(SAVE_TIMELINE_BTN).first().realHover();
+        cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).should('be.disabled');
+        cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
         cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
         cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should(
           'have.text',

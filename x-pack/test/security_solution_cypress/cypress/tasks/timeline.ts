@@ -53,7 +53,7 @@ import {
   TOGGLE_TIMELINE_EXPAND_EVENT,
   CREATE_NEW_TIMELINE_TEMPLATE,
   OPEN_TIMELINE_TEMPLATE_ICON,
-  TIMELINE_EDIT_MODAL_OPEN_BUTTON,
+  TIMELINE_SAVE_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   QUERY_TAB_BUTTON,
   CLOSE_OPEN_TIMELINE_MODAL_BTN,
@@ -100,7 +100,7 @@ export const addDescriptionToTimeline = (
   modalAlreadyOpen: boolean = false
 ) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+    cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
   }
   cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
@@ -110,9 +110,10 @@ export const addDescriptionToTimeline = (
 
 export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = false) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+    cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -123,7 +124,7 @@ export const addNameAndDescriptionToTimeline = (
   modalAlreadyOpen: boolean = false
 ) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+    cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
   }
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
@@ -342,6 +343,10 @@ export const executeTimelineSearch = (query: string) => {
 
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
+};
+
+export const saveTimeline = () => {
+  addNameToTimeline('test');
 };
 
 export const deleteTimeline = () => {

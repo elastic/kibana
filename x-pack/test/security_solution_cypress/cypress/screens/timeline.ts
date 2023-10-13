@@ -257,7 +257,7 @@ export const TIMESTAMP_TOGGLE_FIELD =
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
-export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-btn"]';
+export const TIMELINE_SAVE_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-btn"]';
 
 export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
@@ -298,8 +298,6 @@ export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
-
-export const SAVE_TIMELINE_BTN = '[data-test-subj="save-timeline-btn"]';
 
 export const SAVE_TIMELINE_BTN_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
 
