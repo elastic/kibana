@@ -24,6 +24,7 @@ export interface CspRadioOption {
   icon?: string;
   tooltip?: string;
   isBeta?: boolean;
+  testId?: string;
 }
 
 export const RadioGroup = ({
@@ -34,7 +35,6 @@ export const RadioGroup = ({
   onChange,
 }: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
-
   return (
     <div
       css={css`
@@ -101,6 +101,7 @@ export const RadioGroup = ({
               `}
             >
               <EuiRadio
+                data-test-subj={option.testId}
                 label={option.label}
                 id={option.id}
                 checked={isChecked}
