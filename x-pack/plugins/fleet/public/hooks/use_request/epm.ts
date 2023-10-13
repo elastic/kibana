@@ -316,16 +316,14 @@ export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
   });
 };
 
-export function useGetInputsTemplates(
+export function sendGetInputsTemplates(
   { pkgName, pkgVersion }: GetInputsTemplatesRequest['params'],
   query: GetInputsTemplatesRequest['query']
 ) {
-  return useQuery<GetInputsTemplatesResponse, RequestError>(['format', query], () =>
-    sendRequestForRq<GetInputsTemplatesResponse>({
-      path: epmRouteService.getInputsTemplatesPath(pkgName, pkgVersion),
-      method: 'get',
-      query,
-      version: API_VERSIONS.public.v1,
-    })
-  );
+  return sendRequest<GetInputsTemplatesResponse>({
+    path: epmRouteService.getInputsTemplatesPath(pkgName, pkgVersion),
+    method: 'get',
+    query,
+    version: API_VERSIONS.public.v1,
+  });
 }

@@ -5,60 +5,114 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiSkeletonText,
+  EuiCallOut,
+  EuiLink,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetInputsTemplates, useStartServices } from '../../../../../hooks';
-import { Loading } from '../../../../../components';
+import type { PackageInfo } from '../../../../../types';
+
+import { sendGetInputsTemplates, useStartServices } from '../../../../../hooks';
 
 interface ConfigsProps {
-  pkgName: string;
-  pkgVersion: string;
+  packageInfo: PackageInfo;
 }
 
-export const Configs: React.FC<ConfigsProps> = ({ pkgName, pkgVersion }) => {
+export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   const [configs, setConfigs] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<undefined | Error>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { notifications } = useStartServices();
-
-  const { data, isLoading, error } = useGetInputsTemplates(
-    { pkgName, pkgVersion },
-    { format: 'yml' }
-  );
+  const pkgName = packageInfo.name;
+  const pkgVersion = packageInfo.version;
+  // @ts-ignore-line
+  const notInstalled = !packageInfo?.installationInfo;
 
   useEffect(() => {
-    if (isLoading) {
-      setConfigs(undefined);
-    } else if (!!data) {
-      setConfigs(data as string);
-    }
-  }, [data, isLoading]);
+    const fetchYamlConfigs = async () => {
+      try {
+        const res = await sendGetInputsTemplates({ pkgName, pkgVersion }, { format: 'yml' });
+        setConfigs(res?.data as string);
+      } catch (e) {
+        setError(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchYamlConfigs();
+  }, [pkgName, pkgVersion]);
 
   if (error) {
     notifications.toasts.addError(error, {
-      title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
-        defaultMessage: 'Error loading changelog information',
+      title: i18n.translate('xpack.fleet.epm.InputTemplates.loadingErro', {
+        defaultMessage: 'Error input templates',
       }),
     });
   }
 
-  return isLoading && !configs ? (
-    <Loading />
-  ) : (
+  return (
     <EuiFlexGroup data-test-subj="epm.Configs" alignItems="flexStart">
       <EuiFlexItem grow={1} />
       <EuiFlexItem grow={6}>
-        <EuiText>
-          <p>
-            View sample configurations for each of the {pkgName} integration&rsquo;s data streams
-            below. Copy/paste this YML into your <code>elastic-agent.yml</code> file or into a file
-            within your <code>inputs.d</code> directory.
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiCodeBlock language="yaml" isCopyable={true} paddingSize="s" overflowHeight={1000}>
-          {configs}
-        </EuiCodeBlock>
+        {isLoading && !configs ? (
+          <EuiSkeletonText lines={10} />
+        ) : (
+          <>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.epm.InputTemplates.mainText"
+                  defaultMessage="View sample configurations for each of the {name} integration's data streams below. Copy/paste this YML into your {elasticAgentYml} file or into a file within your {inputsDir} directory. For more information, see the {userGuideLink}"
+                  values={{
+                    name: `${pkgName}`,
+                    elasticAgentYml: <code>elastic-agent.yml</code>,
+                    inputsDir: <code>inputs.d</code>,
+                    userGuideLink: (
+                      <EuiLink
+                        href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-input-configuration.html"
+                        external
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.epm.InputTemplates.guideLink"
+                          defaultMessage="Fleet and Elastic Agent Guide"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+            {notInstalled && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="xpack.fleet.epm.InputTemplates.installCallout"
+                      defaultMessage="Install the integration to use the following configs."
+                    />
+                  }
+                  color="warning"
+                  iconType="warning"
+                />
+              </>
+            )}
+            <EuiSpacer size="m" />
+            <EuiCodeBlock language="yaml" isCopyable={true} paddingSize="s" overflowHeight={1000}>
+              {configs}
+            </EuiCodeBlock>
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

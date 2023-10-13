@@ -627,7 +627,6 @@ export function Detail() {
       });
     }
 
-    // TODO check conditions to show this tab (isInstalled?)
     if (canReadPackageSettings) {
       tabs.push({
         id: 'configs',
@@ -768,7 +767,7 @@ export function Detail() {
             <AssetsPage packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
-            <Configs pkgName={packageInfo.name} pkgVersion={packageInfo.version} />
+            <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
