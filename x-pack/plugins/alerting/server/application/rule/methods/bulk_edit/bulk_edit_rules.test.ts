@@ -678,6 +678,7 @@ describe('bulkEdit()', () => {
         actions: [existingAction, { ...newAction, uuid: '222' }],
         id: existingRule.id,
         snoozeSchedule: [],
+        isSnoozedUntil: null,
       });
     });
 
@@ -907,6 +908,7 @@ describe('bulkEdit()', () => {
         ],
         id: existingRule.id,
         snoozeSchedule: [],
+        isSnoozedUntil: null,
       });
     });
   });
