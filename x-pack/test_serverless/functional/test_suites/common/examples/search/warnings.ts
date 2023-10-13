@@ -13,7 +13,7 @@ import type { WebElementWrapper } from '../../../../../../../test/functional/ser
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
@@ -23,14 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const monacoEditor = getService('monacoEditor');
 
-  // Failing: See https://github.com/elastic/kibana/issues/165623
-  // FLAKY: https://github.com/elastic/kibana/issues/165379
-  // FLAKY: https://github.com/elastic/kibana/issues/165502
-  // FLAKY: https://github.com/elastic/kibana/issues/165503
-  // FLAKY: https://github.com/elastic/kibana/issues/165624
-  // FLAKY: https://github.com/elastic/kibana/issues/165635
-  describe.skip('handling warnings with search source fetch', function () {
+  describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
@@ -51,6 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.login();
       // create rollup data
       log.info(`loading ${testIndex} index...`);
       await esArchiver.loadIfNeeded(testArchive);
@@ -104,8 +101,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.clearAllToasts();
     });
 
-    it('shows shard failure warning notifications by default', async () => {
+    it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
+
+      await retry.try(async () => {
+        const toasts = await find.allByCssSelector(toastsSelector);
+        expect(toasts.length).to.be(2);
+        const expects = ['The data might be incomplete or wrong.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
+      });
+
+      // click "see full error" button in the toast
+      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
+      await openShardModalButton.click();
+
+      // request
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailRequest');
+        const requestText = await monacoEditor.getCodeEditorValue(0);
+        expect(requestText).to.contain(testRollupField);
+      });
+
+      // response
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailResponse');
+        const responseText = await monacoEditor.getCodeEditorValue(0);
+        expect(responseText).to.contain(shardFailureReason);
+      });
+
+      await testSubjects.click('euiFlyoutCloseButton');
 
       // wait for response - toasts appear before the response is rendered
       let response: estypes.SearchResponse | undefined;
@@ -113,34 +139,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         response = await getTestJson('responseTab', 'responseCodeBlock');
         expect(response).not.to.eql({});
       });
-
-      // toasts
-      const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(2);
-      const expects = ['2 of 4 shards failed', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
-      });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
-      await openShardModalButton.click();
-
-      await retry.waitFor('modal title visible', async () => {
-        const modalHeader = await testSubjects.find('shardFailureModalTitle');
-        return (await modalHeader.getVisibleText()) === '2 of 4 shards failed';
-      });
-
-      // request
-      await testSubjects.click('shardFailuresModalRequestButton');
-      const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
-      // response
-      await testSubjects.click('shardFailuresModalResponseButton');
-      const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
-
-      await testSubjects.click('closeShardFailureModal');
 
       // response tab
       assert(response && response._shards.failures);
@@ -158,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(warnings).to.eql([]);
     });
 
-    it('able to handle shard failure warnings and prevent default notifications', async () => {
+    it('should show search warnings in results tab', async () => {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
@@ -166,53 +164,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
+        const expects = ['The data might be incomplete or wrong.', 'Query result'];
+        await asyncForEach(toasts, async (t, index) => {
+          expect(await t.getVisibleText()).to.eql(expects[index]);
+        });
       });
-      const expects = ['Query result', '2 of 4 shards failed'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
-      });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
-      await openShardModalButton.click();
-
-      await retry.waitFor('modal title visible', async () => {
-        const modalHeader = await testSubjects.find('shardFailureModalTitle');
-        return (await modalHeader.getVisibleText()) === '2 of 4 shards failed';
-      });
-
-      // request
-      await testSubjects.click('shardFailuresModalRequestButton');
-      const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
-      // response
-      await testSubjects.click('shardFailuresModalResponseButton');
-      const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
-
-      await testSubjects.click('closeShardFailureModal');
-
-      // response tab
-      const response = await getTestJson('responseTab', 'responseCodeBlock');
-      expect(response._shards.total).to.be(4);
-      expect(response._shards.successful).to.be(2);
-      expect(response._shards.skipped).to.be(0);
-      expect(response._shards.failed).to.be(2);
-      expect(response._shards.failures.length).to.equal(1);
-      expect(response._shards.failures[0].index).to.equal(testRollupIndex);
-      expect(response._shards.failures[0].reason.type).to.equal(shardFailureType);
-      expect(response._shards.failures[0].reason.reason).to.equal(shardFailureReason);
 
       // warnings tab
       const warnings = await getTestJson('warningsTab', 'warningsCodeBlock');
-      expect(warnings).to.eql([
-        {
-          type: 'shard_failure',
-          message: '2 of 4 shards failed',
-          reason: { reason: shardFailureReason, type: shardFailureType },
-          text: 'The data might be incomplete or wrong.',
-        },
-      ]);
+      expect(warnings.length).to.be(1);
+      expect(warnings[0].type).to.be('incomplete');
     });
   });
 }

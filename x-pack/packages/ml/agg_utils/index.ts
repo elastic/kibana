@@ -19,6 +19,7 @@ export type {
 } from './src/fetch_histograms_for_fields';
 export { isMultiBucketAggregate } from './src/is_multi_bucket_aggregate';
 export { isSignificantTerm } from './src/type_guards';
+export { SIGNIFICANT_TERM_TYPE } from './src/types';
 export type {
   AggCardinality,
   SignificantTerm,
@@ -27,6 +28,7 @@ export type {
   SignificantTermGroupHistogram,
   SignificantTermHistogram,
   SignificantTermHistogramItem,
+  SignificantTermType,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,

@@ -174,14 +174,15 @@
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
     "@kbn/subscription-tracking",
+    "@kbn/core-application-common",
+    "@kbn/openapi-generator",
+    "@kbn/es",
+    "@kbn/react-kibana-mount",
+    "@kbn/unified-doc-viewer-plugin",
     "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
-    "@kbn/core-application-common",
-    "@kbn/openapi-generator",
-    "@kbn/es",
-    "@kbn/react-kibana-mount"
     "@kbn/unified-field-list"
   ]
 }

@@ -64,6 +64,7 @@ export const SearchApplicationIndicesLogic = kea<
       actions.updateSearchApplicationRequest({
         name: values.searchApplicationName,
         indices: updatedIndices,
+        template: values.searchApplicationData.template,
       });
     },
     searchApplicationUpdated: () => {
@@ -77,6 +78,7 @@ export const SearchApplicationIndicesLogic = kea<
       actions.updateSearchApplicationRequest({
         name: values.searchApplicationName,
         indices: updatedIndices,
+        template: values.searchApplicationData.template,
       });
     },
   }),

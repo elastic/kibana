@@ -84,7 +84,7 @@ export const registerCleanUpTask = (
                 if (remaining.length === 0) {
                   return { state, schedule: { interval: '24h' } };
                 } else {
-                  return { state, schedule: { interval: '15m' } };
+                  return { state, schedule: { interval: '20m' } };
                 }
               }
             } catch (e) {

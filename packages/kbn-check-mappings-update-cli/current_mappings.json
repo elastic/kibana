@@ -1065,9 +1065,6 @@
   "links": {
     "dynamic": false,
     "properties": {
-      "id": {
-        "type": "text"
-      },
       "title": {
         "type": "text"
       },
@@ -3128,6 +3125,22 @@
       },
       "color": {
         "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
       }
     }
   },
