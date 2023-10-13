@@ -333,10 +333,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const newTokensMap = missingTokenPolicyIds.reduce((acc, policyId) => {
       const token = this.generateToken();
-      return {
-        ...acc,
-        [policyId]: token,
-      };
+      acc[policyId] = token;
+      return acc;
     }, {} as Record<string, string>);
 
     await this.persistTokens(missingTokenPolicyIds, newTokensMap);

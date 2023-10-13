@@ -69,9 +69,6 @@ export function generateInputId(input: NewPackagePolicyInput) {
 export function formatInputs(inputs: NewPackagePolicy['inputs']) {
   return inputs.reduce((acc, input) => {
     const inputId = generateInputId(input);
-    if (!acc) {
-      acc = {};
-    }
     acc[inputId] = {
       enabled: input.enabled,
       vars: formatVars(input.vars),
@@ -101,9 +98,6 @@ export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
 
 function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
   return streams.reduce((acc, stream) => {
-    if (!acc) {
-      acc = {};
-    }
     acc[stream.data_stream.dataset] = {
       enabled: stream.enabled,
       vars: formatVars(stream.vars),

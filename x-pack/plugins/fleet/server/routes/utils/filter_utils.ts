@@ -59,8 +59,7 @@ export const validateFilterKueryNode = ({
 
     if (ast.arguments) {
       const myPath = `${path}.${index}`;
-      return [
-        ...kueryNode,
+      kueryNode.push(
         ...validateFilterKueryNode({
           astFilter: ast,
           types,
@@ -70,8 +69,9 @@ export const validateFilterKueryNode = ({
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
           nestedKeys: localNestedKeys || nestedKeys,
           skipNormalization,
-        }),
-      ];
+        })
+      );
+      return kueryNode;
     }
     if (storeValue && index === 0) {
       const splitPath = path.split('.');
@@ -80,16 +80,14 @@ export const validateFilterKueryNode = ({
         : `${path}.${index}`;
       const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
 
-      return [
-        ...kueryNode,
-        {
-          astPath,
-          error: hasFilterKeyError(key, types, indexMapping, skipNormalization),
-          isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
-          key,
-          type: getType(key),
-        },
-      ];
+      kueryNode.push({
+        astPath,
+        error: hasFilterKeyError(key, types, indexMapping, skipNormalization),
+        isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
+        key,
+        type: getType(key),
+      });
+      return kueryNode;
     }
     return kueryNode;
   }, []);

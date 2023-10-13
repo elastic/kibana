@@ -147,21 +147,20 @@ const parseFields = (
            * If the children parsed have any error we concatenate them in our accumulator.
            */
           if (parsedChildren.errors) {
-            acc.errors = [...acc.errors, ...parsedChildren.errors];
+            acc.errors.push(...parsedChildren.errors);
           }
         }
 
         acc.value[fieldName] = parsedField;
 
         if (Boolean(parametersRemoved.length)) {
-          acc.errors = [
-            ...acc.errors,
+          acc.errors.push(
             ...parametersRemoved.map((paramName) => ({
               code: 'ERR_PARAMETER' as 'ERR_PARAMETER',
               fieldPath,
               paramName,
-            })),
-          ];
+            }))
+          );
         }
       }
 

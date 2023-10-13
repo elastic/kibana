@@ -153,28 +153,26 @@ export const validateFilterKueryNode = ({
   return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
     if (ast.arguments) {
       const myPath = `${path}.${index}`;
-      return [
-        ...kueryNode,
+      kueryNode.push(
         ...validateFilterKueryNode({
           astFilter: ast,
           types,
           indexMapping,
           path: `${myPath}.arguments`,
-        }),
-      ];
+        })
+      );
+      return kueryNode;
     }
 
     if (index === 0) {
       const splitPath = path.split('.');
-      return [
-        ...kueryNode,
-        {
-          astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
-          error: hasFieldKeyError(ast.value, types, indexMapping, indexType),
-          key: ast.value,
-          type: getFieldType(ast.value, indexMapping),
-        },
-      ];
+      kueryNode.push({
+        astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
+        error: hasFieldKeyError(ast.value, types, indexMapping, indexType),
+        key: ast.value,
+        type: getFieldType(ast.value, indexMapping),
+      });
+      return kueryNode;
     }
 
     return kueryNode;

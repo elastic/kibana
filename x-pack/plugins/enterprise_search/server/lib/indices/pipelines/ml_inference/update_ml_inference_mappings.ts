@@ -68,30 +68,8 @@ const generateTextExpansionMappingProperties = (sourceFields: string[], targetFi
         },
       },
     },
-    ...targetFields.reduce(
-      (previous, targetField) => ({
-        ...previous,
-        [targetField]: {
-          properties: {
-            model_id: {
-              type: 'keyword',
-            },
-            predicted_value: {
-              type: 'rank_features',
-            },
-          },
-        },
-      }),
-      {}
-    ),
-  };
-};
-
-const formDefaultElserMappingProps = (sourceFields: string[]) => {
-  return sourceFields.reduce(
-    (previous, sourceField) => ({
-      ...previous,
-      [`${sourceField}_expanded`]: {
+    ...targetFields.reduce((previous, targetField) => {
+      (previous as Record<string, unknown>)[targetField] = {
         properties: {
           model_id: {
             type: 'keyword',
@@ -100,10 +78,26 @@ const formDefaultElserMappingProps = (sourceFields: string[]) => {
             type: 'rank_features',
           },
         },
+      };
+      return previous;
+    }, {}),
+  };
+};
+
+const formDefaultElserMappingProps = (sourceFields: string[]) => {
+  return sourceFields.reduce((previous, sourceField) => {
+    (previous as Record<string, unknown>)[`${sourceField}_expanded`] = {
+      properties: {
+        model_id: {
+          type: 'keyword',
+        },
+        predicted_value: {
+          type: 'rank_features',
+        },
       },
-    }),
-    {}
-  );
+    };
+    return previous;
+  }, {});
 };
 
 const isTextExpansionModel = async (modelId: string, esClient: ElasticsearchClient) => {

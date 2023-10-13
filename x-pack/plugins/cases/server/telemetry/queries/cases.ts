@@ -147,23 +147,20 @@ export const getCasesTelemetryData = async ({
 const getCasesSavedObjectTelemetry = async (
   savedObjectsClient: ISavedObjectsRepository
 ): Promise<SavedObjectsFindResponse<unknown, CaseAggregationResult>> => {
-  const caseByOwnerAggregationQuery = OWNERS.reduce(
-    (aggQuery, owner) => ({
-      ...aggQuery,
-      [owner]: {
-        filter: {
-          term: {
-            [`${CASE_SAVED_OBJECT}.attributes.owner`]: owner,
-          },
-        },
-        aggs: {
-          ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
-          ...getAssigneesAggregations(),
+  const caseByOwnerAggregationQuery = OWNERS.reduce((aggQuery, owner) => {
+    (aggQuery as Record<string, unknown>)[owner] = {
+      filter: {
+        term: {
+          [`${CASE_SAVED_OBJECT}.attributes.owner`]: owner,
         },
       },
-    }),
-    {}
-  );
+      aggs: {
+        ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
+        ...getAssigneesAggregations(),
+      },
+    };
+    return aggQuery;
+  }, {});
 
   return savedObjectsClient.find<unknown, CaseAggregationResult>({
     page: 0,
@@ -254,22 +251,19 @@ const getCommentsSavedObjectTelemetry = async (
     },
   });
 
-  const attachmentsByOwnerAggregationQuery = OWNERS.reduce(
-    (aggQuery, owner) => ({
-      ...aggQuery,
-      [owner]: {
-        filter: {
-          term: {
-            [`${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`]: owner,
-          },
-        },
-        aggs: {
-          ...attachmentRegistries(),
+  const attachmentsByOwnerAggregationQuery = OWNERS.reduce((aggQuery, owner) => {
+    (aggQuery as Record<string, unknown>)[owner] = {
+      filter: {
+        term: {
+          [`${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`]: owner,
         },
       },
-    }),
-    {}
-  );
+      aggs: {
+        ...attachmentRegistries(),
+      },
+    };
+    return aggQuery;
+  }, {});
 
   return savedObjectsClient.find<unknown, AttachmentAggregationResult>({
     page: 0,
@@ -307,23 +301,20 @@ const getFilesTelemetry = async (
     },
   });
 
-  const filesByOwnerAggregationQuery = OWNERS.reduce(
-    (aggQuery, owner) => ({
-      ...aggQuery,
-      [owner]: {
-        filter: {
-          term: {
-            [`${FILE_SO_TYPE}.attributes.Meta.owner`]: owner,
-          },
-        },
-        aggs: {
-          ...averageSize(),
-          ...top20MimeTypes(),
+  const filesByOwnerAggregationQuery = OWNERS.reduce((aggQuery, owner) => {
+    (aggQuery as Record<string, unknown>)[owner] = {
+      filter: {
+        term: {
+          [`${FILE_SO_TYPE}.attributes.Meta.owner`]: owner,
         },
       },
-    }),
-    {}
-  );
+      aggs: {
+        ...averageSize(),
+        ...top20MimeTypes(),
+      },
+    };
+    return aggQuery;
+  }, {});
 
   const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseIds: *`);
 

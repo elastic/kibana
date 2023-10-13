@@ -39,7 +39,11 @@ const getIndexTemplatesToUsedBy = (indexTemplatesEs: TemplateFromEs[]) => {
   return indexTemplatesEs.reduce((acc, item) => {
     if (item.index_template.composed_of) {
       item.index_template.composed_of.forEach((component) => {
-        acc[component] = acc[component] ? [...acc[component], item.name] : [item.name];
+        if (!acc[component]) {
+          acc[component] = [];
+        }
+        acc[component].push(item.name);
+        return acc;
       });
     }
     return acc;
