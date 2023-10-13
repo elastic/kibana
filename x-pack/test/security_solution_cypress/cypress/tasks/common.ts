@@ -25,15 +25,22 @@ export const API_AUTH = Object.freeze({
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
-export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress',
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+});
 
-export const rootRequest = <T = unknown>(
-  options: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> =>
+export const rootRequest = <T = unknown>({
+  headers: optionHeaders,
+  ...restOptions
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
-    ...options,
+    headers: {
+      ...API_HEADERS,
+      ...(optionHeaders || {}),
+    },
+    ...restOptions,
   });
 
 /** Starts dragging the subject */
@@ -113,7 +120,6 @@ export const deleteAlertsAndRules = () => {
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
     },
     timeout: 300000,
   });
@@ -274,7 +280,6 @@ export const postDataView = (dataSource: string) => {
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
-      [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
     },
     failOnStatusCode: false,
   });

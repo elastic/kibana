@@ -67,6 +67,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     });
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().uncheck();
 
+    // close modal and save timeline changes
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
     saveTimeline();
 
@@ -76,11 +77,13 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
       ).to.contain('netflow');
     });
 
+    // open modal, filter and check
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
 
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();
 
+    // close modal and save timeline changes
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
     saveTimeline();
 
