@@ -18,7 +18,7 @@ import { generateId } from '../../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -917,7 +917,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
@@ -964,7 +964,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
@@ -975,7 +975,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'bar_stacked',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
@@ -1099,7 +1099,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'product',
           splitAccessor: 'category',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
@@ -1145,7 +1145,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'category',
           splitAccessor: 'product',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
@@ -1192,7 +1192,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'timestamp',
           splitAccessor: 'product',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: undefined,
         },
       ],
     });
