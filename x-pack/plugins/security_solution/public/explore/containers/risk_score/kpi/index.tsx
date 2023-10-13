@@ -72,21 +72,21 @@ export const useRiskScoreKpi = ({
 
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
+  const requestTimerange = useMemo(
+    () => (timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined),
+    [timerange]
+  );
+
   useEffect(() => {
     if (!skip && defaultIndex && featureEnabled) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
         entity: riskEntity,
+        timerange: requestTimerange,
       });
     }
-  }, [defaultIndex, search, filterQuery, skip, riskEntity, featureEnabled]);
-
-  // since query does not take timerange arg, we need to manually refetch when time range updates
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timerange?.to, timerange?.from]);
+  }, [defaultIndex, search, filterQuery, skip, riskEntity, featureEnabled, requestTimerange]);
 
   useEffect(() => {
     if (error) {
