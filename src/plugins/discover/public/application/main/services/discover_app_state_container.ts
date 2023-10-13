@@ -303,7 +303,7 @@ export function getInitialState(
       ? defaultAppState
       : {
           ...defaultAppState,
-          ...cleanupUrlState(stateStorageURL),
+          ...cleanupUrlState(stateStorageURL, services.uiSettings),
         },
     services.uiSettings
   );

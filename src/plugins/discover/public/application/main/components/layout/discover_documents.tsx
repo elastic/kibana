@@ -34,7 +34,6 @@ import {
   HIDE_ANNOUNCEMENTS,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
-  SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
@@ -56,6 +55,10 @@ import {
   DiscoverTourProvider,
 } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import {
+  getMaxAllowedSampleSize,
+  getAllowedSampleSize,
+} from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
@@ -128,7 +131,6 @@ function DiscoverDocumentsComponent({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const defaultSampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -338,7 +340,8 @@ function DiscoverDocumentsComponent({
                 isPlainRecord={isTextBasedQuery}
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
-                sampleSizeState={sampleSizeState || defaultSampleSize}
+                maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+                sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
                 onUpdateSampleSize={!isTextBasedQuery ? onUpdateSampleSize : undefined}
                 onFieldEdited={onFieldEdited}
                 configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}

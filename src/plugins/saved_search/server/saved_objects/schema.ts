@@ -7,7 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { VIEW_MODE } from '../../common';
+import {
+  MIN_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  VIEW_MODE,
+} from '../../common';
 
 const SCHEMA_SEARCH_BASE = {
   // General
@@ -82,5 +86,10 @@ const SCHEMA_SEARCH_BASE = {
 export const SCHEMA_SEARCH_V8_8_0 = schema.object(SCHEMA_SEARCH_BASE);
 export const SCHEMA_SEARCH_V8_12_0 = schema.object({
   ...SCHEMA_SEARCH_BASE,
-  sampleSize: schema.maybe(schema.number()),
+  sampleSize: schema.maybe(
+    schema.number({
+      min: MIN_SAVED_SEARCH_SAMPLE_SIZE,
+      max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
+    })
+  ),
 });

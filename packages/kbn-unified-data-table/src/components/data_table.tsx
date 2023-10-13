@@ -204,6 +204,10 @@ export interface UnifiedDataTableProps {
    */
   onUpdateRowsPerPage?: (rowsPerPage: number) => void;
   /**
+   * Configuration option to limit sample size slider
+   */
+  maxAllowedSampleSize?: number;
+  /**
    * The max size of the documents returned by Elasticsearch
    */
   sampleSizeState: number;
@@ -347,6 +351,7 @@ export const UnifiedDataTable = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  maxAllowedSampleSize,
   sampleSizeState,
   onUpdateSampleSize,
   isPlainRecord = false,
@@ -734,6 +739,7 @@ export const UnifiedDataTable = ({
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <UnifiedDataTableAdditionalDisplaySettings
+          maxAllowedSampleSize={maxAllowedSampleSize}
           sampleSize={sampleSizeState}
           onChangeSampleSize={onUpdateSampleSize}
         />
@@ -741,7 +747,7 @@ export const UnifiedDataTable = ({
     }
 
     return Object.keys(options).length ? options : undefined;
-  }, [sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
+  }, [maxAllowedSampleSize, sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
 
   const inMemory = useMemo(() => {
     return isPlainRecord && columns.length

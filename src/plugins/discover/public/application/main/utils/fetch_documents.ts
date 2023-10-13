@@ -9,10 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
-import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
+import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -24,7 +25,7 @@ export const fetchDocuments = (
   { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
   const sampleSize = getAppState().sampleSize;
-  searchSource.setField('size', sampleSize || services.uiSettings.get(SAMPLE_SIZE_SETTING));
+  searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);

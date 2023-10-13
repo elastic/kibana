@@ -11,19 +11,29 @@ import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
-export const MAX_ALLOWED_SAMPLE_SIZE = 1000;
-export const MIN_ALLOWED_SAMPLE_SIZE = 10;
-export const SAMPLE_SIZE_STEP = 10;
+export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
+export const MIN_ALLOWED_SAMPLE_SIZE = 1;
+export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `step={10}` configuration for EuiRange
+export const RANGE_STEP_SAMPLE_SIZE = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
+  maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize: (sampleSize: number) => void;
 }
 
 export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   UnifiedDataTableAdditionalDisplaySettingsProps
-> = ({ sampleSize, onChangeSampleSize }) => {
+> = ({
+  maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
+  sampleSize,
+  onChangeSampleSize,
+}) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
+  const minRangeSampleSize = Math.max(
+    Math.min(RANGE_MIN_SAMPLE_SIZE, sampleSize),
+    MIN_ALLOWED_SAMPLE_SIZE
+  ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
 
   const debouncedOnChangeSampleSize = useMemo(
     () => debounce(onChangeSampleSize, 300, { leading: false, trailing: true }),
@@ -39,14 +49,14 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
 
       const newSampleSize = Number(event.target.value);
 
-      if (newSampleSize > 0) {
+      if (newSampleSize >= MIN_ALLOWED_SAMPLE_SIZE) {
         setActiveSampleSize(newSampleSize);
-        if (newSampleSize <= MAX_ALLOWED_SAMPLE_SIZE) {
+        if (newSampleSize <= maxAllowedSampleSize) {
           debouncedOnChangeSampleSize(newSampleSize);
         }
       }
     },
-    [setActiveSampleSize, debouncedOnChangeSampleSize]
+    [maxAllowedSampleSize, setActiveSampleSize, debouncedOnChangeSampleSize]
   );
 
   const sampleSizeLabel = i18n.translate('unifiedDataTable.sampleSizeSettings.sampleSizeLabel', {
@@ -62,9 +72,9 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
       <EuiRange
         compressed
         fullWidth
-        min={MIN_ALLOWED_SAMPLE_SIZE}
-        max={MAX_ALLOWED_SAMPLE_SIZE}
-        step={SAMPLE_SIZE_STEP}
+        min={minRangeSampleSize}
+        max={maxAllowedSampleSize}
+        step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
         showInput
         value={activeSampleSize}
         onChange={onChangeActiveSampleSize}

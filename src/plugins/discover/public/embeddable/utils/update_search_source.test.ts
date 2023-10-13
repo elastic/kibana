@@ -22,7 +22,6 @@ const dataViewMockWithTimeField = buildDataViewMock({
 
 describe('updateSearchSource', () => {
   const defaults = {
-    sampleSize: 50,
     sortDir: 'asc',
   };
 
@@ -59,15 +58,16 @@ describe('updateSearchSource', () => {
     expect(searchSource.getField('size')).toEqual(customSampleSize);
   });
 
-  it('updates a given search source with a default sample size', async () => {
-    const searchSource = createSearchSourceMock({});
-    updateSearchSource(searchSource, dataViewMock, [] as SortOrder[], undefined, true, defaults);
-    expect(searchSource.getField('size')).toEqual(defaults.sampleSize);
-  });
-
   it('updates a given search source with sort field', async () => {
     const searchSource1 = createSearchSourceMock({});
-    updateSearchSource(searchSource1, dataViewMock, [] as SortOrder[], undefined, true, defaults);
+    updateSearchSource(
+      searchSource1,
+      dataViewMock,
+      [] as SortOrder[],
+      customSampleSize,
+      true,
+      defaults
+    );
     expect(searchSource1.getField('sort')).toEqual([{ _score: 'asc' }]);
 
     const searchSource2 = createSearchSourceMock({});
@@ -75,10 +75,9 @@ describe('updateSearchSource', () => {
       searchSource2,
       dataViewMockWithTimeField,
       [] as SortOrder[],
-      undefined,
+      customSampleSize,
       true,
       {
-        sampleSize: 50,
         sortDir: 'desc',
       }
     );
@@ -89,7 +88,7 @@ describe('updateSearchSource', () => {
       searchSource3,
       dataViewMockWithTimeField,
       [['bytes', 'desc']] as SortOrder[],
-      undefined,
+      customSampleSize,
       true,
       defaults
     );

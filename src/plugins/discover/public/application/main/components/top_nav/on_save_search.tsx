@@ -15,6 +15,7 @@ import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/pu
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
+import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 
 async function saveDataSource({
   savedSearch,
@@ -119,9 +120,15 @@ export async function onSaveSearch({
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
       : state.appState.getState().rowsPerPage;
-    savedSearch.sampleSize = uiSettings.get(DOC_TABLE_LEGACY)
-      ? currentSampleSize
-      : state.appState.getState().sampleSize;
+
+    // save the custom value or reset it if it's invalid
+    const appStateSampleSize = state.appState.getState().sampleSize;
+    const allowedSampleSize = getAllowedSampleSize(appStateSampleSize, uiSettings);
+    savedSearch.sampleSize =
+      appStateSampleSize && allowedSampleSize === appStateSampleSize
+        ? appStateSampleSize
+        : undefined;
+
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
