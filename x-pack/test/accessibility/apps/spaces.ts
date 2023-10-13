@@ -85,9 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
-    // Skipped due to an a11y violation
-    // https://github.com/elastic/kibana/issues/144155
-    describe.skip('Create Space B and Verify', async () => {
+    describe('Create Space B and Verify', async () => {
       it('a11y test for delete space button', async () => {
         await PageObjects.spaceSelector.clickCreateSpace();
         await PageObjects.spaceSelector.clickEnterSpaceName();
