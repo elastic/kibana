@@ -284,7 +284,7 @@ export function processFields(fields: Fields): Fields {
   return validateFields(dedupedFields, dedupedFields);
 }
 
-const isFields = (path: string) => {
+export const isFields = (path: string) => {
   return path.includes('/fields/');
 };
 

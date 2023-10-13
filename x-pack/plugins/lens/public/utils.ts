@@ -9,7 +9,7 @@ import { uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -36,6 +36,7 @@ import {
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -421,3 +422,10 @@ export function shouldRemoveSource(
       dropType === 'replace_incompatible')
   );
 }
+
+export const getColorMappingDefaults = () => {
+  if (COLOR_MAPPING_OFF_BY_DEFAULT) {
+    return undefined;
+  }
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+};
