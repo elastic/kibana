@@ -44,10 +44,7 @@ const navigationTree: NavigationTreeDefinition = {
           }),
           link: 'dev_tools:console',
           getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/dev_tools#/console')) ||
-              pathNameSerialized.startsWith(prepend('/app/dev_tools#/searchprofiler'))
-            );
+            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },
         },
         {
