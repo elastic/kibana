@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { apiKeyHint, secretTokenHint, serverUrlHint, serviceEnvironmentHint, serviceNameHint } from "./shared_hints";
+import {
+  apiKeyHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+  serviceNameHint,
+} from './shared_hints';
 
 export const javaVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'elastic.apm.secret_token' }),
