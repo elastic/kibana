@@ -22,9 +22,9 @@ import {
   updateDataProviderbyDraggingField,
   addNameAndDescriptionToTimeline,
   populateTimeline,
-  waitForTimelineChanges,
   createNewTimeline,
   updateDataProviderByFieldHoverAction,
+  saveTimeline,
 } from '../../../tasks/timeline';
 import { getTimeline } from '../../../objects/timeline';
 import { hostsUrl } from '../../../urls/navigation';
@@ -62,12 +62,12 @@ describe(
       cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
     });
 
-    it.skip(
+    it(
       'persists timeline when data provider is updated by dragging a field from data grid',
       { tags: ['@brokenInServerless'] },
       () => {
         updateDataProviderbyDraggingField('host.name', 0);
-        waitForTimelineChanges();
+        saveTimeline();
         cy.reload();
         cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
           .first()
@@ -79,9 +79,9 @@ describe(
 
     it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
       addDataProvider({ field: 'host.name', operator: 'exists' });
-      waitForTimelineChanges();
+      saveTimeline();
       updateDataProviderByFieldHoverAction('host.name', 0);
-      waitForTimelineChanges();
+      saveTimeline();
       cy.reload();
       cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
         .first()

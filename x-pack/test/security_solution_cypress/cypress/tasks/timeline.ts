@@ -346,7 +346,19 @@ export const expandFirstTimelineEventDetails = () => {
 };
 
 export const saveTimeline = () => {
-  addNameToTimeline('test');
+  cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
+
+  cy.get(TIMELINE_TITLE_INPUT)
+    .invoke('val')
+    .then((value) => {
+      if (!value) {
+        cy.get(TIMELINE_TITLE_INPUT).type(`test{enter}`);
+        cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'test', name);
+      }
+      cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+      cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+    });
 };
 
 export const deleteTimeline = () => {
