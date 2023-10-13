@@ -15,9 +15,11 @@ import { z } from 'zod';
 import { RuleCreateProps } from '../../../model/rule_schema/rule_schemas.gen';
 import { BulkCrudRulesResponse } from '../response_schema.gen';
 
-export type BulkCreateRulesRequestBody = z.infer<typeof BulkCreateRulesRequestBody>;
+export type BulkCreateRulesRequestBody = RuleCreateProps[];
+
 export const BulkCreateRulesRequestBody = z.array(RuleCreateProps);
 export type BulkCreateRulesRequestBodyInput = z.input<typeof BulkCreateRulesRequestBody>;
 
-export type BulkCreateRulesResponse = z.infer<typeof BulkCreateRulesResponse>;
+export type BulkCreateRulesResponse = BulkCrudRulesResponse;
+
 export const BulkCreateRulesResponse = BulkCrudRulesResponse;

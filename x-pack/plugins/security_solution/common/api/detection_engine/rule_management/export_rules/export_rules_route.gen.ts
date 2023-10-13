@@ -14,7 +14,18 @@ import { z } from 'zod';
 
 import { RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';
 
-export type ExportRulesRequestQuery = z.infer<typeof ExportRulesRequestQuery>;
+export interface ExportRulesRequestQuery {
+  /**
+   * Determines whether a summary of the exported rules is returned.
+   */
+  exclude_export_details?: boolean;
+  /**
+   * File name for saving the exported rules.
+   * @default export.ndjson
+   */
+  file_name?: string;
+}
+
 export const ExportRulesRequestQuery = z.object({
   /**
    * Determines whether a summary of the exported rules is returned.
@@ -33,7 +44,15 @@ export const ExportRulesRequestQuery = z.object({
 });
 export type ExportRulesRequestQueryInput = z.input<typeof ExportRulesRequestQuery>;
 
-export type ExportRulesRequestBody = z.infer<typeof ExportRulesRequestBody>;
+export type ExportRulesRequestBody = {
+  /**
+   * Array of `rule_id` fields. Exports all rules when unspecified.
+   */
+  objects: Array<{
+    rule_id: RuleSignatureId;
+  }>;
+} | null;
+
 export const ExportRulesRequestBody = z
   .object({
     /**

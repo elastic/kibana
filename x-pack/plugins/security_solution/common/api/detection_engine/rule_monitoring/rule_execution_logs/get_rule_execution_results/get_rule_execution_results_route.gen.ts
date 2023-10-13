@@ -19,9 +19,45 @@ import {
 } from '../../model/execution_result.gen';
 import { SortOrder } from '../../../model/sorting.gen';
 
-export type GetRuleExecutionResultsRequestQuery = z.infer<
-  typeof GetRuleExecutionResultsRequestQuery
->;
+export interface GetRuleExecutionResultsRequestQuery {
+  /**
+   * Start date of the time range to query
+   */
+  start: string;
+  /**
+   * End date of the time range to query
+   */
+  end: string;
+  /**
+   * Query text to filter results by
+   */
+  query_text?: string;
+  /**
+   * Comma-separated list of rule execution statuses to filter results by
+   */
+  status_filters?: RuleExecutionStatus[];
+  /**
+   * Field to sort results by
+   * @default timestamp
+   */
+  sort_field?: SortFieldOfRuleExecutionResult;
+  /**
+   * Sort order to sort results by
+   * @default desc
+   */
+  sort_order?: SortOrder;
+  /**
+   * Page number to return
+   * @default 1
+   */
+  page?: number;
+  /**
+   * Number of results per page
+   * @default 20
+   */
+  per_page?: number;
+}
+
 export const GetRuleExecutionResultsRequestQuery = z.object({
   /**
    * Start date of the time range to query
@@ -67,9 +103,13 @@ export type GetRuleExecutionResultsRequestQueryInput = z.input<
   typeof GetRuleExecutionResultsRequestQuery
 >;
 
-export type GetRuleExecutionResultsRequestParams = z.infer<
-  typeof GetRuleExecutionResultsRequestParams
->;
+export interface GetRuleExecutionResultsRequestParams {
+  /**
+   * Saved object ID of the rule to get execution results for
+   */
+  ruleId: string;
+}
+
 export const GetRuleExecutionResultsRequestParams = z.object({
   /**
    * Saved object ID of the rule to get execution results for
@@ -80,7 +120,11 @@ export type GetRuleExecutionResultsRequestParamsInput = z.input<
   typeof GetRuleExecutionResultsRequestParams
 >;
 
-export type GetRuleExecutionResultsResponse = z.infer<typeof GetRuleExecutionResultsResponse>;
+export interface GetRuleExecutionResultsResponse {
+  events?: RuleExecutionResult[];
+  total?: number;
+}
+
 export const GetRuleExecutionResultsResponse = z.object({
   events: z.array(RuleExecutionResult).optional(),
   total: z.number().int().optional(),

@@ -6,7 +6,7 @@
  */
 
 import { z } from "zod";
-import { requireOptional, isValidDateMath } from "@kbn/zod-helpers"
+import { requireOptional, RequiredOptional, isValidDateMath } from "@kbn/zod-helpers"
 
 {{> disclaimer}}
 
@@ -17,12 +17,20 @@ import {
 {{/each}}
 
 {{#each components.schemas}}
-{{#description}}
-/**
-  * {{{.}}}
-  */
-{{/description}}
-export type {{@key}} = z.infer<typeof {{@key}}>;
+{{#if description}}
+/** 
+{{{commentString description}}}
+{{#if default}} 
+* @default {{{default}}}
+{{/if}}
+{{#if example}} 
+* @example 
+{{{commentString example}}}
+{{/if}}
+*/
+{{/if}}
+export type {{@key}} = {{> typescript_schema_item}};
+
 export const {{@key}} = {{> zod_schema_item}};
 {{#if enum}}
 {{#unless (isSingle enum)}}
@@ -40,7 +48,8 @@ export type {{@key}}Enum = typeof {{@key}}.enum;
 * {{{requestQuery.description}}}
 */
 {{/if}}
-export type {{operationId}}RequestQuery = z.infer<typeof {{operationId}}RequestQuery>;
+export type {{operationId}}RequestQuery = {{> typescript_schema_item requestQuery }};
+
 export const {{operationId}}RequestQuery = {{> zod_query_item requestQuery }};
 export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}RequestQuery>;
 {{/if}}
@@ -51,7 +60,8 @@ export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}Req
 * {{{requestParams.description}}}
 */
 {{/if}}
-export type {{operationId}}RequestParams = z.infer<typeof {{operationId}}RequestParams>;
+export type {{operationId}}RequestParams = {{> typescript_schema_item requestParams }};
+
 export const {{operationId}}RequestParams = {{> zod_schema_item requestParams }};
 export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}RequestParams>;
 {{/if}}
@@ -62,7 +72,8 @@ export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}Re
 * {{{requestBody.description}}}
 */
 {{/if}}
-export type {{operationId}}RequestBody = z.infer<typeof {{operationId}}RequestBody>;
+export type {{operationId}}RequestBody = {{> typescript_schema_item requestBody }};
+
 export const {{operationId}}RequestBody = {{> zod_schema_item requestBody }};
 export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}RequestBody>;
 {{/if}}
@@ -73,7 +84,8 @@ export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}Requ
 * {{{response.description}}}
 */
 {{/if}}
-export type {{operationId}}Response = z.infer<typeof {{operationId}}Response>;
+export type {{operationId}}Response = {{> typescript_schema_item response }};
+
 export const {{operationId}}Response = {{> zod_schema_item response }};
 {{/if}}
 {{/each}}

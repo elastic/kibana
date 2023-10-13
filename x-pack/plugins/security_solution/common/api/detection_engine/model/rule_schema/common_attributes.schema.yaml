@@ -14,6 +14,7 @@ components:
     RuleObjectId:
       type: string
       format: uuid
+      description: Rule saved object ID
 
     RuleSignatureId:
       type: string
@@ -22,10 +23,12 @@ components:
     RuleName:
       type: string
       minLength: 1
+      description: The rule's name.
 
     RuleDescription:
       type: string
       minLength: 1
+      description: The rule's description.
 
     RuleVersion:
       type: integer
@@ -48,6 +51,7 @@ components:
     RuleMetadata:
       type: object
       additionalProperties: true
+      description: 'Placeholder for metadata about the rule. NOTE: This field is overwritten when you save changes to the rule’s settings.'
 
     RuleLicense:
       type: string
@@ -62,6 +66,7 @@ components:
       type: array
       items:
         type: string
+      description: String array used to describe common reasons why the rule may issue false-positive alerts. Defaults to an empty array.
 
     RuleReferenceArray:
       type: array
@@ -155,7 +160,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Technique'
-          description: Array containing information on the attack techniques (optional)
+          description: Array containing information on the attack techniques
       required:
         - framework
         - tactic
@@ -175,6 +180,7 @@ components:
 
     RuleQuery:
       type: string
+      description: Query used by the rule to create alerts. For threat-match rules, only the query’s results are used to determine whether an alert is generated.
 
     RuleFilterArray:
       type: array
@@ -204,6 +210,23 @@ components:
         - name
         - type
         - ecs
+      description: |-
+        Almost all types of Security rules check source event documents for a match to some kind of query or filter. If a document has certain field with certain values, then it's a match and the rule will generate an alert.
+
+        Required field is an event field that must be present in the source indices of a given rule.
+
+      example: |-
+        const standardEcsField: RequiredField = {
+          name: 'event.action',
+          type: 'keyword',
+          ecs: true,
+        };
+
+        const nonEcsField: RequiredField = {
+          name: 'winlog.event_data.AttributeLDAPDisplayName',
+          type: 'keyword',
+          ecs: false,
+        };
 
     RequiredFieldArray:
       type: array
@@ -267,7 +290,13 @@ components:
         - field_names
 
     RuleActionThrottle:
-      description: Defines the interval on which a rule's actions are executed.
+      description: |-
+        Defines the interval on which a rule's actions are executed.
+
+        Note: The rule level throttle field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
+
+        In Elastic Security 8.8 and later, you can use the (frequency) field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s throttle field. In the response, the converted throttle setting appears in the individual actions' frequency field.
+      deprecated: true
       oneOf:
         - type: string
           enum:

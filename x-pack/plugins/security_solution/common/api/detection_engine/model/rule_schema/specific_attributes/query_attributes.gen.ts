@@ -13,35 +13,49 @@ import { z } from 'zod';
  */
 
 /**
-  * Describes how alerts will be generated for documents with missing suppress by fields:
-doNotSuppress - per each document a separate alert will be created
-suppress - only alert will be created per suppress by bucket
-  */
-export type AlertSuppressionMissingFieldsStrategy = z.infer<
-  typeof AlertSuppressionMissingFieldsStrategy
->;
+ * Describes how alerts will be generated for documents with missing suppress by fields:
+ * doNotSuppress - per each document a separate alert will be created
+ * suppress - only alert will be created per suppress by bucket
+ */
+export type AlertSuppressionMissingFieldsStrategy = 'doNotSuppress' | 'suppress';
+
 export const AlertSuppressionMissingFieldsStrategy = z.enum(['doNotSuppress', 'suppress']);
 export const AlertSuppressionMissingFieldsStrategyEnum = AlertSuppressionMissingFieldsStrategy.enum;
 export type AlertSuppressionMissingFieldsStrategyEnum =
   typeof AlertSuppressionMissingFieldsStrategy.enum;
 
-export type AlertSuppressionGroupBy = z.infer<typeof AlertSuppressionGroupBy>;
+export type AlertSuppressionGroupBy = string[];
+
 export const AlertSuppressionGroupBy = z.array(z.string()).min(1).max(3);
 
-export type AlertSuppressionDuration = z.infer<typeof AlertSuppressionDuration>;
+export interface AlertSuppressionDuration {
+  value: number;
+  unit: 's' | 'm' | 'h';
+}
+
 export const AlertSuppressionDuration = z.object({
   value: z.number().int().min(1),
   unit: z.enum(['s', 'm', 'h']),
 });
 
-export type AlertSuppression = z.infer<typeof AlertSuppression>;
+export interface AlertSuppression {
+  group_by: AlertSuppressionGroupBy;
+  duration?: AlertSuppressionDuration;
+  missing_fields_strategy?: AlertSuppressionMissingFieldsStrategy;
+}
+
 export const AlertSuppression = z.object({
   group_by: AlertSuppressionGroupBy,
   duration: AlertSuppressionDuration.optional(),
   missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
 });
 
-export type AlertSuppressionCamel = z.infer<typeof AlertSuppressionCamel>;
+export interface AlertSuppressionCamel {
+  groupBy: AlertSuppressionGroupBy;
+  duration?: AlertSuppressionDuration;
+  missingFieldsStrategy?: AlertSuppressionMissingFieldsStrategy;
+}
+
 export const AlertSuppressionCamel = z.object({
   groupBy: AlertSuppressionGroupBy,
   duration: AlertSuppressionDuration.optional(),

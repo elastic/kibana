@@ -23,7 +23,22 @@ import {
   WithOutputs,
 } from '../model/schema/common.gen';
 
-export type ListRequestQuery = z.infer<typeof ListRequestQuery>;
+export interface ListRequestQuery {
+  agentIds?: AgentIds;
+  commands?: Commands;
+  page?: Page;
+  /**
+   * Number of items per page
+   * @default 10
+   */
+  pageSize?: number;
+  startDate?: StartDate;
+  endDate?: EndDate;
+  userIds?: UserIds;
+  types?: Types;
+  withOutputs?: WithOutputs;
+}
+
 export const ListRequestQuery = z.object({
   agentIds: AgentIds.optional(),
   commands: Commands.optional(),

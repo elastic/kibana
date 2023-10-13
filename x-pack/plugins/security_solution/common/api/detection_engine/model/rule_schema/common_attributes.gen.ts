@@ -15,82 +15,131 @@ import { z } from 'zod';
 /**
  * A universally unique identifier
  */
-export type UUID = z.infer<typeof UUID>;
+export type UUID = string;
+
 export const UUID = z.string().uuid();
 
-export type RuleObjectId = z.infer<typeof RuleObjectId>;
+/**
+ * Rule saved object ID
+ */
+export type RuleObjectId = string;
+
 export const RuleObjectId = z.string().uuid();
 
 /**
  * Could be any string, not necessarily a UUID
  */
-export type RuleSignatureId = z.infer<typeof RuleSignatureId>;
+export type RuleSignatureId = string;
+
 export const RuleSignatureId = z.string();
 
-export type RuleName = z.infer<typeof RuleName>;
+/**
+ * The rule's name.
+ */
+export type RuleName = string;
+
 export const RuleName = z.string().min(1);
 
-export type RuleDescription = z.infer<typeof RuleDescription>;
+/**
+ * The rule's description.
+ */
+export type RuleDescription = string;
+
 export const RuleDescription = z.string().min(1);
 
 /**
  * The rule's version number.
  */
-export type RuleVersion = z.infer<typeof RuleVersion>;
+export type RuleVersion = number;
+
 export const RuleVersion = z.number().int().min(1);
 
-export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
+export type IsRuleImmutable = boolean;
+
 export const IsRuleImmutable = z.boolean();
 
 /**
  * Determines whether the rule is enabled.
  */
-export type IsRuleEnabled = z.infer<typeof IsRuleEnabled>;
+export type IsRuleEnabled = boolean;
+
 export const IsRuleEnabled = z.boolean();
 
 /**
  * String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
  */
-export type RuleTagArray = z.infer<typeof RuleTagArray>;
+export type RuleTagArray = string[];
+
 export const RuleTagArray = z.array(z.string());
 
-export type RuleMetadata = z.infer<typeof RuleMetadata>;
+/**
+ * Placeholder for metadata about the rule. NOTE: This field is overwritten when you save changes to the rule’s settings.
+ */
+export type RuleMetadata = {} & { [key: string]: unknown };
+
 export const RuleMetadata = z.object({}).catchall(z.unknown());
 
 /**
  * The rule's license.
  */
-export type RuleLicense = z.infer<typeof RuleLicense>;
+export type RuleLicense = string;
+
 export const RuleLicense = z.string();
 
-export type RuleAuthorArray = z.infer<typeof RuleAuthorArray>;
+export type RuleAuthorArray = string[];
+
 export const RuleAuthorArray = z.array(z.string());
 
-export type RuleFalsePositiveArray = z.infer<typeof RuleFalsePositiveArray>;
+/**
+ * String array used to describe common reasons why the rule may issue false-positive alerts. Defaults to an empty array.
+ */
+export type RuleFalsePositiveArray = string[];
+
 export const RuleFalsePositiveArray = z.array(z.string());
 
-export type RuleReferenceArray = z.infer<typeof RuleReferenceArray>;
+export type RuleReferenceArray = string[];
+
 export const RuleReferenceArray = z.array(z.string());
 
-export type InvestigationGuide = z.infer<typeof InvestigationGuide>;
+export type InvestigationGuide = string;
+
 export const InvestigationGuide = z.string();
 
-export type SetupGuide = z.infer<typeof SetupGuide>;
+export type SetupGuide = string;
+
 export const SetupGuide = z.string();
 
-export type BuildingBlockType = z.infer<typeof BuildingBlockType>;
+export type BuildingBlockType = string;
+
 export const BuildingBlockType = z.string();
 
-export type AlertsIndex = z.infer<typeof AlertsIndex>;
+export type AlertsIndex = string;
+
 export const AlertsIndex = z.string();
 
-export type AlertsIndexNamespace = z.infer<typeof AlertsIndexNamespace>;
+export type AlertsIndexNamespace = string;
+
 export const AlertsIndexNamespace = z.string();
 
-export type MaxSignals = z.infer<typeof MaxSignals>;
+export type MaxSignals = number;
+
 export const MaxSignals = z.number().int().min(1);
 
-export type Subtechnique = z.infer<typeof Subtechnique>;
+export interface Subtechnique {
+  /**
+   * Subtechnique ID
+   */
+  id: string;
+  /**
+   * Subtechnique name
+   */
+  name: string;
+  /**
+   * Subtechnique reference
+   */
+  reference: string;
+}
+
 export const Subtechnique = z.object({
   /**
    * Subtechnique ID
@@ -106,7 +155,25 @@ export const Subtechnique = z.object({
   reference: z.string(),
 });
 
-export type Technique = z.infer<typeof Technique>;
+export interface Technique {
+  /**
+   * Technique ID
+   */
+  id: string;
+  /**
+   * Technique name
+   */
+  name: string;
+  /**
+   * Technique reference
+   */
+  reference: string;
+  /**
+   * Array containing more specific information on the attack technique
+   */
+  subtechnique?: Subtechnique[];
+}
+
 export const Technique = z.object({
   /**
    * Technique ID
@@ -126,7 +193,21 @@ export const Technique = z.object({
   subtechnique: z.array(Subtechnique).optional(),
 });
 
-export type Tactic = z.infer<typeof Tactic>;
+export interface Tactic {
+  /**
+   * Tactic ID
+   */
+  id: string;
+  /**
+   * Tactic name
+   */
+  name: string;
+  /**
+   * Tactic reference
+   */
+  reference: string;
+}
+
 export const Tactic = z.object({
   /**
    * Tactic ID
@@ -142,7 +223,18 @@ export const Tactic = z.object({
   reference: z.string(),
 });
 
-export type Threat = z.infer<typeof Threat>;
+export interface Threat {
+  /**
+   * Relevant attack framework
+   */
+  framework: string;
+  tactic: Tactic;
+  /**
+   * Array containing information on the attack techniques
+   */
+  technique?: Technique[];
+}
+
 export const Threat = z.object({
   /**
    * Relevant attack framework
@@ -150,60 +242,99 @@ export const Threat = z.object({
   framework: z.string(),
   tactic: Tactic,
   /**
-   * Array containing information on the attack techniques (optional)
+   * Array containing information on the attack techniques
    */
   technique: z.array(Technique).optional(),
 });
 
-export type ThreatArray = z.infer<typeof ThreatArray>;
+export type ThreatArray = Threat[];
+
 export const ThreatArray = z.array(Threat);
 
-export type IndexPatternArray = z.infer<typeof IndexPatternArray>;
+export type IndexPatternArray = string[];
+
 export const IndexPatternArray = z.array(z.string());
 
-export type DataViewId = z.infer<typeof DataViewId>;
+export type DataViewId = string;
+
 export const DataViewId = z.string();
 
-export type RuleQuery = z.infer<typeof RuleQuery>;
+/**
+ * Query used by the rule to create alerts. For threat-match rules, only the query’s results are used to determine whether an alert is generated.
+ */
+export type RuleQuery = string;
+
 export const RuleQuery = z.string();
 
-export type RuleFilterArray = z.infer<typeof RuleFilterArray>;
+export type RuleFilterArray = unknown[];
+
 export const RuleFilterArray = z.array(z.unknown());
 
-export type RuleNameOverride = z.infer<typeof RuleNameOverride>;
+export type RuleNameOverride = string;
+
 export const RuleNameOverride = z.string();
 
-export type TimestampOverride = z.infer<typeof TimestampOverride>;
+export type TimestampOverride = string;
+
 export const TimestampOverride = z.string();
 
-export type TimestampOverrideFallbackDisabled = z.infer<typeof TimestampOverrideFallbackDisabled>;
+export type TimestampOverrideFallbackDisabled = boolean;
+
 export const TimestampOverrideFallbackDisabled = z.boolean();
 
-export type RequiredField = z.infer<typeof RequiredField>;
+/**
+ * Almost all types of Security rules check source event documents for a match to some kind of query or filter. If a document has certain field with certain values, then it's a match and the rule will generate an alert.
+ *
+ * Required field is an event field that must be present in the source indices of a given rule.
+ * @example
+ * const standardEcsField: RequiredField = {
+ *   name: 'event.action',
+ *   type: 'keyword',
+ *   ecs: true,
+ * };
+ *
+ * const nonEcsField: RequiredField = {
+ *   name: 'winlog.event_data.AttributeLDAPDisplayName',
+ *   type: 'keyword',
+ *   ecs: false,
+ * };
+ */
+export interface RequiredField {
+  name: string;
+  type: string;
+  ecs: boolean;
+}
+
 export const RequiredField = z.object({
   name: z.string().min(1),
   type: z.string().min(1),
   ecs: z.boolean(),
 });
 
-export type RequiredFieldArray = z.infer<typeof RequiredFieldArray>;
+export type RequiredFieldArray = RequiredField[];
+
 export const RequiredFieldArray = z.array(RequiredField);
 
-export type TimelineTemplateId = z.infer<typeof TimelineTemplateId>;
+export type TimelineTemplateId = string;
+
 export const TimelineTemplateId = z.string();
 
-export type TimelineTemplateTitle = z.infer<typeof TimelineTemplateTitle>;
+export type TimelineTemplateTitle = string;
+
 export const TimelineTemplateTitle = z.string();
 
-export type SavedObjectResolveOutcome = z.infer<typeof SavedObjectResolveOutcome>;
+export type SavedObjectResolveOutcome = 'exactMatch' | 'aliasMatch' | 'conflict';
+
 export const SavedObjectResolveOutcome = z.enum(['exactMatch', 'aliasMatch', 'conflict']);
 export const SavedObjectResolveOutcomeEnum = SavedObjectResolveOutcome.enum;
 export type SavedObjectResolveOutcomeEnum = typeof SavedObjectResolveOutcome.enum;
 
-export type SavedObjectResolveAliasTargetId = z.infer<typeof SavedObjectResolveAliasTargetId>;
+export type SavedObjectResolveAliasTargetId = string;
+
 export const SavedObjectResolveAliasTargetId = z.string();
 
-export type SavedObjectResolveAliasPurpose = z.infer<typeof SavedObjectResolveAliasPurpose>;
+export type SavedObjectResolveAliasPurpose = 'savedObjectConversion' | 'savedObjectImport';
+
 export const SavedObjectResolveAliasPurpose = z.enum([
   'savedObjectConversion',
   'savedObjectImport',
@@ -211,25 +342,39 @@ export const SavedObjectResolveAliasPurpose = z.enum([
 export const SavedObjectResolveAliasPurposeEnum = SavedObjectResolveAliasPurpose.enum;
 export type SavedObjectResolveAliasPurposeEnum = typeof SavedObjectResolveAliasPurpose.enum;
 
-export type RelatedIntegration = z.infer<typeof RelatedIntegration>;
+export interface RelatedIntegration {
+  package: string;
+  version: string;
+  integration?: string;
+}
+
 export const RelatedIntegration = z.object({
   package: z.string().min(1),
   version: z.string().min(1),
   integration: z.string().min(1).optional(),
 });
 
-export type RelatedIntegrationArray = z.infer<typeof RelatedIntegrationArray>;
+export type RelatedIntegrationArray = RelatedIntegration[];
+
 export const RelatedIntegrationArray = z.array(RelatedIntegration);
 
-export type InvestigationFields = z.infer<typeof InvestigationFields>;
+export interface InvestigationFields {
+  field_names: string[];
+}
+
 export const InvestigationFields = z.object({
   field_names: z.array(z.string()).min(1),
 });
 
 /**
  * Defines the interval on which a rule's actions are executed.
+ *
+ * Note: The rule level throttle field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
+ *
+ * In Elastic Security 8.8 and later, you can use the (frequency) field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s throttle field. In the response, the converted throttle setting appears in the individual actions' frequency field.
  */
-export type RuleActionThrottle = z.infer<typeof RuleActionThrottle>;
+export type RuleActionThrottle = 'no_actions' | 'rule' | string;
+
 export const RuleActionThrottle = z.union([
   z.enum(['no_actions', 'rule']),
   z.string().regex(/^[1-9]\d*[smhd]$/),
@@ -238,14 +383,44 @@ export const RuleActionThrottle = z.union([
 /**
  * The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
  */
-export type RuleActionFrequency = z.infer<typeof RuleActionFrequency>;
+export interface RuleActionFrequency {
+  summary: boolean;
+  notifyWhen: 'onActionGroupChange' | 'onActiveAlert' | 'onThrottleInterval';
+  throttle: RuleActionThrottle | null;
+}
+
 export const RuleActionFrequency = z.object({
   summary: z.boolean(),
   notifyWhen: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
   throttle: RuleActionThrottle.nullable(),
 });
 
-export type RuleAction = z.infer<typeof RuleAction>;
+export interface RuleAction {
+  /**
+   * The action type used for sending notifications.
+   */
+  action_type_id: string;
+  /**
+   * Optionally groups actions by use cases. Use `default` for alert notifications.
+   */
+  group: string;
+  /**
+   * The connector ID.
+   */
+  id: string;
+  /**
+   * Object containing the allowed connector fields, which varies according to the connector type.
+   */
+  params: {} & { [key: string]: unknown };
+  uuid?: string;
+  /**
+   * TODO implement the schema type
+   */
+  alerts_filter?: {};
+
+  frequency?: RuleActionFrequency;
+}
+
 export const RuleAction = z.object({
   /**
    * The action type used for sending notifications.

@@ -14,7 +14,12 @@ import { z } from 'zod';
 
 import { BaseActionSchema } from '../model/schema/common.gen';
 
-export type GetFileActionRequestBody = z.infer<typeof GetFileActionRequestBody>;
+export type GetFileActionRequestBody = BaseActionSchema & {
+  parameters: {
+    path: string;
+  };
+};
+
 export const GetFileActionRequestBody = BaseActionSchema.and(
   z.object({
     parameters: z.object({

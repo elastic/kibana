@@ -14,7 +14,13 @@ import { z } from 'zod';
 
 import { SuccessResponse, AgentId } from '../model/schema/common.gen';
 
-export type GetAgentPolicySummaryRequestQuery = z.infer<typeof GetAgentPolicySummaryRequestQuery>;
+export interface GetAgentPolicySummaryRequestQuery {
+  query: {
+    package_name?: string;
+    policy_id?: string | null;
+  };
+}
+
 export const GetAgentPolicySummaryRequestQuery = z.object({
   query: z.object({
     package_name: z.string().optional(),
@@ -25,9 +31,15 @@ export type GetAgentPolicySummaryRequestQueryInput = z.input<
   typeof GetAgentPolicySummaryRequestQuery
 >;
 
-export type GetAgentPolicySummaryResponse = z.infer<typeof GetAgentPolicySummaryResponse>;
+export type GetAgentPolicySummaryResponse = SuccessResponse;
+
 export const GetAgentPolicySummaryResponse = SuccessResponse;
-export type GetPolicyResponseRequestQuery = z.infer<typeof GetPolicyResponseRequestQuery>;
+export interface GetPolicyResponseRequestQuery {
+  query: {
+    agentId?: AgentId;
+  };
+}
+
 export const GetPolicyResponseRequestQuery = z.object({
   query: z.object({
     agentId: AgentId.optional(),
@@ -35,5 +47,6 @@ export const GetPolicyResponseRequestQuery = z.object({
 });
 export type GetPolicyResponseRequestQueryInput = z.input<typeof GetPolicyResponseRequestQuery>;
 
-export type GetPolicyResponseResponse = z.infer<typeof GetPolicyResponseResponse>;
+export type GetPolicyResponseResponse = SuccessResponse;
+
 export const GetPolicyResponseResponse = SuccessResponse;

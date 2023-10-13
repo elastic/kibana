@@ -14,9 +14,12 @@ import { z } from 'zod';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
-export type GetEndpointSuggestionsRequestParams = z.infer<
-  typeof GetEndpointSuggestionsRequestParams
->;
+export interface GetEndpointSuggestionsRequestParams {
+  query: {
+    suggestion_type?: 'eventFilters';
+  };
+}
+
 export const GetEndpointSuggestionsRequestParams = z.object({
   query: z.object({
     suggestion_type: z.literal('eventFilters').optional(),
@@ -26,7 +29,14 @@ export type GetEndpointSuggestionsRequestParamsInput = z.input<
   typeof GetEndpointSuggestionsRequestParams
 >;
 
-export type GetEndpointSuggestionsRequestBody = z.infer<typeof GetEndpointSuggestionsRequestBody>;
+export interface GetEndpointSuggestionsRequestBody {
+  field?: string;
+  query?: string;
+  filters?: unknown;
+
+  fieldMeta?: unknown;
+}
+
 export const GetEndpointSuggestionsRequestBody = z.object({
   field: z.string().optional(),
   query: z.string().optional(),
@@ -37,5 +47,6 @@ export type GetEndpointSuggestionsRequestBodyInput = z.input<
   typeof GetEndpointSuggestionsRequestBody
 >;
 
-export type GetEndpointSuggestionsResponse = z.infer<typeof GetEndpointSuggestionsResponse>;
+export type GetEndpointSuggestionsResponse = SuccessResponse;
+
 export const GetEndpointSuggestionsResponse = SuccessResponse;

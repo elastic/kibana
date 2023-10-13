@@ -47,4 +47,10 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('isUnknown', (val: object) => {
     return !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val);
   });
+  handlebarsInstance.registerHelper('commentString', (val: string) => {
+    return val
+      .split('\n')
+      .map((line) => ` * ${line}`)
+      .join('\n');
+  });
 }

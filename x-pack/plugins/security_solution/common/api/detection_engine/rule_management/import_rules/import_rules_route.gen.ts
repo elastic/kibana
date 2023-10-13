@@ -15,7 +15,25 @@ import { z } from 'zod';
 import { ErrorSchema } from '../../model/error_schema.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
-export type ImportRulesRequestQuery = z.infer<typeof ImportRulesRequestQuery>;
+export interface ImportRulesRequestQuery {
+  /**
+   * Determines whether existing rules with the same `rule_id` are overwritten.
+   */
+  overwrite?: boolean;
+  /**
+   * Determines whether existing exception lists with the same `list_id` are overwritten.
+   */
+  overwrite_exceptions?: boolean;
+  /**
+   * Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.
+   */
+  overwrite_action_connectors?: boolean;
+  /**
+   * Generates a new list ID for each imported exception list.
+   */
+  as_new_list?: boolean;
+}
+
 export const ImportRulesRequestQuery = z.object({
   /**
    * Determines whether existing rules with the same `rule_id` are overwritten.
@@ -60,7 +78,20 @@ export const ImportRulesRequestQuery = z.object({
 });
 export type ImportRulesRequestQueryInput = z.input<typeof ImportRulesRequestQuery>;
 
-export type ImportRulesResponse = z.infer<typeof ImportRulesResponse>;
+export interface ImportRulesResponse {
+  exceptions_success: boolean;
+  exceptions_success_count: number;
+  exceptions_errors: ErrorSchema[];
+  rules_count: number;
+  success: boolean;
+  success_count: number;
+  errors: ErrorSchema[];
+  action_connectors_errors: ErrorSchema[];
+  action_connectors_warnings: WarningSchema[];
+  action_connectors_success: boolean;
+  action_connectors_success_count: number;
+}
+
 export const ImportRulesResponse = z
   .object({
     exceptions_success: z.boolean(),

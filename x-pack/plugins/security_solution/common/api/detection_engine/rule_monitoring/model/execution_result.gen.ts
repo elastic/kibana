@@ -15,7 +15,29 @@ import { z } from 'zod';
 /**
  * Rule execution result is an aggregate that groups plain rule execution events by execution UUID. It contains such information as execution UUID, date, status and metrics.
  */
-export type RuleExecutionResult = z.infer<typeof RuleExecutionResult>;
+export interface RuleExecutionResult {
+  execution_uuid: string;
+  timestamp: string;
+  duration_ms: number;
+  status: string;
+  message: string;
+  num_active_alerts: number;
+  num_new_alerts: number;
+  num_recovered_alerts: number;
+  num_triggered_actions: number;
+  num_succeeded_actions: number;
+  num_errored_actions: number;
+  total_search_duration_ms: number;
+  es_search_duration_ms: number;
+  schedule_delay_ms: number;
+  timed_out: boolean;
+  indexing_duration_ms: number;
+  search_duration_ms: number;
+  gap_duration_s: number;
+  security_status: string;
+  security_message: string;
+}
+
 export const RuleExecutionResult = z.object({
   execution_uuid: z.string(),
   timestamp: z.string().datetime(),
@@ -42,7 +64,14 @@ export const RuleExecutionResult = z.object({
 /**
  * We support sorting rule execution results by these fields.
  */
-export type SortFieldOfRuleExecutionResult = z.infer<typeof SortFieldOfRuleExecutionResult>;
+export type SortFieldOfRuleExecutionResult =
+  | 'timestamp'
+  | 'duration_ms'
+  | 'gap_duration_s'
+  | 'indexing_duration_ms'
+  | 'search_duration_ms'
+  | 'schedule_delay_ms';
+
 export const SortFieldOfRuleExecutionResult = z.enum([
   'timestamp',
   'duration_ms',

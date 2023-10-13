@@ -15,7 +15,22 @@ import { z } from 'zod';
 import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionMetrics } from './execution_metrics.gen';
 
-export type RuleExecutionSummary = z.infer<typeof RuleExecutionSummary>;
+export interface RuleExecutionSummary {
+  last_execution: {
+    /**
+     * Date of the last execution
+     */
+    date: string;
+    /**
+     * Status of the last execution
+     */
+    status: RuleExecutionStatus;
+    status_order: RuleExecutionStatusOrder;
+    message: string;
+    metrics: RuleExecutionMetrics;
+  };
+}
+
 export const RuleExecutionSummary = z.object({
   last_execution: z.object({
     /**

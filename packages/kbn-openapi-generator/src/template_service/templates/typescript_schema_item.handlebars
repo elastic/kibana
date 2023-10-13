@@ -1,0 +1,112 @@
+{{~#if type~}}
+  {{~> (concat "type_" type)~}}
+  {{~#if nullable}} | null{{/if~}}
+  {{~#if (eq requiredBool false)}} | undefined{{/if~}}
+{{~/if~}}
+
+{{~#if $ref~}}
+  {{~#if (eq x-modify "partial")}}Partial<{{/if~}}
+  {{~#if (eq x-modify "required")}}Required<{{/if~}}
+  {{~#if (eq x-modify "requiredOptional")}}RequiredOptional<{{/if~}}
+  {{referenceName}}
+  {{~#if (eq x-modify "requiredOptional")}}>{{/if~}}
+  {{~#if (eq x-modify "required")}}>{{/if~}}
+  {{~#if (eq x-modify "partial")}}>{{/if~}}
+  {{~#if nullable}} | null{{/if~}}
+  {{~#if (eq requiredBool false)}} | undefined{{/if~}}
+{{~/if~}}
+
+{{~#if allOf~}}
+  {{~#each allOf~}}
+    {{~#if @first~}}
+      {{> typescript_schema_item }}
+    {{~else~}}
+      & {{> typescript_schema_item }}
+    {{~/if~}}
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if anyOf~}}
+    {{~#each anyOf~}}
+    {{#unless @first}}| {{/unless}}{{~> typescript_schema_item ~}}
+    {{~/each~}}
+  {{~#if nullable}} | null{{/if~}}
+  {{~#if (eq requiredBool false)}} | undefined{{/if~}}
+{{~/if~}}
+
+{{~#if oneOf~}}
+    {{~#each oneOf~}}
+    {{#unless @first}}| {{/unless}}{{~> typescript_schema_item ~}}
+    {{~/each~}}
+  {{~#if nullable}} | null{{/if~}}
+  {{~#if (eq requiredBool false)}} | undefined{{/if~}}
+{{~/if~}}
+
+{{#if (isUnknown .)}}
+unknown
+{{/if}}
+
+{{~#*inline "type_array"~}}
+  Array<{{~> typescript_schema_item items ~}}>
+{{~/inline~}}
+
+{{~#*inline "type_boolean"~}}
+  boolean
+  {{~#if nullable}} | null{{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_integer"~}}
+  number
+{{~/inline~}}
+
+{{~#*inline "type_number"~}}
+  number
+{{~/inline~}}
+
+{{~#*inline "type_object"~}}
+  {{#if (eq x-modify "partial")}}Partial<{{/if}}
+  {{#if (eq x-modify "required")}}Required<{{/if}}
+  {{#if (eq x-modify "requiredOptional")}}RequiredOptional<{{/if}}
+  {
+    {{#each properties}}
+      {{#if description}}
+      /** 
+      {{{commentString description}}}
+      {{#if default}} 
+      * @default {{{default}}}
+      {{/if}}
+      {{#if example}} 
+      * @example 
+      {{{commentString example}}}
+      {{/if}}
+      */
+      {{/if}}
+      {{@key}} {{#if (includes ../required @key)}}:{{else}}?:{{/if}} {{> typescript_schema_item}}
+    {{/each}}
+  }
+  {{#if (eq x-modify "requiredOptional")}}>{{/if}}
+  {{#if (eq x-modify "required")}}>{{/if}}
+  {{#if (eq x-modify "partial")}}>{{/if}}
+  {{~#if additionalProperties}}
+    {{~#if (eq additionalProperties true)~}}
+      & { [key: string]: unknown }
+    {{~else~}}
+      & { [key: string]: {{> typescript_schema_item additionalProperties}} }
+    {{~/if~}}
+  {{~/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_string"~}}
+  {{~#if enum~}}
+    {{~#if (isSingle enum)~}}
+      "{{first enum}}"
+    {{~else~}}
+        {{~#each enum~}}
+          | "{{.}}"
+        {{~/each~}}
+    {{~/if~}}
+  {{~else~}}
+  string
+  {{~/if~}}
+{{~/inline~}}
+

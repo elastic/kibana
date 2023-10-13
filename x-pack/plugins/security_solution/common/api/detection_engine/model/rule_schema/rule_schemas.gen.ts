@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import type { RequiredOptional } from '@kbn/zod-helpers';
 import { requireOptional, isValidDateMath } from '@kbn/zod-helpers';
 
 /*
@@ -42,21 +43,91 @@ import { AlertSuppression } from './specific_attributes/query_attributes.gen';
 import { Threshold } from './specific_attributes/threshold_attributes.gen';
 import { NewTermsFields, HistoryWindowStart } from './specific_attributes/new_terms_attributes.gen';
 
-export type BaseRequiredFields = z.infer<typeof BaseRequiredFields>;
+export interface BaseRequiredFields {
+  name: RuleName;
+  description: RuleDescription;
+  /**
+   * A numerical representation of the alert’s severity from 0 to 100.
+   * @example
+   * 0 - 21 represents low severity
+   * 22 - 47 represents medium severity
+   * 48 - 73 represents high severity
+   * 74 - 100 represents critical severity
+   */
+  risk_score: number;
+  /**
+   * Severity level of alerts produced by the rule
+   * @example
+   * 'low' Alerts that are of interest but generally not considered to be security incidents
+   * 'medium' Alerts that require investigation
+   * 'high' Alerts that require immediate investigation
+   * 'critical' Alerts that indicate it is highly likely a security incident has occurred
+   */
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
 export const BaseRequiredFields = z.object({
   name: RuleName,
   description: RuleDescription,
   /**
-   * Risk score (0 to 100)
+   * A numerical representation of the alert’s severity from 0 to 100.
    */
   risk_score: z.number().int().min(0).max(100),
   /**
-   * Severity of the rule
+   * Severity level of alerts produced by the rule
    */
   severity: z.enum(['low', 'medium', 'high', 'critical']),
 });
 
-export type BaseOptionalFields = z.infer<typeof BaseOptionalFields>;
+export interface BaseOptionalFields {
+  /**
+   * Sets the source field for the alert's signal.rule.name value
+   */
+  rule_name_override?: string;
+  /**
+   * Sets the time field used to query indices
+   */
+  timestamp_override?: string;
+  /**
+   * Disables the fallback to the event's @timestamp field
+   */
+  timestamp_override_fallback_disabled?: boolean;
+  /**
+   * Timeline template ID
+   */
+  timeline_id?: string;
+  /**
+   * Timeline template title
+   */
+  timeline_title?: string;
+  /**
+   * Outcome is a property of the saved object resolve API. It will provide information about the rule following the 8.0 migrations
+   */
+  outcome?: 'exactMatch' | 'aliasMatch' | 'conflict';
+  alias_target_id?: string;
+  alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
+  license?: RuleLicense;
+  /**
+   * Notes to help investigate alerts produced by the rule.
+   */
+  note?: string;
+  /**
+   * Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default. For more information, refer to https://www.elastic.co/guide/en/security/current/building-block-rule.html.
+   */
+  building_block_type?: string;
+  /**
+   * (deprecated) Has no effect.
+   */
+  output_index?: string;
+  /**
+   * Has no effect.
+   */
+  namespace?: string;
+  meta?: RuleMetadata;
+  investigation_fields?: InvestigationFields;
+  throttle?: RuleActionThrottle;
+}
+
 export const BaseOptionalFields = z.object({
   /**
    * Sets the source field for the alert's signal.rule.name value
@@ -90,7 +161,7 @@ export const BaseOptionalFields = z.object({
    */
   note: z.string().optional(),
   /**
-   * Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default.
+   * Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default. For more information, refer to https://www.elastic.co/guide/en/security/current/building-block-rule.html.
    */
   building_block_type: z.string().optional(),
   /**
@@ -106,7 +177,80 @@ export const BaseOptionalFields = z.object({
   throttle: RuleActionThrottle.optional(),
 });
 
-export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
+export interface BaseDefaultableFields {
+  version?: RuleVersion;
+  tags?: RuleTagArray;
+  enabled?: IsRuleEnabled;
+  /**
+   * Overrides generated alerts' risk_score with a value from the source event
+   */
+  risk_score_mapping?: Array<
+    RequiredOptional<{
+      field: string;
+      operator: 'equals';
+      value: string;
+      risk_score?: number;
+    }>
+  >;
+  /**
+   * Overrides generated alerts' severity with values from the source event
+   */
+  severity_mapping?: Array<{
+    field: string;
+    operator: 'equals';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    value: string;
+  }>;
+  /**
+   * Frequency of rule execution, using a date math range. For example, "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
+   */
+  interval?: string;
+  /**
+   * Time from which data is analyzed each time the rule executes, using a date math range. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+   * @example
+   * 'now-4200s' - Means the rule analyzes data from 70 minutes before its start time
+   */
+  from?: string;
+  to?: string;
+  actions?: RuleAction[];
+  exceptions_list?: Array<{
+    /**
+     * ID of the exception container
+     */
+    id: string;
+    /**
+     * List ID of the exception container
+     */
+    list_id: string;
+    /**
+     * The exception type
+     */
+    type:
+      | 'detection'
+      | 'rule_default'
+      | 'endpoint'
+      | 'endpoint_trusted_apps'
+      | 'endpoint_events'
+      | 'endpoint_host_isolation_exceptions'
+      | 'endpoint_blocklists';
+    /**
+     * Determines the exceptions validity in rule's Kibana space
+     */
+    namespace_type: 'agnostic' | 'single';
+  }>;
+  author?: string[];
+  false_positives?: string[];
+  /**
+   * Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
+   */
+  references?: string[];
+  /**
+   * Maximum number of alerts the rule can create during a single execution. Defaults to 100.
+   */
+  max_signals?: number;
+  threat?: ThreatArray;
+}
+
 export const BaseDefaultableFields = z.object({
   version: RuleVersion.optional(),
   tags: RuleTagArray.optional(),
@@ -144,7 +288,7 @@ export const BaseDefaultableFields = z.object({
    */
   interval: z.string().optional(),
   /**
-   * Time from which data is analyzed each time the rule executes, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+   * Time from which data is analyzed each time the rule executes, using a date math range. Defaults to now-6m (analyzes data from 6 minutes before the start time).
    */
   from: z.string().superRefine(isValidDateMath).optional(),
   to: z.string().optional(),
@@ -181,53 +325,101 @@ export const BaseDefaultableFields = z.object({
     .optional(),
   author: z.array(z.string()).optional(),
   false_positives: z.array(z.string()).optional(),
+  /**
+   * Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
+   */
   references: z.array(z.string()).optional(),
+  /**
+   * Maximum number of alerts the rule can create during a single execution. Defaults to 100.
+   */
   max_signals: z.number().int().min(1).optional(),
   threat: ThreatArray.optional(),
 });
 
-export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
+export type BaseCreateProps = BaseRequiredFields & BaseOptionalFields & BaseDefaultableFields;
+
 export const BaseCreateProps =
   BaseRequiredFields.and(BaseOptionalFields).and(BaseDefaultableFields);
 
-export type BasePatchProps = z.infer<typeof BasePatchProps>;
+export type BasePatchProps = Partial<BaseRequiredFields> &
+  BaseOptionalFields &
+  BaseDefaultableFields;
+
 export const BasePatchProps = BaseRequiredFields.partial()
   .and(BaseOptionalFields)
   .and(BaseDefaultableFields);
 
-export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
+export type BaseResponseProps = BaseRequiredFields &
+  RequiredOptional<BaseOptionalFields> &
+  Required<BaseDefaultableFields>;
+
 export const BaseResponseProps = BaseRequiredFields.and(
   BaseOptionalFields.transform(requireOptional)
 ).and(BaseDefaultableFields.required());
 
-export type ResponseRequiredFields = z.infer<typeof ResponseRequiredFields>;
+export interface ResponseRequiredFields {
+  id: RuleObjectId;
+  rule_id: RuleSignatureId;
+  /**
+   * Immutable rules are prebuilt Elastic rules that cannot be modified by users.
+   */
+  immutable: boolean;
+  updated_at: string;
+  updated_by: string;
+  created_at: string;
+  created_by: string;
+  /**
+   * Revision is a monotonic counter that is incremented each time the rule is updated. It is used to implement optimistic concurrency control.
+   */
+  revision: number;
+  related_integrations: RelatedIntegrationArray;
+  required_fields: RequiredFieldArray;
+  setup: SetupGuide;
+}
+
 export const ResponseRequiredFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
+  /**
+   * Immutable rules are prebuilt Elastic rules that cannot be modified by users.
+   */
   immutable: z.boolean(),
   updated_at: z.string().datetime(),
   updated_by: z.string(),
   created_at: z.string().datetime(),
   created_by: z.string(),
+  /**
+   * Revision is a monotonic counter that is incremented each time the rule is updated. It is used to implement optimistic concurrency control.
+   */
   revision: z.number().int().min(0),
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
   setup: SetupGuide,
 });
 
-export type ResponseOptionalFields = z.infer<typeof ResponseOptionalFields>;
+export interface ResponseOptionalFields {
+  execution_summary?: RuleExecutionSummary;
+}
+
 export const ResponseOptionalFields = z.object({
   execution_summary: RuleExecutionSummary.optional(),
 });
 
-export type SharedCreateProps = z.infer<typeof SharedCreateProps>;
+export type SharedCreateProps = BaseCreateProps & {
+  rule_id?: RuleSignatureId;
+};
+
 export const SharedCreateProps = BaseCreateProps.and(
   z.object({
     rule_id: RuleSignatureId.optional(),
   })
 );
 
-export type SharedUpdateProps = z.infer<typeof SharedUpdateProps>;
+export type SharedUpdateProps = BaseCreateProps & {
+  id?: RuleObjectId;
+  rule_id?: RuleSignatureId;
+};
+
 export const SharedUpdateProps = BaseCreateProps.and(
   z.object({
     id: RuleObjectId.optional(),
@@ -235,7 +427,11 @@ export const SharedUpdateProps = BaseCreateProps.and(
   })
 );
 
-export type SharedPatchProps = z.infer<typeof SharedPatchProps>;
+export type SharedPatchProps = BasePatchProps & {
+  id?: RuleObjectId;
+  rule_id?: RuleSignatureId;
+};
+
 export const SharedPatchProps = BasePatchProps.and(
   z.object({
     id: RuleObjectId.optional(),
@@ -243,24 +439,44 @@ export const SharedPatchProps = BasePatchProps.and(
   })
 );
 
-export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
+export type SharedResponseProps = BaseResponseProps &
+  ResponseRequiredFields &
+  ResponseOptionalFields;
+
 export const SharedResponseProps =
   BaseResponseProps.and(ResponseRequiredFields).and(ResponseOptionalFields);
 
-export type QueryLanguage = z.infer<typeof QueryLanguage>;
+export type QueryLanguage = 'kuery' | 'lucene' | 'eql' | 'esql';
+
 export const QueryLanguage = z.enum(['kuery', 'lucene', 'eql', 'esql']);
 export const QueryLanguageEnum = QueryLanguage.enum;
 export type QueryLanguageEnum = typeof QueryLanguage.enum;
 
-export type KqlQueryLanguage = z.infer<typeof KqlQueryLanguage>;
+export type KqlQueryLanguage = 'kuery' | 'lucene';
+
 export const KqlQueryLanguage = z.enum(['kuery', 'lucene']);
 export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
 export type KqlQueryLanguageEnum = typeof KqlQueryLanguage.enum;
 
-export type EqlQueryLanguage = z.infer<typeof EqlQueryLanguage>;
+export type EqlQueryLanguage = 'eql';
+
 export const EqlQueryLanguage = z.literal('eql');
 
-export type EqlRequiredFields = z.infer<typeof EqlRequiredFields>;
+export interface EqlRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'eql';
+  /**
+   * EQL query to execute
+   */
+  query: string;
+  /**
+   * Query language to use
+   */
+  language: EqlQueryLanguage;
+}
+
 export const EqlRequiredFields = z.object({
   /**
    * Rule type
@@ -276,7 +492,15 @@ export const EqlRequiredFields = z.object({
   language: EqlQueryLanguage,
 });
 
-export type EqlOptionalFields = z.infer<typeof EqlOptionalFields>;
+export interface EqlOptionalFields {
+  index?: string[];
+  data_view_id?: string;
+  filters?: unknown[];
+  event_category_override?: EventCategoryOverride;
+  tiebreaker_field?: TiebreakerField;
+  timestamp_field?: TimestampField;
+}
+
 export const EqlOptionalFields = z.object({
   index: z.array(z.string()).optional(),
   data_view_id: z.string().optional(),
@@ -286,30 +510,43 @@ export const EqlOptionalFields = z.object({
   timestamp_field: TimestampField.optional(),
 });
 
-export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
+export type EqlRuleCreateFields = EqlRequiredFields & EqlOptionalFields;
+
 export const EqlRuleCreateFields = EqlRequiredFields.and(EqlOptionalFields);
 
-export type EqlRuleResponseFields = z.infer<typeof EqlRuleResponseFields>;
+export type EqlRuleResponseFields = EqlRequiredFields & RequiredOptional<EqlOptionalFields>;
+
 export const EqlRuleResponseFields = EqlRequiredFields.and(
   EqlOptionalFields.transform(requireOptional)
 );
 
-export type EqlRulePatchFields = z.infer<typeof EqlRulePatchFields>;
+export type EqlRulePatchFields = Partial<EqlRequiredFields> & EqlOptionalFields;
+
 export const EqlRulePatchFields = EqlRequiredFields.partial().and(EqlOptionalFields);
 
-export type EqlRule = z.infer<typeof EqlRule>;
+export type EqlRule = SharedResponseProps & EqlRuleResponseFields;
+
 export const EqlRule = SharedResponseProps.and(EqlRuleResponseFields);
 
-export type EqlRuleCreateProps = z.infer<typeof EqlRuleCreateProps>;
+export type EqlRuleCreateProps = SharedCreateProps & EqlRuleCreateFields;
+
 export const EqlRuleCreateProps = SharedCreateProps.and(EqlRuleCreateFields);
 
-export type EqlRuleUpdateProps = z.infer<typeof EqlRuleUpdateProps>;
+export type EqlRuleUpdateProps = SharedUpdateProps & EqlRuleCreateFields;
+
 export const EqlRuleUpdateProps = SharedUpdateProps.and(EqlRuleCreateFields);
 
-export type EqlRulePatchProps = z.infer<typeof EqlRulePatchProps>;
+export type EqlRulePatchProps = SharedPatchProps & EqlRulePatchFields;
+
 export const EqlRulePatchProps = SharedPatchProps.and(EqlRulePatchFields);
 
-export type QueryRuleRequiredFields = z.infer<typeof QueryRuleRequiredFields>;
+export interface QueryRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'query';
+}
+
 export const QueryRuleRequiredFields = z.object({
   /**
    * Rule type
@@ -317,17 +554,38 @@ export const QueryRuleRequiredFields = z.object({
   type: z.literal('query'),
 });
 
-export type QueryRuleOptionalFields = z.infer<typeof QueryRuleOptionalFields>;
+export interface QueryRuleOptionalFields {
+  index?: string[];
+  data_view_id?: string;
+  filters?: unknown[];
+  /**
+   * Kibana saved search used by the rule to create alerts.
+   */
+  saved_id?: string;
+  response_actions?: ResponseAction[];
+  alert_suppression?: AlertSuppression;
+}
+
 export const QueryRuleOptionalFields = z.object({
   index: z.array(z.string()).optional(),
   data_view_id: z.string().optional(),
   filters: z.array(z.unknown()).optional(),
+  /**
+   * Kibana saved search used by the rule to create alerts.
+   */
   saved_id: z.string().optional(),
   response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
-export type QueryRuleDefaultableFields = z.infer<typeof QueryRuleDefaultableFields>;
+export interface QueryRuleDefaultableFields {
+  /**
+   * Query to execute
+   */
+  query?: string;
+  language?: KqlQueryLanguage;
+}
+
 export const QueryRuleDefaultableFields = z.object({
   /**
    * Query to execute
@@ -336,34 +594,54 @@ export const QueryRuleDefaultableFields = z.object({
   language: KqlQueryLanguage.optional(),
 });
 
-export type QueryRuleCreateFields = z.infer<typeof QueryRuleCreateFields>;
+export type QueryRuleCreateFields = QueryRuleRequiredFields &
+  QueryRuleOptionalFields &
+  QueryRuleDefaultableFields;
+
 export const QueryRuleCreateFields = QueryRuleRequiredFields.and(QueryRuleOptionalFields).and(
   QueryRuleDefaultableFields
 );
 
-export type QueryRulePatchFields = z.infer<typeof QueryRulePatchFields>;
+export type QueryRulePatchFields = Partial<QueryRuleRequiredFields> &
+  QueryRuleOptionalFields &
+  QueryRuleDefaultableFields;
+
 export const QueryRulePatchFields = QueryRuleRequiredFields.partial()
   .and(QueryRuleOptionalFields)
   .and(QueryRuleDefaultableFields);
 
-export type QueryRuleResponseFields = z.infer<typeof QueryRuleResponseFields>;
+export type QueryRuleResponseFields = QueryRuleRequiredFields &
+  RequiredOptional<QueryRuleOptionalFields> &
+  Required<QueryRuleDefaultableFields>;
+
 export const QueryRuleResponseFields = QueryRuleRequiredFields.and(
   QueryRuleOptionalFields.transform(requireOptional)
 ).and(QueryRuleDefaultableFields.required());
 
-export type QueryRule = z.infer<typeof QueryRule>;
+export type QueryRule = SharedResponseProps & QueryRuleResponseFields;
+
 export const QueryRule = SharedResponseProps.and(QueryRuleResponseFields);
 
-export type QueryRuleCreateProps = z.infer<typeof QueryRuleCreateProps>;
+export type QueryRuleCreateProps = SharedCreateProps & QueryRuleCreateFields;
+
 export const QueryRuleCreateProps = SharedCreateProps.and(QueryRuleCreateFields);
 
-export type QueryRuleUpdateProps = z.infer<typeof QueryRuleUpdateProps>;
+export type QueryRuleUpdateProps = SharedUpdateProps & QueryRuleCreateFields;
+
 export const QueryRuleUpdateProps = SharedUpdateProps.and(QueryRuleCreateFields);
 
-export type QueryRulePatchProps = z.infer<typeof QueryRulePatchProps>;
+export type QueryRulePatchProps = SharedPatchProps & QueryRulePatchFields;
+
 export const QueryRulePatchProps = SharedPatchProps.and(QueryRulePatchFields);
 
-export type SavedQueryRuleRequiredFields = z.infer<typeof SavedQueryRuleRequiredFields>;
+export interface SavedQueryRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'saved_query';
+  saved_id: string;
+}
+
 export const SavedQueryRuleRequiredFields = z.object({
   /**
    * Rule type
@@ -372,7 +650,18 @@ export const SavedQueryRuleRequiredFields = z.object({
   saved_id: z.string(),
 });
 
-export type SavedQueryRuleOptionalFields = z.infer<typeof SavedQueryRuleOptionalFields>;
+export interface SavedQueryRuleOptionalFields {
+  index?: string[];
+  data_view_id?: string;
+  filters?: unknown[];
+  response_actions?: ResponseAction[];
+  alert_suppression?: AlertSuppression;
+  /**
+   * Query to execute
+   */
+  query?: string;
+}
+
 export const SavedQueryRuleOptionalFields = z.object({
   index: z.array(z.string()).optional(),
   data_view_id: z.string().optional(),
@@ -385,39 +674,63 @@ export const SavedQueryRuleOptionalFields = z.object({
   query: z.string().optional(),
 });
 
-export type SavedQueryRuleDefaultableFields = z.infer<typeof SavedQueryRuleDefaultableFields>;
+export interface SavedQueryRuleDefaultableFields {
+  language?: KqlQueryLanguage;
+}
+
 export const SavedQueryRuleDefaultableFields = z.object({
   language: KqlQueryLanguage.optional(),
 });
 
-export type SavedQueryRuleCreateFields = z.infer<typeof SavedQueryRuleCreateFields>;
+export type SavedQueryRuleCreateFields = SavedQueryRuleRequiredFields &
+  SavedQueryRuleOptionalFields &
+  SavedQueryRuleDefaultableFields;
+
 export const SavedQueryRuleCreateFields = SavedQueryRuleRequiredFields.and(
   SavedQueryRuleOptionalFields
 ).and(SavedQueryRuleDefaultableFields);
 
-export type SavedQueryRulePatchFields = z.infer<typeof SavedQueryRulePatchFields>;
+export type SavedQueryRulePatchFields = Partial<SavedQueryRuleRequiredFields> &
+  SavedQueryRuleOptionalFields &
+  SavedQueryRuleDefaultableFields;
+
 export const SavedQueryRulePatchFields = SavedQueryRuleRequiredFields.partial()
   .and(SavedQueryRuleOptionalFields)
   .and(SavedQueryRuleDefaultableFields);
 
-export type SavedQueryRuleResponseFields = z.infer<typeof SavedQueryRuleResponseFields>;
+export type SavedQueryRuleResponseFields = SavedQueryRuleRequiredFields &
+  RequiredOptional<SavedQueryRuleOptionalFields> &
+  Required<SavedQueryRuleDefaultableFields>;
+
 export const SavedQueryRuleResponseFields = SavedQueryRuleRequiredFields.and(
   SavedQueryRuleOptionalFields.transform(requireOptional)
 ).and(SavedQueryRuleDefaultableFields.required());
 
-export type SavedQueryRule = z.infer<typeof SavedQueryRule>;
+export type SavedQueryRule = SharedResponseProps & SavedQueryRuleResponseFields;
+
 export const SavedQueryRule = SharedResponseProps.and(SavedQueryRuleResponseFields);
 
-export type SavedQueryRuleCreateProps = z.infer<typeof SavedQueryRuleCreateProps>;
+export type SavedQueryRuleCreateProps = SharedCreateProps & SavedQueryRuleCreateFields;
+
 export const SavedQueryRuleCreateProps = SharedCreateProps.and(SavedQueryRuleCreateFields);
 
-export type SavedQueryRuleUpdateProps = z.infer<typeof SavedQueryRuleUpdateProps>;
+export type SavedQueryRuleUpdateProps = SharedUpdateProps & SavedQueryRuleCreateFields;
+
 export const SavedQueryRuleUpdateProps = SharedUpdateProps.and(SavedQueryRuleCreateFields);
 
-export type SavedQueryRulePatchProps = z.infer<typeof SavedQueryRulePatchProps>;
+export type SavedQueryRulePatchProps = SharedPatchProps & SavedQueryRulePatchFields;
+
 export const SavedQueryRulePatchProps = SharedPatchProps.and(SavedQueryRulePatchFields);
 
-export type ThresholdRuleRequiredFields = z.infer<typeof ThresholdRuleRequiredFields>;
+export interface ThresholdRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'threshold';
+  query: string;
+  threshold: Threshold;
+}
+
 export const ThresholdRuleRequiredFields = z.object({
   /**
    * Rule type
@@ -427,7 +740,13 @@ export const ThresholdRuleRequiredFields = z.object({
   threshold: Threshold,
 });
 
-export type ThresholdRuleOptionalFields = z.infer<typeof ThresholdRuleOptionalFields>;
+export interface ThresholdRuleOptionalFields {
+  index?: string[];
+  data_view_id?: string;
+  filters?: unknown[];
+  saved_id?: string;
+}
+
 export const ThresholdRuleOptionalFields = z.object({
   index: z.array(z.string()).optional(),
   data_view_id: z.string().optional(),
@@ -435,39 +754,88 @@ export const ThresholdRuleOptionalFields = z.object({
   saved_id: z.string().optional(),
 });
 
-export type ThresholdRuleDefaultableFields = z.infer<typeof ThresholdRuleDefaultableFields>;
+export interface ThresholdRuleDefaultableFields {
+  language?: KqlQueryLanguage;
+}
+
 export const ThresholdRuleDefaultableFields = z.object({
   language: KqlQueryLanguage.optional(),
 });
 
-export type ThresholdRuleCreateFields = z.infer<typeof ThresholdRuleCreateFields>;
+export type ThresholdRuleCreateFields = ThresholdRuleRequiredFields &
+  ThresholdRuleOptionalFields &
+  ThresholdRuleDefaultableFields;
+
 export const ThresholdRuleCreateFields = ThresholdRuleRequiredFields.and(
   ThresholdRuleOptionalFields
 ).and(ThresholdRuleDefaultableFields);
 
-export type ThresholdRulePatchFields = z.infer<typeof ThresholdRulePatchFields>;
+export type ThresholdRulePatchFields = Partial<ThresholdRuleRequiredFields> &
+  ThresholdRuleOptionalFields &
+  ThresholdRuleDefaultableFields;
+
 export const ThresholdRulePatchFields = ThresholdRuleRequiredFields.partial()
   .and(ThresholdRuleOptionalFields)
   .and(ThresholdRuleDefaultableFields);
 
-export type ThresholdRuleResponseFields = z.infer<typeof ThresholdRuleResponseFields>;
+export type ThresholdRuleResponseFields = ThresholdRuleRequiredFields &
+  RequiredOptional<ThresholdRuleOptionalFields> &
+  Required<ThresholdRuleDefaultableFields>;
+
 export const ThresholdRuleResponseFields = ThresholdRuleRequiredFields.and(
   ThresholdRuleOptionalFields.transform(requireOptional)
 ).and(ThresholdRuleDefaultableFields.required());
 
-export type ThresholdRule = z.infer<typeof ThresholdRule>;
+export type ThresholdRule = SharedResponseProps & ThresholdRuleResponseFields;
+
 export const ThresholdRule = SharedResponseProps.and(ThresholdRuleResponseFields);
 
-export type ThresholdRuleCreateProps = z.infer<typeof ThresholdRuleCreateProps>;
+export type ThresholdRuleCreateProps = SharedCreateProps & ThresholdRuleCreateFields;
+
 export const ThresholdRuleCreateProps = SharedCreateProps.and(ThresholdRuleCreateFields);
 
-export type ThresholdRuleUpdateProps = z.infer<typeof ThresholdRuleUpdateProps>;
+export type ThresholdRuleUpdateProps = SharedUpdateProps & ThresholdRuleCreateFields;
+
 export const ThresholdRuleUpdateProps = SharedUpdateProps.and(ThresholdRuleCreateFields);
 
-export type ThresholdRulePatchProps = z.infer<typeof ThresholdRulePatchProps>;
+export type ThresholdRulePatchProps = SharedPatchProps & ThresholdRulePatchFields;
+
 export const ThresholdRulePatchProps = SharedPatchProps.and(ThresholdRulePatchFields);
 
-export type ThreatMatchRuleRequiredFields = z.infer<typeof ThreatMatchRuleRequiredFields>;
+export interface ThreatMatchRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'threat_match';
+  query: string;
+  /**
+   * Query used to determine which fields in the Elasticsearch index are used for generating alerts.
+   */
+  threat_query: string;
+  /**
+   * Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index.
+   *
+   * You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See below for an example that uses both and and or logic.
+   */
+  threat_mapping: Array<{
+    entries: Array<{
+      /**
+       * Field from the event indices on which the rule runs
+       */
+      field: string;
+      type: 'mapping';
+      /**
+       * Field from the Elasticsearch threat index
+       */
+      value: string;
+    }>;
+  }>;
+  /**
+   * Elasticsearch indices used to check which field values generate alerts
+   */
+  threat_index: string[];
+}
+
 export const ThreatMatchRuleRequiredFields = z.object({
   /**
    * Rule type
@@ -475,26 +843,54 @@ export const ThreatMatchRuleRequiredFields = z.object({
   type: z.literal('threat_match'),
   query: z.string(),
   /**
-   * Query to execute
+   * Query used to determine which fields in the Elasticsearch index are used for generating alerts.
    */
   threat_query: z.string(),
+  /** 
+      * Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index.
+
+You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See below for an example that uses both and and or logic. 
+      */
   threat_mapping: z
     .array(
       z.object({
         entries: z.array(
           z.object({
+            /**
+             * Field from the event indices on which the rule runs
+             */
             field: z.string().min(1),
             type: z.literal('mapping'),
+            /**
+             * Field from the Elasticsearch threat index
+             */
             value: z.string().min(1),
           })
         ),
       })
     )
     .min(1),
+  /**
+   * Elasticsearch indices used to check which field values generate alerts
+   */
   threat_index: z.array(z.string()),
 });
 
-export type ThreatMatchRuleOptionalFields = z.infer<typeof ThreatMatchRuleOptionalFields>;
+export interface ThreatMatchRuleOptionalFields {
+  index?: string[];
+  data_view_id?: string;
+  filters?: unknown[];
+  saved_id?: string;
+  threat_filters?: unknown[];
+  /**
+   * Defines the path to the threat indicator in the indicator documents (optional)
+   */
+  threat_indicator_path?: string;
+  threat_language?: KqlQueryLanguage;
+  concurrent_searches?: number;
+  items_per_search?: number;
+}
+
 export const ThreatMatchRuleOptionalFields = z.object({
   index: z.array(z.string()).optional(),
   data_view_id: z.string().optional(),
@@ -510,80 +906,126 @@ export const ThreatMatchRuleOptionalFields = z.object({
   items_per_search: z.number().int().min(1).optional(),
 });
 
-export type ThreatMatchRuleDefaultableFields = z.infer<typeof ThreatMatchRuleDefaultableFields>;
+export interface ThreatMatchRuleDefaultableFields {
+  language?: KqlQueryLanguage;
+}
+
 export const ThreatMatchRuleDefaultableFields = z.object({
   language: KqlQueryLanguage.optional(),
 });
 
-export type ThreatMatchRuleCreateFields = z.infer<typeof ThreatMatchRuleCreateFields>;
+export type ThreatMatchRuleCreateFields = ThreatMatchRuleRequiredFields &
+  ThreatMatchRuleOptionalFields &
+  ThreatMatchRuleDefaultableFields;
+
 export const ThreatMatchRuleCreateFields = ThreatMatchRuleRequiredFields.and(
   ThreatMatchRuleOptionalFields
 ).and(ThreatMatchRuleDefaultableFields);
 
-export type ThreatMatchRulePatchFields = z.infer<typeof ThreatMatchRulePatchFields>;
+export type ThreatMatchRulePatchFields = Partial<ThreatMatchRuleRequiredFields> &
+  ThreatMatchRuleOptionalFields &
+  ThreatMatchRuleDefaultableFields;
+
 export const ThreatMatchRulePatchFields = ThreatMatchRuleRequiredFields.partial()
   .and(ThreatMatchRuleOptionalFields)
   .and(ThreatMatchRuleDefaultableFields);
 
-export type ThreatMatchRuleResponseFields = z.infer<typeof ThreatMatchRuleResponseFields>;
+export type ThreatMatchRuleResponseFields = ThreatMatchRuleRequiredFields &
+  RequiredOptional<ThreatMatchRuleOptionalFields> &
+  Required<ThreatMatchRuleDefaultableFields>;
+
 export const ThreatMatchRuleResponseFields = ThreatMatchRuleRequiredFields.and(
   ThreatMatchRuleOptionalFields.transform(requireOptional)
 ).and(ThreatMatchRuleDefaultableFields.required());
 
-export type ThreatMatchRule = z.infer<typeof ThreatMatchRule>;
+export type ThreatMatchRule = SharedResponseProps & ThreatMatchRuleResponseFields;
+
 export const ThreatMatchRule = SharedResponseProps.and(ThreatMatchRuleResponseFields);
 
-export type ThreatMatchRuleCreateProps = z.infer<typeof ThreatMatchRuleCreateProps>;
+export type ThreatMatchRuleCreateProps = SharedCreateProps & ThreatMatchRuleCreateFields;
+
 export const ThreatMatchRuleCreateProps = SharedCreateProps.and(ThreatMatchRuleCreateFields);
 
-export type ThreatMatchRuleUpdateProps = z.infer<typeof ThreatMatchRuleUpdateProps>;
+export type ThreatMatchRuleUpdateProps = SharedUpdateProps & ThreatMatchRuleCreateFields;
+
 export const ThreatMatchRuleUpdateProps = SharedUpdateProps.and(ThreatMatchRuleCreateFields);
 
-export type ThreatMatchRulePatchProps = z.infer<typeof ThreatMatchRulePatchProps>;
+export type ThreatMatchRulePatchProps = SharedPatchProps & ThreatMatchRulePatchFields;
+
 export const ThreatMatchRulePatchProps = SharedPatchProps.and(ThreatMatchRulePatchFields);
 
-export type MachineLearningRuleRequiredFields = z.infer<typeof MachineLearningRuleRequiredFields>;
+export interface MachineLearningRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'machine_learning';
+  /**
+   * Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100
+   */
+  anomaly_threshold: number;
+  /**
+   * Machine learning job ID the rule monitors for anomaly scores.
+   */
+  machine_learning_job_id: string | string[];
+}
+
 export const MachineLearningRuleRequiredFields = z.object({
   /**
    * Rule type
    */
   type: z.literal('machine_learning'),
   /**
-   * Anomaly threshold
+   * Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100
    */
   anomaly_threshold: z.number().int().min(0),
   /**
-   * Machine learning job ID
+   * Machine learning job ID the rule monitors for anomaly scores.
    */
   machine_learning_job_id: z.union([z.string(), z.array(z.string()).min(1)]),
 });
 
-export type MachineLearningRulePatchFields = z.infer<typeof MachineLearningRulePatchFields>;
+export type MachineLearningRulePatchFields = Partial<MachineLearningRuleRequiredFields>;
+
 export const MachineLearningRulePatchFields = MachineLearningRuleRequiredFields.partial();
 
-export type MachineLearningRuleResponseFields = z.infer<typeof MachineLearningRuleResponseFields>;
+export type MachineLearningRuleResponseFields = MachineLearningRuleRequiredFields;
+
 export const MachineLearningRuleResponseFields = MachineLearningRuleRequiredFields;
 
-export type MachineLearningRuleCreateFields = z.infer<typeof MachineLearningRuleCreateFields>;
+export type MachineLearningRuleCreateFields = MachineLearningRuleRequiredFields;
+
 export const MachineLearningRuleCreateFields = MachineLearningRuleRequiredFields;
 
-export type MachineLearningRule = z.infer<typeof MachineLearningRule>;
+export type MachineLearningRule = SharedResponseProps & MachineLearningRuleResponseFields;
+
 export const MachineLearningRule = SharedResponseProps.and(MachineLearningRuleResponseFields);
 
-export type MachineLearningRuleCreateProps = z.infer<typeof MachineLearningRuleCreateProps>;
+export type MachineLearningRuleCreateProps = SharedCreateProps & MachineLearningRuleCreateFields;
+
 export const MachineLearningRuleCreateProps = SharedCreateProps.and(
   MachineLearningRuleCreateFields
 );
 
-export type MachineLearningRuleUpdateProps = z.infer<typeof MachineLearningRuleUpdateProps>;
+export type MachineLearningRuleUpdateProps = SharedUpdateProps & MachineLearningRuleCreateFields;
+
 export const MachineLearningRuleUpdateProps = SharedUpdateProps.and(
   MachineLearningRuleCreateFields
 );
 
-export type MachineLearningRulePatchProps = z.infer<typeof MachineLearningRulePatchProps>;
+export type MachineLearningRulePatchProps = SharedPatchProps & MachineLearningRulePatchFields;
+
 export const MachineLearningRulePatchProps = SharedPatchProps.and(MachineLearningRulePatchFields);
 
-export type NewTermsRuleRequiredFields = z.infer<typeof NewTermsRuleRequiredFields>;
+export interface NewTermsRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'new_terms';
+  query: string;
+  new_terms_fields: NewTermsFields;
+  history_window_start: HistoryWindowStart;
+}
+
 export const NewTermsRuleRequiredFields = z.object({
   /**
    * Rule type
@@ -594,49 +1036,82 @@ export const NewTermsRuleRequiredFields = z.object({
   history_window_start: HistoryWindowStart,
 });
 
-export type NewTermsRuleOptionalFields = z.infer<typeof NewTermsRuleOptionalFields>;
+export interface NewTermsRuleOptionalFields {
+  index?: string[];
+  data_view_id?: string;
+  filters?: unknown[];
+}
+
 export const NewTermsRuleOptionalFields = z.object({
   index: z.array(z.string()).optional(),
   data_view_id: z.string().optional(),
   filters: z.array(z.unknown()).optional(),
 });
 
-export type NewTermsRuleDefaultableFields = z.infer<typeof NewTermsRuleDefaultableFields>;
+export interface NewTermsRuleDefaultableFields {
+  language?: KqlQueryLanguage;
+}
+
 export const NewTermsRuleDefaultableFields = z.object({
   language: KqlQueryLanguage.optional(),
 });
 
-export type NewTermsRulePatchFields = z.infer<typeof NewTermsRulePatchFields>;
+export type NewTermsRulePatchFields = Partial<NewTermsRuleRequiredFields> &
+  NewTermsRuleOptionalFields &
+  NewTermsRuleDefaultableFields;
+
 export const NewTermsRulePatchFields = NewTermsRuleRequiredFields.partial()
   .and(NewTermsRuleOptionalFields)
   .and(NewTermsRuleDefaultableFields);
 
-export type NewTermsRuleResponseFields = z.infer<typeof NewTermsRuleResponseFields>;
+export type NewTermsRuleResponseFields = NewTermsRuleRequiredFields &
+  RequiredOptional<NewTermsRuleOptionalFields> &
+  Required<NewTermsRuleDefaultableFields>;
+
 export const NewTermsRuleResponseFields = NewTermsRuleRequiredFields.and(
   NewTermsRuleOptionalFields.transform(requireOptional)
 ).and(NewTermsRuleDefaultableFields.required());
 
-export type NewTermsRuleCreateFields = z.infer<typeof NewTermsRuleCreateFields>;
+export type NewTermsRuleCreateFields = NewTermsRuleRequiredFields &
+  NewTermsRuleOptionalFields &
+  NewTermsRuleDefaultableFields;
+
 export const NewTermsRuleCreateFields = NewTermsRuleRequiredFields.and(
   NewTermsRuleOptionalFields
 ).and(NewTermsRuleDefaultableFields);
 
-export type NewTermsRule = z.infer<typeof NewTermsRule>;
+export type NewTermsRule = SharedResponseProps & NewTermsRuleResponseFields;
+
 export const NewTermsRule = SharedResponseProps.and(NewTermsRuleResponseFields);
 
-export type NewTermsRuleCreateProps = z.infer<typeof NewTermsRuleCreateProps>;
+export type NewTermsRuleCreateProps = SharedCreateProps & NewTermsRuleCreateFields;
+
 export const NewTermsRuleCreateProps = SharedCreateProps.and(NewTermsRuleCreateFields);
 
-export type NewTermsRuleUpdateProps = z.infer<typeof NewTermsRuleUpdateProps>;
+export type NewTermsRuleUpdateProps = SharedUpdateProps & NewTermsRuleCreateFields;
+
 export const NewTermsRuleUpdateProps = SharedUpdateProps.and(NewTermsRuleCreateFields);
 
-export type NewTermsRulePatchProps = z.infer<typeof NewTermsRulePatchProps>;
+export type NewTermsRulePatchProps = SharedPatchProps & NewTermsRulePatchFields;
+
 export const NewTermsRulePatchProps = SharedPatchProps.and(NewTermsRulePatchFields);
 
-export type EsqlQueryLanguage = z.infer<typeof EsqlQueryLanguage>;
+export type EsqlQueryLanguage = 'esql';
+
 export const EsqlQueryLanguage = z.literal('esql');
 
-export type EsqlRuleRequiredFields = z.infer<typeof EsqlRuleRequiredFields>;
+export interface EsqlRuleRequiredFields {
+  /**
+   * Rule type
+   */
+  type: 'esql';
+  language: EsqlQueryLanguage;
+  /**
+   * ESQL query to execute
+   */
+  query: string;
+}
+
 export const EsqlRuleRequiredFields = z.object({
   /**
    * Rule type
@@ -649,28 +1124,44 @@ export const EsqlRuleRequiredFields = z.object({
   query: z.string(),
 });
 
-export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;
+export type EsqlRulePatchFields = Partial<EsqlRuleRequiredFields>;
+
 export const EsqlRulePatchFields = EsqlRuleRequiredFields.partial();
 
-export type EsqlRuleResponseFields = z.infer<typeof EsqlRuleResponseFields>;
+export type EsqlRuleResponseFields = EsqlRuleRequiredFields;
+
 export const EsqlRuleResponseFields = EsqlRuleRequiredFields;
 
-export type EsqlRuleCreateFields = z.infer<typeof EsqlRuleCreateFields>;
+export type EsqlRuleCreateFields = EsqlRuleRequiredFields;
+
 export const EsqlRuleCreateFields = EsqlRuleRequiredFields;
 
-export type EsqlRule = z.infer<typeof EsqlRule>;
+export type EsqlRule = SharedResponseProps & EsqlRuleResponseFields;
+
 export const EsqlRule = SharedResponseProps.and(EsqlRuleResponseFields);
 
-export type EsqlRuleCreateProps = z.infer<typeof EsqlRuleCreateProps>;
+export type EsqlRuleCreateProps = SharedCreateProps & EsqlRuleCreateFields;
+
 export const EsqlRuleCreateProps = SharedCreateProps.and(EsqlRuleCreateFields);
 
-export type EsqlRuleUpdateProps = z.infer<typeof EsqlRuleUpdateProps>;
+export type EsqlRuleUpdateProps = SharedUpdateProps & EsqlRuleCreateFields;
+
 export const EsqlRuleUpdateProps = SharedUpdateProps.and(EsqlRuleCreateFields);
 
-export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
+export type EsqlRulePatchProps = SharedPatchProps & Partial<EsqlRulePatchFields>;
+
 export const EsqlRulePatchProps = SharedPatchProps.and(EsqlRulePatchFields.partial());
 
-export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreateProps>;
+export type TypeSpecificCreateProps =
+  | EqlRuleCreateFields
+  | QueryRuleCreateFields
+  | SavedQueryRuleCreateFields
+  | ThresholdRuleCreateFields
+  | ThreatMatchRuleCreateFields
+  | MachineLearningRuleCreateFields
+  | NewTermsRuleCreateFields
+  | EsqlRuleCreateFields;
+
 export const TypeSpecificCreateProps = z.union([
   EqlRuleCreateFields,
   QueryRuleCreateFields,
@@ -682,7 +1173,16 @@ export const TypeSpecificCreateProps = z.union([
   EsqlRuleCreateFields,
 ]);
 
-export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchProps>;
+export type TypeSpecificPatchProps =
+  | EqlRulePatchFields
+  | QueryRulePatchFields
+  | SavedQueryRulePatchFields
+  | ThresholdRulePatchFields
+  | ThreatMatchRulePatchFields
+  | MachineLearningRulePatchFields
+  | NewTermsRulePatchFields
+  | EsqlRulePatchFields;
+
 export const TypeSpecificPatchProps = z.union([
   EqlRulePatchFields,
   QueryRulePatchFields,
@@ -694,7 +1194,16 @@ export const TypeSpecificPatchProps = z.union([
   EsqlRulePatchFields,
 ]);
 
-export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponse>;
+export type TypeSpecificResponse =
+  | EqlRuleResponseFields
+  | QueryRuleResponseFields
+  | SavedQueryRuleResponseFields
+  | ThresholdRuleResponseFields
+  | ThreatMatchRuleResponseFields
+  | MachineLearningRuleResponseFields
+  | NewTermsRuleResponseFields
+  | EsqlRuleResponseFields;
+
 export const TypeSpecificResponse = z.union([
   EqlRuleResponseFields,
   QueryRuleResponseFields,
@@ -706,7 +1215,16 @@ export const TypeSpecificResponse = z.union([
   EsqlRuleResponseFields,
 ]);
 
-export type RuleCreateProps = z.infer<typeof RuleCreateProps>;
+export type RuleCreateProps =
+  | EqlRuleCreateProps
+  | QueryRuleCreateProps
+  | SavedQueryRuleCreateProps
+  | ThresholdRuleCreateProps
+  | ThreatMatchRuleCreateProps
+  | MachineLearningRuleCreateProps
+  | NewTermsRuleCreateProps
+  | EsqlRuleCreateProps;
+
 export const RuleCreateProps = z.union([
   EqlRuleCreateProps,
   QueryRuleCreateProps,
@@ -718,7 +1236,16 @@ export const RuleCreateProps = z.union([
   EsqlRuleCreateProps,
 ]);
 
-export type RuleUpdateProps = z.infer<typeof RuleUpdateProps>;
+export type RuleUpdateProps =
+  | EqlRuleUpdateProps
+  | QueryRuleUpdateProps
+  | SavedQueryRuleUpdateProps
+  | ThresholdRuleUpdateProps
+  | ThreatMatchRuleUpdateProps
+  | MachineLearningRuleUpdateProps
+  | NewTermsRuleUpdateProps
+  | EsqlRuleUpdateProps;
+
 export const RuleUpdateProps = z.union([
   EqlRuleUpdateProps,
   QueryRuleUpdateProps,
@@ -730,7 +1257,16 @@ export const RuleUpdateProps = z.union([
   EsqlRuleUpdateProps,
 ]);
 
-export type RulePatchProps = z.infer<typeof RulePatchProps>;
+export type RulePatchProps =
+  | EqlRulePatchProps
+  | QueryRulePatchProps
+  | SavedQueryRulePatchProps
+  | ThresholdRulePatchProps
+  | ThreatMatchRulePatchProps
+  | MachineLearningRulePatchProps
+  | NewTermsRulePatchProps
+  | EsqlRulePatchProps;
+
 export const RulePatchProps = z.union([
   EqlRulePatchProps,
   QueryRulePatchProps,
@@ -742,7 +1278,16 @@ export const RulePatchProps = z.union([
   EsqlRulePatchProps,
 ]);
 
-export type RuleResponse = z.infer<typeof RuleResponse>;
+export type RuleResponse =
+  | EqlRule
+  | QueryRule
+  | SavedQueryRule
+  | ThresholdRule
+  | ThreatMatchRule
+  | MachineLearningRule
+  | NewTermsRule
+  | EsqlRule;
+
 export const RuleResponse = z.union([
   EqlRule,
   QueryRule,

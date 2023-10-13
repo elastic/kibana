@@ -12,6 +12,8 @@ components:
         type: string
       minItems: 1
       maxItems: 3
+      description: Fields to monitor for new values. Must contain 1–3 field names.
     HistoryWindowStart:
       type: string
       minLength: 1
+      description: Start date to use when checking if a term has been seen before. Supports relative dates – for example, now-30d will search the last 30 days of data when checking if a term is new. We do not recommend using absolute dates, which can cause issues with rule performance due to querying increasing amounts of data over time.

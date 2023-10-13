@@ -14,7 +14,14 @@ import { z } from 'zod';
 
 import { BaseActionSchema } from '../model/schema/common.gen';
 
-export type FileUploadActionRequestBody = z.infer<typeof FileUploadActionRequestBody>;
+export type FileUploadActionRequestBody = BaseActionSchema & {
+  parameters: {
+    overwrite?: boolean;
+  };
+
+  file: string;
+};
+
 export const FileUploadActionRequestBody = BaseActionSchema.and(
   z.object({
     parameters: z.object({

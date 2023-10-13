@@ -15,7 +15,11 @@ import { z } from 'zod';
 import { RuleObjectId, RuleSignatureId } from '../../../model/rule_schema/common_attributes.gen';
 import { BulkCrudRulesResponse } from '../response_schema.gen';
 
-export type BulkDeleteRulesRequestBody = z.infer<typeof BulkDeleteRulesRequestBody>;
+export type BulkDeleteRulesRequestBody = Array<{
+  id?: RuleObjectId;
+  rule_id?: RuleSignatureId;
+}>;
+
 export const BulkDeleteRulesRequestBody = z.array(
   z.object({
     id: RuleObjectId.optional(),
@@ -24,5 +28,6 @@ export const BulkDeleteRulesRequestBody = z.array(
 );
 export type BulkDeleteRulesRequestBodyInput = z.input<typeof BulkDeleteRulesRequestBody>;
 
-export type BulkDeleteRulesResponse = z.infer<typeof BulkDeleteRulesResponse>;
+export type BulkDeleteRulesResponse = BulkCrudRulesResponse;
+
 export const BulkDeleteRulesResponse = BulkCrudRulesResponse;

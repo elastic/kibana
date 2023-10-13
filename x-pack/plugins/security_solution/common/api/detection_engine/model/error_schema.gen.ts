@@ -14,7 +14,17 @@ import { z } from 'zod';
 
 import { RuleSignatureId } from './rule_schema/common_attributes.gen';
 
-export type ErrorSchema = z.infer<typeof ErrorSchema>;
+export interface ErrorSchema {
+  id?: string;
+  rule_id?: RuleSignatureId;
+  list_id?: string;
+  item_id?: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
 export const ErrorSchema = z
   .object({
     id: z.string().optional(),
