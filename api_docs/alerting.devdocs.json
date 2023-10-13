@@ -3396,10 +3396,6 @@
                 "path": "x-pack/plugins/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/metric_anomaly/metric_anomaly_executor.ts"
-              },
-              {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/server/alerts/base_rule.ts"
               },
