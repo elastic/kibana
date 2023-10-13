@@ -238,14 +238,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             )}
           </HideShowContainer>
         )}
-        {isDiscoverInTimelineEnabled && (
-          <HideShowContainer
-            $isVisible={TimelineTabs.discover === activeTimelineTab}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
-          >
-            <DiscoverTab timelineId={timelineId} />
-          </HideShowContainer>
-        )}
       </>
     );
   }
