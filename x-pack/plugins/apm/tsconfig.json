@@ -52,7 +52,6 @@
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/typed-react-router-config",
-    "@kbn/advanced-settings-plugin",
     "@kbn/core-http-browser",
     "@kbn/server-route-repository",
     "@kbn/datemath",
