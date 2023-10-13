@@ -188,8 +188,8 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     return lastValueFrom(defer(processUpload).pipe(this.uploadSemaphore.acquire()));
   }
 
-  private getReadableContentStream(id: string, size?: number): ReadableContentStream {
-    return getReadableContentStream({
+  private getReadableContentStream(id: string, size?: number): () => ReadableContentStream {
+    return getReadableContentStream.bind(this, {
       id,
       client: this.esClient,
       index: this.index,
@@ -207,9 +207,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     await this.esClient.indices.refresh({ index: this.index });
 
     return lastValueFrom(
-      defer(this.getReadableContentStream.bind(this, id, size)).pipe(
-        this.downloadSemaphore.acquire()
-      )
+      defer(this.getReadableContentStream(id, size)).pipe(this.downloadSemaphore.acquire())
     );
   }
 

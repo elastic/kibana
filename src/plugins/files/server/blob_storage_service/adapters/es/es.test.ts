@@ -7,24 +7,17 @@
  */
 
 import { Readable } from 'stream';
+import { encode } from 'cbor-x';
 import { promisify } from 'util';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Semaphore } from '@kbn/std';
 import { errors } from '@elastic/elasticsearch';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchBlobStorageClient } from './es';
-import { getReadableContentStream } from './content_stream';
 
 const setImmediate = promisify(global.setImmediate);
-
-jest.mock('./content_stream', () => {
-  const module = jest.requireActual('./content_stream');
-  return {
-    ...module,
-    getReadableContentStream: jest.fn(),
-  };
-});
 
 describe('ElasticsearchBlobStorageClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -86,25 +79,60 @@ describe('ElasticsearchBlobStorageClient', () => {
   });
 
   test('limits max concurrent downloads', async () => {
-    const blobStoreClient = createBlobStoreClient();
-    const downloadAccquireSpy = jest.spyOn(downloadSemaphore, 'acquire');
+    const index = 'someplace';
 
-    (getReadableContentStream as jest.Mock).mockImplementation(() => Readable.from(['test']));
+    const blobStoreClient = createBlobStoreClient(index);
+    const downloadAccquireSpy = jest.spyOn(downloadSemaphore, 'acquire');
 
     const downloadsToQueueCount = 4;
 
+    const createDownloadContent = (headChunkId: string) =>
+      Buffer.from(`download content ${headChunkId}`, 'utf8');
+
+    esClient.get.mockImplementation(({ id }) => {
+      return new Promise(function (resolve) {
+        setTimeout(
+          () =>
+            resolve(
+              Readable.from([
+                encode({
+                  found: true,
+                  _source: {
+                    data: createDownloadContent(id),
+                  },
+                }),
+              ]) as unknown as GetResponse
+            ),
+          100
+        );
+      });
+    });
+
     const [p1, p2, ...rest] = Array.from(new Array(downloadsToQueueCount)).map((_, idx) =>
-      blobStoreClient.download({ id: String(idx) })
+      blobStoreClient.download({ id: String(idx), size: 1 }).then(async (stream) => {
+        const chunks = [];
+
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+
+        return Buffer.from(chunks).toString();
+      })
     );
 
     await setImmediate();
     expect(downloadAccquireSpy).toHaveBeenCalledTimes(downloadsToQueueCount);
-    await p1;
-    expect(getReadableContentStream).toHaveBeenCalledTimes(1);
-    await p2;
-    expect(getReadableContentStream).toHaveBeenCalledTimes(2);
+
+    expect(esClient.get).toHaveBeenCalledTimes(1);
+    const p1DownloadContent = await p1;
+    expect(p1DownloadContent).toEqual(expect.stringContaining('download content 0'));
+
+    expect(esClient.get).toHaveBeenCalledTimes(2);
+    const p2DownloadContent = await p2;
+    expect(p2DownloadContent).toEqual(expect.stringContaining('download content 1'));
+
     await Promise.all(rest);
-    expect(getReadableContentStream).toHaveBeenCalledTimes(downloadsToQueueCount);
+    expect(esClient.get).toHaveBeenCalledTimes(downloadsToQueueCount);
   });
 
   describe('.createIndexIfNotExists()', () => {
