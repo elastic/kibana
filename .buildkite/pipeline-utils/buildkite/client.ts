@@ -67,14 +67,12 @@ interface BuildkiteInputSelectField {
 }
 
 export interface BuildkiteInputStep {
-  input: {
-    prompt: string;
-    fields: Array<BuildkiteInputTextField | BuildkiteInputSelectField>;
-    if?: string;
-    allow_dependency_failure?: boolean;
-    branches?: string;
-  };
-  label: string;
+  input: string;
+  prompt?: string;
+  fields: Array<BuildkiteInputTextField | BuildkiteInputSelectField>;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  branches?: string;
   parallelism?: number;
   agents?: {
     queue: string;

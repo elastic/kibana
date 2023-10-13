@@ -58,20 +58,17 @@ async function generateCommitSelectionInput(commitData: CommitData) {
   const commits = commitData.commits;
 
   const bk = new BuildkiteClient();
-
   const inputStep: BuildkiteInputStep = {
-    label: 'Select commit to deploy',
+    input: 'Select commit to deploy',
+    prompt: 'Select commit to deploy.',
     key: 'select-commit',
-    input: {
-      prompt: 'Select commit to deploy',
-      fields: [
-        {
-          select: 'Select commit to deploy',
-          key: 'commit',
-          options: commits.map((commit) => ({ label: commit.message, value: commit.hash })),
-        },
-      ],
-    },
+    fields: [
+      {
+        select: 'Select commit to deploy',
+        key: 'commit-sha',
+        options: commits.map((commit) => ({ label: commit.message, value: commit.hash })),
+      },
+    ],
   };
 
   bk.uploadSteps([inputStep]);
