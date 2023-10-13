@@ -229,6 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            max_attempts: 2,
           });
         }
       } finally {
@@ -412,6 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
             mode: 'any',
             ipv6: true,
             ipv4: true,
+            max_attempts: 2,
           });
         }
       } finally {
@@ -528,6 +530,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             params: '',
+            max_attempts: 2,
           });
         }
       } finally {
@@ -640,6 +643,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv4: true,
             ipv6: true,
             params: '',
+            max_attempts: 2,
           });
         }
       } finally {
@@ -750,6 +754,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 type: 'browser',
                 hash: 'ekrjelkjrelkjre',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -1915,6 +1920,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: 'Cannot update monitor to different type.',
             },
@@ -2047,6 +2053,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -2126,6 +2133,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -2205,6 +2213,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },

@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
+        expect(ips.flat(10)).to.eql([]);
       });
 
       it('should filter a CIDR range of "127.0.0.1/30"', async () => {
@@ -347,7 +347,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
+        expect(ips.flat(10)).to.eql([]);
       });
     });
 
@@ -409,7 +409,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
+        expect(ips.flat(10)).to.eql([]);
       });
     });
 
@@ -514,7 +514,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
+        expect(ips.flat(10)).to.eql([]);
       });
 
       it('will return 2 results if we have a list which contains the CIDR ranges of "127.0.0.1/32, 127.0.0.2/31, 127.0.0.4/30"', async () => {

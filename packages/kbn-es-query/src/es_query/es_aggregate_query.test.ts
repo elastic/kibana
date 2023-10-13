@@ -33,6 +33,11 @@ describe('sql query helpers', () => {
       expect(flag).toBe(false);
     });
 
+    it('should return false for an undefined query', () => {
+      const flag = isOfAggregateQueryType(undefined);
+      expect(flag).toBe(false);
+    });
+
     it('should return true for an Aggregate type query', () => {
       const flag = isOfAggregateQueryType({ sql: 'SELECT * FROM foo' });
       expect(flag).toBe(true);

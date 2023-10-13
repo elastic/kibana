@@ -35,9 +35,10 @@ import {
   deleteAlertsAndRules,
   reload,
 } from '../../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
@@ -72,7 +73,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     // Prevent installation of whole prebuilt rules package, use mock prebuilt rules instead
     preventPrebuiltRulesPackageInstallation();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
     createRule(getNewRule({ name: 'Rule to export', enabled: false })).as('ruleResponse');
   });
 

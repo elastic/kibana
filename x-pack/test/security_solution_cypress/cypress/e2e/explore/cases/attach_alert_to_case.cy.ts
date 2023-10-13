@@ -12,7 +12,8 @@ import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit, waitForPageWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../../screens/alerts';
@@ -20,11 +21,11 @@ import { LOADING_INDICATOR } from '../../../screens/security_header';
 
 const loadDetectionsPage = (role: ROLES) => {
   login(role);
-  waitForPageWithoutDateRange(ALERTS_URL, role);
+  visit(ALERTS_URL, { role });
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Alerts timeline', { tags: ['@ess'] }, () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();

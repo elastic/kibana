@@ -32,7 +32,6 @@
     "@kbn/i18n",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
-    "@kbn/ml-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
@@ -44,6 +43,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-defend-plugin",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/shared-ux-chrome-navigation"
   ]
 }

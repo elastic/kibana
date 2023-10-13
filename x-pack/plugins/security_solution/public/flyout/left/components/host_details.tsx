@@ -30,7 +30,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -49,8 +49,7 @@ import { useHostRelatedUsers } from '../../../common/containers/related_entities
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from './test_ids';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
-import { USER_RISK_TOOLTIP } from '../../../explore/users/components/all_users/translations';
+import { ENTITY_RISK_LEVEL } from '../../../explore/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
@@ -142,8 +141,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                 value: user,
               }}
               mode={CellActionsMode.HOVER_RIGHT}
-              triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
-              visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+              triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+              visibleCellActions={6}
               sourcererScopeId={getSourcererScopeId(scopeId)}
               metadata={{ scopeId }}
               showActionTooltips
@@ -177,20 +176,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: (
-                <EuiToolTip content={USER_RISK_TOOLTIP}>
-                  <>
-                    {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.user)}{' '}
-                    <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-                  </>
-                </EuiToolTip>
-              ),
+              name: ENTITY_RISK_LEVEL(RiskScoreEntity.user),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,
               render: (riskScore: RiskSeverity) => {
                 if (riskScore != null) {
-                  return <RiskScore severity={riskScore} />;
+                  return <RiskScoreLevel severity={riskScore} />;
                 }
                 return getEmptyTagValue();
               },
@@ -231,12 +223,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   return (
     <>
       <EuiTitle size="xs">
-        <h4>
+        <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
             defaultMessage="Host"
           />
-        </h4>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ExpandablePanel
@@ -249,12 +241,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
-          <h5>
+          <h4>
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsInfoTitle"
               defaultMessage="Host information"
             />
-          </h5>
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <AnomalyTableProvider
@@ -289,12 +281,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTitle"
                     defaultMessage="Related users"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

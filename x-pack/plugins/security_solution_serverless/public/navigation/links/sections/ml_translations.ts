@@ -213,16 +213,16 @@ export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
     defaultMessage: 'Data view data visualizer page',
   }
 );
-export const DATA_COMPARISON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.ml.datComparison.title',
+export const DATA_DRIFT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.dataDrift.title',
   {
-    defaultMessage: 'Data comparison',
+    defaultMessage: 'Data drift',
   }
 );
 export const DATA_COMPARISON_DESC = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.ml.datComparison.desc',
+  'xpack.securitySolutionServerless.navLinks.ml.dataDrift.desc',
   {
-    defaultMessage: 'Data comparison page',
+    defaultMessage: 'Data drift page',
   }
 );
 export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(

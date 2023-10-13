@@ -191,7 +191,7 @@ const getApmErrorDocRoute = createApmServerRoute({
   },
 });
 
-interface ApmServicesListItem {
+export interface ApmServicesListItem {
   'service.name': string;
   'agent.name'?: string;
   'transaction.type'?: string;
@@ -260,6 +260,7 @@ const getApmServicesListRoute = createApmServerRoute({
       rollupInterval: RollupInterval.OneMinute,
       serviceGroup: null,
       mlClient,
+      useDurationSummary: false,
     });
 
     let mappedItems = serviceItems.items.map((item): ApmServicesListItem => {

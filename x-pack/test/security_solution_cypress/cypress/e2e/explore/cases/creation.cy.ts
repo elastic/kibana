@@ -49,11 +49,13 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { loginWithUser, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
-describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
@@ -70,8 +72,8 @@ describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
-    loginWithUser({ username: 'elastic', password: 'changeme' });
-    visitWithoutDateRange(CASES_URL);
+    login();
+    visit(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
     attachTimeline(this.mycase);
@@ -103,8 +105,12 @@ describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =
       'have.text',
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', this.mycase.reporter);
-    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', this.mycase.reporter);
+    cy.get(CASE_DETAILS_USERNAMES)
+      .eq(REPORTER)
+      .should('have.text', Cypress.env('ELASTICSEARCH_USERNAME'));
+    cy.get(CASE_DETAILS_USERNAMES)
+      .eq(PARTICIPANTS)
+      .should('have.text', Cypress.env('ELASTICSEARCH_USERNAME'));
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
 
     EXPECTED_METRICS.forEach((metric) => {
@@ -121,7 +127,7 @@ describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () =
     cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
 
-    visit(OVERVIEW_URL);
+    visitWithTimeRange(OVERVIEW_URL);
     cy.get(OVERVIEW_CASE_NAME).should('have.text', this.mycase.name);
     cy.get(OVERVIEW_CASE_DESCRIPTION).should(
       'have.text',
