@@ -70,7 +70,7 @@ Promise<ResolvedSanitizedRule<Params>> {
   try {
     ruleSchema.validate(rule);
   } catch (error) {
-    throw Boom.badRequest(`Error validating resolve data - ${error.message}`);
+    context.logger.warn(`Error validating resolve data - ${error.message}`);
   }
 
   // format legacy actions for SIEM rules

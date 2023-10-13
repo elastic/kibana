@@ -110,6 +110,8 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshToken]);
 
+  console.log('RULE', rule);
+
   return (
     <EuiPanel data-test-subj="ruleStatusPanel" hasBorder paddingSize="none">
       <EuiPanel hasShadow={false}>
