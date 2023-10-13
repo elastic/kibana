@@ -8,7 +8,9 @@
 export default function ({ loadTestFile }) {
   // TODO: The `scripts` folder was renamed to `scripts_tests` because the folder
   // name `scripts` triggers the `eslint@kbn/imports/no_boundary_crossing` rule
-  describe('scripts', () => {
+  describe('scripts', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./languages'));
   });
 }

@@ -152,6 +152,8 @@ export class DataView implements DataViewBase {
    */
   public matchedIndices: string[] = [];
 
+  private allowHidden: boolean = false;
+
   /**
    * constructor
    * @param config - config data and dependencies
@@ -187,6 +189,7 @@ export class DataView implements DataViewBase {
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
+    this.allowHidden = spec.allowHidden || false;
   }
 
   /**
@@ -200,6 +203,8 @@ export class DataView implements DataViewBase {
    */
 
   getIndexPattern = () => this.title;
+
+  getAllowHidden = () => this.allowHidden;
 
   /**
    * Set index pattern
@@ -812,9 +817,7 @@ export class DataView implements DataViewBase {
     }
 
     // Apply configuration to the field
-    if (config.customLabel || config.customLabel === null) {
-      this.setFieldCustomLabel(fieldName, config.customLabel);
-    }
+    this.setFieldCustomLabel(fieldName, config.customLabel);
 
     if (config.popularity || config.popularity === null) {
       this.setFieldCount(fieldName, config.popularity);
