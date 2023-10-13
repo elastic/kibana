@@ -10,5 +10,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless observability API - feature flags', function () {
     loadTestFile(require.resolve('./custom_threshold_rule'));
+    describe('Infra UI', function () {
+      loadTestFile(require.resolve('./infra/metadata'));
+      loadTestFile(require.resolve('./infra/snapshot'));
+      loadTestFile(require.resolve('./infra/processes'));
+      loadTestFile(require.resolve('./infra/infra'));
+    });
   });
 }
