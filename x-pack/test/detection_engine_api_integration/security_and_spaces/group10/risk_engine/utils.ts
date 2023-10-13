@@ -302,6 +302,24 @@ export const cleanRiskEngineConfig = async ({
   }
 };
 
+/**
+ * General helper for cleaning up risk engine artifacts. This should be used before and after any risk engine tests so as not to pollute the test environment.
+ */
+export const cleanRiskEngine = async ({
+  es,
+  kibanaServer,
+  log,
+}: {
+  es: Client;
+  kibanaServer: KbnClient;
+  log: ToolingLog;
+}): Promise<void> => {
+  await deleteRiskEngineTask({ es, log });
+  await cleanRiskEngineConfig({ kibanaServer });
+  await clearTransforms({ es, log });
+  await deleteRiskScoreIndices({ log, es });
+};
+
 export const updateRiskEngineConfigSO = async ({
   attributes,
   kibanaServer,
