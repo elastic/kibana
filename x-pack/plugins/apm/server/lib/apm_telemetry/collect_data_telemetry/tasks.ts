@@ -633,10 +633,10 @@ export const tasks: TelemetryTask[] = [
           indices.metric,
           indices.transaction,
         ],
-        terminate_after: 1,
         body: {
           size: 0,
-          track_total_hits: false,
+          track_total_hits: true,
+          terminate_after: 1,
           query: {
             bool: {
               filter: [
@@ -656,7 +656,7 @@ export const tasks: TelemetryTask[] = [
       return {
         has_any_services_per_official_agent:
           sum(Object.values(servicesPerAgent)) > 0,
-        has_any_services: services.hits.total.value > 0,
+        has_any_services: services?.hits?.total?.value > 0,
         services_per_agent: servicesPerAgent,
       };
     },
