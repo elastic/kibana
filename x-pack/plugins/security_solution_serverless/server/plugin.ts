@@ -33,6 +33,8 @@ import {
   setEndpointPackagePolicyServerlessFlag,
 } from './endpoint/services';
 
+import { enableRuleActions } from './rules/enable_rule_actions';
+
 export class SecuritySolutionServerlessPlugin
   implements
     Plugin<
@@ -54,6 +56,7 @@ export class SecuritySolutionServerlessPlugin
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
+    const enabledAppFeatures = getProductAppFeatures(this.config.productTypes);
 
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
@@ -63,12 +66,13 @@ export class SecuritySolutionServerlessPlugin
       const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
       this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
       const appFeaturesConfigurator = getProductAppFeaturesConfigurator(
-        getProductAppFeatures(this.config.productTypes),
+        enabledAppFeatures,
         this.config
       );
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
-      pluginsSetup.securitySolution.enableRuleActionsByFeatureConfig();
     }
+
+    enableRuleActions({ actions: pluginsSetup.actions, appFeatureKeys: enabledAppFeatures });
 
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,

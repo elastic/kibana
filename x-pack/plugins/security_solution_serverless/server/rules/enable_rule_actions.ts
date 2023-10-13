@@ -11,9 +11,9 @@ import {
   EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
+import type { AppFeatureKeys } from '@kbn/security-solution-features/src/types';
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 
 const INTERNAL_RULE_ACTIONS = [
   IndexConnectorTypeId,
@@ -26,12 +26,12 @@ const INTERNAL_RULE_ACTIONS = [
  */
 export const enableRuleActions = ({
   actions,
-  appFeatures,
+  appFeatureKeys,
 }: {
   actions: ActionsPluginSetupContract;
-  appFeatures: AppFeaturesService;
+  appFeatureKeys: AppFeatureKeys;
 }) => {
-  if (appFeatures.isEnabled(AppFeatureSecurityKey.externalRuleActions)) {
+  if (appFeatureKeys.includes(AppFeatureSecurityKey.externalRuleActions)) {
     // enables all rule actions
     actions.setEnabledConnectorTypes([EnabledActionTypes.Any]);
   } else {
