@@ -38,7 +38,6 @@ export default ({ getService }: FtrProviderContext) => {
       await clearLegacyDashboards({ supertest, log });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168376
     describe('init api', () => {
       it('should return response with success status', async () => {
         const response = await riskEngineRoutes.init();
@@ -340,7 +339,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168355
     describe('status api', () => {
       it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
