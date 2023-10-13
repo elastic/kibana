@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('composite_slo', () => {
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./update'));
+  describe('Serverless Search - Server', function () {
+    loadTestFile(require.resolve('./api_key'));
+    loadTestFile(require.resolve('./connectors'));
+    loadTestFile(require.resolve('./indices'));
   });
 }
