@@ -303,7 +303,7 @@ const FilterableCell: React.FC<{
 export const LimitedResultsBar = () => (
   <>
     <EuiSpacer size="xxl" />
-    <EuiBottomBar data-test-subj="test-bottom-bar">
+    <EuiBottomBar data-test-subj="test-bottom-bar" paddingSize="s">
       <EuiText textAlign="center">
         <FormattedMessage
           id="xpack.csp.findings..bottomBarLabel"

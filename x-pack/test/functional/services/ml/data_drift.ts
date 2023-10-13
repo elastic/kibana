@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+type SubjectId = 'reference' | 'comparison';
+
 export function MachineLearningDataDriftProvider({
   getService,
   getPageObjects,
@@ -17,6 +19,7 @@ export function MachineLearningDataDriftProvider({
   const PageObjects = getPageObjects(['discover', 'header']);
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const comboBox = getService('comboBox');
 
   type RandomSamplerOption =
     | 'dvRandomSamplerOptionOnAutomatic'
@@ -29,11 +32,27 @@ export function MachineLearningDataDriftProvider({
       return `${testSubject}-${id}`;
     },
 
+    async assertDataViewTitle(expectedTitle: string) {
+      const selector = 'mlDataDriftPageDataViewTitle';
+      await testSubjects.existOrFail(selector);
+      await retry.tryForTime(5000, async () => {
+        const title = await testSubjects.getVisibleText(selector);
+        expect(title).to.eql(
+          expectedTitle,
+          `Expected data drift page's data view title to be '${expectedTitle}' (got '${title}')`
+        );
+      });
+    },
+
     async assertTimeRangeSelectorSectionExists() {
       await testSubjects.existOrFail('dataComparisonTimeRangeSelectorSection');
     },
 
-    async assertTotalDocumentCount(selector: string, expectedFormattedTotalDocCount: string) {
+    async assertTotalDocumentCount(
+      id: 'Reference' | 'Comparison',
+      expectedFormattedTotalDocCount: string
+    ) {
+      const selector = `dataVisualizerTotalDocCount-${id}`;
       await retry.tryForTime(5000, async () => {
         const docCount = await testSubjects.getVisibleText(selector);
         expect(docCount).to.eql(
@@ -206,9 +225,126 @@ export function MachineLearningDataDriftProvider({
     async runAnalysis() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(`aiopsRerunAnalysisButton`);
-        // As part of the interface for the histogram brushes, the button to clear the selection should be present
         await this.assertDataDriftTableExists();
       });
+    },
+
+    async navigateToCreateNewDataViewPage() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`dataDriftCreateDataViewButton`);
+        await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
+      });
+    },
+
+    async assertIndexPatternNotEmptyFormErrorExists(id: SubjectId) {
+      const subj = `mlDataDriftIndexPatternFormRow-${id ?? ''}`;
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(subj);
+        const row = await testSubjects.find(subj);
+        const errorElements = await row.findAllByClassName('euiFormErrorText');
+        expect(await errorElements[0].getVisibleText()).eql('Index pattern must not be empty.');
+      });
+    },
+
+    async assertIndexPatternInput(id: SubjectId, expectedText: string) {
+      const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
+
+      await retry.tryForTime(5000, async () => {
+        const input = await testSubjects.find(inputSelector);
+        const text = await input.getAttribute('value');
+        expect(text).eql(
+          expectedText,
+          `Expected ${inputSelector} to have text ${expectedText} (got ${text})`
+        );
+      });
+    },
+
+    async setIndexPatternInput(id: SubjectId, pattern: string) {
+      const inputSelector = `mlDataDriftIndexPatternTitleInput-${id}`;
+
+      // The input for index pattern automatically appends "*" at the end of the string
+      // So here we just omit that * at the end to avoid double characters
+
+      await retry.tryForTime(10 * 1000, async () => {
+        const hasWildCard = pattern.endsWith('*');
+        const trimmedPattern = hasWildCard ? pattern.substring(0, pattern.length - 1) : pattern;
+
+        const input = await testSubjects.find(inputSelector);
+        await input.clearValue();
+
+        await testSubjects.setValue(inputSelector, trimmedPattern, {
+          clearWithKeyboard: true,
+          typeCharByChar: true,
+        });
+
+        if (!hasWildCard) {
+          // If original pattern does not have wildcard, make to delete the wildcard
+          await input.focus();
+          await browser.pressKeys(browser.keys.DELETE);
+        }
+
+        await this.assertIndexPatternInput(id, pattern);
+      });
+    },
+
+    async assertAnalyzeWithoutSavingButtonMissing() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.missingOrFail('analyzeDataDriftWithoutSavingButton');
+      });
+    },
+
+    async assertAnalyzeWithoutSavingButtonState(disabled = true) {
+      await retry.tryForTime(5000, async () => {
+        const isDisabled = !(await testSubjects.isEnabled('analyzeDataDriftWithoutSavingButton'));
+        expect(isDisabled).to.equal(
+          disabled,
+          `Expect analyze without saving button disabled state to be ${disabled} (got ${isDisabled})`
+        );
+      });
+    },
+
+    async assertAnalyzeDataDriftButtonState(disabled = true) {
+      await retry.tryForTime(5000, async () => {
+        const isDisabled = !(await testSubjects.isEnabled('analyzeDataDriftButton'));
+        expect(isDisabled).to.equal(
+          disabled,
+          `Expect analyze data drift button disabled state to be ${disabled} (got ${isDisabled})`
+        );
+      });
+    },
+
+    async clickAnalyzeWithoutSavingButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('analyzeDataDriftWithoutSavingButton');
+        await testSubjects.click('analyzeDataDriftWithoutSavingButton');
+        await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
+      });
+    },
+
+    async clickAnalyzeDataDrift() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('analyzeDataDriftButton');
+        await testSubjects.click('analyzeDataDriftButton');
+        await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
+      });
+    },
+
+    async assertDataDriftTimestampField(expectedIdentifier: string) {
+      await retry.tryForTime(2000, async () => {
+        const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+          'mlDataDriftTimestampField > comboBoxInput'
+        );
+        expect(comboBoxSelectedOptions).to.eql(
+          expectedIdentifier === '' ? [] : [expectedIdentifier],
+          `Expected type field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        );
+      });
+    },
+
+    async selectTimeField(timeFieldName: string) {
+      await comboBox.set('mlDataDriftTimestampField', timeFieldName);
+
+      await this.assertDataDriftTimestampField(timeFieldName);
     },
   };
 }

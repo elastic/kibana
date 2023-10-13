@@ -79,8 +79,10 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
-import type { DataQualityPanelConfig } from './overview/types';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponent$ } from './contract_components';
+import type { ConfigSettings } from '../common/config_settings';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -145,15 +147,14 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  isSidebarEnabled$: Observable<boolean>;
   getComponent$: GetComponent$;
   upselling: UpsellingService;
-  dataQualityPanelConfig: DataQualityPanelConfig | undefined;
 }
 
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
@@ -176,14 +177,14 @@ export type StartServices = CoreStart &
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  experimentalFeatures: ExperimentalFeatures;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
-  setDataQualityPanelConfig: (dataQualityPanelConfig: DataQualityPanelConfig) => void;
+  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;

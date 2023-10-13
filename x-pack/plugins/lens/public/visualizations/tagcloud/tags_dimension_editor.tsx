@@ -28,11 +28,10 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { useState, MutableRefObject, useCallback } from 'react';
-import { PalettePicker } from '@kbn/coloring/src/shared_components/coloring/palette_picker';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { TagcloudState } from './types';
-import { PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer, PalettePicker } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
@@ -43,6 +42,7 @@ interface Props {
   frame: FramePublicAPI;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   isDarkMode: boolean;
+  isInlineEditing?: boolean;
 }
 
 export function TagsDimensionEditor({
@@ -52,6 +52,7 @@ export function TagsDimensionEditor({
   panelRef,
   isDarkMode,
   paletteService,
+  isInlineEditing,
 }: Props) {
   const { inputValue: localState, handleInputChange: setLocalState } =
     useDebouncedValue<TagcloudState>({
@@ -137,6 +138,7 @@ export function TagsDimensionEditor({
                     defaultMessage: 'Edit colors',
                   })
             }
+            isInlineEditing={isInlineEditing}
           >
             <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
               <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
