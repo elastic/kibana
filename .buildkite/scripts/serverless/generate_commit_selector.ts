@@ -44,12 +44,10 @@ async function collectAvailableCommits(commitCount: string): Promise<CommitData>
     return { message, hash };
   });
 
-  const payload = {
+  return {
     commits: kibanaCommitList,
     currentKibanaCommit,
   };
-
-  return payload;
 }
 
 async function generateCommitSelectionInput(commitData: CommitData) {
@@ -66,6 +64,7 @@ async function generateCommitSelectionInput(commitData: CommitData) {
       {
         select: 'Select commit to deploy',
         key: 'commit-sha',
+        // TODO: Enrich this with build stats?
         options: commits.map((commit) => ({ label: commit.message, value: commit.hash })),
       },
     ],
