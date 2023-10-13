@@ -10,10 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  UnifiedDataTableAdditionalDisplaySettings,
-  MAX_ALLOWED_SAMPLE_SIZE,
-} from './data_table_additional_display_settings';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import lodash from 'lodash';
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
@@ -51,11 +48,12 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
     });
 
     it('should not execute the callback for an invalid input', async () => {
-      const invalidValue = MAX_ALLOWED_SAMPLE_SIZE + 10;
+      const invalidValue = 600;
       const onChangeSampleSizeMock = jest.fn();
 
       const component = mountWithIntl(
         <UnifiedDataTableAdditionalDisplaySettings
+          maxAllowedSampleSize={500}
           sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
         />
