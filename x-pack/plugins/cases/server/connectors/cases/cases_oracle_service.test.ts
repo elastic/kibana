@@ -170,7 +170,7 @@ describe('CasesOracleService', () => {
     it('gets a record correctly', async () => {
       const record = await service.getRecord('so-id');
 
-      expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id' });
+      expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id', version: 'so-version' });
     });
   });
 
@@ -199,7 +199,7 @@ describe('CasesOracleService', () => {
     it('creates a record correctly', async () => {
       const record = await service.createRecord('so-id', { cases, rules });
 
-      expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id' });
+      expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id', version: 'so-version' });
     });
 
     it('calls the unsecuredSavedObjectsClient.create method correctly', async () => {
@@ -214,7 +214,7 @@ describe('CasesOracleService', () => {
           counter: 1,
           createdAt: expect.anything(),
           rules,
-          updatedAt: expect.anything(),
+          updatedAt: null,
         },
         { id }
       );
@@ -252,15 +252,25 @@ describe('CasesOracleService', () => {
     it('increases the counter correctly', async () => {
       const record = await service.increaseCounter('so-id');
 
-      expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id', counter: 2 });
+      expect(record).toEqual({
+        ...oracleSO.attributes,
+        id: 'so-id',
+        version: 'so-version',
+        counter: 2,
+      });
     });
 
     it('calls the unsecuredSavedObjectsClient.update method correctly', async () => {
       await service.increaseCounter('so-id');
 
-      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('cases-oracle', 'so-id', {
-        counter: 2,
-      });
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'cases-oracle',
+        'so-id',
+        {
+          counter: 2,
+        },
+        { version: 'so-version' }
+      );
     });
   });
 });

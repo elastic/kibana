@@ -37,7 +37,8 @@ export interface OracleRecord {
   cases: Array<{ id: string }>;
   rules: Array<{ id: string }>;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  version: string;
 }
 
 export interface OracleRecordCreateRequest {

@@ -10,7 +10,7 @@ import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import { CryptoService } from './crypto_service';
 import type { OracleKey, OracleRecord, OracleRecordCreateRequest } from './types';
 
-type OracleRecordWithoutId = Omit<OracleRecord, 'id'>;
+type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
 
 export class CasesOracleService {
   private readonly log: Logger;
@@ -49,7 +49,7 @@ export class CasesOracleService {
   public async getRecord(recordId: string): Promise<OracleRecord> {
     this.log.debug(`Getting oracle record with ID: ${recordId}`);
 
-    const oracleRecord = await this.unsecuredSavedObjectsClient.get<OracleRecordWithoutId>(
+    const oracleRecord = await this.unsecuredSavedObjectsClient.get<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       recordId
     );
@@ -65,14 +65,14 @@ export class CasesOracleService {
 
     this.log.debug(`Creating oracle record with ID: ${recordId}`);
 
-    const oracleRecord = await this.unsecuredSavedObjectsClient.create<OracleRecordWithoutId>(
+    const oracleRecord = await this.unsecuredSavedObjectsClient.create<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       {
         counter: 1,
         cases,
         rules,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        updatedAt: null,
       },
       { id: recordId }
     );
@@ -81,17 +81,18 @@ export class CasesOracleService {
   }
 
   public async increaseCounter(recordId: string): Promise<OracleRecord> {
-    const record = await this.getRecord(recordId);
+    const { id: _, version, ...record } = await this.getRecord(recordId);
     const newCounter = record.counter + 1;
 
     this.log.debug(
       `Increasing the counter of oracle record with ID: ${recordId} from ${record.counter} to ${newCounter}`
     );
 
-    const oracleRecord = await this.unsecuredSavedObjectsClient.update<OracleRecordWithoutId>(
+    const oracleRecord = await this.unsecuredSavedObjectsClient.update<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       recordId,
-      { counter: newCounter }
+      { counter: newCounter },
+      { version }
     );
 
     return this.getRecordResponse({
@@ -101,8 +102,11 @@ export class CasesOracleService {
     });
   }
 
-  private getRecordResponse = (oracleRecord: SavedObject<OracleRecordWithoutId>): OracleRecord => ({
+  private getRecordResponse = (
+    oracleRecord: SavedObject<OracleRecordAttributes>
+  ): OracleRecord => ({
     id: oracleRecord.id,
+    version: oracleRecord.version ?? '',
     counter: oracleRecord.attributes.counter,
     cases: oracleRecord.attributes.cases,
     rules: oracleRecord.attributes.rules,
