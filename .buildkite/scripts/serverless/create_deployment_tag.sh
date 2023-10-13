@@ -4,6 +4,11 @@ set -euo pipefail
 DEPLOYMENT_TAG="test-depl-$(date +%Y%m%d%H%M%S)"
 KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get commit-sha)
 
+if [[ -z "$KIBANA_COMMIT_SHA" ]]; then
+  echo "Commit sha is not set, exiting"
+  exit 1
+fi
+
 echo "--- Creating deployment tag $DEPLOYMENT_TAG at $KIBANA_COMMIT_SHA"
 
 # Create a tag for the deployment
