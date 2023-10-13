@@ -339,7 +339,7 @@ export const GET_TIMELINE_HEADER = (fieldName: string) => {
   return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };
 
-export const DISCOVER_TAB = getDataTestSubjectSelector('timelineTabs-discover');
+export const ESQL_TAB = getDataTestSubjectSelector('timelineTabs-esql');
 
 export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
   'timeline-date-picker-container'
