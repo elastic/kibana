@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { EuiPopover, EuiText, EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-
 import { useKibana } from '../../../../common/lib/kibana';
 
 /**
@@ -29,8 +28,19 @@ const EsqlInfoIconComponent = () => {
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText size="s">
-        <Markdown
-          markdown={i18n.getTooltipContent(docLinks.links.securitySolution.createEsqlRuleType)}
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent"
+          defaultMessage="Check out our {createEsqlRuleTypeLink} to get started using ES|QL rules in Security."
+          values={{
+            createEsqlRuleTypeLink: (
+              <EuiLink href={docLinks.links.securitySolution.createEsqlRuleType} target="_blank">
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsTooltipLink"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </EuiText>
     </EuiPopover>

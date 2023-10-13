@@ -13,14 +13,3 @@ export const ARIA_LABEL = i18n.translate(
     defaultMessage: `Open help popover`,
   }
 );
-
-export const getTooltipContent = (esqlRuleTypeLink: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent',
-    {
-      defaultMessage: `Check out our {esqlRuleTypeLink} to get started using ES|QL rules in Security.`,
-      values: {
-        esqlRuleTypeLink: `[documentation](${esqlRuleTypeLink})`,
-      },
-    }
-  );
