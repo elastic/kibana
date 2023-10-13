@@ -182,8 +182,8 @@ function getMissingIndexPatternsErrors(
 
 export const filterAndSortUserMessages = (
   userMessages: UserMessage[],
-  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-  { dimensionId, severity }: UserMessageFilters
+  locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[],
+  { dimensionId, severity }: UserMessageFilters = {}
 ) => {
   const locationIds = Array.isArray(locationId)
     ? locationId

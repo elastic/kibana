@@ -44,9 +44,9 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
         },
       ],
     })),
-    toExpression: jest.fn((_state, _frame) => null),
+    toExpression: jest.fn((_state, _frame) => ''),
     toPreviewExpression: jest.fn((_state, _frame) => null),
-
+    getUserMessages: jest.fn((_state) => []),
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
     DimensionEditorComponent: jest.fn(() => <div />),

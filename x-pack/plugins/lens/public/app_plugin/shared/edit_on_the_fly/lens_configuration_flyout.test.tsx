@@ -41,35 +41,31 @@ const lensAttributes = {
   references: [],
 } as unknown as TypedLensByValueInput['attributes'];
 
-describe('LensEditConfigurationFlyout', () => {
-  const mockStartDependencies =
-    createMockStartDependencies() as unknown as LensPluginStartDependencies;
-  const data = mockDataPlugin();
-  (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
-    from: 'now-2m',
-    to: 'now',
-  });
-  const startDependencies = {
-    ...mockStartDependencies,
-    data,
-  };
+const mockStartDependencies =
+  createMockStartDependencies() as unknown as LensPluginStartDependencies;
+const data = mockDataPlugin();
+(data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+  from: 'now-2m',
+  to: 'now',
+});
+const defaultProps = {
+  attributes: lensAttributes,
+  updatePanelState: jest.fn(),
+  coreStart: coreMock.createStart(),
+  startDependencies: { ...mockStartDependencies, data },
+  datasourceMap: mockDatasourceMap(),
+  visualizationMap: mockVisualizationMap(),
+  closeFlyout: jest.fn(),
+  datasourceId: 'testDatasource' as EditConfigPanelProps['datasourceId'],
+};
 
+describe('LensEditConfigurationFlyout', () => {
   function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery
   ) {
     return renderWithReduxStore(
-      <LensEditConfigurationFlyout
-        attributes={lensAttributes}
-        updatePanelState={jest.fn()}
-        coreStart={coreMock.createStart()}
-        startDependencies={startDependencies}
-        datasourceMap={mockDatasourceMap()}
-        visualizationMap={mockVisualizationMap()}
-        closeFlyout={jest.fn()}
-        datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
-        {...propsOverrides}
-      />,
+      <LensEditConfigurationFlyout {...defaultProps} {...propsOverrides} />,
       {},
       {
         preloadedState: {
@@ -131,8 +127,46 @@ describe('LensEditConfigurationFlyout', () => {
       savedObjectId: 'id',
       saveByRef: saveByRefSpy,
     });
-    userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    userEvent.click(screen.getByRole('button', { name: /apply changes/i }));
+
     expect(updateByRefInputSpy).toHaveBeenCalled();
     expect(saveByRefSpy).toHaveBeenCalled();
+  });
+
+  it('save button is disabled if no changes have been made', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const saveByRefSpy = jest.fn();
+    const newProps = {
+      ...defaultProps,
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+      saveByRef: saveByRefSpy,
+    };
+    // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
+    // @ts-ignore
+    newProps.attributes.state.datasourceStates.testDatasource = 'state';
+    renderConfigFlyout(newProps);
+    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+  });
+  it('save button should be disabled if expression cannot be generated', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const saveByRefSpy = jest.fn();
+    const newProps = {
+      ...defaultProps,
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+      saveByRef: saveByRefSpy,
+      datasourceMap: {
+        ...defaultProps.datasourceMap,
+        testDatasource: {
+          ...defaultProps.datasourceMap.testDatasource,
+          toExpression: jest.fn(() => null),
+        },
+      },
+    };
+    renderConfigFlyout(newProps);
+    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
   });
 });

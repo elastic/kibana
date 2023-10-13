@@ -29,17 +29,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   useLensSelector,
-  selectFramePublicAPI,
   useLensDispatch,
   updateIndexPatterns,
+  selectFrameDatasourceAPI,
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type {
+  Datasource,
+  DatasourceMap,
+  FrameDatasourceAPI,
+  UserMessageFilters,
+  UserMessagesDisplayLocationId,
+  Visualization,
+  VisualizationMap,
+} from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensEmbeddableOutput } from '../../../embeddable';
 import type { LensInspector } from '../../../lens_inspector_service';
@@ -47,6 +56,7 @@ import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/c
 import { extractReferencesFromState } from '../../../utils';
 import type { Document } from '../../../persistence';
 import { createIndexPatternService } from '../../../data_views_service/service';
+import { filterAndSortUserMessages } from '../../get_application_user_messages';
 
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
@@ -86,6 +96,28 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
 }
 
+const getUserMessages =
+  (
+    currentDataSource: Datasource | null,
+    currentDatasourceState: unknown,
+    currentVisualization: Visualization,
+    currentVisualizationState: unknown,
+    frame: FrameDatasourceAPI
+  ) =>
+  (
+    locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
+    filters?: UserMessageFilters
+  ) => {
+    const userMessages = [
+      ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
+        frame,
+        setState: () => {},
+      }) ?? []),
+      ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
+    ];
+    return filterAndSortUserMessages([...userMessages], locationId, filters ?? {});
+  };
+
 export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
@@ -109,7 +141,8 @@ export function LensEditConfigurationFlyout({
   const activeDatasource = datasourceMap[datasourceId];
   const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
   const { euiTheme } = useEuiTheme();
-  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const { datasourceStates, visualization, isLoading, searchSessionId, annotationGroups } =
+    useLensSelector((state) => state.lens);
   const dispatch = useLensDispatch();
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
@@ -129,6 +162,8 @@ export function LensEditConfigurationFlyout({
   }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
 
   const attributesChanged: boolean = useMemo(() => {
+    // todo: write a helper for this that would be used in the editor frame as well
+
     const previousAttrs = previousAttributes.current;
 
     const datasourceStatesAreSame =
@@ -142,10 +177,34 @@ export function LensEditConfigurationFlyout({
         : false;
 
     const visualizationState = visualization.state;
-    return (
-      !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
-    );
-  }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
+
+    const isEqualFromVis = visualizationMap[previousAttrs.visualizationType]?.isEqual;
+    const visualizationStateIsEqual = isEqualFromVis
+      ? (() => {
+          try {
+            return isEqualFromVis(
+              previousAttrs.state.visualization,
+              previousAttrs.references,
+              visualizationState,
+              attributes.references,
+              annotationGroups
+            );
+          } catch (err) {
+            return false;
+          }
+        })()
+      : isEqual(visualizationState, previousAttrs.state.visualization);
+
+    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+  }, [
+    attributes.references,
+    datasourceId,
+    datasourceMap,
+    datasourceStates,
+    visualization.state,
+    visualizationMap,
+    annotationGroups,
+  ]);
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
@@ -234,7 +293,7 @@ export function LensEditConfigurationFlyout({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const framePublicAPI = useLensSelector((state) => {
+  const frameDatasourceAPI = useLensSelector((state) => {
     const newState = {
       ...state,
       lens: {
@@ -242,12 +301,12 @@ export function LensEditConfigurationFlyout({
         activeData,
       },
     };
-    return selectFramePublicAPI(newState, datasourceMap);
+    return selectFrameDatasourceAPI(newState, datasourceMap);
   });
   if (isLoading) return null;
 
   const layerPanelsProps = {
-    framePublicAPI,
+    framePublicAPI: frameDatasourceAPI,
     datasourceMap,
     visualizationMap,
     core: coreStart,
@@ -256,7 +315,33 @@ export function LensEditConfigurationFlyout({
     hideLayerHeader: datasourceId === 'textBased',
     indexPatternService,
     setIsInlineFlyoutFooterVisible,
+    getUserMessages: getUserMessages(
+      datasourceMap[datasourceId],
+      datasourceStates[datasourceId].state,
+      activeVisualization,
+      visualization.state,
+      frameDatasourceAPI
+    ),
   };
+
+  // building expression can be expensive, that is why it's a function to run only if attributes changed and has no errors
+  const getNewStateExpression = () =>
+    visualization.state && visualization.activeId
+      ? buildExpression({
+          visualization: activeVisualization,
+          visualizationState: visualization.state,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers: frameDatasourceAPI.datasourceLayers,
+          indexPatterns: frameDatasourceAPI.dataViews.indexPatterns,
+          dateRange: frameDatasourceAPI.dateRange,
+          nowInstant: startDependencies.data.nowProvider.get(),
+          searchSessionId,
+        })
+      : null;
+
+  const isSaveable = attributesChanged && !!getNewStateExpression();
+
   return (
     <>
       <EuiFlyoutBody
@@ -343,7 +428,7 @@ export function LensEditConfigurationFlyout({
             <EuiSpacer size="m" />
             <VisualizationToolbar
               activeVisualization={activeVisualization}
-              framePublicAPI={framePublicAPI}
+              framePublicAPI={frameDatasourceAPI}
             />
             <EuiSpacer size="m" />
             <ConfigPanelWrapper
@@ -381,7 +466,7 @@ export function LensEditConfigurationFlyout({
                   defaultMessage: 'Apply changes',
                 })}
                 iconType="check"
-                isDisabled={!attributesChanged}
+                isDisabled={!isSaveable}
                 data-test-subj="applyFlyoutButton"
               >
                 <FormattedMessage
