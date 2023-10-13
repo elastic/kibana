@@ -117,7 +117,10 @@ export async function getSeriesData(
       [panel.id]: {
         annotations,
         id: panel.id,
-        series: series.reduce((acc, s) => acc.concat(s), []),
+        series: series.reduce((acc, s) => {
+          acc.push(...s);
+          return acc;
+        }, []),
       },
     };
   } catch (err) {

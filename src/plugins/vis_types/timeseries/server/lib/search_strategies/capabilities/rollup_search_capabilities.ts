@@ -59,13 +59,10 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
         return acc;
       }, this.createUiRestriction({}) as Record<string, boolean>);
 
-    return Object.keys(this.availableMetrics).reduce(
-      (acc, item) => ({
-        ...acc,
-        [item]: getFields(this.availableMetrics[item]),
-      }),
-      baseRestrictions
-    );
+    return Object.keys(this.availableMetrics).reduce((acc, item) => {
+      (acc as Record<string, unknown>)[item] = getFields(this.availableMetrics[item]);
+      return acc;
+    }, baseRestrictions);
   }
 
   public get whiteListedGroupByFields() {
