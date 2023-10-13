@@ -493,9 +493,9 @@ export const expandEventAction = () => {
   cy.waitUntil(() => {
     cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).should('exist');
     cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).should('be.visible');
-    return cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).then(($el) => $el.length === 1);
+    return cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).then(($el) => $el.length >= 1);
   });
-  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
 };
 
 export const setKibanaTimezoneToUTC = () =>

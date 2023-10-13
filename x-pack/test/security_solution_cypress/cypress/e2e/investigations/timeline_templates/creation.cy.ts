@@ -43,6 +43,7 @@ import {
   markAsFavorite,
   openTimelineTemplateFromSettings,
   populateTimeline,
+  saveTimeline,
   waitForTimelineChanges,
 } from '../../../tasks/timeline';
 import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
@@ -110,7 +111,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     waitForTimelinesPanelToBeLoaded();
     expandEventAction();
     clickingOnCreateTemplateFromTimelineBtn();
-
+    saveTimeline();
     cy.wait('@timeline', { timeout: 100000 });
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
