@@ -122,9 +122,14 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  margin: 0 12px; //to remove
   overflow: hidden;
 `;
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
+`;
+
+SourcererFlex.displayName = 'SourcererFlex';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -133,12 +138,6 @@ const VerticalRule = styled.div`
 `;
 
 VerticalRule.displayName = 'VerticalRule';
-
-const SourcererFlex = styled(EuiFlexItem)`
-  align-items: flex-end;
-`;
-
-SourcererFlex.displayName = 'SourcererFlex';
 
 const EventsCountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -210,11 +209,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
+  const { uiSettings } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-  const {
-    services: { uiSettings },
-  } = useKibana();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const currentTimeline = useDeepEqualSelector((state) =>
@@ -530,7 +527,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   runtimeMappings={runtimeMappings}
                   tabType={TimelineTabs.query}
                   scopeId={timelineId}
-                  isFlyoutView
                 />
               </ScrollableFlexItem>
             </>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -25,6 +25,7 @@ import type {
 import { FieldsGroupNames, UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import { timelineActions } from '../../../store/timeline';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -150,7 +151,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   isTextBasedQuery,
 }) => {
   const dispatch = useDispatch();
-  const { euiTheme } = useEuiTheme();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 
   const {
@@ -377,25 +377,27 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                 onDrop={onDropFieldToTable}
               >
                 <DropOverlayWrapper isVisible={isDropAllowed}>
-                  <DataGridMemoized
-                    columns={columns}
-                    rowRenderers={rowRenderers}
-                    timelineId={timelineId}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    sort={sort}
-                    events={events}
-                    refetch={refetch}
-                    dataLoadingState={dataLoadingState}
-                    totalCount={totalCount}
-                    onEventClosed={onEventClosed}
-                    expandedDetail={expandedDetail}
-                    showExpandedDetails={showExpandedDetails}
-                    onChangePage={onChangePage}
-                    activeTab={activeTab}
-                    updatedAt={updatedAt}
-                    isTextBasedQuery={isTextBasedQuery}
-                  />
+                  <EventDetailsWidthProvider>
+                    <DataGridMemoized
+                      columns={columns}
+                      rowRenderers={rowRenderers}
+                      timelineId={timelineId}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      sort={sort}
+                      events={events}
+                      refetch={refetch}
+                      dataLoadingState={dataLoadingState}
+                      totalCount={totalCount}
+                      onEventClosed={onEventClosed}
+                      expandedDetail={expandedDetail}
+                      showExpandedDetails={showExpandedDetails}
+                      onChangePage={onChangePage}
+                      activeTab={activeTab}
+                      updatedAt={updatedAt}
+                      isTextBasedQuery={isTextBasedQuery}
+                    />
+                  </EventDetailsWidthProvider>
                 </DropOverlayWrapper>
               </DragDrop>
             </StyledMainEuiPanel>
