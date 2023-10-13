@@ -274,7 +274,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       getSources: async () => {
         return await getIndicesForAutocomplete(dataViews);
       },
-      getFieldsFor: async (options = {}) => {
+      getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
         const pipes = codeRef.current.split('|');
         pipes?.pop();
         const validContent =

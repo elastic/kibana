@@ -9,9 +9,9 @@
 import { monaco } from '../../../../..';
 
 /** @public **/
-export interface ESQLCustomAutocompleteCallbacks {
+export interface ESQLCallbacks {
   getSources?: CallbackFn;
-  getFields?: CallbackFn<
+  getFieldsFor?: CallbackFn<
     { sourcesOnly?: boolean } | { customQuery?: string },
     { name: string; type: string }
   >;
