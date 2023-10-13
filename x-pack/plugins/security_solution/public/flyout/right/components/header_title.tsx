@@ -6,13 +6,14 @@
  */
 
 import type { VFC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { NewChatById } from '@kbn/elastic-assistant';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 import { CopyToClipboard } from '../../shared/components/copy_to_clipboard';
 import { useRefetchByScope } from '../../../timelines/components/side_panel/event_details/flyout/use_refetch_by_scope';
@@ -45,7 +46,8 @@ export interface HeaderTitleProps {
  */
 export const HeaderTitle: VFC<HeaderTitleProps> = memo(
   ({ flyoutIsExpandable, scopeId, refetchFlyoutData }) => {
-    const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+    const { dataFormattedForFieldBrowser, eventId, indexName, getFieldsData } =
+      useRightPanelContext();
     const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
       dataFormattedForFieldBrowser
     );
@@ -63,6 +65,14 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(
     });
 
     const { refetch } = useRefetchByScope({ scopeId });
+    const alertAssignees = useMemo(
+      () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
+      [getFieldsData]
+    );
+    const onAssigneesUpdated = useCallback(() => {
+      refetch();
+      refetchFlyoutData();
+    }, [refetch, refetchFlyoutData]);
 
     return (
       <>
@@ -144,7 +154,11 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(
             <RiskScore />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <Assignees refetch={refetch} refresh={refetchFlyoutData} />
+            <Assignees
+              eventId={eventId}
+              alertAssignees={alertAssignees}
+              onAssigneesUpdated={onAssigneesUpdated}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>

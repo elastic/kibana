@@ -114,19 +114,22 @@ export const useToGetInternalFlyout = () => {
           ruleName={ruleName}
           showAlertDetails={showAlertDetails}
           timestamp={timestamp}
+          scopeId={TimelineId.casePage}
+          refetchFlyoutData={refetchFlyoutData}
         />
       );
     },
     [
-      alert.indexName,
-      isAlert,
-      alertId,
       isHostIsolationPanelOpen,
+      isAlert,
+      alert.indexName,
+      alertId,
       isolateAction,
       loading,
       ruleName,
       showAlertDetails,
       timestamp,
+      refetchFlyoutData,
     ]
   );
 
