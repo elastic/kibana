@@ -26,10 +26,10 @@ interface OracleKeyAllRequired {
   grouping: Record<string, string>;
 }
 
-type OracleKeyWithRequiredRule = Optional<OracleKeyAllRequired, 'grouping'>;
-type OracleKeyWithRequiredGrouping = Optional<OracleKeyAllRequired, 'ruleId'>;
+type OracleKeyWithOptionalKey = Optional<OracleKeyAllRequired, 'ruleId'>;
+type OracleKeyWithOptionalGrouping = Optional<OracleKeyAllRequired, 'grouping'>;
 
-export type OracleKey = ExclusiveUnion<OracleKeyWithRequiredRule, OracleKeyWithRequiredGrouping>;
+export type OracleKey = ExclusiveUnion<OracleKeyWithOptionalKey, OracleKeyWithOptionalGrouping>;
 
 export interface OracleRecord {
   id: string;
