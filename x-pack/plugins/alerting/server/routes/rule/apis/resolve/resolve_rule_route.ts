@@ -6,8 +6,12 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import { resolveParamsSchemaV1 } from '../../../../../common/routes/rule/apis/resolve';
+import {
+  resolveParamsSchemaV1,
+  ResolveRuleResponseV1,
+} from '../../../../../common/routes/rule/apis/resolve';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
@@ -28,14 +32,15 @@ export const resolveRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.resolve({
+        // TODO (http-versioning): Remove this cast, this enables us to move forward
+        // without fixing all of other solution types
+        const rule = (await rulesClient.resolve({
           id,
-        });
-        return res.ok({
-          // TODO (http-versioning): Remove this cast, this enables us to move forward
-          // without fixing all of other solution types
-          body: transformResolveResponseV1(rule as ResolvedRule<never>),
-        });
+        })) as ResolvedRule<RuleParamsV1>;
+        const response: ResolveRuleResponseV1<RuleParamsV1> = {
+          body: transformResolveResponseV1<RuleParamsV1>(rule),
+        };
+        return res.ok(response);
       })
     )
   );
