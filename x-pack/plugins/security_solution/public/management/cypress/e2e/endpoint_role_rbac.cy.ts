@@ -47,7 +47,7 @@ describe('When defining a kibana role for Endpoint security access', { tags: '@e
         'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
         'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',
         'File Operations Perform file-related response actions in the response console.File Operations sub-feature privilegeAllNone',
-        'Execute Operations Perform script execution on the endpoint.Execute Operations sub-feature privilegeAllNone',
+        'Execute Operations Perform script execution response actions in the response console.Execute Operations sub-feature privilegeAllNone',
       ]);
   });
 
