@@ -65,6 +65,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult> {
+    if (!this.startDeps.screenshotting) throw new Error('Screenshotting plugin is not initialized');
     return this.startDeps.screenshotting.getScreenshots({
       ...options,
       urls: options?.urls?.map((url) =>

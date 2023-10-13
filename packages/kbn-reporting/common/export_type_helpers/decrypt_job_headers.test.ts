@@ -26,7 +26,7 @@ describe('headers', () => {
         logger
       );
     await expect(getDecryptedHeaders()).rejects.toMatchInlineSnapshot(
-      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. TypeError: Invalid initialization vector]`
+      `[Error: Failed to decrypt report job data. Please ensure that reporting.common.encryptionKey is set and re-generate this report. TypeError: Invalid initialization vector]`
     );
   });
 

@@ -63,6 +63,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   }
 
   public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
+    if (!this.startDeps.screenshotting) throw new Error('Screenshotting plugin is not initialized');
     return this.startDeps.screenshotting.getScreenshots({
       ...options,
       urls: options?.urls?.map((url) =>
