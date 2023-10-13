@@ -258,7 +258,7 @@ export function SloEditForm({ slo }: Props) {
         <AddRuleFlyout
           canChangeTrigger={false}
           consumer={sloFeatureId}
-          initialValues={{ name: `${slo.name} burn rate rule`, params: { sloId: slo.id } }}
+          initialValues={{ name: `${watch('name')} burn rate rule`, params: { sloId: slo.id } }}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}

@@ -27,6 +27,7 @@ export {};
 
 // @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
 import registerCypressGrep from '@cypress/grep';
+
 registerCypressGrep();
 
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
@@ -34,6 +35,7 @@ import type { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
 import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import { waitUntil } from '../tasks/wait_until';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -54,6 +56,8 @@ declare global {
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
       login(role?: ServerlessRoleName | 'elastic'): void;
+
+      waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
   }
 }
@@ -83,6 +87,8 @@ Cypress.Commands.add('login', (role) => {
 
   return login(role);
 });
+
+Cypress.Commands.add('waitUntil', waitUntil);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

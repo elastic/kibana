@@ -15,7 +15,10 @@ export function getFilteredSearchPackages() {
   if (shouldFilterFleetServer) {
     filtered.push(FLEET_SERVER_PACKAGE);
   }
-  return filtered;
+
+  const excludePackages = appContextService.getConfig()?.internal?.registry?.excludePackages ?? [];
+
+  return filtered.concat(excludePackages);
 }
 
 export function getFilteredInstallPackages() {
@@ -25,5 +28,7 @@ export function getFilteredInstallPackages() {
   if (shouldFilterFleetServer) {
     filtered.push(FLEET_SERVER_PACKAGE);
   }
-  return filtered;
+  const excludePackages = appContextService.getConfig()?.internal?.registry?.excludePackages ?? [];
+
+  return filtered.concat(excludePackages);
 }
