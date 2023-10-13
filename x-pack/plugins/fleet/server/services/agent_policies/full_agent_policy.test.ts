@@ -283,7 +283,7 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
-  it('should return a policy with monitoring enabled but no logs/metrics in keep_monitoring_alive is true', async () => {
+  it('should return a policy with monitoring enabled but no logs/metrics if keep_monitoring_alive is true', async () => {
     mockAgentPolicy({
       keep_monitoring_alive: true,
     });
