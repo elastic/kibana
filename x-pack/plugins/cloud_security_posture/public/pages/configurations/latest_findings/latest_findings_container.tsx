@@ -9,6 +9,7 @@ import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elast
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { Filter, Query } from '@kbn/es-query';
+import { isNoneGroup, useGrouping, getGroupingQuery } from '@kbn/securitysolution-grouping';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
@@ -27,6 +28,7 @@ import {
   CloudSecurityDefaultColumn,
 } from '../../../components/cloud_security_data_table';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
+import { useFindingsByResource } from '../latest_findings_by_resource/use_findings_by_resource';
 
 const getDefaultQuery = ({
   query,
@@ -107,7 +109,195 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   ),
 });
 
+export const FINDINGS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.csp.findings.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {finding} other {findings}}`,
+  });
+
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
+  const cloudPostureTable = useCloudPostureTable({
+    dataView,
+    paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+    columnsLocalStorageKey,
+    defaultQuery: getDefaultQuery,
+  });
+
+  const { query, sort } = cloudPostureTable;
+
+  const grouping = useGrouping({
+    componentProps: {
+      // groupPanelRenderer: renderGroupPanel,
+      // groupStatsRenderer: getStats,
+      // onGroupToggle,
+      unit: FINDINGS_UNIT,
+    },
+    defaultGroupingOptions: [
+      {
+        label: 'Rule Name',
+        key: 'kibana.alert.rule.name',
+      },
+    ],
+    fields: dataView.fields,
+    groupingId: 'latestFindings',
+    maxGroupingLevels: 2,
+    onGroupChange: (params) => {
+      console.log('onGroupChange', params);
+    },
+    onOptionsChange: (options) => {
+      console.log('onOptionsChange', options);
+    },
+  });
+
+  const groupingQuery = getGroupingQuery({
+    additionalFilters: [],
+    from: 'now-1y',
+    groupByField: grouping.selectedGroups.join(','),
+    uniqueValue: grouping.selectedGroups.join(','),
+    to: 'now',
+    // groupByField,
+    // pageNumber,
+    // rootAggregations,
+    // runtimeMappings,
+    // size = DEFAULT_GROUP_BY_FIELD_SIZE,
+    // sort,
+    // statsAggregations,
+    // to,
+    // uniqueValue,
+  });
+
+  console.log({ groupingQuery });
+  console.log({ grouping });
+  console.log(grouping.selectedGroups);
+
+  const { data } = useFindingsByResource({
+    sortDirection: cloudPostureTable.urlQuery.sort.direction,
+    query,
+    enabled: true,
+  });
+
+  console.log({ data });
+
+  const GroupSelector = () => grouping.groupSelector;
+
+  return (
+    <>
+      {/* <GroupSelector /> */}
+      {grouping.getGrouping({
+        activePage: 0,
+        data: {
+          groupsCount: {
+            value: 1,
+          },
+          groupByFields: {
+            buckets: [
+              {
+                key: ['Vulnerability: CVE-2022-28734'],
+                doc_count: 41,
+                hostsCountAggregation: {
+                  value: 25,
+                },
+                ruleTags: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'CNVM',
+                      doc_count: 41,
+                    },
+                    {
+                      key: 'CVE-2022-28734',
+                      doc_count: 41,
+                    },
+                    {
+                      key: 'Cloud Security',
+                      doc_count: 41,
+                    },
+                    {
+                      key: 'Data Source: Cloud Native Vulnerability Management',
+                      doc_count: 41,
+                    },
+                    {
+                      key: 'OS: Linux',
+                      doc_count: 41,
+                    },
+                    {
+                      key: 'Use Case: Vulnerability',
+                      doc_count: 41,
+                    },
+                  ],
+                },
+                unitsCount: {
+                  value: 41,
+                },
+                description: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: "Out-of-bounds write when handling split HTTP headers; When handling split HTTP headers, GRUB2 HTTP code accidentally moves its internal data buffer point by one position. This can lead to a out-of-bound write further when parsing the HTTP request, writing a NULL byte past the buffer. It's conceivable that an attacker controlled set of packets can lead to corruption of the GRUB2's internal memory metadata.",
+                      doc_count: 41,
+                    },
+                  ],
+                },
+                severitiesSubAggregation: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'critical',
+                      doc_count: 18,
+                    },
+                    {
+                      key: 'medium',
+                      doc_count: 13,
+                    },
+                    {
+                      key: 'high',
+                      doc_count: 10,
+                    },
+                  ],
+                },
+                countSeveritySubAggregation: {
+                  value: 3,
+                },
+                usersCountAggregation: {
+                  value: 0,
+                },
+                selectedGroup: 'kibana.alert.rule.name',
+                key_as_string: 'Vulnerability: CVE-2022-28734',
+              },
+            ],
+          },
+          unitsCount: {
+            value: 41,
+          },
+        },
+        groupingLevel: 0,
+        inspectButton: undefined,
+        isLoading: false,
+        itemsPerPage: 10,
+        onChangeGroupsItemsPerPage: () => {
+          console.log('onChangeGroupsItemsPerPage');
+        },
+        onChangeGroupsPage: () => {
+          console.log('onChangeGroupsPage');
+        },
+        renderChildComponent: (groupFilter) => {
+          return <div>{JSON.stringify(groupFilter)}</div>;
+        },
+        onGroupClose: () => {
+          console.log('onGroupClose');
+        },
+        selectedGroup: 'kibana.alert.rule.name',
+        // selectedGroup: 'kibana.alert.rule.name',
+        takeActionItems: () => [],
+      })}
+    </>
+  );
+};
+
+export const LatestFindingsContainerOld = ({ dataView }: FindingsBaseProps) => {
   const cloudPostureTable = useCloudPostureTable({
     dataView,
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
