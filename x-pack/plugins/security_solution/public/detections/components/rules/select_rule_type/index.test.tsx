@@ -15,9 +15,19 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false), // enabled (esqlRulesDisabled = false)
 }));
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+const mockESQLEnabled = jest.fn(() => true);
+jest.mock('../../../../common/lib/kibana', () => {
+  const useKibana = jest.requireActual('../../../../common/lib/kibana').useKibana;
+  return {
+    useKibana: () => ({
+      services: { ...useKibana().services, configSettings: { ESQLEnabled: mockESQLEnabled() } },
+    }),
+  };
+});
 
 describe('SelectRuleType', () => {
   it('renders correctly', () => {
@@ -187,8 +197,27 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeTruthy();
     });
 
-    it('should not render "esql" rule type if its feature disabled', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+    it('should not render "esql" rule type if esql setting is disabled', () => {
+      mockESQLEnabled.mockReturnValueOnce(false);
+      const Component = () => {
+        const field = useFormFieldMock();
+
+        return (
+          <SelectRuleType
+            field={field}
+            describedByIds={[]}
+            isUpdateView={false}
+            hasValidLicense={true}
+            isMlAdmin={true}
+          />
+        );
+      };
+      const wrapper = shallow(<Component />);
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
+    });
+
+    it('should not render "esql" rule type if the feature flag is disabled', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true); // disabled (esqlRulesDisabled = true)
       const Component = () => {
         const field = useFormFieldMock();
 

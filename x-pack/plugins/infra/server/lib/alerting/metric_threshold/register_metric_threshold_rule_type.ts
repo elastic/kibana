@@ -16,6 +16,7 @@ import {
   RuleType,
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
@@ -58,8 +59,13 @@ export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
 
 export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
+  if (!featureFlags.metricThresholdAlertRuleEnabled) {
+    return;
+  }
+
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),

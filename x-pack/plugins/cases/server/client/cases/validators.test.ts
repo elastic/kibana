@@ -26,7 +26,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              value: ['this is a text field value', 'this is second'],
+              value: 'this is a text field value',
             },
             {
               key: 'second_key',
@@ -130,7 +130,7 @@ describe('validators', () => {
             {
               key: 'third_key',
               type: CustomFieldTypes.TEXT,
-              value: ['abc'],
+              value: 'abc',
             },
           ],
 
@@ -187,7 +187,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              value: ['this is a text field value', 'this is second'],
+              value: 'this is a text field value',
             },
             {
               key: 'second_key',
@@ -300,7 +300,7 @@ describe('validators', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_key',

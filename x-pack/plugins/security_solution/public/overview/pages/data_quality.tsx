@@ -54,10 +54,8 @@ import type {
   ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
-import type { DataQualityPanelConfig } from '../types';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
-const defaultDataQualityPanelConfig: DataQualityPanelConfig = { isILMAvailable: true };
 
 const comboBoxStyle: React.CSSProperties = {
   width: '322px',
@@ -158,8 +156,8 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-  const { dataQualityPanelConfig = defaultDataQualityPanelConfig, cases } = useKibana().services;
-  const { isILMAvailable } = dataQualityPanelConfig;
+  const { configSettings, cases } = useKibana().services;
+  const isILMAvailable = configSettings.ILMEnabled;
 
   const [startDate, setStartTime] = useState<string>();
   const [endDate, setEndTime] = useState<string>();
@@ -173,7 +171,7 @@ const DataQualityComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isILMAvailable === false) {
+    if (!isILMAvailable) {
       setStartTime(DEFAULT_START_TIME);
       setEndTime(DEFAULT_END_TIME);
     }

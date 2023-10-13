@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { copyToClipboard } from '@elastic/eui';
 import { RightPanelContext } from '../context';
 import {
   CHAT_BUTTON_TEST_ID,
@@ -24,6 +25,7 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { useAssistant } from '../hooks/use_assistant';
 import { TestProvidersComponent } from '../../../common/mock';
 import { useGetAlertDetailsFlyoutLink } from '../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
+import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -34,6 +36,13 @@ jest.mock(
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(),
+  EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
+}));
+
+const alertUrl = 'https://example.com/alert';
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
 const mockContextValue = {
@@ -57,7 +66,7 @@ describe('<HeaderTitle />', () => {
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
-    jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue('url');
+    jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(alertUrl);
   });
 
   it('should render component', () => {
@@ -74,10 +83,26 @@ describe('<HeaderTitle />', () => {
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('rule-name');
   });
 
-  it('should render share button in the title', () => {
+  it('should render share button in the title and copy the the value to clipboard', () => {
+    const syncedFlyoutState = 'flyoutState';
+    const query = `?${FLYOUT_URL_PARAM}=${syncedFlyoutState}`;
+
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: query,
+      },
+    });
+
     const { getByTestId } = renderHeader(mockContextValue);
 
-    expect(getByTestId(SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
+    const shareButton = getByTestId(SHARE_BUTTON_TEST_ID);
+    expect(shareButton).toBeInTheDocument();
+
+    fireEvent.click(shareButton);
+
+    expect(copyToClipboard).toHaveBeenCalledWith(
+      `${alertUrl}&${FLYOUT_URL_PARAM}=${syncedFlyoutState}`
+    );
   });
 
   it('should not render share button in the title if alert is missing url info', () => {

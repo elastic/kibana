@@ -7,6 +7,8 @@
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { pageObjects as xpackFunctionalPageObjects } from '../../../test/functional/page_objects';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { cloudSecurityPosturePageObjects } from '../../../test/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
 import { SvlCommonNavigationProvider } from './svl_common_navigation';
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
@@ -18,6 +20,7 @@ import { SvlTriggersActionsPageProvider } from './svl_triggers_actions_ui_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
+  ...cloudSecurityPosturePageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
