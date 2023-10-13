@@ -15,7 +15,7 @@ import { waitForDiscoverGridToLoad } from '../../../../tasks/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
+import { createNewTimeline, gotToEsqlTab } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -24,9 +24,8 @@ const TIMESTAMP_COLUMN_NAME = '@timestamp';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165650
 describe.skip(
-  `Discover Datagrid Cell Actions`,
+  `ESQL Datagrid Cell Actions`,
   {
-    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
     tags: ['@ess'],
   },
   () => {
@@ -34,7 +33,7 @@ describe.skip(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       waitForDiscoverGridToLoad();
     });

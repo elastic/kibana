@@ -34,7 +34,7 @@ import {
   addDescriptionToTimeline,
   addNameToTimeline,
   createNewTimeline,
-  gotToDiscoverTab,
+  gotToEsqlTab,
   openTimelineById,
   openTimelineFromSettings,
   waitForTimelineChanges,
@@ -60,11 +60,10 @@ const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-// TODO: reuse or remove this tests when ESQL tab will be added
+// FLAKY: https://github.com/elastic/kibana/issues/168745
 describe.skip(
   'Discover Timeline State Integration',
   {
-    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
     tags: ['@ess', '@brokenInServerless'],
     // ESQL and test involving STACK_MANAGEMENT_PAGE are broken in serverless
   },
@@ -109,14 +108,14 @@ describe.skip(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToDiscoverTab();
+      gotToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
     context('save/restore', () => {
       it('should be able create an empty timeline with default discover state', () => {
         addNameToTimeline('Timerange timeline');
         createNewTimeline();
-        gotToDiscoverTab();
+        gotToEsqlTab();
         cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should(
           'contain.text',
           `Last 15 minutes`
@@ -143,7 +142,7 @@ describe.skip(
             openTimelineFromSettings();
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
-            gotToDiscoverTab();
+            gotToEsqlTab();
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
@@ -193,7 +192,7 @@ describe.skip(
             openTimelineFromSettings();
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
-            gotToDiscoverTab();
+            gotToEsqlTab();
             cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
           });
       });
