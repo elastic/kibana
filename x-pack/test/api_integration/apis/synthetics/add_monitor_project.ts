@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
+import {
+  ELASTIC_MANAGED_LOCATIONS_DISABLED,
+  REQUEST_TOO_LARGE,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   PROFILE_VALUES_ENUM,
@@ -130,6 +133,18 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(projectMonitors)
         .expect(404);
+    });
+
+    it('project monitors - returns forbidden if no access to public locations', async () => {
+      const project = `test-project-${uuidv4()}`;
+
+      await monitorTestService.generateProjectAPIKey(false);
+      const response = await monitorTestService.addProjectMonitors(
+        project,
+        projectMonitors.monitors
+      );
+      expect(response.status).to.eql(403);
+      expect(response.body.message).to.eql(ELASTIC_MANAGED_LOCATIONS_DISABLED);
     });
 
     it('project monitors - handles browser monitors', async () => {
