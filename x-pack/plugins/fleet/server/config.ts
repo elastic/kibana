@@ -193,6 +193,7 @@ export const config: PluginConfigDescriptor = {
           registry: schema.object(
             {
               kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
+              excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
               spec: schema.object(
                 {
                   min: schema.maybe(schema.string()),
@@ -221,6 +222,7 @@ export const config: PluginConfigDescriptor = {
               defaultValue: {
                 kibanaVersionCheckEnabled: true,
                 capabilities: [],
+                excludePackages: [],
                 spec: {
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },

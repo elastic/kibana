@@ -10,11 +10,11 @@ export enum SecurityCellActionsTrigger {
   ALERTS_COUNT = 'security-alertsCount-cellActions',
 }
 
-export enum DiscoverInTimelineTrigger {
+export enum EsqlInTimelineTrigger {
   HISTOGRAM_TRIGGER = 'security-discoverInTimeline-histogramTrigger',
 }
 
-export enum DiscoverInTimelineAction {
+export enum EsqlInTimelineAction {
   VIS_FILTER_ACTION = 'security-discoverInTimeline-visFilterAction',
 }
 

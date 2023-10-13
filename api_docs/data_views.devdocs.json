@@ -5324,6 +5324,24 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -12311,6 +12329,24 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -20029,6 +20065,24 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -22766,6 +22820,24 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServicePublicMethods.defaultDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultDataViewExists",
+            "description": [
+              "\nReturns whether a default data view exists."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -25307,7 +25379,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
+          ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
