@@ -7,8 +7,6 @@
 
 import React, { useState } from 'react';
 
-import { useActions, useValues } from 'kea';
-
 import {
   EuiAccordion,
   EuiFieldText,
@@ -27,27 +25,25 @@ import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '@kbn/search-connectors';
 
-import { Status } from '../../../../../../common/types/api';
-import { LicensingLogic } from '../../../../shared/licensing';
-
-import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
-
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
-import { ConnectorConfigurationLogic, ConfigEntryView } from './connector_configuration_logic';
+import { ConfigEntryView } from './connector_configuration_config';
 import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
 import { ensureBooleanType, ensureStringType } from './utils/connector_configuration_utils';
 
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntryView;
+  hasPlatinumLicense: boolean;
+  isLoading: boolean;
+  setConfigValue: (value: number | string | boolean) => void;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
+  hasPlatinumLicense,
+  isLoading,
+  setConfigValue,
 }) => {
-  const { status } = useValues(ConnectorConfigurationApiLogic);
-  const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
@@ -67,22 +63,22 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     case DisplayType.DROPDOWN:
       return options.length > 3 ? (
         <EuiSelect
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           options={options.map((option) => ({ text: option.label, value: option.value }))}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+            setConfigValue(event.target.value);
           }}
         />
       ) : (
         <EuiRadioGroup
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           idSelected={ensureStringType(value)}
           name="radio group"
           options={options.map((option) => ({ id: option.value, label: option.label }))}
           onChange={(id) => {
-            setLocalConfigEntry({ ...configEntry, value: id });
+            setConfigValue(id);
           }}
         />
       );
@@ -90,12 +86,12 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     case DisplayType.NUMERIC:
       return (
         <EuiFieldText
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           required={required}
           value={ensureStringType(value)}
           isInvalid={!isValid}
           onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+            setConfigValue(event.target.value);
           }}
           placeholder={placeholder}
         />
@@ -104,12 +100,12 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     case DisplayType.TEXTAREA:
       const textarea = (
         <EuiTextArea
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           placeholder={placeholder}
           required={required}
           value={ensureStringType(value) || undefined} // ensures placeholder shows up when value is empty string
           onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+            setConfigValue(event.target.value);
           }}
         />
       );
@@ -147,10 +143,10 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                 <EuiFlexItem grow={false}>
                   <EuiSwitch
                     checked={ensureBooleanType(value)}
-                    disabled={status === Status.LOADING || !hasPlatinumLicense}
+                    disabled={isLoading || !hasPlatinumLicense}
                     label={<p>{label}</p>}
                     onChange={(event) => {
-                      setLocalConfigEntry({ ...configEntry, value: event.target.checked });
+                      setConfigValue(event.target.checked);
                     }}
                   />
                 </EuiFlexItem>
@@ -182,7 +178,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       return (
         <EuiSwitch
           checked={ensureBooleanType(value)}
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           label={
             tooltip ? (
               <EuiFlexGroup gutterSize="xs">
@@ -198,7 +194,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
             )
           }
           onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.checked });
+            setConfigValue(event.target.checked);
           }}
         />
       );
@@ -206,22 +202,22 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     default:
       return sensitive ? (
         <EuiFieldPassword
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           required={required}
           type="dual"
           value={ensureStringType(value)}
           onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+            setConfigValue(event.target.value);
           }}
         />
       ) : (
         <EuiFieldText
-          disabled={status === Status.LOADING}
+          disabled={isLoading}
           placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+            setConfigValue(event.target.value);
           }}
         />
       );

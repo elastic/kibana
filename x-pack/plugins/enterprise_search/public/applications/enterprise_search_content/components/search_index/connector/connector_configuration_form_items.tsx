@@ -13,17 +13,23 @@ import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '@kbn/search-connectors';
 
+import { ConfigEntryView } from './connector_configuration_config';
 import { ConnectorConfigurationField } from './connector_configuration_field';
-import { ConfigEntryView } from './connector_configuration_logic';
 
 interface ConnectorConfigurationFormItemsProps {
   hasDocumentLevelSecurityEnabled: boolean;
+  hasPlatinumLicense: boolean;
+  isLoading: boolean;
   items: ConfigEntryView[];
+  setConfigEntry: (key: string, value: string | number | boolean) => void;
 }
 
 export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFormItemsProps> = ({
+  isLoading,
   items,
   hasDocumentLevelSecurityEnabled,
+  hasPlatinumLicense,
+  setConfigEntry,
 }) => {
   return (
     <EuiFlexGroup direction="column">
@@ -82,7 +88,14 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                     isInvalid={!isValid}
                     data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
                   >
-                    <ConnectorConfigurationField configEntry={configEntry} />
+                    <ConnectorConfigurationField
+                      configEntry={configEntry}
+                      hasPlatinumLicense={hasPlatinumLicense}
+                      isLoading={isLoading}
+                      setConfigValue={(value) => {
+                        setConfigEntry(configEntry.key, value);
+                      }}
+                    />
                   </EuiFormRow>
                 </EuiToolTip>
               </EuiPanel>
@@ -99,7 +112,14 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 isInvalid={!isValid}
                 data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
               >
-                <ConnectorConfigurationField configEntry={configEntry} />
+                <ConnectorConfigurationField
+                  configEntry={configEntry}
+                  hasPlatinumLicense={hasPlatinumLicense}
+                  isLoading={isLoading}
+                  setConfigValue={(value) => {
+                    setConfigEntry(configEntry.key, value);
+                  }}
+                />
               </EuiFormRow>
             </EuiToolTip>
           </EuiFlexItem>

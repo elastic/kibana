@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { useActions, useValues } from 'kea';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -23,35 +21,60 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../../common/types/api';
-
-import { KibanaLogic } from '../../../../shared/kibana';
-
-import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
-
+import { ConfigView } from './connector_configuration_config';
 import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
-import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
-export const ConnectorConfigurationForm = () => {
-  const { productFeatures } = useValues(KibanaLogic);
-  const { status } = useValues(ConnectorConfigurationApiLogic);
+interface ConnectorConfigurationForm {
+  cancelEditing: () => void;
+  configView: ConfigView;
+  hasDocumentLevelSecurity: boolean;
+  hasPlatinumLicense: boolean;
+  isLoading: boolean;
+  saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+}
 
-  const { localConfigView } = useValues(ConnectorConfigurationLogic);
-  const { saveConfig, setIsEditing } = useActions(ConnectorConfigurationLogic);
+function configViewToConfigValues(
+  configView: ConfigView
+): Record<string, string | number | boolean | null> {
+  const result: Record<string, string | number | boolean | null> = {};
+  for (const { key, value } of configView.advancedConfigurations) {
+    result[key] = value;
+  }
+  for (const { key, value } of configView.unCategorizedItems) {
+    result[key] = value;
+  }
+  return result;
+}
+
+export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = ({
+  cancelEditing,
+  configView,
+  hasDocumentLevelSecurity,
+  hasPlatinumLicense,
+  isLoading,
+  saveConfig,
+}) => {
+  const [configValues, setConfigValues] = useState<
+    Record<string, string | number | boolean | null>
+  >({});
+  useEffect(() => setConfigValues(configViewToConfigValues(configView)), [configView]);
 
   return (
     <EuiForm
       onSubmit={(event) => {
         event.preventDefault();
-        saveConfig();
+        saveConfig(configValues);
       }}
       component="form"
     >
       <ConnectorConfigurationFormItems
-        items={localConfigView.unCategorizedItems}
-        hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
+        hasPlatinumLicense={hasPlatinumLicense}
+        isLoading={isLoading}
+        items={configView.unCategorizedItems}
+        hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
+        setConfigEntry={(key, value) => setConfigValues({ ...configValues, [key]: value })}
       />
-      {localConfigView.categories.map((category, index) => (
+      {configView.categories.map((category, index) => (
         <React.Fragment key={index}>
           <EuiSpacer />
           <EuiTitle size="s">
@@ -59,12 +82,15 @@ export const ConnectorConfigurationForm = () => {
           </EuiTitle>
           <EuiSpacer />
           <ConnectorConfigurationFormItems
+            hasPlatinumLicense={hasPlatinumLicense}
+            isLoading={isLoading}
             items={category.configEntries}
-            hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
+            hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
+            setConfigEntry={(key, value) => setConfigValues({ ...configValues, [key]: value })}
           />
         </React.Fragment>
       ))}
-      {localConfigView.advancedConfigurations.length > 0 && (
+      {configView.advancedConfigurations.length > 0 && (
         <React.Fragment>
           <EuiSpacer />
           <EuiTitle size="xs">
@@ -77,8 +103,11 @@ export const ConnectorConfigurationForm = () => {
           </EuiTitle>
           <EuiPanel color="subdued">
             <ConnectorConfigurationFormItems
-              items={localConfigView.advancedConfigurations}
-              hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
+              hasPlatinumLicense={hasPlatinumLicense}
+              isLoading={isLoading}
+              items={configView.advancedConfigurations}
+              hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
+              setConfigEntry={(key, value) => setConfigValues({ ...configValues, [key]: value })}
             />
           </EuiPanel>
         </React.Fragment>
@@ -91,7 +120,7 @@ export const ConnectorConfigurationForm = () => {
               data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
               data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
               type="submit"
-              isLoading={status === Status.LOADING}
+              isLoading={isLoading}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.config.submitButton.title',
@@ -104,9 +133,9 @@ export const ConnectorConfigurationForm = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
-              isDisabled={status === Status.LOADING}
+              isDisabled={isLoading}
               onClick={() => {
-                setIsEditing(false);
+                cancelEditing();
               }}
             >
               {i18n.translate(

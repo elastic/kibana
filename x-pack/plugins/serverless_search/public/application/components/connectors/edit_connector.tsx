@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
+  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -31,6 +32,7 @@ import { EditName } from './edit_name';
 import { EditServiceType } from './edit_service_type';
 import { EditDescription } from './edit_description';
 import { DeleteConnectorModal } from './delete_connector_modal';
+import { ConnectorConfiguration } from './connector_config/connector_configuration';
 
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
@@ -91,7 +93,7 @@ export const EditConnector: React.FC = () => {
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
-      <EuiPageTemplate.Section grow={false}>
+      <EuiPageTemplate.Section grow={false} color="subdued">
         <EuiText size="s">{CONNECTOR_LABEL}</EuiText>
         <EuiFlexGroup direction="row" justifyContent="spaceBetween">
           <EuiFlexItem>
@@ -166,6 +168,11 @@ export const EditConnector: React.FC = () => {
               description={connector.description ?? ''}
               onSuccess={refetch}
             />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasBorder hasShadow={false}>
+              <ConnectorConfiguration connector={connector} />
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>

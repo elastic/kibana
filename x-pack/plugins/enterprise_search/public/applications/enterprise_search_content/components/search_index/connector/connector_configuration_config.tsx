@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { useActions, useValues } from 'kea';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -21,10 +19,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexViewLogic } from '../index_view_logic';
+import {
+  ConnectorConfigProperties,
+  ConnectorConfiguration,
+  ConnectorStatus,
+} from '@kbn/search-connectors';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
-import { ConfigEntryView, ConnectorConfigurationLogic } from './connector_configuration_logic';
+import { sortAndFilterConnectorConfiguration } from './utils/connector_configuration_utils';
 
 function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; title: string } {
   return {
@@ -33,10 +35,72 @@ function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; 
   };
 }
 
-export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
-  const { connectorError } = useValues(IndexViewLogic);
-  const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
-  const { setIsEditing } = useActions(ConnectorConfigurationLogic);
+interface ConnectorConfigurationProps {
+  configuration: ConnectorConfiguration;
+  connectorStatus: ConnectorStatus;
+  error: string | undefined;
+  hasDocumentLevelSecurity: boolean;
+  hasPlatinumLicense: boolean;
+  isLoading: boolean;
+  isNative?: boolean;
+  saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+}
+
+interface ConfigEntry extends ConnectorConfigProperties {
+  key: string;
+}
+
+export interface ConfigEntryView extends ConfigEntry {
+  is_valid: boolean;
+  validation_errors: string[];
+}
+
+export interface CategoryEntry {
+  configEntries: ConfigEntryView[];
+  key: string;
+  label: string;
+  order: number;
+}
+
+export interface ConfigView {
+  advancedConfigurations: ConfigEntryView[];
+  categories: CategoryEntry[];
+  unCategorizedItems: ConfigEntryView[];
+}
+
+export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationProps> = ({
+  children,
+  configuration,
+  connectorStatus,
+  error,
+  hasDocumentLevelSecurity,
+  hasPlatinumLicense,
+  isLoading,
+  isNative = false,
+  saveConfig,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingConfig, setEditingConfig] = useState<ConfigView>(
+    sortAndFilterConnectorConfiguration(configuration, isNative)
+  );
+
+  useEffect(() => {
+    setEditingConfig(sortAndFilterConnectorConfiguration(configuration, isNative));
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (
+      Object.keys(configuration).length > 0 &&
+      (connectorStatus === ConnectorStatus.CREATED ||
+        connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION)
+    ) {
+      // Only start in edit mode if we haven't configured yet
+      // Necessary to prevent a race condition between saving config and getting updated connector
+      setIsEditing(true);
+    }
+  });
+
+  const configView = sortAndFilterConnectorConfiguration(configuration, isNative);
 
   const uncategorizedDisplayList = configView.unCategorizedItems.map(entryToDisplaylistItem);
 
@@ -45,7 +109,14 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
       {children && <EuiFlexItem>{children}</EuiFlexItem>}
       <EuiFlexItem>
         {isEditing ? (
-          <ConnectorConfigurationForm />
+          <ConnectorConfigurationForm
+            cancelEditing={() => setIsEditing(false)}
+            configView={editingConfig}
+            hasDocumentLevelSecurity={hasDocumentLevelSecurity}
+            hasPlatinumLicense={hasPlatinumLicense}
+            isLoading={isLoading}
+            saveConfig={saveConfig}
+          />
         ) : (
           uncategorizedDisplayList.length > 0 && (
             <EuiFlexGroup direction="column">
@@ -93,7 +164,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           )
         )}
       </EuiFlexItem>
-      {!!connectorError && (
+      {!!error && (
         <EuiFlexItem>
           <EuiCallOut
             color="danger"
@@ -104,7 +175,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
               }
             )}
           >
-            <EuiText size="s">{connectorError}</EuiText>
+            <EuiText size="s">{error}</EuiText>
           </EuiCallOut>
         </EuiFlexItem>
       )}
