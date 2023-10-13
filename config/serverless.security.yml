@@ -23,6 +23,8 @@ xpack.securitySolution.offeringSettings: {
     ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
   }
 
+newsfeed.enabled: true
+
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
 
