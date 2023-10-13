@@ -494,8 +494,6 @@ endpoint_operations_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
-        - .lists*
-        - .items*
       privileges:
         - read
     - names:
@@ -503,9 +501,13 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .lists-*
+        - .items-*
       privileges:
         - read
         - write
+        - maintenance
+        - view_index_metadata
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -529,6 +531,7 @@ endpoint_operations_analyst:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
+        - feature_indexPatterns.read
       resources: "*"
 
 endpoint_policy_manager:

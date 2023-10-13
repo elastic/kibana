@@ -552,8 +552,6 @@ endpoint_operations_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
-        - .lists*
-        - .items*
       privileges:
         - read
     - names:
@@ -561,9 +559,13 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .lists-*
+        - .items-*
       privileges:
         - read
         - write
+        - maintenance
+        - view_index_metadata
   applications:
     - application: ml
       privileges:
