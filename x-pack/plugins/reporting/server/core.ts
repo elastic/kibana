@@ -83,7 +83,7 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
-  screenshotting: ScreenshottingStart;
+  screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
@@ -127,7 +127,7 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: this.getScreenshots.bind(this),
+      getScreenshots: config.statefulSettings.enabled ? this.getScreenshots.bind(this) : undefined,
       getSpaceId: this.getSpaceId.bind(this),
     });
 
@@ -401,7 +401,7 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
+        return screenshotting!.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>
             typeof url === 'string'

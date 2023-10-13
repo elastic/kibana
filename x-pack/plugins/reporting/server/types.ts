@@ -45,7 +45,7 @@ import { ExportTypesRegistry } from './lib';
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
   getSpaceId: ReportingCore['getSpaceId'];
-  getScreenshots: ReportingCore['getScreenshots'];
+  getScreenshots?: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
@@ -62,7 +62,7 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
-  screenshotMode: ScreenshotModePluginSetup;
+  screenshotMode?: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -74,7 +74,7 @@ export interface ReportingStartDeps {
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
-  screenshotting: ScreenshottingStart;
+  screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
