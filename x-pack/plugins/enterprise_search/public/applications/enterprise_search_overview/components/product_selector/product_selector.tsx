@@ -150,13 +150,15 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             <EuiFlexItem>
               <ElasticsearchProductCard />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EnterpriseSearchProductCard
-                hasAppSearchAccess={hasAppSearchAccess ?? false}
-                hasWorkplaceSearchAccess={hasWorkplaceSearchAccess ?? false}
-                isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
-              />
-            </EuiFlexItem>
+            {(hasAppSearchAccess || hasWorkplaceSearchAccess) && (
+              <EuiFlexItem>
+                <EnterpriseSearchProductCard
+                  hasAppSearchAccess={hasAppSearchAccess ?? false}
+                  hasWorkplaceSearchAccess={hasWorkplaceSearchAccess ?? false}
+                  isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
+                />
+              </EuiFlexItem>
+            )}
             {!config.host && config.canDeployEntSearch && (
               <EuiFlexItem>
                 <SetupGuideCta />
