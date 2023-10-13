@@ -205,7 +205,7 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
   );
 };
 
-const navigationDefinition: ProjectNavigationDefinition = {
+const navigationDefinition: ProjectNavigationDefinition<any> = {
   navigationTree: {
     body: [
       // My custom project
@@ -255,16 +255,12 @@ const navigationDefinition: ProjectNavigationDefinition = {
                 link: 'group:settings.tracing',
                 title: 'Tracing',
               },
-              {
-                id: 'seb.nestedGroup',
-                title: 'Nested group',
-                children: [],
-              },
             ],
           },
           {
             id: 'group:settings',
             title: 'Settings',
+            renderAs: 'panelOpener',
             children: [
               {
                 link: 'group:settings.logs',
@@ -311,10 +307,10 @@ const navigationDefinition: ProjectNavigationDefinition = {
             ],
           },
         ],
-      } as GroupDefinition<any>,
+      },
       // Add ml
       {
-        type: 'navGroup',
+        type: 'preset',
         preset: 'ml',
       },
       {
