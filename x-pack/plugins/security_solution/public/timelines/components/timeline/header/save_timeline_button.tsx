@@ -28,9 +28,11 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     status: timelineStatus,
     isSaving,
     updated,
+    changed,
   } = useDeepEqualSelector((state) => getTimelineStatus(state, timelineId));
 
-  const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
+  const isUnsaved = timelineStatus === TimelineStatus.draft;
+  const urgeToSave = isUnsaved || changed;
   // const { startTransaction } = useStartTransaction();
   // const dispatch = useDispatch();
 
@@ -66,6 +68,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     tooltipContent = timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
   }
 
+  const buttonColor = urgeToSave ? 'success' : 'primary';
   return (
     <EuiToolTip
       content={tooltipContent}
@@ -75,7 +78,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
       <>
         <EuiButton
           fill
-          color="primary"
+          color={buttonColor}
           onClick={openEditTimeline}
           iconType="save"
           isLoading={isSaving}

@@ -15,4 +15,5 @@ export const getTimelineStatusByIdSelector = () =>
     status: timeline?.status ?? TimelineStatus.draft,
     updated: timeline?.updated ?? undefined,
     isSaving: timeline?.isSaving ?? undefined,
+    changed: timeline?.changed ?? undefined,
   }));
