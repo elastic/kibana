@@ -6,8 +6,10 @@
  */
 
 import { Moment } from 'moment';
-import { has, set, isNumber } from 'lodash';
-import { Doc, ParsedSchedule } from '../types';
+import { has, isNumber } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { Doc } from '../../common/types';
+import { ParsedSchedule } from '../types';
 import { createDataShapeFunction } from './data_shapes';
 
 export const replaceMetricsWithShapes = (

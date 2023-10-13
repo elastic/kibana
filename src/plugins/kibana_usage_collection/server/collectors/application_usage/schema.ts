@@ -144,6 +144,7 @@ export const applicationUsageSchema = {
   workplaceSearch: commonSchema,
   searchExperiences: commonSchema,
   graph: commonSchema,
+  highCardinalityIndexer: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
   infra: commonSchema, // It's a forward app so we'll likely never report it
