@@ -17,3 +17,5 @@ export { bulkCreateRulesSo } from './methods/bulk_create_rule_so';
 export type { BulkCreateRulesSoParams } from './methods/bulk_create_rule_so';
 export { bulkDeleteRulesSo } from './methods/bulk_delete_rules_so';
 export type { BulkDeleteRulesSoParams } from './methods/bulk_delete_rules_so';
+export { resolveRuleSo } from './methods/resolve_rule_so';
+export type { ResolveRuleSoParams } from './methods/resolve_rule_so';

@@ -6,6 +6,7 @@
  */
 
 export { createRuleSavedObject } from './create_rule_saved_object';
+export { resolveRuleSavedObject } from './resolve_rule_saved_object';
 export { extractReferences } from './extract_references';
 export { validateActions } from './validate_actions';
 export { updateMeta } from './update_meta';

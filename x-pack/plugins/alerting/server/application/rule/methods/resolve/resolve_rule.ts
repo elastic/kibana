@@ -5,8 +5,9 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RuleAttributes } from '../../../../data/rule/types';
+import { resolveRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RuleTypeParams } from '../../../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -32,8 +33,13 @@ Promise<ResolvedSanitizedRule<Params>> {
   } catch (error) {
     throw Boom.badRequest(`Error validating resolve params - ${error.message}`);
   }
-  const { saved_object: result, ...resolveResponse } =
-    await context.unsecuredSavedObjectsClient.resolve<RuleAttributes>('alert', id);
+  const { saved_object: result, ...resolveResponse } = await withSpan(
+    { name: 'resolveRuleSavedObject', type: 'rules' },
+    () =>
+      resolveRuleSavedObject(context, {
+        ruleId: id,
+      })
+  );
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: result.attributes.alertTypeId,
