@@ -38,7 +38,7 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
-import type { GroupDefinition, NonEmptyArray, ProjectNavigationDefinition } from './types';
+import type { GroupDefinition, ProjectNavigationDefinition } from './types';
 import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
@@ -334,7 +334,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
             // Hide discover and dashboard
             return item.link !== 'discover' && item.link !== 'dashboards';
           }),
-        })) as NonEmptyArray<any>,
+        })),
       },
     ],
     footer: [

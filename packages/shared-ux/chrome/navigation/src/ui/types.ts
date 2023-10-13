@@ -16,8 +16,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { RecentlyAccessedProps } from './components';
 
-export type NonEmptyArray<T> = [T, ...T[]];
-
 /**
  * @public
  *
@@ -92,7 +90,7 @@ export interface GroupDefinition<
    * Pass props to the EUI accordion component used to represent a nav group
    */
   accordionProps?: Partial<EuiAccordionProps>;
-  children: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
+  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**
@@ -160,12 +158,12 @@ export interface NavigationTreeDefinition<
    * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
-  body?: NonEmptyArray<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  body?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
-  footer?: NonEmptyArray<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**
