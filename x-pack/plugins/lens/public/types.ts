@@ -198,6 +198,8 @@ export interface TableSuggestion {
    * The change type indicates what was changed in this table compared to the currently active table of this layer.
    */
   changeType: TableChangeType;
+
+  notAssignedMetrics?: boolean;
 }
 
 /**
@@ -746,6 +748,7 @@ export interface OperationMetadata {
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
+  inMetricDimension?: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {

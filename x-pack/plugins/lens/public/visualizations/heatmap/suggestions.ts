@@ -61,6 +61,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
   const isOnlyMetricDimension = groups.length === 0 && metrics.length === 1;
+  const isOnlyBucketDimension = groups.length > 0 && metrics.length === 0;
 
   /**
    * Hide for:
@@ -77,6 +78,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     table.changeType === 'reorder' ||
     isSingleBucketDimension ||
     hasOnlyDatehistogramBuckets ||
+    isOnlyBucketDimension ||
     isOnlyMetricDimension;
 
   const newState: HeatmapVisualizationState = {

@@ -415,6 +415,7 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'bytes',
                 fieldName: 'bytes',
+                inMetricDimension: true,
                 meta: {
                   type: 'number',
                 },
@@ -431,6 +432,7 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'bytes',
                 fieldName: 'bytes',
+                inMetricDimension: true,
                 meta: {
                   type: 'number',
                 },
@@ -473,6 +475,7 @@ describe('Textbased Data Source', () => {
         ],
         isMultiRow: false,
         layerId: 'newid',
+        notAssignedMetrics: false,
       });
     });
 

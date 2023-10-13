@@ -245,9 +245,9 @@ export function LensEditConfigurationFlyout({
         noPadding
       >
         <>
-          {isOfAggregateQueryType(attributes.state.query) && (
+          {isOfAggregateQueryType(query) && (
             <TextBasedLangEditor
-              query={attributes.state.query}
+              query={query}
               onTextLangQueryChange={(q) => {
                 setQuery(q);
                 prevQuery.current = q;

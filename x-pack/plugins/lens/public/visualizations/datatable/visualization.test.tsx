@@ -462,7 +462,11 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         layerId: 'layer1',
         layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }, { columnId: 'd', isTransposed: false }],
+        columns: [
+          { columnId: 'b' },
+          { columnId: 'c' },
+          { columnId: 'd', isTransposed: false, isMetric: false },
+        ],
       });
     });
 
@@ -482,7 +486,7 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         layerId: 'layer1',
         layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b', isTransposed: false }, { columnId: 'c' }],
+        columns: [{ columnId: 'b', isTransposed: false, isMetric: false }, { columnId: 'c' }],
       });
     });
   });
