@@ -249,8 +249,9 @@ export function filterEvent(
     return !ignoreFilters.some(
       (rule) =>
         (!rule.actions || rule.actions.includes(event.event?.action!)) &&
-        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
-        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
+        (!rule.categories ||
+          (event.event?.category as string[])?.every?.((c) => rule.categories?.includes(c))) &&
+        (!rule.types || (event.event?.type as string[])?.every?.((t) => rule.types?.includes(t))) &&
         (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );
