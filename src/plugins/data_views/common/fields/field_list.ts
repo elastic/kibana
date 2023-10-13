@@ -92,7 +92,7 @@ export const fieldList = (
 
     constructor() {
       super();
-      specs.map((field) => this.add(field));
+      specs.forEach((field) => this.add(field));
     }
 
     public readonly getAll = () => [...this.byName.values()];

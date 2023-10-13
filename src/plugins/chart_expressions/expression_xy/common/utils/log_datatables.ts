@@ -99,8 +99,8 @@ export const logDatatable = (
       if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
         return dimensions;
       }
-
-      return [...dimensions, ...getLayerDimensions(layer)];
+      dimensions.push(...getLayerDimensions(layer));
+      return dimensions;
     }, []);
 
     layerDimensions.push([

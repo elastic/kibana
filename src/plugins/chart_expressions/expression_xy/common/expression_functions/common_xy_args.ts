@@ -27,13 +27,13 @@ export const commonXYArgs: CommonXYFn['args'] = {
   },
   fittingFunction: {
     types: ['string'],
-    options: [...Object.values(FittingFunctions)],
+    options: Object.values(FittingFunctions),
     help: strings.getFittingFunctionHelp(),
     strict: true,
   },
   endValue: {
     types: ['string'],
-    options: [...Object.values(EndValues)],
+    options: Object.values(EndValues),
     help: strings.getEndValueHelp(),
     strict: true,
   },
@@ -44,7 +44,7 @@ export const commonXYArgs: CommonXYFn['args'] = {
   },
   valueLabels: {
     types: ['string'],
-    options: [...Object.values(ValueLabelModes)],
+    options: Object.values(ValueLabelModes),
     help: strings.getValueLabelsHelp(),
     strict: true,
     default: ValueLabelModes.HIDE,

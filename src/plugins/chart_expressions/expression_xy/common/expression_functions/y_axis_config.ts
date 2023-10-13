@@ -22,7 +22,7 @@ export const yAxisConfigFunction: YAxisConfigFn = {
     ...commonAxisConfigArgs,
     mode: {
       types: ['string'],
-      options: [...Object.values(AxisModes)],
+      options: Object.values(AxisModes),
       help: strings.getAxisModeHelp(),
     },
     boundsMargin: {
@@ -30,7 +30,7 @@ export const yAxisConfigFunction: YAxisConfigFn = {
       help: strings.getAxisBoundsMarginHelp(),
     },
     scaleType: {
-      options: [...Object.values(YScaleTypes)],
+      options: Object.values(YScaleTypes),
       help: strings.getAxisScaleTypeHelp(),
       default: YScaleTypes.LINEAR,
     },

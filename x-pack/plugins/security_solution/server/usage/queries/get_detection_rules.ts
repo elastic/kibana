@@ -60,21 +60,18 @@ export const getDetectionRules = async ({
     `Getting detection rules with point in time (PIT) query:', ${JSON.stringify(query)}`
   );
   const finder = savedObjectsClient.createPointInTimeFinder<RuleSearchResult>(query);
-  let responses: Array<SavedObjectsFindResult<RuleSearchResult>> = [];
+  const responses: Array<SavedObjectsFindResult<RuleSearchResult>> = [];
   for await (const response of finder.find()) {
     const extra = responses.length + response.saved_objects.length - maxSize;
     if (extra > 0) {
-      responses = [
-        ...responses,
-        ...response.saved_objects.slice(-response.saved_objects.length, -extra),
-      ];
+      responses.push(...response.saved_objects.slice(-response.saved_objects.length, -extra));
     } else {
-      responses = [...responses, ...response.saved_objects];
+      responses.push(...response.saved_objects);
     }
   }
 
   try {
-    finder.close();
+    await finder.close();
   } catch (exception) {
     // This is just a pre-caution in case the finder does a throw we don't want to blow up
     // the response. We have seen this within e2e test containers but nothing happen in normal

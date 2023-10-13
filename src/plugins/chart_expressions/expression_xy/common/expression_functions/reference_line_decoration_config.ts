@@ -39,7 +39,7 @@ export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfi
     },
     lineStyle: {
       types: ['string'],
-      options: [...Object.values(LineStyles)],
+      options: Object.values(LineStyles),
       help: i18n.translate('expressionXY.decorationConfig.lineStyle.help', {
         defaultMessage: 'The style of the reference line',
       }),
@@ -56,12 +56,12 @@ export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfi
       help: i18n.translate('expressionXY.decorationConfig.icon.help', {
         defaultMessage: 'An optional icon used for reference lines',
       }),
-      options: [...Object.values(AvailableReferenceLineIcons)],
+      options: Object.values(AvailableReferenceLineIcons),
       strict: true,
     },
     iconPosition: {
       types: ['string'],
-      options: [...Object.values(IconPositions)],
+      options: Object.values(IconPositions),
       help: i18n.translate('expressionXY.decorationConfig.iconPosition.help', {
         defaultMessage: 'The placement of the icon for the reference line',
       }),
@@ -75,7 +75,7 @@ export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfi
     },
     fill: {
       types: ['string'],
-      options: [...Object.values(FillStyles)],
+      options: Object.values(FillStyles),
       help: i18n.translate('expressionXY.decorationConfig.fill.help', {
         defaultMessage: 'Fill',
       }),

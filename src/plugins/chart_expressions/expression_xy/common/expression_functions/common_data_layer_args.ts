@@ -28,13 +28,13 @@ export const commonDataLayerArgs: Omit<
   seriesType: {
     aliases: ['_'],
     types: ['string'],
-    options: [...Object.values(SeriesTypes)],
+    options: Object.values(SeriesTypes),
     help: strings.getSeriesTypeHelp(),
     required: true,
     strict: true,
   },
   xScaleType: {
-    options: [...Object.values(XScaleTypes)],
+    options: Object.values(XScaleTypes),
     help: strings.getXScaleTypeHelp(),
     strict: true,
   },
@@ -60,7 +60,7 @@ export const commonDataLayerArgs: Omit<
   },
   curveType: {
     types: ['string'],
-    options: [...Object.values(XYCurveTypes)],
+    options: Object.values(XYCurveTypes),
     help: strings.getCurveTypeHelp(),
     strict: true,
   },

@@ -89,7 +89,8 @@ export const requestEventAnnotations = (
       .map((g) => g.dataView.value)
       .reduce<DataViewSpec[]>((acc, current) => {
         if (acc.find((el) => el.id === current.id)) return acc;
-        return [...acc, current];
+        acc.push(current);
+        return acc;
       }, []);
 
     const loadedDataViews = await Promise.all(

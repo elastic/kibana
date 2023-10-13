@@ -48,10 +48,9 @@ export const removeHideExcludeAndHideExists = (input: ControlGroupInput) => {
           delete explicitInput.hideExclude;
           delete explicitInput.hideExists;
         }
-        return {
-          ...panelAccumulator,
-          [panelId]: panel,
-        };
+
+        panelAccumulator[panelId] = panel;
+        return panelAccumulator;
       },
       {}
     );
