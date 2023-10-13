@@ -20,15 +20,13 @@ import {
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
-import { UsageTracker } from './usage_tracker';
+import { usageTracker } from './usage_tracker';
 import {
   EndpointDataLoadingError,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
   wrapErrorAndRejectPromise,
 } from './utils';
-
-const usageTracker = new UsageTracker({ dumpOnProcessExit: true });
 
 export interface SetupFleetForEndpointResponse {
   endpointPackage: BulkInstallPackageInfo;

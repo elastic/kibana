@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file,@typescript-eslint/no-explicit-any */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { isPromise } from '@kbn/std';
+import moment from 'moment';
 
 interface UsageRecordJson {
   id: string;
   start: string;
   finish: string;
+  duration: string;
   status: 'success' | 'failure' | 'pending';
   error?: string;
 }
@@ -37,9 +40,10 @@ export class UsageTracker {
     }
   > = {};
   private readonly options: Required<UsageTrackerOptions>;
+  private wrappedCallbacks = new WeakSet<Function>();
 
   constructor({
-    logger = new ToolingLog(),
+    logger = new ToolingLog({ level: 'info', writeTo: process.stdout }),
     dumpOnProcessExit = false,
     maxRecordsPerType = 25,
   }: UsageTrackerOptions = {}) {
@@ -53,7 +57,7 @@ export class UsageTracker {
       if (dumpOnProcessExit && process && process.once) {
         ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'].forEach((event) => {
           process.once(event, () => {
-            //
+            logger?.debug(`Usage tracking:\n\n${this.toString()}`);
           });
         });
       }
@@ -106,11 +110,61 @@ export class UsageTracker {
         .join('\n')
     );
   }
+
+  /**
+   * Will wrap the provided callback and provide usage tracking on it.
+   * @param callback
+   * @param name
+   */
+  public track<F extends (...args: any) => any = (...args: any) => any>(
+    callback: F,
+    name?: string
+  ): F {
+    if (this.wrappedCallbacks.has(callback)) {
+      return callback;
+    }
+
+    const functionName =
+      name ??
+      callback.name ??
+      (new Error('-').stack ?? '').split('\n')[2] ??
+      callback.toString().substring(0, 50);
+
+    const wrappedFunction = ((...args) => {
+      const usageRecord = this.create(functionName);
+
+      try {
+        const response = callback(...args);
+
+        if (isPromise(response)) {
+          response
+            .then(() => {
+              usageRecord.set('success');
+            })
+            .catch((e) => {
+              usageRecord.set('failure', e.message);
+            });
+        } else {
+          usageRecord.set('success');
+        }
+
+        return response;
+      } catch (e) {
+        usageRecord.set('failure', e.message);
+        throw e;
+      }
+    }) as F;
+
+    this.wrappedCallbacks.add(wrappedFunction);
+
+    return wrappedFunction;
+  }
 }
 
 class UsageRecord {
   private start: UsageRecordJson['start'] = new Date().toISOString();
   private finish: UsageRecordJson['finish'] = '';
+  private duration: UsageRecordJson['duration'] = '';
   private status: UsageRecordJson['status'] = 'pending';
   private error: UsageRecordJson['error'];
 
@@ -119,15 +173,21 @@ class UsageRecord {
   set(status: Exclude<UsageRecordJson['status'], 'pending'>, error?: string) {
     this.finish = new Date().toISOString();
     this.error = error;
+    this.status = status;
+
+    const durationDiff = moment.duration(moment(this.finish).diff(this.start));
+
+    this.duration = `h[ ${durationDiff.hours()} ]  m[ ${durationDiff.minutes()} ]  s[ ${durationDiff.seconds()} ]  ms[ ${durationDiff.milliseconds()} ]`;
   }
 
   public toJSON(): UsageRecordJson {
-    const { id, start, finish, status, error } = this;
+    const { id, start, finish, status, error, duration } = this;
 
     return {
       id,
       start,
       finish,
+      duration,
       status,
       ...(error ? { error } : {}),
     };
@@ -137,3 +197,5 @@ class UsageRecord {
     return JSON.stringify(this.toJSON());
   }
 }
+
+export const usageTracker = new UsageTracker({ dumpOnProcessExit: true });
