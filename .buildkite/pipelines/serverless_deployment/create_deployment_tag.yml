@@ -13,4 +13,3 @@ steps:
 
   - label: ":ship: Create Deployment Tag"
     command: .buildkite/scripts/serverless/create_deployment_tag.sh
-    depends_on: select_commit
