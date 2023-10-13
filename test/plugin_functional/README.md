@@ -29,7 +29,6 @@ test plugin), you can just run:
 
 ```
 yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
-yarn start --plugin-path=test/plugin_functional/plugins/core_history_block
 ```
 
 If you wish to start Kibana with multiple test plugins, you can run:

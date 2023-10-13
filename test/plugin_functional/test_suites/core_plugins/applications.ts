@@ -41,16 +41,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       search,
     });
 
-  // Inspired by Dashboard implementations
-  // intention: Use navigateToAppFromAppsMenu rather than appsMenu.clickLink directly,
   async function navigateToAppFromAppsMenu(title: string) {
     await retry.try(async () => {
       await appsMenu.clickLink(title);
       await waitUntilLoadingIsDone();
-      const currentUrl = await browser.getCurrentUrl();
-      if (!currentUrl.includes('app/foo/home')) {
-        throw new Error(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
-      }
     });
   }
 
@@ -106,19 +100,19 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.existOrFail('fooAppPageA');
     });
 
-    // this is the one that's causing the failures
     it('navigates to app root when navlink is clicked', async () => {
       await testSubjects.click('fooNavHome');
 
-      // await appsMenu.clickLink('Foo');
       navigateToAppFromAppsMenu('Foo');
 
-      // await waitForUrlToBeWithTimeout('/app/foo/home');
-      // fix https://github.com/elastic/kibana/issues/166677 timeout failure
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
-
-      await testSubjects.existOrFail('fooAppHome');
+      try {
+        await testSubjects.existOrFail('fooAppHome');
+      } catch (err) {
+        const currentUrl = await browser.getCurrentUrl();
+        throw new Error(`Did not navigate to app root, url is ${currentUrl}`);
+      }
     });
 
     it('navigates to other apps', async () => {
