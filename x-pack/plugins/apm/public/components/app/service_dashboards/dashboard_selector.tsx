@@ -56,7 +56,7 @@ export function DashboardSelector({
       placeholder={i18n.translate(
         'xpack.apm.serviceDashboards.selectDashboard.placeholder',
         {
-          defaultMessage: 'Select dasbboard',
+          defaultMessage: 'Select dashboard',
         }
       )}
       prepend={i18n.translate(
