@@ -47,6 +47,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
         transaction: 'traces-apm*,apm-*',
         span: 'traces-apm*,apm-*',
         error: 'logs-apm*,apm-*',
+        event: 'logs-apm*,apm-*',
         metric: 'metrics-apm*,apm-*',
         onboarding: 'apm-*',
         sourcemap: 'apm-*',
