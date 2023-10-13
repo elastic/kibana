@@ -37,6 +37,7 @@ describe('class Screenshots', () => {
     mockLogger = loggerMock.create();
 
     mockConfig = {
+      enabled: true,
       networkPolicy: {
         enabled: false,
         rules: [],

@@ -19,11 +19,11 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ConfigSchema } from '..';
 import { customLogsRoutes } from '../components/app/custom_logs';
 import { systemLogsRoutes } from '../components/app/system_logs';
@@ -35,16 +35,6 @@ import {
 import { baseRoutes, routes } from '../routes';
 import { CustomLogs } from '../routes/templates/custom_logs';
 import { SystemLogs } from '../routes/templates/system_logs';
-
-export type BreadcrumbTitle<
-  T extends { [K in keyof T]?: string | undefined } = {}
-> = string | ((props: RouteComponentProps<T>) => string) | null;
-
-export interface RouteDefinition<
-  T extends { [K in keyof T]?: string | undefined } = any
-> extends RouteProps {
-  breadcrumb: BreadcrumbTitle<T>;
-}
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -156,6 +146,8 @@ export function ObservabilityOnboardingAppRoot({
   const i18nCore = core.i18n;
   const plugins = { ...deps };
 
+  const renderFeedbackLinkAsPortal = !config.serverless.enabled;
+
   return (
     <RedirectAppLinks
       className={APP_WRAPPER_CLASS}
@@ -182,10 +174,14 @@ export function ObservabilityOnboardingAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <EuiErrorBoundary>
-                <ObservabilityOnboardingHeaderActionMenu
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  theme$={theme$}
-                />
+                {renderFeedbackLinkAsPortal && (
+                  <HeaderMenuPortal
+                    setHeaderActionMenu={setHeaderActionMenu}
+                    theme$={theme$}
+                  >
+                    <ObservabilityOnboardingHeaderActionMenu />
+                  </HeaderMenuPortal>
+                )}
                 <ObservabilityOnboardingApp />
               </EuiErrorBoundary>
             </Router>
