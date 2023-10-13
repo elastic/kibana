@@ -17,9 +17,10 @@ import {
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode, NodeRenderAs } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
+
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { nodePathToString, isAbsoluteLink } from '../../utils';
+import { nodePathToString, isAbsoluteLink, getNavigationNodeHref } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
@@ -84,11 +85,11 @@ const filterChildren = (
   return filtered.length === 0 ? undefined : filtered;
 };
 
-export const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
+const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
   const serialized = {
     ...navNode,
     children: filterChildren(navNode.children),
-    href: navNode.deepLink?.url ?? navNode.href!,
+    href: getNavigationNodeHref(navNode),
   };
 
   serialized.renderAs = getRenderAs(serialized);
@@ -201,7 +202,7 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = ({ navNode: _navNode }) => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
-  const { id, title, icon, isActive, href, renderAs } = navNode;
+  const { id, title, icon, isActive, href } = navNode;
   const { navigateToUrl, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(!isActive);
@@ -219,24 +220,28 @@ export const NavigationSectionUI: FC<Props> = ({ navNode: _navNode }) => {
     return null;
   }
 
-  const items = navNode.children?.map((item) =>
-    navigationNodeToEuiItem(item, {
-      navigateToUrl,
-      isSideNavCollapsed,
-      openPanel,
-      closePanel,
-    })
-  );
+  const items = isItem
+    ? undefined
+    : navNode.children?.map((item) =>
+        navigationNodeToEuiItem(item, {
+          navigateToUrl,
+          isSideNavCollapsed,
+          openPanel,
+          closePanel,
+        })
+      );
 
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
         onClick: (e: React.MouseEvent) => {
-          // TODO: here we might want to toggle the accordion, _IF_ we render as accordion
+          // TODO: here we might want to toggle the accordion (if we "renderAs: 'accordion'")
           // Will be done in following PR
           e.preventDefault();
           e.stopPropagation();
-          navigateToUrl(href);
+          if (href) {
+            navigateToUrl(href);
+          }
         },
       }
     : undefined;
@@ -258,11 +263,11 @@ export const NavigationSectionUI: FC<Props> = ({ navNode: _navNode }) => {
       id={id}
       title={title}
       icon={icon}
+      items={items}
       iconProps={{ size: 'm' }}
       linkProps={linkProps}
       accordionProps={accordionProps}
       data-test-subj={`nav-bucket-${id}`}
-      items={renderAs === 'item' ? undefined : items}
     />
   );
 };

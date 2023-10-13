@@ -90,16 +90,16 @@ function NavigationGroupInternalComp<
       return children;
     }
 
-    // Each "top level" group is rendered using the EuiCollapsibleNavGroup component
-    // inside the NavigationSectionUI. That's how we get the "collapsible" behavior.
-    const isTopLevel = path && path.length === 1;
+    // We will only render the <NavigationSectionUI /> component for root groups. The nested group
+    // are handled by the EuiCollapsibleNavItem component through its "items" prop.
+    const isRootLevel = path && path.length === 1;
 
     return (
       <>
-        {isTopLevel && <NavigationSectionUI navNode={navNodeWithChildren} />}
-        {/* We render the children so they mount and can register themselves but
-        visually they don't appear here in the DOM. They are rendered inside the
-        <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
+        {isRootLevel && <NavigationSectionUI navNode={navNodeWithChildren} />}
+        {/* We render the children so they mount and can **register** themselves but
+          visually they don't appear here in the DOM. They are rendered inside the
+          <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
         {children}
       </>
     );

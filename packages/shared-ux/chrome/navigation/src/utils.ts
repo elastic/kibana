@@ -43,3 +43,10 @@ export function getNavigationNodeId(
   const id = _id ?? link;
   return id ?? idGenerator();
 }
+
+export function getNavigationNodeHref({
+  href,
+  deepLink,
+}: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
+  return deepLink?.url ?? href;
+}

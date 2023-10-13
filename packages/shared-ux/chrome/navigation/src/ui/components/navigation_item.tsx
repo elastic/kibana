@@ -7,14 +7,14 @@
  */
 
 import React, { Fragment, useEffect, useMemo } from 'react';
-
 import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
+
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
 import type { NodeProps, NodePropsEnhanced } from '../types';
 import { useNavigation } from './navigation';
-import { serializeNavNode } from './navigation_section_ui';
+import { getNavigationNodeHref } from '../../utils';
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -70,30 +70,33 @@ function NavigationItemComp<
     return <Fragment>{navNode.title}</Fragment>;
   }
 
-  if (navNode.path.length === 1) {
-    // This is a top level item (link with no children)
-    const { navNode: serializedNavNode } = serializeNavNode(navNode);
+  const isRootLevel = navNode.path.length === 1;
+
+  if (isRootLevel) {
+    const href = getNavigationNodeHref(navNode);
     return (
       <EuiCollapsibleNavItem
-        id={serializedNavNode.id}
-        title={serializedNavNode.title}
-        icon={serializedNavNode.icon}
+        id={navNode.id}
+        title={navNode.title}
+        icon={navNode.icon}
         iconProps={{ size: 'm' }}
-        data-test-subj={`nav-item-${serializedNavNode.id}`}
+        data-test-subj={`nav-item-${navNode.id}`}
         linkProps={{
-          href: serializedNavNode.href,
+          href,
           onClick: (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            navigateToUrl(serializedNavNode.href);
+            if (href) {
+              navigateToUrl(href);
+            }
           },
         }}
       />
     );
   }
-  // We don't render anything in the UI for this component. It is only used to **register** the node
-  // in the useEffect() above that will in turn update the parent "childrenNodes" state which is
-  // then used as "items" for the EuiCollapsibleNavItem component.
+
+  // We don't render anything in the UI for non root item as those register themselves on the parent (Group)
+  // updating its "childrenNodes" state which are then converted to "items" for the EuiCollapsibleNavItem component.
   return null;
 }
 

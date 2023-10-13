@@ -275,6 +275,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
                 title: 'Signals',
               },
               {
+                id: 'group:settings.signals-2',
                 link: 'group:settings.signals',
                 title: 'Signals - should NOT appear',
                 sideNavStatus: 'hidden', // Should not appear
