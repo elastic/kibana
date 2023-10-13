@@ -1,7 +1,10 @@
 [[setup-cases]]
 == Configure access to cases
 
-preview::[]
+:frontmatter-description: Learn about the {kib} feature privileges required to access cases. 
+:frontmatter-tags-products: [kibana]
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 To access cases in *{stack-manage-app}*, you must have the appropriate {kib}
 privileges:
