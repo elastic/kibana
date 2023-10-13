@@ -19,8 +19,7 @@ export const getNextPanelOrder = (panels?: ControlsPanels) => {
   if (Object.keys(panels ?? {}).length > 0) {
     nextOrder =
       Object.values(panels ?? {}).reduce((highestSoFar, panel) => {
-        if (panel.order > highestSoFar) highestSoFar = panel.order;
-        return highestSoFar;
+        return Math.max(highestSoFar, panel.order);
       }, 0) + 1;
   }
   return nextOrder;

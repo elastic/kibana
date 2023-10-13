@@ -509,7 +509,10 @@ export class AggConfigs {
   getResponseAggs(): AggConfig[] {
     return this.getRequestAggs().reduce(function (responseValuesAggs, agg: AggConfig) {
       const aggs = agg.getResponseAggs();
-      return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
+      if (aggs) {
+        responseValuesAggs.push(...aggs);
+      }
+      return responseValuesAggs;
     }, [] as AggConfig[]);
   }
 

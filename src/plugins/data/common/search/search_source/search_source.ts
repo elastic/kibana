@@ -265,7 +265,8 @@ export class SearchSource {
       typeof queryString === 'string'
         ? this.parseActiveIndexPatternFromQueryString(queryString)
         : queryString?.reduce((acc: string[], currStr: string) => {
-            return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
+            acc.push(...this.parseActiveIndexPatternFromQueryString(currStr));
+            return acc;
           }, []) ?? [];
 
     const activeIndexPattern = filters?.reduce((acc, f) => {
@@ -280,12 +281,9 @@ export class SearchSource {
           } else {
             return difference(acc, filtersArray);
           }
-        } else {
-          return acc;
         }
-      } else {
-        return acc;
       }
+      return acc;
     }, indexPatternFromQuery);
 
     const dedupActiveIndexPattern = new Set([...activeIndexPattern]);
