@@ -27,7 +27,5 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/data-plugin",
-    "@kbn/apm-config-loader",
-    "@kbn/kibana-utils-plugin/common"
   ]
 }
