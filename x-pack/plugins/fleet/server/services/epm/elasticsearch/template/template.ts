@@ -300,17 +300,21 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? field.object_type;
             break;
           case 'group':
-             const fields = field.fields.map((dynField) => ({
-               ...dynField,
-               type: 'object',
-               object_type: dynField.object_type ?? dynField.type,
-             }))
-             _generateMappings(fields, {
+            const subFields = field.fields.map((subField) => ({
+              ...subField,
+              type: 'object',
+              object_type: subField.object_type ?? subField.type,
+            }))
+            _generateMappings(subFields, {
               ...ctx,
               groupFieldName: ctx.groupFieldName
                 ? `${ctx.groupFieldName}.${field.name}`
                 : field.name,
             });
+            break;
+	  case 'flattened':
+            dynProperties.type = field.object_type;
+            matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
             throw new Error(`no dynamic mapping generated for field ${path} of type ${field.object_type}`);
