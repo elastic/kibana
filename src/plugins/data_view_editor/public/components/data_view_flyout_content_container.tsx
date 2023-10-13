@@ -50,10 +50,11 @@ const DataViewFlyoutContentContainer = ({
     try {
       let saveResponse;
       if (editData) {
-        const { name = '', timeFieldName, title = '' } = dataViewSpec;
+        const { name = '', timeFieldName, title = '', allowHidden } = dataViewSpec;
         editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
+        editData.setAllowHidden(allowHidden || false);
         saveResponse = editData.isPersisted()
           ? await dataViews.updateSavedObject(editData)
           : editData;

@@ -105,6 +105,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
+            allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },

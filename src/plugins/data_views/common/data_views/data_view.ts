@@ -206,6 +206,8 @@ export class DataView implements DataViewBase {
 
   getAllowHidden = () => this.allowHidden;
 
+  setAllowHidden = (allowHidden: boolean) => (this.allowHidden = allowHidden);
+
   /**
    * Set index pattern
    * @param string index pattern string
@@ -466,6 +468,7 @@ export class DataView implements DataViewBase {
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
       name: this.name,
+      allowHidden: this.allowHidden,
     };
   }
 

@@ -472,7 +472,8 @@ export class SettingsPageObject extends FtrService {
 
   async allowHiddenClick() {
     await this.testSubjects.click('toggleAdvancedSetting');
-    await this.testSubjects.click('allowHiddenField');
+    const allowHiddenField = await this.testSubjects.find('allowHiddenField');
+    (await allowHiddenField.findByTagName('button')).click();
   }
 
   async createIndexPattern(

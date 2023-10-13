@@ -276,6 +276,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const patternName = await PageObjects.settings.getIndexPageHeading();
         expect(patternName).to.be(pattern);
+
+        // verify that allow hidden persists through reload
+        await browser.refresh();
+
+        await testSubjects.click('editIndexPatternButton');
+        await testSubjects.click('toggleAdvancedSetting');
+        const allowHiddenField = await testSubjects.find('allowHiddenField');
+        const button = await allowHiddenField.findByTagName('button');
+        expect(await button.getAttribute('aria-checked')).to.be('true');
       });
     });
   });
