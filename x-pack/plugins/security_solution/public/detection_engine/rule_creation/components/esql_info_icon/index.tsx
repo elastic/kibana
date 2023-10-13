@@ -35,7 +35,7 @@ const EsqlInfoIconComponent = () => {
             createEsqlRuleTypeLink: (
               <EuiLink href={docLinks.links.securitySolution.createEsqlRuleType} target="_blank">
                 <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsTooltipLink"
+                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipLink"
                   defaultMessage="documentation"
                 />
               </EuiLink>
