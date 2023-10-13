@@ -22,12 +22,6 @@ NOTE:
 |Description
 
 
-|{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
-|This plugin contains the advanced settings management section
-allowing users to configure their advanced settings, also known
-as uiSettings within the code.
-
-
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
 
