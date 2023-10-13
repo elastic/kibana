@@ -87,6 +87,17 @@ export default ({ getService }: FtrProviderContext) => {
       expect(responseModuleIds).to.eql(securityModuleIds);
     });
 
+    it('cannot find non-security job', async () => {
+      const rspBody = await executeGetModuleRequest(
+        'apm_transaction',
+        ['security'],
+        USER.ML_POWERUSER,
+        200
+      );
+      expect(rspBody).to.be.an(Array);
+      expect(rspBody.length).to.eql(0);
+    });
+
     for (const moduleId of moduleIds) {
       it(`loads module ${moduleId}`, async () => {
         const rspBody = await executeGetModuleRequest(moduleId, [], USER.ML_POWERUSER, 200);
