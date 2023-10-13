@@ -15,17 +15,17 @@ export interface EcsRelated {
   /**
    * All the hashes seen on your event. Populating this field, then using it to search for hashes can help in situations where you're unsure what the hash algorithm is (and therefore which key name to search).
    */
-  hash?: string[];
+  hash?: string | string[];
   /**
    * All hostnames or other host identifiers seen on your event. Example identifiers include FQDNs, domain names, workstation names, or aliases.
    */
-  hosts?: string[];
+  hosts?: string | string[];
   /**
    * All of the IPs seen on your event.
    */
-  ip?: string[];
+  ip?: string | string[];
   /**
    * All the user names or other user identifiers seen on the event.
    */
-  user?: string[];
+  user?: string | string[];
 }
