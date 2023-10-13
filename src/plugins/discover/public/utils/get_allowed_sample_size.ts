@@ -13,14 +13,14 @@ import {
 } from '@kbn/saved-search-plugin/common';
 
 export const getMaxAllowedSampleSize = (uiSettings: IUiSettingsClient): number => {
-  return Math.min(uiSettings.get(SAMPLE_SIZE_SETTING), MAX_SAVED_SEARCH_SAMPLE_SIZE);
+  return Math.min(uiSettings.get(SAMPLE_SIZE_SETTING) || 500, MAX_SAVED_SEARCH_SAMPLE_SIZE);
 };
 
 export const getAllowedSampleSize = (
   customSampleSize: number | undefined,
   uiSettings: IUiSettingsClient
 ): number => {
-  if (!customSampleSize) {
+  if (!customSampleSize || customSampleSize < 0) {
     return uiSettings.get(SAMPLE_SIZE_SETTING);
   }
   return Math.max(

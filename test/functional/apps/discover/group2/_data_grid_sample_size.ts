@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const DEFAULT_ROWS_PER_PAGE = 100;
-const DEFAULT_SAMPLE_SIZE = 300;
-const CUSTOM_SAMPLE_SIZE = 750;
+const DEFAULT_SAMPLE_SIZE = 500;
+const CUSTOM_SAMPLE_SIZE = 250;
 const CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH = 150;
 const CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL = 10;
 const FOOTER_SELECTOR = 'unifiedDataTableFooter';
