@@ -121,7 +121,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
       !!errorStates?.length;
 
     const upStatesSortedAsc = upStates.sort(
-      (a, b) => Number(new Date(a['@timestamp'])) - Number(new Date(b['@timestamp']))
+      (a, b) => Number(new Date(a.state.started_at)) - Number(new Date(b.state.started_at))
     );
 
     return {
