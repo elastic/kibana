@@ -285,9 +285,17 @@ const navigationDefinition: ProjectNavigationDefinition = {
                 title: 'Tracing',
               },
               {
-                id: 'seb.nestedGroup',
+                id: 'group.nestedGroup',
+                link: 'group:settings.tracing',
                 title: 'Nested group',
-                children: [],
+                children: [
+                  {
+                    id: 'item1',
+                    link: 'group:settings.signals',
+                    title: 'Hidden - should NOT appear',
+                    sideNavStatus: 'hidden', // Should not appear
+                  },
+                ],
               },
             ],
           },
