@@ -20,6 +20,5 @@
     "@kbn/licensing-plugin",
     "@kbn/utility-types",
     "@kbn/screenshotting-plugin",
-    "@kbn/apm-config-loader",
   ]
 }
