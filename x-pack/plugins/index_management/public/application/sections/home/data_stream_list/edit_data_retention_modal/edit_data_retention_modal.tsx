@@ -162,6 +162,9 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
+      // When data retention is not set and lifecycle is enabled, is the only scenario in
+      // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
+      // dont have inifinite data retention.
       infiniteRetentionPeriod: lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: configurationFormSchema,

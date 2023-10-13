@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           lifecycle: {
-            // @ts-ignore-next-line
+            // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
             enabled: true,
           },
         },

@@ -35,6 +35,8 @@ interface Props {
   filters?: string;
 }
 
+const INFINITE_AS_ICON = true;
+
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
   reload,
@@ -145,7 +147,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle),
+    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle, INFINITE_AS_ICON),
   });
 
   columns.push({

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+
 import { DataStream } from '../../../common';
 
 export const isFleetManaged = (dataStream: DataStream): boolean => {
@@ -40,15 +43,31 @@ export const isSelectedDataStreamHidden = (
   );
 };
 
-export const getLifecycleValue = (lifecycle: DataStream['lifecycle']) => {
+export const getLifecycleValue = (
+  lifecycle?: DataStream['lifecycle'],
+  inifniteAsIcon?: boolean
+) => {
   if (!lifecycle?.enabled) {
     return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionDisabled', {
       defaultMessage: 'Disabled',
     });
   } else if (!lifecycle?.data_retention) {
-    return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionInfinite', {
-      defaultMessage: 'Keep data indefinitely',
-    });
+    const infiniteDataRetention = i18n.translate(
+      'xpack.idxMgmt.dataStreamList.dataRetentionInfinite',
+      {
+        defaultMessage: 'Keep data indefinitely',
+      }
+    );
+
+    if (inifniteAsIcon) {
+      return (
+        <EuiToolTip position="top" content={infiniteDataRetention}>
+          <EuiIcon type="infinity" />
+        </EuiToolTip>
+      );
+    }
+
+    return infiniteDataRetention;
   }
 
   return lifecycle?.data_retention;

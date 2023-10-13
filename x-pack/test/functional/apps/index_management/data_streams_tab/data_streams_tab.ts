@@ -23,8 +23,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await log.debug('Creating required data stream');
       try {
-        await es.cluster.putComponentTemplate({
-          name: `${TEST_DS_NAME}_mapping`,
+        await es.indices.putIndexTemplate({
+          name: `${TEST_DS_NAME}_index_template`,
+          index_patterns: [TEST_DS_NAME],
+          data_stream: {},
+          _meta: {
+            description: `Template for ${TEST_DS_NAME} testing index`,
+          },
           template: {
             settings: { mode: undefined },
             mappings: {
@@ -35,19 +40,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               },
             },
             lifecycle: {
-              // @ts-ignore-next-line
+              // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
               enabled: true,
             },
-          },
-        });
-
-        await es.indices.putIndexTemplate({
-          name: `${TEST_DS_NAME}_index_template`,
-          index_patterns: [TEST_DS_NAME],
-          data_stream: {},
-          composed_of: [`${TEST_DS_NAME}_mapping`],
-          _meta: {
-            description: `Template for ${TEST_DS_NAME} testing index`,
           },
         });
 
@@ -74,9 +69,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.deleteDataStream({ name: TEST_DS_NAME });
         await es.indices.deleteIndexTemplate({
           name: `${TEST_DS_NAME}_index_template`,
-        });
-        await es.cluster.deleteComponentTemplate({
-          name: `${TEST_DS_NAME}_mapping`,
         });
       } catch (e) {
         log.debug('[Teardown error] Error deleting test data stream');
