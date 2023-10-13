@@ -14,6 +14,7 @@ import {
   EuiSkeletonText,
   EuiCallOut,
   EuiLink,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -31,7 +32,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   const [configs, setConfigs] = useState<string | undefined>(undefined);
   const [error, setError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
   const pkgName = packageInfo.name;
   const pkgVersion = packageInfo.version;
   // @ts-ignore-line
@@ -74,11 +75,11 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                   defaultMessage="View sample configurations for each of the {name} integration's data streams below. Copy/paste this YML into your {elasticAgentYml} file or into a file within your {inputsDir} directory. For more information, see the {userGuideLink}"
                   values={{
                     name: `${pkgName}`,
-                    elasticAgentYml: <code>elastic-agent.yml</code>,
-                    inputsDir: <code>inputs.d</code>,
+                    elasticAgentYml: <EuiCode>elastic-agent.yml</EuiCode>,
+                    inputsDir: <EuiCode>inputs.d</EuiCode>,
                     userGuideLink: (
                       <EuiLink
-                        href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-input-configuration.html"
+                        href={docLinks.links.fleet.elasticAgentInputConfiguration}
                         external
                         target="_blank"
                       >
