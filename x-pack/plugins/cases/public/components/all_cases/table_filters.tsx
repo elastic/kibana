@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } 
 
 import { useFilters } from './use_filters';
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
-import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
+import { MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
