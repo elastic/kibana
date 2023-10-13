@@ -25,7 +25,7 @@ import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
 } from '../template/install';
-import { processFields } from '../../fields/field';
+import { isFields, processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/install';
@@ -162,7 +162,6 @@ const processTransformAssetsPerModule = (
       installablePackage,
       path
     );
-
     // Since there can be multiple assets per transform definition
     // We want to create a unique list of assets/specifications for each transform
     if (transformsSpecifications.get(transformModuleId) === undefined) {
@@ -172,7 +171,8 @@ const processTransformAssetsPerModule = (
 
     const content = safeLoad(getAsset(path).toString('utf-8'));
 
-    if (fileName === TRANSFORM_SPECS_TYPES.FIELDS) {
+    // Handling fields.yml and all other files within 'fields' folder
+    if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
       const validFields = processFields(content);
       const mappings = generateMappings(validFields);
       const templateName = getTransformAssetNameForInstallation(
@@ -198,7 +198,14 @@ const processTransformAssetsPerModule = (
       } else {
         destinationIndexTemplates[indexToModify] = template;
       }
-      packageAssets?.set('mappings', mappings);
+
+      // If there's already mappings set previously, append it to new
+      const previousMappings =
+        transformsSpecifications.get(transformModuleId)?.get('mappings') ?? {};
+
+      transformsSpecifications.get(transformModuleId)?.set('mappings', {
+        properties: { ...previousMappings.properties, ...mappings.properties },
+      });
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
