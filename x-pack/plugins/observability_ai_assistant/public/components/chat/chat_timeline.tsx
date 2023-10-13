@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { css } from '@emotion/css';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -13,7 +13,7 @@ import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
 import { ChatCollapsedItems } from './chat_collapsed_items';
 import type { Feedback } from '../feedback_buttons';
-import { type Message, MessageRole } from '../../../common';
+import { type Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
 
@@ -38,7 +38,7 @@ export interface ChatTimelineItem
 }
 
 export interface ChatTimelineProps {
-  items: ChatTimelineItem[];
+  items: Array<ChatTimelineItem | ChatTimelineItem[]>;
   knowledgeBase: UseKnowledgeBaseResult;
   onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
@@ -56,20 +56,16 @@ export function ChatTimeline({
   onStopGenerating,
   onActionClick,
 }: ChatTimelineProps) {
-  const consolidatedItems = useMemo(() => {
-    return consolidateCollapsedItems(items);
-  }, [items]);
-
   return (
     <EuiCommentList
       css={css`
         padding-bottom: 32px;
       `}
     >
-      {consolidatedItems.length <= 1 ? (
+      {items.length <= 1 ? (
         <ChatWelcomePanel knowledgeBase={knowledgeBase} />
       ) : (
-        consolidatedItems.map((item, index) =>
+        items.map((item, index) =>
           Array.isArray(item) ? (
             <ChatCollapsedItems
               key={index}
@@ -101,45 +97,3 @@ export function ChatTimeline({
     </EuiCommentList>
   );
 }
-
-const consolidateCollapsedItems = (items: ChatTimelineItem[]) => {
-  const result: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
-  let currentGroup: ChatTimelineItem[] | null = null;
-
-  for (const item of items) {
-    if (item.display.hide || !item) continue;
-
-    if (item.display.collapsed) {
-      if (currentGroup) {
-        currentGroup.push(item);
-      } else {
-        currentGroup = [item];
-        result.push(currentGroup);
-      }
-      if (item.loading) {
-        result.push({
-          id: '',
-          actions: {
-            canCopy: true,
-            canEdit: false,
-            canGiveFeedback: false,
-            canRegenerate: false,
-          },
-          display: {
-            collapsed: false,
-            hide: false,
-          },
-          content: '',
-          loading: true,
-          role: MessageRole.Assistant,
-          title: '',
-        });
-      }
-    } else {
-      result.push(item);
-      currentGroup = null;
-    }
-  }
-
-  return result;
-};
