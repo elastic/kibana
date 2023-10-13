@@ -45,7 +45,6 @@ const navigationTree: NavigationTreeDefinition = {
           isGroupTitle: true,
         },
         { link: 'dev_tools:console' },
-        { link: 'dev_tools:searchprofiler' },
         {
           id: 'explore',
           title: i18n.translate('xpack.serverlessSearch.nav.explore', {
