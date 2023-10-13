@@ -96,6 +96,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -123,7 +128,12 @@ describe('resolve()', () => {
         "alertTypeId": "123",
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "ok",
+        },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -170,6 +180,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -197,8 +212,12 @@ describe('resolve()', () => {
         "alertTypeId": "123",
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "ok",
+        },
         "id": "1",
-        "legacyId": "some-legacy-id",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -256,6 +275,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -323,6 +347,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -363,7 +392,12 @@ describe('resolve()', () => {
         "alertTypeId": "123",
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "ok",
+        },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -400,6 +434,11 @@ describe('resolve()', () => {
               },
             },
           ],
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [],
       },
@@ -505,6 +544,11 @@ describe('resolve()', () => {
                 },
               },
             ],
+            executionStatus: {
+              status: 'ok',
+              last_execution_date: new Date().toISOString(),
+              last_duration: 10,
+            },
           },
           references: [
             {
@@ -563,6 +607,11 @@ describe('resolve()', () => {
               bar: true,
             },
             actions: [],
+            executionStatus: {
+              status: 'ok',
+              last_execution_date: new Date().toISOString(),
+              last_duration: 10,
+            },
           },
           references: [],
         },
@@ -633,6 +682,11 @@ describe('resolve()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        executionStatus: {
+          status: 'ok',
+          last_execution_date: new Date().toISOString(),
+          last_duration: 10,
+        },
       },
       references: [
         {

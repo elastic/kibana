@@ -6,6 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
 import { resolveParamsSchemaV1 } from '../../../../../common/routes/rule/apis/resolve';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -31,7 +32,9 @@ export const resolveRuleRoute = (
           id,
         });
         return res.ok({
-          body: transformResolveResponseV1(rule),
+          // TODO (http-versioning): Remove this cast, this enables us to move forward
+          // without fixing all of other solution types
+          body: transformResolveResponseV1(rule as ResolvedRule<never>),
         });
       })
     )

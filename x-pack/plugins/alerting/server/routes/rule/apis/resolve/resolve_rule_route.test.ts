@@ -13,6 +13,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
+import { ResolvedSanitizedRule } from '../../../../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -114,7 +115,9 @@ describe('resolveRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_resolve"`);
 
-    rulesClient.resolve.mockResolvedValueOnce(mockedRule);
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+    rulesClient.resolve.mockResolvedValueOnce(mockedRule as ResolvedSanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -141,7 +144,9 @@ describe('resolveRuleRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.resolve.mockResolvedValueOnce(mockedRule);
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+    rulesClient.resolve.mockResolvedValueOnce(mockedRule as ResolvedSanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -168,7 +173,9 @@ describe('resolveRuleRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.resolve.mockResolvedValueOnce(mockedRule);
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+    rulesClient.resolve.mockResolvedValueOnce(mockedRule as ResolvedSanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
