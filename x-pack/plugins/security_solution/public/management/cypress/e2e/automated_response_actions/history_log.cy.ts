@@ -19,8 +19,6 @@ describe('Response actions history page', { tags: ['@ess', '@serverless'] }, () 
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
   before(() => {
-    login(ROLE.soc_manager);
-
     indexEndpointHosts({ numResponseActions: 2 }).then((indexEndpoints) => {
       endpointData = indexEndpoints;
     });
@@ -54,6 +52,10 @@ describe('Response actions history page', { tags: ['@ess', '@serverless'] }, () 
       alertData.cleanup();
       alertData = undefined;
     }
+  });
+
+  beforeEach(() => {
+    login(ROLE.soc_manager);
   });
 
   it('enable filtering by type', () => {
