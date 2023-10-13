@@ -18,7 +18,11 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// also, the system_indices_superuser is not available in serverless, using it for login leads to:
+// CypressError: `cy.request()` failed on: https://localhost:5634/internal/security/login
+// The response we received from your web server was: > 401: Unauthorized
+describe('ALL - Live Query', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');

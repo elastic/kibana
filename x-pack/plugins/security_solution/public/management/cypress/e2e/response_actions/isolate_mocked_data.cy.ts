@@ -29,7 +29,11 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// security_exception: action [indices:admin/auto_create] is unauthorized for user
+// [elastic_serverless] with effective roles [superuser] on restricted indices
+// [.fleet-servers]
+describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;

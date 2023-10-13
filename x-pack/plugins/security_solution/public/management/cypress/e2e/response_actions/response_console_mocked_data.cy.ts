@@ -24,7 +24,11 @@ import {
 } from '../../tasks/isolate';
 import { login } from '../../tasks/login';
 
-describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// security_exception: action [indices:admin/auto_create] is unauthorized for user
+// [elastic_serverless] with effective roles [superuser] on restricted indices
+// [.fleet-servers]
+describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });

@@ -26,7 +26,11 @@ import {
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
   {
-    tags: ['@serverless'],
+    // accessing restricted / system indices directly does not work in serverless
+    // security_exception: action [indices:admin/auto_create] is unauthorized for user
+    // [elastic_serverless] with effective roles [superuser] on restricted indices
+    // [.fleet-servers]
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [

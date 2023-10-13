@@ -25,93 +25,101 @@ import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'] }, () => {
-  let savedQueryId: string;
-  let savedQueryName: string;
+describe(
+  'ALL - Live Query run custom and saved',
+  // accessing restricted / system indices directly does not work in serverless
+  // also, the system_indices_superuser is not available in serverless, using it for login leads to:
+  // CypressError: `cy.request()` failed on: https://localhost:5634/internal/security/login
+  // The response we received from your web server was: > 401: Unauthorized
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    let savedQueryId: string;
+    let savedQueryName: string;
 
-  before(() => {
-    loadSavedQuery({
-      interval: '3600',
-      query: 'select * from uptime;',
-      ecs_mapping: {},
-    }).then((savedQuery) => {
-      savedQueryId = savedQuery.saved_object_id;
-      savedQueryName = savedQuery.name;
+    before(() => {
+      loadSavedQuery({
+        interval: '3600',
+        query: 'select * from uptime;',
+        ecs_mapping: {},
+      }).then((savedQuery) => {
+        savedQueryId = savedQuery.saved_object_id;
+        savedQueryName = savedQuery.name;
+      });
     });
-  });
 
-  beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateTo('/app/osquery');
-  });
-
-  after(() => {
-    cleanupSavedQuery(savedQueryId);
-  });
-
-  it('should run query and enable ecs mapping', () => {
-    const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
-    cy.contains('New live query').click();
-    selectAllAgents();
-    inputQuery('select * from uptime;');
-    cy.wait(500);
-    // checking submit by clicking cmd+enter
-    inputQuery(cmd);
-    checkResults();
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: false,
+    beforeEach(() => {
+      cy.login(ServerlessRoleName.SOC_MANAGER);
+      navigateTo('/app/osquery');
     });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.hours.number', index: 2 },
-    }).should('exist');
 
-    getAdvancedButton().click();
-    typeInECSFieldInput('message{downArrow}{enter}');
-    typeInOsqueryFieldInput('days{downArrow}{enter}');
-    submitQuery();
-
-    checkResults();
-    cy.getBySel(RESULTS_TABLE).within(() => {
-      cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
+    after(() => {
+      cleanupSavedQuery(savedQueryId);
     });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'message', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 2 },
-    })
-      .react('EuiIconTip', { props: { type: 'indexMapping' } })
-      .should('exist');
-  });
 
-  it('should run customized saved query', () => {
-    cy.contains('New live query').click();
-    selectAllAgents();
-    cy.react('SavedQueriesDropdown').type(`${savedQueryName}{downArrow}{enter}`);
-    inputQuery('{selectall}{backspace}select * from users;');
-    cy.wait(1000);
-    submitQuery();
-    checkResults();
-    navigateTo('/app/osquery');
-    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
-      .eq(0)
-      .should('be.visible')
-      .click();
+    it('should run query and enable ecs mapping', () => {
+      const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
+      cy.contains('New live query').click();
+      selectAllAgents();
+      inputQuery('select * from uptime;');
+      cy.wait(500);
+      // checking submit by clicking cmd+enter
+      inputQuery(cmd);
+      checkResults();
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: true,
+        timeline: false,
+      });
+      cy.react(RESULTS_TABLE_CELL_WRRAPER, {
+        props: { id: 'osquery.days.number', index: 1 },
+      }).should('exist');
+      cy.react(RESULTS_TABLE_CELL_WRRAPER, {
+        props: { id: 'osquery.hours.number', index: 2 },
+      }).should('exist');
 
-    cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
-  });
+      getAdvancedButton().click();
+      typeInECSFieldInput('message{downArrow}{enter}');
+      typeInOsqueryFieldInput('days{downArrow}{enter}');
+      submitQuery();
 
-  it('should open query details by clicking the details icon', () => {
-    cy.react('EuiButtonIcon', { props: { iconType: 'visTable' } })
-      .first()
-      .click();
-    cy.contains('Live query details');
-    cy.contains('select * from users;');
-  });
-});
+      checkResults();
+      cy.getBySel(RESULTS_TABLE).within(() => {
+        cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
+      });
+      cy.react(RESULTS_TABLE_CELL_WRRAPER, {
+        props: { id: 'message', index: 1 },
+      }).should('exist');
+      cy.react(RESULTS_TABLE_CELL_WRRAPER, {
+        props: { id: 'osquery.days.number', index: 2 },
+      })
+        .react('EuiIconTip', { props: { type: 'indexMapping' } })
+        .should('exist');
+    });
+
+    it('should run customized saved query', () => {
+      cy.contains('New live query').click();
+      selectAllAgents();
+      cy.react('SavedQueriesDropdown').type(`${savedQueryName}{downArrow}{enter}`);
+      inputQuery('{selectall}{backspace}select * from users;');
+      cy.wait(1000);
+      submitQuery();
+      checkResults();
+      navigateTo('/app/osquery');
+      cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
+        .eq(0)
+        .should('be.visible')
+        .click();
+
+      cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
+    });
+
+    it('should open query details by clicking the details icon', () => {
+      cy.react('EuiButtonIcon', { props: { iconType: 'visTable' } })
+        .first()
+        .click();
+      cy.contains('Live query details');
+      cy.contains('select * from users;');
+    });
+  }
+);

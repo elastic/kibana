@@ -17,7 +17,11 @@ import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// security_exception: action [indices:admin/auto_create] is unauthorized for user
+// [elastic_serverless] with effective roles [superuser] on restricted indices
+// [.fleet-servers]
+describe('Policy Details', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const packagePolicyBackupHelper = new PackagePolicyBackupHelper();
   let indexedHostsData: CyIndexEndpointHosts;
 

@@ -13,7 +13,11 @@ const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-
 describe(
   'Alert Flyout Automated Action Results',
   {
-    tags: ['@ess', '@serverless'],
+    // accessing restricted / system indices directly does not work in serverless
+    // also, the system_indices_superuser is not available in serverless, using it for login leads to:
+    // CypressError: `cy.request()` failed on: https://localhost:5634/internal/security/login
+    // The response we received from your web server was: > 401: Unauthorized
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
   },
   () => {
     let ruleId: string;

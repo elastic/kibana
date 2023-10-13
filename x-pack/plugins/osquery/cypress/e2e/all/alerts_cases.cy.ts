@@ -24,106 +24,117 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
-  let ruleId: string;
-  let packId: string;
-  let packName: string;
-  const packData = packFixture();
+describe(
+  'Alert Event Details - Cases',
+  // accessing restricted / system indices directly does not work in serverless
+  // also, the system_indices_superuser is not available in serverless, using it for login leads to:
+  // CypressError: `cy.request()` failed on: https://localhost:5634/internal/security/login
+  // The response we received from your web server was: > 401: Unauthorized
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    let ruleId: string;
+    let packId: string;
+    let packName: string;
+    const packData = packFixture();
 
-  beforeEach(() => {
-    loadPack(packData).then((data) => {
-      packId = data.saved_object_id;
-      packName = data.name;
-    });
-    loadRule(true).then((data) => {
-      ruleId = data.id;
-      loadRuleAlerts(data.name);
-    });
-  });
-
-  afterEach(() => {
-    cleanupPack(packId);
-    cleanupRule(ruleId);
-  });
-
-  describe('Case creation', () => {
-    let caseId: string;
-
-    before(() => {
-      interceptCaseId((id) => {
-        caseId = id;
+    beforeEach(() => {
+      loadPack(packData).then((data) => {
+        packId = data.saved_object_id;
+        packName = data.name;
+      });
+      loadRule(true).then((data) => {
+        ruleId = data.id;
+        loadRuleAlerts(data.name);
       });
     });
 
-    after(() => {
-      cleanupCase(caseId);
+    afterEach(() => {
+      cleanupPack(packId);
+      cleanupRule(ruleId);
     });
 
-    it('runs osquery against alert and creates a new case', () => {
-      const [caseName, caseDescription] = generateRandomStringName(2);
-      cy.getBySel('expand-event').first().click({ force: true });
-      cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('osquery-action-item').click();
-      cy.contains(/^\d+ agen(t|ts) selected/);
-      cy.contains('Run a set of queries in a pack').click();
-      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
-      cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
-      submitQuery();
-      cy.get('[aria-label="Add to Case"]').first().click();
-      cy.getBySel('cases-table-add-case-filter-bar').click();
-      cy.getBySel('create-case-flyout').should('be.visible');
-      cy.get('input[aria-describedby="caseTitle"]').type(caseName);
-      cy.get('textarea[aria-label="caseDescription"]').type(caseDescription);
-      cy.getBySel('create-case-submit').click();
-      cy.contains(`An alert was added to "${caseName}"`);
-    });
-  });
+    describe('Case creation', () => {
+      let caseId: string;
 
-  describe('Case', () => {
-    let caseId: string;
-
-    before(() => {
-      loadCase('securitySolution').then((data) => {
-        caseId = data.id;
-      });
-    });
-
-    after(() => {
-      cleanupCase(caseId);
-    });
-
-    it('sees osquery results from last action and add to a case', () => {
-      cy.getBySel('expand-event').first().click();
-      cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
-      cy.getBySel('securitySolutionFlyoutResponseButton').click();
-      cy.getBySel('responseActionsViewWrapper').should('exist');
-      cy.contains('select * from users;');
-      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.getBySel('osquery-results-comment').each(($comment) => {
-        cy.wrap($comment).within(() => {
-          // On initial load result table might not render due to displayed error
-          if ($comment.find('div .euiDataGridRow').length <= 0) {
-            // If tabs are present try clicking between status and results to get rid of the error message
-            if ($comment.find('div .euiTabs').length > 0) {
-              cy.getBySel('osquery-status-tab').click();
-              cy.getBySel('osquery-results-tab').click();
-              cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
-            }
-          } else {
-            // Result tab was rendered successfully
-            cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
-          }
+      before(() => {
+        interceptCaseId((id) => {
+          caseId = id;
         });
       });
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: true,
+
+      after(() => {
+        cleanupCase(caseId);
       });
 
-      addToCase(caseId);
-      viewRecentCaseAndCheckResults();
+      it('runs osquery against alert and creates a new case', () => {
+        const [caseName, caseDescription] = generateRandomStringName(2);
+        cy.getBySel('expand-event').first().click({ force: true });
+        cy.getBySel('take-action-dropdown-btn').click();
+        cy.getBySel('osquery-action-item').click();
+        cy.contains(/^\d+ agen(t|ts) selected/);
+        cy.contains('Run a set of queries in a pack').click();
+        cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
+        cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
+        submitQuery();
+        cy.get('[aria-label="Add to Case"]').first().click();
+        cy.getBySel('cases-table-add-case-filter-bar').click();
+        cy.getBySel('create-case-flyout').should('be.visible');
+        cy.get('input[aria-describedby="caseTitle"]').type(caseName);
+        cy.get('textarea[aria-label="caseDescription"]').type(caseDescription);
+        cy.getBySel('create-case-submit').click();
+        cy.contains(`An alert was added to "${caseName}"`);
+      });
     });
-  });
-});
+
+    describe('Case', () => {
+      let caseId: string;
+
+      before(() => {
+        loadCase('securitySolution').then((data) => {
+          caseId = data.id;
+        });
+      });
+
+      after(() => {
+        cleanupCase(caseId);
+      });
+
+      it('sees osquery results from last action and add to a case', () => {
+        cy.getBySel('expand-event').first().click();
+        cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
+        cy.getBySel('securitySolutionFlyoutResponseButton').click();
+        cy.getBySel('responseActionsViewWrapper').should('exist');
+        cy.contains('select * from users;');
+        cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+        cy.getBySel('osquery-results-comment').each(($comment) => {
+          cy.wrap($comment).within(() => {
+            // On initial load result table might not render due to displayed error
+            if ($comment.find('div .euiDataGridRow').length <= 0) {
+              // If tabs are present try clicking between status and results to get rid of the error message
+              if ($comment.find('div .euiTabs').length > 0) {
+                cy.getBySel('osquery-status-tab').click();
+                cy.getBySel('osquery-results-tab').click();
+                cy.getBySel('dataGridRowCell', { timeout: 120000 }).should(
+                  'have.lengthOf.above',
+                  0
+                );
+              }
+            } else {
+              // Result tab was rendered successfully
+              cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+            }
+          });
+        });
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: true,
+          timeline: true,
+        });
+
+        addToCase(caseId);
+        viewRecentCaseAndCheckResults();
+      });
+    });
+  }
+);

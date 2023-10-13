@@ -18,7 +18,11 @@ import {
 describe(
   'When on the Endpoint List in Security Essentials PLI',
   {
-    tags: ['@serverless'],
+    // accessing restricted / system indices directly does not work in serverless
+    // security_exception: action [indices:admin/auto_create] is unauthorized for user
+    // [elastic_serverless] with effective roles [superuser] on restricted indices
+    // [.fleet-servers]
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
