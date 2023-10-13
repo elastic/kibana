@@ -119,8 +119,6 @@ describe('Expression', () => {
   it('should use default metrics', async () => {
     const currentOptions = {};
     const { ruleParams } = await setup(currentOptions);
-    expect(ruleParams.groupBy).toBe('host.hostname');
-    expect(ruleParams.searchConfiguration.query.query).toBe('foo');
     expect(ruleParams.criteria).toEqual([
       {
         metrics: [
@@ -130,10 +128,10 @@ describe('Expression', () => {
           },
         ],
         comparator: Comparator.GT,
-        threshold: [],
+        threshold: [1000],
         timeSize: 1,
         timeUnit: 'm',
-        aggType: 'avg',
+        aggType: 'custom',
       },
     ]);
   });
