@@ -133,7 +133,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -181,14 +180,12 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {isEsqlSettingEnabled && (
-          <HideShowContainer
-            $isVisible={TimelineTabs.esql === activeTimelineTab}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
-          >
-            <EsqlTab timelineId={timelineId} />
-          </HideShowContainer>
-        )}
+        <HideShowContainer
+          $isVisible={TimelineTabs.esql === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
+        >
+          <EsqlTab timelineId={timelineId} />
+        </HideShowContainer>
         <HideShowContainer
           $isVisible={TimelineTabs.pinned === activeTimelineTab}
           data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
@@ -285,7 +282,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -399,28 +395,26 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {isEsqlSettingEnabled && (
-            <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
-              onClick={setEsqlAsActiveTab}
-              isSelected={activeTab === TimelineTabs.esql}
-              disabled={false}
-              key={TimelineTabs.esql}
-            >
-              <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
-              <StyledEuiBetaBadge
-                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
-                size="s"
-                iconType="beaker"
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                  />
-                }
-              />
-            </StyledEuiTab>
-          )}
+          <StyledEuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
+            onClick={setEsqlAsActiveTab}
+            isSelected={activeTab === TimelineTabs.esql}
+            disabled={false}
+            key={TimelineTabs.esql}
+          >
+            <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+            <StyledEuiBetaBadge
+              label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
+              size="s"
+              iconType="beaker"
+              tooltipContent={
+                <FormattedMessage
+                  id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
+                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                />
+              }
+            />
+          </StyledEuiTab>
           {timelineType === TimelineType.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
