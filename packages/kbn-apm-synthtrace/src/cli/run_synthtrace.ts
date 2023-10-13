@@ -12,6 +12,9 @@ import { intervalToMs } from './utils/interval_to_ms';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
 import { startLiveDataUpload } from './utils/start_live_data_upload';
+import { indexSchedule } from './utils/index_schedule';
+import { createConfig } from './utils/get_config';
+import { bootstrap } from './utils/bootstrap';
 
 function options(y: Argv) {
   return y
@@ -90,6 +93,12 @@ async function run(argv: RunCliFlags) {
 
   if (live) {
     await startLiveDataUpload({ runOptions, start: from });
+  } else if (runOptions.config) {
+    console.log('schedule indexer');
+    const config = await createConfig(runOptions.config);
+    const { apmEsClient, logger } = await bootstrap(runOptions);
+
+    await indexSchedule(config, apmEsClient, logger);
   } else {
     await startHistoricalDataUpload({ runOptions, from, to });
   }
