@@ -25,6 +25,7 @@ import {
   PreconfiguredFleetProxiesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
+import { appContextService } from './services';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
@@ -162,9 +163,9 @@ export const config: PluginConfigDescriptor = {
         validate(list) {
           for (const key of list) {
             if (!isValidExperimentalValue(key)) {
-              return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-                ', '
-              )}`;
+              appContextService
+                .getLogger()
+                .warn(`[${key}] is not a valid fleet experimental feature.`);
             }
           }
         },
