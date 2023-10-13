@@ -33,9 +33,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Case View', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
+  // accessing restricted / system indices directly does not work in serverless
+  // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user
+  // [elastic_serverless] with effective roles [superuser] on restricted indices
+  // [.kibana_alerting_cases]
+  describe.skip('Case View', function () {
     before(async () => {
       await svlCommonPage.login();
     });

@@ -8,7 +8,11 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('cloud_security_posture', function () {
+  // accessing restricted / system indices directly does not work in serverless
+  // security_exception: action [indices:admin/create] is unauthorized for user
+  // [elastic_serverless] with effective roles [superuser] on restricted indices
+  // [.fleet-actions-7]
+  describe.skip('cloud_security_posture', function () {
     this.tags(['cloud_security_posture']);
     loadTestFile(require.resolve('./status/status_not_deployed_not_installed'));
     loadTestFile(require.resolve('./status/status_indexed'));
