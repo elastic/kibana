@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { SavedObjectsResolveResponse } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { resolveRuleSo } from '../../data/rule';
+import { getRuleSo } from '../../data/rule';
 import { RuleAttributes } from '../../data/rule/types';
 
-interface ResolveRuleSavedObjectParams {
+interface GetRuleSavedObjectParams {
   ruleId: string;
 }
 
-export async function resolveRuleSavedObject(
+export async function getRuleSavedObject(
   context: RulesClientContext,
-  params: ResolveRuleSavedObjectParams
-): Promise<SavedObjectsResolveResponse<RuleAttributes>> {
+  params: GetRuleSavedObjectParams
+): Promise<SavedObject<RuleAttributes>> {
   const { ruleId } = params;
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.RESOLVE,
+      action: RuleAuditAction.GET,
       outcome: 'unknown',
       savedObject: { type: 'alert', id: ruleId },
     })
   );
 
-  return await withSpan({ name: 'unsecuredSavedObjectsClient.resolve', type: 'rules' }, () =>
-    resolveRuleSo({
+  return await withSpan({ name: 'unsecuredSavedObjectsClient.get', type: 'rules' }, () =>
+    getRuleSo({
       id: ruleId,
       savedObjectsClient: context.unsecuredSavedObjectsClient,
     })

@@ -6,11 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
+import { RuleSnoozeSchedule } from '../../types';
+import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RawRule, RuleSnoozeSchedule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../../../../saved_objects';
 import { validateSnoozeStartDate } from '../../../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../../../lib/errors/rule_muted';
 import { RulesClientContext } from '../../../../rules_client/types';
@@ -18,7 +19,8 @@ import {
   getSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
 } from '../../../../rules_client/common';
-import { updateMeta } from '../../../../rules_client/lib';
+import { updateRuleSo } from '../../../../data/rule';
+import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
 
 export interface SnoozeParams {
   id: string;
@@ -51,9 +53,12 @@ async function snoozeWithOCC(
     snoozeSchedule: RuleSnoozeSchedule;
   }
 ) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
-    id
+  const { attributes, version } = await withSpan(
+    { name: 'getRuleSavedObject', type: 'rules' },
+    () =>
+      getRuleSavedObject(context, {
+        ruleId: id,
+      })
   );
 
   try {
@@ -96,17 +101,14 @@ async function snoozeWithOCC(
     throw Boom.badRequest(error.message);
   }
 
-  const updateAttributes = updateMeta(context, {
-    ...newAttrs,
-    updatedBy: await context.getUserName(),
-    updatedAt: new Date().toISOString(),
-  });
-  const updateOptions = { version };
-
-  await partiallyUpdateAlert(
-    context.unsecuredSavedObjectsClient,
+  await updateRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsUpdateOptions: { version },
     id,
-    updateAttributes,
-    updateOptions
-  );
+    updateRuleAttributes: updateMetaAttributes(context, {
+      ...newAttrs,
+      updatedBy: await context.getUserName(),
+      updatedAt: new Date().toISOString(),
+    }),
+  });
 }
