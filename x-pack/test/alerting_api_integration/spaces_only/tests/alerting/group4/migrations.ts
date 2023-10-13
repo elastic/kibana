@@ -714,5 +714,37 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(securityImmutableRuleMuteAll).toBeFalsy();
       expect(nonSecurityRuleMuteAll).toBeTruthy();
     });
+
+    it('8.11 migrates security rule investigation fields from array to object', async () => {
+      const securityCustomRuleIdWithInvestigationFields =
+        'alert:88bc8c21-07ba-42eb-ad9c-06820275ac11';
+      const securityCustomRuleIdNoInvestigationFIelds =
+        'alert:88bc8c21-07ba-42eb-ad9c-06820275ac10';
+      const nonSecurityRuleId = 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
+
+      const { docs } = await es.mget<{ alert: RawRule }>({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        body: {
+          ids: [
+            securityCustomRuleIdWithInvestigationFields,
+            securityCustomRuleIdNoInvestigationFIelds,
+            nonSecurityRuleId,
+          ],
+        },
+      });
+
+      const securityCustomRuleInvestigationFields =
+        '_source' in docs[0] ? docs[0]._source?.alert.params.investigationFields : undefined;
+      const securityCustomRuleWithoutInvestigationFields =
+        '_source' in docs[1] ? docs[1]._source?.alert.params.investigationFields : undefined;
+      const nonSecurityRuleMuteAll =
+        '_source' in docs[2] ? docs[2]._source?.alert.params.investigationFields : undefined;
+
+      expect(securityCustomRuleInvestigationFields).toEqual({
+        fieldNames: ['agent.name'],
+      });
+      expect(securityCustomRuleWithoutInvestigationFields).toBeUndefined();
+      expect(nonSecurityRuleMuteAll).toBeUndefined();
+    });
   });
 }

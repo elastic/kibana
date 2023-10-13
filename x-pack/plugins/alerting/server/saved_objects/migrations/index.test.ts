@@ -2841,6 +2841,28 @@ describe('successful migrations', () => {
     });
   });
 
+  describe('8.11.0', () => {
+    test('migrates investigation fields for security rules', () => {
+      const migration8110 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.11.0']
+      );
+      const rule = getMockData(
+        {
+          params: { investigationFields: ['foo'] },
+          alertTypeId: 'siem.queryRule',
+        },
+        true
+      );
+      const migratedAlert8110 = migration8110(rule, migrationContext);
+
+      expect(migratedAlert8110.attributes.params).toEqual({
+        investigationFields: {
+          fieldNames: ['foo'],
+        },
+      });
+    });
+  });
+
   describe('Metrics Inventory Threshold rule', () => {
     test('Migrates incorrect action group spelling', () => {
       const migration800 = SavedObjectsUtils.getMigrationFunction(

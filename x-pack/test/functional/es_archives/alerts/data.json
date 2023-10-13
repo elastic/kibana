@@ -1471,3 +1471,67 @@
      }
   }
 }
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:88bc8c21-07ba-42eb-ad9c-06820275ac11",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test migration of a security rule investigation fields with old mapping",
+           "alertTypeId":"siem.queryRule",
+           "consumer":"siem",
+           "params":{
+              "immutable":false,
+              "ruleId":"bf9638eb-8d3c-4f40-83d7-8c40a7c80f2e",
+              "author":[],
+              "description":"Test unmuting of a custom security rule",
+              "falsePositives":[],
+              "from":"now-36000060s",
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[],
+              "severity":"low",
+              "severityMapping":[],
+              "threat":[],
+              "to":"now",
+              "references":[],
+              "version":0,
+              "exceptionsList":[],
+              "type":"query",
+              "language":"kuery",
+              "index":["test-index"],
+              "query":"*:*",
+              "filters":[],
+              "investigationFields": ["agent.name"]
+           },
+           "schedule":{
+              "interval":"5m"
+           },
+           "enabled":false,
+           "actions": [],
+           "apiKeyOwner":null,
+           "apiKey":null,
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2023-03-27T20:42:55.896Z",
+           "muteAll":false,
+           "mutedInstanceIds":[],
+           "scheduledTaskId":null,
+           "tags":[]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"8.10.0"
+        },
+        "updated_at":"2023-03-27T20:42:55.896Z",
+        "references":[]
+     }
+  }
+}
