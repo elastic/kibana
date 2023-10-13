@@ -66,7 +66,8 @@ describe(
       disableExpandableFlyoutAdvancedSettings();
     });
 
-    describe('From alerts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168427
+    describe.skip('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
@@ -83,7 +84,7 @@ describe(
         }
       });
 
-      it.skip('should have generated endpoint and rule', () => {
+      it('should have generated endpoint and rule', () => {
         loadPage(APP_ENDPOINTS_PATH);
         cy.contains(createdHost.hostname).should('exist');
 
