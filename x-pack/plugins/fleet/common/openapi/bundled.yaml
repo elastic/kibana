@@ -4485,6 +4485,12 @@ components:
             enum:
               - metrics
               - logs
+        keep_monitoring_alive:
+          description: >-
+            When set to true, monitoring will be enabled but logs/metrics
+            collection will be disabled
+          type: boolean
+          nullable: true
         data_output_id:
           type: string
           nullable: true
