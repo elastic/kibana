@@ -5,5 +5,8 @@
  * 2.0.
  */
 
+import { PREFIX } from '../../shared/test_ids';
+
 export const TABLE_TAB_CONTENT_TEST_ID = 'event-fields-browser' as const;
 export const JSON_TAB_CONTENT_TEST_ID = 'jsonView' as const;
+export const JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID = `${PREFIX}JsonTabCopyToClipboard` as const;

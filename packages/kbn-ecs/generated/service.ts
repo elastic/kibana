@@ -61,7 +61,7 @@ export interface EcsService {
      * In the case of Elasticsearch, the `service.node.role` could be `master` or `data` or both.
      * Other services could use this to distinguish between a `web` and `worker` role running as part of the service.
      */
-    roles?: string[];
+    roles?: string | string[];
   };
 
   origin?: {
@@ -115,7 +115,7 @@ export interface EcsService {
        * In the case of Elasticsearch, the `service.node.role` could be `master` or `data` or both.
        * Other services could use this to distinguish between a `web` and `worker` role running as part of the service.
        */
-      roles?: string[];
+      roles?: string | string[];
     };
 
     /**
@@ -190,7 +190,7 @@ export interface EcsService {
        * In the case of Elasticsearch, the `service.node.role` could be `master` or `data` or both.
        * Other services could use this to distinguish between a `web` and `worker` role running as part of the service.
        */
-      roles?: string[];
+      roles?: string | string[];
     };
 
     /**

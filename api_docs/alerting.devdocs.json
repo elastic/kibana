@@ -3396,10 +3396,6 @@
                 "path": "x-pack/plugins/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/metric_anomaly/metric_anomaly_executor.ts"
-              },
-              {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/server/alerts/base_rule.ts"
               },
@@ -4883,27 +4879,9 @@
           },
           "<never> | ",
           "RuleWithLegacyId",
-          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: ",
-          "BulkOptions",
-          ") => Promise<{ errors: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkOperationError",
-            "text": "BulkOperationError"
-          },
-          "[]; rules: (",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.Rule",
-            "text": "Rule"
-          },
-          "<never> | ",
-          "RuleWithLegacyId",
-          "<never>)[]; total: number; }>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; }) => Promise<void>; snooze: (options: ",
+          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<",
+          "BulkDisableRulesResult",
+          "<Record<string, any>>>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; }) => Promise<void>; snooze: (options: ",
           "SnoozeParams",
           ") => Promise<void>; unsnooze: (options: ",
           "UnsnoozeParams",
@@ -4941,9 +4919,7 @@
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<",
-          "GetTagsResult",
-          ">; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
           ") => ",
           {
