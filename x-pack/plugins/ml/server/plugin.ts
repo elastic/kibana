@@ -210,7 +210,8 @@ export class MlServerPlugin
       () => this.uiSettings,
       () => this.fieldsFormat,
       getDataViews,
-      () => this.isMlReady
+      () => this.isMlReady,
+      this.compatibleModuleType
     );
 
     const routeInit: RouteInitialization = {

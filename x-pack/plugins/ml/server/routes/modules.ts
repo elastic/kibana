@@ -23,7 +23,7 @@ import type { RouteInitialization } from '../types';
  * Recognizer routes.
  */
 export function dataRecognizer(
-  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
+  { router, routeGuard }: RouteInitialization,
   compatibleModuleType: CompatibleModule | null
 ) {
   /**
@@ -95,10 +95,9 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType,
-              types
+              compatibleModuleType
             );
-            const results = await dr.findMatches(indexPatternTitle);
+            const results = await dr.findMatches(indexPatternTitle, types);
 
             return response.ok({ body: results });
           } catch (e) {
@@ -262,12 +261,11 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType,
-              types
+              compatibleModuleType
             );
 
             const results =
-              moduleId === undefined ? await dr.listModules() : await dr.getModule(moduleId);
+              moduleId === undefined ? await dr.listModules(types) : await dr.getModule(moduleId);
 
             return response.ok({ body: results });
           } catch (e) {

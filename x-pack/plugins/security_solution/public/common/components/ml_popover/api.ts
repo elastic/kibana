@@ -31,6 +31,7 @@ import { KibanaServices } from '../../lib/kibana';
 export const checkRecognizer = async ({
   indexPatternName,
   signal,
+  moduleType,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> =>
   KibanaServices.get().http.fetch<RecognizerModule[]>(
     `/internal/ml/modules/recognize/${indexPatternName}`,
@@ -39,6 +40,7 @@ export const checkRecognizer = async ({
       version: '1',
       asSystemRequest: true,
       signal,
+      query: { types: moduleType },
     }
   );
 
@@ -50,12 +52,17 @@ export const checkRecognizer = async ({
  *
  * @throws An error if response is not OK
  */
-export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> =>
+export const getModules = async ({
+  moduleId = '',
+  signal,
+  moduleType,
+}: GetModulesProps): Promise<Module[]> =>
   KibanaServices.get().http.fetch<Module[]>(`/internal/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
     version: '1',
     asSystemRequest: true,
     signal,
+    query: { types: moduleType },
   });
 
 /**

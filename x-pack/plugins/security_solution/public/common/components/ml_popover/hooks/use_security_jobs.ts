@@ -63,7 +63,7 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
     data: modulesData,
     isFetching: isModulesFetching,
     refetch: refetchModules,
-  } = useFetchModulesQuery({}, { enabled: isMlEnabled, onError });
+  } = useFetchModulesQuery({ moduleType: 'security' }, { enabled: isMlEnabled, onError });
 
   const {
     data: compatibleModules,

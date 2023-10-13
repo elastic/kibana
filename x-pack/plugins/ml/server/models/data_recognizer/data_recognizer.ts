@@ -118,7 +118,6 @@ export class DataRecognizer {
   private _resultsService: ReturnType<typeof resultsServiceProvider>;
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
   private _compatibleModuleType: CompatibleModule | null;
-  private _moduleTypeFilters: string[];
 
   /**
    * A temporary cache of configs loaded from disk and from save object service.
@@ -143,8 +142,7 @@ export class DataRecognizer {
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest,
-    compatibleModuleType: CompatibleModule | null,
-    moduleTypeFilters?: string[]
+    compatibleModuleType: CompatibleModule | null
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -157,7 +155,6 @@ export class DataRecognizer {
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
     this._compatibleModuleType = compatibleModuleType;
-    this._moduleTypeFilters = moduleTypeFilters ?? [];
   }
 
   // list all directories under the given directory
@@ -191,7 +188,7 @@ export class DataRecognizer {
     });
   }
 
-  private async _loadConfigs(): Promise<Config[]> {
+  private async _loadConfigs(moduleTypeFilters?: string[]): Promise<Config[]> {
     if (this._configCache !== null) {
       return this._configCache;
     }
@@ -229,7 +226,7 @@ export class DataRecognizer {
     this._configCache = filterConfigs(
       [...localConfigs, ...savedObjectConfigs],
       this._compatibleModuleType,
-      this._moduleTypeFilters
+      moduleTypeFilters ?? []
     );
 
     return this._configCache;
@@ -245,14 +242,17 @@ export class DataRecognizer {
   }
 
   // get the manifest.json file for a specified id, e.g. "nginx"
-  private async _findConfig(id: string) {
-    const configs = await this._loadConfigs();
+  private async _findConfig(id: string, moduleTypeFilters?: string[]) {
+    const configs = await this._loadConfigs(moduleTypeFilters);
     return configs.find((i) => i.module.id === id);
   }
 
   // called externally by an endpoint
-  public async findMatches(indexPattern: string): Promise<RecognizeResult[]> {
-    const manifestFiles = await this._loadConfigs();
+  public async findMatches(
+    indexPattern: string,
+    moduleTypeFilters?: string[]
+  ): Promise<RecognizeResult[]> {
+    const manifestFiles = await this._loadConfigs(moduleTypeFilters);
     const results: RecognizeResult[] = [];
 
     await Promise.all(
@@ -321,8 +321,8 @@ export class DataRecognizer {
     return body.hits.total.value > 0;
   }
 
-  public async listModules() {
-    const manifestFiles = await this._loadConfigs();
+  public async listModules(moduleTypeFilters?: string[]): Promise<Module[]> {
+    const manifestFiles = await this._loadConfigs(moduleTypeFilters);
     manifestFiles.sort((a, b) => a.module.id.localeCompare(b.module.id)); // sort as json files are read from disk and could be in any order.
 
     const configs: Array<Module | FileBasedModule> = [];
@@ -342,6 +342,7 @@ export class DataRecognizer {
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
   public async getModule(id: string, prefix = ''): Promise<Module> {
+    // filter here????????????????????????????????????????????????????????????????????????
     let module: FileBasedModule | Module | null = null;
     let dirName: string | null = null;
 
@@ -1407,8 +1408,7 @@ export function dataRecognizerFactory(
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest,
-  compatibleModuleType: CompatibleModule | null,
-  moduleTypeFilters?: string[]
+  compatibleModuleType: CompatibleModule | null
 ) {
   return new DataRecognizer(
     client,
@@ -1417,8 +1417,7 @@ export function dataRecognizerFactory(
     dataViewsService,
     mlSavedObjectService,
     request,
-    compatibleModuleType,
-    moduleTypeFilters
+    compatibleModuleType
   );
 }
 

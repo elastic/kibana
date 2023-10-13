@@ -17,6 +17,7 @@ export interface Group {
 export interface CheckRecognizerProps {
   indexPatternName: string[];
   signal?: AbortSignal;
+  moduleType?: string;
 }
 
 export interface RecognizerModule {
@@ -32,6 +33,7 @@ export interface RecognizerModule {
 export interface GetModulesProps {
   moduleId?: string;
   signal?: AbortSignal;
+  moduleType?: string;
 }
 
 export interface Module {
