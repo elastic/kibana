@@ -42,6 +42,7 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
   ),
   temperature: schema.maybe(schema.number()),
+  stream: schema.boolean({ defaultValue: false }),
 });
 
 export const InvokeAIActionResponseSchema = schema.string();

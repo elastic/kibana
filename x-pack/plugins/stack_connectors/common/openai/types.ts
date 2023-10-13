@@ -23,6 +23,7 @@ export type Secrets = TypeOf<typeof SecretsSchema>;
 export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
 export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
 export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
+export type StreamingResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
 export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
 export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;

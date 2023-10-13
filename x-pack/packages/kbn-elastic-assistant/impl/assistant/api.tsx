@@ -56,8 +56,8 @@ export const fetchConnectorExecuteAction = async ({
 
   const requestBody = {
     params: {
-      subActionParams: body,
-      subAction: 'invokeAI',
+      subActionParams: { body: JSON.stringify(body), stream: true },
+      subAction: 'stream',
     },
   };
 
@@ -66,6 +66,28 @@ export const fetchConnectorExecuteAction = async ({
       ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
       : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
 
+    // http
+    //   .post<{
+    //     connector_id: string;
+    //     status: string;
+    //     data: string;
+    //     service_message?: string;
+    //   }>(path, {
+    //     // headers: {
+    //     //   'Content-Type': 'dont-compress-this',
+    //     // },
+    //     body: JSON.stringify(requestBody),
+    //     signal,
+    //     asResponse: true,
+    //     rawResponse: true,
+    //   })
+    //   .then((rez) => {
+    //     console.log('it worked', rez);
+    //   })
+    //   .catch((err) => {
+    //     console.log('it broke', err);
+    //   });
+
     const response = await http.fetch<{
       connector_id: string;
       status: string;
@@ -73,12 +95,13 @@ export const fetchConnectorExecuteAction = async ({
       service_message?: string;
     }>(path, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(requestBody),
       signal,
+      // asResponse: true,
+      // rawResponse: true,
     });
+
+    console.log('response', response);
 
     if (response.status !== 'ok' || !response.data) {
       if (response.service_message) {
