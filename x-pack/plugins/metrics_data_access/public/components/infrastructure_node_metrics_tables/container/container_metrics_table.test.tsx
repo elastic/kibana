@@ -63,13 +63,7 @@ describe('ContainerMetricsTable', () => {
         metricsClient
       );
 
-      render(
-        <LazyContainerMetricsTable
-          timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
-          metricsClient={metricsClient}
-        />
-      );
+      render(<LazyContainerMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('containerMetricsTable')).not.toBeInTheDocument();

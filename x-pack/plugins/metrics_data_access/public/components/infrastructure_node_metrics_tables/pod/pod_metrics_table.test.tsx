@@ -60,13 +60,7 @@ describe('PodMetricsTable', () => {
       const metricsClient = getMetricsClient();
       const LazyPodMetricsTable = createLazyPodMetricsTable(getStartServices()[0], metricsClient);
 
-      render(
-        <LazyPodMetricsTable
-          timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
-          metricsClient={metricsClient}
-        />
-      );
+      render(<LazyPodMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).not.toBeInTheDocument();

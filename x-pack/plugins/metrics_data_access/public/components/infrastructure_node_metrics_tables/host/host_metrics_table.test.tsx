@@ -60,13 +60,7 @@ describe('HostMetricsTable', () => {
       const metricsClient = getMetricsClient();
       const LazyHostMetricsTable = createLazyHostMetricsTable(getStartServices()[0], metricsClient);
 
-      render(
-        <LazyHostMetricsTable
-          timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
-          metricsClient={metricsClient}
-        />
-      );
+      render(<LazyHostMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).not.toBeInTheDocument();
