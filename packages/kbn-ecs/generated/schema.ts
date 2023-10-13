@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const EcsNested = {
+export const EcsSchema = {
   agent: {
     description:
       'The agent fields contain the data about the software entity, if any, that collects, detects, or observes events on a host, or takes measurements on a host.\nExamples include Beats. Agents may also run on observers. ECS agent.* fields shall be populated with details of the agent running on the host or observer where the event happened or the measurement was taken.',
@@ -15969,27 +15969,14 @@ export const EcsNested = {
         short: 'Date/time indicator was last reported.',
         type: 'date',
       },
-      'threat.enrichments.indicator.marking.tlp': {
-        dashed_name: 'threat-enrichments-indicator-marking-tlp',
-        description: 'Traffic Light Protocol sharing markings.',
-        example: 'CLEAR',
-        expected_values: ['WHITE', 'CLEAR', 'GREEN', 'AMBER', 'AMBER+STRICT', 'RED'],
-        flat_name: 'threat.enrichments.indicator.marking.tlp',
-        ignore_above: 1024,
-        level: 'extended',
-        name: 'enrichments.indicator.marking.tlp',
-        normalize: [],
-        short: 'Indicator TLP marking',
-        type: 'keyword',
-      },
-      'threat.enrichments.indicator.marking.tlp_version': {
+      'threat.enrichments.indicator.marking.tlp.version': {
         dashed_name: 'threat-enrichments-indicator-marking-tlp-version',
         description: 'Traffic Light Protocol version.',
         example: 2,
-        flat_name: 'threat.enrichments.indicator.marking.tlp_version',
+        flat_name: 'threat.enrichments.indicator.marking.tlp.version',
         ignore_above: 1024,
         level: 'extended',
-        name: 'enrichments.indicator.marking.tlp_version',
+        name: 'enrichments.indicator.marking.tlp.version',
         normalize: [],
         short: 'Indicator TLP version',
         type: 'keyword',
@@ -18427,18 +18414,6 @@ export const EcsNested = {
         short: 'Indicator TLP marking',
         type: 'keyword',
       },
-      'threat.indicator.marking.tlp_version': {
-        dashed_name: 'threat-indicator-marking-tlp-version',
-        description: 'Traffic Light Protocol version.',
-        example: 2,
-        flat_name: 'threat.indicator.marking.tlp_version',
-        ignore_above: 1024,
-        level: 'extended',
-        name: 'indicator.marking.tlp_version',
-        normalize: [],
-        short: 'Indicator TLP version',
-        type: 'keyword',
-      },
       'threat.indicator.modified_at': {
         dashed_name: 'threat-indicator-modified-at',
         description:
@@ -19367,6 +19342,18 @@ export const EcsNested = {
         name: 'technique.subtechnique.reference',
         normalize: ['array'],
         short: 'Threat subtechnique URL reference.',
+        type: 'keyword',
+      },
+      'threat.threat.indicator.marking.tlp.version': {
+        dashed_name: 'threat-threat-indicator-marking-tlp-version',
+        description: 'Traffic Light Protocol version.',
+        example: 2,
+        flat_name: 'threat.threat.indicator.marking.tlp.version',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'threat.indicator.marking.tlp.version',
+        normalize: [],
+        short: 'Indicator TLP version',
         type: 'keyword',
       },
     },
