@@ -24,17 +24,18 @@
       "embeddable",
       "screenshotMode",
       "share",
-      "features"
+      "features", 
+      "spaces"
     ],
     "optionalPlugins": [
       "security",
-      "spaces",
       "usageCollection",
       "screenshotting",
     ],
     "requiredBundles": [
       "kibanaReact",
-      "discover"
+      "discover",
+      "kibanaUtils"
     ]
   }
 }

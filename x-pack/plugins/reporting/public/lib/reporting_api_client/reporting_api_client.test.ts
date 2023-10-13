@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-jest.mock('moment', () => ({ tz: { guess: jest.fn() } }));
-
 import { tz } from 'moment';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';

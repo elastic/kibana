@@ -22,5 +22,6 @@
     "@kbn/data-plugin",
     "@kbn/generate-csv",
     "@kbn/core-http-server",
+    "@kbn/apm-config-loader",
   ]
 }

@@ -19,5 +19,6 @@
     "@kbn/reporting-common",
     "@kbn/licensing-plugin",
     "@kbn/screenshotting-plugin",
+    "@kbn/apm-config-loader",
   ]
 }

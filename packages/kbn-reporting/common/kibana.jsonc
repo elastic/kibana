@@ -3,6 +3,6 @@
   "id": "@kbn/reporting-common",
   "owner": "@elastic/appex-sharedux",
   "plugin": {
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": ["kibanaUtils", "@kbn/kibana-utils-plugin/commmon"]
   }
 }
