@@ -61,7 +61,11 @@ export const getLifecycleValue = (
 
     if (inifniteAsIcon) {
       return (
-        <EuiToolTip position="top" content={infiniteDataRetention}>
+        <EuiToolTip
+          data-test-subj="infiniteRetention"
+          position="top"
+          content={infiniteDataRetention}
+        >
           <EuiIcon type="infinity" />
         </EuiToolTip>
       );

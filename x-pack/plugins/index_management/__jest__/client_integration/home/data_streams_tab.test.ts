@@ -371,7 +371,7 @@ describe('Data Streams tab', () => {
 
           expect(tableCellsValues).toEqual([
             ['', 'dataStream1', 'green', '1', 'Disabled', 'Delete'],
-            ['', 'dataStream2', 'green', '1', 'Keep data indefinitely', 'Delete'],
+            ['', 'dataStream2', 'green', '1', '', 'Delete'],
           ]);
 
           await actions.clickNameAt(0);
