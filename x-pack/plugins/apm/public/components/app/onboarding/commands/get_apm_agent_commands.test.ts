@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getApmAgentCommands } from "./get_apm_agent_commands";
+import { getApmAgentCommands } from './get_apm_agent_commands';
 
 describe('getCommands', () => {
   describe('Unknown agent', () => {
