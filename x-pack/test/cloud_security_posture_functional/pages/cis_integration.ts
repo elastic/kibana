@@ -154,7 +154,10 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
         await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
-        await cisIntegrationGcp.chooseDropDown(CREDENTIALS_TYPE_TEST_ID, 'Credentials JSON');
+        await cisIntegrationGcp.chooseDropDown(
+          CREDENTIALS_TYPE_TEST_ID,
+          'credentials_json_option_test_id'
+        );
         await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
 
         await cisIntegrationGcp.clickSaveButton();
