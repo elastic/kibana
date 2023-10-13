@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { memo, useState } from 'react';
+import {
+  EuiPopover,
+  EuiSelectable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiFilterButton,
+} from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { allCaseStatus, statuses } from '../status';
 import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
@@ -36,31 +42,77 @@ const StatusFilterComponent: React.FC<Props> = ({
   onStatusChanged,
   hiddenStatuses = [],
 }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const toggleIsPopoverOpen = () => setIsPopoverOpen(!isPopoverOpen);
   const caseStatuses = Object.keys(statuses) as CaseStatusWithAllStatus[];
-  const options: Array<EuiSuperSelectOption<CaseStatusWithAllStatus>> = [StatusAll, ...caseStatuses]
+  const options = [StatusAll, ...caseStatuses]
     .filter((status) => !hiddenStatuses.includes(status))
-    .map((status) => ({
-      value: status,
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
-          <EuiFlexItem grow={false}>
-            <span>{status === 'all' ? <AllStatusBadge /> : <Status status={status} />}</span>
-          </EuiFlexItem>
-          {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': `case-status-filter-${status}`,
-    }));
+    .map((option) => ({ label: option }));
 
   return (
-    <EuiSuperSelect
-      options={options}
-      valueOfSelected={selectedStatus}
-      onChange={onStatusChanged}
-      data-test-subj="case-status-filter"
-    />
+    <EuiPopover
+      ownFocus
+      button={
+        <EuiFilterButton
+          data-test-subj={`options-filter-popover-button-status`}
+          iconType="arrowDown"
+          onClick={toggleIsPopoverOpen}
+          isSelected={isPopoverOpen}
+          numFilters={options.length}
+          // hasActiveFilters={selectedOptions.length > 0}
+          hasActiveFilters={false}
+          // numActiveFilters={selectedOptions.length}
+          numActiveFilters={0}
+          aria-label={'status'}
+        >
+          <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
+            <EuiFlexItem grow={1}>
+              <span>
+                {selectedStatus === 'all' ? <AllStatusBadge /> : <Status status={selectedStatus} />}
+              </span>
+            </EuiFlexItem>
+            {selectedStatus !== StatusAll && (
+              <EuiFlexItem grow={false}>{` (${stats[selectedStatus]})`}</EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFilterButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={toggleIsPopoverOpen}
+      panelPaddingSize="none"
+      repositionOnScroll
+    >
+      <EuiSelectable
+        options={options}
+        searchable
+        searchProps={{ placeholder: 'status', compressed: false }}
+        emptyMessage={'empty'}
+        onChange={(param) => console.log(param)}
+        renderOption={({ label }, searchValue) => {
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
+              <EuiFlexItem grow={1}>
+                <span>
+                  {label === 'all' ? (
+                    <AllStatusBadge />
+                  ) : (
+                    <Status status={label} dataTestSubj={`case-status-filter-${label}`} />
+                  )}
+                </span>
+              </EuiFlexItem>
+              {label !== StatusAll && (
+                <EuiFlexItem grow={false}>{` (${stats[label]})`}</EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        }}
+      >
+        {(list, search) => <div style={{ width: '200px' }}>{list}</div>}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };
+
 StatusFilterComponent.displayName = 'StatusFilter';
 
 export const StatusFilter = memo(StatusFilterComponent);

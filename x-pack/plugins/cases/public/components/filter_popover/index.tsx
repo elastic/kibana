@@ -5,55 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFilterButton,
-  EuiFilterSelectItem,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiSelectable,
   EuiHorizontalRule,
-  EuiPanel,
+  EuiPopoverTitle,
   EuiPopover,
-  EuiText,
 } from '@elastic/eui';
-import styled from 'styled-components';
 
 interface FilterPopoverProps {
   buttonLabel: string;
-  onSelectedOptionsChanged: (value: string[]) => void;
-  options: string[];
+  onSelectedOptionsChanged: (value: EuiSelectableOption[]) => void;
+  options: EuiSelectableOption[];
   optionsEmptyLabel?: string;
   limit?: number;
   limitReachedMessage?: string;
-  selectedOptions: string[];
+  selectedOptions: EuiSelectableOption[];
 }
 
-const ScrollableDiv = styled.div`
-  max-height: 250px;
-  overflow: auto;
-`;
-
-const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
-  const selectedGroupIndex = selectedGroups.indexOf(group);
-  if (selectedGroupIndex >= 0) {
-    return [
-      ...selectedGroups.slice(0, selectedGroupIndex),
-      ...selectedGroups.slice(selectedGroupIndex + 1),
-    ];
-  }
-  return [...selectedGroups, group];
-};
-
-/**
- * Popover for selecting a field to filter on
- *
- * @param buttonLabel label on dropdwon button
- * @param onSelectedOptionsChanged change listener to be notified when option selection changes
- * @param options to display for filtering
- * @param optionsEmptyLabel shows when options empty
- * @param selectedOptions manage state of selectedOptions
- */
 export const FilterPopoverComponent = ({
   buttonLabel,
   onSelectedOptionsChanged,
@@ -64,12 +36,7 @@ export const FilterPopoverComponent = ({
   limitReachedMessage,
 }: FilterPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const setIsPopoverOpenCb = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-  const toggleSelectedGroupCb = useCallback(
-    (option) => onSelectedOptionsChanged(toggleSelectedGroup(option, selectedOptions)),
-    [selectedOptions, onSelectedOptionsChanged]
-  );
+  const toggleIsPopoverOpen = () => setIsPopoverOpen(!isPopoverOpen);
 
   return (
     <EuiPopover
@@ -78,7 +45,7 @@ export const FilterPopoverComponent = ({
         <EuiFilterButton
           data-test-subj={`options-filter-popover-button-${buttonLabel}`}
           iconType="arrowDown"
-          onClick={setIsPopoverOpenCb}
+          onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
           numFilters={options.length}
           hasActiveFilters={selectedOptions.length > 0}
@@ -89,7 +56,7 @@ export const FilterPopoverComponent = ({
         </EuiFilterButton>
       }
       isOpen={isPopoverOpen}
-      closePopover={setIsPopoverOpenCb}
+      closePopover={toggleIsPopoverOpen}
       panelPaddingSize="none"
       repositionOnScroll
     >
@@ -105,30 +72,20 @@ export const FilterPopoverComponent = ({
           <EuiHorizontalRule margin="none" />
         </>
       ) : null}
-      <ScrollableDiv>
-        {options.map((option, index) => (
-          <EuiFilterSelectItem
-            checked={selectedOptions.includes(option) ? 'on' : undefined}
-            disabled={Boolean(
-              limit && selectedOptions.length >= limit && !selectedOptions.includes(option)
-            )}
-            data-test-subj={`options-filter-popover-item-${option}`}
-            key={`${index}-${option}`}
-            onClick={toggleSelectedGroupCb.bind(null, option)}
-          >
-            {option}
-          </EuiFilterSelectItem>
-        ))}
-      </ScrollableDiv>
-      {options.length === 0 && optionsEmptyLabel != null && (
-        <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-          <EuiFlexItem grow={true}>
-            <EuiPanel>
-              <EuiText>{optionsEmptyLabel}</EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiSelectable
+        options={options}
+        searchable
+        searchProps={{ placeholder: buttonLabel, compressed: false }}
+        emptyMessage={optionsEmptyLabel}
+        onChange={onSelectedOptionsChanged}
+      >
+        {(list, search) => (
+          <div style={{ width: '200px' }}>
+            <EuiPopoverTitle paddingSize="s">{options.length}</EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
 };

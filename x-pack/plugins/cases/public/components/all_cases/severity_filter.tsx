@@ -15,16 +15,9 @@ import { severitiesWithAll } from '../severity/config';
 interface Props {
   selectedSeverity: CaseSeverityWithAll;
   onSeverityChange: (status: CaseSeverityWithAll) => void;
-  isLoading: boolean;
-  isDisabled: boolean;
 }
 
-export const SeverityFilter: React.FC<Props> = ({
-  selectedSeverity,
-  onSeverityChange,
-  isLoading,
-  isDisabled,
-}) => {
+export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
   const caseSeverities = Object.keys(severitiesWithAll) as CaseSeverityWithAll[];
   const options: Array<EuiSuperSelectOption<CaseSeverityWithAll>> = caseSeverities.map(
     (severity) => {
@@ -53,9 +46,9 @@ export const SeverityFilter: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
-      disabled={isDisabled}
+      disabled={false}
       fullWidth={true}
-      isLoading={isLoading}
+      isLoading={false}
       options={options}
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
