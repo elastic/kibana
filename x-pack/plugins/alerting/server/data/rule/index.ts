@@ -21,3 +21,5 @@ export { resolveRuleSo } from './methods/resolve_rule_so';
 export type { ResolveRuleSoParams } from './methods/resolve_rule_so';
 export { getRuleSo } from './methods/get_rule_so';
 export type { GetRuleSoParams } from './methods/get_rule_so';
+export { bulkDisableRulesSo } from './methods/bulk_disable_rules_so';
+export type { BulkDisableRulesSoParams } from './methods/bulk_disable_rules_so';

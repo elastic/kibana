@@ -42,6 +42,7 @@ import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
+  RESPONSE_BUTTON_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
@@ -160,5 +161,7 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER =
   getDataTestSubjectSelector(RESPONSE_SECTION_HEADER_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON =
+  getDataTestSubjectSelector(RESPONSE_BUTTON_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE =
   getDataTestSubjectSelector(RESPONSE_EMPTY_TEST_ID);

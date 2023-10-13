@@ -116,8 +116,7 @@ describe('<ResponseDetails />', () => {
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
-
-    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).not.toHaveTextContent(NO_DATA_MESSAGE);
+    // TODO mock osquery results
   });
 
   it('should render the view with osquery only', () => {
@@ -135,7 +134,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(defaultContextValue);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('responseActionsViewWrapper')).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);

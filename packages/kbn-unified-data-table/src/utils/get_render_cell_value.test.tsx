@@ -75,6 +75,18 @@ const rowsSource: EsHitRecord[] = [
   },
 ];
 
+const rowsSourceWithEmptyValues: EsHitRecord[] = [
+  {
+    _id: '1',
+    _index: 'test',
+    _score: 1,
+    _source: { bytes: 100, extension: null },
+    highlight: {
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
+    },
+  },
+];
+
 const rowsFields: EsHitRecord[] = [
   {
     _id: '1',
@@ -341,6 +353,77 @@ describe('Unified data table cell rendering', function () {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+    `);
+  });
+
+  it('renders _source column correctly if on text based mode and have nulls', () => {
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSourceWithEmptyValues.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      isPlainRecord: true,
+    });
+    const component = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <EuiDescriptionList
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
+        compressed={true}
+        type="inline"
+      >
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          bytesDisplayName
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": 100,
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          _index
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "test",
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          _score
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": 1,
+            }
+          }
+        />
+      </EuiDescriptionList>
     `);
   });
 

@@ -1065,9 +1065,6 @@
   "links": {
     "dynamic": false,
     "properties": {
-      "id": {
-        "type": "text"
-      },
       "title": {
         "type": "text"
       },
