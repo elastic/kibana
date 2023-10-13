@@ -67,10 +67,9 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
-import { SAMPLE_SIZE_SETTING } from '../unified_components';
+import { SAMPLE_SIZE_SETTING, UnifiedTimelineComponent } from '../unified_components';
 import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
-import TimelineDataTable from '../unified_components/data_table';
 import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
 
 const TimelineHeaderContainer = styled.div`
@@ -134,21 +133,6 @@ const VerticalRule = styled.div`
 `;
 
 VerticalRule.displayName = 'VerticalRule';
-
-const UnifiedTableScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  width: 100%;
-  margin: 0 12px;
-  overflow: hidden;
-
-  .dscPageBody__contents {
-    overflow: hidden;
-    height: 100%;
-  }
-`;
-
-const getScrollableFlexItem = (isUnifiedDataTable: boolean) =>
-  isUnifiedDataTable ? UnifiedTableScrollableFlexItem : ScrollableFlexItem;
 
 const SourcererFlex = styled(EuiFlexItem)`
   align-items: flex-end;
@@ -460,11 +444,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         skip={!canQueryTimeline}
       />
       {useDiscoverComponentsInTimeline ? (
-        <StyledTableFlexGroup>
+        <StyledTableFlexGroup direction="column" gutterSize="s">
+          <StyledTableFlexItem grow={false}>{header}</StyledTableFlexItem>
           <StyledTableFlexItem>
-            {header}
             <RootDragDropProvider>
-              <TimelineDataTable
+              <UnifiedTimelineComponent
                 columns={columnsHeader}
                 rowRenderers={rowRenderers}
                 timelineId={timelineId}

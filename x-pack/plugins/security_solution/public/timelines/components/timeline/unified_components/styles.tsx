@@ -7,7 +7,7 @@
 
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -15,6 +15,19 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
   margin: 0;
   width: 100%;
   overflow: hidden;
+
+  .dscPageBody__contents {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .test {
+    width: 100%;
+    height: 100%;
+  }
+  .test-gr {
+    height: 100%;
+  }
 `;
 
 export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
@@ -29,6 +42,14 @@ export const progressStyle = css`
 `;
 
 export const StyledPageContentWrapper = styled.div.attrs(({ className = '' }) => ({
+  className: `${className}`,
+}))`
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+`;
+
+export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) => ({
   className: `udtPageContent__wrapper ${className}`,
 }))`
   overflow: hidden; // Ensures horizontal scroll of table

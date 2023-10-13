@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme, EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useMemo, useCallback, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -17,6 +16,7 @@ import type { DataLoadingState } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
+import styled from 'styled-components';
 import { DragDrop, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
 import type {
   UnifiedFieldListSidebarContainerApi,
@@ -44,13 +44,18 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getColumnHeader } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
-import { StyledPageContentWrapper } from './styles';
+import { StyledPageContentWrapper, StyledMainEuiPanel } from './styles';
 import { DRAG_DROP_FIELD } from './translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
-import { TimelineSidebarResponsive } from './sidebar';
 
-const SidebarMemoized = React.memo(TimelineSidebarResponsive);
+const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
+  className: `${className}`,
+}))`
+  width: 100%;
+  height: 100%;
+`;
+
 const DataGridMemoized = React.memo(TimelineDataTable);
 
 const DROP_PROPS = {
@@ -146,9 +151,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const { euiTheme } = useEuiTheme();
-
-  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
-    useState<UnifiedFieldListSidebarContainerApi | null>(null);
+  const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 
   const {
     services: {
@@ -327,26 +330,15 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   }
 
   return (
-    <div
-      ref={setSidebarContainer}
-      css={css`
-        width: 100%;
-        height: 100%;
-      `}
-    >
+    <TimelineBodyContainer className="test" ref={setSidebarContainer}>
       <TimelineResizableLayout
         container={sidebarContainer}
-        unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
+        unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
         sidebarPanel={
-          <EuiFlexGroup
-            gutterSize="none"
-            css={css`
-              height: 100%;
-            `}
-          >
+          <EuiFlexGroup gutterSize="none" className="test-gr">
             <EuiFlexItem>
               <UnifiedFieldListSidebarContainer
-                // ref={initializeUnifiedFieldListSidebarContainerApi}
+                ref={unifiedFieldListContainerRef}
                 showFieldList={true}
                 variant="responsive"
                 getCreationOptions={getCreationOptions}
@@ -362,18 +354,13 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  border-right: ${euiTheme.border.thin};
-                `}
-              />
+              <EuiFlexItem grow={false} />
             </EuiHideFor>
           </EuiFlexGroup>
         }
         mainPanel={
           <StyledPageContentWrapper>
-            <EuiPanel
+            <StyledMainEuiPanel
               role="main"
               panelRef={setMainContainer}
               paddingSize="none"
@@ -411,11 +398,11 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                   />
                 </DropOverlayWrapper>
               </DragDrop>
-            </EuiPanel>
+            </StyledMainEuiPanel>
           </StyledPageContentWrapper>
         }
       />
-    </div>
+    </TimelineBodyContainer>
   );
 };
 
