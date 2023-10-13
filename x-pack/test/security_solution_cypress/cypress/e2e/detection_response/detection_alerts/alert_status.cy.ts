@@ -196,7 +196,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`);
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alert`);
         });
     });
 
