@@ -15,7 +15,6 @@ const configSchema = schema.object({
     span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
     error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    event: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
     sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
   }),
