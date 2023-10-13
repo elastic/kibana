@@ -36,7 +36,7 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
+describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   describe('Open timeline modal', () => {
     before(function () {
       cleanKibana();

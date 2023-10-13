@@ -418,6 +418,7 @@ class DocLinks {
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
