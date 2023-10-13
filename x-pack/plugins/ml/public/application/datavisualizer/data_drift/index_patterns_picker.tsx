@@ -88,6 +88,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
               iconType="plusInCircleFilled"
               onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
               disabled={!canEditDataView}
+              data-test-subj={'dataDriftCreateDataViewButton'}
             >
               <FormattedMessage
                 id="xpack.ml.dataDrift.createDataViewButton"

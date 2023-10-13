@@ -73,7 +73,8 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
       try {
-        const body = await monitorTestService.addProjectMonitors(project, testMonitors);
+        const { body, status } = await monitorTestService.addProjectMonitors(project, testMonitors);
+        expect(status).eql(200);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
           "Couldn't save or update monitor because of an invalid configuration."
@@ -96,16 +97,28 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const body = await monitorTestService.addProjectMonitors(project, testMonitors);
+      const { body, status: status0 } = await monitorTestService.addProjectMonitors(
+        project,
+        testMonitors
+      );
+      expect(status0).eql(200);
+
       expect(body.createdMonitors.length).eql(2);
-      const editedBody = await monitorTestService.addProjectMonitors(project, testMonitors);
+      const { body: editedBody, status: editedStatus } =
+        await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(editedStatus).eql(200);
+
       expect(editedBody.createdMonitors.length).eql(0);
       expect(editedBody.updatedMonitors.length).eql(2);
 
       testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
       testMonitors[1].privateLocations = ['Test private location 8'];
 
-      const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
+      const { body: editedBodyError, status } = await monitorTestService.addProjectMonitors(
+        project,
+        testMonitors
+      );
+      expect(status).eql(200);
       expect(editedBodyError.createdMonitors.length).eql(0);
       expect(editedBodyError.updatedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors.length).eql(1);
