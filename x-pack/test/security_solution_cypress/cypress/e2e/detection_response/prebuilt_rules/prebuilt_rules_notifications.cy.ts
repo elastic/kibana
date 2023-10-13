@@ -21,7 +21,6 @@ import {
   resetRulesTableState,
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-  reload,
 } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
@@ -137,7 +136,6 @@ describe(
             });
             installPrebuiltRuleAssets([UPDATED_RULE]);
             visitRulesManagementTable();
-            reload();
           });
         });
 

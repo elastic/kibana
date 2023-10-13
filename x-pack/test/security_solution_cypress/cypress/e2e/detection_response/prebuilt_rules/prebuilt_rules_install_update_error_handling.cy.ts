@@ -21,7 +21,7 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana, reload } from '../../../tasks/common';
+import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
@@ -134,7 +134,7 @@ describe(
         createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         /* Create a second version of the rule, making it available for update */
         installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
-        reload();
+        cy.reload();
       });
 
       it('upgrading prebuilt rules one by one', () => {
