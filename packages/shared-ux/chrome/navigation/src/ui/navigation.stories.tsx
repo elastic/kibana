@@ -471,6 +471,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with default content
             // Groups with **not** title
+            id: 'group.openpanel2',
             title: 'Open panel (2)',
             renderAs: 'panelOpener',
             link: 'item1',
@@ -518,6 +519,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with default content
             // Accordion to wrap groups
+            id: 'group.openpanel3',
             title: 'Open panel (3)',
             renderAs: 'panelOpener',
             link: 'item1',
@@ -615,6 +617,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           },
           {
             // Panel with nav group title that acts like nav items
+            id: 'group.openpanel4',
             title: 'Open panel (4) - sideNavStatus',
             renderAs: 'panelOpener',
             link: 'item1',
@@ -797,10 +800,10 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel where all children are hidden. The "open panel" icon should NOT
             // appear next to the node title
+            id: 'group.openpanel5',
             title: 'Open panel (5) - all children hidden',
             renderAs: 'panelOpener',
             link: 'item1',
-            id: 'test',
             children: [
               {
                 link: 'test1',
@@ -819,7 +822,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
-            id: 'group:openpanel2',
+            id: 'group.openpanel6',
             title: 'Open panel (custom content)',
             renderAs: 'panelOpener',
             link: 'item1',
@@ -839,7 +842,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
-            id: 'group:openpanel3',
+            id: 'group.openpanel7',
             title: 'Open panel (custom title)',
             renderAs: 'panelOpener',
             link: 'item1',

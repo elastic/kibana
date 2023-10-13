@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chrome-browser';
 
 let uniqueId = 0;
 
-export function generateUniqueNodeId() {
+function generateUniqueNodeId() {
   const id = `node${uniqueId++}`;
   return id;
 }
@@ -34,4 +34,12 @@ export function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'chi
 
 export function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children === undefined;
+}
+
+export function getNavigationNodeId(
+  { id: _id, link }: Pick<NodeDefinition, 'id' | 'link'>,
+  idGenerator = generateUniqueNodeId
+): string {
+  const id = _id ?? link;
+  return id ?? idGenerator();
 }

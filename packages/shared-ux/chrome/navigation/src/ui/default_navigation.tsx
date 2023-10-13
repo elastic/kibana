@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 
-import { generateUniqueNodeId } from '../utils';
+import { getNavigationNodeId } from '../utils';
 import { Navigation } from './components';
 import type {
   GroupDefinition,
@@ -124,16 +124,14 @@ function serializeNode<
     children?: NonEmptyArray<{ id?: string; link?: LinkId }>;
   },
   LinkId extends AppDeepLinkId = AppDeepLinkId
->(item: T, index: number, depth = 0): T & { id: string } {
-  // IF no "id" is provided we will generate a unique id
-  const id = item.id ?? `node-${depth}-${index}`;
-
-  const serializedChildren = item.children?.map((_item, i) => serializeNode(_item, i, depth + 1));
+>(item: T, depth: number, index: number): T & { id: string } {
+  const id = getNavigationNodeId(item, () => `node-${depth}-${index}`);
+  const children = item.children?.map((_item, i) => serializeNode(_item, depth + 1, i));
 
   return {
     ...item,
     id,
-    children: serializedChildren,
+    children,
   };
 }
 
@@ -142,7 +140,7 @@ const serializeNavigationTree = (navTree: NavigationTreeDefinition): NavigationT
 
   const serialize = (item: RootNavigationItemDefinition, index: number) => {
     if (item.type === 'recentlyAccessed') return item;
-    return serializeNode(item, index);
+    return serializeNode(item, 0, index);
   };
 
   if (navTree.body) {
@@ -154,33 +152,6 @@ const serializeNavigationTree = (navTree: NavigationTreeDefinition): NavigationT
   }
 
   return serialized;
-};
-
-const renderItems = (
-  items: Array<RootNavigationItemDefinition | NodeDefinition> = [],
-  path: string[] = []
-) => {
-  return items.map((item, i) => {
-    if (isPresetDefinition(item)) {
-      return <Navigation.Group preset={item.preset} key={`${item.preset}-${i}`} />;
-    }
-
-    if (isRecentlyAccessedDefinition(item)) {
-      return <RecentlyAccessed {...item} key={`recentlyAccessed-${i}`} />;
-    }
-
-    const { id = generateUniqueNodeId() } = item;
-
-    if (isGroupDefinition(item)) {
-      return (
-        <Navigation.Group {...item} id={id} key={id}>
-          {/* Recursively build the tree */}
-          {renderItems(item.children, [...path, id])}
-        </Navigation.Group>
-      );
-    }
-    return <Navigation.Item {...item} key={id} />;
-  });
 };
 
 interface Props {
@@ -201,17 +172,43 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
   const navigationDefinition = useMemo(() => {
     const definition = !navigationTree
       ? getDefaultNavigationTree(projectNavigationTree!)
-      : navigationTree!;
+      : navigationTree;
 
     return serializeNavigationTree(definition);
   }, [navigationTree, projectNavigationTree]);
 
+  const renderNodes = useCallback(
+    (nodes: Array<RootNavigationItemDefinition | NodeDefinition> = []) => {
+      return nodes.map((navNode, i) => {
+        if (isPresetDefinition(navNode)) {
+          return <Navigation.Group preset={navNode.preset} key={`${navNode.preset}-${i}`} />;
+        }
+
+        if (isRecentlyAccessedDefinition(navNode)) {
+          return <RecentlyAccessed {...navNode} key={`recentlyAccessed-${i}`} />;
+        }
+
+        if (isGroupDefinition(navNode)) {
+          return (
+            <Navigation.Group {...navNode} key={navNode.id}>
+              {/* Recursively build the tree */}
+              {renderNodes(navNode.children)}
+            </Navigation.Group>
+          );
+        }
+
+        return <Navigation.Item {...navNode} key={navNode.id} />;
+      });
+    },
+    []
+  );
+
   return (
     <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
       <>
-        {renderItems(navigationDefinition.body)}
+        {renderNodes(navigationDefinition.body)}
         {navigationDefinition.footer && (
-          <NavigationFooter>{renderItems(navigationDefinition.footer)}</NavigationFooter>
+          <NavigationFooter>{renderNodes(navigationDefinition.footer)}</NavigationFooter>
         )}
       </>
     </Navigation>

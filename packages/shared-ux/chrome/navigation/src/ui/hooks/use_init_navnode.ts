@@ -18,18 +18,10 @@ import type {
 import { CloudLinks } from '../../cloud_links';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import { generateUniqueNodeId, isAbsoluteLink } from '../../utils';
+import { getNavigationNodeId, isAbsoluteLink } from '../../utils';
 import { useNavigation } from '../components/navigation';
 import { NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
-
-function getIdFromNavigationNode({
-  id: _id,
-  link,
-}: Pick<NodePropsEnhanced, 'id' | 'link' | 'isGroup'>): string {
-  const id = _id ?? link;
-  return id ?? generateUniqueNodeId();
-}
 
 /**
  * We don't have currently a way to know if a user has access to a Cloud section.
@@ -241,7 +233,7 @@ export const useInitNavNode = <
   const { register: registerNodeOnParent } = useRegisterTreeNode();
   const { activeNodes } = useNavigation();
 
-  const id = getIdFromNavigationNode(node);
+  const id = getNavigationNodeId(node);
 
   const internalNavNode = useMemo(
     () => createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks }),
