@@ -21,6 +21,7 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
     typeof euiTheme.levels.header === 'number'
       ? euiTheme.levels.header - 1 // We want it to appear right below the header
       : euiTheme.levels.header;
+
   return (
     <div
       className="header__actionMenu"
