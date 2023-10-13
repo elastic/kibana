@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExclusiveUnion } from '@elastic/eui';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CasesConnectorConfigSchema,
@@ -16,22 +17,30 @@ export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
 export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
 export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;
 
-export interface OracleKey {
-  ruleId?: string;
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+interface OracleKeyAllRequired {
+  ruleId: string;
   spaceId: string;
   owner: string;
-  grouping?: Record<string, string>;
+  grouping: Record<string, string>;
 }
+
+type OracleKeyWithRequiredRule = Optional<OracleKeyAllRequired, 'grouping'>;
+type OracleKeyWithRequiredGrouping = Optional<OracleKeyAllRequired, 'ruleId'>;
+
+export type OracleKey = ExclusiveUnion<OracleKeyWithRequiredRule, OracleKeyWithRequiredGrouping>;
 
 export interface OracleRecord {
   id: string;
   counter: number;
-  caseIds: string[];
-  ruleId: string;
+  cases: Array<{ id: string }>;
+  rules: Array<{ id: string }>;
   createdAt: string;
   updatedAt: string;
 }
 
-export type OracleRecordCreateRequest = {
-  caseIds: string[];
-} & OracleKey;
+export interface OracleRecordCreateRequest {
+  cases: Array<{ id: string }>;
+  rules: Array<{ id: string }>;
+}

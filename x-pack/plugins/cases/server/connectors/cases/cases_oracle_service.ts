@@ -57,10 +57,11 @@ export class CasesOracleService {
     return this.getRecordResponse(oracleRecord);
   }
 
-  public async createRecord(payload: OracleRecordCreateRequest): Promise<OracleRecord> {
-    const { ruleId, spaceId, owner, grouping } = payload;
-    const { caseIds } = payload;
-    const recordId = this.getRecordId({ ruleId, spaceId, owner, grouping });
+  public async createRecord(
+    recordId: string,
+    payload: OracleRecordCreateRequest
+  ): Promise<OracleRecord> {
+    const { cases, rules } = payload;
 
     this.log.debug(`Creating oracle record with ID: ${recordId}`);
 
@@ -68,8 +69,8 @@ export class CasesOracleService {
       CASE_ORACLE_SAVED_OBJECT,
       {
         counter: 1,
-        caseIds,
-        ruleId,
+        cases,
+        rules,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -103,8 +104,8 @@ export class CasesOracleService {
   private getRecordResponse = (oracleRecord: SavedObject<OracleRecordWithoutId>): OracleRecord => ({
     id: oracleRecord.id,
     counter: oracleRecord.attributes.counter,
-    caseIds: oracleRecord.attributes.caseIds,
-    ruleId: oracleRecord.attributes.ruleId,
+    cases: oracleRecord.attributes.cases,
+    rules: oracleRecord.attributes.rules,
     createdAt: oracleRecord.attributes.createdAt,
     updatedAt: oracleRecord.attributes.updatedAt,
   });

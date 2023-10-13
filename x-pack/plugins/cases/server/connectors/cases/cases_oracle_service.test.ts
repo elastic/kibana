@@ -109,6 +109,7 @@ describe('CasesOracleService', () => {
       const spaceId = 'default';
       const owner = 'cases';
 
+      // @ts-expect-error: ruleId and grouping are omitted for testing
       expect(() => service.getRecordId({ spaceId, owner })).toThrowErrorMatchingInlineSnapshot(
         `"ruleID or grouping is required"`
       );
@@ -145,13 +146,16 @@ describe('CasesOracleService', () => {
   });
 
   describe('getRecord', () => {
+    const cases = [{ id: 'test-case-id' }];
+    const rules = [{ id: 'test-rule-id' }];
+
     const oracleSO = {
       id: 'so-id',
       version: 'so-version',
       attributes: {
         counter: 1,
-        caseIds: ['test-case-id'],
-        ruleId: 'test-rule-id',
+        cases,
+        rules,
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
@@ -171,19 +175,16 @@ describe('CasesOracleService', () => {
   });
 
   describe('createRecord', () => {
-    const ruleId = 'test-rule-id';
-    const spaceId = 'default';
-    const owner = 'cases';
-    const grouping = { 'host.ip': '0.0.0.1' };
-    const caseIds = ['test-case-id'];
+    const cases = [{ id: 'test-case-id' }];
+    const rules = [{ id: 'test-rule-id' }];
 
     const oracleSO = {
       id: 'so-id',
       version: 'so-version',
       attributes: {
         counter: 1,
-        caseIds,
-        ruleId,
+        cases,
+        rules,
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
@@ -196,39 +197,23 @@ describe('CasesOracleService', () => {
     });
 
     it('creates a record correctly', async () => {
-      const record = await service.createRecord({
-        ruleId,
-        spaceId,
-        owner,
-        grouping,
-        caseIds,
-      });
+      const record = await service.createRecord('so-id', { cases, rules });
 
       expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id' });
     });
 
     it('calls the unsecuredSavedObjectsClient.create method correctly', async () => {
-      const keyParams = {
-        ruleId,
-        spaceId,
-        owner,
-        grouping,
-      };
+      const id = 'so-id';
 
-      const id = service.getRecordId(keyParams);
-
-      await service.createRecord({
-        ...keyParams,
-        caseIds,
-      });
+      await service.createRecord(id, { cases, rules });
 
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'cases-oracle',
         {
-          caseIds: ['test-case-id'],
+          cases,
           counter: 1,
           createdAt: expect.anything(),
-          ruleId: 'test-rule-id',
+          rules,
           updatedAt: expect.anything(),
         },
         { id }
@@ -237,13 +222,16 @@ describe('CasesOracleService', () => {
   });
 
   describe('increaseCounter', () => {
+    const cases = [{ id: 'test-case-id' }];
+    const rules = [{ id: 'test-rule-id' }];
+
     const oracleSO = {
       id: 'so-id',
       version: 'so-version',
       attributes: {
         counter: 1,
-        caseIds: ['test-case-id'],
-        ruleId: 'test-rule-id',
+        cases,
+        rules,
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
