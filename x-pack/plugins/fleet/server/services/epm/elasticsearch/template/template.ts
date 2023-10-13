@@ -300,10 +300,10 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? field.object_type;
             break;
           case 'group':
-             const fields = field.fields.map((field) => ({
-               ...field,
+             const fields = field.fields.map((dynField) => ({
+               ...dynField,
                type: 'object',
-               object_type: field.object_type ?? field.type,
+               object_type: dynField.object_type ?? dynField.type,
              }))
              _generateMappings(fields, {
               ...ctx,
