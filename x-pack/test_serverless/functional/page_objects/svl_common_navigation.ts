@@ -95,7 +95,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async expectSectionExists(sectionId: NavigationId) {
         log.debug('ServerlessCommonNavigation.sidenav.expectSectionExists', sectionId);
-        await testSubjects.existOrFail(`~nav-bucket-${sectionId}`);
+        await testSubjects.existOrFail(`~nav-item-${sectionId}`);
       },
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
