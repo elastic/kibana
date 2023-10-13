@@ -20,7 +20,7 @@ export interface EcsFile {
    * Array of file attributes.
    * Attributes names will vary by platform. Here's a non-exhaustive list of values that are expected in this field: archive, compressed, directory, encrypted, execute, hidden, read, readonly, system, write.
    */
-  attributes?: string[];
+  attributes?: string | string[];
   code_signature?: {
     /**
      * The hashing algorithm used to sign the process.
@@ -109,7 +109,28 @@ export interface EcsFile {
     /**
      * List of exported element names and types.
      */
-    exports?: Array<Record<string, unknown>>;
+    exports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * A hash of the Go language imports in an ELF file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+     */
+    go_import_hash?: string;
+    /**
+     * List of imported Go language element names and types.
+     */
+    go_imports?: Record<string, unknown>;
+    /**
+     * Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_var_entropy?: number;
+    /**
+     * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+     */
+    go_stripped?: boolean;
     header?: {
       /**
        * Version of the ELF Application Binary Interface (ABI).
@@ -146,23 +167,36 @@ export interface EcsFile {
     };
 
     /**
+     * A hash of the imports in an ELF file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is an ELF implementation of the Windows PE imphash.
+     */
+    import_hash?: string;
+    /**
      * List of imported element names and types.
      */
-    imports?: Array<Record<string, unknown>>;
+    imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_var_entropy?: number;
     /**
      * An array containing an object for each section of the ELF file.
      * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
      */
-    sections?: Array<Record<string, unknown>>;
+    sections?: Record<string, unknown> | Array<Record<string, unknown>>;
     /**
      * An array containing an object for each segment of the ELF file.
      * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
      */
-    segments?: Array<Record<string, unknown>>;
+    segments?: Record<string, unknown> | Array<Record<string, unknown>>;
     /**
      * List of shared libraries used by this ELF object.
      */
-    shared_libraries?: string[];
+    shared_libraries?: string | string[];
     /**
      * telfhash symbol hash for ELF file.
      */
@@ -223,6 +257,57 @@ export interface EcsFile {
    * Inode representing the file in the filesystem.
    */
   inode?: string;
+  macho?: {
+    /**
+     * A hash of the Go language imports in a Mach-O file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+     */
+    go_import_hash?: string;
+    /**
+     * List of imported Go language element names and types.
+     */
+    go_imports?: Record<string, unknown>;
+    /**
+     * Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_var_entropy?: number;
+    /**
+     * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+     */
+    go_stripped?: boolean;
+    /**
+     * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is a synonym for symhash.
+     */
+    import_hash?: string;
+    /**
+     * List of imported element names and types.
+     */
+    imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_var_entropy?: number;
+    /**
+     * An array containing an object for each section of the Mach-O file.
+     * The keys that should be present in these objects are defined by sub-fields underneath `macho.sections.*`.
+     */
+    sections?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * A hash of the imports in a Mach-O file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is a Mach-O implementation of the Windows PE imphash
+     */
+    symhash?: string;
+  };
+
   /**
    * MIME type should identify the format of the file or stream of bytes using https://www.iana.org/assignments/media-types/media-types.xhtml[IANA official types], where possible. When more than one type is applicable, the most specific type should be used.
    */
@@ -265,10 +350,48 @@ export interface EcsFile {
      */
     file_version?: string;
     /**
+     * A hash of the Go language imports in a PE file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
+     */
+    go_import_hash?: string;
+    /**
+     * List of imported Go language element names and types.
+     */
+    go_imports?: Record<string, unknown>;
+    /**
+     * Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of Go imports.
+     */
+    go_imports_names_var_entropy?: number;
+    /**
+     * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
+     */
+    go_stripped?: boolean;
+    /**
      * A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
      * Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.
      */
     imphash?: string;
+    /**
+     * A hash of the imports in a PE file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
+     * This is a synonym for imphash.
+     */
+    import_hash?: string;
+    /**
+     * List of imported element names and types.
+     */
+    imports?: Record<string, unknown> | Array<Record<string, unknown>>;
+    /**
+     * Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_entropy?: number;
+    /**
+     * Variance for Shannon entropy calculation from the list of imported element names and types.
+     */
+    imports_names_var_entropy?: number;
     /**
      * Internal name of the file, provided at compile-time.
      */
@@ -282,6 +405,11 @@ export interface EcsFile {
      * Internal product name of the file, provided at compile-time.
      */
     product?: string;
+    /**
+     * An array containing an object for each section of the PE file.
+     * The keys that should be present in these objects are defined by sub-fields underneath `pe.sections.*`.
+     */
+    sections?: Record<string, unknown> | Array<Record<string, unknown>>;
   };
 
   /**
@@ -305,16 +433,16 @@ export interface EcsFile {
     /**
      * List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.
      */
-    alternative_names?: string[];
+    alternative_names?: string | string[];
     issuer?: {
       /**
        * List of common name (CN) of issuing certificate authority.
        */
-      common_name?: string[];
+      common_name?: string | string[];
       /**
        * List of country \(C) codes
        */
-      country?: string[];
+      country?: string | string[];
       /**
        * Distinguished name (DN) of issuing certificate authority.
        */
@@ -322,19 +450,19 @@ export interface EcsFile {
       /**
        * List of locality names (L)
        */
-      locality?: string[];
+      locality?: string | string[];
       /**
        * List of organizations (O) of issuing certificate authority.
        */
-      organization?: string[];
+      organization?: string | string[];
       /**
        * List of organizational units (OU) of issuing certificate authority.
        */
-      organizational_unit?: string[];
+      organizational_unit?: string | string[];
       /**
        * List of state or province names (ST, S, or P)
        */
-      state_or_province?: string[];
+      state_or_province?: string | string[];
     };
 
     /**
@@ -373,11 +501,11 @@ export interface EcsFile {
       /**
        * List of common names (CN) of subject.
        */
-      common_name?: string[];
+      common_name?: string | string[];
       /**
        * List of country \(C) code
        */
-      country?: string[];
+      country?: string | string[];
       /**
        * Distinguished name (DN) of the certificate subject entity.
        */
@@ -385,19 +513,19 @@ export interface EcsFile {
       /**
        * List of locality names (L)
        */
-      locality?: string[];
+      locality?: string | string[];
       /**
        * List of organizations (O) of subject.
        */
-      organization?: string[];
+      organization?: string | string[];
       /**
        * List of organizational units (OU) of subject.
        */
-      organizational_unit?: string[];
+      organizational_unit?: string | string[];
       /**
        * List of state or province names (ST, S, or P)
        */
-      state_or_province?: string[];
+      state_or_province?: string | string[];
     };
 
     /**
