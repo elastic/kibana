@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useEsqlRuleTypeEnabled } from './use_esql_rule_type_enabled';
+export { useIsEsqlRuleTypeEnabled } from './use_is_esql_rule_type_enabled';

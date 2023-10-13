@@ -22,7 +22,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
-import { useEsqlRuleTypeEnabled } from '../../../../detection_engine/rule_creation/hooks';
+import { useIsEsqlRuleTypeEnabled } from '../../../../detection_engine/rule_creation/hooks';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -49,7 +49,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
     const setEsql = useCallback(() => setType('esql'), [setType]);
 
-    const isEsqlRuleTypeEnabled = useEsqlRuleTypeEnabled();
+    const isEsqlRuleTypeEnabled = useIsEsqlRuleTypeEnabled();
 
     const eqlSelectableConfig = useMemo(
       () => ({
