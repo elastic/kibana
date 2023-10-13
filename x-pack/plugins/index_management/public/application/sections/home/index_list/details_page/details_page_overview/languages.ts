@@ -69,10 +69,10 @@ export const goDefinition: LanguageDefinition = {
   "fmt"
   "log"
   "strings"
-​
+
   "github.com/elastic/elasticsearch-serverless-go"
 )
-​
+
 func main() {
   cfg := elasticsearch.Config{
     Address: "${url}",
@@ -88,7 +88,7 @@ func main() {
 { "index": { "_id": "1"}}
 {"name": "foo", "title": "bar"}\n\`)).
     Do(context.Background())
-  ​
+
   fmt.Println(res, err)
 }`,
 };
