@@ -15,7 +15,6 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
