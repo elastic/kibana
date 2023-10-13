@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,35 +22,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
 
-import { sendGetInputsTemplates, useStartServices } from '../../../../../hooks';
+import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hooks';
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
 }
 
 export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
-  const [configs, setConfigs] = useState<string | undefined>(undefined);
-  const [error, setError] = useState<undefined | Error>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { notifications, docLinks } = useStartServices();
   const pkgName = packageInfo.name;
   const pkgVersion = packageInfo.version;
   // @ts-ignore-line
   const notInstalled = !packageInfo?.installationInfo;
 
-  useEffect(() => {
-    const fetchYamlConfigs = async () => {
-      try {
-        const res = await sendGetInputsTemplates({ pkgName, pkgVersion }, { format: 'yml' });
-        setConfigs(res?.data as string);
-      } catch (e) {
-        setError(e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchYamlConfigs();
-  }, [pkgName, pkgVersion]);
+  const {
+    data: configs,
+    error,
+    isLoading,
+  } = useGetInputsTemplatesQuery({ pkgName, pkgVersion }, { format: 'yaml' });
 
   if (error) {
     notifications.toasts.addError(error, {
