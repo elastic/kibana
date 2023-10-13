@@ -24,6 +24,9 @@ describe('usePluginConfig()', () => {
         logsUIEnabled: false,
         metricsExplorerEnabled: false,
         osqueryEnabled: false,
+        inventoryThresholdAlertRuleEnabled: true,
+        metricThresholdAlertRuleEnabled: true,
+        logThresholdAlertRuleEnabled: true,
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {
