@@ -119,7 +119,7 @@ export const deleteRiskScoreIndices = async ({
       }),
     ]);
   } catch (e) {
-    log.error(`Error deleting risk score indices: ${e.message}`);
+    log.warning(`Error deleting risk score indices: ${e.message}`);
   }
 };
 
@@ -344,7 +344,7 @@ export const clearTransforms = async ({
       force: true,
     });
   } catch (e) {
-    log.error(`Error deleting risk_score_latest_transform_default: ${e.message}`);
+    log.warning(`Error deleting risk_score_latest_transform_default: ${e.message}`);
   }
 };
 
@@ -364,7 +364,7 @@ export const clearLegacyTransforms = async ({
   try {
     await Promise.all(transforms);
   } catch (e) {
-    log.error(`Error deleting legacy transforms: ${e.message}`);
+    log.warning(`Error deleting legacy transforms: ${e.message}`);
   }
 };
 
@@ -392,7 +392,7 @@ export const clearLegacyDashboards = async ({
       .send()
       .expect(200);
   } catch (e) {
-    log.error(`Error deleting legacy dashboards: ${e.message}`);
+    log.warning(`Error deleting legacy dashboards: ${e.message}`);
   }
 };
 
