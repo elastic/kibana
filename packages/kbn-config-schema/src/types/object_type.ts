@@ -159,10 +159,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       ...newProps,
     }).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
-        return {
-          ...memo,
-          [key]: value,
-        };
+        (memo as Record<string, unknown>)[key] = value;
       }
       return memo;
     }, {} as ExtendedProps<P, NP>);
@@ -178,10 +175,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   public extendsDeep(options: ExtendsDeepOptions) {
     const extendedProps = Object.entries(this.props).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
-        return {
-          ...memo,
-          [key]: value.extendsDeep(options),
-        };
+        Object.assign(memo, { [key]: value.extendsDeep(options) });
       }
       return memo;
     }, {} as P);

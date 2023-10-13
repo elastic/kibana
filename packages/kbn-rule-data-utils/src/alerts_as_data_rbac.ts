@@ -77,12 +77,14 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
   if (params == null) {
     return defaultConfigValues;
   }
-  const paramKeysWithValues = Object.keys(params).reduce((acc: EsQueryConfig, key) => {
+  const paramKeysWithValues = Object.keys(params).reduce((acc, key) => {
     const configKey = key as ConfigKeys;
     if (params[configKey] != null) {
-      return { [key]: params[configKey], ...acc };
+      acc[key] = params[configKey];
+    } else {
+      acc[key] = defaultConfigValues[configKey];
     }
-    return { [key]: defaultConfigValues[configKey], ...acc };
-  }, {} as EsQueryConfig);
-  return paramKeysWithValues;
+    return acc;
+  }, {} as Record<string, unknown>);
+  return paramKeysWithValues as EsQueryConfig;
 };

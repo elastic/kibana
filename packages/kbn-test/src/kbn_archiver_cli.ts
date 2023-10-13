@@ -34,10 +34,10 @@ function parseTypesFlag(flags: Flags) {
   }
 
   const types = typeof flags.type === 'string' ? [flags.type] : flags.type;
-  return types.reduce(
-    (acc: string[], type) => [...acc, ...type.split(',').map((t) => t.trim())],
-    []
-  );
+  return types.reduce((acc: string[], type) => {
+    acc.push(...type.split(',').map((t) => t.trim()));
+    return acc;
+  }, []);
 }
 
 export function runKbnArchiverCli() {

@@ -7,6 +7,7 @@
  */
 
 import { Filter, FILTERS } from '@kbn/es-query';
+
 export const getEmptyValue = () => '—';
 
 type StrictFilter = Filter & {
@@ -19,9 +20,8 @@ export const createGroupFilter = (
 ): StrictFilter[] =>
   values != null && values.length > 0
     ? values.reduce(
-        (acc: StrictFilter[], query) => [
-          ...acc,
-          {
+        (acc: StrictFilter[], query) => {
+          acc.push({
             meta: {
               alias: null,
               disabled: false,
@@ -39,8 +39,9 @@ export const createGroupFilter = (
                 },
               },
             },
-          },
-        ],
+          });
+          return acc;
+        },
         [
           {
             meta: {

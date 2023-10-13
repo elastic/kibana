@@ -25,7 +25,8 @@ export function snip(source: string, snips: Snip[]) {
     .reduce((acc: Snip[], s) => {
       const prev = acc.at(-1);
       if (!prev || prev[1] < s[0]) {
-        return [...acc, s];
+        acc.push(s);
+        return acc;
       }
 
       if (prev[2] || s[2]) {

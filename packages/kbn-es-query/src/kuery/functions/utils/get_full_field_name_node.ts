@@ -34,24 +34,17 @@ export function getFullFieldNameNode(
     const nestedPathFromField = subTypeNested?.nested.path;
 
     if (nestedPath && !nestedPathFromField) {
-      return [
-        ...acc,
-        `${field.name} is not a nested field but is in nested group "${nestedPath}" in the KQL expression.`,
-      ];
-    }
-
-    if (nestedPathFromField && !nestedPath) {
-      return [
-        ...acc,
-        `${field.name} is a nested field, but is not in a nested group in the KQL expression.`,
-      ];
-    }
-
-    if (nestedPathFromField !== nestedPath) {
-      return [
-        ...acc,
-        `Nested field ${field.name} is being queried with the incorrect nested path. The correct path is ${subTypeNested?.nested.path}.`,
-      ];
+      acc.push(
+        `${field.name} is not a nested field but is in nested group "${nestedPath}" in the KQL expression.`
+      );
+    } else if (nestedPathFromField && !nestedPath) {
+      acc.push(
+        `${field.name} is a nested field, but is not in a nested group in the KQL expression.`
+      );
+    } else if (nestedPathFromField !== nestedPath) {
+      acc.push(
+        `Nested field ${field.name} is being queried with the incorrect nested path. The correct path is ${subTypeNested?.nested.path}.`
+      );
     }
 
     return acc;
