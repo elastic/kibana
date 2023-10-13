@@ -167,14 +167,17 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     it('should show option enabled', () => {
       render();
 
-      expect(renderResult.getByTestId('test')).toHaveTextContent(exactMatchText('Malware enabled'));
+      expect(renderResult.getByTestId('test').getAttribute('disabled')).toBe('');
+      expect(renderResult.getByTestId('test')).not.toHaveTextContent(
+        exactMatchText('Malware enabled')
+      );
     });
 
     it('should show option disabled', () => {
       setMalwareMode(formProps.policy, true, true, false);
       render();
-
-      expect(renderResult.getByTestId('test')).toHaveTextContent(
+      expect(renderResult.getByTestId('test').getAttribute('disabled')).toBe('');
+      expect(renderResult.getByTestId('test')).not.toHaveTextContent(
         exactMatchText('Malware disabled')
       );
     });

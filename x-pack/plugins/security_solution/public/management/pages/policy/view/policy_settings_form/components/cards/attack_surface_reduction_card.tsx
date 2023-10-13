@@ -89,16 +89,13 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
         supportedOss={ATTACK_SURFACE_OS_LIST}
         dataTestSubj={getTestId()}
       >
-        {isEditMode ? (
-          <EuiSwitch
-            label={label}
-            checked={isChecked}
-            onChange={handleSwitchChange}
-            data-test-subj={getTestId('enableDisableSwitch')}
-          />
-        ) : (
-          <span data-test-subj={getTestId('valueLabel')}>{label}</span>
-        )}
+        <EuiSwitch
+          label={label}
+          checked={isChecked}
+          disabled={!isEditMode}
+          onChange={handleSwitchChange}
+          data-test-subj={getTestId('enableDisableSwitch')}
+        />
       </SettingCard>
     );
   }

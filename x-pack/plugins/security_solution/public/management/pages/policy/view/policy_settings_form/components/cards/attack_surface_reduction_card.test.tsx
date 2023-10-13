@@ -14,8 +14,6 @@ import type { AttackSurfaceReductionCardProps } from './attack_surface_reduction
 import {
   AttackSurfaceReductionCard,
   LOCKED_CARD_ATTACK_SURFACE_REDUCTION,
-  SWITCH_DISABLED_LABEL,
-  SWITCH_ENABLED_LABEL,
 } from './attack_surface_reduction_card';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import { cloneDeep, set } from 'lodash';
@@ -153,8 +151,8 @@ describe('Policy Attack Surface Reduction Card', () => {
     it('should show correct value when disabled', () => {
       render();
 
-      expect(renderResult.getByTestId(testSubj.viewModeValue)).toHaveTextContent(
-        SWITCH_ENABLED_LABEL
+      expect(renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('disabled')).toBe(
+        ''
       );
     });
 
@@ -162,8 +160,8 @@ describe('Policy Attack Surface Reduction Card', () => {
       set(formProps.policy, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
       render();
 
-      expect(renderResult.getByTestId(testSubj.viewModeValue)).toHaveTextContent(
-        SWITCH_DISABLED_LABEL
+      expect(renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('disabled')).toBe(
+        ''
       );
     });
   });

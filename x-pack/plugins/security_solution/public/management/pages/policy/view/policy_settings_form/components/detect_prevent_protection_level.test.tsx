@@ -139,7 +139,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Protection levelPrevent')
+        exactMatchText('Protection levelDetectPrevent')
       );
     });
 
@@ -149,7 +149,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Protection levelDetect')
+        exactMatchText('Protection levelDetectPrevent')
       );
     });
   });

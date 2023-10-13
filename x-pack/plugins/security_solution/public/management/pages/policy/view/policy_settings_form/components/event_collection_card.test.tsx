@@ -209,7 +209,9 @@ describe('Policy Event Collection Card common component', () => {
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
         exactMatchText('1 / 2 event collections enabled')
       );
-      expect(renderResult.getByTestId('test-options')).toHaveTextContent(exactMatchText('Network'));
+      expect(renderResult.getByTestId('test-options')).toHaveTextContent(
+        exactMatchText('FileNetwork')
+      );
     });
 
     it('should show empty value if no events are selected', () => {
@@ -222,7 +224,9 @@ describe('Policy Event Collection Card common component', () => {
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
         exactMatchText('0 / 2 event collections enabled')
       );
-      expect(renderResult.getByTestId('test-options')).toHaveTextContent(exactMatchText('—'));
+      expect(renderResult.getByTestId('test-options')).toHaveTextContent(
+        exactMatchText('FileNetwork—')
+      );
     });
 
     describe('and supplemental options are used', () => {

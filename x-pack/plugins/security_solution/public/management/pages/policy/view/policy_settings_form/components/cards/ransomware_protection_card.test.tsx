@@ -90,79 +90,122 @@ describe('Policy Ransomware Protections Card', () => {
       formProps.mode = 'view';
     });
 
-    it('should display correctly when overall card is enabled', () => {
-      const { getByTestId } = render();
+    [
+      { title: 'should display correctly when overall card is enabled' },
+      {
+        title: 'should display correctly when overall card is disabled',
+        path: 'windows.malware.mode',
+        value: ProtectionModes.off,
+      },
+      {
+        title: 'should display user notification disabled',
+        path: 'windows.popup.malware.enabled',
+        value: false,
+      },
+    ].forEach((test) => {
+      it(test.title, () => {
+        if (test.path) {
+          set(formProps.policy, test.path, test.value);
+        }
+        const { getByTestId } = render();
 
-      expectIsViewOnly(getByTestId(testSubj.card));
+        expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Ransomware' +
-            'Operating system' +
-            'Windows ' +
-            'Ransomware protections enabled' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.12+' +
-            'Notify user' +
-            'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
-        )
-      );
+        expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('disabled')).toBe('');
+        expect(getByTestId(testSubj.card)).toHaveTextContent(
+          exactMatchText(
+            'Type' +
+              'Ransomware' +
+              'Operating system' +
+              'Windows ' +
+              'Ransomware protections enabled' +
+              'Protection level' +
+              'Detect' +
+              'Prevent' +
+              'User notification' +
+              'Agent version 7.12+' +
+              'Notify user' +
+              'Customize notification message' +
+              'Info' +
+              'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+          )
+        );
+      });
     });
-
-    it('should display correctly when overall card is disabled', () => {
-      set(formProps.policy, 'windows.malware.mode', ProtectionModes.off);
-      const { getByTestId } = render();
-
-      expectIsViewOnly(getByTestId(testSubj.card));
-
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Ransomware' +
-            'Operating system' +
-            'Windows ' +
-            'Ransomware protections enabled' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.12+' +
-            'Notify user' +
-            'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
-        )
-      );
-    });
-
-    it('should display user notification disabled', () => {
-      set(formProps.policy, 'windows.popup.malware.enabled', false);
-
-      const { getByTestId } = render();
-
-      expectIsViewOnly(getByTestId(testSubj.card));
-
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Ransomware' +
-            'Operating system' +
-            'Windows ' +
-            'Ransomware protections enabled' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.12+' +
-            'Notify user' +
-            'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
-        )
-      );
-    });
+    // it('should display correctly when overall card is enabled', () => {
+    //   const { getByTestId } = render();
+    //
+    //   expectIsViewOnly(getByTestId(testSubj.card));
+    //
+    //   expect(getByTestId(testSubj.card)).toHaveTextContent(
+    //     exactMatchText(
+    //       'Type' +
+    //         'Ransomware' +
+    //         'Operating system' +
+    //         'Windows ' +
+    //         'Ransomware protections enabled' +
+    //         'Protection level' +
+    //         'Detect' +
+    //         'Prevent' +
+    //         'User notification' +
+    //         'Agent version 7.12+' +
+    //         'Notify user' +
+    //         'Customize notification message' +
+    //         'Info' +
+    //         'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+    //     )
+    //   );
+    // });
+    //
+    // it('should display correctly when overall card is disabled', () => {
+    //   set(formProps.policy, 'windows.malware.mode', ProtectionModes.off);
+    //   const { getByTestId } = render();
+    //
+    //   expectIsViewOnly(getByTestId(testSubj.card));
+    //
+    //   expect(getByTestId(testSubj.card)).toHaveTextContent(
+    //     exactMatchText(
+    //       'Type' +
+    //         'Ransomware' +
+    //         'Operating system' +
+    //         'Windows ' +
+    //         'Ransomware protections enabled' +
+    //         'Protection level' +
+    //         'Prevent' +
+    //         'User notification' +
+    //         'Agent version 7.12+' +
+    //         'Notify user' +
+    //         'Notification message' +
+    //         '—' +
+    //         'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+    //     )
+    //   );
+    // });
+    //
+    // it('should display user notification disabled', () => {
+    //   set(formProps.policy, 'windows.popup.malware.enabled', false);
+    //
+    //   const { getByTestId } = render();
+    //
+    //   expectIsViewOnly(getByTestId(testSubj.card));
+    //
+    //   expect(getByTestId(testSubj.card)).toHaveTextContent(
+    //     exactMatchText(
+    //       'Type' +
+    //         'Ransomware' +
+    //         'Operating system' +
+    //         'Windows ' +
+    //         'Ransomware protections enabled' +
+    //         'Protection level' +
+    //         'Prevent' +
+    //         'User notification' +
+    //         'Agent version 7.12+' +
+    //         'Notify user' +
+    //         'Notification message' +
+    //         '—' +
+    //         'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+    //     )
+    //   );
+    // });
   });
 });

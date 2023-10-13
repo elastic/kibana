@@ -226,8 +226,7 @@ describe(
 
           it('should render the protection updates tab content', () => {
             loadProtectionUpdatesUrl(policy.id);
-            cy.getByTestSubj('protection-updates-manifest-switch').should('not.exist');
-            cy.getByTestSubj('protection-updates-state-view-mode');
+            cy.getByTestSubj('protection-updates-manifest-switch').should('be.disabled');
             cy.getByTestSubj('protection-updates-manifest-name-title');
 
             cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
@@ -235,12 +234,16 @@ describe(
               oneWeekAgo.format('MMMM DD, YYYY')
             );
             cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
-            cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
-            cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
+            cy.getByTestSubj('protection-updates-version-to-deploy-picker').within(() => {
+              cy.get('input')
+                .should('have.value', moment.utc().format('MMMM DD, YYYY'))
+                .and('be.disabled');
+            });
 
             cy.getByTestSubj('protection-updates-manifest-name-note-title');
-            cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
-            cy.getByTestSubj('protection-updates-manifest-note-view-mode').contains(testNote);
+            cy.getByTestSubj('protection-updates-manifest-note')
+              .contains(testNote)
+              .and('be.disabled');
             cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
           });
         });
@@ -273,21 +276,7 @@ describe(
 
           it('should render the protection updates tab content', () => {
             loadProtectionUpdatesUrl(policy.id);
-            cy.getByTestSubj('protection-updates-manifest-switch').should('not.exist');
-            cy.getByTestSubj('protection-updates-state-view-mode');
-            cy.getByTestSubj('protection-updates-manifest-name-title');
-
-            cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
-            cy.getByTestSubj('protection-updates-deployed-version').contains(
-              oneWeekAgo.format('MMMM DD, YYYY')
-            );
-            cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
-            cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
-            cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
-
-            cy.getByTestSubj('protection-updates-manifest-name-note-title').should('not.exist');
             cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
-            cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
             cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
           });
         });

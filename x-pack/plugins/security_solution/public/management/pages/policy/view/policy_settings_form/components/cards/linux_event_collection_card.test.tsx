@@ -92,6 +92,7 @@ describe('Policy Linux Event Collection Card', () => {
             'Linux ' +
             '2 / 3 event collections enabled' +
             'Events' +
+            'File' +
             'Network' +
             'Process' +
             'Session data' +

@@ -44,20 +44,6 @@ interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
 }
 
-const AUTOMATIC_UPDATES_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdates',
-  {
-    defaultMessage: 'Automatic updates enabled',
-  }
-);
-
-const AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdatesOff',
-  {
-    defaultMessage: 'Automatic updates disabled.',
-  }
-);
-
 export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
   ({ policy: _policy }) => {
     const toasts = useToasts();
@@ -94,10 +80,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
     const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
-
-    const viewModeSwitchLabel = automaticUpdatesEnabled
-      ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
-      : AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL;
 
     const saveButtonEnabled =
       (fetchedNote ? note !== fetchedNote.note : note !== '') ||
@@ -208,25 +190,20 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             </h5>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {canWritePolicyManagement ? (
-            <div data-test-subj={'protection-updates-version-to-deploy-picker'}>
-              <EuiDatePicker
-                popoverPlacement={'downCenter'}
-                dateFormat={displayDateFormat}
-                selected={selectedDate}
-                maxDate={today}
-                minDate={cutoffDate}
-                onChange={(date) => {
-                  setSelectedDate(date || today);
-                  setManifestVersion(date?.format(internalDateFormat) || 'latest');
-                }}
-              />
-            </div>
-          ) : (
-            <EuiText size="m" data-test-subj="protection-updates-version-to-deploy-view-mode">
-              {selectedDate.format(displayDateFormat)}
-            </EuiText>
-          )}
+          <div data-test-subj={'protection-updates-version-to-deploy-picker'}>
+            <EuiDatePicker
+              disabled={!canWritePolicyManagement}
+              popoverPlacement={'downCenter'}
+              dateFormat={displayDateFormat}
+              selected={selectedDate}
+              maxDate={today}
+              minDate={cutoffDate}
+              onChange={(date) => {
+                setSelectedDate(date || today);
+                setManifestVersion(date?.format(internalDateFormat) || 'latest');
+              }}
+            />
+          </div>
         </>
       );
     };
@@ -357,26 +334,20 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 />
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              {canWritePolicyManagement ? (
-                <EuiTextArea
-                  value={note}
-                  disabled={getNoteInProgress || createNoteInProgress}
-                  onChange={(e) => setNote(e.target.value)}
-                  fullWidth
-                  rows={3}
-                  placeholder={i18n.translate(
-                    'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
-                    {
-                      defaultMessage: 'Add relevant information about update here',
-                    }
-                  )}
-                  data-test-subj={'protection-updates-manifest-note'}
-                />
-              ) : (
-                <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>
-                  {note}
-                </EuiText>
-              )}
+              <EuiTextArea
+                value={note}
+                disabled={getNoteInProgress || createNoteInProgress || !canWritePolicyManagement}
+                onChange={(e) => setNote(e.target.value)}
+                fullWidth
+                rows={3}
+                placeholder={i18n.translate(
+                  'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
+                  {
+                    defaultMessage: 'Add relevant information about update here',
+                  }
+                )}
+                data-test-subj={'protection-updates-manifest-note'}
+              />
             </>
           )}
         </>
@@ -407,25 +378,24 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               </EuiTitle>
             </EuiFlexItem>
             <EuiShowFor sizes={['l', 'xl', 'm']}>
-              {canWritePolicyManagement ? (
-                <EuiSwitch
-                  disabled={isUpdating || createNoteInProgress || getNoteInProgress}
-                  label={i18n.translate(
-                    'xpack.securitySolution.endpoint.protectionUpdates.enableAutomaticUpdates',
-                    {
-                      defaultMessage: 'Enable automatic updates',
-                    }
-                  )}
-                  labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
-                  checked={automaticUpdatesEnabled}
-                  onChange={toggleAutomaticUpdates}
-                  data-test-subj={'protection-updates-manifest-switch'}
-                />
-              ) : (
-                <EuiText data-test-subj={'protection-updates-state-view-mode'}>
-                  {viewModeSwitchLabel}
-                </EuiText>
-              )}
+              <EuiSwitch
+                disabled={
+                  isUpdating ||
+                  createNoteInProgress ||
+                  getNoteInProgress ||
+                  !canWritePolicyManagement
+                }
+                label={i18n.translate(
+                  'xpack.securitySolution.endpoint.protectionUpdates.enableAutomaticUpdates',
+                  {
+                    defaultMessage: 'Enable automatic updates',
+                  }
+                )}
+                labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
+                checked={automaticUpdatesEnabled}
+                onChange={toggleAutomaticUpdates}
+                data-test-subj={'protection-updates-manifest-switch'}
+              />
             </EuiShowFor>
           </EuiFlexGroup>
 

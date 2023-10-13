@@ -116,13 +116,14 @@ describe('Policy Behaviour Protection Card', () => {
         'Windows, Mac, Linux ',
         `Malicious behavior protections ${config.enabled ? 'enabled' : 'disabled'}`,
         'Protection level',
+        'Detect',
         'Prevent',
-        ...(config.reputationServices
-          ? ['Reputation serviceInfo', "Don't use reputation service"]
-          : []),
+        ...(config.reputationServices ? ['Reputation serviceInfo', 'Reputation service'] : []),
         'User notification',
         'Agent version 7.15+',
-        ...(config.notifyUser ? ['Notify user', 'Notification message', '—'] : ['Notify user']),
+        ...(config.notifyUser
+          ? ['Notify user', 'Customize notification message', 'Info']
+          : ['Notify user']),
         ...(config.prebuiltRules
           ? [
               'View related detection rules. ',

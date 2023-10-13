@@ -280,7 +280,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
       [keyPath, onChange, policy]
     );
 
-    return isEditMode ? (
+    return (
       <EuiCheckbox
         key={keyPath}
         id={keyPath}
@@ -288,11 +288,9 @@ const EventCheckbox = memo<EventCheckboxProps>(
         data-test-subj={dataTestSubj}
         checked={isChecked}
         onChange={checkboxOnChangeHandler}
-        disabled={disabled}
+        disabled={disabled || !isEditMode}
       />
-    ) : isChecked ? (
-      <div data-test-subj={dataTestSubj}>{displayLabel}</div>
-    ) : null;
+    );
   }
 );
 EventCheckbox.displayName = 'EventCheckbox';

@@ -171,7 +171,8 @@ describe('Policy form Detect Prevent Protection level component', () => {
           'User notification' +
             'Agent version 7.11+' +
             'Notify user' +
-            'Notification message' +
+            'Customize notification message' +
+            'Info' +
             'you got owned'
         )
       );
@@ -182,7 +183,9 @@ describe('Policy form Detect Prevent Protection level component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('User notificationAgent version 7.11+Notify userNotification message—')
+        exactMatchText(
+          'User notificationAgent version 7.11+Notify userCustomize notification messageInfo'
+        )
       );
     });
 

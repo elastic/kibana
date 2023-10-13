@@ -38,7 +38,6 @@ export type DetectPreventProtectionLevelProps = PolicyFormComponentCommonProps &
 
 export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLevelProps>(
   ({ policy, protection, osList, mode, onChange, 'data-test-subj': dataTestSubj }) => {
-    const isEditMode = mode === 'edit';
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const radios: Immutable<
@@ -62,16 +61,6 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLevelPro
       ];
     }, []);
 
-    const currentProtectionLevelLabel = useMemo(() => {
-      const radio = radios.find((item) => item.id === policy.windows[protection].mode);
-
-      if (radio) {
-        return radio.label;
-      }
-
-      return PREVENT_LABEL;
-    }, [policy.windows, protection, radios]);
-
     return (
       <div data-test-subj={getTestId()}>
         <SettingCardHeader>
@@ -82,26 +71,22 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLevelPro
         </SettingCardHeader>
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
-          {isEditMode ? (
-            radios.map(({ label, id, flexGrow }) => {
-              return (
-                <EuiFlexItem grow={flexGrow} key={id}>
-                  <ProtectionRadio
-                    policy={policy}
-                    onChange={onChange}
-                    mode={mode}
-                    protection={protection}
-                    protectionMode={id}
-                    osList={osList}
-                    label={label}
-                    data-test-subj={getTestId(`${id}Radio`)}
-                  />
-                </EuiFlexItem>
-              );
-            })
-          ) : (
-            <>{currentProtectionLevelLabel}</>
-          )}
+          {radios.map(({ label, id, flexGrow }) => {
+            return (
+              <EuiFlexItem grow={flexGrow} key={id}>
+                <ProtectionRadio
+                  policy={policy}
+                  onChange={onChange}
+                  mode={mode}
+                  protection={protection}
+                  protectionMode={id}
+                  osList={osList}
+                  label={label}
+                  data-test-subj={getTestId(`${id}Radio`)}
+                />
+              </EuiFlexItem>
+            );
+          })}
         </EuiFlexGroup>
       </div>
     );

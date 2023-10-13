@@ -144,7 +144,6 @@ export const getPolicySettingsFormTestSubjects = (
       card: antivirusTestSubj(),
       enableDisableSwitch: antivirusTestSubj('switch'),
       osValueContainer: antivirusTestSubj('osValueContainer'),
-      viewOnlyValue: antivirusTestSubj('value'),
     },
     advancedSection: {
       container: advancedSectionTestSubj(''),
@@ -168,11 +167,18 @@ export const getPolicySettingsFormTestSubjects = (
 };
 
 export const expectIsViewOnly = (ele: HTMLElement): void => {
-  expect(
-    ele.querySelectorAll(
+  // expect(
+  //   ele.querySelectorAll(
+  //     'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
+  //   )
+  // ).toHaveLength(0);
+  ele
+    .querySelectorAll(
       'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
     )
-  ).toHaveLength(0);
+    .forEach((item) => {
+      expect(item.getAttribute('disabled')).toBe('');
+    });
 };
 
 /**

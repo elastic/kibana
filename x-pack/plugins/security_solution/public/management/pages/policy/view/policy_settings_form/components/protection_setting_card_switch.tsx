@@ -133,12 +133,9 @@ export const ProtectionSettingCardSwitch = React.memo(
       [policy, onChange, additionalOnSwitchChange, osList, isPlatinumPlus, protection]
     );
 
-    if (!isEditMode) {
-      return <span data-test-subj={getTestId()}>{switchLabel}</span>;
-    }
-
     return (
       <EuiSwitch
+        disabled={!isEditMode}
         label={switchLabel}
         labelProps={{ 'data-test-subj': getTestId('label') }}
         checked={selected}
