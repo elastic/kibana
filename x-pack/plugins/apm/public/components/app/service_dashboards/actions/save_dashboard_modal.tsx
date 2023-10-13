@@ -167,7 +167,7 @@ export function SaveDashboardModal({
             placeholder={i18n.translate(
               'xpack.apm.serviceDashboards.selectDashboard.placeholder',
               {
-                defaultMessage: 'Select dasbboard',
+                defaultMessage: 'Select dashboard',
               }
             )}
             singleSelection={{ asPlainText: true }}

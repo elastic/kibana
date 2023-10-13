@@ -31,7 +31,7 @@ export function DashboardSelector({
         ...history.location,
         search: fromQuery({
           ...toQuery(location.search),
-          dashboardId: currentDashboard?.id,
+          dashboardId: currentDashboard?.dashboardSavedObjectId,
         }),
       }),
     // It should only update when loaded

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
@@ -35,6 +35,8 @@ import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { getFilters } from '../metrics/static_dashboard';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
@@ -53,8 +55,8 @@ export function ServiceDashboards() {
     useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const { dataView } = useApmDataView();
+  const { share } = useApmPluginContext();
 
   const { data, status, refetch } = useFetcher(
     (callApmApi) => {
@@ -146,6 +148,34 @@ export function ServiceDashboards() {
     );
   };
 
+  const getLocatorParams = useCallback(
+    (params) => ({
+      serviceName,
+      dashboardId: params.dashboardId,
+      query: {
+        environment,
+        kuery: params.query?.query ?? kuery,
+        rangeFrom: params.timeRange?.from ?? rangeFrom,
+        rangeTo: params.timeRange?.to ?? rangeTo,
+        dashboardId: params.dashboardId,
+      },
+    }),
+    [serviceName, environment, kuery, rangeFrom, rangeTo]
+  );
+
+  const locator = useMemo(() => {
+    const baseLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
+    if (!baseLocator) return;
+
+    return {
+      ...baseLocator,
+      getRedirectUrl: (params: SerializableRecord) =>
+        baseLocator.getRedirectUrl(getLocatorParams(params)),
+      navigate: (params: SerializableRecord) =>
+        baseLocator.navigate(getLocatorParams(params)),
+    };
+  }, [share, getLocatorParams]);
+
   return (
     <EuiPanel hasBorder={true}>
       {status === FETCH_STATUS.LOADING ? (
@@ -210,7 +240,8 @@ export function ServiceDashboards() {
             <EuiSpacer size="l" />
             {currentDashboard && (
               <DashboardRenderer
-                savedObjectId={currentDashboard.dashboardSavedObjectId}
+                locator={locator}
+                savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
                 ref={setDashboard}
               />
