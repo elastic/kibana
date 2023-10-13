@@ -10,7 +10,8 @@ import { checkActionItemsInResults, loadRuleAlerts } from '../../tasks/live_quer
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/168743
+describe.skip(
   'Alert Flyout Automated Action Results',
   {
     tags: ['@ess', '@serverless'],
@@ -48,7 +49,7 @@ describe(
           // @ts-expect-error-next-line href string - check types
           cy.visit($href);
           cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-            cy.contains(`action_data.query`);
+            cy.contains('action_data{ "query":');
           });
           cy.contains(discoverRegex);
         });

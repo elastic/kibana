@@ -6,25 +6,50 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { copyToClipboard } from '@elastic/eui';
 import { RightPanelContext } from '../context';
 import { JsonTab } from './json_tab';
-import { JSON_TAB_CONTENT_TEST_ID } from './test_ids';
+import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 
-describe('<JsonTab />', () => {
-  it('should render code block component', () => {
-    const contextValue = {
-      searchHit: {
-        some_field: 'some_value',
-      },
-    } as unknown as RightPanelContext;
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(),
+  EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
+}));
 
-    const { getByTestId } = render(
+const searchHit = {
+  some_field: 'some_value',
+};
+const contextValue = {
+  searchHit,
+} as unknown as RightPanelContext;
+
+const renderJsonTab = () =>
+  render(
+    <IntlProvider locale="en">
       <RightPanelContext.Provider value={contextValue}>
         <JsonTab />
       </RightPanelContext.Provider>
-    );
+    </IntlProvider>
+  );
+
+describe('<JsonTab />', () => {
+  it('should render json code editor component', () => {
+    const { getByTestId } = renderJsonTab();
 
     expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should copy to clipboard', () => {
+    const { getByTestId } = renderJsonTab();
+
+    const copyToClipboardButton = getByTestId(JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID);
+    expect(copyToClipboardButton).toBeInTheDocument();
+
+    fireEvent.click(copyToClipboardButton);
+
+    expect(copyToClipboard).toHaveBeenCalledWith(JSON.stringify(searchHit, null, 2));
   });
 });
