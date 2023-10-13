@@ -145,6 +145,11 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegrationGcp.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+            credentialFileName
+        ).to.be(true);
       });
 
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {
@@ -163,6 +168,11 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegrationGcp.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
+            credentialJsonName
+        ).to.be(true);
       });
     });
   });

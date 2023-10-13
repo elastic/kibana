@@ -72,6 +72,14 @@ export function AddCisIntegrationFormPageProvider({
       await credentialTypeBox.click();
       await chosenOption.click();
     },
+
+    getFieldValueInEditPage: async (field: string) => {
+      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+      const integrationList = await testSubjects.findAll('integrationNameLink');
+      await integrationList[0].click();
+      const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
+      return fieldValue;
+    },
   };
 
   const navigateToAddIntegrationCspmPage = async () => {
@@ -82,8 +90,16 @@ export function AddCisIntegrationFormPageProvider({
     );
   };
 
+  const navigateToIntegrationCspList = async () => {
+    await PageObjects.common.navigateToActualUrl(
+      'integrations', // Defined in Security Solution plugin
+      '/detail/cloud_security_posture/policies'
+    );
+  };
+
   return {
     cisGcp,
     navigateToAddIntegrationCspmPage,
+    navigateToIntegrationCspList,
   };
 }
