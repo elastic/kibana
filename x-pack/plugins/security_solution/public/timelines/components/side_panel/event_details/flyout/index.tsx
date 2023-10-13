@@ -9,6 +9,7 @@ import { EntityType } from '@kbn/timelines-plugin/common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useGetFieldsData } from '../../../../../common/hooks/use_get_fields_data';
 import { TimelineId } from '../../../../../../common/types';
 import { useHostIsolationTools } from '../use_host_isolation_tools';
 import { FlyoutHeaderContent } from './header';
@@ -39,6 +40,7 @@ export const useToGetInternalFlyout = () => {
       skip: !alert.id,
     }
   );
+  const getFieldsData = useGetFieldsData(rawEventData?.fields);
 
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
@@ -116,6 +118,7 @@ export const useToGetInternalFlyout = () => {
           timestamp={timestamp}
           scopeId={TimelineId.casePage}
           refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       );
     },
@@ -130,6 +133,7 @@ export const useToGetInternalFlyout = () => {
       showAlertDetails,
       timestamp,
       refetchFlyoutData,
+      getFieldsData,
     ]
   );
 
