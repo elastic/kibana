@@ -20,7 +20,7 @@ import {
   RuleReferencesSchema,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_exceptions';
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 import {
   createRule,
@@ -29,8 +29,8 @@ import {
   createExceptionList,
   deleteAllAlerts,
   createAlertsIndex,
-} from '../../../../utils';
-import { deleteAllExceptions } from '../../../../../../../lists_api_integration/utils';
+} from '../../../utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
