@@ -156,10 +156,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.alerting.setConnectorName('test-connector');
         await ml.alerting.setWebhookUrl('https://www.elastic.co');
         await ml.alerting.clickSaveActionButton();
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-action-score-matched',
+          screenshotDirectories,
+          1920,
+          1400
+        );
         await ml.alerting.openAddRuleVariable();
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot(
           'ml-anomaly-alert-messages',
+          screenshotDirectories,
+          1920,
+          1400
+        );
+        const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+        await actionFrequency.click();
+        const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+        await actionSummary.click();
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-action-summary',
           screenshotDirectories,
           1920,
           1400
