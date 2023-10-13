@@ -308,6 +308,16 @@ const navigationDefinition: ProjectNavigationDefinition = {
         type: 'navGroup',
         preset: 'ml',
       },
+      {
+        type: 'navItem',
+        title: 'Custom link at root level',
+      },
+      {
+        type: 'navItem',
+        icon: 'logoElastic',
+        link: 'ml',
+        title: 'Link at root level + icon',
+      },
       // And specific links from analytics
       {
         type: 'navGroup',
