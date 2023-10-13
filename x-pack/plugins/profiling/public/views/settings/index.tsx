@@ -6,7 +6,6 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   profilingCo2PerKWH,
@@ -80,22 +79,6 @@ export function Settings() {
                 })}
               </EuiText>
             </EuiTitle>
-          </EuiPanel>
-          <EuiPanel hasShadow={false}>
-            {settingKeys.map((settingKey) => {
-              const editableConfig = settingsEditableConfig[settingKey];
-              return (
-                <LazyField
-                  key={settingKey}
-                  setting={editableConfig}
-                  handleChange={handleFieldChange}
-                  enableSaving
-                  docLinks={docLinks.links}
-                  toasts={notifications.toasts}
-                  unsavedChanges={unsavedChanges[settingKey]}
-                />
-              );
-            })}
           </EuiPanel>
         </EuiPanel>
         {!isEmpty(unsavedChanges) && (

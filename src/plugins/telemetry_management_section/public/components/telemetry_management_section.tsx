@@ -21,7 +21,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
@@ -56,7 +55,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
   render() {
     const { telemetryService } = this.props;
-    const { showExample, enabled, processing } = this.state;
+    const { showExample } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -90,30 +89,6 @@ export class TelemetryManagementSection extends Component<Props, State> {
             <EuiSplitPanel.Inner>
               {this.maybeGetAppliesSettingMessage()}
               <EuiSpacer size="s" />
-              <LazyField
-                setting={{
-                  type: 'boolean',
-                  name: 'Usage collection',
-                  displayName: i18n.translate('telemetry.provideUsageDataTitle', {
-                    defaultMessage: 'Share usage with Elastic',
-                  }),
-                  value: enabled,
-                  description: this.renderDescription(),
-                  defVal: true,
-                  ariaName: i18n.translate('telemetry.provideUsageDataAriaName', {
-                    defaultMessage: 'Share usage with Elastic',
-                  }),
-                  requiresPageReload: false,
-                  category: [],
-                  isOverridden: false,
-                  isCustom: true,
-                }}
-                loading={processing}
-                docLinks={this.props.docLinks}
-                toasts={this.props.toasts}
-                handleChange={this.toggleOptIn}
-                enableSaving={this.props.enableSaving}
-              />
             </EuiSplitPanel.Inner>
           </EuiForm>
         </EuiSplitPanel.Outer>

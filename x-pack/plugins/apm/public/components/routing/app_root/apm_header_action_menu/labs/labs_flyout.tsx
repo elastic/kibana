@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -137,25 +136,6 @@ export function LabsFlyout({ onClose }: Props) {
         <EuiSkeletonText lines={3} />
       ) : (
         <>
-          <EuiFlyoutBody>
-            {labsItems.map((settingKey, i) => {
-              const editableConfig = settingsEditableConfig[settingKey];
-              return (
-                <>
-                  <LazyField
-                    key={settingKey}
-                    setting={editableConfig}
-                    handleChange={handleFieldChange}
-                    enableSaving
-                    docLinks={docLinks.links}
-                    toasts={notifications.toasts}
-                    unsavedChanges={unsavedChanges[settingKey]}
-                  />
-                  <EuiHorizontalRule />
-                </>
-              );
-            })}
-          </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>

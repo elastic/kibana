@@ -133,7 +133,6 @@
     "@kbn/ace": "link:packages/kbn-ace",
     "@kbn/actions-plugin": "link:x-pack/plugins/actions",
     "@kbn/actions-simulators-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/actions_simulators",
-    "@kbn/advanced-settings-plugin": "link:src/plugins/advanced_settings",
     "@kbn/aiops-components": "link:x-pack/packages/ml/aiops_components",
     "@kbn/aiops-plugin": "link:x-pack/plugins/aiops",
     "@kbn/aiops-utils": "link:x-pack/packages/ml/aiops_utils",

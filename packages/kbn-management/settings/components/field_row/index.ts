@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { lazy } from 'react';
+
 export { FieldRow, type FieldRowProps } from './field_row';
 export { FieldRowProvider, FieldRowKibanaProvider, type FieldRowProviderProps } from './services';
 export type {
@@ -14,3 +16,7 @@ export type {
   KibanaDependencies,
   Services,
 } from './types';
+
+export const LazyField = lazy(() =>
+  import('./field_row').then(({ FieldRow }) => ({ default: FieldRow }))
+);

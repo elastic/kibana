@@ -179,30 +179,28 @@ export class ManagementPlugin
 
     // Register the Settings app only if in serverless, until we integrate the SettingsApplication into the Advanced settings plugin
     // Otherwise, it will be double registered from the Advanced settings plugin
-    if (plugins.serverless) {
-      const title = kbnI18n.translate('management.settings.settingsLabel', {
-        defaultMessage: 'Advanced Settings',
-      });
+    const title = kbnI18n.translate('management.settings.settingsLabel', {
+      defaultMessage: 'Advanced Settings',
+    });
 
-      this.managementSections.definedSections.kibana.registerApp({
-        id: 'settings',
-        title,
-        order: 3,
-        async mount({ element, setBreadcrumbs, history }) {
-          setBreadcrumbs([{ text: title }]);
+    this.managementSections.definedSections.kibana.registerApp({
+      id: 'settings',
+      title,
+      order: 3,
+      async mount({ element, setBreadcrumbs, history }) {
+        setBreadcrumbs([{ text: title }]);
 
-          ReactDOM.render(
-            <KibanaRenderContextProvider {...core}>
-              <KibanaSettingsApplication {...{ ...core, history }} />
-            </KibanaRenderContextProvider>,
-            element
-          );
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-      });
-    }
+        ReactDOM.render(
+          <KibanaRenderContextProvider {...core}>
+            <KibanaSettingsApplication {...{ ...core, history }} />
+          </KibanaRenderContextProvider>,
+          element
+        );
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+    });
 
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>

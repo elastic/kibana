@@ -2964,10 +2964,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
-  version "0.0.0"
-  uid ""
-
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
   version "0.0.0"
   uid ""

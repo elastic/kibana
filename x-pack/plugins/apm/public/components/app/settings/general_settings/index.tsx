@@ -6,7 +6,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apmLabsButton,
@@ -80,20 +79,6 @@ export function GeneralSettings() {
   return (
     <>
       <EuiSpacer />
-      {apmSettingsKeys.map((settingKey) => {
-        const editableConfig = settingsEditableConfig[settingKey];
-        return (
-          <LazyField
-            key={settingKey}
-            setting={editableConfig}
-            handleChange={handleFieldChange}
-            enableSaving
-            docLinks={docLinks.links}
-            toasts={notifications.toasts}
-            unsavedChanges={unsavedChanges[settingKey]}
-          />
-        );
-      })}
       {!isEmpty(unsavedChanges) && (
         <BottomBarActions
           isLoading={isSaving}

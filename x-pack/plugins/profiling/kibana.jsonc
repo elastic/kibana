@@ -8,7 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "profiling"],
     "optionalPlugins": [
-      "spaces", 
+      "spaces",
       "usageCollection"
     ],
     "requiredPlugins": [
@@ -31,7 +31,6 @@
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant",
-      "advancedSettings"
     ]
   }
 }
