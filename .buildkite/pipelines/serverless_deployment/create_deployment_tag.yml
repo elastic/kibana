@@ -6,7 +6,7 @@ env:
 
 steps:
   - label: "Collect Kibana commit data"
-    command: ts-node .buildkite/scripts/serverless/generate_commit_selector.ts commits.json 20
+    command: ts-node .buildkite/scripts/serverless/generate_commit_selector.ts commits.json 50
     key: collect_data
 
   - wait: ~
