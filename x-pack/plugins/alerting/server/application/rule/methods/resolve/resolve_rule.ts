@@ -16,7 +16,7 @@ import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '
 import { Rule } from '../../types';
 import { ruleSchema } from '../../schemas';
 import { resolveRuleParamsSchema } from './schemas';
-import type { ResolvedRule } from './types';
+import type { ResolvedSanitizedRule } from '../../../../types';
 
 export interface ResolveParams {
   id: string;
@@ -25,7 +25,8 @@ export interface ResolveParams {
 export async function resolveRule<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { id }: ResolveParams
-): Promise<ResolvedRule<Params>> {
+): // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+Promise<ResolvedSanitizedRule<Params>> {
   try {
     resolveRuleParamsSchema.validate({ id });
   } catch (error) {
@@ -83,11 +84,15 @@ export async function resolveRule<Params extends RuleTypeParams = never>(
     return {
       ...(migratedRule as Rule<never>),
       ...resolveResponse,
-    };
+      // TODO (http-versioning): Remove this cast, this enables us to move forward
+      // without fixing all of other solution types
+    } as ResolvedSanitizedRule;
   }
 
   return {
     ...rule,
     ...resolveResponse,
-  };
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+  } as ResolvedSanitizedRule;
 }
