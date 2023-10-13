@@ -20,11 +20,12 @@ export function parseActionRunOutcomeByConnectorTypesBucket(
   const connectorTypes = connectorTypeBuckets as AvgActionRunOutcomeByConnectorTypeBucket[];
   return connectorTypes.reduce((acc, connectorType) => {
     const outcomes = connectorType.outcome?.count?.buckets ?? [];
-    return {
-      ...acc,
-      [replaceFirstAndLastDotSymbols(connectorType.key)]: outcomes.reduce((accBucket, bucket) => {
-        return { ...accBucket, [replaceFirstAndLastDotSymbols(bucket.key)]: bucket.doc_count || 0 };
-      }, {}),
-    };
+    (acc as Record<string, unknown>)[replaceFirstAndLastDotSymbols(connectorType.key)] =
+      outcomes.reduce((accBucket, bucket) => {
+        (accBucket as Record<string, unknown>)[replaceFirstAndLastDotSymbols(bucket.key)] =
+          bucket.doc_count || 0;
+        return accBucket;
+      }, {});
+    return acc;
   }, {});
 }

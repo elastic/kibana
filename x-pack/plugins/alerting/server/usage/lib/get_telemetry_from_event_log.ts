@@ -436,28 +436,16 @@ export function parseExecutionFailureByRuleType(
 
       if (acc[reason]) {
         if (acc[reason][ruleType]) {
-          return {
-            ...acc,
-            [reason]: {
-              ...acc[reason],
-              [ruleType]: acc[reason][ruleType] + bucket.doc_count,
-            },
-          };
+          acc[reason][ruleType] = acc[reason][ruleType] + bucket.doc_count;
+        } else {
+          acc[reason][ruleType] = bucket.doc_count;
         }
-        return {
-          ...acc,
-          [reason]: {
-            ...acc[reason],
-            [ruleType]: bucket.doc_count,
-          },
+      } else {
+        acc[reason] = {
+          [ruleType]: bucket.doc_count,
         };
       }
-      return {
-        ...acc,
-        [reason]: {
-          [ruleType]: bucket.doc_count,
-        },
-      };
+      return acc;
     },
     {}
   );
@@ -472,22 +460,17 @@ export function parsePercentileAggs(
   ruleTypeId?: string
 ) {
   return Object.keys(percentiles ?? {}).reduce((acc, percentileKey: string) => {
-    let result = {};
     const percentileKeyMapped = percentileFieldNameMapping[percentileKey];
     if (percentileKeyMapped) {
       if (ruleTypeId) {
-        result = {
-          [percentileKeyMapped]: {
-            [ruleTypeId]: percentiles[percentileKey] ?? 0,
-          },
+        (acc as Record<string, unknown>)[percentileKeyMapped] = {
+          [ruleTypeId]: percentiles[percentileKey] ?? 0,
         };
       } else {
-        result = {
-          [percentileKeyMapped]: percentiles[percentileKey] ?? 0,
-        };
+        (acc as Record<string, unknown>)[percentileKeyMapped] = percentiles[percentileKey] ?? 0;
       }
     }
-    return Object.assign(acc, result);
+    return acc;
   }, {});
 }
 

@@ -153,7 +153,10 @@ const handler = async ({
           errors: [...acc.errors, ...item.errors],
           rules: [...acc.rules, ...item.rules],
           accListSpecificForBulkOperation: acc.accListSpecificForBulkOperation.map(
-            (element, index) => [...element, ...item.accListSpecificForBulkOperation[index]]
+            (element, index) => {
+              element.push(...item.accListSpecificForBulkOperation[index]);
+              return element;
+            }
           ),
         };
       },

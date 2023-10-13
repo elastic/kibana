@@ -187,25 +187,27 @@ export async function getTransactionBreakdown({
     const formattedValues = formatBucket(bucket);
     const time = bucket.key;
 
-    const updatedSeries = kpiNames.reduce((p, kpiName) => {
-      const { name, percentage } = formattedValues.find(
-        (val) => val.name === kpiName
-      ) || {
-        name: kpiName,
-        percentage: null,
-      };
+    const updatedSeries = kpiNames.reduce(
+      (p, kpiName) => {
+        const { name, percentage } = formattedValues.find(
+          (val) => val.name === kpiName
+        ) || {
+          name: kpiName,
+          percentage: null,
+        };
 
-      if (!p[name]) {
-        p[name] = [];
-      }
-      return {
-        ...p,
-        [name]: p[name].concat({
+        if (!p[name]) {
+          p[name] = [];
+        }
+
+        p[name] = p[name].concat({
           x: time,
           y: percentage,
-        }),
-      };
-    }, prev);
+        });
+        return p;
+      },
+      { ...prev }
+    );
 
     const lastValues = Object.values(updatedSeries).map(last);
 
