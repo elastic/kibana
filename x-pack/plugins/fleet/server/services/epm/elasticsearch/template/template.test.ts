@@ -1134,7 +1134,7 @@ describe('EPM template', () => {
       properties: {},
       dynamic_templates: [
         {
-          'numeric_labels': {
+          numeric_labels: {
             match_mapping_type: '*',
             path_match: 'numeric_labels.*',
             mapping: {
@@ -1167,8 +1167,8 @@ describe('EPM template', () => {
             path_match: 'aggregate.*',
             mapping: {
               type: 'aggregate_metric_double',
-              metrics: ["min", "max", "sum", "value_count"],
-              default_metric: "max"
+              metrics: ['min', 'max', 'sum', 'value_count'],
+              default_metric: 'max',
             },
           },
         },

@@ -206,7 +206,7 @@ function _generateMappings(
         if (type === 'object' && field.object_type) {
           const pathMatch = path.includes('*') ? path : `${path}.*`;
 
-          let dynProperties: Properties = getDefaultProperties(field);
+          const dynProperties: Properties = getDefaultProperties(field);
           let matchingType: string | undefined;
           switch (field.object_type) {
             case 'keyword':
@@ -300,12 +300,12 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? field.object_type;
             break;
           case 'group':
-             const fields = field.fields.map((dynField) => ({
-               ...dynField,
-               type: 'object',
-               object_type: dynField.object_type ?? dynField.type,
-             }))
-             _generateMappings(fields, {
+            const fields = field.fields.map((dynField) => ({
+              ...dynField,
+              type: 'object',
+              object_type: dynField.object_type ?? dynField.type,
+            }));
+            _generateMappings(fields, {
               ...ctx,
               groupFieldName: ctx.groupFieldName
                 ? `${ctx.groupFieldName}.${field.name}`
@@ -313,7 +313,9 @@ function _generateMappings(
             });
             break;
           default:
-            throw new Error(`no dynamic mapping generated for field ${path} of type ${field.object_type}`);
+            throw new Error(
+              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            );
         }
 
         if (dynProperties && matchingType) {
