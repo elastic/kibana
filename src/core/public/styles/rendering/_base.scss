@@ -19,7 +19,7 @@
   pointer-events: none;
   visibility: hidden;
   position: fixed;
-  top: var(--euiFixedHeadersOffset, 0);
+  top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
   right: 0;
   bottom: 0;
   left: 0;
@@ -41,7 +41,6 @@
 
 // Conditionally override :root CSS fixed header variable. Updating `--euiFixedHeadersOffset`
 // on the body will cause all child EUI components to automatically update their offsets
-
 .kbnBody--hasHeaderBanner {
   --euiFixedHeadersOffset: var(--kbnHeaderOffsetWithBanner);
 
@@ -56,9 +55,25 @@
     top: var(--kbnHeaderBannerHeight);
   }
 }
+
+// Set a body CSS variable for the app container to use - calculates the total
+// height of all fixed headers + the sticky action menu toolbar
+.kbnBody--hasProjectActionMenu {
+  --kbnAppHeadersOffset: calc(var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight));
+
+  &.kbnBody--hasHeaderBanner {
+    --kbnAppHeadersOffset: calc(var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight));
+  }
+}
+
 .kbnBody--chromeHidden {
   --euiFixedHeadersOffset: 0;
-}
-.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
-  --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
+
+  &.kbnBody--hasHeaderBanner {
+    --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
+  }
+
+  &.kbnBody--hasProjectActionMenu {
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
+  }
 }
