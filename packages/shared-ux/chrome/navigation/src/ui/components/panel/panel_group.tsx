@@ -64,19 +64,20 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
   const renderChildren = useCallback(() => {
     if (!filteredChildren) return null;
 
-    return filteredChildren.map((item, i) =>
-      item.children && item.renderAs !== 'item' ? (
+    return filteredChildren.map((item, i) => {
+      const isItem = item.renderAs === 'item' || !item.children;
+      return isItem ? (
+        <PanelNavItem key={item.id} item={item} />
+      ) : (
         <Fragment key={item.id}>
           <PanelGroup navNode={item} />
           {i < totalChildren - 1 && <EuiSpacer />}
         </Fragment>
-      ) : (
-        <PanelNavItem key={item.id} item={item} />
-      )
-    );
+      );
+    });
   }, [filteredChildren, totalChildren]);
 
-  if (!navNode.children?.length) {
+  if (!filteredChildren?.length) {
     return null;
   }
 

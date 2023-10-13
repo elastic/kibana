@@ -117,7 +117,7 @@ function validateNodeProps<
   }
   if (renderAs === 'panelOpener' && !link) {
     throw new Error(
-      `[Chrome navigation] Error in node [${id}]. If "openPanel" is provided, a "link" must also be provided.`
+      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
     );
   }
   if (appendHorizontalRule && !isGroup) {
