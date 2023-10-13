@@ -148,11 +148,9 @@ export const getAllListItemTypes = async (
   });
 
   // Dictionary of found items
-  return transformedResponse.data.reduce(
-    (acc, item) => ({
-      ...acc,
-      [item.item_id]: item,
-    }),
-    {}
-  );
+  return transformedResponse.data.reduce((acc, item) => {
+    // eslint-disable-next-line no-param-reassign
+    acc[item.item_id] = item;
+    return acc;
+  }, {} as Record<string, ExceptionListItemSchema>);
 };

@@ -244,8 +244,8 @@ const getVisibleControlPanels = (dataView: DataView | undefined) =>
 export const getVisibleControlPanelsConfig = (dataView?: DataView) => {
   return getVisibleControlPanels(dataView).reduce((panelsMap, panelKey) => {
     const config = controlPanelConfigs[panelKey];
-
-    return { ...panelsMap, [panelKey]: config };
+    panelsMap[panelKey] = config;
+    return panelsMap;
   }, {} as ControlPanels);
 };
 

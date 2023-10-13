@@ -20,6 +20,7 @@ export interface ExceptionListQueryInfo {
   listId: string;
   namespaceType: NamespaceType;
 }
+
 /**
  * Helper to build out a filter using list_id
  * @param objects {array} - exception lists to add to filter
@@ -129,11 +130,9 @@ export const getAllListTypes = async (
   }
 
   // Dictionary of found lists
-  return foundListsResponse.data.reduce(
-    (acc, list) => ({
-      ...acc,
-      [list.list_id]: list,
-    }),
-    {}
-  );
+  return foundListsResponse.data.reduce((acc, list) => {
+    // eslint-disable-next-line no-param-reassign
+    acc[list.list_id] = list;
+    return acc;
+  }, {} as Record<string, ExceptionListSchema>);
 };

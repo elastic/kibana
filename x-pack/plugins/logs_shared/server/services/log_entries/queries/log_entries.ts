@@ -87,13 +87,10 @@ const createHighlightClause = (highlightQuery: JsonObject | undefined, fields: s
     ? {
         highlight: {
           boundary_scanner: 'word' as const,
-          fields: fields.reduce(
-            (highlightFieldConfigs, fieldName) => ({
-              ...highlightFieldConfigs,
-              [fieldName]: {},
-            }),
-            {}
-          ),
+          fields: fields.reduce((highlightFieldConfigs, fieldName) => {
+            (highlightFieldConfigs as Record<string, unknown>)[fieldName] = {};
+            return highlightFieldConfigs;
+          }, {}),
           fragment_size: 1,
           number_of_fragments: 100,
           post_tags: [''],

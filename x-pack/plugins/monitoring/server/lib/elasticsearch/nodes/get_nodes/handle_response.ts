@@ -44,10 +44,8 @@ export function handleResponse(
       accum: { [nodeId: string]: any },
       { key: nodeId, by_date: byDate }: { key: string; by_date: any }
     ) => {
-      return {
-        ...accum,
-        [nodeId]: uncovertMetricNames(byDate),
-      };
+      accum[nodeId] = uncovertMetricNames(byDate);
+      return accum;
     },
     {}
   );

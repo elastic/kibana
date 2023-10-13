@@ -12,7 +12,8 @@ export const mergePipelineVersions = (versions: PipelineVersion[]): PipelineVers
     (acc: { [key: string]: PipelineVersion }, pipeline: PipelineVersion) => {
       const existing = acc[pipeline.hash];
       if (!existing) {
-        return { ...acc, [pipeline.hash]: pipeline };
+        acc[pipeline.hash] = pipeline;
+        return acc;
       }
 
       existing.firstSeen = Math.min(existing.firstSeen, pipeline.firstSeen);
