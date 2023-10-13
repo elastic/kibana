@@ -7,6 +7,16 @@
 # ENSURE ANY CHANGE MADE TO THIS FILE IS REFLECTED IN THOSE FILES AS WELL.
 
 steps:
+  - label: ":pipeline::kibana::seedling: Trigger SLO check"
+    trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
+    build:
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+      env:
+        TARGET_ENV: production
+        CHECK_SLO: true
+        CHECK_SLO_TAG: kibana
+    soft_fail: true
+
   - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
     trigger: "ess-k8s-production-e2e-tests" # https://buildkite.com/elastic/ess-k8s-production-e2e-tests
     build:
