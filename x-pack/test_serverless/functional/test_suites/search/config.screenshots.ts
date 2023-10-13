@@ -19,5 +19,5 @@ export default createTestConfig({
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.ad.enabled=false', 'xpack.ml.dfa.enabled=false'],
+  esServerArgs: [],
 });
