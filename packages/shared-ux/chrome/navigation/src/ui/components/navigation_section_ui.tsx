@@ -194,13 +194,7 @@ const nodeToEuiCollapsibleNavProps = (
   const accordionProps: Partial<EuiAccordionProps> | undefined = isItem
     ? undefined
     : {
-        // initialIsOpen: isActive,
         initialIsOpen: true, // FIXME open state is controlled on component mount
-        // forceState: isCollapsed ? 'closed' : 'open',
-        // onToggle: (isOpen) => {
-        //   setIsCollapsed(!isOpen);
-        //   setDoCollapseFromActiveState(false);
-        // },
         ...navNode.accordionProps,
       };
 

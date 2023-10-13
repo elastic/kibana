@@ -16,8 +16,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { RecentlyAccessedProps } from './components';
 
-export type NonEmptyArray<T> = [T, ...T[]];
-
 /**
  * @public
  *
@@ -76,8 +74,7 @@ export interface GroupDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'>,
-    Required<Pick<NodeDefinition<LinkId, Id, ChildrenId>, 'children'>> {
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navGroup';
   /**
    * Flag to indicate if the group is initially collapsed or not.
@@ -93,6 +90,7 @@ export interface GroupDefinition<
    * Pass props to the EUI accordion component used to represent a nav group
    */
   accordionProps?: Partial<EuiAccordionProps>;
+  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**
@@ -104,9 +102,9 @@ export interface PresetDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children'> {
-  type: 'navGroup';
-  preset?: NavigationGroupPreset;
+> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
+  type: 'preset';
+  preset: NavigationGroupPreset;
 }
 
 /**
@@ -151,17 +149,21 @@ export type ProjectNavigationTreeDefinition<
  *
  * Definition for the complete navigation tree, including body and footer
  */
-export interface NavigationTreeDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
+export interface NavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
   /**
    * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
-  body?: Array<RootNavigationItemDefinition<LinkId>>;
+  body?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
-  footer?: Array<RootNavigationItemDefinition<LinkId>>;
+  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**
@@ -170,19 +172,23 @@ export interface NavigationTreeDefinition<LinkId extends AppDeepLinkId = AppDeep
  * A project navigation definition that can be passed to the `<DefaultNavigation />` component
  * or when calling `setNavigation()` on the serverless plugin.
  */
-export interface ProjectNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
+export interface ProjectNavigationDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave
    * all the other navigation items to the default (Recently viewed items, Management, etc.)
    */
-  projectNavigationTree?: ProjectNavigationTreeDefinition<LinkId>;
+  projectNavigationTree?: ProjectNavigationTreeDefinition<LinkId, Id, ChildrenId>;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
    * if both are provided.
    */
-  navigationTree?: NavigationTreeDefinition<LinkId>;
+  navigationTree?: NavigationTreeDefinition<LinkId, Id, ChildrenId>;
 }
 
 /**

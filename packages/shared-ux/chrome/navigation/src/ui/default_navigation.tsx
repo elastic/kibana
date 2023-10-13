@@ -16,7 +16,6 @@ import type {
   GroupDefinition,
   PresetDefinition,
   NavigationTreeDefinition,
-  NonEmptyArray,
   ProjectNavigationDefinition,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
@@ -62,7 +61,13 @@ const getDefaultNavigationTree = (
       {
         type: 'recentlyAccessed',
       },
-      ...projectDefinition.map((def) => ({ ...def, type: 'navGroup' as const })),
+      ...projectDefinition.map((def) => {
+        if ((def as GroupDefinition).children) {
+          return { children: [], ...def, type: 'navGroup' as const };
+        } else {
+          return { ...def, type: 'navItem' as const };
+        }
+      }),
       {
         type: 'navGroup',
         ...getPresets('analytics'),
@@ -74,7 +79,7 @@ const getDefaultNavigationTree = (
     ],
     footer: [
       {
-        type: 'navGroup',
+        type: 'navItem',
         id: 'devTools',
         title: i18n.translate('sharedUXPackages.chrome.sideNavigation.devTools', {
           defaultMessage: 'Developer tools',
@@ -121,7 +126,7 @@ function serializeNode<
   T extends {
     id?: string;
     link?: LinkId;
-    children?: NonEmptyArray<{ id?: string; link?: LinkId }>;
+    children?: Array<{ id?: string; link?: LinkId }>;
   },
   LinkId extends AppDeepLinkId = AppDeepLinkId
 >(item: T, depth: number, index: number): T & { id: string } {

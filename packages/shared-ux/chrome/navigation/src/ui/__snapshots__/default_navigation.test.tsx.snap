@@ -606,13 +606,13 @@ Array [
     "icon": "editorCodeBlock",
     "id": "devTools",
     "isActive": false,
-    "isGroup": true,
+    "isGroup": false,
     "path": Array [
       "devTools",
     ],
     "sideNavStatus": "visible",
     "title": "Developer tools",
-    "type": "navGroup",
+    "type": "navItem",
   },
   Object {
     "breadcrumbStatus": "hidden",

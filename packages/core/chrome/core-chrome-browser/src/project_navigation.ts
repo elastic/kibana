@@ -53,8 +53,6 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
-type NonEmptyArray<T> = [T, ...T[]];
-
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -225,7 +223,7 @@ export interface NodeDefinition<
   /** Cloud link id */
   cloudLink?: CloudLinkId;
   /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
-  children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
+  children?: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**

@@ -26,11 +26,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type {
-  ChromeNavLink,
-  ChromeProjectNavigationNode,
-  NodeDefinition,
-} from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../../types';
@@ -38,7 +34,7 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
-import type { GroupDefinition, NonEmptyArray, ProjectNavigationDefinition } from './types';
+import type { GroupDefinition, ProjectNavigationDefinition } from './types';
 import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
@@ -131,7 +127,7 @@ const deepLinks: ChromeNavLink[] = [
   createDeepLink('group:settings.tracing'),
 ];
 
-const simpleNavigationDefinition: ProjectNavigationDefinition = {
+const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
   projectNavigationTree: [
     {
       id: 'example_projet',
@@ -179,7 +175,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
           ],
         },
       ],
-    } as NodeDefinition<any>,
+    },
   ],
 };
 
@@ -205,7 +201,7 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
   );
 };
 
-const navigationDefinition: ProjectNavigationDefinition = {
+const navigationDefinition: ProjectNavigationDefinition<any> = {
   navigationTree: {
     body: [
       // My custom project
@@ -255,16 +251,12 @@ const navigationDefinition: ProjectNavigationDefinition = {
                 link: 'group:settings.tracing',
                 title: 'Tracing',
               },
-              {
-                id: 'seb.nestedGroup',
-                title: 'Nested group',
-                children: [],
-              },
             ],
           },
           {
             id: 'group:settings',
             title: 'Settings',
+            renderAs: 'panelOpener',
             children: [
               {
                 link: 'group:settings.logs',
@@ -311,10 +303,10 @@ const navigationDefinition: ProjectNavigationDefinition = {
             ],
           },
         ],
-      } as GroupDefinition<any>,
+      },
       // Add ml
       {
-        type: 'navGroup',
+        type: 'preset',
         preset: 'ml',
       },
       {
@@ -338,7 +330,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
             // Hide discover and dashboard
             return item.link !== 'discover' && item.link !== 'dashboards';
           }),
-        })) as NonEmptyArray<any>,
+        })),
       },
     ],
     footer: [
