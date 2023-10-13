@@ -471,6 +471,7 @@ const fetchComparisonDriftedData = async ({
 
   console.log(`--@@Ranges response\n`, rangesResp.aggregations);
 
+  const fieldsWithNoOverlap = new Set<string>();
   for (const { field } of fields) {
     if (rangesResp.aggregations[`${field}_ranges`]) {
       const buckets = rangesResp.aggregations[`${field}_ranges`]
@@ -478,6 +479,7 @@ const fetchComparisonDriftedData = async ({
 
       if (buckets) {
         const totalSumOfAllBuckets = buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0);
+
         const fractions = buckets.map((bucket) => ({
           ...bucket,
           fraction: bucket.doc_count / totalSumOfAllBuckets,
@@ -490,15 +492,21 @@ const fetchComparisonDriftedData = async ({
           totalSumOfAllBuckets
         );
 
-        driftedRequestAggs[`${field}_ks_test`] = {
-          bucket_count_ks_test: {
-            buckets_path: `${field}_ranges>_count`,
-            alternative: ['two_sided'],
-            ...(totalSumOfAllBuckets > 0
-              ? { fractions: fractions.map((bucket) => Number(bucket.fraction.toFixed(3))) }
-              : {}),
-          },
-        };
+        if (totalSumOfAllBuckets > 0) {
+          driftedRequestAggs[`${field}_ks_test`] = {
+            bucket_count_ks_test: {
+              buckets_path: `${field}_ranges>_count`,
+              alternative: ['two_sided'],
+              ...(totalSumOfAllBuckets > 0
+                ? { fractions: fractions.map((bucket) => Number(bucket.fraction.toFixed(3))) }
+                : {}),
+            },
+          };
+        } else {
+          // If all doc_counts are 0, that means there's no overlap whatsoever
+          // in which case we don't need to make the ks test agg, because it defaults to astronomically small value
+          fieldsWithNoOverlap.add(field);
+        }
       }
     }
   }
@@ -510,12 +518,28 @@ const fetchComparisonDriftedData = async ({
     },
     signal
   );
-  console.log(`--@@Drifted request (with ks_test)\n`, {
-    ...driftedRequest,
-    body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(driftedRequestAggs) },
+  console.log(
+    `--@@Drifted request (where ks_test agg is omitted if sum of doc_count = 0 from ranges results)\n`,
+    {
+      ...driftedRequest,
+      body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(driftedRequestAggs) },
+    }
+  );
+
+  fieldsWithNoOverlap.forEach((field) => {
+    if (driftedResp.aggregations) {
+      driftedResp.aggregations[`${field}_ks_test`] = {
+        // Setting -Infinity to represent astronomically small number
+        // which would be represented as < 0.000001 in table
+        two_sided: -Infinity,
+      };
+    }
   });
 
-  console.log(`--@@Drifted request (with ks_test) response\n`, driftedResp);
+  console.log(
+    `--@@Drifted request (with ks_test) response with -Infinity set if sum of doc_count = 0 from ranges results \n`,
+    driftedResp
+  );
 
   return driftedResp;
 };
@@ -747,7 +771,7 @@ export const useFetchDataComparisonResult = (
 
         setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
 
-        // Place holder for when there might be difference data views in the future
+        // Placeholder for when there might be difference data views in the future
         const referenceIndex = initialSettings
           ? initialSettings.reference
           : currentDataView?.getIndexPattern();
