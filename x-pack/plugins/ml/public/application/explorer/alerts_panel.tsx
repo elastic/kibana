@@ -14,22 +14,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
+import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { CollapsiblePanel } from '../components/collapsible_panel';
-import { MlTooltipComponent, TooltipData } from '../components/chart_tooltip';
-import { AnnotationTimeline } from './annotation_timeline';
 import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import { useFieldFormatter } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 
 export const AlertsPanel: FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
-  const durationLabel = i18n.translate('xpack.ml.explorer.alerts.alertsDuration', {
-    defaultMessage: 'Duration',
-  });
+
   const { anomalyTimelineStateService, anomalyDetectionAlertsStateService } =
     useAnomalyExplorerContext();
 
@@ -43,10 +40,6 @@ export const AlertsPanel: FC = () => {
     anomalyTimelineStateService.getContainerWidth$(),
     anomalyTimelineStateService.getContainerWidth()
   );
-
-  const anomalyTimeLabel = i18n.translate('xpack.ml.explorer.alerts.alertAnomalyTime', {
-    defaultMessage: 'Anomaly time',
-  });
 
   const columns: Array<EuiBasicTableColumn<AnomalyDetectionAlert>> = [
     {
@@ -83,6 +76,22 @@ export const AlertsPanel: FC = () => {
     },
   ];
 
+  const yValueMap: Record<string, number> = {};
+  const chartData = alertsData
+    ?.map((alert, i) => {
+      if (!yValueMap.hasOwnProperty(alert.ruleName)) {
+        yValueMap[alert.ruleName] = Math.max(...Object.values(yValueMap), 0) + 1;
+      }
+      const yV = yValueMap[alert.ruleName];
+      return [
+        // null is required to make isolated points
+        [alert.timestamp, null, alert.ruleName],
+        [alert.timestamp, yV, alert.ruleName],
+        [alert.end_timestamp, yV, alert.ruleName],
+      ];
+    })
+    .flat();
+
   return (
     <>
       <CollapsiblePanel
@@ -102,105 +111,37 @@ export const AlertsPanel: FC = () => {
           );
         })}
       >
-        {annotationXDomain && alertsData ? (
-          <>
-            <MlTooltipComponent>
-              {(tooltipService) => (
-                <AnnotationTimeline<AnomalyDetectionAlert>
-                  key={'sdfsdfs'}
-                  label={i18n.translate('xpack.ml.explorer.swimLaneAlertsLabel', {
-                    defaultMessage: 'Alerts',
-                  })}
-                  chartWidth={swimlaneContainerWidth!}
-                  domain={annotationXDomain}
-                  data={alertsData}
-                  tooltipService={tooltipService}
-                  getTooltipContent={(item, hasMergedAnnotations) => {
-                    const tooltipData: TooltipData = [];
+        <div style={{ height: '60px', width: '100%', paddingLeft: `${Y_AXIS_LABEL_WIDTH}px` }}>
+          <Chart title={''} description={''}>
+            <Settings xDomain={annotationXDomain!} />
+            <LineSeries
+              id={'test'}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              splitSeriesAccessors={[2]}
+              data={chartData!}
+            />
+            <Axis
+              id="x"
+              position={Position.Bottom}
+              style={{
+                tickLine: { size: 0.0001, padding: 4 },
+                tickLabel: {
+                  alignment: { horizontal: Position.Left, vertical: Position.Bottom },
+                  padding: 0,
+                  offset: { x: 0, y: 0 },
+                },
+              }}
+              timeAxisLayerCount={2}
+              gridLine={{
+                visible: true,
+              }}
+            />
+          </Chart>
+        </div>
 
-                    let timespan = dateFormatter(item.timestamp);
-
-                    if (typeof item.end_timestamp !== 'undefined') {
-                      timespan += ` - ${dateFormatter(item.end_timestamp)}`;
-                    }
-
-                    if (hasMergedAnnotations) {
-                      tooltipData.push(
-                        {
-                          label: item.ruleName,
-                          value: `[${item.anomalyScore}]`,
-                          formattedValue: `[${item.anomalyScore}]`,
-                          seriesIdentifier: {
-                            key: `${item.id}_name`,
-                            specId: item.id,
-                          },
-                          isHighlighted: true,
-                          isVisible: true,
-                          color: item.color,
-                        },
-                        {
-                          label: anomalyTimeLabel,
-                          value: dateFormatter(item.anomalyTimestamp),
-                          formattedValue: dateFormatter(item.anomalyTimestamp),
-                          seriesIdentifier: {
-                            key: `${item.id}_time`,
-                            specId: item.id,
-                          },
-                          isHighlighted: true,
-                          isVisible: true,
-                          color: 'transparent',
-                        },
-                        {
-                          label: durationLabel,
-                          value: timespan,
-                          formattedValue: timespan,
-                          seriesIdentifier: {
-                            key: `${item.id}_duration`,
-                            specId: item.id,
-                          },
-                          isHighlighted: true,
-                          isVisible: true,
-                          color: 'transparent',
-                        }
-                      );
-                    } else {
-                      tooltipData.push(
-                        {
-                          label: item.ruleName,
-                          value: `${item.anomalyScore}`,
-                          formattedValue: `${item.anomalyScore}`,
-                          seriesIdentifier: {
-                            key: item.id,
-                            specId: item.id,
-                          },
-                          isHighlighted: true,
-                          isVisible: true,
-                          color: 'transparent',
-                        },
-                        {
-                          label: `Time`,
-                          skipHeader: true,
-                          value: `${timespan}`,
-                          formattedValue: `${timespan}`,
-                          seriesIdentifier: {
-                            key: item.id,
-                            specId: item.id,
-                          },
-                          valueAccessor: 'time',
-                          isHighlighted: true,
-                          isVisible: true,
-                          color: 'transparent',
-                        }
-                      );
-                    }
-                    return tooltipData;
-                  }}
-                />
-              )}
-            </MlTooltipComponent>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
         {selectedAlertsData && selectedAlertsData.length > 0 ? (
           <EuiInMemoryTable columns={columns} items={selectedAlertsData} />
         ) : null}
