@@ -206,7 +206,7 @@ function _generateMappings(
         if (type === 'object' && field.object_type) {
           const pathMatch = path.includes('*') ? path : `${path}.*`;
 
-          let dynProperties: Properties = getDefaultProperties(field);
+          const dynProperties: Properties = getDefaultProperties(field);
           let matchingType: string | undefined;
           switch (field.object_type) {
             case 'keyword':
@@ -312,12 +312,14 @@ function _generateMappings(
                 : field.name,
             });
             break;
-	  case 'flattened':
+          case 'flattened':
             dynProperties.type = field.object_type;
             matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
-            throw new Error(`no dynamic mapping generated for field ${path} of type ${field.object_type}`);
+            throw new Error(
+              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            );
         }
 
         if (dynProperties && matchingType) {
