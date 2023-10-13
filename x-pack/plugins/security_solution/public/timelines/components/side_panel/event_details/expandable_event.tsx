@@ -141,11 +141,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               {timestamp && (
                 <>
                   <EuiSpacer size="s" />
-                  {/* <EuiFlexGroup direction="row" gutterSize="m" alignItems="center"> */}
-                  {/* <EuiFlexItem grow={false}> */}
                   <PreferenceFormattedDate value={new Date(timestamp)} />
-                  {/* </EuiFlexItem> */}
-                  {/* </EuiFlexGroup> */}
                 </>
               )}
               {isAlert && eventId && isAlertDetailsPageEnabled && (
