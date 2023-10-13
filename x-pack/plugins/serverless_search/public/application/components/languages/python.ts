@@ -45,7 +45,11 @@ client = Elasticsearch(
 ]
 
 client.bulk(operations=documents)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `from elasticsearch_serverless import Elasticsearch
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+  }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
