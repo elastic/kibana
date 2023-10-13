@@ -14,6 +14,7 @@ import {
 } from '@testing-library/react-hooks';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { MessageRole } from '../../common';
+import { ChatTimelineItem } from '../components/chat/chat_timeline';
 import type { PendingMessage } from '../types';
 import { useTimeline, UseTimelineResult } from './use_timeline';
 
@@ -197,10 +198,16 @@ describe('useTimeline', () => {
       });
 
       it('adds two items of which the last one is loading', async () => {
-        expect(hookResult.result.current.items[0].role).toEqual(MessageRole.User);
-        expect(hookResult.result.current.items[1].role).toEqual(MessageRole.User);
+        expect((hookResult.result.current.items[0] as ChatTimelineItem).role).toEqual(
+          MessageRole.User
+        );
+        expect((hookResult.result.current.items[1] as ChatTimelineItem).role).toEqual(
+          MessageRole.User
+        );
 
-        expect(hookResult.result.current.items[2].role).toEqual(MessageRole.Assistant);
+        expect((hookResult.result.current.items[2] as ChatTimelineItem).role).toEqual(
+          MessageRole.Assistant
+        );
 
         expect(hookResult.result.current.items[1]).toMatchObject({
           role: MessageRole.User,
@@ -303,7 +310,9 @@ describe('useTimeline', () => {
         describe('and it being regenerated', () => {
           beforeEach(() => {
             act(() => {
-              hookResult.result.current.onRegenerate(hookResult.result.current.items[2]);
+              hookResult.result.current.onRegenerate(
+                hookResult.result.current.items[2] as ChatTimelineItem
+              );
               subject.next({ message: { role: MessageRole.Assistant, content: '' } });
             });
           });
@@ -335,7 +344,9 @@ describe('useTimeline', () => {
               });
 
               act(() => {
-                hookResult.result.current.onRegenerate(hookResult.result.current.items[2]);
+                hookResult.result.current.onRegenerate(
+                  hookResult.result.current.items[2] as ChatTimelineItem
+                );
               });
             });
 
