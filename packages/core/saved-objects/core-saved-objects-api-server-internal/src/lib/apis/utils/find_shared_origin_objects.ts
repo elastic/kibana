@@ -118,11 +118,10 @@ function createOriginKueryFilter(
       if (purpose === 'updateObjectsSpaces') {
         // we never want to match on the raw document `_id` fields.
         // If they are equal, this just means that the object already exists in that space and it's ok.
-        const notIdMatch = buildNode(KQL_FUNCTION_NOT, buildNode(
-          KQL_FUNCTION_IS,
-          `${type}.id`,
-          esKuery.escapeKuery(`${type}:${id}`)
-        ));
+        const notIdMatch = buildNode(
+          KQL_FUNCTION_NOT,
+          buildNode(KQL_FUNCTION_IS, `${type}.id`, esKuery.escapeKuery(`${type}:${id}`))
+        );
 
         // If this object has an origin ID, then we do still want to match if another object's ID matches the
         // object's origin (idMatchesOrigin), or if another object's origin matches the object's origin (originMatch).
