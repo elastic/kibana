@@ -99,7 +99,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
+        const section = await testSubjects.find(`~nav-item-${sectionId}`);
         const collapseBtn = await section.findByCssSelector(
           `[aria-controls="${sectionId}"][aria-expanded]`
         );
@@ -126,7 +126,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
-        const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
+        const section = await testSubjects.find(`~nav-item-${sectionId}`);
         const collapseBtn = await section.findByCssSelector(
           `[aria-controls="${sectionId}"][aria-expanded]`
         );
@@ -137,7 +137,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (!isOpen) return;
-        const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
+        const section = await testSubjects.find(`~nav-item-${sectionId}`);
         const collapseBtn = await section.findByCssSelector(
           `[aria-controls="${sectionId}"][aria-expanded]`
         );
@@ -192,10 +192,10 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
     search: new SvlNavigationSearchPageObject(ctx),
     recent: {
       async expectExists() {
-        await testSubjects.existOrFail('nav-bucket-recentlyAccessed');
+        await testSubjects.existOrFail('nav-item-recentlyAccessed');
       },
       async expectHidden() {
-        await testSubjects.missingOrFail('nav-bucket-recentlyAccessed', { timeout: 1000 });
+        await testSubjects.missingOrFail('nav-item-recentlyAccessed', { timeout: 1000 });
       },
       async expectLinkExists(text: string) {
         await this.expectExists();
@@ -203,7 +203,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await retry.try(async () => {
           foundLink = await getByVisibleText(
             async () =>
-              (await testSubjects.find('nav-bucket-recentlyAccessed')).findAllByTagName('a'),
+              (await testSubjects.find('nav-item-recentlyAccessed')).findAllByTagName('a'),
             text
           );
           expect(!!foundLink).to.be(true);
