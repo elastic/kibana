@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import { RuleSnoozeSchedule } from '../../types';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -21,16 +20,18 @@ import {
 } from '../../../../rules_client/common';
 import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
-
-export interface SnoozeParams {
-  id: string;
-  snoozeSchedule: RuleSnoozeSchedule;
-}
+import { snoozeRuleParamsSchema } from './schemas';
+import type { SnoozeRuleOptions } from './types';
 
 export async function snoozeRule(
   context: RulesClientContext,
-  { id, snoozeSchedule }: SnoozeParams
+  { id, snoozeSchedule }: SnoozeRuleOptions
 ): Promise<void> {
+  try {
+    snoozeRuleParamsSchema.validate({ id });
+  } catch (error) {
+    throw Boom.badRequest(`Error validating snooze params - ${error.message}`);
+  }
   const snoozeDateValidationMsg = validateSnoozeStartDate(snoozeSchedule.rRule.dtstart);
   if (snoozeDateValidationMsg) {
     throw new RuleMutedError(snoozeDateValidationMsg);
@@ -45,13 +46,7 @@ export async function snoozeRule(
 
 async function snoozeWithOCC(
   context: RulesClientContext,
-  {
-    id,
-    snoozeSchedule,
-  }: {
-    id: string;
-    snoozeSchedule: RuleSnoozeSchedule;
-  }
+  { id, snoozeSchedule }: SnoozeRuleOptions
 ) {
   const { attributes, version } = await withSpan(
     { name: 'getRuleSavedObject', type: 'rules' },

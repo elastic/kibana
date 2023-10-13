@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RawRule } from '../../../../types';
+import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../../../../saved_objects';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { getUnsnoozeAttributes } from '../../../../rules_client/common';
-import { updateMeta } from '../../../../rules_client/lib';
+import { updateRuleSo } from '../../../../data/rule';
+import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
+import { unsnoozeRuleParamsSchema } from './schemas';
 
 export interface UnsnoozeParams {
   id: string;
@@ -31,9 +34,17 @@ export async function unsnoozeRule(
 }
 
 async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }: UnsnoozeParams) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
-    id
+  try {
+    unsnoozeRuleParamsSchema.validate({ id });
+  } catch (error) {
+    throw Boom.badRequest(`Error validating unsnooze params - ${error.message}`);
+  }
+  const { attributes, version } = await withSpan(
+    { name: 'getRuleSavedObject', type: 'rules' },
+    () =>
+      getRuleSavedObject(context, {
+        ruleId: id,
+      })
   );
 
   try {
@@ -69,17 +80,14 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
   const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
 
-  const updateAttributes = updateMeta(context, {
-    ...newAttrs,
-    updatedBy: await context.getUserName(),
-    updatedAt: new Date().toISOString(),
-  });
-  const updateOptions = { version };
-
-  await partiallyUpdateAlert(
-    context.unsecuredSavedObjectsClient,
+  await updateRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsUpdateOptions: { version },
     id,
-    updateAttributes,
-    updateOptions
-  );
+    updateRuleAttributes: updateMetaAttributes(context, {
+      ...newAttrs,
+      updatedBy: await context.getUserName(),
+      updatedAt: new Date().toISOString(),
+    }),
+  });
 }
