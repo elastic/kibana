@@ -183,6 +183,7 @@
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
-    "@kbn/unified-field-list"
+    "@kbn/unified-field-list",
+    "@kbn/resizable-layout"
   ]
 }
