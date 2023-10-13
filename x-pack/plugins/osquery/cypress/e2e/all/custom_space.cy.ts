@@ -20,8 +20,7 @@ const testSpaces = [
   { name: 'default', tags: ['@ess', '@serverless'] },
   { name: 'custom-spaces', tags: ['@ess'] },
 ];
-// FLAKY: https://github.com/elastic/kibana/issues/168742
-describe.skip('ALL - Custom space', () => {
+describe('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
     describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
       let packName: string;
