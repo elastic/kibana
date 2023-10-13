@@ -7,6 +7,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
@@ -45,6 +46,7 @@ interface FieldCapsApiParams {
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
+  expandWildcard?: ExpandWildcard;
 }
 
 /**
