@@ -6,18 +6,16 @@
  */
 
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetStatefulQueryBar } from '../use_get_stateful_query_bar';
 
 export const useSearchBarCustomizations = () => {
   const { CustomStatefulTopNavKqlQueryBar } = useGetStatefulQueryBar();
-  const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
 
   const setSearchBarCustomizations: CustomizationCallback = ({ customizations }) => {
     customizations.set({
       id: 'search_bar',
       CustomSearchBar: CustomStatefulTopNavKqlQueryBar,
-      hideDataViewPicker: isDiscoverInTimelineEnabled,
+      hideDataViewPicker: true,
     });
   };
 
