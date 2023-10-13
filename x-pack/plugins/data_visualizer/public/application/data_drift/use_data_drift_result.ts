@@ -386,6 +386,7 @@ const fetchComparisonDriftedData = async ({
   fields,
   baselineResponseAggs,
   baseRequest,
+  baselineRequest,
   randomSamplerWrapper,
   signal,
 }: {
@@ -395,6 +396,7 @@ const fetchComparisonDriftedData = async ({
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
   baselineResponseAggs: object;
+  baselineRequest: object;
 }) => {
   const driftedRequest = { ...baseRequest };
 
@@ -455,14 +457,14 @@ const fetchComparisonDriftedData = async ({
   }
 
   console.log(`--@@Getting ranges\n`, {
-    ...driftedRequest,
-    body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
+    ...baselineRequest,
+    body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
   });
   // Compute fractions based on results of ranges
   const rangesResp = await dataSearch(
     {
-      ...driftedRequest,
-      body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
+      ...baselineRequest,
+      body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
     },
     signal
   );
@@ -869,6 +871,7 @@ export const useFetchDataComparisonResult = (
               fetchComparisonDriftedData({
                 dataSearch,
                 baseRequest: driftedRequest,
+                baselineRequest,
                 baselineResponseAggs,
                 fields: chunkedFields,
                 randomSamplerWrapper: prodRandomSamplerWrapper,
