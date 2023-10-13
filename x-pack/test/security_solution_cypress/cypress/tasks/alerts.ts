@@ -304,6 +304,12 @@ export const goToAcknowledgedAlerts = () => {
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
+export const markAlertsAcknowledged = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
+};
+
 export const markAcknowledgedFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
