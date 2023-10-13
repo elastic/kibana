@@ -42,9 +42,14 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          isGroupTitle: true,
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.startsWith(prepend('/app/dev_tools#/console')) ||
+              pathNameSerialized.startsWith(prepend('/app/dev_tools#/searchprofiler'))
+            );
+          },
         },
-        { link: 'dev_tools:console' },
         {
           id: 'explore',
           title: i18n.translate('xpack.serverlessSearch.nav.explore', {
