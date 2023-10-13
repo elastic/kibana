@@ -16,7 +16,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { usePack } from '../../packs/use_pack';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
-import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
+import LiveQueryQueryField from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
 
 interface OsqueryResponseActionsValues {
