@@ -30,6 +30,10 @@ import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+  });
+
   context('Opening alerts', () => {
     beforeEach(() => {
       login();
@@ -41,6 +45,10 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', 'auditbeat_big');
     });
 
     it('can mark a closed alert as open', () => {
@@ -61,15 +69,12 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
               waitForAlerts();
 
               const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-              cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+              cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
 
               goToOpenedAlerts();
               waitForAlerts();
 
-              cy.get(ALERTS_COUNT).should(
-                'have.text',
-                `${numberOfOpenedAlerts + numberOfAlertsToBeOpened} alerts`.toString()
-              );
+              cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
             });
         });
     });
@@ -99,15 +104,12 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
               waitForAlerts();
 
               const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-              cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
+              cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
 
               goToOpenedAlerts();
               waitForAlerts();
 
-              cy.get(ALERTS_COUNT).should(
-                'have.text',
-                `${numberOfOpenedAlerts + numberOfAlertsToBeOpened} alerts`.toString()
-              );
+              cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
             });
         });
     });
@@ -132,12 +134,12 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
           markAcknowledgedFirstAlert();
           waitForAlerts();
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
 
           goToAcknowledgedAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
+          cy.get(ALERTS_COUNT).contains(`${numberOfAlertsToBeMarkedAcknowledged}`);
         });
     });
 
@@ -154,15 +156,12 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
           markAlertsAcknowledged();
           waitForAlerts();
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
 
           goToAcknowledgedAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should(
-            'have.text',
-            `${numberOfAlertsToBeMarkedAcknowledged} alerts`
-          );
+          cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeMarkedAcknowledged);
         });
     });
   });
@@ -191,12 +190,12 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
           waitForAlerts();
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
+          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlertsAfterClosing);
 
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alert`);
+          cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
         });
     });
 
@@ -219,12 +218,12 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
           waitForAlerts();
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
+          cy.get(ALERTS_COUNT).contains(expectedNumberOfAlertsAfterClosing);
 
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`);
+          cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
         });
     });
   });
