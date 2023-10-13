@@ -13,5 +13,3 @@ steps:
 
   - label: ":ship: Create Deployment Tag"
     command: .buildkite/scripts/serverless/create_deployment_tag.sh
-    agents:
-      queue: macos-arm
