@@ -26,11 +26,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type {
-  ChromeNavLink,
-  ChromeProjectNavigationNode,
-  NodeDefinition,
-} from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../../types';
@@ -131,7 +127,7 @@ const deepLinks: ChromeNavLink[] = [
   createDeepLink('group:settings.tracing'),
 ];
 
-const simpleNavigationDefinition: ProjectNavigationDefinition = {
+const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
   projectNavigationTree: [
     {
       id: 'example_projet',
@@ -179,7 +175,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
           ],
         },
       ],
-    } as NodeDefinition<any>,
+    },
   ],
 };
 
