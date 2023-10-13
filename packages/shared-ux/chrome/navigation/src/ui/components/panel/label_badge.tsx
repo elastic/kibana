@@ -14,12 +14,19 @@ export const BETA_LABEL = i18n.translate('sharedUXPackages.chrome.sideNavigation
   defaultMessage: 'Beta',
 });
 
-export const BetaBadge = ({ text, className }: { text?: string; className?: string }) => {
+export const LabelBadge = ({
+  text = BETA_LABEL,
+  className,
+}: {
+  /** Optional text for the badge. @default 'Beta' */
+  text?: string;
+  className?: string;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiBetaBadge
-      label={text ?? BETA_LABEL}
+      label={text}
       size="s"
       css={css`
         margin-left: ${euiTheme.size.s};
