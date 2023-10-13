@@ -59,7 +59,7 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
             <React.Fragment key={customField.key}>
               <EuiPanel
                 paddingSize="s"
-                data-test-subj={`custom-field-${customField.label}-${customField.type}`}
+                data-test-subj={`custom-field-${customField.key}-${customField.type}`}
                 hasShadow={false}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="s">

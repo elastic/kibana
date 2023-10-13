@@ -22,7 +22,6 @@
       "uiActions",
       "taskManager",
       "embeddable",
-      "screenshotting",
       "screenshotMode",
       "share",
       "features"
@@ -30,7 +29,8 @@
     "optionalPlugins": [
       "security",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "screenshotting",
     ],
     "requiredBundles": [
       "kibanaReact",
