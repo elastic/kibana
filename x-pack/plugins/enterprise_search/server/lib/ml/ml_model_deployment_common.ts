@@ -19,4 +19,3 @@ export function isNotFoundExceptionError(error: unknown): boolean {
     error?.statusCode === 404
   );
 }
-
