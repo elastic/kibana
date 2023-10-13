@@ -21,6 +21,8 @@ export const getJobIdPrefix = (spaceId: string, sourceId: string, idFormat: IdFo
   if (idFormat === 'legacy') {
     return `kibana-logs-ui-${spaceId}-${sourceId}-`;
   } else {
+    // A UUID is 36 characters but based on the ML job names for logs, our limit is 32 characters
+    // Thus we remove the 4 dashes
     const uuid = v5(`${spaceId}-${sourceId}`, ID_NAMESPACE).replaceAll('-', '');
     return `logs-${uuid}-`;
   }
