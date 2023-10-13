@@ -43,3 +43,4 @@ export {
   generatePngObservable,
   buildKibanaPath,
 } from './export_type_helpers';
+export type { ManagementLinkFn } from './url';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
 import moment from 'moment';
@@ -85,8 +85,14 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
-  allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
+  }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
+  allow: offeringBasedSchema({
+    serverless: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    traditional: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+  }),
 });
 
 // Browser side polling: job completion notifier, management table auto-refresh
@@ -109,21 +115,24 @@ const ExportTypeSchema = schema.object({
   }),
   // Png reports are disabled in serverless
   png: schema.object({
-    enabled: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.boolean({ defaultValue: false }),
-      schema.boolean({ defaultValue: true })
-    ),
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
   }),
   // Pdf reports are disabled in serverless
   pdf: schema.object({
-    enabled: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.boolean({ defaultValue: false }),
-      schema.boolean({ defaultValue: true })
-    ),
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+});
+
+const SettingsSchema = schema.object({
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
   }),
 });
 
@@ -137,6 +146,7 @@ export const ConfigSchema = schema.object({
   roles: RolesSchema,
   poll: PollSchema,
   export_types: ExportTypeSchema,
+  statefulSettings: SettingsSchema,
 });
 
 export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

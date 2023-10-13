@@ -8,7 +8,7 @@ import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ManagementLinkFn } from '@kbn/reporting-common/url';
+import { ManagementLinkFn } from '@kbn/reporting-common';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
