@@ -29,6 +29,7 @@ import {
 } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createNewTermsAlertType,
@@ -281,6 +282,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    if (config.settings.ESQLEnabled && !experimentalFeatures.esqlRulesDisabled) {
+      plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
+    }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
@@ -452,6 +456,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     return {
       setAppFeaturesConfigurator:
         appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
+      experimentalFeatures: { ...config.experimentalFeatures },
     };
   }
 

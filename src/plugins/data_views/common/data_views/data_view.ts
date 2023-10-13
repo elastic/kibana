@@ -501,9 +501,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     }
 
     // Apply configuration to the field
-    if (config.customLabel || config.customLabel === null) {
-      this.setFieldCustomLabel(fieldName, config.customLabel);
-    }
+    this.setFieldCustomLabel(fieldName, config.customLabel);
 
     if (config.popularity || config.popularity === null) {
       this.setFieldCount(fieldName, config.popularity);

@@ -1196,6 +1196,74 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.useEditableSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "useEditableSettings",
+        "description": [],
+        "signature": [
+          "(app: ",
+          "ObservabilityApp",
+          ", settingsKeys: string[]) => { settingsEditableConfig: Record<string, ",
+          "FieldSetting",
+          ">; unsavedChanges: Record<string, ",
+          {
+            "pluginId": "advancedSettings",
+            "scope": "public",
+            "docId": "kibAdvancedSettingsPluginApi",
+            "section": "def-public.FieldState",
+            "text": "FieldState"
+          },
+          ">; handleFieldChange: (key: string, fieldState: ",
+          {
+            "pluginId": "advancedSettings",
+            "scope": "public",
+            "docId": "kibAdvancedSettingsPluginApi",
+            "section": "def-public.FieldState",
+            "text": "FieldState"
+          },
+          ") => void; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useEditableSettings.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              "ObservabilityApp"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useEditableSettings.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "settingsKeys",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.useEsSearch",
         "type": "Function",
         "tags": [],
@@ -3580,6 +3648,21 @@
           "\"transaction.marks.agent.largestContentfulPaint\""
         ],
         "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LOGS_ONBOARDING_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_ONBOARDING_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/logs-onboarding-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
