@@ -146,7 +146,7 @@ export function Navigation({
   }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
-    <PanelProvider contentProvider={panelContentProvider}>
+    <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
       <NavigationContext.Provider value={contextValue}>
         <NavigationUI
           footerChildren={footerChildren}

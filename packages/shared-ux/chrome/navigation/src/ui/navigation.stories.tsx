@@ -225,8 +225,42 @@ const navigationDefinition: ProjectNavigationDefinition = {
             title: 'Alerts',
           },
           {
+            link: 'item2',
+            title: 'Item should NOT appear!!',
+            sideNavStatus: 'hidden', // Should not appear
+          },
+          {
             link: 'item3',
             title: 'Some other node',
+          },
+          {
+            id: 'group:settings-2',
+            title: 'Settings as nav Item',
+            renderAs: 'item', // Render just like any other item, even if it has children
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals',
+              },
+              {
+                link: 'group:settings.signals',
+                title: 'Signals - should NOT appear',
+                sideNavStatus: 'hidden', // Should not appear
+              },
+              {
+                link: 'group:settings.tracing',
+                title: 'Tracing',
+              },
+              {
+                id: 'seb.nestedGroup',
+                title: 'Nested group',
+                children: [],
+              },
+            ],
           },
           {
             id: 'group:settings',
@@ -241,8 +275,38 @@ const navigationDefinition: ProjectNavigationDefinition = {
                 title: 'Signals',
               },
               {
+                id: 'group:settings.signals-2',
+                link: 'group:settings.signals',
+                title: 'Signals - should NOT appear',
+                sideNavStatus: 'hidden', // Should not appear
+              },
+              {
                 link: 'group:settings.tracing',
                 title: 'Tracing',
+              },
+              {
+                id: 'group.nestedGroup',
+                link: 'group:settings.tracing',
+                title: 'Nested group',
+                children: [
+                  {
+                    id: 'item1',
+                    link: 'group:settings.signals',
+                    title: 'Hidden - should NOT appear',
+                    sideNavStatus: 'hidden', // Should not appear
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'group:settings.hidden',
+            title: 'Settings - should NOT appear',
+            sideNavStatus: 'hidden',
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
               },
             ],
           },
@@ -252,6 +316,16 @@ const navigationDefinition: ProjectNavigationDefinition = {
       {
         type: 'navGroup',
         preset: 'ml',
+      },
+      {
+        type: 'navItem',
+        title: 'Custom link at root level',
+      },
+      {
+        type: 'navItem',
+        icon: 'logoElastic',
+        link: 'ml',
+        title: 'Link at root level + icon',
       },
       // And specific links from analytics
       {
@@ -315,10 +389,6 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
   );
 };
 
-const CustomPanelContent = () => {
-  return <EuiText>This is a custom component to render in the panel.</EuiText>;
-};
-
 const panelContentProvider: ContentProvider = (id: string) => {
   if (id === 'example_projet.group:openpanel1') {
     return; // Use default title & content
@@ -327,7 +397,14 @@ const panelContentProvider: ContentProvider = (id: string) => {
   if (id === 'example_projet.group:openpanel2') {
     // Custom content
     return {
-      content: <CustomPanelContent />,
+      content: ({ closePanel }) => {
+        return (
+          <div>
+            <EuiText>This is a custom component to render in the panel.</EuiText>
+            <EuiButton onClick={() => closePanel()}>Close panel</EuiButton>
+          </div>
+        );
+      },
     };
   }
 
@@ -365,7 +442,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             // Groups with title
             id: 'group:openpanel1',
             title: 'Open panel (1)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -374,6 +451,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     link: 'group:settings.logs',
                     title: 'Logs',
+                    icon: 'logoObservability',
                   },
                   {
                     link: 'group:settings.signals',
@@ -412,8 +490,9 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with default content
             // Groups with **not** title
+            id: 'group.openpanel2',
             title: 'Open panel (2)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -459,8 +538,9 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
           {
             // Panel with default content
             // Accordion to wrap groups
+            id: 'group.openpanel3',
             title: 'Open panel (3)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -486,7 +566,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
               {
                 id: 'group2',
                 title: 'MANAGEMENT',
-                isCollapsible: true,
+                renderAs: 'accordion',
                 children: [
                   {
                     id: 'group2-A',
@@ -510,7 +590,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     id: 'group2-B',
                     title: 'Group 2 (marked as collapsible)',
-                    isCollapsible: true,
+                    renderAs: 'accordion',
                     children: [
                       {
                         id: 'group2:settings.logs',
@@ -555,9 +635,215 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
-            id: 'group:openpanel2',
+            // Panel with nav group title that acts like nav items
+            id: 'group.openpanel4',
+            title: 'Open panel (4) - sideNavStatus',
+            renderAs: 'panelOpener',
+            link: 'item1',
+            children: [
+              {
+                id: 'root',
+                children: [
+                  {
+                    title: 'Should act as item 1',
+                    link: 'item1',
+                    renderAs: 'item',
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Normal item',
+                  },
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Item should NOT appear!', // Should not appear
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    title: 'Group should NOT appear!',
+                    link: 'group:settings.logs',
+                    sideNavStatus: 'hidden', // This group should not appear
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Should act as item 2',
+                    renderAs: 'item', // This group renders as a normal item
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                children: [
+                  {
+                    title: 'Another group as Item',
+                    id: 'group2.renderAsItem',
+                    renderAs: 'item',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'group2:settings.tracing',
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                        sideNavStatus: 'hidden',
+                      },
+                    ],
+                  },
+                ],
+              },
+              // Groups with accordion
+              {
+                id: 'group2',
+                title: 'MANAGEMENT',
+                renderAs: 'accordion',
+                children: [
+                  {
+                    id: 'group2-A',
+                    title: 'Group 1',
+                    children: [
+                      {
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                      {
+                        link: 'group:settings.tracing',
+                        title: 'Tracing',
+                        withBadge: true, // Default to "Beta" badge
+                      },
+                    ],
+                  },
+                  {
+                    id: 'root-groupB',
+                    children: [
+                      {
+                        id: 'group2-B',
+                        title: 'Group 2 (render as Item)',
+                        renderAs: 'item', // This group renders as a normal item
+                        children: [
+                          {
+                            id: 'group2:settings.logs',
+                            link: 'group:settings.logs',
+                            title: 'Logs',
+                          },
+                          {
+                            id: 'group2:settings.signals',
+                            link: 'group:settings.signals',
+                            title: 'Signals',
+                          },
+                          {
+                            id: 'group2:settings.tracing',
+                            link: 'group:settings.tracing',
+                            title: 'Tracing',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'group2-C',
+                    title: 'Group 3',
+                    children: [
+                      {
+                        id: 'group2:settings.logs',
+                        link: 'group:settings.logs',
+                        title: 'Logs',
+                      },
+                      {
+                        title: 'Yet another group as item',
+                        renderAs: 'item',
+                        children: [
+                          {
+                            id: 'group2:settings.logs',
+                            link: 'group:settings.logs',
+                            title: 'Logs',
+                          },
+                          {
+                            id: 'group2:settings.signals',
+                            link: 'group:settings.signals',
+                            title: 'Signals',
+                          },
+                        ],
+                      },
+                      {
+                        id: 'group2:settings.signals',
+                        link: 'group:settings.signals',
+                        title: 'Signals',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            // Panel where all children are hidden. The "open panel" icon should NOT
+            // appear next to the node title
+            id: 'group.openpanel5',
+            title: 'Open panel (5) - all children hidden',
+            renderAs: 'panelOpener',
+            link: 'item1',
+            children: [
+              {
+                link: 'test1',
+                sideNavStatus: 'hidden',
+              },
+              {
+                title: 'Some group',
+                children: [
+                  {
+                    link: 'item1',
+                    title: 'My first group item',
+                    sideNavStatus: 'hidden',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'group.openpanel6',
             title: 'Open panel (custom content)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -575,9 +861,9 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
             ],
           },
           {
-            id: 'group:openpanel3',
+            id: 'group.openpanel7',
             title: 'Open panel (custom title)',
-            openPanel: true,
+            renderAs: 'panelOpener',
             link: 'item1',
             children: [
               {
@@ -670,7 +956,12 @@ export const WithUIComponents = (args: NavigationServices) => {
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
-              <Navigation.Group<any> id="group:openPanel" link="item1" title="Open panel" openPanel>
+              <Navigation.Group<any>
+                id="group:openPanel"
+                link="item1"
+                title="Open panel"
+                renderAs="panelOpener"
+              >
                 <Navigation.Group id="group1">
                   <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
@@ -681,7 +972,7 @@ export const WithUIComponents = (args: NavigationServices) => {
                   <Navigation.Item<any> link="group:settings.signals" title="Signals" />
                   <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
                 </Navigation.Group>
-                <Navigation.Group title="MANAGEMENT" id="group3" isCollapsible>
+                <Navigation.Group title="MANAGEMENT" id="group3" renderAs="accordion">
                   <Navigation.Group title="Group A" id="group3-a">
                     <Navigation.Item<any> link="group:settings.logs" title="Logs" />
                     <Navigation.Item<any>

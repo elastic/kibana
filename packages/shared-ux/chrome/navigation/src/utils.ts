@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chrome-browser';
 
 let uniqueId = 0;
 
-export function generateUniqueNodeId() {
-  const id = `node-${uniqueId++}`;
+function generateUniqueNodeId() {
+  const id = `node${uniqueId++}`;
   return id;
 }
 
@@ -19,7 +19,7 @@ export function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');
 }
 
-export function getUniqueNodeId<T extends { path?: string[]; id: string } | null>(
+export function nodePathToString<T extends { path?: string[]; id: string } | null>(
   node?: T
 ): T extends { path?: string[]; id: string } ? string : undefined {
   if (!node) return undefined as T extends { path?: string[]; id: string } ? string : undefined;
@@ -28,18 +28,25 @@ export function getUniqueNodeId<T extends { path?: string[]; id: string } | null
     : undefined;
 }
 
-export function isGroupNode({
-  nodeType,
-  children,
-}: Pick<ChromeProjectNavigationNode, 'nodeType' | 'children'>) {
-  if (nodeType === 'group') return true;
+export function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children !== undefined;
 }
 
-export function isItemNode({
-  nodeType,
-  children,
-}: Pick<ChromeProjectNavigationNode, 'nodeType' | 'children'>) {
-  if (nodeType === 'item') return true;
+export function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children === undefined;
+}
+
+export function getNavigationNodeId(
+  { id: _id, link }: Pick<NodeDefinition, 'id' | 'link'>,
+  idGenerator = generateUniqueNodeId
+): string {
+  const id = _id ?? link;
+  return id ?? idGenerator();
+}
+
+export function getNavigationNodeHref({
+  href,
+  deepLink,
+}: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
+  return deepLink?.url ?? href;
 }

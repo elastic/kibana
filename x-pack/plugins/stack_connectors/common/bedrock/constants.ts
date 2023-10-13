@@ -20,6 +20,7 @@ export enum SUB_ACTION {
   TEST = 'test',
 }
 
+export const DEFAULT_TOKEN_LIMIT = 8191;
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-v2';
 
 export const DEFAULT_BEDROCK_URL = `https://bedrock.us-east-1.amazonaws.com` as const;

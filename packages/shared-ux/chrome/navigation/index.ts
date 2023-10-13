@@ -12,11 +12,15 @@ export { DefaultNavigation, getPresets, Navigation } from './src/ui';
 
 export type {
   GroupDefinition,
+  PresetDefinition,
+  ItemDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
   ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
+  PanelComponentProps,
+  PanelContent,
 } from './src/ui';
 
 export type { NavigationServices } from './types';

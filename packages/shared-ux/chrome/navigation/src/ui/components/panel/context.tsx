@@ -7,8 +7,9 @@
  */
 
 import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { getUniqueNodeId } from '../../../utils';
+import { nodePathToString } from '../../../utils';
 import { DefaultContent } from './default_content';
 import { ContentProvider, PanelNavNode } from './types';
 
@@ -17,7 +18,9 @@ export interface PanelContext {
   toggle: () => void;
   open: (navNode: PanelNavNode) => void;
   close: () => void;
-  activeNode: PanelNavNode | null;
+  /** The selected node is the node in the main panel that opens the Panel */
+  selectedNode: PanelNavNode | null;
+  /** Handler to retrieve the component to render in the panel */
   getContent: () => React.ReactNode;
 }
 
@@ -25,11 +28,12 @@ const Context = React.createContext<PanelContext | null>(null);
 
 interface Props {
   contentProvider?: ContentProvider;
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
+export const PanelProvider: FC<Props> = ({ children, contentProvider, activeNodes }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeNode, setActiveNode] = useState<PanelNavNode | null>(null);
+  const [selectedNode, setActiveNode] = useState<PanelNavNode | null>(null);
 
   const toggle = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -46,19 +50,24 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
   }, []);
 
   const getContent = useCallback(() => {
-    if (!activeNode) {
+    if (!selectedNode) {
       return null;
     }
 
-    const provided = contentProvider?.(getUniqueNodeId(activeNode));
+    const provided = contentProvider?.(nodePathToString(selectedNode));
 
     if (!provided) {
-      return <DefaultContent activeNode={activeNode} />;
+      return <DefaultContent selectedNode={selectedNode} />;
     }
 
-    const title: string | ReactNode = provided.title ?? activeNode.title;
-    return provided.content ?? <DefaultContent activeNode={{ ...activeNode, title }} />;
-  }, [activeNode, contentProvider]);
+    if (provided.content) {
+      const Component = provided.content;
+      return <Component closePanel={close} selectedNode={selectedNode} activeNodes={activeNodes} />;
+    }
+
+    const title: string | ReactNode = provided.title ?? selectedNode.title;
+    return <DefaultContent selectedNode={{ ...selectedNode, title }} />;
+  }, [selectedNode, contentProvider, close, activeNodes]);
 
   const ctx: PanelContext = useMemo(
     () => ({
@@ -66,10 +75,10 @@ export const PanelProvider: FC<Props> = ({ children, contentProvider }) => {
       toggle,
       open,
       close,
-      activeNode,
+      selectedNode,
       getContent,
     }),
-    [isOpen, toggle, open, close, activeNode, getContent]
+    [isOpen, toggle, open, close, selectedNode, getContent]
   );
 
   return <Context.Provider value={ctx}>{children}</Context.Provider>;

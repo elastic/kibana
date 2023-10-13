@@ -15,6 +15,7 @@ Array [
           "group1",
           "item1",
         ],
+        "sideNavStatus": "visible",
         "title": "Item 1",
       },
       Object {
@@ -34,6 +35,7 @@ Array [
           "group1",
           "item2",
         ],
+        "sideNavStatus": "visible",
         "title": "Title from deeplink!",
       },
       Object {
@@ -53,6 +55,7 @@ Array [
           "group1",
           "item3",
         ],
+        "sideNavStatus": "visible",
         "title": "Deeplink title overriden",
       },
     ],
@@ -64,6 +67,7 @@ Array [
     "path": Array [
       "group1",
     ],
+    "sideNavStatus": "visible",
     "title": "Group 1",
     "type": "navGroup",
   },
@@ -86,6 +90,7 @@ Array [
           "rootNav:analytics",
           "discover",
         ],
+        "sideNavStatus": "visible",
         "title": "Deeplink discover",
       },
       Object {
@@ -105,6 +110,7 @@ Array [
           "rootNav:analytics",
           "dashboards",
         ],
+        "sideNavStatus": "visible",
         "title": "Deeplink dashboards",
       },
       Object {
@@ -124,6 +130,7 @@ Array [
           "rootNav:analytics",
           "visualize",
         ],
+        "sideNavStatus": "visible",
         "title": "Deeplink visualize",
       },
     ],
@@ -136,6 +143,7 @@ Array [
     "path": Array [
       "rootNav:analytics",
     ],
+    "sideNavStatus": "visible",
     "title": "Data exploration",
     "type": "navGroup",
   },
@@ -158,6 +166,7 @@ Array [
           "rootNav:ml",
           "ml:overview",
         ],
+        "sideNavStatus": "visible",
         "title": "Deeplink ml:overview",
       },
       Object {
@@ -177,6 +186,7 @@ Array [
           "rootNav:ml",
           "ml:notifications",
         ],
+        "sideNavStatus": "visible",
         "title": "Deeplink ml:notifications",
       },
       Object {
@@ -199,6 +209,7 @@ Array [
               "anomaly_detection",
               "ml:anomalyDetection",
             ],
+            "sideNavStatus": "visible",
             "title": "Jobs",
           },
           Object {
@@ -219,6 +230,7 @@ Array [
               "anomaly_detection",
               "ml:anomalyExplorer",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:anomalyExplorer",
           },
           Object {
@@ -239,6 +251,7 @@ Array [
               "anomaly_detection",
               "ml:singleMetricViewer",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:singleMetricViewer",
           },
           Object {
@@ -259,6 +272,7 @@ Array [
               "anomaly_detection",
               "ml:settings",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:settings",
           },
         ],
@@ -271,6 +285,7 @@ Array [
           "rootNav:ml",
           "anomaly_detection",
         ],
+        "sideNavStatus": "visible",
         "title": "Anomaly Detection",
       },
       Object {
@@ -293,6 +308,7 @@ Array [
               "data_frame_analytics",
               "ml:dataFrameAnalytics",
             ],
+            "sideNavStatus": "visible",
             "title": "Jobs",
           },
           Object {
@@ -313,6 +329,7 @@ Array [
               "data_frame_analytics",
               "ml:resultExplorer",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:resultExplorer",
           },
           Object {
@@ -333,6 +350,7 @@ Array [
               "data_frame_analytics",
               "ml:analyticsMap",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:analyticsMap",
           },
         ],
@@ -345,6 +363,7 @@ Array [
           "rootNav:ml",
           "data_frame_analytics",
         ],
+        "sideNavStatus": "visible",
         "title": "Data Frame Analytics",
       },
       Object {
@@ -367,6 +386,7 @@ Array [
               "model_management",
               "ml:nodesOverview",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:nodesOverview",
           },
           Object {
@@ -387,6 +407,7 @@ Array [
               "model_management",
               "ml:nodes",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:nodes",
           },
         ],
@@ -399,6 +420,7 @@ Array [
           "rootNav:ml",
           "model_management",
         ],
+        "sideNavStatus": "visible",
         "title": "Model Management",
       },
       Object {
@@ -421,6 +443,7 @@ Array [
               "data_visualizer",
               "ml:fileUpload",
             ],
+            "sideNavStatus": "visible",
             "title": "File",
           },
           Object {
@@ -441,6 +464,7 @@ Array [
               "data_visualizer",
               "ml:indexDataVisualizer",
             ],
+            "sideNavStatus": "visible",
             "title": "Data view",
           },
           Object {
@@ -461,6 +485,7 @@ Array [
               "data_visualizer",
               "ml:dataDrift",
             ],
+            "sideNavStatus": "visible",
             "title": "Data drift",
           },
         ],
@@ -473,6 +498,7 @@ Array [
           "rootNav:ml",
           "data_visualizer",
         ],
+        "sideNavStatus": "visible",
         "title": "Data Visualizer",
       },
       Object {
@@ -495,6 +521,7 @@ Array [
               "aiops_labs",
               "ml:logRateAnalysis",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:logRateAnalysis",
           },
           Object {
@@ -515,6 +542,7 @@ Array [
               "aiops_labs",
               "ml:logPatternAnalysis",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:logPatternAnalysis",
           },
           Object {
@@ -535,6 +563,7 @@ Array [
               "aiops_labs",
               "ml:changePointDetections",
             ],
+            "sideNavStatus": "visible",
             "title": "Deeplink ml:changePointDetections",
           },
         ],
@@ -547,6 +576,7 @@ Array [
           "rootNav:ml",
           "aiops_labs",
         ],
+        "sideNavStatus": "visible",
         "title": "AIOps labs",
       },
     ],
@@ -559,6 +589,7 @@ Array [
     "path": Array [
       "rootNav:ml",
     ],
+    "sideNavStatus": "visible",
     "title": "Machine Learning",
     "type": "navGroup",
   },
@@ -579,6 +610,7 @@ Array [
     "path": Array [
       "devTools",
     ],
+    "sideNavStatus": "visible",
     "title": "Developer tools",
     "type": "navGroup",
   },
@@ -602,6 +634,7 @@ Array [
           "project_settings_project_nav",
           "management",
         ],
+        "sideNavStatus": "visible",
         "title": "Management",
       },
       Object {
@@ -615,6 +648,7 @@ Array [
           "project_settings_project_nav",
           "cloudLinkUserAndRoles",
         ],
+        "sideNavStatus": "visible",
         "title": "Mock Users & Roles",
       },
       Object {
@@ -628,6 +662,7 @@ Array [
           "project_settings_project_nav",
           "cloudLinkBilling",
         ],
+        "sideNavStatus": "visible",
         "title": "Mock Billing & Subscriptions",
       },
     ],
@@ -640,6 +675,7 @@ Array [
     "path": Array [
       "project_settings_project_nav",
     ],
+    "sideNavStatus": "visible",
     "title": "Project settings",
     "type": "navGroup",
   },

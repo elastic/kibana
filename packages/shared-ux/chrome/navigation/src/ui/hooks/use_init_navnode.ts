@@ -6,29 +6,22 @@
  * Side Public License, v 1.
  */
 
-import {
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type {
   AppDeepLinkId,
   ChromeNavLink,
   ChromeProjectNavigationNode,
   CloudLinkId,
+  SideNavNodeStatus,
 } from '@kbn/core-chrome-browser';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { CloudLinks } from '../../cloud_links';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import { generateUniqueNodeId, isAbsoluteLink } from '../../utils';
+import { getNavigationNodeId, isAbsoluteLink } from '../../utils';
 import { useNavigation } from '../components/navigation';
-import { NodeProps, NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
+import { NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
-
-function getIdFromNavigationNode<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
->({ id }: NodeProps<LinkId, Id, ChildrenId>): string {
-  return id ?? generateUniqueNodeId();
-}
 
 /**
  * We don't have currently a way to know if a user has access to a Cloud section.
@@ -39,36 +32,36 @@ function hasUserAccessToCloudLink(): boolean {
   return true;
 }
 
-function isNodeVisible(
+function getNodeStatus(
   {
     link,
     deepLink,
     cloudLink,
+    sideNavStatus,
   }: {
     link?: string;
     deepLink?: ChromeNavLink;
     cloudLink?: CloudLinkId;
+    sideNavStatus?: SideNavNodeStatus;
   },
   { cloudLinks }: { cloudLinks: CloudLinks }
-) {
+): SideNavNodeStatus | 'remove' {
   if (link && !deepLink) {
     // If a link is provided, but no deepLink is found, don't render anything
-    return false;
+    return 'remove';
   }
 
   if (cloudLink) {
     if (!cloudLinks[cloudLink]) {
       // Invalid cloudLinkId or link url has not been set in kibana.yml
-      return false;
+      return 'remove';
     }
-    return hasUserAccessToCloudLink();
+    if (!hasUserAccessToCloudLink()) return 'remove';
   }
 
-  if (deepLink) {
-    return !deepLink.hidden;
-  }
+  if (deepLink && deepLink.hidden) return 'remove';
 
-  return true;
+  return sideNavStatus ?? 'visible';
 }
 
 function getTitleForNode<
@@ -108,7 +101,7 @@ function validateNodeProps<
   link,
   href,
   cloudLink,
-  openPanel,
+  renderAs,
   appendHorizontalRule,
   isGroup,
 }: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>) {
@@ -122,7 +115,7 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
     );
   }
-  if (openPanel && !link) {
+  if (renderAs === 'panelOpener' && !link) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. If "openPanel" is provided, a "link" must also be provided.`
     );
@@ -150,7 +143,15 @@ function createInternalNavNode<
 
   const { children, link, cloudLink, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
-  const isVisible = isNodeVisible({ link, deepLink, cloudLink }, { cloudLinks });
+  const sideNavStatus = getNodeStatus(
+    {
+      link,
+      deepLink,
+      cloudLink,
+      sideNavStatus: navNode.sideNavStatus,
+    },
+    { cloudLinks }
+  );
   const title = getTitleForNode(_navNode, { deepLink, cloudLinks });
   const href = cloudLink ? cloudLinks[cloudLink]?.href : _navNode.href;
 
@@ -158,18 +159,19 @@ function createInternalNavNode<
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
   }
 
-  if (!isVisible) {
+  if (sideNavStatus === 'remove') {
     return null;
   }
 
   return {
     ...navNode,
     id,
-    path: path ?? [id],
+    path: path ?? [],
     title: title ?? '',
     deepLink,
     href,
     isActive,
+    sideNavStatus,
   };
 }
 
@@ -231,7 +233,7 @@ export const useInitNavNode = <
   const { register: registerNodeOnParent } = useRegisterTreeNode();
   const { activeNodes } = useNavigation();
 
-  const id = getIdFromNavigationNode(node);
+  const id = getNavigationNodeId(node);
 
   const internalNavNode = useMemo(
     () => createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks }),

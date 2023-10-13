@@ -76,7 +76,8 @@ export interface GroupDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> extends NodeDefinition<LinkId, Id, ChildrenId> {
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'>,
+    Required<Pick<NodeDefinition<LinkId, Id, ChildrenId>, 'children'>> {
   type: 'navGroup';
   /**
    * Flag to indicate if the group is initially collapsed or not.
@@ -92,7 +93,33 @@ export interface GroupDefinition<
    * Pass props to the EUI accordion component used to represent a nav group
    */
   accordionProps?: Partial<EuiAccordionProps>;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition built from a specific preset.
+ */
+export interface PresetDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navGroup';
   preset?: NavigationGroupPreset;
+}
+
+/**
+ * @public
+ *
+ * An item root.
+ */
+export interface ItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navItem';
 }
 
 /**
@@ -104,13 +131,20 @@ export type RootNavigationItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> = RecentlyAccessedDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
+> =
+  | RecentlyAccessedDefinition
+  | GroupDefinition<LinkId, Id, ChildrenId>
+  | PresetDefinition<LinkId, Id, ChildrenId>
+  | ItemDefinition<LinkId, Id, ChildrenId>;
 
 export type ProjectNavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> = Array<Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>>;
+> = Array<
+  | Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>
+  | Omit<ItemDefinition<LinkId, Id, ChildrenId>, 'type'>
+>;
 
 /**
  * @public

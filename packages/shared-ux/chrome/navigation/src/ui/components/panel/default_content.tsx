@@ -25,7 +25,10 @@ import type { PanelNavNode } from './types';
 function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | undefined {
   if (!node.children) return undefined;
 
-  const allChildrenAreItems = node.children.every(isItemNode);
+  const allChildrenAreItems = node.children.every((_node) => {
+    if (isItemNode(_node)) return true;
+    return _node.renderAs === 'item';
+  });
 
   if (allChildrenAreItems) {
     // Automatically wrap all the children into top level "root" group.
@@ -39,7 +42,10 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
     ];
   }
 
-  const allChildrenAreGroups = node.children.every(isGroupNode);
+  const allChildrenAreGroups = node.children.every((_node) => {
+    if (_node.renderAs === 'item') return false;
+    return isGroupNode(_node);
+  });
 
   if (!allChildrenAreGroups) {
     throw new Error(
@@ -51,24 +57,28 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
 }
 
 interface Props {
-  activeNode: PanelNavNode;
+  /** The selected node is the node in the main panel that opens the Panel */
+  selectedNode: PanelNavNode;
 }
 
-export const DefaultContent: FC<Props> = ({ activeNode }) => {
-  const children = serializeChildren(activeNode);
-  const totalChildren = children?.length ?? 0;
-  const firstGroupTitle = children?.[0]?.title;
+export const DefaultContent: FC<Props> = ({ selectedNode }) => {
+  const filteredChildren = selectedNode.children?.filter(
+    (child) => child.sideNavStatus !== 'hidden'
+  );
+  const serializedChildren = serializeChildren({ ...selectedNode, children: filteredChildren });
+  const totalChildren = serializedChildren?.length ?? 0;
+  const firstGroupTitle = serializedChildren?.[0]?.title;
   const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
       <EuiFlexItem>
-        {typeof activeNode.title === 'string' ? (
+        {typeof selectedNode.title === 'string' ? (
           <EuiTitle size="xxs">
-            <h2>{activeNode.title}</h2>
+            <h2>{selectedNode.title}</h2>
           </EuiTitle>
         ) : (
-          activeNode.title
+          selectedNode.title
         )}
       </EuiFlexItem>
 
@@ -76,11 +86,11 @@ export const DefaultContent: FC<Props> = ({ activeNode }) => {
         <>
           {firstGroupHasTitle && <EuiSpacer size="l" />}
 
-          {children && (
+          {serializedChildren && (
             <>
-              {children.map((child, i) => {
+              {serializedChildren.map((child, i) => {
                 const hasHorizontalRuleBefore =
-                  i === 0 ? false : !!children?.[i - 1]?.appendHorizontalRule;
+                  i === 0 ? false : !!serializedChildren?.[i - 1]?.appendHorizontalRule;
 
                 return (
                   <Fragment key={child.id}>

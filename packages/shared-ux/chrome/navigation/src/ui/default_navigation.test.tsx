@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, type RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { type Observable, of, BehaviorSubject } from 'rxjs';
 import type {
   ChromeNavLink,
@@ -19,7 +19,7 @@ import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type {
-  NavigationTreeDefinition,
+  // NavigationTreeDefinition,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
 } from './types';
@@ -31,21 +31,21 @@ const SET_NAVIGATION_DELAY = 100;
 
 const services = getServicesMock();
 
-const renderDefaultNavigation = ({
-  navTreeDef,
-  onProjectNavigationChange,
-}: {
-  navTreeDef: NavigationTreeDefinition;
-  onProjectNavigationChange: (projectNavigation: ChromeProjectNavigation) => void;
-}): RenderResult => {
-  return render(
-    <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-      <DefaultNavigation navigationTree={navTreeDef} />
-    </NavigationProvider>
-  );
-};
+// const renderDefaultNavigation = ({
+//   navTreeDef,
+//   onProjectNavigationChange,
+// }: {
+//   navTreeDef: NavigationTreeDefinition;
+//   onProjectNavigationChange: (projectNavigation: ChromeProjectNavigation) => void;
+// }): RenderResult => {
+//   return render(
+//     <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+//       <DefaultNavigation navigationTree={navTreeDef} />
+//     </NavigationProvider>
+//   );
+// };
 
-const renderNavigation = ()
+// const renderNavigation = ()
 
 describe('<DefaultNavigation />', () => {
   beforeAll(() => {
@@ -421,6 +421,7 @@ describe('<DefaultNavigation />', () => {
                       "group1",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Absolute link",
                   },
                 ],
@@ -433,6 +434,7 @@ describe('<DefaultNavigation />', () => {
                   "root",
                   "group1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
             ],
@@ -444,6 +446,7 @@ describe('<DefaultNavigation />', () => {
             "path": Array [
               "root",
             ],
+            "sideNavStatus": "visible",
             "title": "",
             "type": "navGroup",
           },
@@ -540,17 +543,19 @@ describe('<DefaultNavigation />', () => {
         },
       ]);
 
-      const navigationBody: RootNavigationItemDefinition[] = [
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
         {
           type: 'navGroup',
           id: 'group1',
           children: [
             {
-              link: 'item1' as any,
+              id: 'item1',
+              link: 'item1',
               title: 'Item 1',
             },
             {
-              link: 'item2' as any,
+              id: 'item2',
+              link: 'item2',
               title: 'Item 2',
             },
           ],
@@ -584,10 +589,10 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+      expect((await findByTestId(/nav-item-group1.item1\s/)).dataset.testSubj).toMatch(
         /nav-item-isActive/
       );
-      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
+      expect((await findByTestId(/nav-item-group1.item2\s/)).dataset.testSubj).not.toMatch(
         /nav-item-isActive/
       );
     });
@@ -609,6 +614,7 @@ describe('<DefaultNavigation />', () => {
           id: 'group1',
           children: [
             {
+              id: 'item1',
               link: 'item1' as any,
               title: 'Item 1',
               getIsActive: () => true,

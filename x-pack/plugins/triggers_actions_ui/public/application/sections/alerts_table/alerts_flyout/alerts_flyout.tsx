@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPagination,
   EuiProgress,
-  EuiFlyoutSize,
 } from '@elastic/eui';
 import type { Alert, AlertsTableConfigurationRegistry } from '../../../../types';
 
@@ -40,7 +39,6 @@ interface AlertsFlyoutProps {
   alert: Alert;
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;
-  flyoutSize?: EuiFlyoutSize;
   alertsCount: number;
   isLoading: boolean;
   onClose: () => void;
@@ -51,7 +49,6 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
   alertsTableConfiguration,
   flyoutIndex,
-  flyoutSize = 'm',
   alertsCount,
   isLoading,
   onClose,
@@ -109,7 +106,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout" ownFocus={false}>
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={false}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <Suspense fallback={null}>

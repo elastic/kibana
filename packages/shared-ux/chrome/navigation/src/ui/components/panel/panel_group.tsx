@@ -52,19 +52,20 @@ interface Props {
 
 export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
   const { euiTheme } = useEuiTheme();
-  const { id, title, children, isCollapsible, appendHorizontalRule } = navNode;
-  const totalChildren = children?.length ?? 0;
+  const { id, title, appendHorizontalRule } = navNode;
+  const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
+  const totalChildren = filteredChildren?.length ?? 0;
   const classNames = getClassnames(euiTheme);
   const hasTitle = !!title && title !== '';
   const removePaddingTop = !hasTitle && !isFirstInList;
-  const someChildIsGroup = children?.some((child) => !!child.children);
-  const firstChildIsGroup = !!children?.[0]?.children;
+  const someChildIsGroup = filteredChildren?.some((child) => !!child.children);
+  const firstChildIsGroup = !!filteredChildren?.[0]?.children;
 
   const renderChildren = useCallback(() => {
-    if (!children) return null;
+    if (!filteredChildren) return null;
 
-    return children.map((item, i) =>
-      item.children ? (
+    return filteredChildren.map((item, i) =>
+      item.children && item.renderAs !== 'item' ? (
         <Fragment key={item.id}>
           <PanelGroup navNode={item} />
           {i < totalChildren - 1 && <EuiSpacer />}
@@ -73,13 +74,13 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         <PanelNavItem key={item.id} item={item} />
       )
     );
-  }, [children, totalChildren]);
+  }, [filteredChildren, totalChildren]);
 
   if (!navNode.children?.length) {
     return null;
   }
 
-  if (isCollapsible) {
+  if (navNode.renderAs === 'accordion') {
     return (
       <>
         <EuiAccordion

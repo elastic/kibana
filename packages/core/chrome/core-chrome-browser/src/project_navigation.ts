@@ -49,6 +49,10 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+export type SideNavNodeStatus = 'hidden' | 'visible';
+
+export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
+
 type NonEmptyArray<T> = [T, ...T[]];
 
 export type GetIsActiveFn = (params: {
@@ -74,20 +78,23 @@ interface NodeDefinitionBase {
    */
   href?: string;
   /**
-   * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
+   * Optional status to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
+   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
+   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
+   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
+   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
+   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * @default 'visible'
+   */
+  sideNavStatus?: SideNavNodeStatus;
+  /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: GetIsActiveFn;
-  /**
-   * Node type is automatically detected by checking if the node has children or not.
-   * A node without children is considered an "item" node.
-   * If you want to force a node to be a "group" node you can use this property.
-   */
-  nodeType?: 'group' | 'item';
   /**
    * ----------------------------------------------------------------------------------------------
    * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------
@@ -99,15 +106,13 @@ interface NodeDefinitionBase {
    */
   isGroupTitle?: boolean;
   /**
-   * ["group" nodes only] Optional flag to indicate if the group node is collapsible in an accordion.
-   * Default :false
+   * ["group" nodes only] Property to indicate how the group should be rendered.
+   * - Accordion: wraps the items in an EuiAccordion
+   * - PanelOpener: renders a button to open a panel on the right of the side nav
+   * - item: renders the group as an item in the side nav
+   * @default 'block'
    */
-  isCollapsible?: boolean;
-  /**
-   * ["group" nodes only] Flag to indicate if the node opens a panel when clicking on it.
-   * Note: Can't be used with a `link` or `href` value.
-   */
-  openPanel?: boolean;
+  renderAs?: RenderAs;
   /**
    * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
    * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation

@@ -6,51 +6,128 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 
 import {
+  EuiAccordionProps,
   EuiCollapsibleNavItem,
   EuiCollapsibleNavItemProps,
   EuiCollapsibleNavSubItemProps,
   EuiTitle,
 } from '@elastic/eui';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode, NodeRenderAs } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
+
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { getUniqueNodeId, isAbsoluteLink } from '../../utils';
+import { nodePathToString, isAbsoluteLink, getNavigationNodeHref } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
-const navigationNodeToEuiItem = (
-  item: ChromeProjectNavigationNode,
+const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
+  Boolean(navNode.deepLink) || Boolean(navNode.href);
+
+const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNode.children?.length);
+
+const getRenderAs = (navNode: ChromeProjectNavigationNode): NodeRenderAs | undefined => {
+  if (navNode.renderAs) return navNode.renderAs;
+
+  if (nodeHasLink(navNode) && !nodeHasChildren(navNode)) return 'item';
+
+  return undefined;
+};
+
+/**
+ * Predicate to determine if a node should be visible in the main side nav.
+ * If it is not visible it will be filtered out and not rendered.
+ */
+const itemIsVisible = (item: ChromeProjectNavigationNode) => {
+  if (item.sideNavStatus === 'hidden') return false;
+
+  const isGroupTitle = Boolean(item.isGroupTitle);
+  if (isGroupTitle) {
+    return true;
+  }
+
+  if (nodeHasLink(item)) {
+    return true;
+  }
+
+  if (nodeHasChildren(item)) {
+    return item.renderAs === 'item' ? true : item.children!.some(itemIsVisible);
+  }
+
+  return false;
+};
+
+const filterChildren = (
+  children?: ChromeProjectNavigationNode[]
+): ChromeProjectNavigationNode[] | undefined => {
+  if (!children) return undefined;
+  const filtered = children.filter(itemIsVisible);
+  return filtered.length === 0 ? undefined : filtered;
+};
+
+const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
+  const serialized = {
+    ...navNode,
+    id: nodePathToString(navNode),
+    children: filterChildren(navNode.children),
+    href: getNavigationNodeHref(navNode),
+  };
+
+  serialized.renderAs = getRenderAs(serialized);
+
+  return {
+    navNode: serialized,
+    hasChildren: nodeHasChildren(serialized),
+    hasLink: nodeHasLink(serialized),
+    isItem: serialized.renderAs === 'item',
+  };
+};
+
+const isEuiCollapsibleNavItemProps = (
+  props: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps
+): props is EuiCollapsibleNavItemProps => {
+  return (
+    props.title !== undefined && (props as EuiCollapsibleNavSubItemProps).renderItem === undefined
+  );
+};
+
+// Generate the EuiCollapsible props for both the root component (EuiCollapsibleNavItem) and its
+// "items" props. Both are compatible with the exception of "renderItem" which is only used for
+// sub items.
+const nodeToEuiCollapsibleNavProps = (
+  _navNode: ChromeProjectNavigationNode,
   {
     navigateToUrl,
     openPanel,
     closePanel,
     isSideNavCollapsed,
+    treeDepth,
   }: {
     navigateToUrl: NavigateToUrlFn;
     openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
     isSideNavCollapsed: boolean;
+    treeDepth: number;
   }
-): EuiCollapsibleNavSubItemProps => {
-  const href = item.deepLink?.url ?? item.href;
-  const id = getUniqueNodeId(item);
-  const { openPanel: itemOpenPanel = false } = item;
+): EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps => {
+  const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
+
+  const { id, title, href, icon, renderAs, isActive, deepLink, isGroupTitle } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
+  const isSelected = hasChildren ? false : isActive;
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
-    [`nav-item-deepLinkId-${item.deepLink?.id}`]: !!item.deepLink,
-    [`nav-item-id-${item.id}`]: item.id,
+    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+    [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isSelected,
   });
 
   // Note: this can be replaced with an `isGroup` API or whatever you prefer
   // Could also probably be pulled out to a separate component vs inlined
-  if (item.isGroupTitle) {
-    return {
+  if (isGroupTitle) {
+    const props: EuiCollapsibleNavSubItemProps = {
       renderItem: () => (
         <EuiTitle
           size="xxxs"
@@ -62,17 +139,19 @@ const navigationNodeToEuiItem = (
           })}
         >
           <div id={id} data-test-subj={dataTestSubj}>
-            {item.title}
+            {title}
           </div>
         </EuiTitle>
       ),
     };
+    return props;
   }
 
-  if (itemOpenPanel) {
-    return {
-      renderItem: () => <NavigationItemOpenPanel item={item} navigateToUrl={navigateToUrl} />,
+  if (renderAs === 'panelOpener') {
+    const props: EuiCollapsibleNavSubItemProps = {
+      renderItem: () => <NavigationItemOpenPanel item={navNode} navigateToUrl={navigateToUrl} />,
     };
+    return props;
   }
 
   const onClick = (e: React.MouseEvent) => {
@@ -84,128 +163,82 @@ const navigationNodeToEuiItem = (
     }
   };
 
-  return {
+  const items = isItem
+    ? undefined
+    : navNode.children?.map((child) =>
+        nodeToEuiCollapsibleNavProps(child, {
+          navigateToUrl,
+          openPanel,
+          closePanel,
+          isSideNavCollapsed,
+          treeDepth: treeDepth + 1,
+        })
+      );
+
+  const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
+    ? {
+        href,
+        external: isExternal,
+        onClick: (e: React.MouseEvent) => {
+          // TODO: here we might want to toggle the accordion (if we "renderAs: 'accordion'")
+          // Will be done in following PR
+          e.preventDefault();
+          e.stopPropagation();
+          if (href) {
+            navigateToUrl(href);
+          }
+        },
+      }
+    : undefined;
+
+  const accordionProps: Partial<EuiAccordionProps> | undefined = isItem
+    ? undefined
+    : {
+        // initialIsOpen: isActive,
+        initialIsOpen: true, // FIXME open state is controlled on component mount
+        // forceState: isCollapsed ? 'closed' : 'open',
+        // onToggle: (isOpen) => {
+        //   setIsCollapsed(!isOpen);
+        //   setDoCollapseFromActiveState(false);
+        // },
+        ...navNode.accordionProps,
+      };
+
+  const props: EuiCollapsibleNavItemProps = {
     id,
-    title: item.title,
+    title,
     isSelected,
-    accordionProps: {
-      ...item.accordionProps,
-      initialIsOpen: true, // FIXME open state is controlled on component mount
-    },
-    linkProps: { external: isExternal },
+    accordionProps,
+    linkProps,
     onClick,
     href,
-    items: itemOpenPanel
-      ? undefined // Don't render children if the item opens a panel
-      : item.children?.map((_item) =>
-          navigationNodeToEuiItem(_item, {
-            navigateToUrl,
-            openPanel,
-            closePanel,
-            isSideNavCollapsed,
-          })
-        ),
+    items,
     ['data-test-subj']: dataTestSubj,
-    icon: item.icon,
-    iconProps: { size: 's' },
+    icon,
+    iconProps: { size: treeDepth === 0 ? 'm' : 's' },
   };
+  return props;
 };
 
 interface Props {
   navNode: ChromeProjectNavigationNode;
-  items?: ChromeProjectNavigationNode[];
 }
 
-export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
-  const { id, title, icon, isActive } = navNode;
+export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   const { navigateToUrl, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
-  const [isCollapsed, setIsCollapsed] = useState(!isActive);
-  // We want to auto expand the group automatically if the node is active (URL match)
-  // but once the user manually expand a group we don't want to close it afterward automatically.
-  const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
-  // If the item has no link and no cildren, we don't want to render it
-  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNode) => {
-    const isGroupTitle = Boolean(item.isGroupTitle);
-    const hasLink = Boolean(item.deepLink) || Boolean(item.href);
-    if (isGroupTitle) {
-      return true;
-    }
-    if (hasLink) {
-      return true;
-    }
-    const hasChildren = Boolean(item.children?.length);
-    if (hasChildren) {
-      return item.children!.some(itemHasLinkOrChildren);
-    }
-    return false;
-  };
-
-  const filteredItems = items.filter(itemHasLinkOrChildren).map((item) => {
-    if (item.children) {
-      return {
-        ...item,
-        children: item.children.filter(itemHasLinkOrChildren),
-      };
-    }
-    return item;
+  const props = nodeToEuiCollapsibleNavProps(navNode, {
+    navigateToUrl,
+    openPanel,
+    closePanel,
+    isSideNavCollapsed,
+    treeDepth: 0,
   });
 
-  const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
-  const groupHasChildren = filteredItems.some(itemHasLinkOrChildren);
-  // Group with a link and no children will be rendered as a link and not an EUI accordion
-  const groupIsLink = groupHasLink && !groupHasChildren;
-  const groupHref = navNode.deepLink?.url ?? navNode.href!;
-
-  useEffect(() => {
-    if (doCollapseFromActiveState) {
-      setIsCollapsed(!isActive);
-    }
-  }, [isActive, doCollapseFromActiveState]);
-
-  if (!groupHasLink && !groupHasChildren) {
-    return null;
+  if (!isEuiCollapsibleNavItemProps(props)) {
+    throw new Error(`Invalid EuiCollapsibleNavItem props for node ${props.id}`);
   }
 
-  const propsForGroupAsLink: Partial<EuiCollapsibleNavItemProps> = groupIsLink
-    ? {
-        linkProps: {
-          href: groupHref,
-          onClick: (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigateToUrl(groupHref);
-          },
-        },
-      }
-    : {};
-
-  return (
-    <EuiCollapsibleNavItem
-      id={id}
-      title={title}
-      icon={icon}
-      iconProps={{ size: 'm' }}
-      accordionProps={{
-        initialIsOpen: isActive,
-        forceState: isCollapsed ? 'closed' : 'open',
-        onToggle: (isOpen) => {
-          setIsCollapsed(!isOpen);
-          setDoCollapseFromActiveState(false);
-        },
-        ...navNode.accordionProps,
-      }}
-      data-test-subj={`nav-bucket-${id}`}
-      {...propsForGroupAsLink}
-      items={filteredItems.map((item) =>
-        navigationNodeToEuiItem(item, {
-          navigateToUrl,
-          isSideNavCollapsed,
-          openPanel,
-          closePanel,
-        })
-      )}
-    />
-  );
+  return <EuiCollapsibleNavItem {...props} />;
 };

@@ -7,12 +7,14 @@
  */
 
 import React, { Fragment, useEffect, useMemo } from 'react';
-
 import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { EuiCollapsibleNavItem } from '@elastic/eui';
+
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
 import type { NodeProps, NodePropsEnhanced } from '../types';
 import { useNavigation } from './navigation';
+import { getNavigationNodeHref } from '../../utils';
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -27,7 +29,7 @@ function NavigationItemComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
-  const { cloudLinks } = useNavigationServices();
+  const { cloudLinks, navigateToUrl } = useNavigationServices();
   const navigationContext = useNavigation();
   const navNodeRef = React.useRef<ChromeProjectNavigationNode | null>(null);
 
@@ -37,6 +39,9 @@ function NavigationItemComp<
       ...rest,
       isGroup: false,
     };
+    if (typeof _children === 'string') {
+      nodeEnhanced.title = nodeEnhanced.title ?? _children;
+    }
     return {
       children: _children,
       node: nodeEnhanced,
@@ -50,18 +55,49 @@ function NavigationItemComp<
     navNodeRef.current = navNode;
   }, [navNode]);
 
-  if (!navNode || !unstyled) {
+  if (!navNode) {
     return null;
   }
 
-  if (children) {
-    if (typeof children === 'function') {
-      return children(navNode);
+  if (unstyled) {
+    if (children) {
+      if (typeof children === 'function') {
+        return children(navNode);
+      }
+      return <>{children}</>;
     }
-    return <>{children}</>;
+
+    return <Fragment>{navNode.title}</Fragment>;
   }
 
-  return <Fragment>{navNode.title}</Fragment>;
+  const isRootLevel = navNode.path.length === 1;
+
+  if (isRootLevel) {
+    const href = getNavigationNodeHref(navNode);
+    return (
+      <EuiCollapsibleNavItem
+        id={navNode.id}
+        title={navNode.title}
+        icon={navNode.icon}
+        iconProps={{ size: 'm' }}
+        data-test-subj={`nav-item-${navNode.id}`}
+        linkProps={{
+          href,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (href) {
+              navigateToUrl(href);
+            }
+          },
+        }}
+      />
+    );
+  }
+
+  // We don't render anything in the UI for non root item as those register themselves on the parent (Group)
+  // updating its "childrenNodes" state which are then converted to "items" for the EuiCollapsibleNavItem component.
+  return null;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;

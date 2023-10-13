@@ -475,6 +475,7 @@ describe('<Navigation />', () => {
                   "root",
                   "group1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
               Object {
@@ -497,6 +498,7 @@ describe('<Navigation />', () => {
                       "group2",
                       "item1",
                     ],
+                    "sideNavStatus": "visible",
                     "title": "Title from deeplink",
                   },
                 ],
@@ -509,6 +511,7 @@ describe('<Navigation />', () => {
                   "root",
                   "group2",
                 ],
+                "sideNavStatus": "visible",
                 "title": "",
               },
             ],
@@ -520,6 +523,7 @@ describe('<Navigation />', () => {
             "path": Array [
               "root",
             ],
+            "sideNavStatus": "visible",
             "title": "",
           },
         ]
@@ -619,6 +623,7 @@ describe('<Navigation />', () => {
                   "group1",
                   "item1",
                 ],
+                "sideNavStatus": "visible",
                 "title": "Item 1",
               },
             ],
@@ -630,6 +635,7 @@ describe('<Navigation />', () => {
             "path": Array [
               "group1",
             ],
+            "sideNavStatus": "visible",
             "title": "",
           },
         ]
@@ -710,10 +716,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
-      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+      expect((await findByTestId(/nav-item-group1.item1\s/)).dataset.testSubj).toMatch(
         /nav-item-isActive/
       );
-      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
+      expect((await findByTestId(/nav-item-group1.item2\s/)).dataset.testSubj).not.toMatch(
         /nav-item-isActive/
       );
 

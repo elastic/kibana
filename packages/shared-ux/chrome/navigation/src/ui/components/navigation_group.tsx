@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
@@ -64,10 +64,24 @@ function NavigationGroupInternalComp<
 
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node, { cloudLinks });
 
+  // We add to the nav node the children that have mounted and registered themselves.
+  // Those children render in the UI inside the NavigationSectionUI -> EuiCollapsibleNavItem -> items
+  const navNodeWithChildren = useMemo(() => {
+    if (!navNode) return null;
+
+    const hasChildren = Object.keys(childrenNodes).length > 0;
+    const withChildren: ChromeProjectNavigationNode = {
+      ...navNode,
+      children: hasChildren ? Object.values(childrenNodes) : undefined,
+    };
+
+    return withChildren;
+  }, [navNode, childrenNodes]);
+
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
   const renderContent = useCallback(() => {
-    if (!path || !navNode) {
+    if (!path || !navNodeWithChildren) {
       return null;
     }
 
@@ -76,22 +90,20 @@ function NavigationGroupInternalComp<
       return children;
     }
 
-    // Each "top level" group is rendered using the EuiCollapsibleNavGroup component
-    // inside the NavigationSectionUI. That's how we get the "collapsible" behavior.
-    const isTopLevel = path && path.length === 1;
+    // We will only render the <NavigationSectionUI /> component for root groups. The nested group
+    // are handled by the EuiCollapsibleNavItem component through its "items" prop.
+    const isRootLevel = path && path.length === 1;
 
     return (
       <>
-        {isTopLevel && (
-          <NavigationSectionUI navNode={navNode} items={Object.values(childrenNodes)} />
-        )}
-        {/* We render the children so they mount and can register themselves but
-        visually they don't appear here in the DOM. They are rendered inside the
-        <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
+        {isRootLevel && <NavigationSectionUI navNode={navNodeWithChildren} />}
+        {/* We render the children so they mount and can **register** themselves but
+          visually they don't appear here in the DOM. They are rendered inside the
+          <EuiCollapsibleNavItem />  "items" prop (see <NavigationSectionUI />) */}
         {children}
       </>
     );
-  }, [navNode, path, childrenNodes, children, unstyled]);
+  }, [navNodeWithChildren, path, children, unstyled]);
 
   const contextValue = useMemo(() => {
     return {
