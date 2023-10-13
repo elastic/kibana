@@ -60,7 +60,8 @@ export interface CloudDefendPolicy {
 // Currently we support file and process selectors (which match on their respective set of hook points)
 export type SelectorType = 'file' | 'process';
 
-export type SelectorCondition =
+export type SelectorCondition = keyof Pick<
+  Selector,
   | 'containerImageFullName'
   | 'containerImageName'
   | 'containerImageTag'
@@ -75,7 +76,8 @@ export type SelectorCondition =
   | 'operation'
   | 'processExecutable'
   | 'processName'
-  | 'sessionLeaderInteractive';
+  | 'sessionLeaderInteractive'
+>;
 
 export type ResponseAction = 'log' | 'alert' | 'block';
 
