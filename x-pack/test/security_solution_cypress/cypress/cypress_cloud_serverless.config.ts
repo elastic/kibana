@@ -25,7 +25,7 @@ export default defineCypressConfig({
     grepFilterSpecs: true,
     grepOmitFiltered: true,
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
-    grepIntegrationFolder: "../"
+    grepIntegrationFolder: '../',
   },
   e2e: {
     specPattern: './cypress/e2e/**/*.cy.ts',

@@ -31,8 +31,6 @@ before(() => {
 
 registerCypressGrep();
 
-
-
 Cypress.on('uncaught:exception', () => {
   return false;
 });

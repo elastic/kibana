@@ -28,7 +28,7 @@ export default defineCypressConfig({
   env: {
     grepFilterSpecs: true,
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
-    grepIntegrationFolder: "../"
+    grepIntegrationFolder: '../',
   },
   e2e: {
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
