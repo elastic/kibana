@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
-
 import {
   ElasticsearchResponseError,
   isNotFoundException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
-
-export const acceptableModelNames = Object.keys(ELASTIC_MODEL_DEFINITIONS);
 
 export function isNotFoundExceptionError(error: unknown): boolean {
   return (
@@ -24,19 +20,3 @@ export function isNotFoundExceptionError(error: unknown): boolean {
   );
 }
 
-export function throwIfNotAcceptableModelName(modelName: string) {
-  if (!acceptableModelNames.includes(modelName)) {
-    const notFoundError: ElasticsearchResponseError = {
-      meta: {
-        body: {
-          error: {
-            type: 'resource_not_found_exception',
-          },
-        },
-        statusCode: 404,
-      },
-      name: 'ResponseError',
-    };
-    throw notFoundError;
-  }
-}
