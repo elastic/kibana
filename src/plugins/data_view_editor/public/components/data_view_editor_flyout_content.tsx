@@ -124,6 +124,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
+        allowHidden: formData.allowHidden,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
