@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
 import type {
@@ -78,167 +79,171 @@ export interface IndexedHostsResponse
  * @param generator
  * @param disableEndpointActionsForHost
  */
-export async function indexEndpointHostDocs({
-  numDocs,
-  client,
-  kbnClient,
-  realPolicies,
-  epmEndpointPackage,
-  metadataIndex,
-  policyResponseIndex,
-  enrollFleet,
-  generator,
-  withResponseActions = true,
-  numResponseActions,
-  alertIds,
-}: {
-  numDocs: number;
-  client: Client;
-  kbnClient: KbnClient;
-  realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
-  epmEndpointPackage: GetInfoResponse['item'];
-  metadataIndex: string;
-  policyResponseIndex: string;
-  enrollFleet: boolean;
-  generator: EndpointDocGenerator;
-  withResponseActions?: boolean;
-  numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
-  alertIds?: string[];
-}): Promise<IndexedHostsResponse> {
-  const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
-  const timestamp = new Date().getTime();
-  const kibanaVersion = await fetchKibanaVersion(kbnClient);
-  const response: IndexedHostsResponse = {
-    hosts: [],
-    agents: [],
-    policyResponses: [],
+export const indexEndpointHostDocs = usageTracker.track(
+  'indexEndpointHostDocs',
+  async ({
+    numDocs,
+    client,
+    kbnClient,
+    realPolicies,
+    epmEndpointPackage,
     metadataIndex,
     policyResponseIndex,
-    fleetAgentsIndex: '',
-    endpointActionResponses: [],
-    endpointActionResponsesIndex: '',
-    endpointActions: [],
-    endpointActionsIndex: '',
-    actionResponses: [],
-    responsesIndex: '',
-    actions: [],
-    actionsIndex: '',
-    integrationPolicies: [],
-    agentPolicies: [],
-  };
-  let hostMetadata: HostMetadata;
-  let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | Agent;
+    enrollFleet,
+    generator,
+    withResponseActions = true,
+    numResponseActions,
+    alertIds,
+  }: {
+    numDocs: number;
+    client: Client;
+    kbnClient: KbnClient;
+    realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
+    epmEndpointPackage: GetInfoResponse['item'];
+    metadataIndex: string;
+    policyResponseIndex: string;
+    enrollFleet: boolean;
+    generator: EndpointDocGenerator;
+    withResponseActions?: boolean;
+    numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
+    alertIds?: string[];
+  }): Promise<IndexedHostsResponse> => {
+    const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
+    const timestamp = new Date().getTime();
+    const kibanaVersion = await fetchKibanaVersion(kbnClient);
+    const response: IndexedHostsResponse = {
+      hosts: [],
+      agents: [],
+      policyResponses: [],
+      metadataIndex,
+      policyResponseIndex,
+      fleetAgentsIndex: '',
+      endpointActionResponses: [],
+      endpointActionResponsesIndex: '',
+      endpointActions: [],
+      endpointActionsIndex: '',
+      actionResponses: [],
+      responsesIndex: '',
+      actions: [],
+      actionsIndex: '',
+      integrationPolicies: [],
+      agentPolicies: [],
+    };
+    let hostMetadata: HostMetadata;
+    let wasAgentEnrolled = false;
+    let enrolledAgent: undefined | Agent;
 
-  for (let j = 0; j < numDocs; j++) {
-    generator.updateHostData();
-    generator.updateHostPolicyData();
+    for (let j = 0; j < numDocs; j++) {
+      generator.updateHostData();
+      generator.updateHostPolicyData();
 
-    hostMetadata = generator.generateHostMetadata(
-      timestamp - timeBetweenDocs * (numDocs - j - 1),
-      EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
-    );
+      hostMetadata = generator.generateHostMetadata(
+        timestamp - timeBetweenDocs * (numDocs - j - 1),
+        EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
+      );
 
-    if (enrollFleet) {
-      const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
-      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuidv4()}`;
+      if (enrollFleet) {
+        const { id: appliedPolicyId, name: appliedPolicyName } =
+          hostMetadata.Endpoint.policy.applied;
+        const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuidv4()}`;
 
-      // If we don't yet have a "real" policy record, then create it now in ingest (package config)
-      if (!realPolicies[appliedPolicyId]) {
-        const createdPolicies = await indexFleetEndpointPolicy(
-          kbnClient,
-          uniqueAppliedPolicyName,
-          epmEndpointPackage.version
-        );
+        // If we don't yet have a "real" policy record, then create it now in ingest (package config)
+        if (!realPolicies[appliedPolicyId]) {
+          const createdPolicies = await indexFleetEndpointPolicy(
+            kbnClient,
+            uniqueAppliedPolicyName,
+            epmEndpointPackage.version
+          );
 
-        mergeAndAppendArrays(response, createdPolicies);
+          mergeAndAppendArrays(response, createdPolicies);
 
-        // eslint-disable-next-line require-atomic-updates
-        realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
-      }
+          // eslint-disable-next-line require-atomic-updates
+          realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
+        }
 
-      // If we did not yet enroll an agent for this Host, do it now that we have good policy id
-      if (!wasAgentEnrolled) {
-        wasAgentEnrolled = true;
+        // If we did not yet enroll an agent for this Host, do it now that we have good policy id
+        if (!wasAgentEnrolled) {
+          wasAgentEnrolled = true;
 
-        const indexedAgentResponse = await indexFleetAgentForHost(
-          client,
-          kbnClient,
-          hostMetadata,
-          realPolicies[appliedPolicyId].policy_id,
-          kibanaVersion
-        );
+          const indexedAgentResponse = await indexFleetAgentForHost(
+            client,
+            kbnClient,
+            hostMetadata,
+            realPolicies[appliedPolicyId].policy_id,
+            kibanaVersion
+          );
 
-        enrolledAgent = indexedAgentResponse.agents[0];
-        mergeAndAppendArrays(response, indexedAgentResponse);
-      }
-      // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
-      hostMetadata = {
-        ...hostMetadata,
-        agent: {
-          ...hostMetadata.agent,
-          id: enrolledAgent?.id ?? hostMetadata.agent.id,
-        },
-        elastic: {
-          ...hostMetadata.elastic,
+          enrolledAgent = indexedAgentResponse.agents[0];
+          mergeAndAppendArrays(response, indexedAgentResponse);
+        }
+        // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
+        hostMetadata = {
+          ...hostMetadata,
           agent: {
-            ...hostMetadata.elastic.agent,
-            id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
+            ...hostMetadata.agent,
+            id: enrolledAgent?.id ?? hostMetadata.agent.id,
           },
-        },
-        Endpoint: {
-          ...hostMetadata.Endpoint,
-          policy: {
-            ...hostMetadata.Endpoint.policy,
-            applied: {
-              ...hostMetadata.Endpoint.policy.applied,
-              id: realPolicies[appliedPolicyId].id,
+          elastic: {
+            ...hostMetadata.elastic,
+            agent: {
+              ...hostMetadata.elastic.agent,
+              id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
             },
           },
-        },
-      };
+          Endpoint: {
+            ...hostMetadata.Endpoint,
+            policy: {
+              ...hostMetadata.Endpoint.policy,
+              applied: {
+                ...hostMetadata.Endpoint.policy.applied,
+                id: realPolicies[appliedPolicyId].id,
+              },
+            },
+          },
+        };
 
-      if (withResponseActions) {
-        // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-        const actionsResponse = await indexEndpointAndFleetActionsForHost(client, hostMetadata, {
-          alertIds,
-          numResponseActions,
-        });
-        mergeAndAppendArrays(response, actionsResponse);
+        if (withResponseActions) {
+          // Create some fleet endpoint actions and .logs-endpoint actions for this Host
+          const actionsResponse = await indexEndpointAndFleetActionsForHost(client, hostMetadata, {
+            alertIds,
+            numResponseActions,
+          });
+          mergeAndAppendArrays(response, actionsResponse);
+        }
       }
+
+      await client
+        .index({
+          index: metadataIndex,
+          document: hostMetadata,
+          op_type: 'create',
+          refresh: 'wait_for',
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      const hostPolicyResponse = generator.generatePolicyResponse({
+        ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
+        policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
+      });
+
+      await client
+        .index({
+          index: policyResponseIndex,
+          document: hostPolicyResponse,
+          op_type: 'create',
+          refresh: 'wait_for',
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      // Clone the hostMetadata and policyResponse document to ensure that no shared state
+      // (as a result of using the generator) is returned across docs.
+      response.hosts.push(cloneDeep(hostMetadata));
+      response.policyResponses.push(cloneDeep(hostPolicyResponse));
     }
 
-    await client
-      .index({
-        index: metadataIndex,
-        document: hostMetadata,
-        op_type: 'create',
-        refresh: 'wait_for',
-      })
-      .catch(wrapErrorAndRejectPromise);
-
-    const hostPolicyResponse = generator.generatePolicyResponse({
-      ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
-      policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
-    });
-
-    await client
-      .index({
-        index: policyResponseIndex,
-        document: hostPolicyResponse,
-        op_type: 'create',
-        refresh: 'wait_for',
-      })
-      .catch(wrapErrorAndRejectPromise);
-
-    // Clone the hostMetadata and policyResponse document to ensure that no shared state
-    // (as a result of using the generator) is returned across docs.
-    response.hosts.push(cloneDeep(hostMetadata));
-    response.policyResponses.push(cloneDeep(hostPolicyResponse));
+    return response;
   }
-
-  return response;
-}
+);
 
 const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   const version = (

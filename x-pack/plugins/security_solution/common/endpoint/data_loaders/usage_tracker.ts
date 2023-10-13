@@ -26,6 +26,8 @@ interface UsageTrackerOptions {
   maxRecordsPerType?: number;
 }
 
+type AnyFunction = (...args: any) => any;
+
 /**
  * Keep track of usage of stuff. Example: can track how many time a given utility/function was called.
  *
@@ -57,7 +59,7 @@ export class UsageTracker {
       if (dumpOnProcessExit && process && process.once) {
         ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'].forEach((event) => {
           process.once(event, () => {
-            logger?.debug(`Usage tracking:\n\n${this.toString()}`);
+            logger?.debug(`Tooling usage tracking:\n\n${this.toString()}`);
           });
         });
       }
@@ -116,10 +118,23 @@ export class UsageTracker {
    * @param callback
    * @param name
    */
-  public track<F extends (...args: any) => any = (...args: any) => any>(
-    callback: F,
-    name?: string
+  public track<F extends AnyFunction = AnyFunction>(callback: F): F;
+  public track<F extends AnyFunction = AnyFunction>(name: string, callback: F): F;
+  public track<F extends AnyFunction = AnyFunction>(
+    callbackOrName: F | string,
+    maybeCallback?: F
   ): F {
+    const isArg1Callback = typeof callbackOrName === 'function';
+
+    if (!isArg1Callback && !maybeCallback) {
+      throw new Error(
+        `Second argument to 'track()' can not be undefined when first argument defined a name`
+      );
+    }
+
+    const callback = (isArg1Callback ? callbackOrName : maybeCallback) as F;
+    const name = isArg1Callback ? undefined : (callbackOrName as string);
+
     if (this.wrappedCallbacks.has(callback)) {
       return callback;
     }
@@ -177,7 +192,7 @@ class UsageRecord {
 
     const durationDiff = moment.duration(moment(this.finish).diff(this.start));
 
-    this.duration = `h[ ${durationDiff.hours()} ]  m[ ${durationDiff.minutes()} ]  s[ ${durationDiff.seconds()} ]  ms[ ${durationDiff.milliseconds()} ]`;
+    this.duration = `h[${durationDiff.hours()}]  m[${durationDiff.minutes()}]  s[${durationDiff.seconds()}]  ms[${durationDiff.milliseconds()}]`;
   }
 
   public toJSON(): UsageRecordJson {

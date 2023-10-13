@@ -10,6 +10,7 @@ import seedrandom from 'seedrandom';
 import type { KbnClient } from '@kbn/test';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
+import { usageTracker } from './data_loaders/usage_tracker';
 import type { TreeOptions } from './generate_data';
 import { EndpointDocGenerator } from './generate_data';
 import type {
@@ -54,102 +55,105 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param alertIds
  * @param logger_
  */
-export async function indexHostsAndAlerts(
-  client: Client,
-  kbnClient: KbnClient,
-  seed: string,
-  numHosts: number,
-  numDocs: number,
-  metadataIndex: string,
-  policyResponseIndex: string,
-  eventIndex: string,
-  alertIndex: string,
-  alertsPerHost: number,
-  fleet: boolean,
-  options: TreeOptions = {},
-  DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
-  withResponseActions = true,
-  numResponseActions?: number,
-  alertIds?: string[],
-  logger_?: ToolingLog
-): Promise<IndexedHostsAndAlertsResponse> {
-  const random = seedrandom(seed);
-  const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
-  const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
-  const response: IndexedHostsAndAlertsResponse = {
-    hosts: [],
-    policyResponses: [],
-    agents: [],
-    fleetAgentsIndex: '',
-    metadataIndex,
-    policyResponseIndex,
-    actionResponses: [],
-    responsesIndex: '',
-    actions: [],
-    actionsIndex: '',
-    endpointActions: [],
-    endpointActionsIndex: '',
-    endpointActionResponses: [],
-    endpointActionResponsesIndex: '',
-    integrationPolicies: [],
-    agentPolicies: [],
-  };
-
-  // Ensure fleet is setup and endpoint package installed
-  await setupFleetForEndpoint(kbnClient, logger);
-
-  // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
-  if (fleet) {
-    await enableFleetServerIfNecessary(client);
-  }
-
-  // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
-  const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
-
-  const shouldWaitForEndpointMetadataDocs = fleet;
-  if (shouldWaitForEndpointMetadataDocs) {
-    await waitForMetadataTransformsReady(client);
-    await stopMetadataTransforms(client);
-  }
-
-  for (let i = 0; i < numHosts; i++) {
-    const generator = new DocGenerator(random);
-    const indexedHosts = await indexEndpointHostDocs({
-      numDocs,
-      client,
-      kbnClient,
-      realPolicies,
-      epmEndpointPackage,
+export const indexHostsAndAlerts = usageTracker.track(
+  'indexHostsAndAlerts',
+  async (
+    client: Client,
+    kbnClient: KbnClient,
+    seed: string,
+    numHosts: number,
+    numDocs: number,
+    metadataIndex: string,
+    policyResponseIndex: string,
+    eventIndex: string,
+    alertIndex: string,
+    alertsPerHost: number,
+    fleet: boolean,
+    options: TreeOptions = {},
+    DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
+    withResponseActions = true,
+    numResponseActions?: number,
+    alertIds?: string[],
+    logger_?: ToolingLog
+  ): Promise<IndexedHostsAndAlertsResponse> => {
+    const random = seedrandom(seed);
+    const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
+    const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
+    const response: IndexedHostsAndAlertsResponse = {
+      hosts: [],
+      policyResponses: [],
+      agents: [],
+      fleetAgentsIndex: '',
       metadataIndex,
       policyResponseIndex,
-      enrollFleet: fleet,
-      generator,
-      withResponseActions,
-      numResponseActions,
-      alertIds,
-    });
+      actionResponses: [],
+      responsesIndex: '',
+      actions: [],
+      actionsIndex: '',
+      endpointActions: [],
+      endpointActionsIndex: '',
+      endpointActionResponses: [],
+      endpointActionResponsesIndex: '',
+      integrationPolicies: [],
+      agentPolicies: [],
+    };
 
-    mergeAndAppendArrays(response, indexedHosts);
+    // Ensure fleet is setup and endpoint package installed
+    await setupFleetForEndpoint(kbnClient, logger);
 
-    await indexAlerts({
-      client,
-      eventIndex,
-      alertIndex,
-      generator,
-      numAlerts: alertsPerHost,
-      options,
-    });
+    // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
+    if (fleet) {
+      await enableFleetServerIfNecessary(client);
+    }
+
+    // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
+    const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
+    const shouldWaitForEndpointMetadataDocs = fleet;
+    if (shouldWaitForEndpointMetadataDocs) {
+      await waitForMetadataTransformsReady(client);
+      await stopMetadataTransforms(client);
+    }
+
+    for (let i = 0; i < numHosts; i++) {
+      const generator = new DocGenerator(random);
+      const indexedHosts = await indexEndpointHostDocs({
+        numDocs,
+        client,
+        kbnClient,
+        realPolicies,
+        epmEndpointPackage,
+        metadataIndex,
+        policyResponseIndex,
+        enrollFleet: fleet,
+        generator,
+        withResponseActions,
+        numResponseActions,
+        alertIds,
+      });
+
+      mergeAndAppendArrays(response, indexedHosts);
+
+      await indexAlerts({
+        client,
+        eventIndex,
+        alertIndex,
+        generator,
+        numAlerts: alertsPerHost,
+        options,
+      });
+    }
+
+    if (shouldWaitForEndpointMetadataDocs) {
+      await startMetadataTransforms(
+        client,
+        response.agents.map((agent) => agent.id)
+      );
+    }
+
+    return response;
   }
-
-  if (shouldWaitForEndpointMetadataDocs) {
-    await startMetadataTransforms(
-      client,
-      response.agents.map((agent) => agent.id)
-    );
-  }
-
-  return response;
-}
+);
 
 export type DeleteIndexedHostsAndAlertsResponse = DeleteIndexedEndpointHostsResponse;
 
