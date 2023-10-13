@@ -32,7 +32,6 @@ import {
   endpointMeteringService,
   setEndpointPackagePolicyServerlessFlag,
 } from './endpoint/services';
-
 import { enableRuleActions } from './rules/enable_rule_actions';
 
 export class SecuritySolutionServerlessPlugin
