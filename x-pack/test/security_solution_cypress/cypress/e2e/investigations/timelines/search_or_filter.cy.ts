@@ -22,6 +22,7 @@ import {
   changeTimelineQueryLanguage,
   executeTimelineKQL,
   executeTimelineSearch,
+  saveTimeline,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
@@ -70,6 +71,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
 
     it('should be able to update timeline kqlMode with filter', () => {
       cy.get(TIMELINE_KQLMODE_FILTER).click();
+      saveTimeline();
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
@@ -77,8 +79,9 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
       });
     });
 
-    it.skip('should be able to update timeline kqlMode with search', () => {
+    it('should be able to update timeline kqlMode with search', () => {
       cy.get(TIMELINE_KQLMODE_SEARCH).click();
+      saveTimeline();
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');

@@ -354,7 +354,6 @@ export const saveTimeline = () => {
     .then((value) => {
       if (!value) {
         cy.get(TIMELINE_TITLE_INPUT).type(`test{enter}`);
-        cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'test', name);
       }
       cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
       cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
