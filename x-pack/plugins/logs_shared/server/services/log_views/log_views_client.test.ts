@@ -298,6 +298,7 @@ describe('LogViewsClient class', () => {
               "type": "keyword",
             },
           },
+          "setAllowHidden": [Function],
           "setFieldFormat": [Function],
           "setIndexPattern": [Function],
           "shortDotsEnable": false,
