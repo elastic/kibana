@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const { body: result } = await supertest
       .post(RISK_SCORE_CALCULATION_URL)
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31')
+      .set('elastic-api-version', '1')
       .send(body)
       .expect(200);
     return result;

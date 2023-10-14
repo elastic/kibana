@@ -18,6 +18,8 @@ import {
   installLegacyRiskScore,
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
+  deleteRiskEngineTask,
+  deleteAllRiskScores,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,6 +31,16 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('Risk Engine', () => {
+    beforeEach(async () => {
+      await cleanRiskEngineConfig({ kibanaServer });
+      await deleteRiskEngineTask({ es, log });
+      await deleteAllRiskScores(log, es);
+      await clearTransforms({
+        es,
+        log,
+      });
+    });
+
     afterEach(async () => {
       await cleanRiskEngineConfig({
         kibanaServer,
@@ -45,10 +57,11 @@ export default ({ getService }: FtrProviderContext) => {
         supertest,
         log,
       });
+      await deleteRiskEngineTask({ es, log });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168376
-    describe.skip('init api', () => {
+    describe('init api', () => {
       it('should return response with success status', async () => {
         const response = await riskEngineRoutes.init();
         expect(response.body).to.eql({
@@ -63,7 +76,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should install resources on init call', async () => {
-        const ilmPolicyName = '.risk-score-ilm-policy';
         const componentTemplateName = '.risk-score-mappings';
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
         const dataStreamName = 'risk-score.risk-score-default';
@@ -71,27 +83,6 @@ export default ({ getService }: FtrProviderContext) => {
         const transformId = 'risk_score_latest_transform_default';
 
         await riskEngineRoutes.init();
-
-        const ilmPolicy = await es.ilm.getLifecycle({
-          name: ilmPolicyName,
-        });
-
-        expect(ilmPolicy[ilmPolicyName].policy).to.eql({
-          _meta: {
-            managed: true,
-          },
-          phases: {
-            hot: {
-              min_age: '0ms',
-              actions: {
-                rollover: {
-                  max_age: '30d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        });
 
         const { component_templates: componentTemplates1 } = await es.cluster.getComponentTemplate({
           name: componentTemplateName,
@@ -245,11 +236,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(indexTemplate.index_template.template!.mappings?._meta?.kibana?.version).to.be.a(
           'string'
         );
+
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
-            lifecycle: {
-              name: '.risk-score-ilm-policy',
-            },
             mapping: {
               total_fields: {
                 limit: '1000',
@@ -258,6 +247,10 @@ export default ({ getService }: FtrProviderContext) => {
             hidden: 'true',
             auto_expand_replicas: '0-1',
           },
+        });
+
+        expect(indexTemplate.index_template.template!.lifecycle).to.eql({
+          enabled: true,
         });
 
         const dsResponse = await es.indices.get({
@@ -272,10 +265,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(dataStream?.mappings?._meta?.namespace).to.eql('default');
         expect(dataStream?.mappings?._meta?.kibana?.version).to.be.a('string');
         expect(dataStream?.mappings?.dynamic).to.eql('false');
-
-        expect(dataStream?.settings?.index?.lifecycle).to.eql({
-          name: '.risk-score-ilm-policy',
-        });
 
         expect(dataStream?.settings?.index?.mapping).to.eql({
           total_fields: {
@@ -374,7 +363,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168355
-    describe.skip('status api', () => {
+    describe('status api', () => {
       it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
 

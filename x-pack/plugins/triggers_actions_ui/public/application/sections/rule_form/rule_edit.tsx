@@ -26,6 +26,8 @@ import {
 } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleFlyoutCloseReason,
@@ -47,6 +49,14 @@ import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+
+const defaultUpdateRuleErrorMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleEdit.saveErrorNotificationText',
+  {
+    defaultMessage: 'Cannot update rule.',
+  }
+);
 
 const cloneAndMigrateRule = (initialRule: Rule) => {
   const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
@@ -181,12 +191,17 @@ export const RuleEdit = ({
         );
       }
     } catch (errorRes) {
-      toasts.addDanger(
-        errorRes.body?.message ??
-          i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.saveErrorNotificationText', {
-            defaultMessage: 'Cannot update rule.',
-          })
+      const message = parseRuleCircuitBreakerErrorMessage(
+        errorRes.body?.message || defaultUpdateRuleErrorMessage
       );
+      toasts.addDanger({
+        title: message.summary,
+        ...(message.details && {
+          text: toMountPoint(
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+          ),
+        }),
+      });
     }
     setIsSaving(false);
   }
