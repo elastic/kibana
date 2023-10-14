@@ -61,7 +61,8 @@ export class EndpointMeteringService {
         projectId: cloudSetup?.serverless?.projectId,
       });
 
-      return [...acc, record];
+      acc.push(record);
+      return acc;
     }, [] as UsageRecord[]);
   };
 

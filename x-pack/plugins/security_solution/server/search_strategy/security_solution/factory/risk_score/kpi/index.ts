@@ -36,10 +36,10 @@ export const kpiRiskScore: SecuritySolutionFactory<RiskQueries.kpiRiskScore> = {
     const riskBuckets = getOr([], 'aggregations.risk.buckets', response.rawResponse);
 
     const result: Record<RiskSeverity, number> = riskBuckets.reduce(
-      (cummulative: Record<string, number>, bucket: AggBucket) => ({
-        ...cummulative,
-        [bucket.key]: getOr(0, 'unique_entries.value', bucket),
-      }),
+      (cummulative: Record<string, number>, bucket: AggBucket) => {
+        cummulative[bucket.key] = getOr(0, 'unique_entries.value', bucket);
+        return cummulative;
+      },
       {}
     );
 

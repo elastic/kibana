@@ -6,10 +6,14 @@
  */
 export const sortWithExcludesAtEnd = (indices: string[]) => {
   const allSorted = indices.reduce(
-    (acc: { includes: string[]; excludes: string[] }, index) =>
-      index.trim().startsWith('-')
-        ? { includes: acc.includes, excludes: [...acc.excludes, index] }
-        : { includes: [...acc.includes, index], excludes: acc.excludes },
+    (acc: { includes: string[]; excludes: string[] }, index) => {
+      if (index.trim().startsWith('-')) {
+        acc.excludes.push(index);
+      } else {
+        acc.includes.push(index);
+      }
+      return acc;
+    },
     { includes: [], excludes: [] }
   );
   return [...allSorted.includes.sort(), ...allSorted.excludes.sort()];
@@ -18,6 +22,9 @@ export const sortWithExcludesAtEnd = (indices: string[]) => {
 export const ensurePatternFormat = (patternList: string[]): string[] =>
   sortWithExcludesAtEnd([
     ...new Set(
-      patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
+      patternList.reduce((acc: string[], pattern: string) => {
+        acc.unshift(...pattern.split(','));
+        return acc;
+      }, [])
     ),
   ]);

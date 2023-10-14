@@ -37,13 +37,12 @@ const formatTimeOfEvent = (timeOfEvent: string | null): string | undefined => {
 const removeNullValues = (
   params: ExecutorSubActionAddEventParams
 ): ExecutorSubActionAddEventParams =>
-  (Object.keys(params) as Array<keyof ExecutorSubActionAddEventParams>).reduce(
-    (acc, key) => ({
-      ...acc,
-      ...(params[key] != null ? { [key]: params[key] } : {}),
-    }),
-    {} as ExecutorSubActionAddEventParams
-  );
+  (Object.keys(params) as Array<keyof ExecutorSubActionAddEventParams>).reduce((acc, key) => {
+    if (params[key] != null) {
+      (acc as Record<string, unknown>)[key] = params[key];
+    }
+    return acc;
+  }, {} as ExecutorSubActionAddEventParams);
 
 export const prepareParams = (
   params: ExecutorSubActionAddEventParams

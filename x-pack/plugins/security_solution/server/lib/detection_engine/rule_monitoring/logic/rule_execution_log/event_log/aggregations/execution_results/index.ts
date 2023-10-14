@@ -362,10 +362,10 @@ export const formatSortForBucketSort = (sort: estypes.Sort) => {
  */
 export const formatSortForTermsSort = (sort: estypes.Sort) => {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [SORT_FIELD_TO_AGG_MAPPING[curr]]: get(s, `${curr}.order`) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[SORT_FIELD_TO_AGG_MAPPING[curr]] = get(s, `${curr}.order`);
+      return acc;
+    }, {})
   );
 };
 

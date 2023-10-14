@@ -26,10 +26,10 @@ import * as i18n from './translations';
 export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
     ? incident
-    : Object.entries(incident).reduce(
-        (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
-        {} as Incident
-      );
+    : Object.entries(incident).reduce((acc, [key, value]) => {
+        (acc as Record<string, unknown>)[`${FIELD_PREFIX}${key}`] = value;
+        return acc;
+      }, {} as Incident);
 
 const createErrorMessage = (errorResponse?: ServiceNowError): string => {
   if (errorResponse == null) {

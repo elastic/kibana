@@ -161,10 +161,10 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
         ...new Set(
-          config.authc.sortedProviders.reduce(
-            (acc, provider) => [...acc, provider.type],
-            [] as string[]
-          )
+          config.authc.sortedProviders.reduce((acc, provider) => {
+            acc.push(provider.type);
+            return acc;
+          }, [] as string[])
         ),
       ];
       const accessAgreementEnabled =

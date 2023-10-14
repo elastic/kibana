@@ -454,10 +454,10 @@ export const createExternalService = (
         });
 
         const fields = res.data.values.reduce(
-          (acc: { [x: string]: {} }, value: { fieldId: string }) => ({
-            ...acc,
-            [value.fieldId]: { ...value },
-          }),
+          (acc: { [x: string]: {} }, value: { fieldId: string }) => {
+            (acc as Record<string, unknown>)[value.fieldId] = { ...value };
+            return acc;
+          },
           {}
         );
         return normalizeFields(fields);
@@ -484,13 +484,12 @@ export const createExternalService = (
         const currentListOfFields = Object.keys(acc);
         return currentListOfFields.length === 0
           ? fieldTypesByIssue
-          : currentListOfFields.reduce(
-              (add: GetCommonFieldsResponse, field) =>
-                Object.keys(fieldTypesByIssue).includes(field)
-                  ? { ...add, [field]: acc[field] }
-                  : add,
-              {}
-            );
+          : currentListOfFields.reduce((add: GetCommonFieldsResponse, field) => {
+              if (Object.keys(fieldTypesByIssue).includes(field)) {
+                (add as Record<string, unknown>)[field] = acc[field];
+              }
+              return add;
+            }, {});
       }, {});
     } catch (error) {
       // errors that happen here would be thrown in the contained async calls

@@ -725,10 +725,10 @@ export const getSelectedTimelines = async (
 
   const savedObjects = await Promise.resolve(
     savedObjectsClient.bulkGet<SavedObjectTimelineWithoutExternalRefs>(
-      (exportedIds ?? []).reduce(
-        (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
-        [] as Array<{ id: string; type: string }>
-      )
+      (exportedIds ?? []).reduce((acc, timelineId) => {
+        acc.push({ id: timelineId, type: timelineSavedObjectType });
+        return acc;
+      }, [] as Array<{ id: string; type: string }>)
     )
   );
 
@@ -740,13 +740,12 @@ export const getSelectedTimelines = async (
       if (savedObject.error == null) {
         const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
-        return {
-          errors: acc.errors,
-          timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(populatedTimeline)],
-        };
+        acc.timelines.push(convertSavedObjectToSavedTimeline(populatedTimeline));
+        return acc;
       }
 
-      return { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
+      acc.errors.push(savedObject.error);
+      return acc;
     },
     {
       timelines: [] as TimelineSavedObject[],

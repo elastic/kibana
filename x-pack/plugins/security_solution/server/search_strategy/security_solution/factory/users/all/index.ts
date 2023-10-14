@@ -110,13 +110,11 @@ async function enhanceEdges(
     isNewRiskScoreModuleInstalled
   );
   const usersRiskByUserName: Record<string, RiskSeverity> | undefined =
-    userRiskData?.hits.hits.reduce(
-      (acc, hit) => ({
-        ...acc,
-        [hit._source?.user.name ?? '']: hit._source?.user?.risk?.calculated_level,
-      }),
-      {}
-    );
+    userRiskData?.hits.hits.reduce((acc, hit) => {
+      (acc as Record<string, unknown>)[hit._source?.user.name ?? ''] =
+        hit._source?.user?.risk?.calculated_level;
+      return acc;
+    }, {});
 
   return usersRiskByUserName
     ? edges.map(({ name, lastSeen, domain }) => ({

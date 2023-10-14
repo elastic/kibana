@@ -20,6 +20,7 @@ export interface OutputError {
   message: string;
   statusCode: number;
 }
+
 export interface BulkError {
   // Id can be single id or stringified ids.
   id?: string;
@@ -193,6 +194,7 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
   }
   return Object.keys(obj).reduce((acc, item) => {
     const newKey = snakeCase(item);
-    return { ...acc, [newKey]: obj[item] };
+    (acc as Record<string, unknown>)[newKey] = obj[item];
+    return acc;
   }, {});
 };
