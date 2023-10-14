@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT } from '../../screens/alerts';
+import { getNewRule } from '../../../objects/rule';
+import { ALERTS_COUNT } from '../../../screens/alerts';
 import {
   clickAlertsHistogramLegend,
   clickAlertsHistogramLegendAddToTimeline,
   clickAlertsHistogramLegendFilterFor,
   clickAlertsHistogramLegendFilterOut,
   selectAlertsHistogram,
-} from '../../tasks/alerts';
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
-import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
-import { ALERTS_URL } from '../../urls/navigation';
+} from '../../../tasks/alerts';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { cleanKibana } from '../../../tasks/common';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
+import { ALERTS_URL } from '../../../urls/navigation';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
   GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE,
-} from '../../screens/search_bar';
-import { TOASTER } from '../../screens/alerts_detection_rules';
+} from '../../../screens/search_bar';
+import { TOASTER } from '../../../screens/alerts_detection_rules';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
