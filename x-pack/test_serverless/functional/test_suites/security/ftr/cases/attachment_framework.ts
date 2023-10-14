@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
 
   // Failing
@@ -40,7 +41,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
 
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(

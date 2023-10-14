@@ -26,6 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
 
   const retry = getService('retry');
@@ -34,14 +35,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 
@@ -279,7 +278,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.testResources.removeKibanaSampleData('logs');
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('adds lens visualization in description', async () => {
@@ -324,7 +323,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('initially renders user actions list correctly', async () => {
@@ -436,7 +435,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('should set the cases title', async () => {
@@ -498,7 +497,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('updates a custom field correctly', async () => {

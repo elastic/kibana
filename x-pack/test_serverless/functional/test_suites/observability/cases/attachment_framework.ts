@@ -18,11 +18,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
 
   describe('Cases persistable attachments', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
@@ -43,7 +42,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
 
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
