@@ -39,9 +39,5 @@ export function isTestable(modelItem: ModelItem, checkForState = false) {
     return true;
   }
 
-  if (isDfaTrainedModel(modelItem)) {
-    return true;
-  }
-
-  return false;
+  return isDfaTrainedModel(modelItem);
 }

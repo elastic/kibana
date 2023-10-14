@@ -40,19 +40,20 @@ import { getPipelineConfig } from '../get_pipeline_config';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import type { MlInferenceState } from '../types';
 import { checkIndexExists } from '../retry_create_data_view';
+import { type TestPipelineMode, TEST_PIPELINE_MODE } from '../types';
 
 const sourceIndexMissingMessage = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.sourceIndexMissing',
   {
     defaultMessage:
-      'Source index is missing. Unable to fetch sample documents. Please add sample documents.',
+      'The source index used to train the model is missing. Enter text for documents to test the pipeline.',
   }
 );
 
 interface Props {
   sourceIndex?: string;
   state: MlInferenceState;
-  mode: 'standAlone' | 'step';
+  mode: TestPipelineMode;
 }
 
 export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
@@ -138,35 +139,40 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         console.error(error);
       }
       setSampleDocsString(JSON.stringify(records, null, 2));
+      setSimulatePipelineResult(undefined);
       setLastFetchedSampleDocsString(JSON.stringify(records, null, 2));
       setIsValid(true);
     },
     [esSearch]
   );
 
-  const getSampleDoc = useCallback(async () => {
-    getDocs({
-      index: sourceIndex,
-      body: {
-        size: 1,
-      },
-    });
-  }, [getDocs, sourceIndex]);
-
-  const getRandomSampleDoc = useCallback(async () => {
-    getDocs({
-      index: sourceIndex,
-      body: {
-        size: 1,
-        query: {
-          function_score: {
-            query: { match_all: {} },
-            random_score: {},
+  const { getSampleDoc, getRandomSampleDoc } = useMemo(
+    () => ({
+      getSampleDoc: async () => {
+        getDocs({
+          index: sourceIndex,
+          body: {
+            size: 1,
           },
-        },
+        });
       },
-    });
-  }, [getDocs, sourceIndex]);
+      getRandomSampleDoc: async () => {
+        getDocs({
+          index: sourceIndex,
+          body: {
+            size: 1,
+            query: {
+              function_score: {
+                query: { match_all: {} },
+                random_score: {},
+              },
+            },
+          },
+        });
+      },
+    }),
+    [getDocs, sourceIndex]
+  );
 
   useEffect(
     function checkSourceIndexExists() {
@@ -200,19 +206,6 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         gutterSize="xs"
         data-test-subj="mlTrainedModelsInferenceTestStep"
       >
-        {sourceIndexMissingError && showCallOut ? (
-          <EuiFlexItem grow={false}>
-            <EuiCallOut
-              onDismiss={() => {
-                setShowCallOut(false);
-              }}
-              size="s"
-              title={sourceIndexMissingError}
-              iconType="warning"
-            />
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem>
           <EuiTitle size="s">
             <h4>
@@ -226,7 +219,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             <p>
-              {mode === 'step' ? (
+              {mode === TEST_PIPELINE_MODE.STEP ? (
                 <>
                   <strong>
                     {i18n.translate(
@@ -266,15 +259,28 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
               {sampleDocsString && sourceIndexMissingError === undefined ? (
                 <FormattedMessage
                   id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.sourceIndexDocText"
-                  defaultMessage="The provided sample document is taken from the dataset used to train the model."
+                  defaultMessage="The provided sample document is taken from the source index used to train the model."
                 />
               ) : null}
             </p>
           </EuiText>
         </EuiFlexItem>
-        {mode === 'standAlone' ? (
+        <EuiSpacer size="m" />
+        {sourceIndexMissingError && showCallOut ? (
           <EuiFlexItem>
-            <EuiSpacer size="m" />
+            <EuiCallOut
+              onDismiss={() => {
+                setShowCallOut(false);
+              }}
+              size="s"
+              title={sourceIndexMissingError}
+              iconType="warning"
+            />
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        ) : null}
+        {mode === TEST_PIPELINE_MODE.STAND_ALONE ? (
+          <EuiFlexItem>
             <EuiAccordion
               id={accordionId}
               buttonContent={
@@ -330,7 +336,9 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
                 <EuiButtonEmpty
                   size="xs"
                   onClick={() => setSampleDocsString(lastFetchedSampleDocsString)}
-                  disabled={sampleDocsString === ''}
+                  disabled={
+                    sampleDocsString === '' || sampleDocsString === lastFetchedSampleDocsString
+                  }
                 >
                   {i18n.translate(
                     'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.resetSampleDocsButton',
@@ -399,8 +407,6 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
                       onChange={onChange}
                     />
                   </EuiResizablePanel>
-
-                  <EuiResizableButton />
 
                   <EuiResizablePanel grow={false} hasBorder initialSize={50} paddingSize="xs">
                     <EuiCodeBlock
