@@ -123,6 +123,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           1920,
           1400
         );
+        await ml.alerting.selectSlackConnectorType();
+        await ml.testExecution.logTestStep('should open connectors');
+        await ml.alerting.clickCreateConnectorButton();
+        await ml.alerting.setConnectorName('test-connector');
+        await ml.alerting.setWebhookUrl('https://www.elastic.co');
+        await ml.alerting.clickSaveActionButton();
+        await commonScreenshots.takeScreenshot(
+          'ml-health-check-action',
+          screenshotDirectories,
+          1920,
+          1400
+        );
         await ml.alerting.clickCancelSaveRuleButton();
 
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
@@ -150,14 +162,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           1920,
           1400
         );
-        await ml.alerting.selectSlackConnectorType();
-        await ml.testExecution.logTestStep('should open connectors');
-        await ml.alerting.clickCreateConnectorButton();
-        await ml.alerting.setConnectorName('test-connector');
-        await ml.alerting.setWebhookUrl('https://www.elastic.co');
-        await ml.alerting.clickSaveActionButton();
+        await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
         await commonScreenshots.takeScreenshot(
-          'ml-anomaly-action-score-matched',
+          'ml-anomaly-alert-action-score-matched',
           screenshotDirectories,
           1920,
           1400
@@ -175,7 +182,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
         await actionSummary.click();
         await commonScreenshots.takeScreenshot(
-          'ml-anomaly-action-summary',
+          'ml-anomaly-alert-action-summary',
           screenshotDirectories,
           1920,
           1400
