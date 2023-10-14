@@ -335,12 +335,14 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
     // else get all the fields for the found dataview
     return {
       indices: [index],
-      fields: fields.map((field) => {
-        return {
-          name: field.name,
-          description: field.customLabel || '',
-          type: field.type,
-        };
+      fields: fields.flatMap((field) => {
+        return (field.esTypes ?? [field.type]).map((type) => {
+          return {
+            name: field.name,
+            description: field.customLabel || '',
+            type,
+          };
+        });
       }),
     };
   },

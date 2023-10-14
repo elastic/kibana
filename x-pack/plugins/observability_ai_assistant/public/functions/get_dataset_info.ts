@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FunctionVisibility, RegisterFunctionDefinition } from '../../common/types';
+import { chunk, groupBy, uniq } from 'lodash';
+import { CreateChatCompletionResponse } from 'openai';
+import { FunctionVisibility, MessageRole, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
-import { compressFields } from '../../common/utils/compress_fields';
 
 export function registerGetDatasetInfoFunction({
   service,
@@ -41,42 +42,112 @@ export function registerGetDatasetInfoFunction({
         required: ['index'],
       } as const,
     },
-    ({ arguments: { index }, messages }, signal) => {
-      return service
-        .callApi('POST /internal/observability_ai_assistant/functions/get_dataset_info', {
+    async ({ arguments: { index }, messages, connectorId }, signal) => {
+      const response = await service.callApi(
+        'POST /internal/observability_ai_assistant/functions/get_dataset_info',
+        {
           params: {
             body: {
               index,
             },
           },
           signal,
+        }
+      );
+
+      const allFields = response.fields;
+
+      const fieldNames = uniq(allFields.map((field) => field.name));
+
+      const groupedFields = groupBy(allFields, (field) => field.name);
+
+      const relevantFields = await Promise.all(
+        chunk(fieldNames, 500).map(async (fieldsInChunk) => {
+          const chunkResponse = (await service.callApi(
+            'POST /internal/observability_ai_assistant/chat',
+            {
+              signal,
+              params: {
+                query: {
+                  stream: false,
+                },
+                body: {
+                  connectorId,
+                  messages: [
+                    {
+                      '@timestamp': new Date().toISOString(),
+                      message: {
+                        role: MessageRole.System,
+                        content: `You are a helpful assistant for Elastic Observability.
+                        Your task is to create a list of field names that are relevant
+                        to the conversation, using ONLY the list of fields and
+                        types provided in the last user message. DO NOT UNDER ANY
+                        CIRCUMSTANCES include fields not mentioned in this list.`,
+                      },
+                    },
+                    ...messages.slice(1),
+                    {
+                      '@timestamp': new Date().toISOString(),
+                      message: {
+                        role: MessageRole.User,
+                        content: `This is the list:
+
+                        ${fieldsInChunk.join('\n')}`,
+                      },
+                    },
+                  ],
+                  functions: [
+                    {
+                      name: 'fields',
+                      description: 'The fields you consider relevant to the conversation',
+                      parameters: {
+                        type: 'object',
+                        additionalProperties: false,
+                        properties: {
+                          fields: {
+                            type: 'array',
+                            additionalProperties: false,
+                            addditionalItems: false,
+                            items: {
+                              type: 'string',
+                              additionalProperties: false,
+                              addditionalItems: false,
+                            },
+                          },
+                        },
+                        required: ['fields'],
+                      },
+                    },
+                  ],
+                  functionCall: 'fields',
+                },
+              },
+            }
+          )) as CreateChatCompletionResponse;
+
+          return chunkResponse.choices[0].message?.function_call?.arguments
+            ? (
+                JSON.parse(chunkResponse.choices[0].message?.function_call?.arguments) as {
+                  fields: string[];
+                }
+              ).fields
+                .filter((field) => fieldNames.includes(field))
+                .map((field) => {
+                  const fieldDescriptors = groupedFields[field];
+                  return `${field}:${fieldDescriptors
+                    .map((descriptor) => descriptor.type)
+                    .join(',')}`;
+                })
+            : [chunkResponse.choices[0].message?.content ?? ''];
         })
-        .then((response) => {
-          const content: {
-            indices: string[];
-            fields: string;
-            warning?: string;
-          } = {
-            indices: response.indices,
-            fields: '[]',
-          };
+      );
 
-          const fields = response.fields.map((field) => {
-            return `${field.name},${field.type}`;
-          });
-
-          // limit to 500 fields
-          if (fields.length > 500) {
-            fields.length = 500;
-            content.warning = 'field list too long';
-          }
-
-          content.fields = compressFields(fields);
-
-          return {
-            content,
-          };
-        });
+      return {
+        content: {
+          indices: response.indices,
+          fields: relevantFields.flat(),
+        },
+      };
     }
   );
 }
