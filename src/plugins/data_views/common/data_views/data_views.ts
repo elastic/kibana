@@ -810,6 +810,7 @@ export class DataViewsService {
         type,
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
+        allowHidden: spec.allowHidden,
       },
       spec.fieldAttrs,
       displayErrors

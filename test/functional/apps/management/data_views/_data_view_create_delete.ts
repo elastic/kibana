@@ -254,10 +254,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('hidden index support', () => {
       it('can create data view against hidden index', async () => {
-        const pattern = 'logstash-2015.09.21';
+        const pattern = 'logstash-2015.09.2*';
 
         await es.transport.request({
-          path: '/logstash-2015.09.21/_settings',
+          path: '/logstash-2015.09.2*/_settings',
           method: 'PUT',
           body: {
             index: {
