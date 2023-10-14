@@ -10,10 +10,10 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
 
-import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
-import { TIMELINES_URL } from '../../urls/navigation';
+import { TIMELINES_URL } from '../../../urls/navigation';
 import {
   clickAlertCheckbox,
   deselectSourcererOptions,
@@ -29,12 +29,12 @@ import {
   refreshUntilAlertsIndexExists,
   resetSourcerer,
   saveSourcerer,
-} from '../../tasks/sourcerer';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { SOURCERER } from '../../screens/sourcerer';
-import { createTimeline } from '../../tasks/api_calls/timelines';
-import { getTimeline, getTimelineModifiedSourcerer } from '../../objects/timeline';
-import { closeTimeline, openTimelineById } from '../../tasks/timeline';
+} from '../../../tasks/sourcerer';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import { SOURCERER } from '../../../screens/sourcerer';
+import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { getTimeline, getTimelineModifiedSourcerer } from '../../../objects/timeline';
+import { closeTimeline, openTimelineById } from '../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];

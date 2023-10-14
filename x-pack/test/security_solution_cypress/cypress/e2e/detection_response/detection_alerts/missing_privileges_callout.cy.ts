@@ -7,21 +7,21 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { ALERTS_URL } from '../../urls/navigation';
-import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
-import { getNewRule } from '../../objects/rule';
-import { PAGE_TITLE } from '../../screens/common/page';
+import { ALERTS_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { getNewRule } from '../../../objects/rule';
+import { PAGE_TITLE } from '../../../screens/common/page';
 
-import { login } from '../../tasks/login';
-import { visit } from '../../tasks/navigation';
-import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { createRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
 import {
   getCallOut,
   waitForCallOutToBeShown,
   dismissCallOut,
   MISSING_PRIVILEGES_CALLOUT,
-} from '../../tasks/common/callouts';
-import { ruleDetailsUrl } from '../../urls/rule_details';
+} from '../../../tasks/common/callouts';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.reader);
