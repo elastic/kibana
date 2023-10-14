@@ -35,8 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167665
-  describe.skip('Alerting rules', () => {
+  describe('Alerting rules', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;
@@ -53,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
+        conflicts: 'proceed',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);

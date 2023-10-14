@@ -25,7 +25,7 @@ import { hostsUrl } from '../../../urls/navigation';
 
 // Flaky on serverless
 const defaultPageSize = 25;
-describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'timeline' });

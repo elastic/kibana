@@ -19,7 +19,6 @@ import {
 import {
   resetRulesTableState,
   deleteAlertsAndRules,
-  reload,
   deletePrebuiltRulesAssets,
 } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
@@ -30,10 +29,9 @@ const RULE_1 = createRuleAssetSavedObject({
   rule_id: 'rule_1',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       login();
@@ -120,7 +118,7 @@ describe(
           /* Install available rules, assert that the notification is gone */
           /* then delete one rule and assert that the notification is back */
           installAllPrebuiltRulesRequest().then(() => {
-            reload();
+            cy.reload();
             deleteFirstRule();
             cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
             cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
@@ -140,7 +138,7 @@ describe(
             });
             createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
             visitRulesManagementTable();
-            reload();
+            cy.reload();
           });
         });
 

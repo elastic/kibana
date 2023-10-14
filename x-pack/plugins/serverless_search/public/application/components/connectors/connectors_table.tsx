@@ -6,10 +6,12 @@
  */
 
 import {
+  copyToClipboard,
   Criteria,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +23,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,18 +36,28 @@ import {
 } from '@kbn/search-connectors';
 import React, { useEffect, useState } from 'react';
 import { generatePath } from 'react-router-dom';
-import { CONNECTORS_LABEL } from '../../../../common/i18n_string';
+import {
+  CONNECTORS_LABEL,
+  CONNECTOR_LABEL,
+  COPY_CONNECTOR_ID_LABEL,
+  DELETE_CONNECTOR_LABEL,
+} from '../../../../common/i18n_string';
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useKibanaServices } from '../../hooks/use_kibana';
 import { EDIT_CONNECTOR_PATH } from '../connectors_router';
+import { DeleteConnectorModal } from './delete_connector_modal';
 
 export const ConnectorsTable: React.FC = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [query, setQuery] = useState<string>('');
 
-  const { data, isError } = useConnectors();
+  const { data, isError, isLoading } = useConnectors();
   const { data: connectorTypes } = useConnectorTypes();
+  const {
+    application: { navigateToUrl },
+  } = useKibanaServices();
 
   type Filter = 'service_type' | 'name' | 'last_sync_status' | 'description' | 'service_type';
   const [filter, setFilter] = useState<Filter>('name');
@@ -102,7 +115,9 @@ export const ConnectorsTable: React.FC = () => {
       field: 'name',
       name: nameLabel,
       render: (name: string, connector: Connector) => (
-        <EuiLink href={generatePath(EDIT_CONNECTOR_PATH, { id: connector.id })}>
+        <EuiLink
+          onClick={() => navigateToUrl(generatePath(EDIT_CONNECTOR_PATH, { id: connector.id }))}
+        >
           {name || connector.id}
         </EuiLink>
       ),
@@ -172,6 +187,37 @@ export const ConnectorsTable: React.FC = () => {
           </EuiBadge>
         ),
     },
+    {
+      field: 'last_sync_status',
+      name: syncStatusLabel,
+      render: (syncStatus: SyncStatus | null) =>
+        syncStatus ? (
+          <EuiBadge color={syncStatusToColor(syncStatus)}>{syncStatusToText(syncStatus)}</EuiBadge>
+        ) : (
+          <EuiBadge>
+            {i18n.translate('xpack.serverlessSearch.connectors.notSyncedLabel', {
+              defaultMessage: 'Not synced',
+            })}
+          </EuiBadge>
+        ),
+    },
+    {
+      actions: [
+        {
+          name: COPY_CONNECTOR_ID_LABEL,
+          description: COPY_CONNECTOR_ID_LABEL,
+          icon: 'copy',
+          type: 'icon',
+          onClick: (connector: Connector) => copyToClipboard(connector.id),
+        },
+        {
+          render: (connector: Connector) => <DeleteConnectorModalAction connector={connector} />,
+        },
+      ],
+      name: i18n.translate('xpack.serverlessSearch.connectors.actionsLabel', {
+        defaultMessage: 'Actions',
+      }),
+    },
   ];
 
   const items =
@@ -203,11 +249,11 @@ export const ConnectorsTable: React.FC = () => {
             connectors: <strong>{CONNECTORS_LABEL}</strong>,
             items: (
               <strong>
-                <EuiI18nNumber value={(pageIndex + 1) * pageSize} />-
-                <EuiI18nNumber value={(pageIndex + 2) * pageSize} />
+                <EuiI18nNumber value={pageIndex * pageSize + 1} />-
+                <EuiI18nNumber value={pageIndex * pageSize + 1 + items.length} />
               </strong>
             ),
-            count: <EuiI18nNumber value={items.length} />,
+            count: <EuiI18nNumber value={data?.connectors.length ?? 0} />,
           }}
         />
       </EuiText>
@@ -215,6 +261,7 @@ export const ConnectorsTable: React.FC = () => {
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
         columns={columns}
+        loading={isLoading}
         items={items}
         onChange={({ page }: Criteria<Connector>) => {
           if (page) {
@@ -229,6 +276,30 @@ export const ConnectorsTable: React.FC = () => {
           totalItemCount: data?.connectors.length ?? 0,
         }}
       />
+    </>
+  );
+};
+
+const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connector }) => {
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  return (
+    <>
+      {modalIsOpen && (
+        <DeleteConnectorModal
+          closeDeleteModal={() => setModalIsOpen(false)}
+          connectorId={connector.id}
+          connectorName={connector.name || CONNECTOR_LABEL}
+        />
+      )}
+      <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
+        <EuiButtonIcon
+          aria-label={DELETE_CONNECTOR_LABEL}
+          onClick={() => setModalIsOpen(true)}
+          iconType="trash"
+          color="danger"
+        />
+      </EuiToolTip>
     </>
   );
 };

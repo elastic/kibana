@@ -28,11 +28,8 @@ export class SecuritySolutionEssPlugin
 {
   public setup(
     _core: CoreSetup,
-    setupDeps: SecuritySolutionEssPluginSetupDeps
+    _setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
-    const { securitySolution } = setupDeps;
-    securitySolution.setDataQualityPanelConfig({ isILMAvailable: true });
-
     return {};
   }
 

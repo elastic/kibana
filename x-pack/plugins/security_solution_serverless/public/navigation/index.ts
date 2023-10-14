@@ -35,8 +35,7 @@ export const setupNavigation = (
 };
 
 export const startNavigation = (services: Services, config: ServerlessSecurityPublicConfig) => {
-  const { serverless, securitySolution, management } = services;
-  securitySolution.setIsSidebarEnabled(false);
+  const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
 
   const projectNavigationTree = new ProjectNavigationTree(services);

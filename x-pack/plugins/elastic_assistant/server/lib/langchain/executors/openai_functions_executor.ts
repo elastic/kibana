@@ -25,6 +25,7 @@ export const callOpenAIFunctionsExecutor = async ({
   actions,
   connectorId,
   esClient,
+  elserId,
   langChainMessages,
   llmType,
   logger,
@@ -44,7 +45,7 @@ export const callOpenAIFunctionsExecutor = async ({
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger, elserId);
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
 
   const tools: Tool[] = [
