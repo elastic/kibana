@@ -22,6 +22,11 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
+import {
+  KibanaErrorBoundary,
+  KibanaErrorBoundaryKibanaProvider,
+} from '@kbn/shared-ux-error-boundary';
+
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -53,6 +58,7 @@ export const AppContainer: FC<Props> = ({
 }: Props) => {
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
+  const [appError, setAppError] = useState<Error | null>(null);
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
 
@@ -87,9 +93,9 @@ export const AppContainer: FC<Props> = ({
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
       } catch (e) {
-        // TODO: add error UI
         // eslint-disable-next-line no-console
         console.error(e);
+        setAppError(e);
       } finally {
         if (elementRef.current) {
           setShowSpinner(false);
@@ -113,7 +119,11 @@ export const AppContainer: FC<Props> = ({
     theme$,
   ]);
 
-  return (
+  return appError ? (
+    <KibanaErrorBoundaryKibanaProvider toasts={null}>
+      <KibanaErrorBoundary as="callout" error={appError} />
+    </KibanaErrorBoundaryKibanaProvider>
+  ) : (
     <Fragment>
       {appNotFound && <AppNotFound />}
       {showSpinner && !appNotFound && (
