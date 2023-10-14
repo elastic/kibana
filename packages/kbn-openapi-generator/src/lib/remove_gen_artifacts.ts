@@ -15,8 +15,8 @@ import { resolve } from 'path';
  *
  * @param folderPath target directory
  */
-export async function removeGenArtifacts(folderPath: string) {
-  const artifactsPath = await globby([resolve(folderPath, './**/*.gen.ts')]);
+export async function removeGenArtifacts(folderPath: string, suffix: string = 'gen.ts') {
+  const artifactsPath = await globby([resolve(folderPath, `./**/*${suffix}`)]);
 
   await Promise.all(artifactsPath.map((artifactPath) => fs.unlink(artifactPath)));
 }

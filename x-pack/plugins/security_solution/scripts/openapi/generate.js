@@ -16,3 +16,10 @@ generate({
   sourceGlob: './**/*.schema.yaml',
   templateName: 'zod_operation_schema',
 });
+
+generate({
+  rootDir: SECURITY_SOLUTION_ROOT,
+  sourceGlob: './**/*.schema.yaml',
+  templateName: 'cypress',
+  suffix: '.test.gen.ts',
+});

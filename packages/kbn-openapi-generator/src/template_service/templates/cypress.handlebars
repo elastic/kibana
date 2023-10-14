@@ -1,0 +1,42 @@
+{{> disclaimer}}
+
+import {
+{{#each operations}}
+  {{operationId}}Response,
+  {{#if requestQuery}}{{operationId}}RequestQueryInput,{{/if}}
+  {{#if requestParams}}{{operationId}}RequestParamsInput,{{/if}}
+  {{#if requestBody}}{{operationId}}RequestBodyInput,{{/if}}
+{{/each}}
+} from './{{fileName}}.gen.ts';
+
+{{#each operations}}
+export const {{camelCase operationId}} = (
+  {{#if (or requestQuery requestBody requestParams)}}
+  {
+    {{~#if requestQuery}}query,{{/if}}
+    {{~#if requestParams}}params,{{/if}}
+    {{~#if requestBody}}body,{{/if}}
+  }: {{operationId}}Props
+  {{/if}}
+): Cypress.Chainable<Cypress.Response<{{operationId}}Response>> =>
+  cy.request({
+    method: '{{upperCase method}}',
+    url: '{{path}}',
+    headers: { 
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '{{ ../info.version }}',
+    },
+    {{~#if requestQuery}}qs: query,{{/if}}
+    {{~#if requestBody}}body: JSON.stringify(body),{{/if}}
+  });
+
+{{#if (or requestQuery requestBody requestParams)}}
+export interface {{operationId}}Props {
+  {{~#if requestQuery}}query: {{operationId}}RequestQueryInput;{{/if}}
+  {{~#if requestParams}}params: {{operationId}}RequestParamsInput;{{/if}}
+  {{~#if requestBody}}body: {{operationId}}RequestBodyInput;{{/if}}
+}
+{{/if}}
+
+{{/each}}

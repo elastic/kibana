@@ -17,18 +17,32 @@ export interface GenerationContext {
   components: OpenAPIV3.ComponentsObject | undefined;
   operations: NormalizedOperation[];
   imports: ImportsMap;
+  info: OpenAPIV3.InfoObject;
+  fileName: string;
 }
 
-export function getGenerationContext(document: OpenApiDocument): GenerationContext {
+export function getGenerationContext(
+  document: OpenApiDocument,
+  sourcePath: string
+): GenerationContext {
   const normalizedDocument = normalizeSchema(document);
 
   const components = getComponents(normalizedDocument);
   const operations = getApiOperationsList(normalizedDocument);
   const imports = getImportsMap(normalizedDocument);
+  const info = {
+    title: normalizedDocument.info.title,
+    /* Convert date versions to YYYY-MM-DD format, integer number versions are untouched */
+    version: JSON.stringify(normalizedDocument.info.version).replace(/\"/g, '').split('T')[0],
+  };
+
+  const fileName = (/.*\/(.*).schema.yaml/.exec(sourcePath) || [])[1];
 
   return {
     components,
     operations,
     imports,
+    info,
+    fileName,
   };
 }

@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export function getGeneratedFilePath(sourcePath: string) {
-  return sourcePath.replace(/\..+$/, '.gen.ts');
+export function getGeneratedFilePath(sourcePath: string, suffix: string = '.gen.ts') {
+  return sourcePath.replace(/\..+$/, suffix);
 }

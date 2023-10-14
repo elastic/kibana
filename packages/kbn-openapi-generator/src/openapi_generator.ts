@@ -25,10 +25,11 @@ export interface GeneratorConfig {
   rootDir: string;
   sourceGlob: string;
   templateName: TemplateName;
+  suffix?: string;
 }
 
 export const generate = async (config: GeneratorConfig) => {
-  const { rootDir, sourceGlob, templateName } = config;
+  const { rootDir, sourceGlob, templateName, suffix = '.gen.ts' } = config;
 
   console.log(chalk.bold(`Generating API route schemas`));
   console.log(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));
@@ -46,13 +47,13 @@ export const generate = async (config: GeneratorConfig) => {
   );
 
   console.log(`🧹  Cleaning up any previously generated artifacts`);
-  await removeGenArtifacts(rootDir);
+  await removeGenArtifacts(rootDir, suffix);
 
   console.log(`🪄   Generating new artifacts`);
   const TemplateService = await initTemplateService();
   await Promise.all(
     parsedSources.map(async ({ sourcePath, parsedSchema }) => {
-      const generationContext = getGenerationContext(parsedSchema);
+      const generationContext = getGenerationContext(parsedSchema, sourcePath);
 
       // If there are no operations or components to generate, skip this file
       const shouldGenerate =
@@ -64,14 +65,14 @@ export const generate = async (config: GeneratorConfig) => {
       const result = TemplateService.compileTemplate(templateName, generationContext);
 
       // Write the generation result to disk
-      await fs.writeFile(getGeneratedFilePath(sourcePath), result);
+      await fs.writeFile(getGeneratedFilePath(sourcePath, suffix), result);
     })
   );
 
   // Format the output folder using prettier as the generator produces
   // unformatted code and fix any eslint errors
   console.log(`💅  Formatting output`);
-  const generatedArtifactsGlob = resolve(rootDir, './**/*.gen.ts');
+  const generatedArtifactsGlob = resolve(rootDir, `./**/*${suffix}`);
   await formatOutput(generatedArtifactsGlob);
   await fixEslint(generatedArtifactsGlob);
 };
