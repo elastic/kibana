@@ -80,8 +80,11 @@ const getJobStatusRoute = createHighCardinalityIndexerServerRoute({
   endpoint: 'GET /internal/high_cardinality_indexer/job/_status',
   options: {},
   handler: async ({ logger, jobRegistry }): Promise<{ isRunning: boolean }> => {
+    logger.debug(`Getting job status...`);
     const isRunning = jobRegistry.getStatus();
-    logger.info(`Getting job status...`);
+    if (isRunning) {
+      logger.info(`Job is running...`);
+    }
     return { isRunning };
   },
 });

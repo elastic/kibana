@@ -38,7 +38,7 @@ const DEFAULT_FORM_SETTINGS = {
   concurrency: 5,
   dataset: FAKE_LOGS,
   eventsPerCycle: 500,
-  interval: 600,
+  interval: 1000,
   payloadSize: 10000,
   reduceWeekendTrafficBy: 0,
   installAssets: false,
@@ -59,7 +59,7 @@ export function MainRoute() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverIsIndexing, setServerIsIndexing] = useState(false);
 
-  const getStatus = useCallback(async () => {
+  const getJobStatus = useCallback(async () => {
     const { isRunning } = await http.get<{ isRunning: boolean }>(
       '/internal/high_cardinality_indexer/job/_status'
     );
@@ -75,11 +75,11 @@ export function MainRoute() {
   }, [http]);
 
   useEffect(() => {
-    getStatus();
-  }, [getStatus]);
+    getJobStatus();
+  }, [getJobStatus]);
 
   useInterval(() => {
-    getStatus();
+    getJobStatus();
   }, 15000);
 
   const [formData, setFormData] = useState(DEFAULT_FORM_SETTINGS);
@@ -91,14 +91,16 @@ export function MainRoute() {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmitForm = () => {
-    setIsLoading(true);
-    setServerIsIndexing(true);
+  const processForm = (unprocessedFormData: typeof DEFAULT_FORM_SETTINGS) => {
+    const { scheduleStart, scheduleEnd, scheduleTemplate, ...rest } = unprocessedFormData;
 
-    const { scheduleStart, scheduleEnd, scheduleTemplate, ...rest } = formData;
-
-    const payload = {
+    return {
       ...rest,
+      concurrency: Number(formData.concurrency),
+      eventsPerCycle: Number(formData.eventsPerCycle),
+      interval: Number(formData.interval),
+      payloadSize: Number(formData.payloadSize),
+      reduceWeekendTrafficBy: Number(formData.reduceWeekendTrafficBy),
       schedule: [
         {
           template: formData.scheduleTemplate,
@@ -107,6 +109,13 @@ export function MainRoute() {
         },
       ],
     };
+  };
+
+  const handleSubmitForm = () => {
+    setIsLoading(true);
+    setServerIsIndexing(true);
+
+    const payload = processForm(formData);
 
     http
       .post('/internal/high_cardinality_indexer/job/_create', {
@@ -160,7 +169,7 @@ export function MainRoute() {
       >
         {i18n.translate('xpack.highCardinalityIndexer.callout.description', {
           defaultMessage:
-            'This app is used to index fake data into your cluster to aid testing of various use cases such as Alerting, Logs and Hosts.',
+            "This app is used to index fake data into your cluster to aid testing of use cases such as Alerting, Logs and Hosts. Only use this if you know what you're doing.",
         })}
       </EuiCallOut>
 
@@ -222,9 +231,7 @@ export function MainRoute() {
                   name="payloadSize"
                   disabled={isLoading || serverIsIndexing}
                   value={formData.payloadSize}
-                  onChange={(e) =>
-                    handleChangeFormField(Number(e.currentTarget.value), 'payloadSize')
-                  }
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'payloadSize')}
                 />
               </EuiFormRow>
 
@@ -237,9 +244,7 @@ export function MainRoute() {
                   name="eventsPerCycle"
                   disabled={isLoading || serverIsIndexing}
                   value={formData.eventsPerCycle}
-                  onChange={(e) =>
-                    handleChangeFormField(Number(e.currentTarget.value), 'eventsPerCycle')
-                  }
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'eventsPerCycle')}
                 />
               </EuiFormRow>
 
@@ -252,9 +257,7 @@ export function MainRoute() {
                   name="concurrency"
                   disabled={isLoading || serverIsIndexing}
                   value={formData.concurrency}
-                  onChange={(e) =>
-                    handleChangeFormField(Number(e.currentTarget.value), 'concurrency')
-                  }
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'concurrency')}
                 />
               </EuiFormRow>
             </EuiForm>
@@ -263,14 +266,14 @@ export function MainRoute() {
             <EuiForm component="form">
               <EuiFormRow
                 label={i18n.translate('xpack.highCardinalityIndexer.form.interval', {
-                  defaultMessage: 'Index interval',
+                  defaultMessage: 'Interval (ms)',
                 })}
               >
                 <EuiFieldNumber
                   name="interval"
                   disabled={isLoading || serverIsIndexing}
                   value={formData.interval}
-                  onChange={(e) => handleChangeFormField(Number(e.currentTarget.value), 'interval')}
+                  onChange={(e) => handleChangeFormField(e.currentTarget.value, 'interval')}
                 />
               </EuiFormRow>
 
@@ -372,7 +375,7 @@ export function MainRoute() {
                     defaultMessage: 'Indexing...',
                   })
                 : i18n.translate('xpack.highCardinalityIndexer.form.startIndexing', {
-                    defaultMessage: 'Start indexing',
+                    defaultMessage: 'Start indexing fake data',
                   })}
             </EuiButton>
           </EuiFlexItem>

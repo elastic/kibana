@@ -32,8 +32,8 @@ export class JobRegistry {
     }
 
     this.job = new CreateEvents({ client: params.client, logger: params.logger });
-
     this.job.start(params);
+
     this.isRunning = true;
   }
 

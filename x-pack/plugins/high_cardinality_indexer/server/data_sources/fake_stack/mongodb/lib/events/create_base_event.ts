@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { Moment } from 'moment';
 import { MONGODB } from '../../../common/constants';
 

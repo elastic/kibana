@@ -29,13 +29,15 @@ export const createQueue = ({
       const body: object[] = [];
       const startTs = Date.now();
 
+      let indexName: string = '';
+
       docs.forEach((doc) => {
-        const namespace = `${config.indexing.dataset}.${doc.namespace}`;
+        indexName = `high-cardinality-data-${config.indexing.dataset}.${doc.namespace}-${moment(
+          doc['@timestamp']
+        ).format('YYYY-MM-DD')}`;
         body.push({
           create: {
-            _index: `high-cardinality-data-${namespace}-${moment(doc['@timestamp']).format(
-              'YYYY-MM-DD'
-            )}`,
+            _index: indexName,
           },
         });
         body.push(omit(doc, 'namespace'));
@@ -49,9 +51,9 @@ export const createQueue = ({
             return callback(new Error('Failed to index'));
           }
           logger.info(
-            `Indexing ${docs.length} documents. Took: ${resp.took}, latency: ${
-              Date.now() - startTs
-            }, indexed: ${docs.length}`
+            `Indexed ${docs.length} documents into index ${indexName}. Took: ${
+              resp.took
+            }, latency: ${Date.now() - startTs}, indexed: ${docs.length}`
           );
           return callback();
         })

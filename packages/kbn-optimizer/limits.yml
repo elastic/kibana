@@ -69,6 +69,7 @@ pageLoadAssetSize:
   graph: 31504
   grokdebugger: 26779
   guidedOnboarding: 42965
+  high_cardinality_indexer: 19539
   home: 30182
   imageEmbeddable: 12500
   indexLifecycleManagement: 107090
