@@ -7,21 +7,21 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { ALERTS_URL } from '../../urls/navigation';
-import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
-import { ruleDetailsUrl } from '../../urls/rule_details';
-import { getNewRule } from '../../objects/rule';
-import { PAGE_TITLE } from '../../screens/common/page';
+import { ALERTS_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
+import { getNewRule } from '../../../objects/rule';
+import { PAGE_TITLE } from '../../../screens/common/page';
 
-import { login } from '../../tasks/login';
-import { visit } from '../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
+import { createRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
 import {
   getCallOut,
   NEED_ADMIN_FOR_UPDATE_CALLOUT,
   waitForCallOutToBeShown,
-} from '../../tasks/common/callouts';
+} from '../../../tasks/common/callouts';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
@@ -33,7 +33,6 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-// TODO: https://github.com/elastic/kibana/issues/161539 Does it need to run in Serverless?
 describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
   { tags: ['@ess', '@skipInServerless'] },
