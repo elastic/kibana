@@ -19,7 +19,7 @@ type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 import type { FtrProviderContext } from '../ftr_provider_context';
 import type { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-const getSectionIdTestSubj = (sectionId: NavigationId) => `nav-item-${sectionId}`;
+const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId} `;
 
 export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   const testSubjects = ctx.getService('testSubjects');
