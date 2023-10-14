@@ -19,6 +19,8 @@ type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 import type { FtrProviderContext } from '../ftr_provider_context';
 import type { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
+const getSectionIdTestSubj = (sectionId: NavigationId) => `nav-item-${sectionId}`;
+
 export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
@@ -95,11 +97,11 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async expectSectionExists(sectionId: NavigationId) {
         log.debug('ServerlessCommonNavigation.sidenav.expectSectionExists', sectionId);
-        await testSubjects.existOrFail(`~nav-item-${sectionId}`);
+        await testSubjects.existOrFail(getSectionIdTestSubj(sectionId));
       },
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const section = await testSubjects.find(`~nav-item-${sectionId}`);
+        const section = await testSubjects.find(getSectionIdTestSubj(sectionId));
         const collapseBtn = await section.findByCssSelector(
           `[aria-controls="${sectionId}"][aria-expanded]`
         );
@@ -126,7 +128,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
-        const section = await testSubjects.find(`~nav-item-${sectionId}`);
+        const section = await testSubjects.find(getSectionIdTestSubj(sectionId));
         const collapseBtn = await section.findByCssSelector(
           `[aria-controls="${sectionId}"][aria-expanded]`
         );
@@ -137,7 +139,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (!isOpen) return;
-        const section = await testSubjects.find(`~nav-item-${sectionId}`);
+        const section = await testSubjects.find(getSectionIdTestSubj(sectionId));
         const collapseBtn = await section.findByCssSelector(
           `[aria-controls="${sectionId}"][aria-expanded]`
         );
