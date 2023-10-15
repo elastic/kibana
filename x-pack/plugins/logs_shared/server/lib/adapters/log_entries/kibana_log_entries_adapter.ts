@@ -201,16 +201,14 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
 function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): LogEntryDocument[] {
   return hits.map((hit) => {
     const logFields = fields.reduce<{ [fieldName: string]: JsonArray }>(
-      (flattenedFields, field) =>
-        field in hit.fields
-          ? {
-              ...flattenedFields,
-              [field]: hit.fields[field],
-            }
-          : flattenedFields,
+      (flattenedFields, field) => {
+        if (field in hit.fields) {
+          flattenedFields[field] = hit.fields[field];
+        }
+        return flattenedFields;
+      },
       {}
     );
-
     return {
       id: hit._id,
       index: hit._index,

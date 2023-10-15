@@ -66,12 +66,14 @@ export interface ILogsSharedLogEntriesDomain {
     params: LogEntriesAroundParams,
     columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
+
   getLogEntries(
     requestContext: LogsSharedPluginRequestHandlerContext,
     logView: LogViewReference,
     params: LogEntriesParams,
     columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
+
   getLogSummaryBucketsBetween(
     requestContext: LogsSharedPluginRequestHandlerContext,
     logView: LogViewReference,
@@ -80,6 +82,7 @@ export interface ILogsSharedLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]>;
+
   getLogSummaryHighlightBucketsBetween(
     requestContext: LogsSharedPluginRequestHandlerContext,
     logView: LogViewReference,
@@ -89,6 +92,7 @@ export interface ILogsSharedLogEntriesDomain {
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]>;
+
   getLogEntryDatasets(
     requestContext: LogsSharedPluginRequestHandlerContext,
     timestampField: string,
@@ -390,7 +394,7 @@ const getRequiredFields = (
   const fieldsFromCustomColumns = configuration.columns.reduce<string[]>(
     (accumulatedFields, logColumn) => {
       if (logViewFieldColumnConfigurationRT.is(logColumn)) {
-        return [...accumulatedFields, logColumn.fieldColumn.field];
+        accumulatedFields.push(logColumn.fieldColumn.field);
       }
       return accumulatedFields;
     },

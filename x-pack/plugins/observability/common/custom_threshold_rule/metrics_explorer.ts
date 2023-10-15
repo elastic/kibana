@@ -15,7 +15,10 @@ type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
 
 const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
   Record<MetricExplorerAggregations, null>
->((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<MetricExplorerAggregations, null>);
+>((acc, agg) => {
+  acc[agg] = null;
+  return acc;
+}, {} as Record<MetricExplorerAggregations, null>);
 
 export const metricsExplorerAggregationRT = rt.keyof(metricsExplorerAggregationKeys);
 
@@ -26,10 +29,10 @@ export type MetricExplorerCustomMetricAggregations = Exclude<
 const metricsExplorerCustomMetricAggregationKeys = xor(
   METRIC_EXPLORER_AGGREGATIONS,
   OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS
-).reduce<Record<MetricExplorerCustomMetricAggregations, null>>(
-  (acc, agg) => ({ ...acc, [agg]: null }),
-  {} as Record<MetricExplorerCustomMetricAggregations, null>
-);
+).reduce<Record<MetricExplorerCustomMetricAggregations, null>>((acc, agg) => {
+  acc[agg as MetricExplorerCustomMetricAggregations] = null;
+  return acc;
+}, {} as Record<MetricExplorerCustomMetricAggregations, null>);
 export const metricsExplorerCustomMetricAggregationRT = rt.keyof(
   metricsExplorerCustomMetricAggregationKeys
 );

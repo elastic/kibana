@@ -255,7 +255,7 @@ const getRequiredFields = (
 ): string[] => {
   const fieldsFromColumns = columns.reduce<string[]>((accumulatedFields, logColumn) => {
     if (logViewFieldColumnConfigurationRT.is(logColumn)) {
-      return [...accumulatedFields, logColumn.fieldColumn.field];
+      accumulatedFields.push(logColumn.fieldColumn.field);
     }
     return accumulatedFields;
   }, []);

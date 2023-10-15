@@ -73,7 +73,8 @@ export const createListItemsBulk = async ({
           ...elasticQuery,
         };
         const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
-        return [...accum, createBody, elasticBody];
+        accum.push(createBody, elasticBody);
+        return accum;
       } else {
         // TODO: Report errors with return values from the bulk insert into another index or saved object
         return accum;

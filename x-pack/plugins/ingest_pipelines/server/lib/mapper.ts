@@ -70,10 +70,10 @@ function parseAndValidate(file: string) {
   }
 
   const missingHeaders = REQUIRED_CSV_HEADERS.reduce<string[]>((acc, header) => {
-    if (meta.fields.includes(header)) {
-      return acc;
+    if (!meta.fields.includes(header)) {
+      acc.push(header);
     }
-    return [...acc, header];
+    return acc;
   }, []);
 
   if (missingHeaders.length > 0) {

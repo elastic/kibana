@@ -272,7 +272,10 @@ export enum InfraFormatterType {
 export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
 const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
   Record<SnapshotCustomAggregation, null>
->((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<SnapshotCustomAggregation, null>);
+>((acc, agg) => {
+  acc[agg] = null;
+  return acc;
+}, {} as Record<SnapshotCustomAggregation, null>);
 
 export const SnapshotCustomAggregationRT = rt.keyof(snapshotCustomAggregationKeys);
 

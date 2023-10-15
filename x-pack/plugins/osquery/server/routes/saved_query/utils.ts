@@ -20,7 +20,7 @@ export const getInstalledSavedQueriesMap = async (packageService: PackageClient 
       installation.installed_kibana,
       (acc, item) => {
         if (item.type === savedQuerySavedObjectType) {
-          return { ...acc, [item.id]: item };
+          acc[item.id] = item;
         }
 
         return acc;

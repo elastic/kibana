@@ -128,7 +128,8 @@ export const convertMonitoringFromRawAndVerify = (
 export const getExecutionDurationPercentiles = (history: RuleMonitoringHistory[]) => {
   const durationSamples = history.reduce<number[]>((duration, historyItem) => {
     if (typeof historyItem.duration === 'number') {
-      return [...duration, historyItem.duration];
+      duration.push(historyItem.duration);
+      return duration;
     }
     return duration;
   }, []);
