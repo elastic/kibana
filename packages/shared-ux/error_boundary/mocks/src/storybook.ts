@@ -40,3 +40,35 @@ export class ErrorBoundaryStorybookMock extends AbstractStorybookMock<{}, ErrorB
     return params;
   }
 }
+
+interface UserTableEntry {
+  id: string;
+  firstName: string | null | undefined;
+  lastName: string;
+  action: string;
+}
+
+export const getMockUserTable = (): UserTableEntry[] => {
+  const users: UserTableEntry[] = [];
+
+  users.push({
+    id: 'user-123',
+    firstName: 'Rodger',
+    lastName: 'Turcotte',
+    action: 'Rodger.Turcotte',
+  });
+  users.push({
+    id: 'user-345',
+    firstName: 'Bella',
+    lastName: 'Cremin',
+    action: 'Bella23',
+  });
+  users.push({
+    id: 'user-678',
+    firstName: 'Layne',
+    lastName: 'Franecki',
+    action: 'The_Real_Layne_2',
+  });
+
+  return users;
+};

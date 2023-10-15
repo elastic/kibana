@@ -6,21 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiGlobalToastList } from '@elastic/eui';
 import React, { FC, useContext } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import * as Rx from 'rxjs';
 
-import { ErrorBoundaryKibanaDependencies, ErrorBoundaryServices, Toasts } from '../../types';
+import { ErrorBoundaryServices } from '../../types';
 import { ErrorService } from './error_service';
-import { ToastsService } from './toasts_service';
+import { StatefulToastList, ToastsService } from './toasts_service';
 
 const Context = React.createContext<ErrorBoundaryServices | null>(null);
-
-const StatefulToastList = ({ toasts$ }: { toasts$: Rx.Observable<Toasts> }) => {
-  const toasts = useObservable(toasts$);
-  return <EuiGlobalToastList toasts={toasts} dismissToast={() => {}} toastLifeTimeMs={9000} />;
-};
 
 /**
  * A Context Provider for Jest and Storybooks
@@ -42,10 +34,7 @@ export const ErrorBoundaryProvider: FC<ErrorBoundaryServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const ErrorBoundaryKibanaProvider: FC<ErrorBoundaryKibanaDependencies> = ({
-  children,
-  // ...dependencies
-}) => {
+export const ErrorBoundaryKibanaProvider: FC = ({ children }) => {
   const reloadWindow = () => window.location.reload();
   const toastsService = new ToastsService({ reloadWindow });
 

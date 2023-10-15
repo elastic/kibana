@@ -11,12 +11,14 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { ErrorBoundaryServices, Toasts } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
-import { ErrorCallout, ErrorInline } from '../services/toasts_service';
+import { FatalInline, FatalPrompt, RecoverableInline, RecoverablePrompt } from './error_messages';
 
 interface ErrorBoundaryState {
   error: null | Error;
   errorInfo: null | Partial<React.ErrorInfo>;
   messageAs: 'callout' | 'toast';
+  componentName: null | string;
+  isFatal: null | boolean;
 }
 
 interface ErrorBoundaryProps {
@@ -45,47 +47,68 @@ class ErrorBoundaryInternal extends React.Component<
       error: null,
       errorInfo: null,
       messageAs: props.as === 'callout' ? props.as : 'toast',
+      componentName: null,
+      isFatal: null,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
+    const { name, isFatal } = this.props.errorService.registerError(error, errorInfo);
     this.setState(() => {
-      // this.props.errorService.onError(error); // capture telemetry
       if (this.state.messageAs === 'toast') {
-        this.props.toastsService.addError(error);
+        this.props.toastsService.addError(error, isFatal);
       }
-      return { error, errorInfo };
+      return { error, errorInfo, componentName: name, isFatal };
     });
   }
 
   render() {
     if (this.state.error != null) {
-      const { error, errorInfo } = this.state;
-      const { errorComponentName } = this.props.errorService.getErrorComponentName(errorInfo);
+      const { error, errorInfo, componentName, isFatal } = this.state;
 
-      if (this.state.messageAs === 'callout') {
-        // display error message in a "loud" container
-        return (
-          <ErrorCallout
-            error={error}
-            errorInfo={errorInfo}
-            name={errorComponentName}
-            reloadWindow={this.props.reloadWindow}
-          />
-        );
+      if (isFatal) {
+        switch (this.state.messageAs) {
+          case 'toast':
+            return (
+              <FatalInline
+                error={error}
+                errorInfo={errorInfo}
+                name={componentName}
+                reloadWindow={this.props.reloadWindow}
+              />
+            );
+          default:
+            return (
+              <FatalPrompt
+                error={error}
+                errorInfo={errorInfo}
+                name={componentName}
+                reloadWindow={this.props.reloadWindow}
+              />
+            );
+        }
+      } else {
+        switch (this.state.messageAs) {
+          case 'toast':
+            return (
+              <RecoverableInline
+                error={error}
+                errorInfo={errorInfo}
+                name={componentName}
+                reloadWindow={this.props.reloadWindow}
+              />
+            );
+          default:
+            return (
+              <RecoverablePrompt
+                error={error}
+                errorInfo={errorInfo}
+                name={componentName}
+                reloadWindow={this.props.reloadWindow}
+              />
+            );
+        }
       }
-
-      // display error message in a "less loud" container
-      return (
-        <>
-          <ErrorInline
-            error={error}
-            errorInfo={errorInfo}
-            name={errorComponentName}
-            reloadWindow={this.props.reloadWindow}
-          />
-        </>
-      );
     }
 
     // not in error state
