@@ -29,10 +29,16 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     this.http = http;
   }
 
-  private _request<T = unknown>(url: string, query?: {}, body?: string): Promise<T | undefined> {
+  private _request<T = unknown>(
+    url: string,
+    query?: {},
+    body?: string,
+    forceRefresh?: boolean
+  ): Promise<T | undefined> {
+    const headers = forceRefresh ? { cache: 'reload' } : undefined;
     const request = body
       ? this.http.post<T>(url, { query, body, version })
-      : this.http.fetch<T>(url, { query, version });
+      : this.http.fetch<T>(url, { query, version, headers });
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
@@ -60,6 +66,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       indexFilter,
       includeUnmapped,
       fields,
+      forceRefresh,
     } = options;
     return this._request<FieldsForWildcardResponse>(
       FIELDS_FOR_WILDCARD_PATH,
@@ -72,7 +79,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_unmapped: includeUnmapped,
         fields,
       },
-      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined
+      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
+      forceRefresh
     ).then((response) => {
       return response || { fields: [], indices: [] };
     });
