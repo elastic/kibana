@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -34,8 +35,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
+    let currentUrl;
     return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
-      return (await browser.getCurrentUrl()) === expectedUrl;
+      currentUrl = await browser.getCurrentUrl();
+      log.debug(`waiting for currentUrl ${currentUrl} to be expectedUrl ${expectedUrl}`);
+      return currentUrl === expectedUrl;
     });
   };
 
@@ -50,7 +54,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('should navigate to page A when navlink is clicked', async () => {
-      await appsMenu.clickLink('DL Page A');
+      await appsMenu.clickLink('DL page A');
       await waitForUrlToBe('/app/dl/page-a');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('dlAppPageA');
@@ -64,7 +68,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('should navigate to nested page B when navlink is clicked', async () => {
-      await appsMenu.clickLink('DL Page B');
+      await appsMenu.clickLink('DL page B');
       await waitForUrlToBe('/app/dl/page-b');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('dlAppPageB');
