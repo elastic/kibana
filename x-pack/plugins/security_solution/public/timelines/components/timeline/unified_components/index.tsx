@@ -45,7 +45,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getColumnHeader } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
-import { StyledPageContentWrapper, StyledMainEuiPanel } from './styles';
+import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
 import { DRAG_DROP_FIELD } from './translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
@@ -262,6 +262,8 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+      console.log(field)
+      console.log(values)
       if (dataView && filterManager) {
         const fieldName = typeof field === 'string' ? field : field.name;
         popularizeField(dataView, fieldName, dataViews, capabilities);
@@ -354,7 +356,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
-              <EuiFlexItem grow={false} />
+              <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
             </EuiHideFor>
           </EuiFlexGroup>
         }

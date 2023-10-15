@@ -8,6 +8,7 @@
 import styled from 'styled-components';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -35,6 +36,12 @@ export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }
 }))`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
+`;
+
+export const StyledSplitFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
+  className: `${className}`,
+}))`
+  border-right: ${euiThemeVars.euiBorderThin};
 `;
 
 export const progressStyle = css`

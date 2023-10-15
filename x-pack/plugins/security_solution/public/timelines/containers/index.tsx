@@ -155,8 +155,7 @@ export const useTimelineEventsHandler = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loading);
-  // const [isMoreDataLoading, setMoreDataLoading] = useState(false);
+  const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
   const [activePage, setActivePage] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
@@ -176,11 +175,6 @@ export const useTimelineEventsHandler = ({
   const wrappedLoadPage = useCallback(
     (newActivePage: number) => {
       clearSignalsState();
-      if (newActivePage === 0) {
-        setLoading(DataLoadingState.loading);
-      } else {
-        setLoading(DataLoadingState.loadingMore);
-      }
 
       if (id === TimelineId.active) {
         activeTimeline.setExpandedDetail({});
@@ -240,6 +234,11 @@ export const useTimelineEventsHandler = ({
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
+        if (activePage === 0) {
+          setLoading(DataLoadingState.loading);
+        } else {
+          setLoading(DataLoadingState.loadingMore);
+        }
         const { endTracking } = startTracking({ name: `${APP_UI_ID} timeline events search` });
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
@@ -333,7 +332,17 @@ export const useTimelineEventsHandler = ({
       await asyncSearch();
       refetch.current = asyncSearch;
     },
-    [pageName, skip, id, startTracking, data.search, dataViewId, refetchGrid, wrappedLoadPage]
+    [
+      pageName,
+      skip,
+      id,
+      activePage,
+      startTracking,
+      data.search,
+      dataViewId,
+      refetchGrid,
+      wrappedLoadPage,
+    ]
   );
 
   useEffect(() => {
