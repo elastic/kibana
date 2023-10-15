@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ErrorBoundary, ErrorBoundaryKibanaProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
@@ -54,15 +55,19 @@ export const mountSection = async ({
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
         <RedirectToHomeIfUnauthorized applications={coreStart.application}>
-          <TagManagementPage
-            setBreadcrumbs={setBreadcrumbs}
-            core={coreStart}
-            tagClient={tagClient}
-            tagCache={tagCache}
-            assignmentService={assignmentService}
-            capabilities={capabilities}
-            assignableTypes={assignableTypes}
-          />
+          <ErrorBoundaryKibanaProvider>
+            <ErrorBoundary>
+              <TagManagementPage
+                setBreadcrumbs={setBreadcrumbs}
+                core={coreStart}
+                tagClient={tagClient}
+                tagCache={tagCache}
+                assignmentService={assignmentService}
+                capabilities={capabilities}
+                assignableTypes={assignableTypes}
+              />
+            </ErrorBoundary>
+          </ErrorBoundaryKibanaProvider>
         </RedirectToHomeIfUnauthorized>
       </KibanaThemeProvider>
     </I18nProvider>,

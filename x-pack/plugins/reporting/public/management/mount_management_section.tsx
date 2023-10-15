@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { ErrorBoundary, ErrorBoundaryKibanaProvider } from '@kbn/shared-ux-error-boundary';
 import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
@@ -39,18 +40,22 @@ export async function mountManagementSection(
             docLinks: coreStart.docLinks,
           }}
         >
-          <InternalApiClientProvider apiClient={apiClient}>
-            <IlmPolicyStatusContextProvider>
-              <ReportListing
-                toasts={coreSetup.notifications.toasts}
-                license$={license$}
-                config={config}
-                redirect={coreStart.application.navigateToApp}
-                navigateToUrl={coreStart.application.navigateToUrl}
-                urlService={urlService}
-              />
-            </IlmPolicyStatusContextProvider>
-          </InternalApiClientProvider>
+          <ErrorBoundaryKibanaProvider>
+            <ErrorBoundary>
+              <InternalApiClientProvider apiClient={apiClient}>
+                <IlmPolicyStatusContextProvider>
+                  <ReportListing
+                    toasts={coreSetup.notifications.toasts}
+                    license$={license$}
+                    config={config}
+                    redirect={coreStart.application.navigateToApp}
+                    navigateToUrl={coreStart.application.navigateToUrl}
+                    urlService={urlService}
+                  />
+                </IlmPolicyStatusContextProvider>
+              </InternalApiClientProvider>
+            </ErrorBoundary>
+          </ErrorBoundaryKibanaProvider>
         </KibanaContextProvider>
       </I18nProvider>
     </KibanaThemeProvider>,
