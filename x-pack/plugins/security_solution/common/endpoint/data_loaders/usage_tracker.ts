@@ -10,13 +10,16 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { isPromise } from '@kbn/std';
 import moment from 'moment';
+import { once } from 'lodash';
 
 interface UsageRecordJson {
   id: string;
   start: string;
   finish: string;
+  durationMs: number;
   duration: string;
   status: 'success' | 'failure' | 'pending';
+  stack: string;
   error?: string;
 }
 
@@ -33,7 +36,7 @@ type AnyFunction = (...args: any) => any;
  *
  * ** Should not be used for production code **
  */
-export class UsageTracker {
+class UsageTracker {
   private readonly records: Record<
     string,
     {
@@ -45,7 +48,7 @@ export class UsageTracker {
   private wrappedCallbacks = new WeakSet<Function>();
 
   constructor({
-    logger = new ToolingLog({ level: 'info', writeTo: process.stdout }),
+    logger = new ToolingLog({ level: 'verbose', writeTo: process.stdout }),
     dumpOnProcessExit = false,
     maxRecordsPerType = 25,
   }: UsageTrackerOptions = {}) {
@@ -57,15 +60,36 @@ export class UsageTracker {
 
     try {
       if (dumpOnProcessExit && process && process.once) {
-        ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'].forEach((event) => {
-          process.once(event, () => {
-            logger?.debug(`Tooling usage tracking:\n\n${this.toString()}`);
-          });
+        const nodeEvents = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
+        const logStats = once(() => {
+          logger.verbose(`Tooling usage tracking:
+${this.toText()}`);
+        });
+
+        logger.verbose(
+          `${this.constructor.name}: Setting up event listeners for: ${nodeEvents.join(' | ')}`
+        );
+
+        nodeEvents.forEach((event) => {
+          process.once(event, logStats);
         });
       }
     } catch (err) {
       logger.debug(`Unable to setup 'dumpOnProcessExit': ${err.message}`);
     }
+  }
+
+  protected formatDuration(durationMs: number): string {
+    const durationObj = moment.duration(durationMs);
+    const pad = (num: number, max = 2): string => {
+      return String(num).padStart(max, '0');
+    };
+    const hours = pad(durationObj.hours());
+    const minutes = pad(durationObj.minutes());
+    const seconds = pad(durationObj.seconds());
+    const milliseconds = pad(durationObj.milliseconds(), 3);
+
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
 
   create(id: string): UsageRecord {
@@ -92,24 +116,102 @@ export class UsageTracker {
       .map((record) => record.toJSON());
   }
 
+  /**
+   * Returns a `JSON.parse()` compatible string of all of the entries captured
+   */
   toString(): string {
     return JSON.stringify(this.toJSON());
   }
 
-  public dump(logger?: ToolingLog) {
-    (logger ?? this.options.logger).info(
+  getSummary(): Array<{ name: string; count: number; shortestMs: number; longestMs: number }> {
+    return Object.entries(this.records).map(([funcName, record]) => {
+      const funcSummary = {
+        name: funcName,
+        count: record.count,
+        shortestMs: 0,
+        longestMs: 0,
+      };
+
+      for (const instanceRecord of record.records) {
+        const instanceDuration = instanceRecord.toJSON().durationMs;
+
+        funcSummary.shortestMs =
+          funcSummary.shortestMs > 0
+            ? Math.min(funcSummary.shortestMs, instanceDuration)
+            : instanceDuration;
+
+        funcSummary.longestMs =
+          funcSummary.longestMs > 0
+            ? Math.max(funcSummary.longestMs, instanceDuration)
+            : instanceDuration;
+      }
+
+      return funcSummary;
+    });
+  }
+
+  toSummaryTable(): string {
+    const separator = ' | ';
+    const width = {
+      name: 60,
+      count: 5,
+      shortest: 12,
+      longest: 12,
+    };
+
+    const maxLineLength =
+      Object.values(width).reduce((acc, n) => acc + n, 0) +
+      (Object.keys(width).length - 1) * separator.length;
+
+    const summaryText = this.getSummary().map(({ name, count, shortestMs, longestMs }) => {
+      const fmtName = name.padEnd(width.name);
+      const fmtCount = String(count).padEnd(width.count);
+      const fmtShortest = this.formatDuration(shortestMs);
+      const fmtLongest = this.formatDuration(longestMs);
+
+      return `${fmtName}${separator}${fmtCount}${separator}${fmtShortest}${separator}${fmtLongest}`;
+    });
+
+    return `${'-'.repeat(maxLineLength)}
+${'Name'.padEnd(width.name)}${separator}${'Count'.padEnd(
+      width.count
+    )}${separator}${'Shortest'.padEnd(width.shortest)}${separator}${'longest'.padEnd(width.longest)}
+${'-'.repeat(maxLineLength)}
+${summaryText.join('\n')}
+${'-'.repeat(maxLineLength)}
+`;
+  }
+
+  /**
+   * Returns a string with information about the entries captured
+   */
+  toText(): string {
+    return (
+      this.toSummaryTable() +
       Object.entries(this.records)
         .map(([key, { count, records: usageRecords }]) => {
           return `
-  [${key}] Invoked ${count} times. Last ${this.options.maxRecordsPerType}:
-      ${usageRecords
-        .map((record) => {
-          return record.toString();
-        })
-        .join('\n      ')}
+[${key}] Invoked ${count} times. Records${
+            count > this.options.maxRecordsPerType
+              ? ` (last ${this.options.maxRecordsPerType})`
+              : ''
+          }:
+${'-'.repeat(98)}
+${usageRecords
+  .map((record) => {
+    return record.toText();
+  })
+  .join('\n')}
 `;
         })
-        .join('\n')
+        .join('')
+    );
+  }
+
+  public dump(logger?: ToolingLog) {
+    (logger ?? this.options.logger).info(
+      `${this.constructor.name}: usage tracking:
+${this.toText()}`
     );
   }
 
@@ -140,10 +242,12 @@ export class UsageTracker {
     }
 
     const functionName =
-      name ??
-      callback.name ??
-      (new Error('-').stack ?? '').split('\n')[2] ??
-      callback.toString().substring(0, 50);
+      name ||
+      callback.name ||
+      // Get the file/line number where function was defined
+      ((new Error('-').stack ?? '').split('\n')[2] || '').trim() ||
+      // Last resort: get 50 first char. of function code
+      callback.toString().trim().substring(0, 50);
 
     const wrappedFunction = ((...args) => {
       const usageRecord = this.create(functionName);
@@ -179,11 +283,16 @@ export class UsageTracker {
 class UsageRecord {
   private start: UsageRecordJson['start'] = new Date().toISOString();
   private finish: UsageRecordJson['finish'] = '';
+  private durationMs = 0;
   private duration: UsageRecordJson['duration'] = '';
   private status: UsageRecordJson['status'] = 'pending';
   private error: UsageRecordJson['error'];
+  private stack: string = '';
 
-  constructor(private readonly id: string) {}
+  constructor(private readonly id: string) {
+    Error.captureStackTrace(this);
+    this.stack = `\n${this.stack.split('\n').slice(2).join('\n')}`;
+  }
 
   set(status: Exclude<UsageRecordJson['status'], 'pending'>, error?: string) {
     this.finish = new Date().toISOString();
@@ -192,24 +301,36 @@ class UsageRecord {
 
     const durationDiff = moment.duration(moment(this.finish).diff(this.start));
 
+    this.durationMs = durationDiff.asMilliseconds();
     this.duration = `h[${durationDiff.hours()}]  m[${durationDiff.minutes()}]  s[${durationDiff.seconds()}]  ms[${durationDiff.milliseconds()}]`;
   }
 
   public toJSON(): UsageRecordJson {
-    const { id, start, finish, status, error, duration } = this;
+    const { id, start, finish, status, error, duration, durationMs, stack } = this;
 
     return {
       id,
       start,
       finish,
+      durationMs,
       duration,
       status,
+      stack,
       ...(error ? { error } : {}),
     };
   }
 
   public toString(): string {
     return JSON.stringify(this.toJSON());
+  }
+
+  public toText(): string {
+    const data = this.toJSON();
+    const keys = Object.keys(data).sort();
+
+    return keys.reduce((acc, key) => {
+      return acc.concat(`\n${key}: ${data[key as keyof UsageRecordJson]}`);
+    }, '');
   }
 }
 
