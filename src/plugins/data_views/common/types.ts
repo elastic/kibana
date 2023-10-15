@@ -314,6 +314,7 @@ export interface GetFieldsOptions {
   includeUnmapped?: boolean;
   fields?: string[];
   allowHidden?: boolean;
+  forceRefresh?: boolean;
 }
 
 /**

@@ -170,6 +170,7 @@ const handler: (
       };
 
       if (cacheHeader) {
+        // revalidates if 5 minutes passed, otherwise caches for a year
         headers['cache-control'] = 'private, max-age=31536000, stale-while-revalidate=86400';
       }
 
