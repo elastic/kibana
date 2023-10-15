@@ -34,15 +34,15 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
         },
         {
           names: [
-            'names:',
             '.alerts-security*',
             '.siem-signals-*',
             '.preview.alerts-security*',
             '.internal.preview.alerts-security*',
+            '.internal.alerts-security.alerts-*',
             '.lists-*',
             '.items-*',
           ],
-          privileges: ['read', 'write', 'maintenance', 'view_index_metadata'],
+          privileges: ['read', 'write', 'manage', 'maintenance', 'view_index_metadata'],
         },
       ],
       run_as: [],

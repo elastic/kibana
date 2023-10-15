@@ -559,11 +559,13 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .internal.alerts-security.alerts-*
         - .lists-*
         - .items-*
       privileges:
         - read
         - write
+        - manage
         - maintenance
         - view_index_metadata
   applications:
