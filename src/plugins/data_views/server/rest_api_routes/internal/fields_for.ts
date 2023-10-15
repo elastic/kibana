@@ -113,8 +113,12 @@ const validate: FullValidationConfig<any, any, any> = {
   },
 };
 
-const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
-  (isRollupsEnabled) => async (context, request, response) => {
+const handler: (
+  isRollupsEnabled: () => boolean
+) => (cacheHeader: boolean) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled) =>
+  (cacheHeader = false) =>
+  async (context, request, response) => {
     const { asCurrentUser } = (await context.core).elasticsearch.client;
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
     const {
@@ -159,11 +163,19 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         indices,
       };
 
+      const headers: Record<string, string> = {
+        'content-type': 'application/json',
+        // Etag?
+        // Expires
+      };
+
+      if (cacheHeader) {
+        headers['cache-control'] = 'private, max-age=31536000, stale-while-revalidate=86400';
+      }
+
       return response.ok({
         body,
-        headers: {
-          'content-type': 'application/json',
-        },
+        headers,
       });
     } catch (error) {
       if (
@@ -196,12 +208,16 @@ export const registerFieldForWildcard = async (
   const configuredHandler = handler(isRollupsEnabled);
 
   // handler
-  router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
-  router.versioned.post({ path, access }).addVersion({ version, validate }, configuredHandler);
+  router.versioned
+    .put({ path, access, options: {} })
+    .addVersion({ version, validate }, configuredHandler(false));
+  router.versioned
+    .post({ path, access })
+    .addVersion({ version, validate }, configuredHandler(false));
   router.versioned
     .get({ path, access })
     .addVersion(
       { version, validate: { request: { query: querySchema }, response: validate.response } },
-      configuredHandler
+      configuredHandler(true)
     );
 };
