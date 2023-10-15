@@ -313,11 +313,11 @@ export class UserActionPersister {
         payload: { attachment: attachment.attachment },
       });
 
-      if (commentUserAction == null) {
-        return acc;
+      if (commentUserAction != null) {
+        acc.push(commentUserAction);
       }
 
-      return [...acc, commentUserAction];
+      return acc;
     }, []);
 
     await this.bulkCreateAndLog({

@@ -90,7 +90,7 @@ const handler = async ({
 
     const ruleIdsWithConflictError = currentErrors.reduce<string[]>((acc, error) => {
       if (error.status === 409) {
-        return [...acc, error.rule.id];
+        acc.push(error.rule.id);
       }
       return acc;
     }, []);

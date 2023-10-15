@@ -38,12 +38,8 @@ export const transformFromLegacyActions = (
 
   return legacyActionsAttr.actions.reduce<RawRuleAction[]>((acc, action) => {
     const { actionRef, action_type_id: actionTypeId, group, params } = action;
-    if (!actionReference[actionRef]) {
-      return acc;
-    }
-    return [
-      ...acc,
-      {
+    if (actionReference[actionRef]) {
+      acc.push({
         group,
         params,
         uuid: v4(),
@@ -54,7 +50,8 @@ export const transformFromLegacyActions = (
           notifyWhen: transformToNotifyWhen(legacyActionsAttr.ruleThrottle) ?? 'onActiveAlert',
           throttle: transformToAlertThrottle(legacyActionsAttr.ruleThrottle),
         },
-      },
-    ];
+      });
+    }
+    return acc;
   }, []);
 };

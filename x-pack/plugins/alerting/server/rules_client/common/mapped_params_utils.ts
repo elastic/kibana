@@ -99,7 +99,7 @@ export const getModifiedSearchFields = (searchFields: string[] | undefined) => {
   return searchFields.reduce<string[]>((result, field) => {
     const modifiedField = getModifiedField(field);
     if (modifiedField) {
-      return [...result, modifiedField];
+      result.push(modifiedField);
     }
     return result;
   }, []);

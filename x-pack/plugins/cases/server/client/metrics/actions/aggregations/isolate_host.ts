@@ -15,6 +15,7 @@ interface ActionsAggregation {
     buckets: Array<{ key: string; doc_count: number }>;
   };
 }
+
 type ActionsAggregationResponse = ActionsAggregation | undefined;
 
 export class IsolateHostActions implements AggregationBuilder<SingleCaseMetricsResponse> {
@@ -35,7 +36,10 @@ export class IsolateHostActions implements AggregationBuilder<SingleCaseMetricsR
   formatResponse(aggregationsResponse: AggregationResponse) {
     const aggs = aggregationsResponse as ActionsAggregationResponse;
     const actionsCounters = aggs?.actions?.buckets.reduce<Record<string, number>>(
-      (result, { key, doc_count: total }) => ({ ...result, [key]: total }),
+      (result, { key, doc_count: total }) => {
+        result[key] = total;
+        return result;
+      },
       {}
     );
     return {

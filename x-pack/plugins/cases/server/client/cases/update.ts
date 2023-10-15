@@ -469,7 +469,8 @@ export const update = async (
     const builtUserActions =
       userActionsDict != null
         ? Object.keys(userActionsDict).reduce<UserActionEvent[]>((acc, key) => {
-            return [...acc, ...userActionsDict[key]];
+            acc.push(...userActionsDict[key]);
+            return acc;
           }, [])
         : [];
 

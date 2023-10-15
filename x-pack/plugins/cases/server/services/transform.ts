@@ -84,14 +84,11 @@ export function transformFieldsToESModel(connector: CaseConnector): ConnectorPer
     return [];
   }
 
-  return Object.entries(connector.fields).reduce<ConnectorPersistedFields>(
-    (acc, [key, value]) => [
-      ...acc,
-      {
-        key,
-        value,
-      },
-    ],
-    []
-  );
+  return Object.entries(connector.fields).reduce<ConnectorPersistedFields>((acc, [key, value]) => {
+    acc.push({
+      key,
+      value,
+    });
+    return acc;
+  }, []);
 }
