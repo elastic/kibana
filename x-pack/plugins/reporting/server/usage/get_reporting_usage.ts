@@ -52,6 +52,7 @@ enum keys {
   PNG_CPU = 'png_cpu',
   PNG_MEM = 'png_memory',
 }
+
 enum fields {
   JOB_TYPE = 'jobtype',
   LAYOUT = 'meta.layout.keyword',
@@ -73,28 +74,28 @@ const METRIC_PERCENTILES = [50, 75, 95, 99];
 
 // indexes some key/count buckets by the "key" property
 const getKeyCount = <BucketType>(buckets: KeyCountBucket[]): BucketType =>
-  buckets.reduce(
-    (accum, { key, doc_count: count }) => ({ ...accum, [key]: count }),
-    {} as BucketType
-  );
+  buckets.reduce((accum, { key, doc_count: count }) => {
+    (accum as Record<string, unknown>)[key] = count;
+    return accum;
+  }, {} as BucketType);
 
 // indexes some key/count buckets by statusType > jobType > appName: statusCount
 const getAppStatuses = (buckets: StatusByAppBucket[]) =>
   buckets.reduce((statuses, statusBucket) => {
-    return {
-      ...statuses,
-      [statusBucket.key]: statusBucket.jobTypes.buckets.reduce((jobTypes, job) => {
-        return {
-          ...jobTypes,
-          [job.key]: job.appNames.buckets.reduce((apps, app) => {
-            return {
-              ...apps,
-              [app.key]: app.doc_count,
-            };
-          }, {}),
-        };
-      }, {}),
-    };
+    (statuses as Record<string, unknown>)[statusBucket.key] = statusBucket.jobTypes.buckets.reduce(
+      (jobTypes, job) => {
+        (jobTypes as Record<string, unknown>)[job.key] = job.appNames.buckets.reduce(
+          (apps, app) => {
+            (apps as Record<string, unknown>)[app.key] = app.doc_count;
+            return apps;
+          },
+          {}
+        );
+        return jobTypes;
+      },
+      {}
+    );
+    return statuses;
   }, {});
 
 type JobType = Omit<AvailableTotal, 'available'> & {
@@ -131,7 +132,9 @@ function normalizeJobtypes(jobBuckets: KeyCountBucket[], jobTypeMetrics?: JobTyp
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
       execution_times: pick(executionTimes ?? {}, ['min', 'max', 'avg']),
     };
-    return { ...accum, [key]: jobType };
+
+    (accum as Record<keyof JobTypes, unknown>)[key] = jobType;
+    return accum;
   }, {} as JobTypes);
 }
 
@@ -176,17 +179,15 @@ function normalizeMetrics(metrics: estypes.AggregationsStringTermsAggregate | un
     { key: string } & { [key: string]: estypes.AggregationsPercentilesAggregateBase }
   >;
   return metricBuckets.reduce((accum, next) => {
-    return {
-      ...accum,
-      [next.key]: {
-        pdf_pages: next.pdf_pages,
-        pdf_cpu: next.pdf_cpu,
-        pdf_memory: next.pdf_memory,
-        png_cpu: next.png_cpu,
-        png_memory: next.png_memory,
-        csv_rows: next.csv_rows,
-      },
+    (accum as Record<string, unknown>)[next.key] = {
+      pdf_pages: next.pdf_pages,
+      pdf_cpu: next.pdf_cpu,
+      pdf_memory: next.pdf_memory,
+      png_cpu: next.png_cpu,
+      png_memory: next.png_memory,
+      csv_rows: next.csv_rows,
     };
+    return accum;
   }, {} as { [K in keyof JobTypes]: MetricsStats });
 }
 

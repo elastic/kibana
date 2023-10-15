@@ -20,17 +20,15 @@ export class GetCustomMetricIndicatorAggregation {
       const filter = metric.filter
         ? getElastichsearchQueryOrThrow(metric.filter)
         : { match_all: {} };
-      return {
-        ...acc,
-        [`_${type}_${metric.name}`]: {
-          filter,
-          aggs: {
-            sum: {
-              [metric.aggregation]: { field: metric.field },
-            },
+      (acc as Record<string, unknown>)[`_${type}_${metric.name}`] = {
+        filter,
+        aggs: {
+          sum: {
+            [metric.aggregation]: { field: metric.field },
           },
         },
       };
+      return acc;
     }, {});
   }
 
@@ -42,10 +40,10 @@ export class GetCustomMetricIndicatorAggregation {
   }
 
   private buildMetricEquation(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
-    const bucketsPath = metricDef.metrics.reduce(
-      (acc, metric) => ({ ...acc, [metric.name]: `_${type}_${metric.name}>sum` }),
-      {}
-    );
+    const bucketsPath = metricDef.metrics.reduce((acc, metric) => {
+      (acc as Record<string, string>)[metric.name] = `_${type}_${metric.name}>sum`;
+      return acc;
+    }, {});
     return {
       bucket_script: {
         buckets_path: bucketsPath,
