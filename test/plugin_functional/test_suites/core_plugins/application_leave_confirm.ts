@@ -9,6 +9,7 @@
 import url from 'url';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
   url.format({
@@ -19,11 +20,19 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
     search,
   });
 
+async function logResult(curr: string, kib: string, log: ToolingLog) {
+  if (curr === kib) {
+    log.debug('navigation cancelled');
+  } else {
+    log.debug(`nav cancelled failed, curr is ${curr}`);
+  }
+}
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
 
   describe('application using leave confirmation', () => {
     describe('when navigating to another app', () => {
@@ -33,7 +42,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave1'));
+        const currentUrl = await browser.getCurrentUrl();
+        const kibanaUrl = getKibanaUrl('/app/appleave1');
+        await logResult(currentUrl, kibanaUrl, log);
+        expect(currentUrl).to.eql(kibanaUrl);
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');

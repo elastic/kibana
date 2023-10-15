@@ -35,9 +35,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
-    let currentUrl;
     return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
-      currentUrl = await browser.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       log.debug(`waiting for currentUrl ${currentUrl} to be expectedUrl ${expectedUrl}`);
       return currentUrl === expectedUrl;
     });
