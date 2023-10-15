@@ -28,9 +28,10 @@ export const getIdsAndNamespaces = ({
       }
     })
     .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
-      (acc, { listId, namespaceType }) => ({
-        ids: [...acc.ids, listId],
-        namespaces: [...acc.namespaces, namespaceType],
-      }),
+      (acc, { listId, namespaceType }) => {
+        acc.ids.push(listId);
+        acc.namespaces.push(namespaceType);
+        return acc;
+      },
       { ids: [], namespaces: [] }
     );

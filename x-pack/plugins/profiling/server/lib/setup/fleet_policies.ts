@@ -31,6 +31,7 @@ export function generateSecretToken() {
 }
 
 type PackagePolicyVars = PackageInputType & { secret_token?: string };
+
 export function getVarsFor({
   config,
   includeSecretToken,
@@ -48,10 +49,8 @@ export function getVarsFor({
   >((acc, currKey) => {
     const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
     const type = typeof value === 'boolean' ? 'bool' : 'text';
-    return {
-      ...acc,
-      [currKey]: { type, value },
-    };
+    acc[currKey] = { type, value };
+    return acc;
   }, {});
 }
 

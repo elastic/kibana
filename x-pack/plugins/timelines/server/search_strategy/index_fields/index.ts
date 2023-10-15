@@ -224,7 +224,7 @@ export const requestIndexFieldSearch = async (
 export const dedupeIndexName = (indices: string[]) =>
   indices.reduce<string[]>((acc, index) => {
     if (index.trim() !== '' && index.trim() !== '_all' && !acc.includes(index.trim())) {
-      return [...acc, index];
+      acc.push(index);
     }
     return acc;
   }, []);

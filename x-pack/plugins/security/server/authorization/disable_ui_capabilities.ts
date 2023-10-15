@@ -153,14 +153,16 @@ export function disableUICapabilitiesFactory(
     }
 
     const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
-      (acc, [featureId, featureUICapabilities]) => [
-        ...acc,
-        ...flatten(
-          Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
-            return getActionsForFeatureCapability(featureId, uiCapability, value);
-          })
-        ),
-      ],
+      (acc, [featureId, featureUICapabilities]) => {
+        acc.push(
+          ...flatten(
+            Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
+              return getActionsForFeatureCapability(featureId, uiCapability, value);
+            })
+          )
+        );
+        return acc;
+      },
       []
     );
 

@@ -122,13 +122,10 @@ export class InternalFileService {
 
       return format === 'array'
         ? result
-        : ids.reduce<{ [id: string]: IFile<M> | null }>(
-            (acc, id, i) => ({
-              ...acc,
-              [id]: result[i],
-            }),
-            {}
-          );
+        : ids.reduce<{ [id: string]: IFile<M> | null }>((acc, id, i) => {
+            acc[id] = result[i];
+            return acc;
+          }, {});
     } catch (e) {
       this.logger.error(`Could not retrieve files: ${e}`);
       throw e;

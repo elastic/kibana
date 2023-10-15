@@ -555,10 +555,10 @@ export class DataView implements DataViewBase {
 
   getAllRuntimeFields(): Record<string, RuntimeField> {
     return Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeField>>(
-      (acc, fieldName) => ({
-        ...acc,
-        [fieldName]: this.getRuntimeField(fieldName)!,
-      }),
+      (acc, fieldName) => {
+        acc[fieldName] = this.getRuntimeField(fieldName)!;
+        return acc;
+      },
       {}
     );
   }

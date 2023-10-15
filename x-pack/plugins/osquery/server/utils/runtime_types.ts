@@ -90,20 +90,17 @@ const getExcessProps = (
     const childrenObject = r[k] as Record<string, unknown>;
     if (codecChildren != null && childrenProps != null && codecChildren._tag === 'DictionaryType') {
       const keys = Object.keys(childrenObject);
+      acc.push(
+        ...keys.reduce<string[]>((kAcc, i) => {
+          kAcc.push(...getExcessProps(childrenProps, childrenObject[i]));
 
-      return [
-        ...acc,
-        ...keys.reduce<string[]>(
-          (kAcc, i) => [...kAcc, ...getExcessProps(childrenProps, childrenObject[i])],
-          []
-        ),
-      ];
-    }
-
-    if (codecChildren != null && childrenProps != null) {
-      return [...acc, ...getExcessProps(childrenProps, childrenObject)];
+          return kAcc;
+        }, [])
+      );
+    } else if (codecChildren != null && childrenProps != null) {
+      acc.push(...getExcessProps(childrenProps, childrenObject));
     } else if (codecChildren == null) {
-      return [...acc, k];
+      acc.push(k);
     }
 
     return acc;

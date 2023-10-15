@@ -255,10 +255,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
           if (transformedFn.type === 'function') {
             const prevChain = realIndex > 0 ? newAst.chain.slice(0, realIndex) : [];
             const nextChain = newAst.chain.slice(realIndex + 1);
-            return {
-              ...newAst,
-              chain: [...prevChain, transformedFn, ...nextChain],
-            };
+            newAst.chain = [...prevChain, transformedFn, ...nextChain];
+            return newAst;
           }
 
           if (transformedFn.type === 'expression') {
@@ -266,10 +264,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
             const prevChain = realIndex > 0 ? newAst.chain.slice(0, realIndex) : [];
             const nextChain = newAst.chain.slice(realIndex + 1);
             additionalFunctions += chain.length - 1;
-            return {
-              ...newAst,
-              chain: [...prevChain, ...chain, ...nextChain],
-            };
+            newAst.chain = [...prevChain, ...chain, ...nextChain];
+            return newAst;
           }
 
           return newAst;

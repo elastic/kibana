@@ -90,7 +90,8 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return types.reduce<any>((acc, typeNode) => {
       const constraints = getConstraints(typeNode, program);
       const contraintsArray = Array.isArray(constraints) ? constraints : [constraints];
-      return [...acc, ...contraintsArray];
+      acc.push(...contraintsArray);
+      return acc;
     }, []);
   }
 

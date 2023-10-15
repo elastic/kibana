@@ -83,9 +83,7 @@ export const getSignalVersionsByIndex = async ({
       count: sb.doc_count,
     }));
 
-    return {
-      ...agg,
-      [_index]: signalsVersions,
-    };
+    (agg as Record<string, unknown>)[_index] = signalsVersions;
+    return agg;
   }, {});
 };

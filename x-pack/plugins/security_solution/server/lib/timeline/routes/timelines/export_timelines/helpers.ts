@@ -58,12 +58,15 @@ const getTimelinesFromObjects = async (
     ),
   ]);
 
-  const myNotes = notes.reduce<Note[]>((acc, note) => [...acc, ...note], []);
+  const myNotes = notes.reduce<Note[]>((acc, note) => {
+    acc.push(...note);
+    return acc;
+  }, []);
 
-  const myPinnedEventIds = pinnedEvents.reduce<PinnedEvent[]>(
-    (acc, pinnedEventId) => [...acc, ...pinnedEventId],
-    []
-  );
+  const myPinnedEventIds = pinnedEvents.reduce<PinnedEvent[]>((acc, pinnedEventId) => {
+    acc.push(...pinnedEventId);
+    return acc;
+  }, []);
 
   const myResponse = exportedIds.reduce<ExportedTimelines[]>((acc, timelineId) => {
     const myTimeline = timelines.find((t) => t.savedObjectId === timelineId);
@@ -71,14 +74,11 @@ const getTimelinesFromObjects = async (
       const timelineNotes = myNotes.filter((n) => n.timelineId === timelineId);
       const timelinePinnedEventIds = myPinnedEventIds.filter((p) => p.timelineId === timelineId);
       const exportedTimeline = omit(['status', 'excludedRowRendererIds'], myTimeline);
-      return [
-        ...acc,
-        {
-          ...exportedTimeline,
-          ...getGlobalEventNotesByTimelineId(timelineNotes),
-          pinnedEventIds: getPinnedEventsIdsByTimelineId(timelinePinnedEventIds),
-        },
-      ];
+      acc.push({
+        ...exportedTimeline,
+        ...getGlobalEventNotesByTimelineId(timelineNotes),
+        pinnedEventIds: getPinnedEventsIdsByTimelineId(timelinePinnedEventIds),
+      });
     }
     return acc;
   }, []);

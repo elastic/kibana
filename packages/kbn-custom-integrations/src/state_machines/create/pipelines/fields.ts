@@ -50,10 +50,10 @@ const updateTouchedFields =
       ...context,
       touchedFields: {
         ...context.touchedFields,
-        ...Object.keys(event.fields).reduce<WithTouchedFields['touchedFields']>(
-          (acc, field) => ({ ...acc, [field]: true }),
-          {} as WithTouchedFields['touchedFields']
-        ),
+        ...Object.keys(event.fields).reduce<WithTouchedFields['touchedFields']>((acc, field) => {
+          acc[field as keyof WithTouchedFields['touchedFields']] = true;
+          return acc;
+        }, {} as WithTouchedFields['touchedFields']),
       },
     };
     return [mergedContext, event];

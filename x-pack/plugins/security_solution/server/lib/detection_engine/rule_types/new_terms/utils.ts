@@ -94,10 +94,10 @@ export const createFieldValuesMap = (
     return undefined;
   }
 
-  const valuesMap = newTermsFields.reduce<Record<string, Record<string, boolean>>>(
-    (acc, field) => ({ ...acc, [field]: {} }),
-    {}
-  );
+  const valuesMap = newTermsFields.reduce<Record<string, Record<string, boolean>>>((acc, field) => {
+    acc[field] = {};
+    return acc;
+  }, {});
 
   buckets
     .map((bucket) => bucket.key)
@@ -134,14 +134,14 @@ export const getNewTermsRuntimeMappings = (
           // ES has limit in 100 values for runtime field, after this query will fail
           int emitLimit = 100;
           stack.add([0, '']);
-          
+
           while (stack.length > 0) {
               if (emitLimit == 0) {
                 break;
               }
               def tuple = stack.pop();
               def index = tuple[0];
-              def line = tuple[1];    
+              def line = tuple[1];
               if (index === params['fields'].length) {
                 emit(line);
                 emitLimit = emitLimit - 1;
@@ -154,7 +154,7 @@ export const getNewTermsRuntimeMappings = (
                     }
                     def delimiter = index === 0 ? '' : '${DELIMITER}';
                     def nextLine = line + delimiter + fieldStr.encodeBase64();
-          
+
                     stack.add([index + 1, nextLine])
                 }
               }

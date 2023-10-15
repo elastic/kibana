@@ -56,16 +56,14 @@ export const getDataFromFieldsHits = (
     const fieldCategory =
       prependFieldCategory != null ? prependFieldCategory : getFieldCategory(field);
     if (isGeoField(field)) {
-      return [
-        ...accumulator,
-        {
-          category: fieldCategory,
-          field,
-          values: formatGeoLocation(item),
-          originalValue: formatGeoLocation(item),
-          isObjectArray: true, // important for UI
-        },
-      ];
+      accumulator.push({
+        category: fieldCategory,
+        field,
+        values: formatGeoLocation(item),
+        originalValue: formatGeoLocation(item),
+        isObjectArray: true, // important for UI
+      });
+      return accumulator;
     }
 
     const objArrStr = toObjectArrayOfStrings(item);
@@ -80,16 +78,14 @@ export const getDataFromFieldsHits = (
         (ecsField) => ecsField === field
       ) === undefined
     ) {
-      return [
-        ...accumulator,
-        {
-          category: fieldCategory,
-          field: dotField,
-          values: strArr,
-          originalValue: strArr,
-          isObjectArray,
-        },
-      ];
+      accumulator.push({
+        category: fieldCategory,
+        field: dotField,
+        values: strArr,
+        originalValue: strArr,
+        isObjectArray,
+      });
+      return accumulator;
     }
 
     const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField)

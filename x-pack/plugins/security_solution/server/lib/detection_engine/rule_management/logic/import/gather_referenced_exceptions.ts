@@ -25,10 +25,9 @@ export const parseReferencedExceptionsLists = (
       rule.exceptions_list != null &&
       rule.exceptions_list.length > 0
     ) {
-      return [...acc, ...rule.exceptions_list];
-    } else {
-      return acc;
+      acc.push(...rule.exceptions_list);
     }
+    return acc;
   }, []);
 
   if (lists == null || lists.length === 0) {

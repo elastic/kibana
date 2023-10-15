@@ -853,7 +853,8 @@ export const getFormattedBuilderEntries = (
         parentIndex,
         allowCustomFieldOptions
       );
-      return [...acc, newItemEntry];
+      acc.push(newItemEntry);
+      return acc;
     } else {
       const parentEntry: FormattedBuilderEntry = {
         correspondingKeywordField: undefined,
