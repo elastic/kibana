@@ -42,7 +42,6 @@ import { AppNavLinkStatus } from './shared_imports';
 import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
-import { mountManagementSection } from './management/mount_management_section';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -178,21 +177,24 @@ export class ReportingPublicPlugin
       order: 3,
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        const [start, startDeps] = await getStartServices();
+        const [[start, startDeps], { mountManagementSection }] = await Promise.all([
+          getStartServices(),
+          import('./management/mount_management_section'),
+        ]);
 
         const { docTitle } = start.chrome;
         docTitle.change(this.title);
 
         const { license$ } = startDeps.licensing;
-        const umountAppCallback = mountManagementSection({
-          coreSetup: core,
-          coreStart: start,
+        const umountAppCallback = await mountManagementSection(
+          core,
+          start,
           license$,
-          config: this.config,
-          urlService: share.url,
+          this.config,
           apiClient,
-          params,
-        });
+          share.url,
+          params
+        );
 
         return () => {
           docTitle.reset();
