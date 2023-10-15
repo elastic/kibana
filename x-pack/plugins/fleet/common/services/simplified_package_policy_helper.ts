@@ -69,7 +69,7 @@ export function generateInputId(input: NewPackagePolicyInput) {
 export function formatInputs(inputs: NewPackagePolicy['inputs']) {
   return inputs.reduce((acc, input) => {
     const inputId = generateInputId(input);
-    acc[inputId] = {
+    acc![inputId] = {
       enabled: input.enabled,
       vars: formatVars(input.vars),
       streams: formatStreams(input.streams),

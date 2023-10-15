@@ -150,31 +150,34 @@ export const validateFilterKueryNode = ({
   indexType = 'actions',
   path = 'arguments',
 }: ValidateFilterKueryNodeParams): ValidateFilterKueryNode[] => {
-  return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
-    if (ast.arguments) {
-      const myPath = `${path}.${index}`;
-      kueryNode.push(
-        ...validateFilterKueryNode({
-          astFilter: ast,
-          types,
-          indexMapping,
-          path: `${myPath}.arguments`,
-        })
-      );
-      return kueryNode;
-    }
+  return astFilter.arguments.reduce(
+    (kueryNode: ValidateFilterKueryNode[], ast: KueryNode, index: number) => {
+      if (ast.arguments) {
+        const myPath = `${path}.${index}`;
+        kueryNode.push(
+          ...validateFilterKueryNode({
+            astFilter: ast,
+            types,
+            indexMapping,
+            path: `${myPath}.arguments`,
+          })
+        );
+        return kueryNode;
+      }
 
-    if (index === 0) {
-      const splitPath = path.split('.');
-      kueryNode.push({
-        astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
-        error: hasFieldKeyError(ast.value, types, indexMapping, indexType),
-        key: ast.value,
-        type: getFieldType(ast.value, indexMapping),
-      });
-      return kueryNode;
-    }
+      if (index === 0) {
+        const splitPath = path.split('.');
+        kueryNode.push({
+          astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
+          error: hasFieldKeyError(ast.value, types, indexMapping, indexType)!,
+          key: ast.value,
+          type: getFieldType(ast.value, indexMapping),
+        } as ValidateFilterKueryNode);
+        return kueryNode;
+      }
 
-    return kueryNode;
-  }, []);
+      return kueryNode;
+    },
+    []
+  );
 };

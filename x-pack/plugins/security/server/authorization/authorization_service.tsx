@@ -111,7 +111,6 @@ export class AuthorizationService {
   setup({
     http,
     capabilities,
-    packageVersion,
     buildNumber,
     getClusterClient,
     license,

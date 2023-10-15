@@ -44,53 +44,56 @@ export const validateFilterKueryNode = ({
   skipNormalization,
 }: ValidateFilterKueryNodeParams): ValidateFilterKueryNode[] => {
   let localNestedKeys: string | undefined;
-  return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
-    if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
-      localNestedKeys = ast.value;
-    } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
-      const key = ast.value.replace('.attributes', '');
-      const mappingKey = 'properties.' + key.split('.').join('.properties.');
-      const field = get(indexMapping, mappingKey);
-
-      if (field != null && field.type === 'nested') {
+  return astFilter.arguments.reduce(
+    (kueryNode: ValidateFilterKueryNode[], ast: KueryNode, index: number) => {
+      if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
         localNestedKeys = ast.value;
+      } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
+        const key = ast.value.replace('.attributes', '');
+        const mappingKey = 'properties.' + key.split('.').join('.properties.');
+        const field = get(indexMapping, mappingKey);
+
+        if (field != null && field.type === 'nested') {
+          localNestedKeys = ast.value;
+        }
       }
-    }
 
-    if (ast.arguments) {
-      const myPath = `${path}.${index}`;
-      kueryNode.push(
-        ...validateFilterKueryNode({
-          astFilter: ast,
-          types,
-          indexMapping,
-          storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
-          path: `${myPath}.arguments`,
-          hasNestedKey: ast.type === 'function' && ast.function === 'nested',
-          nestedKeys: localNestedKeys || nestedKeys,
-          skipNormalization,
-        })
-      );
-      return kueryNode;
-    }
-    if (storeValue && index === 0) {
-      const splitPath = path.split('.');
-      const astPath = path.includes('.')
-        ? splitPath.slice(0, splitPath.length - 1).join('.')
-        : `${path}.${index}`;
-      const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
+      if (ast.arguments) {
+        const myPath = `${path}.${index}`;
+        kueryNode.push(
+          ...validateFilterKueryNode({
+            astFilter: ast,
+            types,
+            indexMapping,
+            storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
+            path: `${myPath}.arguments`,
+            hasNestedKey: ast.type === 'function' && ast.function === 'nested',
+            nestedKeys: localNestedKeys || nestedKeys,
+            skipNormalization,
+          })
+        );
+        return kueryNode;
+      }
+      if (storeValue && index === 0) {
+        const splitPath = path.split('.');
+        const astPath = path.includes('.')
+          ? splitPath.slice(0, splitPath.length - 1).join('.')
+          : `${path}.${index}`;
+        const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
 
-      kueryNode.push({
-        astPath,
-        error: hasFilterKeyError(key, types, indexMapping, skipNormalization),
-        isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
-        key,
-        type: getType(key),
-      });
+        kueryNode.push({
+          astPath,
+          error: hasFilterKeyError(key, types, indexMapping, skipNormalization)!,
+          isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
+          key,
+          type: getType(key),
+        } as ValidateFilterKueryNode);
+        return kueryNode;
+      }
       return kueryNode;
-    }
-    return kueryNode;
-  }, []);
+    },
+    []
+  );
 };
 
 const getType = (key: string | undefined | null) => {
