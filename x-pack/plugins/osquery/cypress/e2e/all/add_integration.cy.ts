@@ -29,7 +29,7 @@ import {
   policyContainsIntegration,
 } from '../../tasks/integrations';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
