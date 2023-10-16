@@ -387,7 +387,6 @@ export default function Expressions(props: Props) {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
-  console.log('dataView', dataView);
   return (
     <>
       <EuiTitle size="xs">
@@ -481,7 +480,12 @@ export default function Expressions(props: Props) {
                 expression={e || {}}
                 dataView={derivedIndexPattern}
               >
-                <PreviewChart metricExpression={e} dataViewId={dataView?.id} />
+                <PreviewChart
+                  metricExpression={e}
+                  dataViewId={dataView?.id}
+                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
+                  groupBy={ruleParams.groupBy}
+                />
                 {/* Preview */}
                 {/* <ExpressionChart*/}
                 {/*  expression={e}*/}

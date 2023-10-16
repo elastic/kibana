@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { OperationType } from '@kbn/lens-plugin/public';
 import { Comparator } from '../../../../../common/custom_threshold_rule/types';
-import { AGGREGATION_TYPES } from '../../types';
+
 export const Fill = {
   ABOVE: 'above' as const,
   BELOW: 'below' as const,
@@ -48,10 +49,23 @@ export interface FromBasedDataLayer {
         isBucketed: boolean;
         scale: string;
         params: {
+          size?: number;
+          orderBy?: {
+            type: string;
+            fallback: boolean;
+          };
+          orderDirection?: string;
+          otherBucket?: boolean;
+          missingBucket?: boolean;
           interval?: string;
           includeEmptyRows?: boolean;
           dropPartials?: boolean;
           emptyAsNull?: boolean;
+          parentFormat?: {
+            id: string;
+          };
+          secondaryFields?: string | string[];
+          accuracyMode?: boolean;
         };
       };
     };
@@ -72,6 +86,7 @@ export interface LensReferenceLayer {
     lineWidth: number;
     fill: FILL_TYPE;
   }>;
+  splitAccessor?: string;
 }
 
 export interface LensDataLayer {
@@ -101,6 +116,7 @@ export interface LensDataLayer {
     };
   };
   xAccessor: string;
+  splitAccessor?: string;
 }
 
 export interface AddLensDataLayer {
@@ -108,16 +124,10 @@ export interface AddLensDataLayer {
   accessors: string;
   xAccessor: string;
   dataViewId: string;
-  operationType: Omit<
-    typeof AGGREGATION_TYPES,
-    AGGREGATION_TYPES.CUSTOM,
-    AGGREGATION_TYPES.P99,
-    AGGREGATION_TYPES.P95,
-    AGGREGATION_TYPES.CARDINALITY,
-    AGGREGATION_TYPES.RATE
-  >;
+  operationType: OperationType;
   sourceField: string;
   label: string;
+  groupBy?: string | string[];
 }
 
 export interface AddLensReferenceLayer {
@@ -127,7 +137,7 @@ export interface AddLensReferenceLayer {
   value: number;
   label: string;
   lineWidth?: number;
-  comparator: keyof Comparator;
+  comparator: Comparator;
   color?: string;
 }
 

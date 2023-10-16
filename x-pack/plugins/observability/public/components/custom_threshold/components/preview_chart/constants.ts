@@ -20,7 +20,7 @@ export const scaffoldingLensDoc = {
         showSingleSeries: false,
       },
       valueLabels: 'hide',
-      preferredSeriesType: 'bar_stacked',
+      preferredSeriesType: 'bar',
       layers: [],
       gridlinesVisibilitySettings: {
         x: true,

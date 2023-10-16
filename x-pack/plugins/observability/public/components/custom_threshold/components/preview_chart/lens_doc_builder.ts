@@ -41,6 +41,10 @@ class LensDocBuilder {
       delete this.lensDoc.state.datasourceStates.formBased.layers[layerId];
     }
   }
+  addQueryFilter(query?: string) {
+    this.lensDoc.state.query.query = query || '';
+    return this;
+  }
 
   addDataLayer({
     layerId,
@@ -50,6 +54,7 @@ class LensDocBuilder {
     operationType,
     sourceField,
     label,
+    groupBy,
   }: AddLensDataLayer): this {
     this._removeLayer(layerId);
     this._addReference({ dataViewId, layerId });
@@ -57,7 +62,7 @@ class LensDocBuilder {
       layerId,
       accessors: [accessors],
       position: 'top',
-      seriesType: 'bar_stacked',
+      seriesType: 'bar',
       showGridlines: false,
       layerType: 'data',
       colorMapping: {
@@ -83,6 +88,7 @@ class LensDocBuilder {
       },
       xAccessor,
     });
+
     this.lensDoc.state.datasourceStates.formBased.layers[layerId] = {
       columns: {
         [xAccessor]: {
@@ -115,6 +121,40 @@ class LensDocBuilder {
       ignoreGlobalFilters: false,
       incompleteColumns: {},
     };
+    if (groupBy && groupBy.length >= 1) {
+      const xAccessorGroupBy = xAccessor + '-groupBy';
+      this.lensDoc.state.datasourceStates.formBased.layers[layerId].columns[xAccessorGroupBy] = {
+        label: `Top values of ${groupBy.toLocaleString()}`,
+        dataType: 'string',
+        operationType: 'terms',
+        scale: 'ordinal',
+        sourceField: groupBy[0],
+        isBucketed: true,
+        params: {
+          size: 3,
+          orderBy: {
+            type: 'alphabetical',
+            fallback: true,
+          },
+          orderDirection: 'asc',
+          otherBucket: true,
+          missingBucket: false,
+          parentFormat: {
+            id: 'multi_terms',
+          },
+          secondaryFields: groupBy.slice(1),
+          accuracyMode: false,
+        },
+      };
+      this.lensDoc.state.datasourceStates.formBased.layers[layerId].columnOrder.unshift(
+        xAccessorGroupBy
+      );
+      this.lensDoc.state.visualization.layers.forEach((layer) => {
+        if (layer.layerId === layerId) {
+          layer.splitAccessor = xAccessorGroupBy;
+        }
+      });
+    }
     return this;
   }
 
@@ -128,7 +168,6 @@ class LensDocBuilder {
     color,
     lineWidth,
   }: AddLensReferenceLayer) {
-    console.log("value", value)
     this._removeLayer(layerId);
     this._addReference({ dataViewId, layerId });
     this.lensDoc.state.visualization.layers.push({
@@ -141,7 +180,7 @@ class LensDocBuilder {
           axisMode: 'left',
           color: color || '#e80000',
           lineWidth: lineWidth || 3,
-          fill: this._getAnnotationDirection(comparator)
+          fill: this._getAnnotationDirection(comparator),
         },
       ],
     });
