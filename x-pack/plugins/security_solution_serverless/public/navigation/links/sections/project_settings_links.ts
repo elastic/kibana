@@ -19,180 +19,21 @@ import {
 } from '../../../common/lazy_icons';
 import * as i18n from './project_settings_translations';
 
-// appLinks configures the Security Solution pages links
-const projectSettingsAppLink: LinkItem = {
-  id: SecurityPageName.projectSettings,
-  title: i18n.PROJECT_SETTINGS_TITLE,
-  path: SecurityPagePath[SecurityPageName.projectSettings],
-  capabilities: [`${SERVER_APP_ID}.show`],
-  hideTimeline: true,
-  skipUrlState: true,
-  links: [], // endpoints and cloudDefend links are added in createAssetsLinkFromManage
-};
-
-export const createProjectSettingsLinkFromManage = (manageLink: LinkItem): LinkItem => {
-  const projectSettingsSubLinks = [];
-
-  const entityAnalyticsLink = manageLink.links?.find(
-    ({ id }) => id === SecurityPageName.entityAnalyticsManagement
-  );
-  if (entityAnalyticsLink) {
-    projectSettingsSubLinks.push(entityAnalyticsLink);
-  }
-
-  return {
-    ...projectSettingsAppLink,
-    links: projectSettingsSubLinks,
-  };
-};
-
-export const projectSettingsNavCategories: ProjectLinkCategory[] = [
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [
-      ExternalPageName.cloudUsersAndRoles,
-      ExternalPageName.cloudBilling,
-      SecurityPageName.entityAnalyticsManagement,
-    ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [
-      ExternalPageName.integrationsSecurity,
-      ExternalPageName.maps,
-      ExternalPageName.visualize,
-    ],
-  },
-  {
-    type: LinkCategoryType.accordion,
-    label: i18n.MANAGEMENT_CATEGORY_TITLE,
-    categories: [
-      {
-        label: i18n.DATA_CATEGORY_TITLE,
-        linkIds: [
-          ExternalPageName.managementIndexManagement,
-          ExternalPageName.managementTransforms,
-          ExternalPageName.managementIngestPipelines,
-          ExternalPageName.managementDataViews,
-          ExternalPageName.managementJobsListLink,
-          ExternalPageName.managementPipelines,
-        ],
-      },
-      {
-        label: i18n.ALERTS_INSIGHTS_CATEGORY_TITLE,
-        linkIds: [
-          ExternalPageName.managementCases,
-          ExternalPageName.managementTriggersActionsConnectors,
-          ExternalPageName.managementMaintenanceWindows,
-        ],
-      },
-      {
-        label: i18n.CONTENT_CATEGORY_TITLE,
-        linkIds: [
-          ExternalPageName.managementObjects,
-          ExternalPageName.managementFiles,
-          ExternalPageName.managementReporting,
-          ExternalPageName.managementTags,
-        ],
-      },
-      {
-        label: i18n.OTHER_CATEGORY_TITLE,
-        linkIds: [ExternalPageName.managementApiKeys, ExternalPageName.managementSettings],
-      },
-    ],
-  },
-];
-
-// navLinks define the navigation links for the Security Solution pages and External pages as well
 export const projectSettingsNavLinks: ProjectNavigationLink[] = [
   {
-    id: ExternalPageName.cloudUsersAndRoles,
-    title: i18n.CLOUD_USERS_ROLES_TITLE,
-    description: i18n.CLOUD_USERS_ROLES_DESCRIPTION,
-    landingIcon: IconUsersRolesLazy,
-  },
-  {
-    id: ExternalPageName.cloudBilling,
-    title: i18n.CLOUD_BILLING_TITLE,
-    description: i18n.CLOUD_BILLING_DESCRIPTION,
-    landingIcon: IconReportingLazy,
+    id: ExternalPageName.management,
+    title: i18n.MANAGEMENT_TITLE,
   },
   {
     id: ExternalPageName.integrationsSecurity,
     title: i18n.INTEGRATIONS_TITLE,
-    description: i18n.INTEGRATIONS_DESCRIPTION,
-    landingIcon: IconIndexManagementLazy,
   },
   {
-    id: ExternalPageName.maps,
-    title: i18n.MAPS_TITLE,
-    description: i18n.MAPS_DESCRIPTION,
-    landingIcon: IconMapServicesLazy,
+    id: ExternalPageName.cloudUsersAndRoles,
+    title: i18n.CLOUD_USERS_ROLES_TITLE,
   },
   {
-    id: ExternalPageName.visualize,
-    title: i18n.VISUALIZE_TITLE,
-    description: i18n.VISUALIZE_DESCRIPTION,
-    landingIcon: IconVisualizationLazy,
-  },
-  {
-    id: ExternalPageName.managementIndexManagement,
-    title: i18n.MANAGEMENT_INDEX_MANAGEMENT_TITLE,
-  },
-  {
-    id: ExternalPageName.managementTransforms,
-    title: i18n.MANAGEMENT_TRANSFORMS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementMaintenanceWindows,
-    title: i18n.MANAGEMENT_MAINTENANCE_WINDOWS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementIngestPipelines,
-    title: i18n.MANAGEMENT_INGEST_PIPELINES_TITLE,
-  },
-  {
-    id: ExternalPageName.managementDataViews,
-    title: i18n.MANAGEMENT_DATA_VIEWS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementJobsListLink,
-    title: i18n.MANAGEMENT_ML_TITLE,
-  },
-  {
-    id: ExternalPageName.managementPipelines,
-    title: i18n.MANAGEMENT_LOGSTASH_PIPELINES_TITLE,
-  },
-  {
-    id: ExternalPageName.managementCases,
-    title: i18n.MANAGEMENT_CASES_TITLE,
-  },
-  {
-    id: ExternalPageName.managementTriggersActionsConnectors,
-    title: i18n.MANAGEMENT_CONNECTORS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementReporting,
-    title: i18n.MANAGEMENT_REPORTING_TITLE,
-  },
-  {
-    id: ExternalPageName.managementObjects,
-    title: i18n.MANAGEMENT_SAVED_OBJECTS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementApiKeys,
-    title: i18n.MANAGEMENT_API_KEYS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementTags,
-    title: i18n.MANAGEMENT_TAGS_TITLE,
-  },
-  {
-    id: ExternalPageName.managementFiles,
-    title: i18n.MANAGEMENT_FILES_TITLE,
-  },
-  {
-    id: ExternalPageName.managementSettings,
-    title: i18n.MANAGEMENT_SETTINGS_TITLE,
+    id: ExternalPageName.cloudBilling,
+    title: i18n.CLOUD_BILLING_TITLE,
   },
 ];

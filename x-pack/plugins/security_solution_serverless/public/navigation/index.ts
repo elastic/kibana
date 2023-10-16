@@ -13,24 +13,22 @@ import type {
 } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { SecurityPagePath } from './links/constants';
+// import { SecurityPagePath } from './links/constants';
 import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 import { getDefaultNavigationComponent } from './default_navigation';
-import { getProjectAppLinksSwitcher } from './links/app_links';
+import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-const SECURITY_PROJECT_SETTINGS_PATH = `${APP_PATH}${
-  SecurityPagePath[SecurityPageName.projectSettings]
-}`;
+// const SECURITY_PROJECT_SETTINGS_PATH = `${APP_PATH}${
+//   SecurityPagePath[SecurityPageName.projectSettings]
+// }`;
 
 export const setupNavigation = (
   _core: CoreSetup,
-  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps,
-  experimentalFeatures: ExperimentalFeatures
+  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps
 ) => {
-  securitySolution.setAppLinksSwitcher(getProjectAppLinksSwitcher(experimentalFeatures));
+  securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
   securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
 };
 
@@ -45,9 +43,9 @@ export const startNavigation = (services: Services, config: ServerlessSecurityPu
       serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
     });
   } else {
-    if (!config.developer.disableManagementUrlRedirect) {
-      management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
-    }
+    // if (!config.developer.disableManagementUrlRedirect) {
+    //   management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
+    // }
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigation({ navigationTree: chromeNavigationTree });
     });
