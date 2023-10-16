@@ -196,4 +196,4 @@ CMD ["/usr/local/bin/kibana-docker"]
 {{/cloud}}
 
 
-USER kibana
+USER 1000
