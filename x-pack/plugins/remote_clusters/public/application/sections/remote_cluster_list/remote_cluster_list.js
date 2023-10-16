@@ -93,7 +93,7 @@ export class RemoteClusterList extends Component {
 
   renderNoPermission() {
     return (
-      <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+      <EuiPageSection alignment="center" grow>
         <EuiPageTemplate.EmptyPrompt
           iconType="warning"
           color="danger"
@@ -114,7 +114,7 @@ export class RemoteClusterList extends Component {
             </p>
           }
         />
-      </EuiPageTemplate>
+      </EuiPageSection>
     );
   }
 
@@ -124,7 +124,7 @@ export class RemoteClusterList extends Component {
     const { statusCode, error: errorString } = error.body;
 
     return (
-      <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+      <EuiPageSection alignment="center" grow>
         <EuiPageTemplate.EmptyPrompt
           iconType="warning"
           color="danger"
@@ -142,13 +142,13 @@ export class RemoteClusterList extends Component {
             </p>
           }
         />
-      </EuiPageTemplate>
+      </EuiPageSection>
     );
   }
 
   renderEmpty() {
     return (
-      <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+      <EuiPageSection alignment="center" grow>
         <EuiPageTemplate.EmptyPrompt
           data-test-subj="remoteClusterListEmptyPrompt"
           iconType="managementApp"
@@ -201,7 +201,7 @@ export class RemoteClusterList extends Component {
             </>
           }
         />
-      </EuiPageTemplate>
+      </EuiPageSection>
     );
   }
 
