@@ -66,7 +66,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     initialInput: EmbeddableChangePointChartInput,
     parent?: IContainer
   ) {
-    super(initialInput, { defaultTitle: initialInput.title }, parent);
+    super(initialInput, {}, parent);
 
     this.initOutput().finally(() => this.setInitializationFinished());
   }

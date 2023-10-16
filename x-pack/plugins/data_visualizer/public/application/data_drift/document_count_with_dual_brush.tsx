@@ -141,7 +141,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
     timeRangeEarliest === undefined ||
     timeRangeLatest === undefined
   ) {
-    return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
+    return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} id={id} /> : null;
   }
 
   const chartPoints: LogRateHistogramItem[] = Object.entries(documentCountStats.buckets).map(
@@ -166,7 +166,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
       data-test-subj={getDataTestSubject('dataDriftTotalDocCountHeader', id)}
     >
       <EuiFlexItem>
-        <TotalCountHeader totalCount={totalCount} approximate={approximate} label={label} />
+        <TotalCountHeader totalCount={totalCount} approximate={approximate} label={label} id={id} />
       </EuiFlexItem>
 
       <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">

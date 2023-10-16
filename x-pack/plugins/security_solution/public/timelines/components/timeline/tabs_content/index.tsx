@@ -15,8 +15,8 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
@@ -88,6 +88,7 @@ const GraphTab = tabWithSuspense(lazy(() => import('../graph_tab_content')));
 const NotesTab = tabWithSuspense(lazy(() => import('../notes_tab_content')));
 const PinnedTab = tabWithSuspense(lazy(() => import('../pinned_tab_content')));
 const SessionTab = tabWithSuspense(lazy(() => import('../session_tab_content')));
+const EsqlTab = tabWithSuspense(lazy(() => import('../esql_tab_content')));
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -132,6 +133,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
+    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -179,6 +181,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
+        {isEsqlSettingEnabled && (
+          <HideShowContainer
+            $isVisible={TimelineTabs.esql === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
+          >
+            <EsqlTab timelineId={timelineId} />
+          </HideShowContainer>
+        )}
         <HideShowContainer
           $isVisible={TimelineTabs.pinned === activeTimelineTab}
           data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
@@ -275,7 +285,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
+  const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -360,13 +370,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [activeTab, conversationId, reportAssistantInvoked, setActiveTab]);
 
-  const setDiscoverAsActiveTab = useCallback(() => {
+  const setEsqlAsActiveTab = useCallback(() => {
     dispatch(
       initializeTimelineSettings({
         id: timelineId,
       })
     );
-    setActiveTab(TimelineTabs.discover);
+    setActiveTab(TimelineTabs.esql);
   }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
@@ -389,13 +399,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {isDiscoverInTimelineEnabled && (
+          {isEsqlSettingEnabled && (
             <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
-              onClick={setDiscoverAsActiveTab}
-              isSelected={activeTab === TimelineTabs.discover}
+              data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
+              onClick={setEsqlAsActiveTab}
+              isSelected={activeTab === TimelineTabs.esql}
               disabled={false}
-              key={TimelineTabs.discover}
+              key={TimelineTabs.esql}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
               <StyledEuiBetaBadge
