@@ -20,7 +20,7 @@ import type { CommandDefinition } from './types';
 export const commandDefinitions: CommandDefinition[] = [
   {
     name: 'row',
-    description: i18n.translate('monaco.esql.definitions.fromDoc', {
+    description: i18n.translate('monaco.esql.definitions.rowDoc', {
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),

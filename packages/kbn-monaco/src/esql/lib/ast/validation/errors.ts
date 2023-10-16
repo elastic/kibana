@@ -17,34 +17,42 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId: K;
   values: ErrorValues<K>;
 }): { message: string; type?: 'error' | 'warning' } {
+  // Use a less strict type instead of doing a typecast on each message type
+  const out = values as unknown as Record<string, string>;
+  // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
   switch (messageId) {
     case 'wrongArgumentType':
       return {
         message: i18n.translate('monaco.esql.validation.wrongArgumentType', {
           defaultMessage:
             'Argument of [{name}] must be [{argType}], found value [{value}] type [{givenType}]',
-          values,
+          values: {
+            name: out.name,
+            argType: out.argType,
+            value: out.value,
+            givenType: out.givenType,
+          },
         }),
       };
     case 'unknownColumn':
       return {
         message: i18n.translate('monaco.esql.validation.wrongArgumentColumnType', {
           defaultMessage: 'Unknown column [{name}]',
-          values,
+          values: { name: out.name },
         }),
       };
     case 'unknownIndex':
       return {
         message: i18n.translate('monaco.esql.validation.wrongArgumentColumnType', {
           defaultMessage: 'Unknown index [{name}]',
-          values,
+          values: { name: out.name },
         }),
       };
     case 'unknownFunction':
       return {
         message: i18n.translate('monaco.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function [{name}]',
-          values,
+          values: { name: out.name },
         }),
       };
     case 'wrongArgumentNumber':
@@ -52,7 +60,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
           defaultMessage:
             'Error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
-          values,
+          values: { fn: out.fn, funArgs: out.numArgs, passedArgs: out.passedArgs },
         }),
       };
     case 'noNestedArgumentSupport':
@@ -60,7 +68,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
             "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
-          values,
+          values: { name: out.name, argType: out.argType },
         }),
       };
     case 'shadowFieldType':
@@ -68,7 +76,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('monaco.esql.validation.typeOverwrite', {
           defaultMessage:
             'Column [{field}] of type {fieldType} has been overwritten as new type: {newType}',
-          values,
+          values: { field: out.field, fieldType: out.fieldType, newType: out.newType },
         }),
         type: 'warning',
       };
@@ -77,42 +85,62 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('monaco.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
             '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type {givenType}',
-          values,
+          values: {
+            command: out.command,
+            type: out.type,
+            typeCount: out.typeCount,
+            column: out.column,
+            givenType: out.givenType,
+          },
         }),
       };
     case 'unknownOption':
       return {
         message: i18n.translate('monaco.esql.validation.unknownOption', {
           defaultMessage: 'Invalid option for {command}: [{option}]',
-          values,
+          values: {
+            command: out.command,
+            option: out.option,
+          },
         }),
       };
     case 'unsupportedFunction':
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
           defaultMessage: '{command} does not support function {name}',
-          values,
+          values: {
+            command: out.command,
+            name: out.name,
+          },
         }),
       };
     case 'unknownInterval':
       return {
         message: i18n.translate('monaco.esql.validation.unknownInterval', {
           defaultMessage: `Unexpected time interval qualifier: '{value}'`,
-          values,
+          values: {
+            value: out.value,
+          },
         }),
       };
     case 'unsupportedTypeForCommand':
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedTypeForCommand', {
           defaultMessage: '{command} does not support [{type}] in expression [{value}]',
-          values,
+          values: {
+            command: out.command,
+            type: out.type,
+            value: out.value,
+          },
         }),
       };
     case 'unknownPolicy':
       return {
         message: i18n.translate('monaco.esql.validation.unknownPolicy', {
           defaultMessage: 'Unknown policy [{name}]',
-          values,
+          values: {
+            name: out.name,
+          },
         }),
       };
   }
