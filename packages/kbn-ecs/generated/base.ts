@@ -32,5 +32,5 @@ export interface EcsBase {
   /**
    * List of keywords used to tag each event.
    */
-  tags?: string | string[];
+  tags?: string[];
 }

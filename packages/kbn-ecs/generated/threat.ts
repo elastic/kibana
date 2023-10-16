@@ -14,7 +14,7 @@ export interface EcsThreat {
   /**
    * A list of associated indicators objects enriching the event, and the context of that association/enrichment.
    */
-  enrichments?: Record<string, unknown> | Array<Record<string, unknown>>;
+  enrichments?: Array<Record<string, unknown>>;
   feed?: {
     /**
      * The saved object ID of the dashboard belonging to the threat feed for displaying dashboard links to threat feeds in Kibana.
@@ -43,7 +43,7 @@ export interface EcsThreat {
      * The alias(es) of the group for a set of related intrusion activity that are tracked by a common name in the security community.
      * While not required, you can use a MITRE ATT&CK® group alias(es).
      */
-    alias?: string | string[];
+    alias?: string[];
     /**
      * The id of the group for a set of related intrusion activity that are tracked by a common name in the security community.
      * While not required, you can use a MITRE ATT&CK® group id.
@@ -100,7 +100,7 @@ export interface EcsThreat {
        * Array of file attributes.
        * Attributes names will vary by platform. Here's a non-exhaustive list of values that are expected in this field: archive, compressed, directory, encrypted, execute, hidden, read, readonly, system, write.
        */
-      attributes?: string | string[];
+      attributes?: string[];
       code_signature?: {
         /**
          * The hashing algorithm used to sign the process.
@@ -189,28 +189,7 @@ export interface EcsThreat {
         /**
          * List of exported element names and types.
          */
-        exports?: Record<string, unknown> | Array<Record<string, unknown>>;
-        /**
-         * A hash of the Go language imports in an ELF file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
-         * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
-         */
-        go_import_hash?: string;
-        /**
-         * List of imported Go language element names and types.
-         */
-        go_imports?: Record<string, unknown>;
-        /**
-         * Shannon entropy calculation from the list of Go imports.
-         */
-        go_imports_names_entropy?: number;
-        /**
-         * Variance for Shannon entropy calculation from the list of Go imports.
-         */
-        go_imports_names_var_entropy?: number;
-        /**
-         * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
-         */
-        go_stripped?: boolean;
+        exports?: Array<Record<string, unknown>>;
         header?: {
           /**
            * Version of the ELF Application Binary Interface (ABI).
@@ -247,36 +226,23 @@ export interface EcsThreat {
         };
 
         /**
-         * A hash of the imports in an ELF file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
-         * This is an ELF implementation of the Windows PE imphash.
-         */
-        import_hash?: string;
-        /**
          * List of imported element names and types.
          */
-        imports?: Record<string, unknown> | Array<Record<string, unknown>>;
-        /**
-         * Shannon entropy calculation from the list of imported element names and types.
-         */
-        imports_names_entropy?: number;
-        /**
-         * Variance for Shannon entropy calculation from the list of imported element names and types.
-         */
-        imports_names_var_entropy?: number;
+        imports?: Array<Record<string, unknown>>;
         /**
          * An array containing an object for each section of the ELF file.
          * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
          */
-        sections?: Record<string, unknown> | Array<Record<string, unknown>>;
+        sections?: Array<Record<string, unknown>>;
         /**
          * An array containing an object for each segment of the ELF file.
          * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
          */
-        segments?: Record<string, unknown> | Array<Record<string, unknown>>;
+        segments?: Array<Record<string, unknown>>;
         /**
          * List of shared libraries used by this ELF object.
          */
-        shared_libraries?: string | string[];
+        shared_libraries?: string[];
         /**
          * telfhash symbol hash for ELF file.
          */
@@ -379,48 +345,10 @@ export interface EcsThreat {
          */
         file_version?: string;
         /**
-         * A hash of the Go language imports in a PE file excluding standard library imports. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
-         * The algorithm used to calculate the Go symbol hash and a reference implementation are available [here](https://github.com/elastic/toutoumomoma).
-         */
-        go_import_hash?: string;
-        /**
-         * List of imported Go language element names and types.
-         */
-        go_imports?: Record<string, unknown>;
-        /**
-         * Shannon entropy calculation from the list of Go imports.
-         */
-        go_imports_names_entropy?: number;
-        /**
-         * Variance for Shannon entropy calculation from the list of Go imports.
-         */
-        go_imports_names_var_entropy?: number;
-        /**
-         * Set to true if the file is a Go executable that has had its symbols stripped or obfuscated and false if an unobfuscated Go executable.
-         */
-        go_stripped?: boolean;
-        /**
          * A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
          * Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.
          */
         imphash?: string;
-        /**
-         * A hash of the imports in a PE file. An import hash can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.
-         * This is a synonym for imphash.
-         */
-        import_hash?: string;
-        /**
-         * List of imported element names and types.
-         */
-        imports?: Record<string, unknown> | Array<Record<string, unknown>>;
-        /**
-         * Shannon entropy calculation from the list of imported element names and types.
-         */
-        imports_names_entropy?: number;
-        /**
-         * Variance for Shannon entropy calculation from the list of imported element names and types.
-         */
-        imports_names_var_entropy?: number;
         /**
          * Internal name of the file, provided at compile-time.
          */
@@ -434,11 +362,6 @@ export interface EcsThreat {
          * Internal product name of the file, provided at compile-time.
          */
         product?: string;
-        /**
-         * An array containing an object for each section of the PE file.
-         * The keys that should be present in these objects are defined by sub-fields underneath `pe.sections.*`.
-         */
-        sections?: Record<string, unknown> | Array<Record<string, unknown>>;
       };
 
       /**
@@ -462,16 +385,16 @@ export interface EcsThreat {
         /**
          * List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.
          */
-        alternative_names?: string | string[];
+        alternative_names?: string[];
         issuer?: {
           /**
            * List of common name (CN) of issuing certificate authority.
            */
-          common_name?: string | string[];
+          common_name?: string[];
           /**
            * List of country \(C) codes
            */
-          country?: string | string[];
+          country?: string[];
           /**
            * Distinguished name (DN) of issuing certificate authority.
            */
@@ -479,19 +402,19 @@ export interface EcsThreat {
           /**
            * List of locality names (L)
            */
-          locality?: string | string[];
+          locality?: string[];
           /**
            * List of organizations (O) of issuing certificate authority.
            */
-          organization?: string | string[];
+          organization?: string[];
           /**
            * List of organizational units (OU) of issuing certificate authority.
            */
-          organizational_unit?: string | string[];
+          organizational_unit?: string[];
           /**
            * List of state or province names (ST, S, or P)
            */
-          state_or_province?: string | string[];
+          state_or_province?: string[];
         };
 
         /**
@@ -530,11 +453,11 @@ export interface EcsThreat {
           /**
            * List of common names (CN) of subject.
            */
-          common_name?: string | string[];
+          common_name?: string[];
           /**
            * List of country \(C) code
            */
-          country?: string | string[];
+          country?: string[];
           /**
            * Distinguished name (DN) of the certificate subject entity.
            */
@@ -542,19 +465,19 @@ export interface EcsThreat {
           /**
            * List of locality names (L)
            */
-          locality?: string | string[];
+          locality?: string[];
           /**
            * List of organizations (O) of subject.
            */
-          organization?: string | string[];
+          organization?: string[];
           /**
            * List of organizational units (OU) of subject.
            */
-          organizational_unit?: string | string[];
+          organizational_unit?: string[];
           /**
            * List of state or province names (ST, S, or P)
            */
-          state_or_province?: string | string[];
+          state_or_province?: string[];
         };
 
         /**
@@ -642,10 +565,6 @@ export interface EcsThreat {
      */
     modified_at?: string;
     /**
-     * The display name indicator in an UI friendly format
-     */
-    name?: string;
-    /**
      * Identifies a threat indicator as a port number (irrespective of direction).
      */
     port?: number;
@@ -668,7 +587,7 @@ export interface EcsThreat {
          * Content when writing string types.
          * Populated as an array when writing string data to the registry. For single string registry types (REG_SZ, REG_EXPAND_SZ), this should be an array with one string. For sequences of string with REG_MULTI_SZ, this array will be variable length. For numeric data, such as REG_DWORD and REG_QWORD, this should be populated with the decimal representation (e.g `"1"`).
          */
-        strings?: string | string[];
+        strings?: string[];
         /**
          * Standard registry type for encoding contents
          */
@@ -782,16 +701,16 @@ export interface EcsThreat {
       /**
        * List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.
        */
-      alternative_names?: string | string[];
+      alternative_names?: string[];
       issuer?: {
         /**
          * List of common name (CN) of issuing certificate authority.
          */
-        common_name?: string | string[];
+        common_name?: string[];
         /**
          * List of country \(C) codes
          */
-        country?: string | string[];
+        country?: string[];
         /**
          * Distinguished name (DN) of issuing certificate authority.
          */
@@ -799,19 +718,19 @@ export interface EcsThreat {
         /**
          * List of locality names (L)
          */
-        locality?: string | string[];
+        locality?: string[];
         /**
          * List of organizations (O) of issuing certificate authority.
          */
-        organization?: string | string[];
+        organization?: string[];
         /**
          * List of organizational units (OU) of issuing certificate authority.
          */
-        organizational_unit?: string | string[];
+        organizational_unit?: string[];
         /**
          * List of state or province names (ST, S, or P)
          */
-        state_or_province?: string | string[];
+        state_or_province?: string[];
       };
 
       /**
@@ -850,11 +769,11 @@ export interface EcsThreat {
         /**
          * List of common names (CN) of subject.
          */
-        common_name?: string | string[];
+        common_name?: string[];
         /**
          * List of country \(C) code
          */
-        country?: string | string[];
+        country?: string[];
         /**
          * Distinguished name (DN) of the certificate subject entity.
          */
@@ -862,19 +781,19 @@ export interface EcsThreat {
         /**
          * List of locality names (L)
          */
-        locality?: string | string[];
+        locality?: string[];
         /**
          * List of organizations (O) of subject.
          */
-        organization?: string | string[];
+        organization?: string[];
         /**
          * List of organizational units (OU) of subject.
          */
-        organizational_unit?: string | string[];
+        organizational_unit?: string[];
         /**
          * List of state or province names (ST, S, or P)
          */
-        state_or_province?: string | string[];
+        state_or_province?: string[];
       };
 
       /**
@@ -889,7 +808,7 @@ export interface EcsThreat {
      * The alias(es) of the software for a set of related intrusion activity that are tracked by a common name in the security community.
      * While not required, you can use a MITRE ATT&CK® associated software description.
      */
-    alias?: string | string[];
+    alias?: string[];
     /**
      * The id of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®.
      * While not required, you can use a MITRE ATT&CK® software id.
@@ -904,7 +823,7 @@ export interface EcsThreat {
      * The platforms of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®.
      * While not required, you can use MITRE ATT&CK® software platform values.
      */
-    platforms?: string | string[];
+    platforms?: string[];
     /**
      * The reference URL of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®.
      * While not required, you can use a MITRE ATT&CK® software reference URL.
@@ -921,43 +840,43 @@ export interface EcsThreat {
     /**
      * The id of tactic used by this threat. You can use a MITRE ATT&CK® tactic, for example. (ex. https://attack.mitre.org/tactics/TA0002/ )
      */
-    id?: string | string[];
+    id?: string[];
     /**
      * Name of the type of tactic used by this threat. You can use a MITRE ATT&CK® tactic, for example. (ex. https://attack.mitre.org/tactics/TA0002/)
      */
-    name?: string | string[];
+    name?: string[];
     /**
      * The reference url of tactic used by this threat. You can use a MITRE ATT&CK® tactic, for example. (ex. https://attack.mitre.org/tactics/TA0002/ )
      */
-    reference?: string | string[];
+    reference?: string[];
   };
 
   technique?: {
     /**
      * The id of technique used by this threat. You can use a MITRE ATT&CK® technique, for example. (ex. https://attack.mitre.org/techniques/T1059/)
      */
-    id?: string | string[];
+    id?: string[];
     /**
      * The name of technique used by this threat. You can use a MITRE ATT&CK® technique, for example. (ex. https://attack.mitre.org/techniques/T1059/)
      */
-    name?: string | string[];
+    name?: string[];
     /**
      * The reference url of technique used by this threat. You can use a MITRE ATT&CK® technique, for example. (ex. https://attack.mitre.org/techniques/T1059/)
      */
-    reference?: string | string[];
+    reference?: string[];
     subtechnique?: {
       /**
        * The full id of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)
        */
-      id?: string | string[];
+      id?: string[];
       /**
        * The name of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)
        */
-      name?: string | string[];
+      name?: string[];
       /**
        * The reference url of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)
        */
-      reference?: string | string[];
+      reference?: string[];
     };
   };
 }
