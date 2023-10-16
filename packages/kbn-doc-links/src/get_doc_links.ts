@@ -167,7 +167,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsSlack: `${ENTERPRISE_SEARCH_DOCS}connectors-slack.html`,
       connectorsTeams: `${ENTERPRISE_SEARCH_DOCS}connectors-teams.html`,
-      connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}workplace-search-connectors.html`,
       connectorsZoom: `${ENTERPRISE_SEARCH_DOCS}connectors-zoom.html`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
@@ -856,7 +855,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
     },
     esql: {
-      statsBy: `${ELASTICSEARCH_DOCS}esql-stats-by.html`,
+      statsBy: `${ELASTICSEARCH_DOCS}esql.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
