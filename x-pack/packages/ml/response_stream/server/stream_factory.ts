@@ -211,6 +211,7 @@ export function streamFactory<T = unknown>(
       // This disables response buffering on proxy servers (Nginx, uwsgi, fastcgi, etc.)
       // Otherwise, those proxies buffer responses up to 4/8 KiB.
       'X-Accel-Buffering': 'no',
+      'X-Content-Type-Options': 'nosniff',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',

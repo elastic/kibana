@@ -188,7 +188,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.getIndexPattern(),
       grouping: true,
-      compressResponse: false,
+      compressResponse: true,
       flushFix: false,
       // If analysis type is `spike`, pass on window parameters as is,
       // if it's `dip`, swap baseline and deviation.
@@ -204,7 +204,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       sampleProbability,
     },
     { reducer: streamReducer, initialState },
-    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
+    {
+      [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+    }
   );
 
   const { significantTerms } = data;
