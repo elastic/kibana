@@ -30,26 +30,25 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
-  createdHost = {};
   beforeEach(() => {
     login();
   });
 
-  // before(() => {
-  //   getEndpointIntegrationVersion().then((version) =>
-  //     createAgentPolicyTask(version).then((data) => {
-  //       indexedPolicy = data;
-  //       policy = indexedPolicy.integrationPolicies[0];
+  before(() => {
+    getEndpointIntegrationVersion().then((version) =>
+      createAgentPolicyTask(version).then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
 
-  //       return enableAllPolicyProtections(policy.id).then(() => {
-  //         // Create and enroll a new Endpoint host
-  //         return createEndpointHost(policy.policy_id).then((host) => {
-  //           createdHost = host as CreateAndEnrollEndpointHostResponse;
-  //         });
-  //       });
-  //     })
-  //   );
-  // });
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      })
+    );
+  });
 
   after(() => {
     if (createdHost) {
@@ -70,13 +69,13 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
     let ruleName: string;
 
     before(() => {
-      // loadRule(
-      //   { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
-      //   false
-      // ).then((data) => {
-      //   ruleId = data.id;
-      //   ruleName = data.name;
-      // });
+      loadRule(
+        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+        false
+      ).then((data) => {
+        ruleId = data.id;
+        ruleName = data.name;
+      });
     });
 
     after(() => {
