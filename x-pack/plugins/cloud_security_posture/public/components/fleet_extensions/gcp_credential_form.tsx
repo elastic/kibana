@@ -177,12 +177,14 @@ const credentialOptionsList = [
       defaultMessage: 'Credentials File',
     }),
     value: 'credentials-file',
+    'data-test-subj': 'credentials_file_option_test_id',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
     value: 'credentials-json',
+    'data-test-subj': 'credentials_json_option_test_id',
   },
 ];
 
