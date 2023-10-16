@@ -139,10 +139,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('should update rule list on the search clear button click', async () => {
       const rule1 = await createRule({
         supertest,
+        name: 'a',
       });
 
       const rule2 = await createRule({
         supertest,
+        name: 'b',
         tags: [],
       });
 
