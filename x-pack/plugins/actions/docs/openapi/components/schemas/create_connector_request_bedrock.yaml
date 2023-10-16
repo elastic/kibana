@@ -1,5 +1,5 @@
-title: Create AWS Bedrock connector request
-description: The AWS Bedrock connector uses axios to send a POST request to AWS Bedrock.
+title: Create Amazon Bedrock connector request
+description: The Amazon Bedrock connector uses axios to send a POST request to Amazon Bedrock.
 type: object
 required:
   - config

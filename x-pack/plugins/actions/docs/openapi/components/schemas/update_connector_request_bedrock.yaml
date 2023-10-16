@@ -1,4 +1,4 @@
-title: Update AWS Bedrock connector request
+title: Update Amazon Bedrock connector request
 type: object
 required:
   - config

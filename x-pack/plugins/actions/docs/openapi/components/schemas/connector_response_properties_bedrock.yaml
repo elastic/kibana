@@ -1,4 +1,4 @@
-title: Connector response properties for an AWS Bedrock connector
+title: Connector response properties for an Amazon Bedrock connector
 type: object
 required:
   - config

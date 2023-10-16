@@ -822,7 +822,7 @@ components:
         example: c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
   schemas:
     config_properties_bedrock:
-      title: Connector request properties for an AWS Bedrock connector
+      title: Connector request properties for an Amazon Bedrock connector
       description: Defines properties for connectors when type is `.bedrock`.
       type: object
       required:
@@ -830,14 +830,14 @@ components:
       properties:
         apiUrl:
           type: string
-          description: The AWS Bedrock request URL.
+          description: The Amazon Bedrock request URL.
         defaultModel:
           type: string
           description: |
-            The generative artificial intelligence model for AWS Bedrock to use. Current support is for the Anthropic Claude models.
+            The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
           default: anthropic.claude-v2
     secrets_properties_bedrock:
-      title: Connector secrets properties for an AWS Bedrock connector
+      title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
       type: object
       required:
@@ -851,8 +851,8 @@ components:
           type: string
           description: The AWS secret for authentication.
     create_connector_request_bedrock:
-      title: Create AWS Bedrock connector request
-      description: The AWS Bedrock connector uses axios to send a POST request to AWS Bedrock.
+      title: Create Amazon Bedrock connector request
+      description: The Amazon Bedrock connector uses axios to send a POST request to Amazon Bedrock.
       type: object
       required:
         - config
