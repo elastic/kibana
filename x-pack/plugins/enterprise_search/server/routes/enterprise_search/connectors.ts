@@ -212,10 +212,13 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         if (isAccessControlDisabledException(error)) {
           return createError({
             errorCode: ErrorCode.ACCESS_CONTROL_DISABLED,
-            message: i18n.translate('xpack.enterpriseSearch.server.connectors.accessControlSync', {
-              defaultMessage:
-                'Access Control Sync cannot be created. Document Level Security is disabled.',
-            }),
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.connectors.accessControlSync.accessControlDisabledError',
+              {
+                defaultMessage:
+                  'Access Control Sync cannot be created. Document Level Security is disabled.',
+              }
+            ),
             response,
             statusCode: 400,
           });
