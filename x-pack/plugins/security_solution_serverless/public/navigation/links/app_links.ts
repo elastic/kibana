@@ -14,7 +14,7 @@ import { cloneDeep, remove } from 'lodash';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
-import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
+// import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 // This function is called by the security_solution plugin to alter the app links
@@ -43,10 +43,10 @@ export const getProjectAppLinksSwitcher =
     // Add ML link
     projectAppLinks.push(mlAppLink);
 
-    if (!experimentalFeatures.platformNavEnabled && manageLinkItem) {
-      // Add project settings link
-      projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
-    }
+    // if (!experimentalFeatures.platformNavEnabled && manageLinkItem) {
+    //   // Add project settings link
+    //   projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
+    // }
 
     return projectAppLinks;
   };

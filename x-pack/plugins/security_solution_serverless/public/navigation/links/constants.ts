@@ -74,6 +74,7 @@ export enum ExternalPageName {
   integrationsSecurity = 'integrations:/browse/security',
   // Management
   // Ref: packages/default-nav/management/default_navigation.ts
+  management = 'management:',
   managementIngestPipelines = 'management:ingest_pipelines',
   managementPipelines = 'management:pipelines',
   managementIndexManagement = 'management:index_management',

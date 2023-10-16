@@ -7,13 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
-import type { NonEmptyArray } from '@kbn/shared-ux-chrome-navigation/src/ui/types';
 import type { LinkCategory } from '@kbn/security-solution-navigation';
-import {
-  SecurityPageName,
-  isSeparatorLinkCategory,
-  isTitleLinkCategory,
-} from '@kbn/security-solution-navigation';
+import { SecurityPageName, isTitleLinkCategory } from '@kbn/security-solution-navigation';
 import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
 import { getNavLinkIdFromProjectPageName } from '../links/util';
 import { isBreadcrumbHidden } from './utils';
@@ -25,7 +20,7 @@ const GET_STARTED_TITLE = i18n.translate('xpack.securitySolutionServerless.nav.g
   defaultMessage: 'Get Started',
 });
 const DEV_TOOLS_TITLE = i18n.translate('xpack.securitySolutionServerless.nav.devTools.title', {
-  defaultMessage: 'Developer tools',
+  defaultMessage: 'Dev tools',
 });
 const PROJECT_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.nav.projectSettings.title',
@@ -46,7 +41,7 @@ export const formatNavigationTree = (
       icon: 'logoSecurity',
       breadcrumbStatus: 'hidden',
       defaultIsCollapsed: false,
-      children: addFirstLevelProps(formatNodesFromLinks(projectNavLinks, categories)),
+      children: addMainLinksPanelOpenerProp(formatNodesFromLinks(projectNavLinks, categories)),
     },
   ],
   footer: [
@@ -56,6 +51,7 @@ export const formatNavigationTree = (
       title: GET_STARTED_TITLE,
       link: getNavLinkIdFromProjectPageName(SecurityPageName.landing) as AppDeepLinkId,
       icon: 'launch',
+      children: [],
     },
     {
       type: 'navGroup',
@@ -63,6 +59,7 @@ export const formatNavigationTree = (
       title: DEV_TOOLS_TITLE,
       link: 'dev_tools',
       icon: 'editorCodeBlock',
+      children: [],
     },
     {
       type: 'navGroup',
@@ -70,29 +67,22 @@ export const formatNavigationTree = (
       title: PROJECT_SETTINGS_TITLE,
       icon: 'gear',
       breadcrumbStatus: 'hidden',
+      defaultIsCollapsed: true,
       children: [
         {
-          id: 'settings',
-          children: [
-            {
-              link: 'management',
-              title: 'Management',
-            },
-            {
-              link: 'integrations',
-            },
-            {
-              link: 'fleet',
-            },
-            {
-              id: 'cloudLinkUserAndRoles',
-              cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkBilling',
-              cloudLink: 'billingAndSub',
-            },
-          ],
+          link: 'management',
+          title: 'Management',
+        },
+        {
+          link: 'integrations',
+        },
+        {
+          id: 'cloudLinkUserAndRoles',
+          cloudLink: 'userAndRoles',
+        },
+        {
+          id: 'cloudLinkBilling',
+          cloudLink: 'billingAndSub',
         },
       ],
     },
@@ -102,10 +92,7 @@ export const formatNavigationTree = (
 const formatNodesFromLinks = (
   projectNavLinks: ProjectNavigationLink[],
   parentCategories?: Readonly<Array<LinkCategory<ProjectPageName>>>
-): NonEmptyArray<NodeDefinition> | undefined => {
-  if (projectNavLinks.length === 0) {
-    return undefined;
-  }
+): NodeDefinition[] => {
   const nodes: NodeDefinition[] = [];
   if (parentCategories?.length) {
     parentCategories.forEach((category) => {
@@ -114,10 +101,7 @@ const formatNodesFromLinks = (
   } else {
     nodes.push(...formatNodesFromLinksWithoutCategory(projectNavLinks));
   }
-  if (nodes.length === 0) {
-    return undefined;
-  }
-  return nodes as NonEmptyArray<NodeDefinition>;
+  return nodes;
 };
 
 const formatNodesFromLinksWithCategory = (
@@ -127,7 +111,8 @@ const formatNodesFromLinksWithCategory = (
   if (!category?.linkIds) {
     return [];
   }
-  if (isTitleLinkCategory(category)) {
+
+  if (category.linkIds) {
     const children = category.linkIds.reduce<NodeDefinition[]>((acc, linkId) => {
       const projectNavLink = projectNavLinks.find(({ id }) => id === linkId);
       if (projectNavLink != null) {
@@ -135,45 +120,39 @@ const formatNodesFromLinksWithCategory = (
       }
       return acc;
     }, []);
-    if (children.length === 0) {
+    if (!children.length) {
       return [];
     }
+
+    const id = isTitleLinkCategory(category)
+      ? `category-${category.label.toLowerCase().replace(' ', '_')}`
+      : undefined;
+
     return [
       {
-        id: `category-${category.label.toLowerCase().replace(' ', '_')}`,
-        title: category.label,
-        children: children as NonEmptyArray<NodeDefinition>,
+        id,
+        ...(isTitleLinkCategory(category) && { title: category.label }),
+        children,
       },
     ];
-  } else if (isSeparatorLinkCategory(category)) {
-    // TODO: Add separator support when implemented in the shared-ux navigation
-    const categoryProjectNavLinks = category.linkIds.reduce<ProjectNavigationLink[]>(
-      (acc, linkId) => {
-        const projectNavLink = projectNavLinks.find(({ id }) => id === linkId);
-        if (projectNavLink != null) {
-          acc.push(projectNavLink);
-        }
-        return acc;
-      },
-      []
-    );
-    return formatNodesFromLinksWithoutCategory(categoryProjectNavLinks);
   }
   return [];
 };
 
-const formatNodesFromLinksWithoutCategory = (projectNavLinks: ProjectNavigationLink[]) =>
-  projectNavLinks.map((projectNavLink) =>
-    createNodeFromProjectNavLink(projectNavLink)
-  ) as NonEmptyArray<NodeDefinition>;
+const formatNodesFromLinksWithoutCategory = (
+  projectNavLinks: ProjectNavigationLink[]
+): NodeDefinition[] =>
+  projectNavLinks.map((projectNavLink) => createNodeFromProjectNavLink(projectNavLink));
 
 const createNodeFromProjectNavLink = (projectNavLink: ProjectNavigationLink): NodeDefinition => {
-  const { id, title, links, categories } = projectNavLink;
+  const { id, title, links, categories, disabled } = projectNavLink;
   const link = getNavLinkIdFromProjectPageName(id);
   const node: NodeDefinition = {
+    id,
     link: link as AppDeepLinkId,
     title,
     ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
+    ...(disabled && { sideNavStatus: 'hidden' }),
   };
   if (links?.length) {
     node.children = formatNodesFromLinks(links, categories);
@@ -181,21 +160,21 @@ const createNodeFromProjectNavLink = (projectNavLink: ProjectNavigationLink): No
   return node;
 };
 
-const addFirstLevelProps = (
-  nodes: NonEmptyArray<NodeDefinition> | undefined
-): NonEmptyArray<NodeDefinition> | undefined => {
-  if (!nodes) {
-    return undefined;
-  }
-  return nodes.map((node) => {
-    if (node.children) {
+/**
+ * Adds the `renderAs: 'panelOpener'` prop to the main links that have children
+ * This function expects all main links to be in nested groups to add the separation between them.
+ * If these "separator" groups change this function will need to be updated.
+ */
+const addMainLinksPanelOpenerProp = (nodes: NodeDefinition[]): NodeDefinition[] =>
+  nodes.map((node): NodeDefinition => {
+    if (node.children?.length) {
       return {
         ...node,
-        id: node.link,
-        link: undefined,
-        openPanel: true,
+        children: node.children.map((child) => ({
+          ...child,
+          ...(child.children && { renderAs: 'panelOpener' }),
+        })),
       };
     }
     return node;
-  }) as NonEmptyArray<NodeDefinition>;
-};
+  });

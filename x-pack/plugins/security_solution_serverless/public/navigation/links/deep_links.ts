@@ -14,7 +14,8 @@ export const formatProjectDeepLinks: DeepLinksFormatter = (appLinks) =>
     path: appLink.path,
     title: appLink.title,
     searchable: !appLink.globalSearchDisabled,
-    navLinkStatus: appLink.sideNavDisabled ? AppNavLinkStatus.hidden : AppNavLinkStatus.visible,
+    navLinkStatus: AppNavLinkStatus.visible,
+    // navLinkStatus: appLink.sideNavDisabled ? AppNavLinkStatus.hidden : AppNavLinkStatus.visible,
     ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
     ...(appLink.links && appLink.links?.length
       ? {

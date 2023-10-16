@@ -11,12 +11,12 @@ import type {
   SecuritySolutionServerlessPluginSetupDeps,
   ServerlessSecurityPublicConfig,
 } from '../types';
-import type { Services } from '../common/services';
+import { type Services, withServicesProvider } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { SecurityPagePath } from './links/constants';
 import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
-import { getDefaultNavigationComponent } from './default_navigation';
+import { SecuritySideNavComponent } from './default_navigation';
 import { getProjectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
@@ -41,13 +41,12 @@ export const startNavigation = (services: Services, config: ServerlessSecurityPu
   const projectNavigationTree = new ProjectNavigationTree(services);
 
   if (services.experimentalFeatures.platformNavEnabled) {
-    projectNavigationTree.getNavigationTree$().subscribe((navigationTree) => {
-      serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
-    });
+    const SideNavComponentWithServices = withServicesProvider(SecuritySideNavComponent, services);
+    serverless.setSideNavComponent(SideNavComponentWithServices);
   } else {
-    if (!config.developer.disableManagementUrlRedirect) {
-      management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
-    }
+    // if (!config.developer.disableManagementUrlRedirect) {
+    //   management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
+    // }
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigation({ navigationTree: chromeNavigationTree });
     });

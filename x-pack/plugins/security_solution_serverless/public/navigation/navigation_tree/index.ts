@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { LinkCategory } from '@kbn/security-solution-navigation';
@@ -40,5 +40,9 @@ export class ProjectNavigationTree {
     return this.projectNavLinks$.pipe(
       map((projectNavLinks) => formatChromeProjectNavNodes(projectNavLinks))
     );
+  }
+
+  public getProjectNavLinks$(): ProjectNavLinks {
+    return this.projectNavLinks$;
   }
 }

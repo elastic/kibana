@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
 import { ExternalPageName } from '../links/constants';
+import type { ProjectNavigationLink } from '../links/types';
 
 type GetLinkProps = (link: NavigationLink) => {
   href: string & Partial<SolutionSideNavItem>;
@@ -21,9 +22,11 @@ type GetLinkProps = (link: NavigationLink) => {
 
 const isBottomNavItem = (id: string) =>
   id === SecurityPageName.landing ||
-  id === SecurityPageName.projectSettings ||
-  id === ExternalPageName.devTools;
-const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
+  id === ExternalPageName.devTools ||
+  id === ExternalPageName.management ||
+  id === ExternalPageName.integrationsSecurity ||
+  id === ExternalPageName.cloudUsersAndRoles ||
+  id === ExternalPageName.cloudBilling;
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
@@ -57,25 +60,19 @@ const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): Soluti
 };
 
 /**
- * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
- */
-const formatGetStartedLink = (
-  navLink: NavigationLink,
-  getLinkProps: GetLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: SolutionSideNavItemPosition.bottom,
-  ...getLinkProps(navLink),
-  appendSeparator: true,
-});
-
-/**
  * Returns all the formatted SideNavItems, including external links
  */
 export const useSideNavItems = (): SolutionSideNavItem[] => {
   const navLinks = useNavLinks();
+  return useFormattedSideNavItems(navLinks);
+};
+
+/**
+ * Returns all the formatted SideNavItems, including external links
+ */
+export const useFormattedSideNavItems = (
+  navLinks: ProjectNavigationLink[]
+): SolutionSideNavItem[] => {
   const getKibanaLinkProps = useGetLinkProps();
 
   const getLinkProps = useCallback<GetLinkProps>(
@@ -95,12 +92,7 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
   return useMemo(
     () =>
       navLinks.reduce<SolutionSideNavItem[]>((items, navLink) => {
-        if (navLink.disabled) {
-          return items;
-        }
-        if (isGetStartedNavItem(navLink.id)) {
-          items.push(formatGetStartedLink(navLink, getLinkProps));
-        } else {
+        if (!navLink.disabled) {
           items.push(formatLink(navLink, getLinkProps));
         }
         return items;
