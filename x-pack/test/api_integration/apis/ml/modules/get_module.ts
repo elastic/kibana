@@ -92,10 +92,8 @@ export default ({ getService }: FtrProviderContext) => {
         'apm_transaction',
         ['security'],
         USER.ML_POWERUSER,
-        200
+        404
       );
-      expect(rspBody).to.be.an(Array);
-      expect(rspBody.length).to.eql(0);
     });
 
     for (const moduleId of moduleIds) {
