@@ -63,7 +63,11 @@ export async function getTokenCountFromOpenAIStream({
     responseBody += chunk.toString();
   });
 
-  await finished(responseStream);
+  try {
+    await finished(responseStream);
+  } catch {
+    // no need to handle this explicitly
+  }
 
   const response = responseBody
     .split('\n')
