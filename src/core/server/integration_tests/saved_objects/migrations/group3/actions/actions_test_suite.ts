@@ -1430,7 +1430,6 @@ export const runActionTestSuite = ({
     });
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/166199
   describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
