@@ -1161,6 +1161,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 `, [
       'Unknown column [var1]',
     ]);
+    testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField `, []);
     testErrorsAndWarnings(
       `from a | enrich policy on numberField with var0 = otherField, yetAnotherField `,
       []
