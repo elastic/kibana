@@ -95,7 +95,7 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
-import { getBundledPackages } from './bundled_packages';
+import { getBundledPackageByPkgKey, getBundledPackages } from './bundled_packages';
 import { withPackageSpan } from './utils';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
@@ -732,9 +732,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
     } = args;
 
-    const matchingBundledPackage = bundledPackages.find(
-      (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
-    );
+    const matchingBundledPackage = getBundledPackageByPkgKey(pkgkey);
 
     if (matchingBundledPackage) {
       logger.debug(
