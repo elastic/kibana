@@ -460,11 +460,6 @@ export const selectCase = (caseId: string) => {
   cy.get(SELECT_CASE(caseId)).click();
 };
 
-export const waitForTimelineChanges = () => {
-  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
-  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
-};
-
 /**
  * We keep clicking on the refresh button until we have the timeline we are looking
  * for. NOTE: That because refresh happens so fast, the click handler in most cases

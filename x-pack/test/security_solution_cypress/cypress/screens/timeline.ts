@@ -146,8 +146,6 @@ export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
 
-export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiProgress';
-
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
 export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';

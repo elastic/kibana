@@ -44,7 +44,6 @@ import {
   openTimelineTemplateFromSettings,
   populateTimeline,
   saveTimeline,
-  waitForTimelineChanges,
 } from '../../../tasks/timeline';
 import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
@@ -79,7 +78,6 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
       addDescriptionToTimeline(getTimeline().description);
       addNotesToTimeline(getTimeline().notes);
       markAsFavorite();
-      waitForTimelineChanges();
       createNewTimelineTemplate();
       closeTimeline();
       openTimelineTemplateFromSettings(timelineId);
