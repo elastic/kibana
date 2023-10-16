@@ -207,20 +207,14 @@ export class RemoteClusterList extends Component {
 
   renderLoading() {
     return (
-      <EuiPageTemplate
-        minHeight={0}
-        panelled
-        paddingSize="none"
-        offset={0}
-        data-test-subj="remoteClustersTableLoading"
-      >
+      <EuiPageSection alignment="center" grow data-test-subj="remoteClustersTableLoading">
         <SectionLoading>
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterList.loadingTitle"
             defaultMessage="Loading remote clusters…"
           />
         </SectionLoading>
-      </EuiPageTemplate>
+      </EuiPageSection>
     );
   }
 

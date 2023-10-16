@@ -96,20 +96,20 @@ export class RemoteClusterEdit extends Component {
 
     if (isLoading) {
       return (
-        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+        <EuiPageSection alignment="center" grow>
           <SectionLoading>
             <FormattedMessage
               id="xpack.remoteClusters.edit.loadingLabel"
               defaultMessage="Loading remote cluster…"
             />
           </SectionLoading>
-        </EuiPageTemplate>
+        </EuiPageSection>
       );
     }
 
     if (!cluster) {
       return (
-        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+        <EuiPageSection alignment="center" grow>
           <EuiPageTemplate.EmptyPrompt
             iconType="warning"
             color="danger"
@@ -144,7 +144,7 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageTemplate>
+        </EuiPageSection>
       );
     }
 
@@ -152,7 +152,7 @@ export class RemoteClusterEdit extends Component {
 
     if (isConfiguredByNode) {
       return (
-        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+        <EuiPageSection alignment="center" grow>
           <EuiPageTemplate.EmptyPrompt
             iconType="iInCircle"
             title={
@@ -181,7 +181,7 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageTemplate>
+        </EuiPageSection>
       );
     }
 
