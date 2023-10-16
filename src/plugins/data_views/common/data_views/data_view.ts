@@ -152,8 +152,6 @@ export class DataView implements DataViewBase {
    */
   public matchedIndices: string[] = [];
 
-  private allowHidden: boolean = false;
-
   /**
    * constructor
    * @param config - config data and dependencies
@@ -189,7 +187,6 @@ export class DataView implements DataViewBase {
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
-    this.allowHidden = spec.allowHidden || false;
   }
 
   /**
@@ -203,8 +200,6 @@ export class DataView implements DataViewBase {
    */
 
   getIndexPattern = () => this.title;
-
-  getAllowHidden = () => this.allowHidden;
 
   /**
    * Set index pattern
