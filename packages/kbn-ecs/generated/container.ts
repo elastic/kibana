@@ -43,7 +43,7 @@ export interface EcsContainer {
       /**
        * An array of digests of the image the container was built on. Each digest consists of the hash algorithm and value in this format: `algorithm:value`. Algorithm names should align with the field names in the ECS hash field set.
        */
-      all?: string | string[];
+      all?: string[];
     };
 
     /**
@@ -53,7 +53,7 @@ export interface EcsContainer {
     /**
      * Container image tags.
      */
-    tag?: string | string[];
+    tag?: string[];
   };
 
   /**
@@ -91,10 +91,4 @@ export interface EcsContainer {
    * Runtime managing this container.
    */
   runtime?: string;
-  security_context?: {
-    /**
-     * Indicates whether the container is running in privileged mode.
-     */
-    privileged?: boolean;
-  };
 }
