@@ -60,9 +60,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       },
       thresholdRule: { enabled: false },
     },
-    compositeSlo: {
-      enabled: false,
-    },
     aiAssistant: {
       enabled: false,
       feedback: {
