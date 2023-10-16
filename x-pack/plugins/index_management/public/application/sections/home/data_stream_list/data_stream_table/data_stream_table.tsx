@@ -19,6 +19,7 @@ import {
 import { ScopedHistory } from '@kbn/core/public';
 
 import { DataStream } from '../../../../../../common/types';
+import { getLifecycleValue } from '../../../../lib/data_streams';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
@@ -33,6 +34,8 @@ interface Props {
   includeStats: boolean;
   filters?: string;
 }
+
+const INFINITE_AS_ICON = true;
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
@@ -144,7 +147,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle']) => lifecycle?.data_retention,
+    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle, INFINITE_AS_ICON),
   });
 
   columns.push({
