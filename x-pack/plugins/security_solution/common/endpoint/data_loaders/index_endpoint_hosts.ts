@@ -12,6 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
@@ -131,6 +133,8 @@ export const indexEndpointHostDocs = usageTracker.track(
     let wasAgentEnrolled = false;
     let enrolledAgent: undefined | Agent;
 
+    const bulkOperations: BulkRequest['operations'] = [];
+
     for (let j = 0; j < numDocs; j++) {
       generator.updateHostData();
       generator.updateHostPolicyData();
@@ -211,33 +215,34 @@ export const indexEndpointHostDocs = usageTracker.track(
         }
       }
 
-      await client
-        .index({
-          index: metadataIndex,
-          document: hostMetadata,
-          op_type: 'create',
-          refresh: 'wait_for',
-        })
-        .catch(wrapErrorAndRejectPromise);
+      bulkOperations.push({ create: { _index: metadataIndex } }, hostMetadata);
 
       const hostPolicyResponse = generator.generatePolicyResponse({
         ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
         policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
       });
 
-      await client
-        .index({
-          index: policyResponseIndex,
-          document: hostPolicyResponse,
-          op_type: 'create',
-          refresh: 'wait_for',
-        })
-        .catch(wrapErrorAndRejectPromise);
+      bulkOperations.push({ create: { _index: policyResponseIndex } }, hostPolicyResponse);
 
       // Clone the hostMetadata and policyResponse document to ensure that no shared state
       // (as a result of using the generator) is returned across docs.
       response.hosts.push(cloneDeep(hostMetadata));
       response.policyResponses.push(cloneDeep(hostPolicyResponse));
+    }
+
+    const bulkResponse = await client
+      .bulk({ operations: bulkOperations, refresh: 'wait_for' })
+      .catch(wrapErrorAndRejectPromise);
+
+    if (bulkResponse.errors) {
+      throw new EndpointError(
+        `indexEndpointHostDocs(): ES Bulk action failed\n\n${JSON.stringify(
+          bulkResponse,
+          null,
+          2
+        )}`,
+        bulkResponse
+      );
     }
 
     return response;
