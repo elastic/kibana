@@ -21,6 +21,8 @@ These files must be updated when upgrading Node.js:
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
+Before making a PR to upgrade Node.js, remember to <<start-new-nodejs-build,generate our custom Node.js builds>> matching that version.
+
 === Considerations with major Node.js upgrades
 
 When upgrading to a new major version of Node.js, the following extra steps must be performed:
@@ -36,6 +38,13 @@ When upgrading to a new major version of Node.js, the following extra steps must
 Due to Node.js 16 coming to an https://nodejs.org/en/blog/announcements/nodejs16-eol[early End-of-Life] and Node.js 18 no longer supporting the same platforms that {kib} supports (most notably CentOS7/RHEL7), we cannot bundle the official Node.js binaries with the Linux distributable of {kib}.
 To keep support for these older platforms, we're bundling the Linux distributable of {kib} with a https://github.com/elastic/kibana-custom-nodejs-builds[custom build of Node.js] with extended backwards compatibility.
 The only difference between the offical Node.js build and our custom build, is the version of `glibc` that it's compiled against.
+
+[[start-new-nodejs-build]]
+==== How to start a new build
+
+To generate a new custom Node.js build, start the "https://buildkite.com/elastic/kibana-custom-node-dot-js-builds#new[custom node.js builds]" Buildkite pipeline.
+Remember so set the custom `OVERRIDE_TARGET_VERSION` environment variable to the desired Node.js version - e.g. `OVERRIDE_TARGET_VERSION=18.18.2`.
+You find the "Environment Variables" field by expanding "Options >" in the "New Build" dialog.
 
 === Backporting
 
