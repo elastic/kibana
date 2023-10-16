@@ -173,6 +173,16 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       [automaticUpdatesEnabled, selectedDate, today]
     );
 
+    const updateDatepickerSelectedDate = useCallback(
+      (date: Moment | null) => {
+        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(today)) {
+          setSelectedDate(date || today);
+          setManifestVersion(date?.format(internalDateFormat) || 'latest');
+        }
+      },
+      [cutoffDate, today]
+    );
+
     const renderVersionToDeployPicker = () => {
       return (
         <>
@@ -198,10 +208,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               selected={selectedDate}
               maxDate={today}
               minDate={cutoffDate}
-              onChange={(date) => {
-                setSelectedDate(date || today);
-                setManifestVersion(date?.format(internalDateFormat) || 'latest');
-              }}
+              onChange={updateDatepickerSelectedDate}
             />
           </div>
         </>
