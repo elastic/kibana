@@ -22,7 +22,7 @@ export interface EcsTls {
     /**
      * Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.
      */
-    certificate_chain?: string | string[];
+    certificate_chain?: string[];
     hash?: {
       /**
        * Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.
@@ -65,21 +65,21 @@ export interface EcsTls {
     /**
      * Array of ciphers offered by the client during the client hello.
      */
-    supported_ciphers?: string | string[];
+    supported_ciphers?: string[];
     x509?: {
       /**
        * List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.
        */
-      alternative_names?: string | string[];
+      alternative_names?: string[];
       issuer?: {
         /**
          * List of common name (CN) of issuing certificate authority.
          */
-        common_name?: string | string[];
+        common_name?: string[];
         /**
          * List of country \(C) codes
          */
-        country?: string | string[];
+        country?: string[];
         /**
          * Distinguished name (DN) of issuing certificate authority.
          */
@@ -87,19 +87,19 @@ export interface EcsTls {
         /**
          * List of locality names (L)
          */
-        locality?: string | string[];
+        locality?: string[];
         /**
          * List of organizations (O) of issuing certificate authority.
          */
-        organization?: string | string[];
+        organization?: string[];
         /**
          * List of organizational units (OU) of issuing certificate authority.
          */
-        organizational_unit?: string | string[];
+        organizational_unit?: string[];
         /**
          * List of state or province names (ST, S, or P)
          */
-        state_or_province?: string | string[];
+        state_or_province?: string[];
       };
 
       /**
@@ -138,11 +138,11 @@ export interface EcsTls {
         /**
          * List of common names (CN) of subject.
          */
-        common_name?: string | string[];
+        common_name?: string[];
         /**
          * List of country \(C) code
          */
-        country?: string | string[];
+        country?: string[];
         /**
          * Distinguished name (DN) of the certificate subject entity.
          */
@@ -150,19 +150,19 @@ export interface EcsTls {
         /**
          * List of locality names (L)
          */
-        locality?: string | string[];
+        locality?: string[];
         /**
          * List of organizations (O) of subject.
          */
-        organization?: string | string[];
+        organization?: string[];
         /**
          * List of organizational units (OU) of subject.
          */
-        organizational_unit?: string | string[];
+        organizational_unit?: string[];
         /**
          * List of state or province names (ST, S, or P)
          */
-        state_or_province?: string | string[];
+        state_or_province?: string[];
       };
 
       /**
@@ -196,7 +196,7 @@ export interface EcsTls {
     /**
      * Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.
      */
-    certificate_chain?: string | string[];
+    certificate_chain?: string[];
     hash?: {
       /**
        * Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.
@@ -236,16 +236,16 @@ export interface EcsTls {
       /**
        * List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.
        */
-      alternative_names?: string | string[];
+      alternative_names?: string[];
       issuer?: {
         /**
          * List of common name (CN) of issuing certificate authority.
          */
-        common_name?: string | string[];
+        common_name?: string[];
         /**
          * List of country \(C) codes
          */
-        country?: string | string[];
+        country?: string[];
         /**
          * Distinguished name (DN) of issuing certificate authority.
          */
@@ -253,19 +253,19 @@ export interface EcsTls {
         /**
          * List of locality names (L)
          */
-        locality?: string | string[];
+        locality?: string[];
         /**
          * List of organizations (O) of issuing certificate authority.
          */
-        organization?: string | string[];
+        organization?: string[];
         /**
          * List of organizational units (OU) of issuing certificate authority.
          */
-        organizational_unit?: string | string[];
+        organizational_unit?: string[];
         /**
          * List of state or province names (ST, S, or P)
          */
-        state_or_province?: string | string[];
+        state_or_province?: string[];
       };
 
       /**
@@ -304,11 +304,11 @@ export interface EcsTls {
         /**
          * List of common names (CN) of subject.
          */
-        common_name?: string | string[];
+        common_name?: string[];
         /**
          * List of country \(C) code
          */
-        country?: string | string[];
+        country?: string[];
         /**
          * Distinguished name (DN) of the certificate subject entity.
          */
@@ -316,19 +316,19 @@ export interface EcsTls {
         /**
          * List of locality names (L)
          */
-        locality?: string | string[];
+        locality?: string[];
         /**
          * List of organizations (O) of subject.
          */
-        organization?: string | string[];
+        organization?: string[];
         /**
          * List of organizational units (OU) of subject.
          */
-        organizational_unit?: string | string[];
+        organizational_unit?: string[];
         /**
          * List of state or province names (ST, S, or P)
          */
-        state_or_province?: string | string[];
+        state_or_province?: string[];
       };
 
       /**
