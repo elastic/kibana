@@ -60,9 +60,6 @@ export class ObservabilityAIAssistantService {
       conversations: getResourceName('index-template-conversations'),
       kb: getResourceName('index-template-kb'),
     },
-    ilmPolicy: {
-      conversations: getResourceName('ilm-policy-conversations'),
-    },
     pipelines: {
       kb: getResourceName('kb-ingest-pipeline'),
     },
@@ -110,23 +107,6 @@ export class ObservabilityAIAssistantService {
         create: false,
         name: this.resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
-      });
-
-      await esClient.ilm.putLifecycle({
-        name: this.resourceNames.ilmPolicy.conversations,
-        policy: {
-          phases: {
-            hot: {
-              min_age: '0s',
-              actions: {
-                rollover: {
-                  max_age: '90d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        },
       });
 
       await esClient.indices.putIndexTemplate({

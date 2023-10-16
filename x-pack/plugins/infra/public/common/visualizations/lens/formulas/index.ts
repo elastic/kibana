@@ -6,5 +6,4 @@
  */
 
 export { hostLensFormulas } from './host';
-export { nginxLensFormulas } from './nginx';
 export { kubernetesLensFormulas } from './kubernetes';

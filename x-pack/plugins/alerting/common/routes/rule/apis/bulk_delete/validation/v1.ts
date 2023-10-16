@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { BulkDeleteRulesRequestBody } from '..';
 
-export const validateCommonBulkOptions = (options: BulkDeleteRulesRequestBody) => {
+export const validateBulkDeleteRulesBody = (options: BulkDeleteRulesRequestBody) => {
   const filter = options.filter;
   const ids = options.ids;
 

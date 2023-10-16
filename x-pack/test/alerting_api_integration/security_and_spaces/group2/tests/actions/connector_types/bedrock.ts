@@ -11,6 +11,7 @@ import {
   BedrockSimulator,
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -396,7 +397,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(simulator.requestData).to.eql({
               prompt:
                 '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
-              max_tokens_to_sample: 300,
+              max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+              temperature: 0.5,
               stop_sequences: ['\n\nHuman:'],
             });
             expect(body).to.eql({

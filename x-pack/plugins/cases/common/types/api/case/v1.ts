@@ -23,7 +23,6 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -44,15 +43,10 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
-const CaseCustomFieldTextWithValidationValueRt = limitedArraySchema({
-  codec: limitedStringSchema({
-    fieldName: 'value',
-    min: 1,
-    max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  }),
+const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
   fieldName: 'value',
   min: 1,
-  max: MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
+  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 });
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
