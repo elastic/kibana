@@ -31,21 +31,15 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'search_getting_started',
-          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-            defaultMessage: 'Getting started',
-          }),
-          link: 'serverlessElasticsearch',
-        },
-        {
           id: 'dev_tools',
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          isGroupTitle: true,
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+          },
         },
-        { link: 'dev_tools:console' },
-        { link: 'dev_tools:searchprofiler' },
         {
           id: 'explore',
           title: i18n.translate('xpack.serverlessSearch.nav.explore', {
@@ -64,6 +58,9 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'visualize',
+          title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
+            defaultMessage: 'Visualizations',
+          }),
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return (
               pathNameSerialized.startsWith(prepend('/app/visualize')) ||
@@ -116,6 +113,15 @@ const navigationTree: NavigationTreeDefinition = {
     },
   ],
   footer: [
+    {
+      type: 'navGroup',
+      id: 'search_getting_started',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Getting started',
+      }),
+      icon: 'launch',
+      link: 'serverlessElasticsearch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
