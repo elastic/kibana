@@ -4,6 +4,12 @@
 {kib} requires a specific Node.js version to run.
 When running {kib} from source, you must have this version installed locally.
 
+=== Step 1: Generate custom Node.js builds
+
+Before making a PR to upgrade Node.js, we must first <<start-new-nodejs-build,generate the required custom Node.js builds>> matching the desired Node.js version.
+
+=== Step 2: Create PR to upgrade Node.js
+
 The required version of Node.js is listed in several different files throughout the {kib} source code.
 These files must be updated when upgrading Node.js:
 
@@ -16,12 +22,10 @@ These files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/package.json[`package.json`] - The version is specified in the `engines.node` field (if possible, also upgrade `@types/node` to match the new version, both under `devDependencies` and `resolutions`).
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
-    These can be found on the https://nodejs.org[nodejs.org] website.
-    Example for Node.js v18.17.1: https://nodejs.org/dist/v18.17.1/SHASUMS256.txt.asc
+    These can be found in the `SHASUMS256.txt` file inside the public `kibana-custom-node-artifacts` GCP bucket.
+    Example for Node.js v18.18.2: https://console.cloud.google.com/storage/browser/_details/kibana-custom-node-artifacts/node-glibc-217/dist/v18.18.2/SHASUMS256.txt[kibana-custom-node-artifacts/node-glibc-217/dist/v18.18.2/SHASUMS256.txt]
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
-
-Before making a PR to upgrade Node.js, remember to <<start-new-nodejs-build,generate our custom Node.js builds>> matching that version.
 
 === Considerations with major Node.js upgrades
 
