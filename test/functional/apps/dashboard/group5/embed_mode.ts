@@ -80,8 +80,8 @@ export default function ({
         await testSubjects.missingOrFail('superDatePickerToggleQuickMenuButton');
         await testSubjects.existOrFail('globalQueryBar');
       });
-      // failed test. See https://github.com/elastic/kibana/issues/163207
-      it.skip('renders as expected', async () => {
+
+      it('renders as expected', async () => {
         await PageObjects.dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode',
