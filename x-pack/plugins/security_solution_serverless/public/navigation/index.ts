@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_PATH, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
 import type {
   SecuritySolutionServerlessPluginSetupDeps,
