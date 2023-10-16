@@ -144,8 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/167405
-    describe.skip('shared links with state in sessionStorage', async () => {
+    describe('shared links with state in sessionStorage', async () => {
       let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
@@ -182,8 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.clearSessionStorage();
-        await browser.get(currentUrl, false);
         await retry.waitFor('discover to open', async () => {
+          await browser.get(currentUrl, false);
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
           const { message } = await toasts.getErrorToast();
