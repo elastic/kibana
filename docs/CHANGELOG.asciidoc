@@ -148,6 +148,8 @@ Platform::
 * ES|QL, a new query language, is available under technical preview in Discover and Dashboards ({kibana-pull}146971[#146971]).
 Querying & Filtering::
 * Saved queries can now be shared between multiple spaces ({kibana-pull}163436[#163436]).
+Synthetics::
+* Adds automatic retest on failure, where any monitor going from UP to DOWN will automatically run a second test before creating the error or alerting ({kibana-pull}165626[#165626]).
 Uptime::
 * Adds a document viewer to the summary pings table ({kibana-pull}163926[#163926]).
 
