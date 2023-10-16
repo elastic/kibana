@@ -129,8 +129,6 @@ export const dataLoaders = (
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
 
-  const log = new ToolingLog();
-
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
