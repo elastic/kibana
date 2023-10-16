@@ -51,7 +51,7 @@ describe('<Overview />', () => {
   });
   test('api key', () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { level: 2, name: 'Prepare an API Key' })).toBeDefined();
+    expect(getByRole('heading', { level: 2, name: 'API Key' })).toBeDefined();
   });
   test('cloud id', () => {
     const { getByRole } = render(<Overview />);

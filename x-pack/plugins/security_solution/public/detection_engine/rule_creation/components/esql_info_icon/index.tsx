@@ -30,7 +30,7 @@ const EsqlInfoIconComponent = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent"
-          defaultMessage="Check out our {createEsqlRuleTypeLink} to get started using ES|QL rules in Security."
+          defaultMessage="Check out our {createEsqlRuleTypeLink} to get started using ES|QL rules."
           values={{
             createEsqlRuleTypeLink: (
               <EuiLink href={docLinks.links.securitySolution.createEsqlRuleType} target="_blank">

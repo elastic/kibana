@@ -125,7 +125,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains(
-        'use [metadata _id, _version, _index] operator after source index and ensure resulted fields contain _id'
+        'use [metadata _id, _version, _index] operator after source index and ensure _id property is returned in response'
       );
     });
 
@@ -139,7 +139,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains(
-        'use [metadata _id, _version, _index] operator after source index and ensure resulted fields contain _id'
+        'use [metadata _id, _version, _index] operator after source index and ensure _id property is returned in response'
       );
     });
 
