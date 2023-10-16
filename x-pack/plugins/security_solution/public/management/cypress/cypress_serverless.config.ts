@@ -15,6 +15,8 @@ export default defineCypressConfig(
       IS_SERVERLESS: true,
 
       grepTags: '@serverless --@brokenInServerless',
+
+      TOOLING_LOG_LEVEL: 'debug',
     },
   })
 );

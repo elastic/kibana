@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import type { KbnClient } from '@kbn/test';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { usageTracker } from './data_loaders/usage_tracker';
 import type { TreeOptions } from './generate_data';
 import { EndpointDocGenerator } from './generate_data';
@@ -24,7 +24,7 @@ import {
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
-import { mergeAndAppendArrays } from './data_loaders/utils';
+import { createToolingLogger, mergeAndAppendArrays } from './data_loaders/utils';
 import {
   waitForMetadataTransformsReady,
   stopMetadataTransforms,
@@ -77,7 +77,7 @@ export const indexHostsAndAlerts = usageTracker.track(
     logger_?: ToolingLog
   ): Promise<IndexedHostsAndAlertsResponse> => {
     const random = seedrandom(seed);
-    const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
+    const logger = logger_ ?? createToolingLogger();
     const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
     const response: IndexedHostsAndAlertsResponse = {
       hosts: [],
@@ -147,7 +147,7 @@ export const indexHostsAndAlerts = usageTracker.track(
     if (shouldWaitForEndpointMetadataDocs) {
       await startMetadataTransforms(
         client,
-        response.agents.map((agent) => agent.id)
+        response.agents.map((agent) => agent.agent?.id ?? '')
       );
     }
 

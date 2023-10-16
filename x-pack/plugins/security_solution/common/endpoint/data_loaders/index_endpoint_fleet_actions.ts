@@ -31,7 +31,9 @@ export interface IndexedEndpointAndFleetActionsForHostResponse {
   actionResponses: EndpointActionResponse[];
   actionsIndex: string;
   responsesIndex: string;
+  /** @deprecated */
   endpointActions: LogsEndpointAction[];
+  /** @deprecated */
   endpointActionResponses: LogsEndpointActionResponse[];
   endpointActionsIndex: string;
   endpointActionResponsesIndex: string;
@@ -58,13 +60,17 @@ export const indexEndpointAndFleetActionsForHost = usageTracker.track(
     options: IndexEndpointAndFleetActionsForHostOptions = {}
   ): Promise<IndexedEndpointAndFleetActionsForHostResponse> => {
     const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
-    const agentId = endpointHost.elastic.agent.id;
     const actionsCount = options.numResponseActions ?? 1;
     const total =
       actionsCount === 1 ? actionsCount : fleetActionGenerator.randomN(5) + actionsCount;
+    const hostActions = buildIEndpointAndFleetActionsBulkOperations({
+      endpoints: [endpointHost],
+      count: total,
+      alertIds: options.alertIds,
+    });
     const response: IndexedEndpointAndFleetActionsForHostResponse = {
-      actions: [],
-      actionResponses: [],
+      actions: hostActions.actions,
+      actionResponses: hostActions.actionResponses,
       endpointActions: [],
       endpointActionResponses: [],
       actionsIndex: AGENT_ACTIONS_INDEX,
@@ -73,15 +79,72 @@ export const indexEndpointAndFleetActionsForHost = usageTracker.track(
       endpointActionResponsesIndex: ENDPOINT_ACTION_RESPONSES_INDEX,
     };
 
-    const bulkOperations: BulkRequest['operations'] = [];
+    const bulkResponse = await esClient
+      .bulk(
+        {
+          operations: hostActions.operations,
+          refresh: 'wait_for',
+        },
+        ES_INDEX_OPTIONS
+      )
+      .catch(wrapErrorAndRejectPromise);
 
-    for (let i = 0; i < total; i++) {
+    if (bulkResponse.errors) {
+      throw new EndpointError(
+        `indexEndpointAndFleetActionsForHost(): ES Bulk action failed\n\n${JSON.stringify(
+          bulkResponse,
+          null,
+          2
+        )}`,
+        bulkResponse
+      );
+    }
+
+    return response;
+  }
+);
+
+interface BuildIEndpointAndFleetActionsBulkOperationsOptions {
+  endpoints: HostMetadata[];
+  /** Number of response actions to create per endpoint host. Default: 1 */
+  count?: number;
+  /** List of alerts that should be associated with the action */
+  alertIds?: string[];
+}
+
+interface BuildIEndpointAndFleetActionsBulkOperationsResponse
+  extends IndexedEndpointAndFleetActionsForHostResponse {
+  operations: Required<BulkRequest>['operations'];
+}
+
+export const buildIEndpointAndFleetActionsBulkOperations = ({
+  endpoints,
+  count = 1,
+  alertIds,
+}: BuildIEndpointAndFleetActionsBulkOperationsOptions): BuildIEndpointAndFleetActionsBulkOperationsResponse => {
+  const bulkOperations: BulkRequest['operations'] = [];
+  const response: BuildIEndpointAndFleetActionsBulkOperationsResponse = {
+    operations: bulkOperations,
+    actions: [],
+    actionResponses: [],
+    actionsIndex: AGENT_ACTIONS_INDEX,
+    responsesIndex: AGENT_ACTIONS_RESULTS_INDEX,
+    endpointActionsIndex: ENDPOINT_ACTIONS_INDEX,
+    endpointActionResponsesIndex: ENDPOINT_ACTION_RESPONSES_INDEX,
+    endpointActions: [],
+    endpointActionResponses: [],
+  };
+
+  for (const endpoint of endpoints) {
+    const agentId = endpoint.elastic.agent.id;
+
+    for (let i = 0; i < count; i++) {
       // start with endpoint action
       const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
         EndpointActions: {
           data: {
             comment: 'data generator: this host is bad',
-            ...(options.alertIds ? { command: 'isolate' } : {}),
+            ...(alertIds ? { command: 'isolate' } : {}),
           },
         },
       });
@@ -104,12 +167,12 @@ export const indexEndpointAndFleetActionsForHost = usageTracker.track(
           ...logsEndpointAction.EndpointActions,
           data: {
             ...logsEndpointAction.EndpointActions.data,
-            alert_id: options.alertIds,
+            alert_id: alertIds,
           },
         },
         // to test automated actions in cypress
-        user: options.alertIds ? { id: 'unknown' } : logsEndpointAction.user,
-        rule: options.alertIds
+        user: alertIds ? { id: 'unknown' } : logsEndpointAction.user,
+        rule: alertIds
           ? {
               id: 'generated_rule_id',
               name: 'generated_rule_name',
@@ -182,7 +245,9 @@ export const indexEndpointAndFleetActionsForHost = usageTracker.track(
       response.actionResponses.push(fleetActionResponse);
     }
 
+    // -------------------------------------------
     // Add edge case fleet actions (maybe)
+    // -------------------------------------------
     if (fleetActionGenerator.randomFloat() < 0.3) {
       const randomFloat = fleetActionGenerator.randomFloat();
 
@@ -235,31 +300,10 @@ export const indexEndpointAndFleetActionsForHost = usageTracker.track(
         response.actions.push(fleetAction1, fleetAction2);
       }
     }
-
-    const bulkResponse = await esClient
-      .bulk(
-        {
-          operations: bulkOperations,
-          refresh: 'wait_for',
-        },
-        ES_INDEX_OPTIONS
-      )
-      .catch(wrapErrorAndRejectPromise);
-
-    if (bulkResponse.errors) {
-      throw new EndpointError(
-        `indexEndpointAndFleetActionsForHost(): ES Bulk action failed\n\n${JSON.stringify(
-          bulkResponse,
-          null,
-          2
-        )}`,
-        bulkResponse
-      );
-    }
-
-    return response;
   }
-);
+
+  return response;
+};
 
 export interface DeleteIndexedEndpointFleetActionsResponse {
   actions: estypes.DeleteByQueryResponse | undefined;
