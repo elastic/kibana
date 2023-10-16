@@ -132,7 +132,7 @@ interface CreateLoggerInterface {
  */
 export const createToolingLogger: CreateLoggerInterface = (level): ToolingLog => {
   return new ToolingLog({
-    level: level ?? createToolingLogger.defaultLogLevel,
+    level: level || createToolingLogger.defaultLogLevel,
     writeTo: process.stdout,
   });
 };

@@ -11,7 +11,7 @@ import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';
@@ -21,14 +21,14 @@ import type {
   DeleteIndexedFleetAgentsResponse,
   IndexedFleetAgentResponse,
 } from './index_fleet_agent';
-import { deleteIndexedFleetAgents, indexFleetAgentForHost } from './index_fleet_agent';
+import { buildFleetAgentBulkCreateOperations, deleteIndexedFleetAgents } from './index_fleet_agent';
 import type {
   DeleteIndexedEndpointFleetActionsResponse,
   IndexedEndpointAndFleetActionsForHostResponse,
 } from './index_endpoint_fleet_actions';
 import {
+  buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
-  indexEndpointAndFleetActionsForHost,
   type IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
 
@@ -92,7 +92,7 @@ export const indexEndpointHostDocs = usageTracker.track(
     enrollFleet,
     generator,
     withResponseActions = true,
-    numResponseActions,
+    numResponseActions = 1,
     alertIds,
   }: {
     numDocs: number;
@@ -131,7 +131,6 @@ export const indexEndpointHostDocs = usageTracker.track(
     };
     let hostMetadata: HostMetadata;
     let wasAgentEnrolled = false;
-    let enrolledAgent: undefined | Agent;
 
     const bulkOperations: BulkRequest['operations'] = [];
 
@@ -143,6 +142,7 @@ export const indexEndpointHostDocs = usageTracker.track(
         timestamp - timeBetweenDocs * (numDocs - j - 1),
         EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
       );
+      let agentId = hostMetadata.agent.id;
 
       if (enrollFleet) {
         const { id: appliedPolicyId, name: appliedPolicyName } =
@@ -167,16 +167,16 @@ export const indexEndpointHostDocs = usageTracker.track(
         if (!wasAgentEnrolled) {
           wasAgentEnrolled = true;
 
-          const indexedAgentResponse = await indexFleetAgentForHost(
-            client,
-            kbnClient,
-            hostMetadata,
-            realPolicies[appliedPolicyId].policy_id,
-            kibanaVersion
-          );
+          const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
+            endpoints: [hostMetadata],
+            agentPolicyId: realPolicies[appliedPolicyId].policy_id,
+            kibanaVersion,
+          });
 
-          enrolledAgent = indexedAgentResponse.agents[0];
-          mergeAndAppendArrays(response, indexedAgentResponse);
+          bulkOperations.push(...operations);
+          agentId = agents[0]?.agent?.id ?? agentId;
+
+          mergeAndAppendArrays(response, { agents, fleetAgentsIndex });
         }
 
         // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
@@ -184,13 +184,13 @@ export const indexEndpointHostDocs = usageTracker.track(
           ...hostMetadata,
           agent: {
             ...hostMetadata.agent,
-            id: enrolledAgent?.id ?? hostMetadata.agent.id,
+            id: agentId,
           },
           elastic: {
             ...hostMetadata.elastic,
             agent: {
               ...hostMetadata.elastic.agent,
-              id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
+              id: agentId,
             },
           },
           Endpoint: {
@@ -205,13 +205,23 @@ export const indexEndpointHostDocs = usageTracker.track(
           },
         };
 
+        // Create some fleet endpoint actions and .logs-endpoint actions for this Host
         if (withResponseActions) {
-          // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-          const actionsResponse = await indexEndpointAndFleetActionsForHost(client, hostMetadata, {
+          // `count` logic matches that of `indexEndpointAndFleetActionsForHost()`. Unclear why the number of
+          // actions to create will be 5 more than the amount requested if that amount was grater than 1
+          const count =
+            numResponseActions === 1
+              ? numResponseActions
+              : generator.randomN(5) + numResponseActions;
+
+          const { operations, ...indexFleetActions } = buildIEndpointAndFleetActionsBulkOperations({
+            endpoints: [hostMetadata],
+            count,
             alertIds,
-            numResponseActions,
           });
-          mergeAndAppendArrays(response, actionsResponse);
+
+          bulkOperations.push(...operations);
+          mergeAndAppendArrays(response, indexFleetActions);
         }
       }
 
@@ -231,7 +241,10 @@ export const indexEndpointHostDocs = usageTracker.track(
     }
 
     const bulkResponse = await client
-      .bulk({ operations: bulkOperations, refresh: 'wait_for' })
+      .bulk(
+        { operations: bulkOperations, refresh: 'wait_for' },
+        { headers: { 'X-elastic-product-origin': 'fleet' } }
+      )
       .catch(wrapErrorAndRejectPromise);
 
     if (bulkResponse.errors) {
