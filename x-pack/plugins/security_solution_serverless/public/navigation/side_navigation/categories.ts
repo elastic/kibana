@@ -15,7 +15,7 @@ import { ExternalPageName } from '../links/constants';
 export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.dashboards],
+    linkIds: [ExternalPageName.discover, SecurityPageName.dashboards],
   },
   {
     type: LinkCategoryType.separator,

@@ -46,7 +46,7 @@ export class AiopsPlugin
     // This way we can pass on license changes to the route factory having always
     // the current license because it's stored in a mutable attribute.
     const aiopsLicense: AiopsLicense = { isActivePlatinumLicense: false };
-    this.licenseSubscription = plugins.licensing.license$.subscribe(async (license) => {
+    this.licenseSubscription = plugins.licensing.license$.subscribe((license) => {
       aiopsLicense.isActivePlatinumLicense = isActiveLicense('platinum', license);
 
       if (aiopsLicense.isActivePlatinumLicense) {

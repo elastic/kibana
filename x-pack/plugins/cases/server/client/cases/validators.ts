@@ -107,11 +107,25 @@ export const validateRequiredCustomFields = ({
     (customField) => customField.required
   );
 
+  if (!requiredCustomFields.length) {
+    return;
+  }
+
   const missingRequiredCustomFields = differenceWith(
     requiredCustomFields,
     requestCustomFields ?? [],
     (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
   ).map((e) => e.key);
+
+  requiredCustomFields.forEach((requiredField) => {
+    const found = requestCustomFields?.find(
+      (requestField) => requestField.key === requiredField.key
+    );
+
+    if (found && found.value === null) {
+      missingRequiredCustomFields.push(found.key);
+    }
+  });
 
   if (missingRequiredCustomFields.length) {
     throw Boom.badRequest(`Missing required custom fields: ${missingRequiredCustomFields}`);

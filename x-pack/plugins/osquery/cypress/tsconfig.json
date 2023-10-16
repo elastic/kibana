@@ -4,7 +4,7 @@
     "**/*",
     "./cypress.config.ts",
     "./serverless_cypress.config.ts",
-    "../../../test_serverless/shared/lib"
+    "../../../test_serverless/shared/lib",
   ],
   "exclude": [
     "target/**/*",
@@ -22,6 +22,9 @@
   "kbn_references": [
     {
       "path": "../../../test_serverless/tsconfig.json"
+    },
+    {
+      "path": "../../../test/security_solution_cypress/cypress/tsconfig.json"
     },
     "@kbn/cypress-config",
     // cypress projects that are nested inside of other ts project use code

@@ -24,7 +24,7 @@ import type {
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
-import { BehaviorSubject, map, tap } from 'rxjs';
+import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
@@ -246,26 +246,32 @@ export class TelemetryPlugin
     });
     this.telemetryNotifications = telemetryNotifications;
 
-    application.currentAppId$.subscribe(async () => {
-      // Refresh and get telemetry config
-      const updatedConfig = await this.refreshConfig(http);
+    application.currentAppId$
+      .pipe(
+        switchMap(async () => {
+          // Refresh and get telemetry config
+          const updatedConfig = await this.refreshConfig(http);
 
-      analytics.optIn({
-        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
-      });
+          analytics.optIn({
+            global: {
+              enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode(),
+            },
+          });
 
-      const isUnauthenticated = this.getIsUnauthenticated(http);
-      if (isUnauthenticated) {
-        return;
-      }
+          const isUnauthenticated = this.getIsUnauthenticated(http);
+          if (isUnauthenticated) {
+            return;
+          }
 
-      const telemetryBanner = updatedConfig?.banner;
+          const telemetryBanner = updatedConfig?.banner;
 
-      this.maybeStartTelemetryPoller();
-      if (telemetryBanner) {
-        this.maybeShowOptedInNotificationBanner();
-      }
-    });
+          this.maybeStartTelemetryPoller();
+          if (telemetryBanner) {
+            this.maybeShowOptedInNotificationBanner();
+          }
+        })
+      )
+      .subscribe();
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),

@@ -18,6 +18,7 @@ import {
   projectSettingsNavLinks,
 } from './sections/project_settings_links';
 import { devToolsNavLink } from './sections/dev_tools_links';
+import { discoverNavLink } from './sections/discover_links';
 import type { ProjectNavigationLink } from './types';
 import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
 import { investigationsNavLinks } from './sections/investigations_links';
@@ -54,6 +55,9 @@ const processNavLinks = (
   experimentalFeatures: ExperimentalFeatures
 ): ProjectNavigationLink[] => {
   const projectNavLinks: ProjectNavigationLink[] = [...securityNavLinks];
+
+  // Discover. just pushing it
+  projectNavLinks.push(discoverNavLink);
 
   // Investigations. injecting external sub-links and categories definition to the landing
   const investigationsLinkIndex = projectNavLinks.findIndex(
