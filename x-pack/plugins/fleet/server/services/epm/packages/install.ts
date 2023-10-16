@@ -718,8 +718,6 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
 
   const authorizationHeader = args.authorizationHeader;
 
-  const bundledPackages = await getBundledPackages();
-
   if (args.installSource === 'registry') {
     const {
       pkgkey,
@@ -732,7 +730,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
     } = args;
 
-    const matchingBundledPackage = getBundledPackageByPkgKey(pkgkey);
+    const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
 
     if (matchingBundledPackage) {
       logger.debug(
