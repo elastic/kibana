@@ -405,6 +405,10 @@ soc_manager:
       privileges:
         - all
       resources: "*"
+    - application: indexPatterns
+      privileges:
+        - all
+      resources: "*"
 
 detections_admin:
   cluster:
@@ -614,6 +618,10 @@ endpoint_operations_analyst:
         - all
       resources: "*"
     - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: indexPatterns
       privileges:
         - all
       resources: "*"
