@@ -5,7 +5,7 @@
   "plugin": {
     "server": true,
     "browser": true,
-    "requiredBundles": ["kibanaUtils", "@kbn/kibana-utils-plugin/commmon"],
+    "requiredBundles": ["kibanaUtils"],
     "extraPublicDirs": ["common"]
   }
 }

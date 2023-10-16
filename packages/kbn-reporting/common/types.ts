@@ -9,13 +9,14 @@
 import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { TypeOf } from '@kbn/config-schema';
-import { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { LocatorParams } from './url';
 import { ConfigSchema } from './schema';
 import { CancellationToken } from './cancellation_token';
 import { TaskRunResult } from './metrics';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * @deprecated

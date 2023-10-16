@@ -7,7 +7,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';

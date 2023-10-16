@@ -20,7 +20,7 @@
     "@kbn/i18n",
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
-    "@kbn/core",
+    "@kbn/core/server",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/field-formats-plugin",
