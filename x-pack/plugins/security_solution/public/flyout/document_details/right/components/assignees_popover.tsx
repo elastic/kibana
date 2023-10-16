@@ -13,6 +13,7 @@ import { UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useSuggestUsers } from '../../../../detections/containers/detection_engine/alerts/use_suggest_users';
+import { ASSIGNEES_ADD_BUTTON_TEST_ID } from './test_ids';
 
 const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }> = ({
   togglePopover,
@@ -28,7 +29,8 @@ const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }
     )}
   >
     <EuiButtonIcon
-      data-test-subj="assignees-edit-button"
+      aria-label="Update assignees"
+      data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
       iconType={'plusInCircle'}
       onClick={togglePopover}
       disabled={isDisabled}

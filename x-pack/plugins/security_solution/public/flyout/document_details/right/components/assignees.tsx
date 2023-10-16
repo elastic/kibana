@@ -16,9 +16,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserAvatar } from '@kbn/user-profile-components';
+import { noop } from 'lodash';
 import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/alerts/use_get_user_profiles';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import { ASSIGNEES_TITLE_TEST_ID, ASSIGNEES_VALUE_TEST_ID } from './test_ids';
+import {
+  ASSIGNEE_AVATAR_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
+  ASSIGNEES_VALUE_TEST_ID,
+  ASSIGNEES_COUNT_BADGE_TEST_ID,
+} from './test_ids';
 import { AssigneesPopover } from './assignees_popover';
 
 export interface AssigneesProps {
@@ -44,7 +50,6 @@ export const Assignees: FC<AssigneesProps> = memo(
     const onSuccess = useCallback(() => {
       if (onAssigneesUpdated) onAssigneesUpdated();
     }, [onAssigneesUpdated]);
-    const setIsLoading = useCallback(() => {}, []);
 
     const handleOnAlertAssigneesSubmit = useCallback(async () => {
       if (setAlertAssignees && selectedAssignees) {
@@ -59,9 +64,9 @@ export const Assignees: FC<AssigneesProps> = memo(
           assignees_to_remove: assigneesToRemoveArray,
         };
 
-        await setAlertAssignees(assigneesToUpdate, [eventId], onSuccess, setIsLoading);
+        await setAlertAssignees(assigneesToUpdate, [eventId], onSuccess, noop);
       }
-    }, [alertAssignees, eventId, onSuccess, selectedAssignees, setAlertAssignees, setIsLoading]);
+    }, [alertAssignees, eventId, onSuccess, selectedAssignees, setAlertAssignees]);
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen((value) => !value);
@@ -111,11 +116,19 @@ export const Assignees: FC<AssigneesProps> = memo(
                 ))}
                 repositionOnScroll={true}
               >
-                <EuiNotificationBadge>{assignees.length}</EuiNotificationBadge>
+                <EuiNotificationBadge data-test-subj={ASSIGNEES_COUNT_BADGE_TEST_ID}>
+                  {assignees.length}
+                </EuiNotificationBadge>
               </EuiToolTip>
             ) : (
               assignees.map((user) => (
-                <UserAvatar user={user.user} avatar={user.data.avatar} size={'s'} />
+                <UserAvatar
+                  key={user.uid}
+                  data-test-subj={ASSIGNEE_AVATAR_TEST_ID(user.user.username)}
+                  user={user.user}
+                  avatar={user.data.avatar}
+                  size={'s'}
+                />
               ))
             )}
           </span>

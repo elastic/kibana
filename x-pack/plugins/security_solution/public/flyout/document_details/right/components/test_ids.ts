@@ -24,6 +24,7 @@ export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as con
 export const CHAT_BUTTON_TEST_ID = 'newChatById' as const;
 export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle`;
 export const ASSIGNEES_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesValue`;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton`;
 
 /* About section */
 
@@ -149,3 +150,7 @@ export const RESPONSE_SECTION_HEADER_TEST_ID = RESPONSE_SECTION_TEST_ID + HEADER
 export const RESPONSE_SECTION_CONTENT_TEST_ID = RESPONSE_SECTION_TEST_ID + CONTENT_TEST_ID;
 export const RESPONSE_BUTTON_TEST_ID = `${RESPONSE_TEST_ID}Button` as const;
 export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_TEST_ID}Empty` as const;
+
+/* Alert Assignees */
+export const ASSIGNEE_AVATAR_TEST_ID = (userName: string) => `${PREFIX}AssigneeAvatar-${userName}`;
+export const ASSIGNEES_COUNT_BADGE_TEST_ID = `${PREFIX}AssigneesCountBadge`;
