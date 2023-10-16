@@ -11,7 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
-import { getRandomColor } from '../../../../common/utils/get_ramdom_color';
+import { getRandomColor } from '../../../../common/utils/get_random_color';
 
 interface CreateTagParams {
   savedObjectsClient: SavedObjectsClientContract;

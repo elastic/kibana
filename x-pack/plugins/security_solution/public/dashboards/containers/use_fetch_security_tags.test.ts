@@ -19,7 +19,7 @@ import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 jest.mock('../../common/lib/kibana');
-jest.mock('../../../common/utils/get_ramdom_color', () => ({
+jest.mock('../../../common/utils/get_random_color', () => ({
   getRandomColor: jest.fn().mockReturnValue('#FFFFFF'),
 }));
 
@@ -69,11 +69,14 @@ describe('useFetchSecurityTags', () => {
     mockGet.mockResolvedValue([]);
     await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockCreateTag).toHaveBeenCalledWith({
-      name: SECURITY_TAG_NAME,
-      description: SECURITY_TAG_DESCRIPTION,
-      color: '#FFFFFF',
-    });
+    expect(mockCreateTag).toHaveBeenCalledWith(
+      {
+        name: SECURITY_TAG_NAME,
+        description: SECURITY_TAG_DESCRIPTION,
+        color: '#FFFFFF',
+      },
+      { id: 'security-solution-default', overwrite: true }
+    );
   });
 
   test('should return Security Solution tags', async () => {

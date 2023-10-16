@@ -14,7 +14,7 @@ import {
   SECURITY_TAG_NAME,
   getSecurityTagId,
 } from '../../../common/constants';
-import { getRandomColor } from '../../../common/utils/get_ramdom_color';
+import { getRandomColor } from '../../../common/utils/get_random_color';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 
 export const useFetchSecurityTags = () => {

@@ -38,12 +38,13 @@ describe('TagsClient', () => {
 
     it('calls `http.post` with the correct parameters', async () => {
       const attributes = createTagAttributes();
+      const options = { id: 'test-id' };
 
-      await tagsClient.create(attributes);
+      await tagsClient.create(attributes, options);
 
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith('/api/saved_objects_tagging/tags/create', {
-        body: JSON.stringify(attributes),
+        body: JSON.stringify({ attributes, options }),
       });
     });
     it('returns the tag object from the response', async () => {

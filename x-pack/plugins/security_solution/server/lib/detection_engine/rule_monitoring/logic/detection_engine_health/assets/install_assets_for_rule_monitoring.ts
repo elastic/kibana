@@ -38,7 +38,7 @@ export const installAssetsForRuleMonitoring = async (
   const operation = async (attemptCount: number) => {
     logger.debug(`Installing assets for rule monitoring (attempt ${attemptCount})...`);
 
-    const assets = getAssetsForRuleMonitoring(currentSpaceId, savedObjectsClient);
+    const assets = await getAssetsForRuleMonitoring(currentSpaceId, savedObjectsClient);
 
     // The assets are marked as "managed: true" at the saved object level, which in the future
     // should be reflected in the UI for the user. Ticket to track:
