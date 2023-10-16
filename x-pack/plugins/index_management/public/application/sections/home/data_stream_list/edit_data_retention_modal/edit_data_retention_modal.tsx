@@ -37,6 +37,7 @@ import {
 
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
+import { isDataStreamUnmanaged } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
@@ -45,6 +46,7 @@ interface Props {
   lifecycle: DataStream['lifecycle'];
   dataStreamName: string;
   hasIlmPolicyWithDeletePhase?: boolean;
+  dataStreamManagedBy?: DataStream['nextGenerationManagedBy'];
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
@@ -154,6 +156,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   lifecycle,
   dataStreamName,
   hasIlmPolicyWithDeletePhase,
+  dataStreamManagedBy,
   onClose,
 }) => {
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
@@ -232,6 +235,29 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
+          {isDataStreamUnmanaged(dataStreamManagedBy) && (
+            <>
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.unamangedDataStreamTitle',
+                  { defaultMessage: 'This data stream is currently unmanaged' }
+                )}
+                color="warning"
+                iconType="warning"
+                data-test-subj="unamangedDataStreamCallout"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.unamangedDataStreamBody"
+                    defaultMessage="Configuring data retention will enable lifecycle for this data stream."
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer />
+            </>
+          )}
+
           {hasIlmPolicyWithDeletePhase && (
             <>
               <EuiCallOut
@@ -241,12 +267,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                 )}
                 color="warning"
                 iconType="warning"
-                data-test-subj="dsHasIlmPolicyWithDeletePhase"
+                data-test-subj="hasIlmPolicyWithDeletePhaseCallout"
               >
                 <p>
                   <FormattedMessage
                     id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseBody"
-                    defaultMessage="This data stream is managed by an ILM policy with a delete phase. If you change the data retention, only the non ilm managed indices will be affected."
+                    defaultMessage="Keeping data indefinitely is disabled because this data stream is managed by an ILM policy with a delete phase."
                   />
                 </p>
               </EuiCallOut>

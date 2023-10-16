@@ -376,6 +376,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           dataStreamName={dataStreamName}
           lifecycle={dataStream?.lifecycle}
           hasIlmPolicyWithDeletePhase={dataStream?.hasIlmPolicyWithDeletePhase}
+          dataStreamManagedBy={dataStream?.nextGenerationManagedBy}
         />
       )}
 

@@ -157,6 +157,8 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
         const [{ data_streams: dataStreams }, { data_streams: dataStreamsStats }] =
           await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);
 
+        console.log(JSON.stringify(dataStreams, null, 2));
+
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
           let hasIlmPolicyWithDeletePhase;
@@ -165,10 +167,10 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }
 
-          // if (dataStreams[0].ilm_policy) {
-          if (true) {
-            // const ilmPolicy = await getILMPolicy(client, dataStreams[0].ilm_policy);
-            const ilmPolicy = await getILMPolicy(client, 'asd');
+          if (dataStreams[0].ilm_policy) {
+            // if (true) {
+            const ilmPolicy = await getILMPolicy(client, dataStreams[0].ilm_policy);
+            // const ilmPolicy = await getILMPolicy(client, 'asd');
 
             hasIlmPolicyWithDeletePhase = !isEmpty(ilmPolicy?.policy?.phases?.delete);
           }

@@ -24,16 +24,28 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     hidden,
     lifecycle,
     hasIlmPolicyWithDeletePhase,
+    next_generation_managed_by,
   } = dataStreamFromEs;
 
   return {
     name,
     timeStampField,
     indices: indices.map(
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      ({ index_name, index_uuid }: { index_name: string; index_uuid: string }) => ({
+      ({
+        index_name,
+        index_uuid,
+        prefer_ilm,
+        managed_by,
+      }: {
+        index_name: string;
+        index_uuid: string;
+        prefer_ilm: boolean;
+        managed_by: string;
+      }) => ({
         name: index_name,
         uuid: index_uuid,
+        preferILM: prefer_ilm,
+        managedBy: managed_by,
       })
     ),
     generation,
@@ -48,6 +60,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     hidden,
     lifecycle,
     hasIlmPolicyWithDeletePhase,
+    nextGenerationManagedBy: next_generation_managed_by,
   };
 }
 
