@@ -221,6 +221,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
             title: 'Alerts',
           },
           {
+            id: 'item2-2',
             link: 'item2',
             title: 'Item should NOT appear!!',
             sideNavStatus: 'hidden', // Should not appear
@@ -243,6 +244,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
                 title: 'Signals',
               },
               {
+                id: 'group:settings.signals2',
                 link: 'group:settings.signals',
                 title: 'Signals - should NOT appear',
                 sideNavStatus: 'hidden', // Should not appear
@@ -255,37 +257,57 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
           },
           {
             id: 'group:settings',
-            title: 'Settings',
+            link: 'item1',
+            title: 'Settings as panel opener',
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'group:settings.logs',
-                title: 'Logs',
-              },
-              {
-                link: 'group:settings.signals',
-                title: 'Signals',
-              },
-              {
-                id: 'group:settings.signals-2',
-                link: 'group:settings.signals',
-                title: 'Signals - should NOT appear',
-                sideNavStatus: 'hidden', // Should not appear
-              },
-              {
-                link: 'group:settings.tracing',
-                title: 'Tracing',
-              },
-              {
-                id: 'group.nestedGroup',
-                link: 'group:settings.tracing',
-                title: 'Nested group',
+                title: 'Group 1',
                 children: [
                   {
-                    id: 'item1',
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
                     link: 'group:settings.signals',
-                    title: 'Hidden - should NOT appear',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group:settings.signals-2',
+                    link: 'group:settings.signals',
+                    title: 'Signals - should NOT appear',
                     sideNavStatus: 'hidden', // Should not appear
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+              {
+                children: [
+                  {
+                    id: 'group.nestedGroup',
+                    link: 'group:settings.tracing',
+                    title: 'Group 2',
+                    renderAs: 'item',
+                    children: [
+                      {
+                        id: 'item1',
+                        link: 'group:settings.signals',
+                        title: 'Hidden - should NOT appear',
+                        sideNavStatus: 'hidden', // Should not appear
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                children: [
+                  {
+                    id: 'group.nestedGroup',
+                    link: 'group:settings.tracing',
+                    title: 'Just an item in a group',
                   },
                 ],
               },
@@ -293,12 +315,24 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
           },
           {
             id: 'group:settings.hidden',
-            title: 'Settings - should NOT appear',
+            title: 'Settings 1 - should NOT appear', // sideNavStatus is 'hidden'
             sideNavStatus: 'hidden',
             children: [
               {
                 link: 'group:settings.logs',
                 title: 'Logs',
+              },
+            ],
+          },
+          {
+            id: 'group:settings.childrenHidden',
+            link: 'item1',
+            title: 'Settings 2 - should NOT appear', // All children are hidden
+            children: [
+              {
+                link: 'group:settings.logs',
+                title: 'Logs',
+                sideNavStatus: 'hidden',
               },
             ],
           },
@@ -312,6 +346,18 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
       {
         type: 'navItem',
         title: 'Custom link at root level',
+      },
+      {
+        type: 'navGroup',
+        id: 'test_all_hidden',
+        title: 'Test group render as Item',
+        renderAs: 'item',
+        children: [
+          {
+            id: 'test.item1',
+            link: 'item1',
+          },
+        ],
       },
       {
         type: 'navItem',
@@ -656,12 +702,13 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     title: 'Normal item',
                   },
                   {
-                    link: 'group:settings.logs',
+                    link: 'group:settings.logs2',
                     title: 'Item should NOT appear!', // Should not appear
                     sideNavStatus: 'hidden',
                   },
                   {
                     title: 'Group should NOT appear!',
+                    id: 'group:settings.logs3',
                     link: 'group:settings.logs',
                     sideNavStatus: 'hidden', // This group should not appear
                     children: [

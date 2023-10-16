@@ -132,12 +132,12 @@ interface NodeDefinitionBase {
    */
   openInNewTab?: boolean;
   /**
-   * ["group" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
+   * ["item" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
    * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
    */
   withBadge?: boolean;
   /**
-   * ["group" nodes only] If `withBadge` is true, this object can be used to customize the badge.
+   * ["item" nodes only] If `withBadge` is true, this object can be used to customize the badge.
    */
   badgeOptions?: {
     /** The text of the badge. Default: "Beta" */
@@ -152,7 +152,7 @@ interface NodeDefinitionBase {
  * Some of the process that occurs between the 2 are:
  * - "link" prop get converted to existing ChromNavLink
  * - "path" is added to each node based on where it is located in the tree
- * - "isActive" state is added to each node based on the current location
+ * - "isActive" state is set for each node if its URL matches the current location
  */
 export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */

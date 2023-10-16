@@ -12,12 +12,15 @@ import React, { Fragment, type FC } from 'react';
 
 import { isGroupNode, isItemNode } from '../../../utils';
 import { PanelGroup } from './panel_group';
+import { PanelNavItem } from './panel_nav_item';
 import type { PanelNavNode } from './types';
 
 /**
- * All the children of a panel must be wrapped into groups. This means that when there is only a single
- * group with 3 links it forces the consumer to add an extra wrapper group. To simplify that we automatically
- * wrap all the children into a single group when we detect that all are items.
+ * All the children of a panel must be wrapped into groups. This is because a group in DOM is represented by <ul> tags
+ * inside the <EuiListGroup/> which then renders the items in <li> insid the <EuiListGroupItem /> component.
+ * Having <li> without <ul> is okayish but semantically it is not correct.
+ * This function checks if we only have items and automatically wraps them into a group. If there is a mix
+ * of items and groups it throws an error.
  *
  * @param node The current active node
  * @returns The children serialized
@@ -67,8 +70,9 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
   );
   const serializedChildren = serializeChildren({ ...selectedNode, children: filteredChildren });
   const totalChildren = serializedChildren?.length ?? 0;
-  const firstGroupTitle = serializedChildren?.[0]?.title;
-  const firstGroupHasTitle = !!firstGroupTitle && firstGroupTitle !== '';
+  const firstChildIsGroup = !!serializedChildren?.[0]?.children;
+  const firstGroupTitle = firstChildIsGroup && serializedChildren?.[0]?.title;
+  const firstGroupHasTitle = !!firstGroupTitle;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
@@ -91,8 +95,8 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
               {serializedChildren.map((child, i) => {
                 const hasHorizontalRuleBefore =
                   i === 0 ? false : !!serializedChildren?.[i - 1]?.appendHorizontalRule;
-
-                return (
+                const isGroup = !!child.children;
+                return isGroup ? (
                   <Fragment key={child.id}>
                     <PanelGroup
                       navNode={child}
@@ -103,6 +107,8 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
                       <EuiSpacer size={child.appendHorizontalRule ? 'm' : 'l'} />
                     )}
                   </Fragment>
+                ) : (
+                  <PanelNavItem key={child.id} item={child} />
                 );
               })}
             </>

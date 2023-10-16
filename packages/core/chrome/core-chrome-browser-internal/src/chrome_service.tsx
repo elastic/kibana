@@ -204,14 +204,20 @@ export class ChromeService {
     };
 
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!, chromeStyle$]).pipe(
-      map(([headerBanner, isVisible, chromeStyle]) => {
+    const bodyClasses$ = combineLatest([
+      headerBanner$,
+      this.isVisible$!,
+      chromeStyle$,
+      application.currentActionMenu$,
+    ]).pipe(
+      map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
         return [
           'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+          chromeStyle === 'project' && actionMenu ? 'kbnBody--hasProjectActionMenu' : '',
           getKbnVersionClass(),
-        ];
+        ].filter((className) => !!className);
       })
     );
 
