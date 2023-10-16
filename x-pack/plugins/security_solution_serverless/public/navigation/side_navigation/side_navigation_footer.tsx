@@ -81,7 +81,7 @@ const SideNavigationFooterStandalone: React.FC<{
         title={item.label}
         icon={item.iconType}
         iconProps={{ size: 'm' }}
-        data-test-subj={`nav-bucket-${item.id}`}
+        data-test-subj={`solutionSideNavItemLink-${item.id}`}
         href={item.href}
         onClick={item.onClick}
         isSelected={getNavLinkIdFromProjectPageName(item.id) === activeNodeId}
