@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eu
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
+import { css } from '@emotion/react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -119,7 +120,17 @@ export const Description: FC = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={DESCRIPTION_DETAILS_TEST_ID}>
-        {isAlert ? alertRuleDescription : '-'}
+        <p
+          css={css`
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          `}
+        >
+          {isAlert ? alertRuleDescription : '-'}
+        </p>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
