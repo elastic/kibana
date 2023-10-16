@@ -19,9 +19,10 @@ import {
   SETUP_API_ROUTE,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { usageTracker } from './usage_tracker';
 import {
+  createToolingLogger,
   EndpointDataLoadingError,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
@@ -40,7 +41,7 @@ export interface SetupFleetForEndpointResponse {
 export const setupFleetForEndpoint = usageTracker.track(
   'setupFleetForEndpoint',
   async (kbnClient: KbnClient, logger?: ToolingLog): Promise<void> => {
-    const log = logger ?? new ToolingLog();
+    const log = logger ?? createToolingLogger();
 
     log.info(`setupFleetForEndpoint(): Setting up fleet for endpoint`);
 

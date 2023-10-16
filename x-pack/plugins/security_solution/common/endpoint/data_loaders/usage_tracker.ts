@@ -7,10 +7,11 @@
 
 /* eslint-disable max-classes-per-file,@typescript-eslint/no-explicit-any */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { isPromise } from '@kbn/std';
 import moment from 'moment';
 import { once } from 'lodash';
+import { createToolingLogger } from './utils';
 
 interface UsageRecordJson {
   id: string;
@@ -48,7 +49,7 @@ class UsageTracker {
   private wrappedCallbacks = new WeakSet<Function>();
 
   constructor({
-    logger = new ToolingLog({ level: 'verbose', writeTo: process.stdout }),
+    logger = createToolingLogger(),
     dumpOnProcessExit = false,
     maxRecordsPerType = 25,
   }: UsageTrackerOptions = {}) {

@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
@@ -16,6 +16,7 @@ import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './network_services';
@@ -108,10 +109,11 @@ export const createRuntimeServices = async ({
   apiKey,
   esUsername,
   esPassword,
-  log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
+  log: _log,
   asSuperuser = false,
   noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
+  const log = _log ?? createToolingLogger();
   let username = _username;
   let password = _password;
 
@@ -252,7 +254,7 @@ export const createKbnClient = ({
   username,
   password,
   apiKey,
-  log = new ToolingLog(),
+  log = createToolingLogger(),
   noCertForSsl,
 }: {
   url: string;

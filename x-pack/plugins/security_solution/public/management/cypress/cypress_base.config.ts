@@ -6,8 +6,10 @@
  */
 
 import { merge } from 'lodash';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
+import { usageTracker } from '../../../common/endpoint/data_loaders/usage_tracker';
 
 export const getCypressBaseConfig = (
   overrides: Cypress.ConfigOptions = {}
@@ -70,6 +72,10 @@ export const getCypressBaseConfig = (
 
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           require('@cypress/grep/src/plugin')(config);
+
+          on('after:spec', () => {
+            createToolingLogger().info(usageTracker.toSummaryTable());
+          });
 
           return config;
         },
