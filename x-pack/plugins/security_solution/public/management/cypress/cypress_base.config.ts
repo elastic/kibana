@@ -74,7 +74,10 @@ export const getCypressBaseConfig = (
           require('@cypress/grep/src/plugin')(config);
 
           on('after:spec', () => {
-            createToolingLogger().info(usageTracker.toSummaryTable());
+            createToolingLogger().info(
+              'Tooling Usage Tracking summary:',
+              usageTracker.toSummaryTable()
+            );
           });
 
           return config;
