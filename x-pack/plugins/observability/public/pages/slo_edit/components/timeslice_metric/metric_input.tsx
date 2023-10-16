@@ -74,24 +74,26 @@ export function MetricInput({
   return (
     <>
       <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={
-            <span>
-              {aggregationLabel} {metric.name}
-            </span>
-          }
-        >
-          <Controller
-            name={`indicator.params.metric.metrics.${index}.aggregation`}
-            defaultValue="avg"
-            rules={{ required: true }}
-            control={control}
-            render={({ field: { ref, ...field }, fieldState }) => (
+        <Controller
+          name={`indicator.params.metric.metrics.${index}.aggregation`}
+          defaultValue="avg"
+          rules={{ required: true }}
+          control={control}
+          render={({ field: { ref, ...field }, fieldState }) => (
+            <EuiFormRow
+              fullWidth
+              label={
+                <span>
+                  {aggregationLabel} {metric.name}
+                </span>
+              }
+              isInvalid={fieldState.invalid}
+            >
               <EuiComboBox
                 {...field}
                 async
                 fullWidth
+                isClearable={false}
                 singleSelection={{ asPlainText: true }}
                 placeholder={i18n.translate(
                   'xpack.observability.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder',
@@ -124,35 +126,36 @@ export function MetricInput({
                 }
                 options={AGGREGATION_OPTIONS}
               />
-            )}
-          />
-        </EuiFormRow>
+            </EuiFormRow>
+          )}
+        />
       </EuiFlexItem>
       {metric.aggregation === 'percentile' && (
         <EuiFlexItem grow={0}>
-          <EuiFormRow
-            fullWidth
-            label={
-              <span>
-                {i18n.translate(
-                  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.percentileLabel',
-                  { defaultMessage: 'Percentile' }
-                )}{' '}
-                {metric.name}
-              </span>
-            }
-          >
-            <Controller
-              name={`indicator.params.metric.metrics.${index}.percentile`}
-              defaultValue={95}
-              rules={{
-                required: true,
-                min: 0.001,
-                max: 99.999,
-              }}
-              shouldUnregister={true}
-              control={control}
-              render={({ field: { ref, onChange, ...field }, fieldState }) => (
+          <Controller
+            name={`indicator.params.metric.metrics.${index}.percentile`}
+            defaultValue={95}
+            rules={{
+              required: true,
+              min: 0.001,
+              max: 99.999,
+            }}
+            shouldUnregister={true}
+            control={control}
+            render={({ field: { ref, onChange, ...field }, fieldState }) => (
+              <EuiFormRow
+                fullWidth
+                isInvalid={fieldState.invalid}
+                label={
+                  <span>
+                    {i18n.translate(
+                      'xpack.observability.slo.sloEdit.sliType.timesliceMetric.percentileLabel',
+                      { defaultMessage: 'Percentile' }
+                    )}{' '}
+                    {metric.name}
+                  </span>
+                }
+              >
                 <EuiFieldNumber
                   {...field}
                   style={{ width: 80 }}
@@ -167,28 +170,29 @@ export function MetricInput({
                   isLoading={!!indexPattern && isLoadingIndex}
                   onChange={(event) => onChange(Number(event.target.value))}
                 />
-              )}
-            />
-          </EuiFormRow>
+              </EuiFormRow>
+            )}
+          />
         </EuiFlexItem>
       )}
       {metric.aggregation !== 'doc_count' && (
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={
-              <span>
-                {fieldLabel} {metric.name} {fieldTooltip}
-              </span>
-            }
-          >
-            <Controller
-              name={`indicator.params.metric.metrics.${index}.field`}
-              defaultValue=""
-              rules={{ required: true }}
-              shouldUnregister={true}
-              control={control}
-              render={({ field: { ref, ...field }, fieldState }) => (
+          <Controller
+            name={`indicator.params.metric.metrics.${index}.field`}
+            defaultValue=""
+            rules={{ required: true }}
+            shouldUnregister={true}
+            control={control}
+            render={({ field: { ref, ...field }, fieldState }) => (
+              <EuiFormRow
+                fullWidth
+                isInvalid={fieldState.invalid}
+                label={
+                  <span>
+                    {fieldLabel} {metric.name} {fieldTooltip}
+                  </span>
+                }
+              >
                 <EuiComboBox
                   {...field}
                   async
@@ -225,9 +229,9 @@ export function MetricInput({
                   }
                   options={createOptionsFromFields(metricFields)}
                 />
-              )}
-            />
-          </EuiFormRow>
+              </EuiFormRow>
+            )}
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
