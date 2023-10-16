@@ -9,6 +9,8 @@
 import { getDataViewAppState } from './get_switch_data_view_app_state';
 import { DataView } from '@kbn/data-views-plugin/public';
 
+const emptyDefaultColumns: string[] = [];
+
 /**
  * Helper function returning an data view
  */
@@ -43,6 +45,7 @@ describe('Discover getDataViewAppState', () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
+      emptyDefaultColumns,
       ['category', 'name', 'unknown'],
       [['category', 'desc']]
     );
@@ -53,6 +56,7 @@ describe('Discover getDataViewAppState', () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
+      emptyDefaultColumns,
       ['name'],
       [
         ['category', 'desc'],
@@ -66,6 +70,7 @@ describe('Discover getDataViewAppState', () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
+      emptyDefaultColumns,
       ['name'],
       [
         ['category', 'desc'],
@@ -80,7 +85,13 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
     const next = getDataView('b', 'timeFieldB', ['timeFieldB']);
 
-    const result = getDataViewAppState(current, next, [], [['timeFieldA', 'desc']]);
+    const result = getDataViewAppState(
+      current,
+      next,
+      emptyDefaultColumns,
+      [],
+      [['timeFieldA', 'desc']]
+    );
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldB', 'desc']]);
   });
@@ -89,7 +100,13 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
     const next = getDataView('b', '', ['timeFieldA']);
 
-    const result = getDataViewAppState(current, next, [], [['timeFieldA', 'desc']]);
+    const result = getDataViewAppState(
+      current,
+      next,
+      emptyDefaultColumns,
+      [],
+      [['timeFieldA', 'desc']]
+    );
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([]);
   });
@@ -97,7 +114,7 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('b', '', ['timeFieldA']);
     const next = getDataView('a', 'timeFieldA', ['timeFieldA']);
 
-    const result = getDataViewAppState(current, next, [], []);
+    const result = getDataViewAppState(current, next, emptyDefaultColumns, [], []);
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldA', 'desc']]);
   });
@@ -105,8 +122,16 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('timebased', 'timefield', ['timefield']);
     const next = getDataView('timebased2', 'timefield2', ['timefield', 'timefield2']);
 
-    const result = getDataViewAppState(current, next, [], [['timefield', 'desc']]);
+    const result = getDataViewAppState(
+      current,
+      next,
+      emptyDefaultColumns,
+      [],
+      [['timefield', 'desc']]
+    );
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
+
+  // TODO: add tests
 });
