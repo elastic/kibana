@@ -53,6 +53,7 @@ export const useStats = ({
         const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
           `${STATS_ENDPOINT}/${encodedIndexName}`,
           {
+            version: '1',
             method: 'GET',
             signal: abortController.signal,
             query,
