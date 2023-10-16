@@ -9,6 +9,7 @@ import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
+import { defineQueryApiKeysRoute } from './query';
 import { defineUpdateApiKeyRoutes } from './update';
 import type { RouteDefinitionParams } from '..';
 
@@ -27,6 +28,7 @@ export type {
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './update';
 export type { GetAPIKeysResult } from './get';
+export type { QueryApiKeyResult } from './query';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
@@ -34,4 +36,5 @@ export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
+  defineQueryApiKeysRoute(params);
 }

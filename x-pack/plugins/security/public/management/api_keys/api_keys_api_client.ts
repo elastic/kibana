@@ -12,6 +12,7 @@ import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   GetAPIKeysResult,
+  QueryApiKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from '../../../server/routes/api_keys';
@@ -30,6 +31,12 @@ export class APIKeysAPIClient {
 
   public async getApiKeys() {
     return await this.http.get<GetAPIKeysResult>(apiKeysUrl);
+  }
+
+  public async queryApiKeys() {
+    return await this.http.post<QueryApiKeyResult>(`/internal/security/query/api_key`, {
+      body: JSON.stringify({ size: 100 }),
+    });
   }
 
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
