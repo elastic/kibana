@@ -1146,6 +1146,14 @@ export default function ({
     ) {
       // do not suppress autocomplete for a single character immediately following a slash or comma in URL
     } else if (
+      lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
+      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
+      lastEvaluatedToken.type === 'url.equal' &&
+      currentToken.type === 'url.value' &&
+      currentToken.value.length === 1
+    ) {
+      // do not suppress autocomplete for a single character immediately following an equal in URL
+    } else if (
       lastEvaluatedToken.position.column < currentToken.position.column &&
       lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
       lastEvaluatedToken.type === 'method' &&
