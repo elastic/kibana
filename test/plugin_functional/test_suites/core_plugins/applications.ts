@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const retry = getService('retry');
   const deployment = getService('deployment');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   function waitUntilLoadingIsDone() {
     return PageObjects.header.waitUntilLoadingHasFinished();
@@ -52,7 +53,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
     return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
-      return (await browser.getCurrentUrl()) === expectedUrl;
+      const currentUrl = await browser.getCurrentUrl();
+      if (currentUrl !== expectedUrl)
+        log.debug(`expected url to be ${expectedUrl}, got ${currentUrl}`);
+      return currentUrl === expectedUrl;
     });
   };
 
@@ -107,12 +111,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
-      try {
-        await testSubjects.existOrFail('fooAppHome');
-      } catch (err) {
-        const currentUrl = await browser.getCurrentUrl();
-        throw new Error(`Did not navigate to app root, url is ${currentUrl}`);
-      }
+      await testSubjects.existOrFail('fooAppHome');
     });
 
     it('navigates to other apps', async () => {
