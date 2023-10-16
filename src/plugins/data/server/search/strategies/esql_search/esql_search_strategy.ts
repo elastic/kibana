@@ -11,6 +11,8 @@ import type { Logger } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
 
+const ES_TIMEOUT_IN_MS = 120000;
+
 export const esqlSearchStrategyProvider = (
   logger: Logger,
   useInternalUser: boolean = false
@@ -43,8 +45,12 @@ export const esqlSearchStrategyProvider = (
           {
             signal: abortSignal,
             meta: true,
+            // this is a temporary solution for ES|QL queries.
+            // we found out that they are not aborted correctly
+            // so we decreate the ES timeout to 2mins
+            // and remove the retries
             maxRetries: 0,
-            requestTimeout: 120000,
+            requestTimeout: ES_TIMEOUT_IN_MS,
           }
         );
         return {
