@@ -15,6 +15,7 @@ import {
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
+  isAssignment,
   isColumnItem,
   isFunctionItem,
   isIncompleteItem,
@@ -101,6 +102,10 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   return { command, node };
 }
 
+function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
+  return node.name !== '=' && command.name !== 'enrich';
+}
+
 function getContext(innerText: string, ast: ESQLAst, offset: number) {
   const { command, node } = findAstPosition(ast, offset);
 
@@ -109,7 +114,8 @@ function getContext(innerText: string, ast: ESQLAst, offset: number) {
       // command ... a in ( <here> )
       return { type: 'list' as const, command, node };
     }
-    if (node.type === 'function') {
+    //
+    if (node.type === 'function' && isNotEnrichClauseAssigment(node, command)) {
       // command ... fn( <here> )
       return { type: 'function' as const, command, node };
     }
@@ -136,6 +142,10 @@ function getContext(innerText: string, ast: ESQLAst, offset: number) {
   return { type: 'expression' as const, command, node };
 }
 
+function isEmptyValue(text: string) {
+  return [EDITOR_MARKER, ''].includes(text);
+}
+
 // The enrich with clause it a bit tricky to detect, so it deserves a specific check
 function handleEnrichWithClause(option: ESQLCommandOption) {
   const fnArg = isFunctionItem(option.args[0]) ? option.args[0] : undefined;
@@ -143,11 +153,35 @@ function handleEnrichWithClause(option: ESQLCommandOption) {
     if (fnArg.name === '=' && isColumnItem(fnArg.args[0]) && fnArg.args[1]) {
       const assignValue = fnArg.args[1];
       if (Array.isArray(assignValue) && isColumnItem(assignValue[0])) {
-        return fnArg.args[0].name === assignValue[0].name;
+        return fnArg.args[0].name === assignValue[0].name || isEmptyValue(assignValue[0].name);
       }
     }
   }
   return false;
+}
+
+function hasSameArgBothSides(assignFn: ESQLFunction) {
+  if (assignFn.name === '=' && isColumnItem(assignFn.args[0]) && assignFn.args[1]) {
+    const assignValue = assignFn.args[1];
+    if (Array.isArray(assignValue) && isColumnItem(assignValue[0])) {
+      return assignFn.args[0].name === assignValue[0].name;
+    }
+  }
+}
+
+function appendEnrichFields(
+  fieldsMap: Map<string, ESQLRealField>,
+  policyMetadata: ESQLPolicy | undefined
+) {
+  if (!policyMetadata) {
+    return fieldsMap;
+  }
+  // @TODO: improve this
+  const newMap: Map<string, ESQLRealField> = new Map(fieldsMap);
+  for (const field of policyMetadata.enrichFields) {
+    newMap.set(field, { name: field, type: 'number' });
+  }
+  return newMap;
 }
 
 function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
@@ -261,9 +295,12 @@ export async function suggest(
     // behave like list
     return getFunctionArgsSuggestions(
       innerText,
+      ast,
       astContext.node,
       astContext.command,
-      getFieldsByType
+      getFieldsByType,
+      getFieldsMap,
+      getPolicyMetadata
     );
   }
 
@@ -365,25 +402,21 @@ async function getExpressionSuggestionsByType(
   const isNewExpression = getLastCharFromTrimmed(innerText) === ',' || argIndex === 0;
   const optionsAlreadyDeclared = (
     command.args.filter((arg) => isOptionItem(arg)) as ESQLCommandOption[]
-  ).map(({ name }) => name);
-  const optionsAvailable = commandDef.options.filter(
-    ({ name }) => !optionsAlreadyDeclared.includes(name)
-  );
+  ).map(({ name }) => ({
+    name,
+    index: commandDef.options.findIndex(({ name: defName }) => defName === name),
+  }));
+
+  const optionsAvailable = commandDef.options.filter(({ name }, index) => {
+    const optArg = optionsAlreadyDeclared.find(({ name: optionName }) => optionName === name);
+    return (!optArg && !optionsAlreadyDeclared.length) || (optArg && index > optArg.index);
+  });
   let argDef = commandDef.signature.params[argIndex];
   if (!argDef && isNewExpression && commandDef.signature.multipleParams) {
     argDef = commandDef.signature.params[0];
   }
   const lastValidArgDef = commandDef.signature.params[commandDef.signature.params.length - 1];
 
-  // console.log({
-  //   args: command.args,
-  //   argsLength: command.args.length,
-  //   commandDef,
-  //   argIndex,
-  //   lastArg,
-  //   argDef,
-  //   isNewExpression,
-  // });
   const suggestions: AutocompleteCommandDefinition[] = [];
   const fieldsMap: Map<string, ESQLRealField> = await (argDef &&
   !isIncompleteItem(lastArg) &&
@@ -391,6 +424,7 @@ async function getExpressionSuggestionsByType(
     ? getFieldsMap()
     : new Map());
   const anyVariables = collectVariables(commands, fieldsMap);
+  // enrich with assignment has some special rules who are handled somewhere else
   const canHaveAssignments = ['eval', 'stats', 'where', 'row'].includes(command.name);
 
   if (canHaveAssignments && isNewExpression) {
@@ -527,9 +561,12 @@ async function getAllSuggestionsByType(
 
 async function getFunctionArgsSuggestions(
   innerText: string,
+  commands: ESQLCommand[],
   fn: ESQLFunction,
   command: ESQLCommand,
-  getFieldsByType: GetFieldsByTypeFn
+  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsMap: GetFieldsMapFn,
+  getPolicyMetadata: GetPolicyMetadataFn
 ): Promise<AutocompleteCommandDefinition[]> {
   const fnDefinition = getFunctionDefinition(fn.name);
   if (fnDefinition) {
@@ -594,53 +631,53 @@ async function getOptionArgsSuggestions(
           getFieldsMaps(),
         ]);
         const isNewExpression = getLastCharFromTrimmed(innerText) === ',' || argIndex === 0;
-        const anyVariables = collectVariables(commands, fieldsMap);
+        const anyVariables = collectVariables(
+          commands,
+          appendEnrichFields(fieldsMap, policyMetadata)
+        );
 
         if (isNewExpression) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
-          if (policyMetadata) {
-            suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
-          }
         }
-        if (!isNewExpression && lastArg && !isIncompleteItem(lastArg)) {
+        if (
+          policyMetadata &&
+          ((isAssignment(option.args[0]) && !hasSameArgBothSides(option.args[0])) ||
+            isNewExpression)
+        ) {
+          suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
+        }
+        if (
+          isAssignment(option.args[0]) &&
+          hasSameArgBothSides(option.args[0]) &&
+          !isNewExpression &&
+          lastArg &&
+          !isIncompleteItem(lastArg)
+        ) {
           suggestions.push(...getBuiltinCompatibleFunctionDefinition(command.name, 'any'));
+        }
+
+        if (isAssignment(option.args[0]) && hasSameArgBothSides(option.args[0])) {
+          suggestions.push(
+            ...getFinalSuggestions({
+              comma: true,
+            })
+          );
         }
       }
     }
   }
-  if (optionDef && !suggestions.length) {
-    const argIndex = Math.max(option.args.length - 1, 0);
-    const types = [optionDef.signature.params[argIndex].type].filter(nonNullable);
-    suggestions.push(
-      ...(await getAllSuggestionsByType(types, command.name, getFieldsByType, {
-        functions: false,
-        fields: true,
-        newVariables: false,
-      }))
-    );
+  if (optionDef) {
+    if (!suggestions.length) {
+      const argIndex = Math.max(option.args.length - 1, 0);
+      const types = [optionDef.signature.params[argIndex].type].filter(nonNullable);
+      suggestions.push(
+        ...(await getAllSuggestionsByType(types, command.name, getFieldsByType, {
+          functions: false,
+          fields: true,
+          newVariables: false,
+        }))
+      );
+    }
   }
   return suggestions;
 }
-
-// async function getIdentifierSuggestions(
-//   innerText: string,
-//   command: ESQLCommand,
-//   getSources: GetSourceFn,
-//   getFieldsByType: GetFieldsByTypeFn
-// ): Promise<AutocompleteCommandDefinition[]> {
-//   // does the command has arguments?
-//   const commandDef = getCommandDefinition(command.name);
-//   if (
-//     commandDef.signature.params.filter(({ optional }) => !optional).length <= command.args.length &&
-//     !command.incomplete
-//   ) {
-//     if (getLastCharFromTrimmed(innerText) !== ',') {
-//       return getFinalSuggestions({ comma: true }).concat(getOptions(command));
-//     }
-//   }
-//   if (command.name === 'from') {
-//     // find out possible arguments for the command
-//     return getSources();
-//   }
-//   return getFieldsByType('any');
-// }
