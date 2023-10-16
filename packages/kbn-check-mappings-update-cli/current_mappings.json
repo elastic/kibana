@@ -1465,26 +1465,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "cases-oracle": {
-    "dynamic": false,
-    "properties": {
-      "case_ids": {
-        "type": "keyword"
-      },
-      "counter": {
-        "type": "unsigned_long"
-      },
-      "created_at": {
-        "type": "date"
-      },
-      "rule_id": {
-        "type": "keyword"
-      },
-      "updated_at": {
-        "type": "date"
-      }
-    }
-  },
   "infrastructure-monitoring-log-view": {
     "dynamic": false,
     "properties": {
@@ -2614,106 +2594,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "infrastructure-ui-source": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "inventory-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "upgrade-assistant-reindex-operation": {
-    "dynamic": false,
-    "properties": {
-      "indexName": {
-        "type": "keyword"
-      },
-      "status": {
-        "type": "integer"
-      }
-    }
-  },
-  "upgrade-assistant-ml-upgrade-operation": {
-    "dynamic": false,
-    "properties": {
-      "snapshotId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      }
-    }
-  },
-  "monitoring-telemetry": {
-    "properties": {
-      "reportedClusterUuids": {
-        "type": "keyword"
-      }
-    }
-  },
-  "apm-telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-server-schema": {
-    "properties": {
-      "schemaJson": {
-        "type": "text",
-        "index": false
-      }
-    }
-  },
-  "apm-service-group": {
-    "properties": {
-      "groupName": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "apm-custom-dashboards": {
-    "properties": {
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "serviceEnvironmentFilterEnabled": {
-        "type": "boolean"
-      },
-      "serviceNameFilterEnabled": {
-        "type": "boolean"
-      }
-    }
-  },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
   "siem-ui-timeline-note": {
     "properties": {
       "eventId": {
@@ -3175,5 +3055,105 @@
         "index": false
       }
     }
+  },
+  "infrastructure-ui-source": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "inventory-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": false,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
+  "upgrade-assistant-ml-upgrade-operation": {
+    "dynamic": false,
+    "properties": {
+      "snapshotId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  },
+  "monitoring-telemetry": {
+    "properties": {
+      "reportedClusterUuids": {
+        "type": "keyword"
+      }
+    }
+  },
+  "apm-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "apm-server-schema": {
+    "properties": {
+      "schemaJson": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
+  "apm-service-group": {
+    "properties": {
+      "groupName": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
+      }
+    }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
   }
 }
