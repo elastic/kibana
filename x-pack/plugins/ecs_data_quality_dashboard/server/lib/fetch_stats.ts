@@ -12,7 +12,7 @@ export const fetchStats = (
   client: IScopedClusterClient,
   indexPattern: string
 ): Promise<IndicesStatsResponse> =>
-  client.asInternalUser.indices.stats({
+  client.asCurrentUser.indices.stats({
     expand_wildcards: ['open'],
     index: indexPattern,
   });
