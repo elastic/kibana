@@ -9,6 +9,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 
+import { IncomingMessage } from 'http';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -53,30 +54,45 @@ export const fetchConnectorExecuteAction = async ({
           // Azure OpenAI and Bedrock invokeAI both expect this body format
           messages: outboundMessages,
         };
-
+  const isStream = true;
   const requestBody = {
     params: {
-      subActionParams: { ...body, stream: true },
+      subActionParams: { ...body, stream: isStream },
       subAction: 'invokeAI',
     },
     assistantLangChain,
   };
 
   try {
-    const response = await http.fetch<{
-      connector_id: string;
-      status: string;
-      data: string;
-      service_message?: string;
-    }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
+    const response = await http.fetch<
+      | {
+          connector_id: string;
+          status: string;
+          data: string;
+          service_message?: string;
+        }
+      | IncomingMessage
+    >(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
       signal,
-      // asResponse: true,
-      // rawResponse: true,
+      asResponse: isStream,
+      rawResponse: isStream,
     });
 
-    console.log('response', response);
+    if (isStream) {
+      const reader = response?.response?.body?.getReader();
+
+      console.log('is typeof incoming message');
+      if (!reader) {
+        throw new Error('Could not get reader from response');
+      }
+      return {
+        response: reader,
+        isStream: true,
+        isError: false,
+      };
+    }
 
     if (response.status !== 'ok' || !response.data) {
       if (response.service_message) {

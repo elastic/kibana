@@ -40,17 +40,17 @@ export const postActionsConnectorExecuteRoute = (
 
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
-
-        // get a scoped esClient for assistant memory
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // if not langchain, call execute action directly and return the response:
         if (!request.body.assistantLangChain) {
           const result = await executeAction({ actions, request, connectorId });
-          console.log('this is the reader', result.data);
 
           return response.ok({
             body: result,
           });
         }
+
+        // get a scoped esClient for assistant memory
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         // convert the assistant messages to LangChain messages:
         const langChainMessages = getLangChainMessages(

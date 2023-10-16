@@ -8,6 +8,7 @@
 import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { IncomingMessage } from 'http';
 import { RequestBody } from './types';
 
 interface Props {
@@ -15,20 +16,33 @@ interface Props {
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
 }
+interface StaticResponse {
+  connector_id: string;
+  data: string;
+  status: string;
+}
 
-export const executeAction = async ({ actions, request, connectorId }: Props) => {
+export const executeAction = async ({
+  actions,
+  request,
+  connectorId,
+}: Props): Promise<StaticResponse | IncomingMessage> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: request.body.params,
   });
   const content = get('data', actionResult);
-  // if (typeof content !== 'string') {
-  //   throw new Error(`content should be a string, but it had an unexpected type: ${typeof content}`);
-  // }
-  return {
-    connector_id: connectorId,
-    data: content, // the response from the actions framework
-    status: 'ok',
-  };
+  if (typeof content === 'string') {
+    return {
+      connector_id: connectorId,
+      data: content, // the response from the actions framework
+      status: 'ok',
+    };
+  }
+  // is data stream
+  if (content instanceof IncomingMessage) {
+    return content;
+  }
+  throw new Error('Unexpected action result');
 };

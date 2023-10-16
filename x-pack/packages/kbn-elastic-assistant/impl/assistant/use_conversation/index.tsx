@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import { chatStream } from '../chat_send/chat_stream';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
@@ -56,6 +57,13 @@ interface SetConversationProps {
 }
 
 interface UseConversation {
+  appendStreamMessage: ({
+    conversationId,
+    reader,
+  }: {
+    conversationId: string;
+    reader: ReadableStream<Uint8Array>;
+  }) => void;
   appendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
   appendReplacements: ({
     conversationId,
@@ -71,6 +79,44 @@ interface UseConversation {
 export const useConversation = (): UseConversation => {
   const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
 
+  const [pendingMessage, setPendingMessage] = useState();
+  useEffect(() => {
+    console.log('pendingMessage', pendingMessage);
+  }, [pendingMessage]);
+  const appendStreamMessage = useCallback(({ conversationId, reader }) => {
+    console.log('appending appendStreamMessage');
+    let lastPendingMessage;
+    chatStream(reader).subscribe({
+      next: (msg) => {
+        lastPendingMessage = msg;
+        setPendingMessage(() => msg);
+      },
+      complete: () => {
+        setPendingMessage(lastPendingMessage);
+      },
+    });
+    console.log('lastPendingMessage', lastPendingMessage);
+    // assistantTelemetry?.reportAssistantMessageSent({ conversationId, role: message.role });
+    // let messages: Message[] = [];
+    // setConversations((prev: Record<string, Conversation>) => {
+    //   const prevConversation: Conversation | undefined = prev[conversationId];
+    //
+    //   if (prevConversation != null) {
+    //     messages = [...prevConversation.messages, message];
+    //     const newConversation = {
+    //       ...prevConversation,
+    //       messages,
+    //     };
+    //     return {
+    //       ...prev,
+    //       [conversationId]: newConversation,
+    //     };
+    //   } else {
+    //     return prev;
+    //   }
+    // });
+    // return messages;
+  }, []);
   /**
    * Append a message to the conversation[] for a given conversationId
    */
@@ -264,6 +310,7 @@ export const useConversation = (): UseConversation => {
   return {
     appendMessage,
     appendReplacements,
+    appendStreamMessage,
     clearConversation,
     createConversation,
     deleteConversation,

@@ -54,7 +54,8 @@ export const useChatSend = ({
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, clearConversation } = useConversation();
+  const { appendMessage, appendReplacements, appendStreamMessage, clearConversation } =
+    useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);
@@ -95,6 +96,13 @@ export const useChatSend = ({
         apiConfig: currentConversation.apiConfig,
         messages: updatedMessages,
       });
+      if (rawResponse.isStream) {
+        console.log('appendStreamMessage bout to call', rawResponse);
+        return appendStreamMessage({
+          conversationId: currentConversation.id,
+          reader: rawResponse.response,
+        });
+      }
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
       appendMessage({ conversationId: currentConversation.id, message: responseMessage });
     },
@@ -109,6 +117,7 @@ export const useChatSend = ({
       http,
       appendReplacements,
       editingSystemPromptId,
+      appendStreamMessage,
     ]
   );
 
