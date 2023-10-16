@@ -338,6 +338,55 @@ describe('Data Streams tab', () => {
       });
 
       describe('update data retention', () => {
+        test('Should show disabled or infinite retention period accordingly in table and flyout', async () => {
+          const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+          const ds1 = createDataStreamPayload({
+            name: 'dataStream1',
+            lifecycle: {
+              enabled: false,
+            },
+          });
+          const ds2 = createDataStreamPayload({
+            name: 'dataStream2',
+            lifecycle: {
+              enabled: true,
+            },
+          });
+
+          setLoadDataStreamsResponse([ds1, ds2]);
+          setLoadDataStreamResponse(ds1.name, ds1);
+
+          testBed = await setup(httpSetup, {
+            history: createMemoryHistory(),
+            url: urlServiceMock,
+          });
+          await act(async () => {
+            testBed.actions.goToDataStreamsList();
+          });
+          testBed.component.update();
+
+          const { actions, find, table } = testBed;
+          const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+          expect(tableCellsValues).toEqual([
+            ['', 'dataStream1', 'green', '1', 'Disabled', 'Delete'],
+            ['', 'dataStream2', 'green', '1', '', 'Delete'],
+          ]);
+
+          await actions.clickNameAt(0);
+          expect(find('dataRetentionDetail').text()).toBe('Disabled');
+
+          await act(async () => {
+            testBed.find('closeDetailsButton').simulate('click');
+          });
+          testBed.component.update();
+
+          setLoadDataStreamResponse(ds2.name, ds2);
+          await actions.clickNameAt(1);
+          expect(find('dataRetentionDetail').text()).toBe('Keep data indefinitely');
+        });
+
         test('can set data retention period', async () => {
           const {
             actions: { clickNameAt, clickEditDataRetentionButton },
