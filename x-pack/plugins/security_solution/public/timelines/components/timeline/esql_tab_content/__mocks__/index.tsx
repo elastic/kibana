@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MockDiscoverTabContent } from '../mocks/discover_tab_content';
+import { MockEsqlTabContent } from '../mocks/esql_tab_content';
 
-export const DiscoverTabContent = MockDiscoverTabContent;
+export const EsqlTabContent = MockEsqlTabContent;
 
 // eslint-disable-next-line import/no-default-export
-export default DiscoverTabContent;
+export default EsqlTabContent;
