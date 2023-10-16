@@ -13,12 +13,14 @@ import {
   EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
-import { Asset } from '@kbn/assetManager-plugin/common/types_api';
+import { Asset, AssetFilters } from '@kbn/assetManager-plugin/common/types_api';
+
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
+import { SearchBar } from './components/search_bar';
 
 const TestBox: React.FC = ({ children }) => (
   <div style={{ padding: 20, border: '1px solid magenta' }}>{children}</div>
@@ -29,16 +31,20 @@ export function AssetsInventoryPage() {
   const { services } = useKibana<ObservabilityPublicPluginsStart>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hosts, setHosts] = useState<Asset[]>([]);
+  const [filters, setFilters] = useState<AssetFilters>({});
 
   useEffect(() => {
     async function retrieve() {
       setIsLoading(true);
-      const { hosts } = await services.assetManager.publicAssetsClient.getHosts({ from: 'now-1d' });
+      const { hosts } = await services.assetManager.publicAssetsClient.getHosts({
+        from: 'now-1d',
+        filters,
+      });
       setHosts(hosts);
       setIsLoading(false);
     }
     retrieve();
-  }, [services]);
+  }, [services, filters]);
 
   return (
     <ObservabilityPageTemplate
@@ -55,7 +61,23 @@ export function AssetsInventoryPage() {
     >
       <EuiFlexGroup>
         <EuiFlexItem>
-          <TestBox>Unified search box</TestBox>
+          <SearchBar
+            onSubmit={(filters) => {
+              console.log('incoming filters', filters);
+              setFilters(filters);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          Show filters:{' '}
+          <pre>
+            <code>{JSON.stringify(filters, null, 2)}</code>
+          </pre>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TestBox>
+            <div style={{ width: '200px' }}>Date picker xyz</div>
+          </TestBox>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

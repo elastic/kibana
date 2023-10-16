@@ -214,6 +214,7 @@ export const getHostAssetsQueryOptionsRT = rt.intersection([
     filters: assetFiltersSingleKindRT,
   }),
 ]);
+
 export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
 export const getHostAssetsResponseRT = rt.type({
   hosts: rt.array(assetRT),
