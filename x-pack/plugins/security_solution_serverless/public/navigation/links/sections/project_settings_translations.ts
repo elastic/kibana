@@ -22,7 +22,7 @@ export const INTEGRATIONS_TITLE = i18n.translate(
 export const CLOUD_USERS_ROLES_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.usersAndRoles.title',
   {
-    defaultMessage: 'Users & roles',
+    defaultMessage: 'Users and roles',
   }
 );
 export const CLOUD_BILLING_TITLE = i18n.translate(
