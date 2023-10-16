@@ -284,7 +284,7 @@ function _generateMappings(
           case 'byte':
           case 'long':
           case 'short':
-	  case 'unsigned_long':
+          case 'unsigned_long':
             dynProperties.type = field.object_type;
             dynProperties.time_series_metric = field.metric_type;
             matchingType = field.object_type_mapping_type ?? 'long';
