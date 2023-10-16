@@ -129,6 +129,8 @@ export const dataLoaders = (
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
 
+  const log = new ToolingLog();
+
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
@@ -317,11 +319,12 @@ export const dataLoadersForRealEndpoints = (
   });
 
   on('after:run', async () => {
+    const { log } = await stackServicesPromise;
     if (fleetServerContainerId) {
       try {
         await execa.sync('docker', ['kill', fleetServerContainerId]);
       } catch(error) {
-        console.log(error);
+        log.error(error);
       }
     }
   });
