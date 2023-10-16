@@ -216,7 +216,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               'xpack.enterpriseSearch.server.connectors.accessControlSync.accessControlDisabledError',
               {
                 defaultMessage:
-                  'Access Control Sync cannot be created. Document Level Security is disabled.',
+                  'Access control sync cannot be created. You must first enable Document Level Security.',
               }
             ),
             response,
