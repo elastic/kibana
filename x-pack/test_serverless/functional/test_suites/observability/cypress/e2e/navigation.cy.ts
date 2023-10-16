@@ -153,14 +153,20 @@ describe.skip('Serverless', () => {
   it('sets AIOps nav item as active', () => {
     cy.visitKibana('/app/ml/aiops/explain_log_rate_spikes');
 
-    cy.getByTestSubj('nav-item-id-aiops').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-observability_project_nav.aiops').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
     cy.getByTestSubj('nav-item-id-ml:logRateAnalysis').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
 
     cy.visitKibana('/app/ml/aiops/change_point_detection');
-    cy.getByTestSubj('nav-item-id-aiops').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-observability_project_nav.aiops').should(
+      'have.class',
+      'euiSideNavItemButton-isOpen'
+    );
     cy.getByTestSubj('nav-item-id-ml:changePointDetections').should(
       'have.class',
       'euiSideNavItemButton-isSelected'
