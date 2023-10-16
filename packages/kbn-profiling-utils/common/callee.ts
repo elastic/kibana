@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { sum, sumBy } from 'lodash';
+import { sum } from 'lodash';
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   emptyExecutable,
