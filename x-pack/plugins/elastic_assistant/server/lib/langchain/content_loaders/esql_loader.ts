@@ -9,7 +9,8 @@ import { Logger } from '@kbn/core/server';
 
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
+
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
 /**
@@ -27,6 +28,11 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       },
       true
     );
+    const joinPath = resolve(join(__dirname, filePath));
+    const resolvePath = resolve(__dirname, '../../../knowledge_base/esql/language_definition');
+
+    logger.info(`esql_loader joinPath\n${joinPath}`);
+    logger.info(`esql_loader resolvePath\n${resolvePath}`);
 
     const languageLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/esql/language_definition'),
@@ -52,7 +58,9 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
 
     return response.length > 0;
   } catch (e) {
-    logger.error(`Failed to load ESQL docs and language docs into the Knowledge Base`, e);
+    logger.error(
+      `esql_loader Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base \n${e}`
+    );
     return false;
   }
 };

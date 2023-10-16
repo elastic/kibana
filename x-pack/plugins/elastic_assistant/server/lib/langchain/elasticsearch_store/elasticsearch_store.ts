@@ -98,7 +98,7 @@ export class ElasticsearchStore extends VectorStore {
         i.index?._id != null && i.index.error == null ? [i.index._id] : []
       );
     } catch (e) {
-      this.logger.error('Error loading data into KB', e);
+      this.logger.error(`Error loading data into KB\n ${e}`);
       return [];
     }
   };
