@@ -51,7 +51,7 @@ const defaultHeaders = [
 ];
 
 // Flaky in serverless tests
-describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
