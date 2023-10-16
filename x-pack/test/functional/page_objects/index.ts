@@ -49,7 +49,6 @@ import { TagManagementPageObject } from './tag_management_page';
 import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { WatcherPageObject } from './watcher_page';
-import { ExampleReportingPageObject } from '../../../../test/functional/apps/reporting/example_reporting_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -97,5 +96,4 @@ export const pageObjects = {
   upgradeAssistant: UpgradeAssistantPageObject,
   uptime: UptimePageObject,
   watcher: WatcherPageObject,
-  exampleReportingApp: ExampleReportingPageObject,
 };
