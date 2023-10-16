@@ -57,9 +57,6 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  compositeSlo: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
   slo: schema.object({
     rules: schema.object({

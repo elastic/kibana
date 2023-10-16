@@ -48,7 +48,7 @@ import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
-import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
+import { slo, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
 import {
   DefaultResourceInstaller,
@@ -246,9 +246,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const { ruleDataService } = plugins.ruleRegistry;
 
-    const savedObjectTypes = config.compositeSlo.enabled
-      ? [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE]
-      : [SO_SLO_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE];
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
@@ -300,9 +298,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     core.savedObjects.registerType(slo);
-    if (config.compositeSlo.enabled) {
-      core.savedObjects.registerType(compositeSlo);
-    }
     core.savedObjects.registerType(threshold);
 
     registerRuleTypes(
