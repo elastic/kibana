@@ -28,7 +28,7 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       },
       true
     );
-    const joinPath = resolve(join(__dirname, filePath));
+    const joinPath = resolve(join(__dirname, '../../../knowledge_base/esql/language_definition'));
     const resolvePath = resolve(__dirname, '../../../knowledge_base/esql/language_definition');
 
     logger.info(`esql_loader joinPath\n${joinPath}`);
