@@ -35,9 +35,6 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 };
 
 export const DashboardViewportComponent = () => {
-  const {
-    settings: { isProjectEnabledInLabs },
-  } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
   const dashboard = useDashboardContainer();
