@@ -64,14 +64,6 @@ export const MetricsSectionTitle = () => {
   );
 };
 
-export const NginxMetricsSectionTitle = () => (
-  <SectionTitle
-    title={i18n.translate('xpack.infra.assetDetails.overview.nginxMetricsSectionTitle', {
-      defaultMessage: 'Nginx Metric',
-    })}
-  />
-);
-
 export const KubernetesMetricsSectionTitle = () => (
   <SectionTitle
     title={i18n.translate('xpack.infra.assetDetails.overview.kubernetesMetricsSectionTitle', {

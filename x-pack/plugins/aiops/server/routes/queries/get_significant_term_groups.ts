@@ -15,10 +15,10 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 import { getMissingSignificantTerms } from './get_missing_significant_terms';
 import { transformSignificantTermToGroup } from './transform_significant_term_to_group';
-import type { ItemsetResult } from '../../../common/types';
+import type { ItemSet } from '../../../common/types';
 
 export function getSignificantTermGroups(
-  itemsets: ItemsetResult[],
+  itemsets: ItemSet[],
   significantTerms: SignificantTerm[],
   fields: string[]
 ): SignificantTermGroup[] {
