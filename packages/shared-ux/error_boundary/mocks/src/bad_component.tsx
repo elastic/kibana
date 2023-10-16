@@ -14,7 +14,7 @@ export const BadComponent = () => {
   const [hasError, setHasError] = useState(false);
 
   if (hasError) {
-    throw new Error('This is an error to show the storybook user!'); // custom error
+    throw new Error('This is an error to show the test user!'); // custom error
   }
 
   const clickedForError = action('clicked for error');
@@ -23,5 +23,9 @@ export const BadComponent = () => {
     setHasError(true);
   };
 
-  return <EuiButton onClick={handleClick}>Click for error</EuiButton>;
+  return (
+    <EuiButton onClick={handleClick} data-test-subj="clickForErrorBtn">
+      Click for error
+    </EuiButton>
+  );
 };

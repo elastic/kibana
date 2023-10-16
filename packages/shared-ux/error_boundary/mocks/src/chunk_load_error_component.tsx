@@ -26,7 +26,7 @@ export const ChunkLoadErrorComponent = () => {
   };
 
   return (
-    <EuiButton onClick={handleClick} fill={true}>
+    <EuiButton onClick={handleClick} fill={true} data-test-subj="clickForErrorBtn">
       Click for error
     </EuiButton>
   );

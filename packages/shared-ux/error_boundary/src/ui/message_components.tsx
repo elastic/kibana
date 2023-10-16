@@ -33,10 +33,11 @@ export const FatalPrompt = (props: ErrorCalloutProps) => {
   const errorBoundaryAccordionId = useGeneratedHtmlId({ prefix: 'errorBoundaryAccordion' });
   return (
     <EuiCallOut title={strings.fatal.callout.title()} color="danger" iconType="error">
-      <p>{strings.fatal.callout.body}</p>
+      <p>{strings.fatal.callout.body()}</p>
       <EuiAccordion
         id={errorBoundaryAccordionId}
         buttonContent={strings.fatal.callout.showDetailsButton()}
+        data-test-subj="fatalPromptDetailsBtn"
       >
         <EuiPanel paddingSize="m">
           <EuiCodeBlock>
@@ -50,7 +51,12 @@ export const FatalPrompt = (props: ErrorCalloutProps) => {
       </EuiAccordion>
       <EuiSpacer />
       <p>
-        <EuiButton color="danger" fill={true} onClick={reloadWindow}>
+        <EuiButton
+          color="danger"
+          fill={true}
+          onClick={reloadWindow}
+          data-test-subj="fatalPromptReloadBtn"
+        >
           {strings.fatal.callout.pageReloadButton()}
         </EuiButton>
       </p>
@@ -67,7 +73,7 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
       body={<p>{strings.recoverable.callout.body()}</p>}
       color="primary"
       actions={
-        <EuiButton fill={true} onClick={reloadWindow}>
+        <EuiButton fill={true} onClick={reloadWindow} data-test-subj="recoverablePromptReloadBtn">
           {strings.recoverable.callout.pageReloadButton()}
         </EuiButton>
       }
