@@ -14,7 +14,7 @@ export interface EcsRule {
   /**
    * Name, organization, or pseudonym of the author or authors who created the rule used to generate this event.
    */
-  author?: string | string[];
+  author?: string[];
   /**
    * A categorization value keyword used by the entity using the rule for detection of this event.
    */
