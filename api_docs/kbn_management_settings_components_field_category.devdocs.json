@@ -29,7 +29,7 @@
           "\nConvenience component for displaying a set of {@link FieldCategory} components, given\na set of categorized fields.\n"
         ],
         "signature": [
-          "({ categorizedFields, unsavedChanges, onClearQuery, isSavingEnabled, onFieldChange, }: ",
+          "({ categorizedFields, categoryCounts, unsavedChanges, onClearQuery, isSavingEnabled, onFieldChange, }: ",
           {
             "pluginId": "@kbn/management-settings-components-field-category",
             "scope": "common",
@@ -48,7 +48,7 @@
             "id": "def-common.FieldCategories.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  categorizedFields,\n  unsavedChanges = {},\n  onClearQuery,\n  isSavingEnabled,\n  onFieldChange,\n}",
+            "label": "{\n  categorizedFields,\n  categoryCounts,\n  unsavedChanges = {},\n  onClearQuery,\n  isSavingEnabled,\n  onFieldChange,\n}",
             "description": [],
             "signature": [
               {
@@ -341,6 +341,20 @@
                 "section": "def-common.CategorizedFields",
                 "text": "CategorizedFields"
               }
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoriesProps.categoryCounts",
+            "type": "Object",
+            "tags": [],
+            "label": "categoryCounts",
+            "description": [],
+            "signature": [
+              "{ [category: string]: number; }"
             ],
             "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
             "deprecated": false,

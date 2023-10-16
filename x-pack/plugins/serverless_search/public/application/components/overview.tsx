@@ -26,7 +26,6 @@ import {
   SelectClientPanel,
   OverviewPanel,
   CodeBox,
-  LanguageClientPanel,
   InstallClientPanel,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
@@ -42,25 +41,33 @@ import { Connector } from '@kbn/search-connectors';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
-import { javascriptDefinition } from './languages/javascript';
+import {
+  API_KEY_PLACEHOLDER,
+  CLOUD_ID_PLACEHOLDER,
+  ELASTICSEARCH_URL_PLACEHOLDER,
+} from '../constants';
+import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
+import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 
 export const ElasticsearchOverview = () => {
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<LanguageDefinition>(javascriptDefinition);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { application, cloud, http, user, share } = useKibanaServices();
 
-  const elasticsearchURL = useMemo(() => {
-    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  const { elasticsearchURL, cloudId } = useMemo(() => {
+    return {
+      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
+      cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
+    };
   }, [cloud]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
+    cloudId,
   };
 
   const { data: _data } = useQuery({
@@ -78,16 +85,14 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <SelectClientPanel docLinks={docLinks} http={http}>
-          {languageDefinitions.map((language, index) => (
-            <EuiFlexItem key={`panelItem.${index}`}>
-              <LanguageClientPanel
-                language={language}
-                setSelectedLanguage={setSelectedLanguage}
-                isSelectedLanguage={selectedLanguage === language}
-                assetBasePath={assetBasePath}
-              />
-            </EuiFlexItem>
-          ))}
+          <EuiFlexItem>
+            <LanguageGrid
+              assetBasePath={assetBasePath}
+              setSelectedLanguage={setSelectedLanguage}
+              languages={languageDefinitions}
+              selectedLanguage={selectedLanguage.id}
+            />
+          </EuiFlexItem>
         </SelectClientPanel>
       </EuiPageTemplate.Section>
 
@@ -111,12 +116,12 @@ export const ElasticsearchOverview = () => {
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
             defaultMessage:
-              "You'll need a private API key to securely connect to your project. Use an existing key, or create a new one and copy it somewhere safe.",
+              "An API key is a private, unique identifier for authentication and authorization. You'll need an API key to securely connect to your project.",
           })}
           leftPanelContent={<ApiKeyPanel setClientApiKey={setClientApiKey} />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.apiKey.title', {
-            defaultMessage: 'Prepare an API Key',
+            defaultMessage: 'API Key',
           })}
         />
       </EuiPageTemplate.Section>
