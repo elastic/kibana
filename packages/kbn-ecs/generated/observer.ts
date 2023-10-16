@@ -76,12 +76,12 @@ export interface EcsObserver {
   /**
    * IP addresses of the observer.
    */
-  ip?: string[];
+  ip?: string | string[];
   /**
    * MAC addresses of the observer.
    * The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.
    */
-  mac?: string[];
+  mac?: string | string[];
   /**
    * Custom name of the observer.
    * This is a name that can be given to an observer. This can be helpful for example if multiple firewalls of the same model are used in an organization.

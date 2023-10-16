@@ -180,6 +180,6 @@ export interface EcsSource {
     /**
      * Array of user roles at the time of the event.
      */
-    roles?: string[];
+    roles?: string | string[];
   };
 }
