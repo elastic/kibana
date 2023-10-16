@@ -33,7 +33,7 @@ registerCypressGrep();
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
 import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
 
-import type { ServerlessRoleName } from './roles';
+import { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
 import { waitUntil } from '../tasks/wait_until';
@@ -56,7 +56,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      login(role?: ServerlessRoleName | 'elastic'): void;
+      login(role: ServerlessRoleName): void;
 
       waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
@@ -83,11 +83,10 @@ Cypress.Commands.add('login', (role) => {
   const isServerless = Cypress.env().IS_SERVERLESS;
 
   if (isServerless) {
-    const overwrittenRole = role == null || role === 'elastic' ? 'elastic_serverless' : role;
-
-    return login.with(overwrittenRole, 'changeme');
+    return login.with(role, 'changeme');
   }
 
+  // @ts-expect-error hackish way to provide a new role in Osquery ESS only (Reader)
   return login(role);
 });
 
@@ -96,3 +95,12 @@ Cypress.Commands.add('waitUntil', waitUntil);
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 Cypress.on('uncaught:exception', () => false);
+
+// Login as a Platform Engineer to properly initialize Security Solution App
+before(() => {
+  cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
+  cy.visit('/app/security/alerts');
+  cy.getBySel('globalLoadingIndicator').should('exist');
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
+  cy.getBySel('manage-alert-detection-rules').should('exist');
+});
