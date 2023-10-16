@@ -8,8 +8,8 @@
 
 import url from 'url';
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
 import { ToolingLog } from '@kbn/tooling-log';
+import { PluginFunctionalProviderContext } from '../../services';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
   url.format({
