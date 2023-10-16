@@ -23,6 +23,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     privileges,
     hidden,
     lifecycle,
+    hasIlmPolicyWithDeletePhase,
   } = dataStreamFromEs;
 
   return {
@@ -46,6 +47,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     privileges,
     hidden,
     lifecycle,
+    hasIlmPolicyWithDeletePhase,
   };
 }
 

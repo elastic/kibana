@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiText,
   EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +44,7 @@ import { updateDataRetention } from '../../../../services/api';
 interface Props {
   lifecycle: DataStream['lifecycle'];
   dataStreamName: string;
+  hasIlmPolicyWithDeletePhase?: boolean;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
@@ -151,6 +153,7 @@ const configurationFormSchema: FormSchema = {
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   lifecycle,
   dataStreamName,
+  hasIlmPolicyWithDeletePhase,
   onClose,
 }) => {
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
@@ -229,6 +232,28 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
+          {hasIlmPolicyWithDeletePhase && (
+            <>
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseTitle',
+                  { defaultMessage: 'This data stream is managed by an ILM policy' }
+                )}
+                color="warning"
+                iconType="warning"
+                data-test-subj="dsHasIlmPolicyWithDeletePhase"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.hasIlmPolicyWithDeletePhaseBody"
+                    defaultMessage="This data stream is managed by an ILM policy with a delete phase. If you change the data retention, only the non ilm managed indices will be affected."
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer />
+            </>
+          )}
           <UseField
             path="dataRetention"
             component={NumericField}
@@ -247,14 +272,16 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             componentProps={{
               fullWidth: false,
               euiFieldProps: {
-                disabled: formData.infiniteRetentionPeriod,
+                disabled: hasIlmPolicyWithDeletePhase ? false : formData.infiniteRetentionPeriod,
                 'data-test-subj': `dataRetentionValue`,
                 min: 1,
                 append: (
                   <UnitField
                     path="timeUnit"
                     options={timeUnits}
-                    disabled={formData.infiniteRetentionPeriod}
+                    disabled={
+                      hasIlmPolicyWithDeletePhase ? false : formData.infiniteRetentionPeriod
+                    }
                     euiFieldProps={{
                       'data-test-subj': 'timeUnit',
                       'aria-label': i18n.translate(
@@ -274,6 +301,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             path="infiniteRetentionPeriod"
             component={ToggleField}
             data-test-subj="infiniteRetentionPeriod"
+            componentProps={{
+              euiFieldProps: {
+                disabled: hasIlmPolicyWithDeletePhase,
+              },
+            }}
           />
 
           <EuiSpacer />
