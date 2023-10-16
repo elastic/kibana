@@ -19,3 +19,12 @@ export interface ErrorBoundaryUIServices {
 export interface ErrorBoundaryServices extends ErrorBoundaryUIServices {
   errorService: ErrorService;
 }
+
+/**
+ * Kibana dependencies required to render this component.
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ErrorBoundaryKibanaDependencies {
+  // TODO analytics
+}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useContext } from 'react';
 
 import { ErrorBoundaryServices } from '../../types';
 import { ErrorService } from './error_service';
@@ -29,18 +29,13 @@ export const ErrorBoundaryProvider: FC<ErrorBoundaryServices> = ({
  */
 export const ErrorBoundaryKibanaProvider: FC = ({ children }) => {
   const reloadWindow = () => window.location.reload();
-  const errorService = useMemo(() => new ErrorService(), []);
 
-  return (
-    <Context.Provider
-      value={{
-        reloadWindow,
-        errorService,
-      }}
-    >
-      {children}
-    </Context.Provider>
-  );
+  const value: ErrorBoundaryServices = {
+    reloadWindow,
+    errorService: new ErrorService(),
+  };
+
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 /**

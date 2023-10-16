@@ -12,13 +12,14 @@ import {
   EuiAccordion,
   EuiButton,
   EuiCallOut,
-  EuiCode,
   EuiCodeBlock,
   EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
+import { errorMessageStrings as strings } from './message_strings';
 
 export interface ErrorCalloutProps {
   error: Error;
@@ -27,19 +28,20 @@ export interface ErrorCalloutProps {
   reloadWindow: () => void;
 }
 
-export const ErrorCallout = (props: ErrorCalloutProps) => {
+export const FatalPrompt = (props: ErrorCalloutProps) => {
   const { error, errorInfo, name: errorComponentName, reloadWindow } = props;
   const errorBoundaryAccordionId = useGeneratedHtmlId({ prefix: 'errorBoundaryAccordion' });
   return (
-    <EuiCallOut title="A fatal error was encountered" color="danger" iconType="error">
-      <p>Try refreshing this page.</p>
-      <EuiAccordion id={errorBoundaryAccordionId} buttonContent="Show detail">
+    <EuiCallOut title={strings.fatal.callout.title()} color="danger" iconType="error">
+      <p>{strings.fatal.callout.body}</p>
+      <EuiAccordion
+        id={errorBoundaryAccordionId}
+        buttonContent={strings.fatal.callout.showDetailsButton()}
+      >
         <EuiPanel paddingSize="m">
           <EuiCodeBlock>
             {errorComponentName && (
-              <p>
-                An error occurred in <EuiCode>{errorComponentName}</EuiCode>
-              </p>
+              <p>{strings.fatal.callout.details.componentName(errorComponentName)}</p>
             )}
             {error?.message && <p>{error.message}</p>}
             {errorInfo?.componentStack}
@@ -49,24 +51,24 @@ export const ErrorCallout = (props: ErrorCalloutProps) => {
       <EuiSpacer />
       <p>
         <EuiButton color="danger" fill={true} onClick={reloadWindow}>
-          Refresh
+          {strings.fatal.callout.pageReloadButton()}
         </EuiButton>
       </p>
     </EuiCallOut>
   );
 };
 
-export const RefresherPrompt = (props: ErrorCalloutProps) => {
+export const RecoverablePrompt = (props: ErrorCalloutProps) => {
   const { reloadWindow } = props;
   return (
     <EuiEmptyPrompt
       iconType="broom"
-      title={<h2>Sorry, please refresh</h2>}
-      body={<p>An error occurred when trying to load a part of the page. Please try refreshing.</p>}
+      title={<h2>{strings.recoverable.callout.title()}</h2>}
+      body={<p>{strings.recoverable.callout.body()}</p>}
       color="primary"
       actions={
         <EuiButton fill={true} onClick={reloadWindow}>
-          Refresh
+          {strings.recoverable.callout.pageReloadButton()}
         </EuiButton>
       }
     />

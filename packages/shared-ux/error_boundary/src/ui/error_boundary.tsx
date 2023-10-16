@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
+
 import { ErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
-import { ErrorCallout, RefresherPrompt } from './error_messages';
+import { FatalPrompt, RecoverablePrompt } from './message_components';
 
 interface ErrorBoundaryState {
   error: null | Error;
@@ -19,6 +20,9 @@ interface ErrorBoundaryState {
 }
 
 interface ErrorBoundaryProps {
+  /**
+   *
+   */
   children?: React.ReactNode;
 }
 
@@ -47,10 +51,9 @@ class ErrorBoundaryInternal extends React.Component<
     if (this.state.error != null) {
       const { error, errorInfo, componentName, isFatal } = this.state;
 
-      if (isFatal === false) {
-        // display error message in a "soft" container
+      if (isFatal) {
         return (
-          <RefresherPrompt
+          <FatalPrompt
             error={error}
             errorInfo={errorInfo}
             name={componentName}
@@ -58,9 +61,8 @@ class ErrorBoundaryInternal extends React.Component<
           />
         );
       } else {
-        // display error message in a "loud" container
         return (
-          <ErrorCallout
+          <RecoverablePrompt
             error={error}
             errorInfo={errorInfo}
             name={componentName}
