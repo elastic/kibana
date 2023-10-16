@@ -95,6 +95,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  unknownAggregateFunction: {
+    message: string;
+    type: { command: string; value: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

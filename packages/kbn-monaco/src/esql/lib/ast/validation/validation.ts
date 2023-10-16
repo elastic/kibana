@@ -490,7 +490,6 @@ function validateColumnForCommand(
   if (['from', 'show', 'limit'].includes(commandName)) {
     return messages;
   }
-  const commandDef = getCommandDefinition(commandName);
   if (commandName === 'row') {
     if (!references.variables.has(column.name)) {
       messages.push(
@@ -504,6 +503,7 @@ function validateColumnForCommand(
       );
     }
   } else {
+    const commandDef = getCommandDefinition(commandName);
     const columnRef = getColumnHit(column.name, references);
     if (columnRef) {
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
@@ -551,11 +551,11 @@ function validateColumnForCommand(
 
 function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
-  // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
   if (command.incomplete) {
     return messages;
   }
+  // do not check the command exists, the grammar is already picking that up
+  const commandDef = getCommandDefinition(command.name);
 
   // Now validate arguments
   for (const commandArg of command.args) {
@@ -564,6 +564,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
       if (isFunctionItem(arg)) {
         messages.push(...validateFunction(arg, command.name, references));
       }
+
       if (isOptionItem(arg)) {
         messages.push(
           ...validateOption(
@@ -575,7 +576,20 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
         );
       }
       if (isColumnItem(arg)) {
-        messages.push(...validateColumnForCommand(arg, command.name, references));
+        if (command.name === 'stats') {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownAggregateFunction',
+              values: {
+                command: capitalize(command.name),
+                value: (arg as ESQLSingleAstItem).name,
+              },
+              locations: (arg as ESQLSingleAstItem).location,
+            })
+          );
+        } else {
+          messages.push(...validateColumnForCommand(arg, command.name, references));
+        }
       }
       if (isTimeIntervalItem(arg)) {
         messages.push(

@@ -143,6 +143,16 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
+    case 'unknownAggregateFunction':
+      return {
+        message: i18n.translate('moanco.esql.validation.unknowAggregateFunction', {
+          defaultMessage: '{command} expects an aggregate function, found [{value}]',
+          values: {
+            command: out.command,
+            value: out.value,
+          },
+        }),
+      };
   }
   return { message: '' };
 }

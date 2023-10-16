@@ -952,7 +952,9 @@ describe('validation logic', () => {
 
   describe('stats', () => {
     testErrorsAndWarnings('from a | stats ', []);
-    testErrorsAndWarnings('from a | stats numberField ', []);
+    testErrorsAndWarnings('from a | stats numberField ', [
+      'Stats expects an aggregate function, found [numberField]',
+    ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
