@@ -188,7 +188,6 @@ export function OverviewPage() {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              flyoutSize="s"
               featureIds={observabilityAlertFeatureIds}
               hideLazyLoader
               id={ALERTS_TABLE_ID}

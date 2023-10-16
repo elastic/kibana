@@ -20,6 +20,7 @@ export const ProjectNavigation: React.FC = ({ children }) => {
 
   return (
     <EuiCollapsibleNavBeta
+      data-test-subj="projectLayoutSideNav"
       initialIsCollapsed={isCollapsed}
       onCollapseToggle={onCollapseToggle}
       css={isCollapsed ? { display: 'none;' } : {}}

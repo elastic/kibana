@@ -196,6 +196,10 @@ export const sizeRT = rt.union([
   createLiteralValueFromUndefinedRT(10),
 ]);
 export const assetDateRT = rt.union([dateRt, datemathStringRt]);
+
+/**
+ * Hosts
+ */
 export const getHostAssetsQueryOptionsRT = rt.exact(
   rt.partial({
     from: assetDateRT,
@@ -204,8 +208,25 @@ export const getHostAssetsQueryOptionsRT = rt.exact(
   })
 );
 export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
-
 export const getHostAssetsResponseRT = rt.type({
   hosts: rt.array(assetRT),
 });
 export type GetHostAssetsResponse = rt.TypeOf<typeof getHostAssetsResponseRT>;
+
+/**
+ * Services
+ */
+export const getServiceAssetsQueryOptionsRT = rt.exact(
+  rt.partial({
+    from: assetDateRT,
+    to: assetDateRT,
+    size: sizeRT,
+    parent: rt.string,
+  })
+);
+
+export type GetServiceAssetsQueryOptions = rt.TypeOf<typeof getServiceAssetsQueryOptionsRT>;
+export const getServiceAssetsResponseRT = rt.type({
+  services: rt.array(assetRT),
+});
+export type GetServiceAssetsResponse = rt.TypeOf<typeof getServiceAssetsResponseRT>;

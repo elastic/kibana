@@ -54,7 +54,7 @@ export class ElasticsearchStore extends VectorStore {
     this.esClient = esClient;
     this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
-    this.model = model ?? '.elser_model_1';
+    this.model = model ?? '.elser_model_2';
   }
 
   /**

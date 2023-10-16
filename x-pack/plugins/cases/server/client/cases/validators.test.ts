@@ -26,7 +26,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              value: ['this is a text field value', 'this is second'],
+              value: 'this is a text field value',
             },
             {
               key: 'second_key',
@@ -130,7 +130,7 @@ describe('validators', () => {
             {
               key: 'third_key',
               type: CustomFieldTypes.TEXT,
-              value: ['abc'],
+              value: 'abc',
             },
           ],
 
@@ -187,7 +187,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              value: ['this is a text field value', 'this is second'],
+              value: 'this is a text field value',
             },
             {
               key: 'second_key',
@@ -300,12 +300,12 @@ describe('validators', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE as const,
-          value: null,
+          value: true,
         },
       ];
       expect(() =>
@@ -371,6 +371,38 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
+    });
+
+    it('throws if required custom fields have null value', () => {
+      const requestCustomFields: CaseCustomFields = [
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ];
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'foo',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'foo',
+          required: true,
+        },
+      ];
+      expect(() =>
+        validateRequiredCustomFields({
+          requestCustomFields,
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Missing required custom fields: first_key,second_key"`
+      );
     });
 
     it('throws if configuration is missing and request has custom fields', () => {

@@ -85,18 +85,21 @@ export class Plugin implements InfraClientPluginClass {
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
-    pluginsSetup.observability.dashboard.register({
-      appName: 'infra_logs',
-      hasData: getLogsHasDataFetcher(core.getStartServices),
-      fetchData: getLogsOverviewDataFetcher(core.getStartServices),
-    });
+
+    if (this.config.featureFlags.logsUIEnabled) {
+      // fetchData `appLink` redirects to logs/stream
+      pluginsSetup.observability.dashboard.register({
+        appName: 'infra_logs',
+        hasData: getLogsHasDataFetcher(core.getStartServices),
+        fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+      });
+    }
 
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_metrics',
       hasData: createMetricsHasData(core.getStartServices),
       fetchData: createMetricsFetchData(core.getStartServices),
     });
-
     pluginsSetup.logsShared.logViews.setLogViewsStaticConfig({
       messageFields: this.config.sources?.default?.fields?.message,
     });
@@ -107,13 +110,6 @@ export class Plugin implements InfraClientPluginClass {
     ]);
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
-    const infraEntries = [
-      { label: 'Inventory', app: 'metrics', path: '/inventory' },
-      ...(this.config.featureFlags.metricsExplorerEnabled
-        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
-        : []),
-      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
-    ];
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
         map(
@@ -136,9 +132,13 @@ export class Plugin implements InfraClientPluginClass {
                         path: '/',
                         isBetaFeature: true,
                       },
-                      { label: 'Stream', app: 'logs', path: '/stream' },
-                      { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                      { label: 'Categories', app: 'logs', path: '/log-categories' },
+                      ...(this.config.featureFlags.logsUIEnabled
+                        ? [
+                            { label: 'Stream', app: 'logs', path: '/stream' },
+                            { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+                            { label: 'Categories', app: 'logs', path: '/log-categories' },
+                          ]
+                        : []),
                     ],
                   },
                 ]
@@ -148,7 +148,13 @@ export class Plugin implements InfraClientPluginClass {
                   {
                     label: 'Infrastructure',
                     sortKey: 300,
-                    entries: infraEntries,
+                    entries: [
+                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                        : []),
+                      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
+                    ],
                   },
                 ]
               : []),
@@ -172,54 +178,56 @@ export class Plugin implements InfraClientPluginClass {
       createLogThresholdRuleType(core, logsLocator)
     );
 
-    core.application.register({
-      id: 'logs',
-      title: i18n.translate('xpack.infra.logs.pluginTitle', {
-        defaultMessage: 'Logs',
-      }),
-      euiIconType: 'logoObservability',
-      order: 8100,
-      appRoute: '/app/logs',
-      // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
-      deepLinks: [
-        {
-          id: 'stream',
-          title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
-            defaultMessage: 'Stream',
-          }),
-          path: '/stream',
-        },
-        {
-          id: 'anomalies',
-          title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-            defaultMessage: 'Anomalies',
-          }),
-          path: '/anomalies',
-        },
-        {
-          id: 'log-categories',
-          title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
-            defaultMessage: 'Categories',
-          }),
-          path: '/log-categories',
-        },
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-      ],
-      category: DEFAULT_APP_CATEGORIES.observability,
-      mount: async (params: AppMountParameters) => {
-        // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, plugins, pluginStart] = await core.getStartServices();
+    if (this.config.featureFlags.logsUIEnabled) {
+      core.application.register({
+        id: 'logs',
+        title: i18n.translate('xpack.infra.logs.pluginTitle', {
+          defaultMessage: 'Logs',
+        }),
+        euiIconType: 'logoObservability',
+        order: 8100,
+        appRoute: '/app/logs',
+        // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
+        deepLinks: [
+          {
+            id: 'stream',
+            title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
+              defaultMessage: 'Stream',
+            }),
+            path: '/stream',
+          },
+          {
+            id: 'anomalies',
+            title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: '/anomalies',
+          },
+          {
+            id: 'log-categories',
+            title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
+              defaultMessage: 'Categories',
+            }),
+            path: '/log-categories',
+          },
+          {
+            id: 'settings',
+            title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
+              defaultMessage: 'Settings',
+            }),
+            path: '/settings',
+          },
+        ],
+        category: DEFAULT_APP_CATEGORIES.observability,
+        mount: async (params: AppMountParameters) => {
+          // mount callback should not use setup dependencies, get start dependencies instead
+          const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
-        const { renderApp } = await import('./apps/logs_app');
-        return renderApp(coreStart, plugins, pluginStart, params);
-      },
-    });
+          const { renderApp } = await import('./apps/logs_app');
+          return renderApp(coreStart, plugins, pluginStart, params);
+        },
+      });
+    }
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
     const infraDeepLinks: AppDeepLink[] = [
@@ -285,14 +293,6 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: infraDeepLinks,
-        }));
-      }
-    );
-
     /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
     to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
     core.application.register({
@@ -306,6 +306,14 @@ export class Plugin implements InfraClientPluginClass {
         return renderApp(params);
       },
     });
+
+    startDep$AndHostViewFlag$.subscribe(
+      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: infraDeepLinks,
+        }));
+      }
+    );
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });

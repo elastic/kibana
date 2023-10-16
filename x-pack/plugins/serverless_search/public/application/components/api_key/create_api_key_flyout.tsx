@@ -40,7 +40,7 @@ import {
 } from '../../../../common/i18n_string';
 import { CreateAPIKeyArgs } from '../../../../common/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { CREATE_API_KEY_PATH } from '../../routes';
+import { CREATE_API_KEY_PATH } from '../../../../common/routes';
 import { isApiError } from '../../../utils/api';
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';

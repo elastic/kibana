@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -22,9 +22,4 @@ export interface AssetManagerPluginSetupDependencies {
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;
-}
-
-export interface AssetClientDependencies {
-  elasticsearchClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract;
 }

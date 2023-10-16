@@ -84,13 +84,16 @@ export function InstallElasticAgent() {
 
   async function onContinue() {
     if (systemIntegrationStatus === 'rejected') {
-      await allDataSetsLocator!.navigate({});
+      await allDataSetsLocator!.navigate({
+        origin: { id: 'application-log-onboarding' },
+      });
       return;
     }
 
     await singleDatasetLocator!.navigate({
       integration: 'system',
       dataset: 'system.syslog',
+      origin: { id: 'application-log-onboarding' },
     });
   }
 

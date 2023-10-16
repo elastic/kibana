@@ -42,7 +42,7 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({
 
   const { isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async (inputDescription: string) => {
-      const body = { Description: inputDescription };
+      const body = { description: inputDescription };
       const result = await http.post(
         `/internal/serverless_search/connectors/${connectorId}/description`,
         {
@@ -83,7 +83,7 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({
                 value={newDescription}
               />
             ) : (
-              <EuiText>{description}</EuiText>
+              <EuiText size="s">{description}</EuiText>
             )}
           </EuiFormRow>
         </EuiFlexItem>

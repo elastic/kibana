@@ -71,7 +71,7 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
-  esServerlessOptions?: Pick<ServerlessOptions, 'image' | 'tag' | 'host'>;
+  esServerlessOptions?: Pick<ServerlessOptions, 'image' | 'tag' | 'resources' | 'host'>;
   esJavaOpts?: string;
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
@@ -245,6 +245,7 @@ export function createTestEsCluster<
           image: esServerlessOptions?.image,
           tag: esServerlessOptions?.tag,
           host: esServerlessOptions?.host,
+          resources: esServerlessOptions?.resources,
           port,
           clean: true,
           background: true,

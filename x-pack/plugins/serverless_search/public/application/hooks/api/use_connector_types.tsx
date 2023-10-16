@@ -11,6 +11,7 @@ import { useKibanaServices } from '../use_kibana';
 
 export const useConnectorTypes = () => {
   const { http } = useKibanaServices();
+
   return useQuery({
     queryKey: ['fetchConnectorTypes'],
     queryFn: () =>
