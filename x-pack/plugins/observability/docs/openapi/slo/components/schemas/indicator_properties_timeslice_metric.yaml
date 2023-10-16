@@ -29,7 +29,7 @@ properties:
         example: timestamp
       metric:
         description: >
-          An object defining the metrics, equation, and threhsold to determine if it's a good slice or not
+          An object defining the metrics, equation, and threshold to determine if it's a good slice or not
         type: object
         required:
           - metrics
