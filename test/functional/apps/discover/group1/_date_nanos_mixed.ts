@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/date_nanos_mixed'
       );
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'timestamp-*',
+        defaultDataView: 'timestamp-*',
         hideAnnouncements: true, // should be enough vertical space to render rows
       });
       await browser.setWindowSize(1200, 900);

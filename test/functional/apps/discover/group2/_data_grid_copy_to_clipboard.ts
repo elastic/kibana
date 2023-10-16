@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
   };
 
   describe('discover data grid supports copy to clipboard', function describeIndexTests() {

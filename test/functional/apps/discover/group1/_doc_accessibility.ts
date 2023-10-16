@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'context']);
 
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
   };
 
   describe('discover doc accessibility', () => {

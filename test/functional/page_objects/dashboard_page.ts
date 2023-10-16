@@ -54,11 +54,11 @@ export class DashboardPageObject extends FtrService {
 
   public readonly APP_ID = 'dashboards';
 
-  async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
+  async initTests({ kibanaIndex = this.kibanaIndex, defaultDataView = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.kibanaServer.savedObjects.cleanStandardList();
     await this.kibanaServer.importExport.load(kibanaIndex);
-    await this.kibanaServer.uiSettings.replace({ defaultIndex });
+    await this.kibanaServer.uiSettings.replace({ defaultDataView });
     await this.navigateToApp();
   }
 

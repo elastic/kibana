@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
       );
       await kibanaServer.uiSettings.update({
-        defaultIndex: 'rollup',
+        defaultDataView: 'rollup',
         'metrics:allowStringIndices': true,
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });

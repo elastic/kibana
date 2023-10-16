@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/message_with_newline.json'
       );
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'newline-test',
+        defaultDataView: 'newline-test',
         'doc_table:legacy': true,
       });
       await PageObjects.common.navigateToApp('discover');

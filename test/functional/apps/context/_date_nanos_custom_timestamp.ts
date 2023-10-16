@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/date_nanos_custom'
       );
-      await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
+      await kibanaServer.uiSettings.replace({ defaultDataView: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,

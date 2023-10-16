@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const toTime = '2021-01-25T00:00:00.000Z';
 
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'test-index-unmapped-fields',
+        defaultDataView: 'test-index-unmapped-fields',
         'discover:searchFieldsFromSource': false,
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('defaultDataView');
       await kibanaServer.uiSettings.unset('discover:searchFieldsFromSource');
       await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });

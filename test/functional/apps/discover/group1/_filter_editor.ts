@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
   };
 
   describe('discover filter editor', function describeIndexTests() {

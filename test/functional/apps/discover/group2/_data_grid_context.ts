@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
   ]);
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
     'discover:rowHeightOption': 0, // single line
   };
   const kibanaServer = getService('kibanaServer');

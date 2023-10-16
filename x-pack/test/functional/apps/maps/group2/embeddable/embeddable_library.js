@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
         { skipBrowserRefresh: true }
       );
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
+        defaultDataView: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();

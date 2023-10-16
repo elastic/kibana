@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
   const defaultSettings = {
-    defaultIndex: defaultIndexPatternString,
+    defaultDataView: defaultIndexPatternString,
   };
   const localArchiveDirectory = 'test/functional/fixtures/kbn_archiver/discover';
   const remoteArchiveDirectory = 'test/functional/fixtures/kbn_archiver/ccs/discover';

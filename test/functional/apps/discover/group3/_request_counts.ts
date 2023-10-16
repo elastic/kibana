@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
         'bfetch:disable': true,
         'discover:enableESQL': true,
       });

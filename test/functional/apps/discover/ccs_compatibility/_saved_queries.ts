@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ? 'ftr-remote:date-nested'
     : 'date-nested';
   const defaultSettings = {
-    defaultIndex: logstashIndexPatternString,
+    defaultDataView: logstashIndexPatternString,
   };
   const esNode = config.get('esTestCluster.ccs')
     ? getService('remoteEsArchiver' as 'esArchiver')

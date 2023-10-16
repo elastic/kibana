@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultDataView: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       const from = 'Sep 19, 2017 @ 06:31:44.000';
       const to = 'Sep 23, 2018 @ 18:31:44.000';

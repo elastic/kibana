@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const refreshButtonSelector = 'refreshDataButton';
 
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
   };
 
   const savedSearchName = 'saved-search-with-on-page-load';

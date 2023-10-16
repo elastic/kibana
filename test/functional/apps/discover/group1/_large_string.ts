@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/testlargestring.json'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/hamlet');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'testlargestring' });
     });
 
     it('verify the large string book present', async function () {

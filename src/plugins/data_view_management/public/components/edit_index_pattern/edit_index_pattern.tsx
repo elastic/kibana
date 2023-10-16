@@ -117,7 +117,7 @@ export const EditIndexPattern = withRouter(
     }, [defaultIndex, indexPattern, dataViews]);
 
     const setDefaultPattern = useCallback(() => {
-      uiSettings.set('defaultIndex', indexPattern.id);
+      uiSettings.set('defaultDataView', indexPattern.id);
       setDefaultIndex(indexPattern.id || '');
     }, [uiSettings, indexPattern.id]);
 

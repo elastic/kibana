@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
 
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
   };
 
   describe('discover show/hide chart test', function () {
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('defaultDataView');
     });
 
     it('shows chart by default', async function () {

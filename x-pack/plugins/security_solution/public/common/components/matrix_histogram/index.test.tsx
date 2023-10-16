@@ -68,7 +68,7 @@ describe('Matrix Histogram Component', () => {
   let wrapper: ReactWrapper;
 
   const mockMatrixOverTimeHistogramProps = {
-    defaultIndex: ['defaultIndex'],
+    defaultIndex: ['defaultDataView'],
     defaultStackByOption: {
       text: 'dns.question.registered_domain',
       value: 'dns.question.registered_domain',

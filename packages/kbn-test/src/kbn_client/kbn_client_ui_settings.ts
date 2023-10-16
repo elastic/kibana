@@ -39,7 +39,7 @@ export class KbnClientUiSettings {
    * Gets defaultIndex from the config doc.
    */
   async getDefaultIndex() {
-    return await this.get('defaultIndex');
+    return await this.get('defaultDataView');
   }
 
   /**

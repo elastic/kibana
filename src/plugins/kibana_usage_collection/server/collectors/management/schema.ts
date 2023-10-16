@@ -328,7 +328,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  defaultIndex: {
+  defaultDataView: {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },

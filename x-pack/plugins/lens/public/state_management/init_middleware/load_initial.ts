@@ -111,7 +111,7 @@ export function loadInitial(
     dataViews: lensServices.dataViews,
     storage: lensServices.storage,
     eventAnnotationService: lensServices.eventAnnotationService,
-    defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+    defaultIndexPatternId: lensServices.uiSettings.get('defaultDataView'),
   };
 
   let activeDatasourceId: string | undefined;
@@ -317,7 +317,7 @@ export function loadInitial(
               eventAnnotationService: lensServices.eventAnnotationService,
               storage: lensServices.storage,
               adHocDataViews: doc.state.adHocDataViews,
-              defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+              defaultIndexPatternId: lensServices.uiSettings.get('defaultDataView'),
             },
             { isFullEditor: true }
           )

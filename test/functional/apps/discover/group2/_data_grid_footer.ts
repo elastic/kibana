@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = { defaultDataView: 'logstash-*' };
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const security = getService('security');
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'Sep 30, 2019 @ 00:00:00.000',
         });
         await kibanaServer.uiSettings.update({
-          defaultIndex: 'date-nanos',
+          defaultDataView: 'date-nanos',
           'discover:sampleSize': 4,
           'discover:sampleRowsPerPage': 2,
         });

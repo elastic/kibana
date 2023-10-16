@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
       });
 
       log.debug('load kibana index with default index pattern');

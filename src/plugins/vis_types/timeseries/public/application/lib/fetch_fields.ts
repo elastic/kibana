@@ -21,7 +21,7 @@ export async function fetchFields(
 ): Promise<VisFields> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
   const coreStart = getCoreStart();
-  const defaultIndex = coreStart.uiSettings.get('defaultIndex');
+  const defaultIndex = coreStart.uiSettings.get('defaultDataView');
 
   try {
     const indexFields = await Promise.all(

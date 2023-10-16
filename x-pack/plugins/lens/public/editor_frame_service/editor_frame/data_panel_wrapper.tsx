@@ -96,7 +96,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           references: undefined,
           initialContext: undefined,
           storage: new Storage(localStorage),
-          defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+          defaultIndexPatternId: props.core.uiSettings.get('defaultDataView'),
         },
         {
           isFullEditor: true,

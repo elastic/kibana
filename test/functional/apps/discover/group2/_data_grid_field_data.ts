@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'unifiedFieldList',
   ]);
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = { defaultDataView: 'logstash-*' };
   const dataGrid = getService('dataGrid');
   const security = getService('security');
 

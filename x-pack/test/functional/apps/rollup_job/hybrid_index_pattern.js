@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
         'test_rollup_reader',
       ]);
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'rollup',
+        defaultDataView: 'rollup',
       });
     });
 

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const defaultSettings = {
-    defaultIndex: 'long-window-logstash-*',
+    defaultDataView: 'long-window-logstash-*',
     'dateFormat:tz': 'Europe/Berlin',
   };
   const testSubjects = getService('testSubjects');

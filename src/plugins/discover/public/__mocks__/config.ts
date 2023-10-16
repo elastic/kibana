@@ -11,7 +11,7 @@ import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 
 export const configMock = {
   get: (key: string) => {
-    if (key === 'defaultIndex') {
+    if (key === 'defaultDataView') {
       return 'the-data-view-id';
     } else if (key === SORT_DEFAULT_ORDER_SETTING) {
       return 'desc';

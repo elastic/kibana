@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const esArchiver = getService('esArchiver');
     const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
     const kibanaServer = getService('kibanaServer');
-    const defaultSettings = { defaultIndex: 'logstash-*' };
+    const defaultSettings = { defaultDataView: 'logstash-*' };
     const testSubjects = getService('testSubjects');
     const security = getService('security');
 

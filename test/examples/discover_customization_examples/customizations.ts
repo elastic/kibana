@@ -20,7 +20,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = { defaultDataView: 'logstash-*' };
 
   describe('Customizations', () => {
     before(async () => {
@@ -39,7 +39,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('defaultDataView');
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();

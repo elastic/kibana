@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultDataView: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();

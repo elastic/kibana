@@ -412,7 +412,7 @@ export async function persistedStateToExpression(
       references,
       dataViews: services.dataViews,
       storage: services.storage,
-      defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
+      defaultIndexPatternId: services.uiSettings.get('defaultDataView'),
       adHocDataViews,
       annotationGroups,
     },

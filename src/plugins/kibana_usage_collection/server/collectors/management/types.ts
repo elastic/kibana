@@ -115,7 +115,7 @@ export interface UsageStats {
   'history:limit': number;
   'format:defaultTypeMap': string;
   'format:currency:defaultPattern': string;
-  defaultIndex: string;
+  defaultDataView: string;
   'format:bytes:defaultPattern': string;
   'filters:pinnedByDefault': boolean;
   'filterEditor:suggestValues': boolean;

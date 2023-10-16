@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = { defaultDataView: 'logstash-*' };
   const security = getService('security');
 
   describe('discover data grid row height', function describeIndexTests() {

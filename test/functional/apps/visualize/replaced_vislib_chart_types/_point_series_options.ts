@@ -323,7 +323,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug("set 'dateFormat:tz': 'UTC'");
         await kibanaServer.uiSettings.update({
           'dateFormat:tz': 'UTC',
-          defaultIndex: 'logstash-*',
+          defaultDataView: 'logstash-*',
         });
         // We set the tz from 'America/Phoenix' to UTC and refreshing the browser but not re-entering
         // the absolute time range so the timepicker is going to shift +7 hours.

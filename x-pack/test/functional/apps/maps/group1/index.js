@@ -46,7 +46,7 @@ export default function ({ loadTestFile, getService }) {
 
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
+        defaultDataView: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await browser.setWindowSize(1600, 1000);
     });

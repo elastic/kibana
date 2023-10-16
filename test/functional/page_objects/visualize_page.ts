@@ -58,7 +58,7 @@ export class VisualizePageObject extends FtrService {
     );
 
     await this.kibanaServer.uiSettings.replace({
-      defaultIndex: this.defaultIndexString,
+      defaultDataView: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
       'histogram:maxBars': 100,

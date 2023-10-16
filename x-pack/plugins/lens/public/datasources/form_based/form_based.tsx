@@ -230,7 +230,7 @@ export function getFormBasedDatasource({
       return loadInitialState({
         persistedState,
         references,
-        defaultIndexPatternId: uiSettings.get('defaultIndex'),
+        defaultIndexPatternId: uiSettings.get('defaultDataView'),
         storage,
         initialContext,
         indexPatternRefs,

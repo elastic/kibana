@@ -488,7 +488,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get<string | null>('defaultIndex');
+    const defaultIndexPatternId = await this.config.get<string | null>('defaultDataView');
     return defaultIndexPatternId ?? null;
   };
 
@@ -498,8 +498,8 @@ export class DataViewsService {
    * @param force set default data view even if there's an existing default
    */
   setDefault = async (id: string | null, force = false) => {
-    if (force || !(await this.config.get('defaultIndex'))) {
-      await this.config.set('defaultIndex', id);
+    if (force || !(await this.config.get('defaultDataView'))) {
+      await this.config.set('defaultDataView', id);
     }
   };
 
@@ -1195,12 +1195,12 @@ export class DataViewsService {
 
   private async getDefaultDataViewId() {
     const patterns = await this.getIdsWithTitle();
-    let defaultId: string | undefined = await this.config.get('defaultIndex');
+    let defaultId: string | undefined = await this.config.get('defaultDataView');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
     if (defaultId && !exists) {
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove('defaultIndex');
+        await this.config.remove('defaultDataView');
       }
 
       defaultId = undefined;
@@ -1209,7 +1209,7 @@ export class DataViewsService {
     if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
       defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set('defaultIndex', defaultId);
+        await this.config.set('defaultDataView', defaultId);
       }
     }
 

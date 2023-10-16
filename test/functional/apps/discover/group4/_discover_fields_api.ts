@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const security = getService('security');
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultDataView: 'logstash-*',
     'discover:searchFieldsFromSource': false,
   };
   describe('discover uses fields API test', function describeIndexTests() {

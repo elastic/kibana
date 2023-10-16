@@ -27,7 +27,7 @@ const testDatasets: SampleDatasetSchema[] = [
     previewImagePath: 'previewImagePath',
     darkPreviewImagePath: 'darkPreviewImagePath',
     overviewDashboard: 'overviewDashboard',
-    defaultIndex: 'defaultIndex',
+    defaultIndex: 'defaultDataView',
     savedObjects: [
       {
         id: 'some-dashboard',
@@ -64,7 +64,7 @@ const testDatasets: SampleDatasetSchema[] = [
     previewImagePath: 'previewImagePath',
     darkPreviewImagePath: 'darkPreviewImagePath',
     overviewDashboard: 'overviewDashboard',
-    defaultIndex: 'defaultIndex',
+    defaultIndex: 'defaultDataView',
     savedObjects: [
       {
         id: 'some-dashboard',

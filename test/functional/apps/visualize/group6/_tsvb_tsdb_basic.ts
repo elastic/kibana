@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       log.info(`setting the TSDB dataView as default...`);
       await kibanaServer.uiSettings.replace({
-        defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0c247',
+        defaultDataView: '90943e30-9a47-11e8-b64d-95841ca0c247',
       });
     });
 
@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'
       );
       log.info(`unsetting the TSDB dataView default...`);
-      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('defaultDataView');
     });
 
     beforeEach(async () => {

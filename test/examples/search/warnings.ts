@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
-        defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
+        defaultDataView: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
         'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
       });
 

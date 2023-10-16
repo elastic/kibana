@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultDataView: 'logstash-*' });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
     });
 

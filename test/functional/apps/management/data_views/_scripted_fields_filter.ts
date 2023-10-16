@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/management');
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'f1e4c910-a2e6-11e7-bb30-233be9be6a15',
+        defaultDataView: 'f1e4c910-a2e6-11e7-bb30-233be9be6a15',
       });
     });
 

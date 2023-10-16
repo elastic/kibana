@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = { defaultDataView: 'logstash-*' };
 
   describe('discover data grid doc link', function () {
     before(async () => {

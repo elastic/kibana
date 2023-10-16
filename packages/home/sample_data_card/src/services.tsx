@@ -118,8 +118,8 @@ export const SampleDataCardKibanaProvider: FC<KibanaDependencies> = ({
     installSampleDataSet: async (id, defaultIndex) => {
       await http.post(`${SAMPLE_DATA_API}/${id}`);
 
-      if (uiSettings.isDefault('defaultIndex')) {
-        uiSettings.set('defaultIndex', defaultIndex);
+      if (uiSettings.isDefault('defaultDataView')) {
+        uiSettings.set('defaultDataView', defaultIndex);
       }
 
       clearDataViewsCache();
@@ -128,10 +128,10 @@ export const SampleDataCardKibanaProvider: FC<KibanaDependencies> = ({
       await http.delete(`${SAMPLE_DATA_API}/${id}`);
 
       if (
-        !uiSettings.isDefault('defaultIndex') &&
-        uiSettings.get('defaultIndex') === defaultIndex
+        !uiSettings.isDefault('defaultDataView') &&
+        uiSettings.get('defaultDataView') === defaultIndex
       ) {
-        uiSettings.set('defaultIndex', null);
+        uiSettings.set('defaultDataView', null);
       }
 
       clearDataViewsCache();

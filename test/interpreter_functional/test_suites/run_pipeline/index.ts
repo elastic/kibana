@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
-        defaultIndex: 'logstash-*',
+        defaultDataView: 'logstash-*',
         'bfetch:disableCompression': true, // makes it easier to debug while developing tests
       });
       await browser.setWindowSize(1300, 900);
