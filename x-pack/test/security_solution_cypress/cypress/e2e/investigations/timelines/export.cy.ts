@@ -22,7 +22,10 @@ import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline
 import { cleanKibana } from '../../../tasks/common';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165744
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// From the failure message it's not immediately clear, where this access is happening:
+// CypressError: `cy.wait()` could not find a registered alias for: `@export`.
+describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();

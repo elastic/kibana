@@ -25,7 +25,11 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../../screens/alerts';
 
-describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
+// accessing restricted / system indices directly does not work in serverless
+// security_exception: action [indices:data/write/delete/byquery] is unauthorized for user
+// [elastic_serverless] with effective roles [superuser] on restricted indices
+// [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics]
+describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');
