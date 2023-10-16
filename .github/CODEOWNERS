@@ -442,6 +442,7 @@ x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-managemen
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/actionable-observability
+x-pack/plugins/infra @elastic/infra-monitoring-ui
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
