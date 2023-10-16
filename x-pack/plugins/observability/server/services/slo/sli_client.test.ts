@@ -95,7 +95,7 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+                ranges: [{ from: 'now-1h-180s/m', to: 'now-180s/m' }],
               },
               aggs: {
                 good: { sum: { field: 'slo.numerator' } },
@@ -105,7 +105,7 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+                ranges: [{ from: 'now-5m-180s/m', to: 'now-180s/m' }],
               },
               aggs: {
                 good: { sum: { field: 'slo.numerator' } },
@@ -185,7 +185,7 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+                ranges: [{ from: 'now-1h-720s/m', to: 'now-720s/m' }],
               },
               aggs: {
                 good: {
@@ -203,7 +203,7 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+                ranges: [{ from: 'now-5m-720s/m', to: 'now-720s/m' }],
               },
               aggs: {
                 good: {
