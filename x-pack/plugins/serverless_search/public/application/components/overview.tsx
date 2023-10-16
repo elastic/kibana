@@ -116,12 +116,12 @@ export const ElasticsearchOverview = () => {
         <OverviewPanel
           description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
             defaultMessage:
-              "You'll need a private API key to securely connect to your project. Use an existing key, or create a new one and copy it somewhere safe.",
+              "An API key is a private, unique identifier for authentication and authorization. You'll need an API key to securely connect to your project.",
           })}
           leftPanelContent={<ApiKeyPanel setClientApiKey={setClientApiKey} />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.apiKey.title', {
-            defaultMessage: 'Prepare an API Key',
+            defaultMessage: 'API Key',
           })}
         />
       </EuiPageTemplate.Section>
