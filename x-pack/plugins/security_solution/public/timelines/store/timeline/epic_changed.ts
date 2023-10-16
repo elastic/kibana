@@ -31,7 +31,6 @@ import {
   setExcludedRowRendererIds,
   setFilters,
   setSavedQueryId,
-  updateSavedSearchId,
   setChanged,
 } from './actions';
 
@@ -60,8 +59,6 @@ const timelineChangedTypes = [
   updateSort.type,
   updateRange.type,
   upsertColumn.type,
-
-  updateSavedSearchId.type,
 ].reduce((allTypes, currentType) => {
   allTypes[currentType] = true;
   return allTypes;
