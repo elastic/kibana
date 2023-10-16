@@ -139,16 +139,7 @@ export async function createEvents(
   stream,
   apmEsClient
 ) {
-  let scenarioFile = '../../scenarios/simple_trace.ts';
-  const template = schedule.template;
-  if (template === 'good') {
-    scenarioFile = '../../scenarios/simple_trace.ts';
-  } else if (schedule.template === 'bad') {
-    scenarioFile = '../../scenarios/high_throughput.ts';
-  } else if (schedule.template === 'good_and_bad') {
-    scenarioFile = '../../scenarios/low_throughput.ts';
-  }
-
+  const scenarioFile = `../../config/scenarios/${schedule.template}`;
   const scenario = await getScenario({ file: scenarioFile, logger });
   const { generate } = await scenario({
     logLevel: 1,

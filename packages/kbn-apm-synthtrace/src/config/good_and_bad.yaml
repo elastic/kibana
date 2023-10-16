@@ -1,5 +1,4 @@
 schedule:
-  # Start with good events
   - template: "good"
     start: "now-50m"
     end: "now-45m"
