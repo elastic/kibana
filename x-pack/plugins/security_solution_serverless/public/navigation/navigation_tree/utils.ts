@@ -31,4 +31,5 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
 
 export const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
   HIDDEN_BREADCRUMBS.has(id) ||
-  id.startsWith('management:'); /* management sub-pages set their breadcrumbs themselves */
+  (id.startsWith('management:') &&
+    id !== 'management:'); /* management sub-pages set their breadcrumbs themselves */

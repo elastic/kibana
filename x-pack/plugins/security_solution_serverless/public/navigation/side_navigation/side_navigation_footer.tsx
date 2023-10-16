@@ -9,8 +9,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiCollapsibleNavSubItemProps, IconType } from '@elastic/eui';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import { ExternalPageName } from '../links/constants';
+import { getNavLinkIdFromProjectPageName } from '../links/util';
+import type { ProjectSideNavItem } from './types';
 
 interface FooterCategory {
   type: 'standalone' | 'collapsible';
@@ -35,9 +36,9 @@ const categories: FooterCategory[] = [
 ];
 
 export const SideNavigationFooter: React.FC<{
-  selectedId: string;
-  items: SolutionSideNavItem[];
-}> = ({ selectedId, items }) => {
+  activeNodeId: string;
+  items: ProjectSideNavItem[];
+}> = ({ activeNodeId, items }) => {
   return (
     <>
       {categories.map((category, index) => {
@@ -47,7 +48,7 @@ export const SideNavigationFooter: React.FC<{
             <SideNavigationFooterStandalone
               key={index}
               items={categoryItems}
-              selectedId={selectedId}
+              activeNodeId={activeNodeId}
             />
           );
         }
@@ -57,7 +58,7 @@ export const SideNavigationFooter: React.FC<{
               key={index}
               title={category.title ?? ''}
               items={categoryItems}
-              selectedId={selectedId}
+              activeNodeId={activeNodeId}
               icon={category.icon}
             />
           );
@@ -69,9 +70,9 @@ export const SideNavigationFooter: React.FC<{
 };
 
 const SideNavigationFooterStandalone: React.FC<{
-  items: SolutionSideNavItem[];
-  selectedId: string;
-}> = ({ items, selectedId }) => (
+  items: ProjectSideNavItem[];
+  activeNodeId: string;
+}> = ({ items, activeNodeId }) => (
   <>
     {items.map((item) => (
       <EuiCollapsibleNavItem
@@ -83,7 +84,7 @@ const SideNavigationFooterStandalone: React.FC<{
         data-test-subj={`nav-bucket-${item.id}`}
         href={item.href}
         onClick={item.onClick}
-        isSelected={item.id === selectedId}
+        isSelected={getNavLinkIdFromProjectPageName(item.id) === activeNodeId}
         linkProps={{ external: item.openInNewTab }}
       />
     ))}
@@ -92,11 +93,14 @@ const SideNavigationFooterStandalone: React.FC<{
 
 const SideNavigationFooterCollapsible: React.FC<{
   title: string;
-  items: SolutionSideNavItem[];
-  selectedId: string;
+  items: ProjectSideNavItem[];
+  activeNodeId: string;
   icon?: IconType;
-}> = ({ title, icon, items, selectedId }) => {
-  const hasSelected = useMemo(() => items.some(({ id }) => id === selectedId), [selectedId, items]);
+}> = ({ title, icon, items, activeNodeId }) => {
+  const hasSelected = useMemo(
+    () => items.some(({ id }) => getNavLinkIdFromProjectPageName(id) === activeNodeId),
+    [activeNodeId, items]
+  );
   const [isOpen, setIsOpen] = useState(hasSelected);
   const categoryId = useMemo(() => (title ?? '').toLowerCase().replace(' ', '-'), [title]);
 
@@ -118,20 +122,20 @@ const SideNavigationFooterCollapsible: React.FC<{
           setIsOpen(open);
         },
       }}
-      items={items.map((item) => formatCollapsibleItem(item, selectedId))}
+      items={items.map((item) => formatCollapsibleItem(item, activeNodeId))}
     />
   );
 };
 
 const formatCollapsibleItem = (
-  sideNavItem: SolutionSideNavItem,
-  selectedId: string
+  sideNavItem: ProjectSideNavItem,
+  activeNodeId: string
 ): EuiCollapsibleNavSubItemProps => {
   return {
     'data-test-subj': `solutionSideNavItemLink-${sideNavItem.id}`,
     id: sideNavItem.id,
     title: sideNavItem.label,
-    isSelected: sideNavItem.id === selectedId,
+    isSelected: getNavLinkIdFromProjectPageName(sideNavItem.id) === activeNodeId,
     href: sideNavItem.href,
     ...(sideNavItem.openInNewTab && { target: '_blank' }),
     onClick: sideNavItem.onClick,

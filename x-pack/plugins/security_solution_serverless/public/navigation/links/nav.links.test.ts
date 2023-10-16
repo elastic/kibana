@@ -9,19 +9,14 @@ import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { createProjectNavLinks$ } from './nav_links';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, take } from 'rxjs';
 import { mockServices } from '../../common/services/__mocks__/services.mock';
 import { mlNavCategories, mlNavLinks } from './sections/ml_links';
 import { assetsNavLinks } from './sections/assets_links';
 import { ExternalPageName } from './constants';
-import type { ProjectNavigationLink } from './types';
 import { investigationsNavLinks } from './sections/investigations_links';
-import {
-  projectSettingsNavCategories,
-  projectSettingsNavLinks,
-} from './sections/project_settings_links';
 import { isCloudLink } from './util';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 const mockCloudStart = mockServices.cloud;
 const mockChromeNavLinks = jest.fn((): ChromeNavLink[] => []);
@@ -40,7 +35,6 @@ const testServices = {
     },
   },
 };
-const experimentalFeatures = { platformNavEnabled: false } as ExperimentalFeatures;
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
@@ -51,15 +45,6 @@ const linkMlLanding: NavigationLink<SecurityPageName> = {
   id: SecurityPageName.mlLanding,
   title: 'ML Landing',
   links: [],
-};
-const projectLinkDevTools: ProjectNavigationLink = {
-  id: ExternalPageName.devTools,
-  title: 'Dev tools',
-};
-
-const projectLinkDiscover: ProjectNavigationLink = {
-  id: ExternalPageName.discover,
-  title: 'Discover',
 };
 
 const chromeNavLink1: ChromeNavLink = {
@@ -77,6 +62,22 @@ const devToolsChromeNavLink: ChromeNavLink = {
   baseUrl: '',
 };
 
+const createTestProjectNavLinks = async (
+  testSecurityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,
+  { filterCloudLinks = true }: { filterCloudLinks?: boolean } = {}
+) => {
+  const projectNavLinks$ = createProjectNavLinks$(
+    testSecurityNavLinks$,
+    testServices,
+    mockCloudStart
+  );
+  const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
+  if (filterCloudLinks) {
+    return value.filter((link) => !isCloudLink(link.id));
+  }
+  return value;
+};
+
 describe('getProjectNavLinks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -86,47 +87,19 @@ describe('getProjectNavLinks', () => {
     );
   });
 
-  it('should return security nav links with all external links filtered', async () => {
+  it('should return security nav links with all external (non cloud) links filtered', async () => {
     mockChromeNavLinksHas.mockReturnValue(false); // no external links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, link2]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
-    );
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$);
     expect(value).toEqual([link1, link2]);
-  });
-
-  it('should add devTools nav link if chrome nav link exists', async () => {
-    mockChromeNavLinks.mockReturnValue([devToolsChromeNavLink]);
-    const testSecurityNavLinks$ = new BehaviorSubject([link1]);
-
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
-    );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
-    expect(value).toEqual([link1, projectLinkDevTools]);
   });
 
   it('should filter all external links not configured in chrome links', async () => {
     mockChromeNavLinks.mockReturnValue([chromeNavLink1]);
     const testSecurityNavLinks$ = new BehaviorSubject([link1, link2, linkMlLanding]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
-    );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$);
     expect(value).toEqual([
       link1,
       link2,
@@ -134,25 +107,26 @@ describe('getProjectNavLinks', () => {
     ]);
   });
 
+  it('should add devTools nav link if chrome nav link exists', async () => {
+    mockChromeNavLinks.mockReturnValue([devToolsChromeNavLink]);
+    const testSecurityNavLinks$ = new BehaviorSubject([link1]);
+
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$);
+    expect(value).toEqual([link1, expect.objectContaining({ id: ExternalPageName.devTools })]);
+  });
+
   it('should add machineLearning links', async () => {
     mockChromeNavLinksHas.mockReturnValue(true); // all links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, link2, linkMlLanding]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$);
+    expect(value).toEqual(
+      expect.arrayContaining([
+        link1,
+        link2,
+        { ...linkMlLanding, categories: mlNavCategories, links: mlNavLinks },
+      ])
     );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
-    expect(value).toEqual([
-      link1,
-      link2,
-      { ...linkMlLanding, categories: mlNavCategories, links: mlNavLinks },
-      projectLinkDiscover,
-      projectLinkDevTools,
-    ]);
   });
 
   it('should add assets links', async () => {
@@ -164,20 +138,10 @@ describe('getProjectNavLinks', () => {
     };
     const testSecurityNavLinks$ = new BehaviorSubject([link1, linkAssets]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$);
+    expect(value).toEqual(
+      expect.arrayContaining([link1, { ...linkAssets, links: [...assetsNavLinks, link2] }])
     );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
-    expect(value).toEqual([
-      link1,
-      { ...linkAssets, links: [...assetsNavLinks, link2] },
-      projectLinkDiscover,
-      projectLinkDevTools,
-    ]);
   });
 
   it('should add investigations links', async () => {
@@ -189,54 +153,31 @@ describe('getProjectNavLinks', () => {
     };
     const testSecurityNavLinks$ = new BehaviorSubject([link1, linkInvestigations]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$);
+    expect(value).toEqual(
+      expect.arrayContaining([
+        link1,
+        { ...linkInvestigations, links: [link2, ...investigationsNavLinks] },
+      ])
     );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
-    expect(value).toEqual([
-      link1,
-      { ...linkInvestigations, links: [link2, ...investigationsNavLinks] },
-      projectLinkDiscover,
-      projectLinkDevTools,
-    ]);
   });
 
   it('should add project settings links', async () => {
     mockChromeNavLinksHas.mockReturnValue(true); // all links exist
-    const linkProjectSettings: NavigationLink<SecurityPageName> = {
-      id: SecurityPageName.projectSettings,
-      title: 'Project settings',
-      links: [link2],
-    };
-    const testSecurityNavLinks$ = new BehaviorSubject([link1, linkProjectSettings]);
+    const testSecurityNavLinks$ = new BehaviorSubject([link1]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$, {
+      filterCloudLinks: false,
+    });
+    expect(value).toEqual(
+      expect.arrayContaining([
+        link1,
+        expect.objectContaining({ id: ExternalPageName.management }),
+        expect.objectContaining({ id: ExternalPageName.integrationsSecurity }),
+        expect.objectContaining({ id: ExternalPageName.cloudUsersAndRoles }),
+        expect.objectContaining({ id: ExternalPageName.cloudBilling }),
+      ])
     );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
-
-    const expectedProjectSettingsNavLinks = projectSettingsNavLinks.map(
-      (link) => expect.objectContaining(link) // ignore externalUrl property in cloud links, tested separately
-    );
-
-    expect(value).toEqual([
-      link1,
-      {
-        ...linkProjectSettings,
-        categories: projectSettingsNavCategories,
-        links: [...expectedProjectSettingsNavLinks, link2],
-      },
-      projectLinkDiscover,
-      projectLinkDevTools,
-    ]);
   });
 
   it('should process cloud links', async () => {
@@ -248,18 +189,10 @@ describe('getProjectNavLinks', () => {
     };
     const testSecurityNavLinks$ = new BehaviorSubject([link1, linkProjectSettings]);
 
-    const projectNavLinks$ = createProjectNavLinks$(
-      testSecurityNavLinks$,
-      testServices,
-      mockCloudStart,
-      experimentalFeatures
-    );
-
-    const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
-    const cloudLinks =
-      value
-        .find((link) => link.id === SecurityPageName.projectSettings)
-        ?.links?.filter((link) => isCloudLink(link.id)) ?? [];
+    const value = await createTestProjectNavLinks(testSecurityNavLinks$, {
+      filterCloudLinks: false,
+    });
+    const cloudLinks = value.filter(({ id }) => isCloudLink(id));
 
     expect(cloudLinks.length > 0).toBe(true);
     expect(cloudLinks.every((cloudLink) => cloudLink.externalUrl)).toBe(true);

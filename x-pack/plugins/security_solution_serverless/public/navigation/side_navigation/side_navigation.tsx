@@ -49,6 +49,8 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
   const items = useSideNavItems();
 
   const isLoading = items.length === 0;
+  // we only care about the first node to highlight a left nav main item
+  const activeNodeId = activeChromeNodes?.[0].id ?? '';
 
   const panelTopOffset = useMemo(
     () =>
@@ -58,10 +60,10 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
     [hasHeaderBanner, euiTheme]
   );
 
-  const selectedId = useMemo(() => {
-    const mainNode = activeChromeNodes?.[0]; // we only care about the first node to highlight a left nav main item
-    return mainNode ? getProjectPageNameFromNavLinkId(mainNode.id) : '';
-  }, [activeChromeNodes]);
+  const selectedId = useMemo(
+    () => (activeNodeId ? getProjectPageNameFromNavLinkId(activeNodeId) : ''),
+    [activeNodeId]
+  );
 
   const bodyStyle = css`
     padding-left: calc(${euiTheme.size.xl} + ${euiTheme.size.s});
@@ -90,7 +92,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
           title="Security"
           icon="logoSecurity"
           iconProps={{ size: 'm' }}
-          data-test-subj="nav-bucket-security"
+          data-test-subj="securitySolutionNavHeading"
           items={isCollapsed ? collapsedNavItems : undefined}
         />
         {!isCollapsed && (
@@ -105,7 +107,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
         )}
       </EuiCollapsibleNavBeta.Body>
       <EuiCollapsibleNavBeta.Footer>
-        <SideNavigationFooter selectedId={selectedId} items={footerItems} />
+        <SideNavigationFooter activeNodeId={activeNodeId} items={footerItems} />
       </EuiCollapsibleNavBeta.Footer>
     </>
   );
