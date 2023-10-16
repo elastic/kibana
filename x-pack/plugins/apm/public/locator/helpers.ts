@@ -12,10 +12,7 @@ import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
 export const APMLocatorPayloadValidator = t.union([
-  t.intersection([
-    t.type({ serviceName: t.undefined }),
-    t.type({ dashboardId: t.undefined }),
-  ]),
+  t.type({ serviceName: t.undefined }),
   t.intersection([
     t.type({ serviceName: t.string }),
     t.type({ dashboardId: t.string }),
@@ -25,7 +22,7 @@ export const APMLocatorPayloadValidator = t.union([
     t.type({
       serviceName: t.string,
     }),
-    t.type({ dashboardId: t.undefined }),
+    t.partial({ dashboardId: t.undefined }),
     t.partial({
       serviceOverviewTab: t.keyof({
         traces: null,

@@ -22,6 +22,8 @@ import {
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
