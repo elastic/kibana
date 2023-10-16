@@ -65,7 +65,6 @@ export class ActionsClientLlm extends LLM {
   }
 
   async _call(prompt: string): Promise<string> {
-    console.log('CALLL');
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
@@ -86,10 +85,7 @@ export class ActionsClientLlm extends LLM {
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
 
-    console.log('NOW WHAT?????', requestBody);
     const actionResult = await actionsClient.execute(requestBody);
-
-    console.log('NOW WHAT?????', actionResult);
 
     if (actionResult.status === 'error') {
       throw new Error(

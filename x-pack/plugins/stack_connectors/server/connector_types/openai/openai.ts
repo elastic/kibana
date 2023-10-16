@@ -27,6 +27,8 @@ import {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
+  InvokeAIActionResponse,
+  StreamingResponse,
 } from '../../../common/openai/types';
 import { initDashboard } from './create_dashboard';
 import {
@@ -127,7 +129,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param stream flag indicating whether it is a streaming request or not
    */
   public async streamApi({ body, stream }: StreamActionParams): Promise<RunActionResponse> {
-    console.log('START STREAM');
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -144,7 +145,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       data: executeBody,
       ...axiosOptions,
     });
-    console.log('END STREAM');
     return stream ? pipeStreamingResponse(response) : response.data;
   }
 
@@ -188,7 +188,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * Sends the stringified input to the runApi method. Returns the trimmed completion from the response.
    * @param body An object containing array of message objects, and possible other OpenAI properties
    */
-  public async invokeAI(params: InvokeAIActionParams): Promise<RunActionResponse> {
+  public async invokeAI(
+    params: InvokeAIActionParams
+  ): Promise<InvokeAIActionResponse | StreamingResponse> {
     const { stream, ...body } = params;
     const res = await this.streamApi({ body: JSON.stringify(body), stream });
 
@@ -196,7 +198,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       const result = res.choices[0].message.content.trim();
       return result;
     }
-    console.log('returning now', res);
     return res;
 
     return 'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
