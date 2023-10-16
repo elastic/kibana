@@ -582,12 +582,14 @@ const prepareDefinitionSectionListItems = (
 export interface RuleDefinitionSectionProps {
   rule: Partial<RuleResponse>;
   isInteractive?: boolean;
+  itemRenderer?: (items: EuiDescriptionListProps['listItems']) => JSX.Element;
   dataTestSubj?: string;
 }
 
 export const RuleDefinitionSection = ({
   rule,
   isInteractive = false,
+  itemRenderer,
   dataTestSubj,
 }: RuleDefinitionSectionProps) => {
   const { savedQuery } = useGetSavedQuery({
@@ -603,13 +605,17 @@ export const RuleDefinitionSection = ({
 
   return (
     <div data-test-subj={dataTestSubj}>
-      <EuiDescriptionList
-        type="column"
-        listItems={definitionSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
-        data-test-subj="listItemColumnStepRuleDescription"
-      />
+      {itemRenderer ? (
+        itemRenderer(definitionSectionListItems)
+      ) : (
+        <EuiDescriptionList
+          type="column"
+          listItems={definitionSectionListItems}
+          columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+          rowGutterSize="m"
+          data-test-subj="listItemColumnStepRuleDescription"
+        />
+      )}
     </div>
   );
 };

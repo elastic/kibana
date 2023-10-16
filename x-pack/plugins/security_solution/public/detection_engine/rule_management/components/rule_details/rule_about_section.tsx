@@ -371,21 +371,31 @@ export interface RuleAboutSectionProps {
   rule: Partial<RuleResponse>;
   hideName?: boolean;
   hideDescription?: boolean;
+  itemRenderer?: (items: EuiDescriptionListProps['listItems']) => JSX.Element;
 }
 
-export const RuleAboutSection = ({ rule, hideName, hideDescription }: RuleAboutSectionProps) => {
+export const RuleAboutSection = ({
+  rule,
+  hideName,
+  hideDescription,
+  itemRenderer,
+}: RuleAboutSectionProps) => {
   const aboutSectionListItems = prepareAboutSectionListItems(rule, hideName, hideDescription);
 
   return (
     <div>
       <EuiSpacer size="m" />
-      <EuiDescriptionList
-        type="column"
-        listItems={aboutSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
-        data-test-subj="listItemColumnStepRuleDescription"
-      />
+      {itemRenderer ? (
+        itemRenderer(aboutSectionListItems)
+      ) : (
+        <EuiDescriptionList
+          type="column"
+          listItems={aboutSectionListItems}
+          columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+          rowGutterSize="m"
+          data-test-subj="listItemColumnStepRuleDescription"
+        />
+      )}
     </div>
   );
 };

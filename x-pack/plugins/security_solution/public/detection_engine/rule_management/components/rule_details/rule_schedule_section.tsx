@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
@@ -29,9 +30,10 @@ const From = ({ from, interval }: FromProps) => (
 
 export interface RuleScheduleSectionProps {
   rule: Partial<RuleResponse>;
+  itemRenderer?: (items: EuiDescriptionListProps['listItems']) => JSX.Element;
 }
 
-export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
+export const RuleScheduleSection = ({ rule, itemRenderer }: RuleScheduleSectionProps) => {
   if (!rule.interval || !rule.from) {
     return null;
   }
@@ -51,12 +53,16 @@ export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
 
   return (
     <div data-test-subj="listItemColumnStepRuleDescription">
-      <EuiDescriptionList
-        type="column"
-        listItems={ruleSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
-      />
+      {itemRenderer ? (
+        itemRenderer(ruleSectionListItems)
+      ) : (
+        <EuiDescriptionList
+          type={'column'}
+          listItems={ruleSectionListItems}
+          columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+          rowGutterSize="m"
+        />
+      )}
     </div>
   );
 };
