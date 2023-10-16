@@ -148,6 +148,7 @@ describe('CasesOracleService', () => {
   describe('getRecord', () => {
     const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
+    const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
     const oracleSO = {
       id: 'so-id',
@@ -156,6 +157,7 @@ describe('CasesOracleService', () => {
         counter: 1,
         cases,
         rules,
+        grouping,
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
@@ -177,6 +179,7 @@ describe('CasesOracleService', () => {
   describe('createRecord', () => {
     const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
+    const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
     const oracleSO = {
       id: 'so-id',
@@ -185,6 +188,7 @@ describe('CasesOracleService', () => {
         counter: 1,
         cases,
         rules,
+        grouping,
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
@@ -197,7 +201,7 @@ describe('CasesOracleService', () => {
     });
 
     it('creates a record correctly', async () => {
-      const record = await service.createRecord('so-id', { cases, rules });
+      const record = await service.createRecord('so-id', { cases, rules, grouping });
 
       expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id', version: 'so-version' });
     });
@@ -205,7 +209,7 @@ describe('CasesOracleService', () => {
     it('calls the unsecuredSavedObjectsClient.create method correctly', async () => {
       const id = 'so-id';
 
-      await service.createRecord(id, { cases, rules });
+      await service.createRecord(id, { cases, rules, grouping });
 
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'cases-oracle',
@@ -214,6 +218,7 @@ describe('CasesOracleService', () => {
           counter: 1,
           createdAt: expect.anything(),
           rules,
+          grouping,
           updatedAt: null,
         },
         { id }
@@ -224,6 +229,7 @@ describe('CasesOracleService', () => {
   describe('increaseCounter', () => {
     const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
+    const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
     const oracleSO = {
       id: 'so-id',
@@ -232,6 +238,7 @@ describe('CasesOracleService', () => {
         counter: 1,
         cases,
         rules,
+        grouping,
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },

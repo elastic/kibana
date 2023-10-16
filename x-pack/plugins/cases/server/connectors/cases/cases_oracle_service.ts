@@ -61,7 +61,7 @@ export class CasesOracleService {
     recordId: string,
     payload: OracleRecordCreateRequest
   ): Promise<OracleRecord> {
-    const { cases, rules } = payload;
+    const { cases, rules, grouping } = payload;
 
     this.log.debug(`Creating oracle record with ID: ${recordId}`);
 
@@ -71,6 +71,7 @@ export class CasesOracleService {
         counter: 1,
         cases,
         rules,
+        grouping,
         createdAt: new Date().toISOString(),
         updatedAt: null,
       },
@@ -109,6 +110,7 @@ export class CasesOracleService {
     version: oracleRecord.version ?? '',
     counter: oracleRecord.attributes.counter,
     cases: oracleRecord.attributes.cases,
+    grouping: oracleRecord.attributes.grouping,
     rules: oracleRecord.attributes.rules,
     createdAt: oracleRecord.attributes.createdAt,
     updatedAt: oracleRecord.attributes.updatedAt,

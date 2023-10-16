@@ -7,6 +7,7 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../common/constants';
 
 export const casesOracleSavedObjectType: SavedObjectsType = {
@@ -20,8 +21,12 @@ export const casesOracleSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      caseIds: {
-        type: 'keyword',
+      cases: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+        },
       },
       counter: {
         type: 'unsigned_long',
@@ -30,15 +35,37 @@ export const casesOracleSavedObjectType: SavedObjectsType = {
         type: 'date',
       },
       /*
-      grouping_definition: {
-        type: 'keyword',
+      grouping: {
+        type: 'flattened',
       },
       */
-      ruleId: {
-        type: 'keyword',
+      rules: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+        },
       },
       updatedAt: {
         type: 'date',
+      },
+    },
+  },
+  management: {
+    importableAndExportable: false,
+  },
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        create: schema.object({
+          cases: schema.arrayOf(schema.object({ id: schema.string() })),
+          counter: schema.number(),
+          createdAt: schema.string(),
+          grouping: schema.recordOf(schema.string(), schema.any()),
+          rules: schema.arrayOf(schema.object({ id: schema.string() })),
+          updatedAt: schema.string(),
+        }),
       },
     },
   },

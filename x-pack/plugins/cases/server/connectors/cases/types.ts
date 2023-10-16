@@ -35,6 +35,7 @@ export interface OracleRecord {
   id: string;
   counter: number;
   cases: Array<{ id: string }>;
+  grouping: Record<string, unknown>;
   rules: Array<{ id: string }>;
   createdAt: string;
   updatedAt: string | null;
@@ -44,4 +45,5 @@ export interface OracleRecord {
 export interface OracleRecordCreateRequest {
   cases: Array<{ id: string }>;
   rules: Array<{ id: string }>;
+  grouping: Record<string, unknown>;
 }
