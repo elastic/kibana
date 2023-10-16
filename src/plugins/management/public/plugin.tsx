@@ -188,12 +188,12 @@ export class ManagementPlugin
         id: 'settings',
         title,
         order: 3,
-        async mount({ element, setBreadcrumbs }) {
+        async mount({ element, setBreadcrumbs, history }) {
           setBreadcrumbs([{ text: title }]);
 
           ReactDOM.render(
             <KibanaRenderContextProvider {...core}>
-              <KibanaSettingsApplication {...core} />
+              <KibanaSettingsApplication {...{ ...core, history }} />
             </KibanaRenderContextProvider>,
             element
           );

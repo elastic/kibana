@@ -939,7 +939,7 @@ describe('update', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_key',
@@ -994,7 +994,7 @@ describe('update', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
       ];
 
@@ -1050,7 +1050,7 @@ describe('update', () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
         type: 'text',
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       });
 
       await expect(
@@ -1084,12 +1084,12 @@ describe('update', () => {
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value', 'this is second'],
+                    value: 'this is a text field value',
                   },
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value', 'this is second'],
+                    value: 'this is a text field value',
                   },
                 ],
               },
@@ -1115,7 +1115,7 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value', 'this is second'],
+                    value: 'this is a text field value',
                   },
                   {
                     key: 'missing_key',
@@ -1177,7 +1177,7 @@ describe('update', () => {
                   {
                     key: 'second_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['foobar'],
+                    value: 'foobar',
                   },
                 ],
               },

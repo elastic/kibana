@@ -405,7 +405,7 @@ describe('Filter Utils', () => {
           },
           {
             astPath: 'arguments.1',
-            error: 'The key is empty and needs to be wrapped by a saved object type like foo',
+            error: 'Invalid key',
             isSavedObjectAttr: false,
             key: null,
             type: null,
