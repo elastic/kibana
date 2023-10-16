@@ -127,12 +127,14 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
           defaultMessage: 'Supported from integration version 1.6.0 and above',
         })
       : undefined,
+    testId: 'gcpOrganizationAccountTestId',
   },
   {
     id: GCP_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
       defaultMessage: 'Single Account',
     }),
+    testId: 'gcpSingleAccountTestId',
   },
 ];
 

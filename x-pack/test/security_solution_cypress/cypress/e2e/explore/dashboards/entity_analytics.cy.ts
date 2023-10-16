@@ -138,7 +138,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
       });
     });
 
-    describe('With host risk data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168490
+    describe.skip('With host risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       });
