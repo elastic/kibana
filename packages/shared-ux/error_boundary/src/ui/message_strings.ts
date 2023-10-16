@@ -19,7 +19,7 @@ export const errorMessageStrings = {
     callout: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.title', {
-          defaultMessage: 'A fatal error was encountered',
+          defaultMessage: 'An error was encountered',
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.body', {
@@ -46,12 +46,12 @@ export const errorMessageStrings = {
     callout: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.title', {
-          defaultMessage: 'Sorry, please refresh',
+          defaultMessage: 'You need to refresh',
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.body', {
           defaultMessage:
-            'An error occurred when trying to load a part of the page. Please try refreshing.',
+            'An error occurred when trying to load a part of the page. Refreshing the page should resolve the issue.',
         }),
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {
