@@ -11,13 +11,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm } from '@kbn/ml-agg-utils';
+import type { FieldValuePair, SignificantTerm } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
-import type { ItemsetResult } from '../../../common/types';
+import type { FetchFrequentItemSetsResponse, ItemSet } from '../../../common/types';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../common/api/log_categorization/types';
+import { LOG_RATE_ANALYSIS_SETTINGS } from '../../../common/constants';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
@@ -26,9 +27,9 @@ import { getQueryWithParams } from './get_query_with_params';
 const isMsearchResponseItem = (arg: unknown): arg is estypes.MsearchMultiSearchItem =>
   isPopulatedObject(arg, ['hits']);
 
-export const getTerm2CategoryCountRequest = (
+const getTerm2CategoryCountRequest = (
   params: AiopsLogRateAnalysisSchema,
-  significantTerm: SignificantTerm,
+  fieldValuePairs: FieldValuePair[],
   categoryFieldName: string,
   category: Category,
   from: number | undefined,
@@ -41,7 +42,9 @@ export const getTerm2CategoryCountRequest = (
   const categoryQuery = getCategoryQuery(categoryFieldName, [category]);
 
   if (Array.isArray(query.bool?.filter)) {
-    query.bool?.filter?.push({ term: { [significantTerm.fieldName]: significantTerm.fieldValue } });
+    for (const { fieldName, fieldValue } of fieldValuePairs) {
+      query.bool?.filter?.push({ term: { [fieldName]: fieldValue } });
+    }
     query.bool?.filter?.push(categoryQuery);
     query.bool?.filter?.push({
       range: {
@@ -66,28 +69,29 @@ export async function fetchTerms2CategoriesCounts(
   params: AiopsLogRateAnalysisSchema,
   searchQuery: estypes.QueryDslQueryContainer,
   significantTerms: SignificantTerm[],
+  itemSets: ItemSet[],
   significantCategories: SignificantTerm[],
   from: number,
   to: number,
   logger: Logger,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-) {
+): Promise<FetchFrequentItemSetsResponse> {
   const searches: Array<
     | estypes.MsearchMultisearchBody
     | {
         index: string;
       }
   > = [];
-  const results: ItemsetResult[] = [];
+  const results: ItemSet[] = [];
 
-  significantTerms.forEach((term) => {
-    significantCategories.forEach((category) => {
+  significantCategories.forEach((category) => {
+    significantTerms.forEach((term) => {
       searches.push({ index: params.index });
       searches.push(
         getTerm2CategoryCountRequest(
           params,
-          term,
+          [{ fieldName: term.fieldName, fieldValue: term.fieldValue }],
           category.fieldName,
           { key: `${category.key}`, count: category.doc_count, examples: [] },
           from,
@@ -102,8 +106,36 @@ export async function fetchTerms2CategoriesCounts(
         size: 2,
         maxPValue: Math.max(term.pValue ?? 1, category.pValue ?? 1),
         doc_count: 0,
-        support: 1,
-        total_doc_count: 0,
+        support: 0,
+        total_doc_count: Math.max(term.total_doc_count, category.total_doc_count),
+      });
+    });
+
+    itemSets.forEach((itemSet) => {
+      searches.push({ index: params.index });
+      searches.push(
+        getTerm2CategoryCountRequest(
+          params,
+          Object.entries(itemSet.set).map(([fieldName, fieldValue]) => ({
+            fieldName,
+            fieldValue,
+          })),
+          category.fieldName,
+          { key: `${category.key}`, count: category.doc_count, examples: [] },
+          from,
+          to
+        ) as estypes.MsearchMultisearchBody
+      );
+      results.push({
+        set: {
+          ...itemSet.set,
+          [category.fieldName]: category.fieldValue,
+        },
+        size: Object.keys(itemSet.set).length + 1,
+        maxPValue: Math.max(itemSet.maxPValue ?? 1, category.pValue ?? 1),
+        doc_count: 0,
+        support: 0,
+        total_doc_count: Math.max(itemSet.total_doc_count, category.total_doc_count),
       });
     });
   });
@@ -127,7 +159,7 @@ export async function fetchTerms2CategoriesCounts(
     }
     return {
       fields: [],
-      df: [],
+      itemSets: [],
       totalDocCount: 0,
     };
   }
@@ -136,15 +168,25 @@ export async function fetchTerms2CategoriesCounts(
 
   return {
     fields: uniq(significantCategories.map((c) => c.fieldName)),
-    df: results
+    itemSets: results
       .map((result, i) => {
         const resp = mSearchResponses[i];
         if (isMsearchResponseItem(resp)) {
           result.doc_count = (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
+          if (result.total_doc_count > 0) {
+            // Replicates how the `frequent_item_sets` aggregation calculates
+            // the support value by dividing the number of documents containing
+            // the item set by the total number of documents.
+            result.support = result.doc_count / result.total_doc_count;
+          }
         }
         return result;
       })
-      .filter((d) => d.doc_count > 0),
+      .filter(
+        (d) =>
+          d.doc_count > 0 &&
+          d.support > LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT
+      ),
     totalDocCount: 0,
   };
 }

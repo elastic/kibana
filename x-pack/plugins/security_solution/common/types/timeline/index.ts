@@ -37,7 +37,7 @@ export enum TimelineTabs {
   eql = 'eql',
   session = 'session',
   securityAssistant = 'securityAssistant',
-  discover = 'discover',
+  esql = 'esql',
 }
 
 /*

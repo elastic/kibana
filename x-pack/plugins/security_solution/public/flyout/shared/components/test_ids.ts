@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-/* Insights section*/
+import { PREFIX } from '../test_ids';
 
+export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
+export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
 export const EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID = (dataTestSubj: string) =>
   `${dataTestSubj}ToggleIcon`;
 export const EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID = (dataTestSubj: string) =>
