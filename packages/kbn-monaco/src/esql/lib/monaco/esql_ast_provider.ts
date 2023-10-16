@@ -10,7 +10,7 @@ import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../../monaco_imports';
 import { getParser } from '../antlr_facade';
 import { AstListener } from '../ast/ast_factory';
-import { getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
+import { getHoverItem, getSignatureHelp, suggest } from '../ast/autocomplete/autocomplete';
 import { offsetToRowColumn } from '../ast/shared/helpers';
 import { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';
@@ -57,15 +57,18 @@ export function getLanguageProviders() {
     parser[ROOT_STATEMENT]();
 
     const ast = parseListener.getAst();
-    return ast;
+    return {
+      ...ast,
+      errors: [],
+    };
   };
   return {
     // used for debugging purposes only
     getAst,
     validate: async (code: string, callbacks?: ESQLCallbacks) => {
-      const { ast } = getAst(code);
+      const { ast, errors: syntaxErrors } = getAst(code);
       const { errors, warnings } = await validateAst(ast, callbacks);
-      const monacoErrors = wrapAsMonacoMessage('error', code, errors);
+      const monacoErrors = wrapAsMonacoMessage('error', code, errors.concat(syntaxErrors));
       const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };
     },
@@ -80,6 +83,15 @@ export function getLanguageProviders() {
         ) {
           return getSignatureHelp(model, position, context, getAst);
         },
+      };
+    },
+    getHoverProvider: (): monaco.languages.HoverProvider => {
+      return {
+        provideHover: (
+          model: monaco.editor.ITextModel,
+          position: monaco.Position,
+          token: monaco.CancellationToken
+        ) => getHoverItem(model, position, token, getAst),
       };
     },
     getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {

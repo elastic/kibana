@@ -371,6 +371,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, esqlCallbacks]
   );
 
+  const hoverProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getHoverProvider?.() : undefined),
+    [language]
+  );
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -685,6 +690,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       options={codeEditorOptions}
                       width="100%"
                       suggestionProvider={suggestionProvider}
+                      hoverProvider={{
+                        provideHover: (model, position, token) => {
+                          if (isCompactFocused || !hoverProvider?.provideHover) {
+                            return { contents: [] };
+                          }
+                          return hoverProvider?.provideHover(model, position, token);
+                        },
+                      }}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;

@@ -52,6 +52,7 @@ import {
   getCompatibleLiterals,
   buildConstantsDefinitions,
 } from './factories';
+import { getFunctionSignatures } from '../definitions/helpers';
 
 const EDITOR_MARKER = 'marker_esql_editor';
 
@@ -221,6 +222,36 @@ export function getSignatureHelp(
   return {
     value: { signatures: [], activeParameter: 0, activeSignature: 0 },
     dispose: () => {},
+  };
+}
+
+export function getHoverItem(
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  token: monaco.CancellationToken,
+  astProvider: (text: string | undefined) => { ast: ESQLAst }
+) {
+  const innerText = model.getValue();
+  const offset = monacoPositionToOffset(innerText, position);
+
+  const { ast } = astProvider(innerText);
+  const astContext = getContext(innerText, ast, offset);
+
+  if (astContext.type !== 'function') {
+    return { contents: [] };
+  }
+
+  const fnDefinition = getFunctionDefinition(astContext.node.name);
+
+  if (!fnDefinition) {
+    return { contents: [] };
+  }
+
+  return {
+    contents: [
+      { value: getFunctionSignatures(fnDefinition)[0].declaration },
+      { value: fnDefinition.description },
+    ],
   };
 }
 
