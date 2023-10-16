@@ -43,6 +43,8 @@ export const esqlSearchStrategyProvider = (
           {
             signal: abortSignal,
             meta: true,
+            maxRetries: 0,
+            requestTimeout: 120000,
           }
         );
         return {
