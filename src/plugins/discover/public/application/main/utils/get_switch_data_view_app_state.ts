@@ -25,13 +25,13 @@ export function getDataViewAppState(
   sortDirection: string = 'desc',
   query?: Query | AggregateQuery
 ) {
-  const currentColumnsRefreshed = uniq([...currentColumns, ...defaultColumns]);
+  let columns = currentColumns || [];
 
-  const nextColumns = modifyColumns
-    ? currentColumnsRefreshed.filter((column) => nextDataView.fields.getByName(column))
-    : currentColumnsRefreshed;
+  if (modifyColumns) {
+    const currentColumnsRefreshed = uniq([...columns, ...defaultColumns]);
+    columns = currentColumnsRefreshed.filter((column) => nextDataView.fields.getByName(column));
+  }
 
-  let columns = nextColumns.length ? nextColumns : [];
   if (query && isOfAggregateQueryType(query)) {
     columns = [];
   }
