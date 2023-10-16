@@ -12,12 +12,11 @@ import { SelectRuleType } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { useIsEsqlRuleTypeEnabled } from '../../../../detection_engine/rule_creation/hooks';
 
-jest.mock('../../../../detection_engine/rule_creation/hooks', () =>
-  jest.fn().mockReturnValue(false)
-);
+jest.mock('../../../../detection_engine/rule_creation/hooks', () => ({
+  useIsEsqlRuleTypeEnabled: jest.fn().mockReturnValue(true),
+}));
 const useIsEsqlRuleTypeEnabledMock = useIsEsqlRuleTypeEnabled as jest.Mock;
 
-const mockESQLEnabled = jest.fn(() => true);
 describe('SelectRuleType', () => {
   it('renders correctly', () => {
     const Component = () => {
@@ -187,7 +186,7 @@ describe('SelectRuleType', () => {
     });
 
     it('should not render "esql" rule type if esql rule is not enabled', () => {
-      useIsEsqlRuleTypeEnabled.mockReturnValueOnce(false);
+      useIsEsqlRuleTypeEnabledMock.mockReturnValueOnce(false);
       const Component = () => {
         const field = useFormFieldMock();
 
