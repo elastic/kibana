@@ -95,8 +95,8 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
   const equation = watch(`indicator.params.metric.equation`);
   const indexPattern = watch('indicator.params.index');
 
-  const disableAdd = fields?.length === MAX_VARIABLES;
-  const disableDelete = fields?.length === 1;
+  const disableAdd = fields?.length === MAX_VARIABLES || !indexPattern;
+  const disableDelete = fields?.length === 1 || !indexPattern;
 
   const setDefaultEquationIfUnchanged = (previousNames: string[], nextNames: string[]) => {
     const defaultEquation = createEquationFromMetric(previousNames);
