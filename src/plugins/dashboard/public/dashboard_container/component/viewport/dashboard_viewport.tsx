@@ -60,7 +60,6 @@ export const DashboardViewportComponent = () => {
   const description = dashboard.select((state) => state.explicitInput.description);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
-  const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
   const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
 
@@ -71,7 +70,7 @@ export const DashboardViewportComponent = () => {
 
   return (
     <div className={'dshDashboardViewportWrapper'}>
-      {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
+      {controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
           ref={controlsRoot}

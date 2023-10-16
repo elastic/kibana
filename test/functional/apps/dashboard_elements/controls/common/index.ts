@@ -28,8 +28,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     // enable the controls lab and navigate to the dashboard listing page to start
     await dashboard.navigateToApp();
-    await dashboardControls.enableControlsLab();
-    await dashboard.navigateToApp();
     await dashboard.preserveCrossAppState();
   }
 

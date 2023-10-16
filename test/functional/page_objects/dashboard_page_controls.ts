@@ -61,19 +61,6 @@ export class DashboardPageControls extends FtrService {
      General controls functions
      ----------------------------------------------------------- */
 
-  public async enableControlsLab() {
-    await this.header.clickStackManagement();
-    await this.settings.clickKibanaSettings();
-
-    const currentValue = await this.settings.getAdvancedSettingAriaCheckbox(
-      'labs:dashboard:dashboardControls'
-    );
-
-    if (currentValue !== 'true') {
-      await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
-    }
-  }
-
   public async expectControlsEmpty() {
     await this.testSubjects.existOrFail('controls-empty');
   }
