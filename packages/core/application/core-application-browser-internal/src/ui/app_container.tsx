@@ -22,10 +22,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
-import {
-  KibanaErrorBoundary,
-  KibanaErrorBoundaryKibanaProvider,
-} from '@kbn/shared-ux-error-boundary';
+import { ErrorBoundary, ErrorBoundaryKibanaProvider } from '@kbn/shared-ux-error-boundary';
 
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
@@ -120,9 +117,9 @@ export const AppContainer: FC<Props> = ({
   ]);
 
   return appError ? (
-    <KibanaErrorBoundaryKibanaProvider toasts={null}>
-      <KibanaErrorBoundary as="callout" error={appError} />
-    </KibanaErrorBoundaryKibanaProvider>
+    <ErrorBoundaryKibanaProvider>
+      <ErrorBoundary as="callout" error={appError} />
+    </ErrorBoundaryKibanaProvider>
   ) : (
     <Fragment>
       {appNotFound && <AppNotFound />}

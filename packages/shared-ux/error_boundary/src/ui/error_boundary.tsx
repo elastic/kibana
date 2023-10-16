@@ -37,6 +37,10 @@ interface ErrorBoundaryProps {
    */
   toasts?: Toasts;
   /**
+   * If an error has already been caught, we can provide it here to present the error UI
+   */
+  error?: Error;
+  /**
    *
    */
   children?: React.ReactNode;
@@ -49,7 +53,7 @@ class ErrorBoundaryInternal extends React.Component<
   constructor(props: ErrorBoundaryProps & ErrorBoundaryServices) {
     super(props);
     this.state = {
-      error: null,
+      error: props.error ?? null,
       errorInfo: null,
       messageAs: props.as === 'callout' ? props.as : 'toast',
       componentName: null,
