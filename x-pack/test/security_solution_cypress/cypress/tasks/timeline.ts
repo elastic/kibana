@@ -12,6 +12,7 @@ import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
 
 import {
   ADD_FILTER,
@@ -189,6 +190,7 @@ export const addNotesToTimeline = (notes: string) => {
 export const addEqlToTimeline = (eql: string) => {
   goToCorrelationTab().then(() => {
     cy.get(TIMELINE_CORRELATION_INPUT).type(eql);
+    cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   });
 };
 
@@ -354,9 +356,14 @@ export const saveTimeline = () => {
     .then((value) => {
       if (!value) {
         cy.get(TIMELINE_TITLE_INPUT).type(`test{enter}`);
+        cy.get(TIMELINE_TITLE_INPUT).invoke('val').should('equal', 'test');
       }
-      cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
-      cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+      cy.get('[data-test-subj="save-timeline-modal"]').within(() => {
+        cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).should('not.be.disabled');
+        cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+        cy.get('[data-test-subj="progress-bar"]').should('exist');
+        cy.get('[data-test-subj="progress-bar"]').should('not.exist');
+      });
     });
 };
 
