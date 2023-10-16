@@ -1126,6 +1126,7 @@ export const runActionTestSuite = ({
         client,
         index: ARCHIVE_INDEX_WITH_1M_SO,
         status: 'yellow',
+        timeout: '300s',
       })();
 
       expect(Either.isRight(readyTaskRes)).toBe(true);
