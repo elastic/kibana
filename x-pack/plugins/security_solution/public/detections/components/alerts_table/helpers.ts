@@ -224,7 +224,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
     range: {
       '@timestamp': {
         gte: from,
-        lt: to,
+        lte: to,
         format: 'strict_date_optional_time',
       },
     },
@@ -236,7 +236,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
       key: '@timestamp',
       params: {
         gte: from,
-        lt: to,
+        lte: to,
         format: 'strict_date_optional_time',
       },
     },
