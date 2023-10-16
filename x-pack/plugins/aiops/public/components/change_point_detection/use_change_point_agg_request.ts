@@ -13,6 +13,7 @@ import type {
   MappingRuntimeFields,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -23,11 +24,13 @@ import {
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
+
 import {
   type ChangePointType,
   COMPOSITE_AGG_SIZE,
   EXCLUDED_CHANGE_POINT_TYPES,
   SPLIT_FIELD_CARDINALITY_LIMIT,
+  CHANGE_POINT_DETECTION_EVENT,
 } from './constants';
 
 interface RequestOptions {
@@ -118,10 +121,12 @@ export function useChangePointResults(
   fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
-  splitFieldCardinality: number | null
+  splitFieldCardinality: number | null,
+  embeddedOrigin: string = 'aiops'
 ) {
   const {
     notifications: { toasts },
+    usageCollection,
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
@@ -187,10 +192,26 @@ export function useChangePointResults(
           runtimeMappings
         );
 
+        if (usageCollection?.reportUiCounter) {
+          usageCollection.reportUiCounter(
+            embeddedOrigin,
+            METRIC_TYPE.COUNT,
+            CHANGE_POINT_DETECTION_EVENT.RUN
+          );
+        }
+
         const result = await runRequest<
           { params: SearchRequest },
           { rawResponse: ChangePointAggResponse }
         >({ params: requestPayload });
+
+        if (usageCollection?.reportUiCounter) {
+          usageCollection.reportUiCounter(
+            embeddedOrigin,
+            METRIC_TYPE.COUNT,
+            CHANGE_POINT_DETECTION_EVENT.SUCCESS
+          );
+        }
 
         if (result === null) {
           setProgress(null);
@@ -257,6 +278,13 @@ export function useChangePointResults(
           );
         }
       } catch (e) {
+        if (usageCollection?.reportUiCounter) {
+          usageCollection.reportUiCounter(
+            embeddedOrigin,
+            METRIC_TYPE.COUNT,
+            CHANGE_POINT_DETECTION_EVENT.ERROR
+          );
+        }
         toasts.addError(e, {
           title: i18n.translate('xpack.aiops.changePointDetection.fetchErrorTitle', {
             defaultMessage: 'Failed to fetch change points',
@@ -265,6 +293,7 @@ export function useChangePointResults(
       }
     },
     [
+      embeddedOrigin,
       isSingleMetric,
       totalAggPages,
       dataView,
@@ -278,6 +307,7 @@ export function useChangePointResults(
       splitFieldsOptions,
       runRequest,
       toasts,
+      usageCollection,
     ]
   );
 
