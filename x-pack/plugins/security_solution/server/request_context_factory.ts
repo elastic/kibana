@@ -136,7 +136,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           new RiskEngineDataClient({
             logger: options.logger,
             kibanaVersion: options.kibanaVersion,
-            esClient: coreContext.elasticsearch.client.asInternalUser,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
             soClient: coreContext.savedObjects.client,
             namespace: getSpaceId(),
           })
