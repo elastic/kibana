@@ -25,7 +25,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
@@ -125,12 +124,12 @@ describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
       const component = await mountComponent();
-      expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
+      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
     it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
       const component = await mountComponent({ isPlainRecord: true });
-      expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
+      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeUndefined();
     });
   });
 
