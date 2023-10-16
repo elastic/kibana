@@ -541,6 +541,7 @@ export class DataViewsService {
       allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
+      allowHidden: dataView.getAllowHidden(),
     });
   };
 
@@ -553,6 +554,7 @@ export class DataViewsService {
       rollupIndex: options.rollupIndex,
       allowNoIndex: true,
       indexFilter: options.indexFilter,
+      allowHidden: options.allowHidden,
     });
   };
 
@@ -704,6 +706,7 @@ export class DataViewsService {
         fieldAttrs,
         allowNoIndex,
         name,
+        allowHidden,
       },
     } = savedObject;
 
@@ -731,6 +734,7 @@ export class DataViewsService {
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
+      allowHidden,
     };
   };
 
