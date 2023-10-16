@@ -538,6 +538,7 @@ export const UnifiedDataTable = ({
         fieldFormats: services.fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
+        isPlainRecord,
       }),
     [
       dataView,
@@ -547,6 +548,7 @@ export const UnifiedDataTable = ({
       maxDocFieldsDisplayed,
       services.fieldFormats,
       externalCustomRenderers,
+      isPlainRecord,
     ]
   );
 

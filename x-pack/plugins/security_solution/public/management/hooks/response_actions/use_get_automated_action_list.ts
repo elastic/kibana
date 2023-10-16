@@ -30,6 +30,7 @@ import type {
 
 interface GetAutomatedActionsListOptions {
   enabled: boolean;
+  isLive: boolean;
 }
 
 // Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
@@ -37,7 +38,7 @@ const ACTIONS_QUERY_KEY = 'actions';
 
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
-  { enabled }: GetAutomatedActionsListOptions
+  { enabled, isLive }: GetAutomatedActionsListOptions
 ): UseQueryResult<ActionRequestStrategyResponse & { items: LogsEndpointActionWithHosts[] }> => {
   const { data } = useKibana().services;
 
@@ -79,6 +80,7 @@ export const useGetAutomatedActionList = (
       };
     },
     enabled,
+    refetchInterval: isLive ? 5000 : false,
     keepPreviousData: true,
   });
 };

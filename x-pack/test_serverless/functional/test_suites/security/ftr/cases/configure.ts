@@ -10,24 +10,34 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlSecNavigation = getService('svlSecNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const find = getService('find');
 
   describe('Configure Case', function () {
     // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
     this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
-
       await svlSecNavigation.navigateToLandingPage();
-
       await testSubjects.click('solutionSideNavItemLink-cases');
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('configure-case-button exist', async () => {
+        return await testSubjects.exists('configure-case-button');
+      });
 
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
+      });
     });
 
     after(async () => {
@@ -36,8 +46,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
-      // Error: Expected the radio group value to equal "close-by-pushing" (got "close-by-user")
-      this.tags(['failsOnMKI']);
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -62,6 +70,55 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+      });
+    });
+
+    describe('Custom fields', function () {
+      it('adds a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+
+        await testSubjects.setValue('custom-field-label-input', 'Summary');
+
+        await testSubjects.setCheckbox('text-custom-field-options-wrapper', 'check');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary\nText');
+      });
+
+      it('edits a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const textField = await find.byCssSelector('[data-test-subj*="-custom-field-edit"]');
+
+        await textField.click();
+
+        const input = await testSubjects.find('custom-field-label-input');
+
+        await input.type('!!!');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary!!!\nText');
+      });
+
+      it('deletes a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const deleteButton = await find.byCssSelector('[data-test-subj*="-custom-field-delete"]');
+
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-delete-custom-field-modal');
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await testSubjects.missingOrFail('custom-fields-list');
       });
     });
   });
