@@ -19,6 +19,16 @@ export async function createConfig(configFile: string) {
   return config;
 }
 
+type TransitionMethod = 'linear' | 'exp' | 'sine';
+
+type EventsPerCycle =
+  | number
+  | {
+      start: number;
+      end: number;
+      method: TransitionMethod;
+    };
+
 export interface ParsedSchedule {
   template: string;
   start: number;
@@ -28,6 +38,7 @@ export interface Schedule {
   template: string;
   start: string;
   end: string | boolean;
+  eventsPerCycle: EventsPerCycle;
 }
 
 export interface Config {

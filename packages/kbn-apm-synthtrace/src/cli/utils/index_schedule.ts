@@ -20,13 +20,26 @@ interface Schedule {
   start: number;
   end: number | boolean;
   interval?: number;
+  eventsPerCycle: EventsPerCycle;
 }
+
+type TransitionMethod = 'linear' | 'exp' | 'sine';
+
+type EventsPerCycle =
+  | number
+  | {
+      start: number;
+      end: number;
+      method: TransitionMethod;
+    };
 
 interface ParsedSchedule {
   template: string;
   start: string;
   end: string | boolean;
   interval?: number;
+  eventsPerCycle: EventsPerCycle;
+  randomness: number;
 }
 
 export interface Config {
@@ -38,16 +51,22 @@ const DEFAULT_INTERVAL = 60000;
 const parseSchedule = (now: Moment) => (schedule: Schedule) => {
   const startTs = isNumber(schedule.start)
     ? schedule.start
-    : parser.parse(schedule.start, { momentInstance: now.valueOf(), roundUp: false });
+    : parser.parse(schedule.start, now.valueOf(), false);
+
   const endTs = isNumber(schedule.end)
     ? schedule.end
     : isString(schedule.end)
-    ? parser.parse(schedule.end, { momentInstance: now.valueOf(), roundUp: true })
+    ? parser.parse(schedule.end, now.valueOf(), false)
     : false;
   return { ...schedule, start: startTs, end: endTs };
 };
 
-function createExponentialFunction(start, end) {
+interface Point {
+  x: number;
+  y: number;
+}
+
+function createExponentialFunction(start: Point, end: Point) {
   const totalPoints = end.x - start.x;
   const ratio = end.y / start.y;
   const exponent = Math.log(ratio) / (totalPoints - 1);
@@ -57,20 +76,50 @@ function createExponentialFunction(start, end) {
   };
 }
 
+function createSineFunction(start: Point, end: Point, period = 60) {
+  const midline = start.y;
+  const amplitude = end.y;
+  return (timestamp: Moment) => {
+    const x = (timestamp.valueOf() - start.x) / 1000;
+    const y = midline + amplitude * Math.sin(((2 * Math.PI) / period) * x);
+    if (y < 0) {
+      return 0;
+    }
+    return y;
+  };
+}
+
+function createLinearFunction(start: Point, end: Point) {
+  const slope = (end.y - start.y) / (end.x - start.x);
+  const intercept = start.y - slope * start.x;
+  return (timestamp: Moment) => {
+    return slope * timestamp.valueOf() + intercept;
+  };
+}
+
 function createEventsPerCycleFn(
   schedule: ParsedSchedule,
-  eventsPerCycle
+  eventsPerCycle: EventsPerCycle
 ): (timestamp: Moment) => number {
-  // if (isNumber(schedule.end)) {
-  //   const startPoint = { x: schedule.start, y: eventsPerCycle.start };
-  //   const endPoint = { x: schedule.end, y: eventsPerCycle.end };
+  if (typeof eventsPerCycle !== 'number') {
+    if (isNumber(schedule.end)) {
+      const startPoint = { x: schedule.start, y: eventsPerCycle.start };
+      const endPoint = { x: schedule.end, y: eventsPerCycle.end };
+      if (eventsPerCycle.method === 'exp') {
+        return createExponentialFunction(startPoint, endPoint);
+      }
+      if (eventsPerCycle.method === 'sine') {
+        return createSineFunction(startPoint, endPoint, 60); // TODO add  eventsPerCycle.options?.period
+      }
+      return createLinearFunction(startPoint, endPoint);
+      return createExponentialFunction(startPoint, endPoint);
+    } else if (schedule.end === false) {
+      console.log('EventsPerCycle must be a number if the end value of schedule is false.');
+    }
+  }
 
-  //   return createExponentialFunction(startPoint, endPoint);
-  // } else if (schedule.end === false) {
-  //   console.log('EventsPerCycle must be a number if the end value of schedule is false.');
-  // }
-
-  return (_timestamp: Moment) => eventsPerCycle;
+  return (_timestamp: Moment) =>
+    typeof eventsPerCycle === 'number' ? eventsPerCycle : eventsPerCycle.end;
 }
 
 export async function wait(delay: number) {
@@ -115,29 +164,37 @@ export async function createEvents(
     logger,
   });
 
-  const eventsPerCycle = 1;
+  const eventsPerCycle = schedule.eventsPerCycle || 1;
   const interval = DEFAULT_INTERVAL;
   const calculateEventsPerCycle = createEventsPerCycleFn(schedule, eventsPerCycle);
   const totalEvents = calculateEventsPerCycle(currentTimestamp);
-  console.log(totalEvents, '!!totalEvents');
 
-  const eventTimestamp = moment(
-    random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
-  );
-  const next = logger.perf('execute_scenario', () =>
-    generate({ range: timerange(eventTimestamp, end) })
-  );
+  if (totalEvents > 0) {
+    const epc = schedule.randomness
+      ? random(
+          Math.round(totalEvents - totalEvents * schedule.randomness),
+          Math.round(totalEvents + totalEvents * schedule.randomness)
+        )
+      : totalEvents;
+    const next = range(epc)
+      .map((i) => {
+        const eventTimestamp = moment(
+          random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval)
+        );
+        return generate({ range: timerange(eventTimestamp, end) });
+      })
+      .flat();
 
-  const concatenatedStream = castArray(next)
-    .reverse()
-    .reduce<Writable>((prev, current) => {
-      const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-      return currentStream.pipe(prev);
-    }, new PassThrough({ objectMode: true }));
+    const concatenatedStream = castArray(next)
+      .reverse()
+      .reduce<Writable>((prev, current) => {
+        const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+        return currentStream.pipe(prev);
+      }, new PassThrough({ objectMode: true }));
 
-  concatenatedStream.pipe(stream, { end: false });
-
-  await awaitStream(concatenatedStream);
+    concatenatedStream.pipe(stream, { end: false });
+    await awaitStream(concatenatedStream);
+  }
 
   await apmEsClient.refresh();
 
@@ -171,15 +228,14 @@ export async function createEvents(
 }
 
 export async function indexSchedule(config: Config, apmEsClient, logger) {
-  console.log(config, '!!config');
   const now = moment();
+
   const compiledSchedule = config.schedule.map(parseSchedule(now));
   const stream = new PassThrough({
     objectMode: true,
   });
   apmEsClient.index(stream);
   for (const schedule of compiledSchedule) {
-    console.log(compiledSchedule, '!!compiled');
     const interval = schedule.interval ?? DEFAULT_INTERVAL;
     const startTs = moment(schedule.start);
     const end =
@@ -212,24 +268,3 @@ export async function indexSchedule(config: Config, apmEsClient, logger) {
     );
   }
 }
-
-/**
- * // read the template
-    // if good, get specific scenario
-    // if bad, get a bad scenario
-    // if good_and_bad get a good_bad_scenario
-    let scenarioFile;
-    // TODO change the scenario files
-    // Probably move all this logic inside a new createEvents function
-    if (schedule.template === 'good') {
-      scenarioFile = '../../scenarios/simple_trace.ts';
-    } else if (schedule.template === 'bad') {
-      scenarioFile = '../../scenarios/high_throughput.ts';
-    } else if (schedule.template === 'good_and_bad') {
-      scenarioFile = '../../scenarios/low_throughput.ts';
-    }
-    const scenario = await getScenario({ file: scenarioFile, logger });
-    const { generate } = await scenario({ ...runOptions, logger });
-    index++;
-
- */

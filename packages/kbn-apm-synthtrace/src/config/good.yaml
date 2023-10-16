@@ -1,4 +1,9 @@
 schedule:
   - template: "good"
-    start: "now-8d"
-    end: "now-2d"
+    start: "now-5m"
+    end: "now-3m"
+    randomness: 0.2
+    eventsPerCycle:
+      start: 50
+      end: 2
+      method: "exp"

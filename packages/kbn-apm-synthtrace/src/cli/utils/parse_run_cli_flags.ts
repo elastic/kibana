@@ -15,7 +15,7 @@ import { RunCliFlags } from '../run_synthtrace';
 function getParseConfigFile(flags: RunCliFlags) {
   const { config, _ } = flags;
   if (config) {
-    const parsedConfig = (config || _[0]) as string;
+    const parsedConfig = config as string;
     const configPath = [
       path.resolve(parsedConfig),
       path.resolve(`${parsedConfig}.ts`),
@@ -34,9 +34,12 @@ function getParseConfigFile(flags: RunCliFlags) {
 }
 
 function getParsedFile(flags: RunCliFlags) {
-  const { file, _ } = flags;
+  const { file, config, _ } = flags;
   const parsedFile = (file || _[0]) as string;
-
+  const parsedConfig = config as string;
+  if (parsedConfig) {
+    return;
+  }
   if (!parsedFile) {
     throw new Error('Please specify a scenario to run');
   }
