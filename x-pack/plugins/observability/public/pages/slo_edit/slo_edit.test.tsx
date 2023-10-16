@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
@@ -136,7 +137,9 @@ describe('SLO Edit Page', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    jest.spyOn(Router, 'useHistory').mockClear();
+    const history = createBrowserHistory();
+    history.replace('');
+    jest.spyOn(Router, 'useHistory').mockReturnValueOnce(history);
 
     useFetchDataViewsMock.mockReturnValue({
       isLoading: false,
@@ -255,7 +258,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
 
         const history = createBrowserHistory();
-        history.push(
+        history.replace(
           '/slos/create?_a=(indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
         );
         jest.spyOn(Router, 'useHistory').mockReturnValueOnce(history);
@@ -289,7 +292,8 @@ describe('SLO Edit Page', () => {
       it('prefills the form with the SLO values', async () => {
         const slo = buildSlo({ id: '123Foo' });
         useFetchSloMock.mockReturnValue({ isLoading: false, isInitialLoading: false, slo });
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123Foo' });
+
         jest
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });

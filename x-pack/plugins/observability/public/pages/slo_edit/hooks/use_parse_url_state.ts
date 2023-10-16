@@ -20,7 +20,7 @@ export function useParseUrlState(): CreateSLOForm | undefined {
     useHashQuery: false,
   });
 
-  const urlParams = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
+  const urlState = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
 
-  return !!urlParams ? transformPartialUrlStateToFormState(urlParams) : undefined;
+  return !!urlState ? transformPartialUrlStateToFormState(urlState) : undefined;
 }
