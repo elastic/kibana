@@ -180,16 +180,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -625,7 +625,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -8219,16 +8219,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8664,7 +8664,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
@@ -15317,16 +15317,16 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
-              },
-              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15762,7 +15762,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/document_details/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "transform",
