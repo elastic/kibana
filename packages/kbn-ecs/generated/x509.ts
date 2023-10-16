@@ -15,16 +15,16 @@ export interface EcsX509 {
   /**
    * List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.
    */
-  alternative_names?: string | string[];
+  alternative_names?: string[];
   issuer?: {
     /**
      * List of common name (CN) of issuing certificate authority.
      */
-    common_name?: string | string[];
+    common_name?: string[];
     /**
      * List of country \(C) codes
      */
-    country?: string | string[];
+    country?: string[];
     /**
      * Distinguished name (DN) of issuing certificate authority.
      */
@@ -32,19 +32,19 @@ export interface EcsX509 {
     /**
      * List of locality names (L)
      */
-    locality?: string | string[];
+    locality?: string[];
     /**
      * List of organizations (O) of issuing certificate authority.
      */
-    organization?: string | string[];
+    organization?: string[];
     /**
      * List of organizational units (OU) of issuing certificate authority.
      */
-    organizational_unit?: string | string[];
+    organizational_unit?: string[];
     /**
      * List of state or province names (ST, S, or P)
      */
-    state_or_province?: string | string[];
+    state_or_province?: string[];
   };
 
   /**
@@ -83,11 +83,11 @@ export interface EcsX509 {
     /**
      * List of common names (CN) of subject.
      */
-    common_name?: string | string[];
+    common_name?: string[];
     /**
      * List of country \(C) code
      */
-    country?: string | string[];
+    country?: string[];
     /**
      * Distinguished name (DN) of the certificate subject entity.
      */
@@ -95,19 +95,19 @@ export interface EcsX509 {
     /**
      * List of locality names (L)
      */
-    locality?: string | string[];
+    locality?: string[];
     /**
      * List of organizations (O) of subject.
      */
-    organization?: string | string[];
+    organization?: string[];
     /**
      * List of organizational units (OU) of subject.
      */
-    organizational_unit?: string | string[];
+    organizational_unit?: string[];
     /**
      * List of state or province names (ST, S, or P)
      */
-    state_or_province?: string | string[];
+    state_or_province?: string[];
   };
 
   /**

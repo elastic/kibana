@@ -61,6 +61,7 @@ export const TestRunsTableHeader = ({
       <EuiFlexItem grow={false}>
         <EuiSwitch
           compressed
+          data-test-subj="toggleRetestSwitch"
           label={ONLY_SHOW_RETEST}
           checked={showOnlyFinalAttempts}
           onChange={(e) => dispatch(showOnlyFinalAttemptsAction(e.target.checked))}
