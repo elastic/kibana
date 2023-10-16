@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
@@ -20,14 +21,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
 
   describe('Configure Case', function () {
-    //  Error: timed out waiting for assertRadioGroupValue: Expected the radio group value to equal "close-by-pushing"
+    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
     this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
-
       await svlObltNavigation.navigateToLandingPage();
-
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('configure-case-button exist', async () => {
+        return await testSubjects.exists('configure-case-button');
+      });
+
+      await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
+      });
     });
 
     after(async () => {
@@ -35,12 +46,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlCommonPage.forceLogout();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/166469
-    describe.skip('Closure options', function () {
-      before(async () => {
-        await common.clickAndValidate('configure-case-button', 'case-configure-title');
-      });
-
+    describe('Closure options', function () {
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -53,8 +59,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/167869
-    describe.skip('Connectors', function () {
+    describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
         await retry.waitFor('dropdown-connector-no-connector to exist', async () => {
           return await testSubjects.exists('dropdown-connector-no-connector');
