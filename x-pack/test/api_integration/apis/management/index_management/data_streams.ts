@@ -31,6 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
+          lifecycle: {
+            // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
+            enabled: true,
+          },
         },
         data_stream: {},
       },
@@ -85,8 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(typeof storageSizeBytes).to.be('number');
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/168021
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
