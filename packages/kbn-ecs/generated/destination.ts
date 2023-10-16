@@ -180,6 +180,6 @@ export interface EcsDestination {
     /**
      * Array of user roles at the time of the event.
      */
-    roles?: string | string[];
+    roles?: string[];
   };
 }
