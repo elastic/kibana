@@ -67,12 +67,14 @@ export default function ({ getService }: FtrProviderContext) {
       // This validates the shouldTransformIfDecryptionFails flag
       // (see x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
       it('performs model version transforms even if decryption fails', async () => {
-        const { body: decryptedResponse } = await supertest.get(
-          `/api/saved_objects/get-decrypted-as-internal-user/saved-object-mv/e35debe0-6c54-11ee-88d4-47e62f05d6ef`
-        ).expect(200); // operation will throw if flag is set to false
+        const { body: decryptedResponse } = await supertest
+          .get(
+            `/api/saved_objects/get-decrypted-as-internal-user/saved-object-mv/e35debe0-6c54-11ee-88d4-47e62f05d6ef`
+          )
+          .expect(200); // operation will throw if flag is set to false
         expect(decryptedResponse.attributes).to.eql({
           nonEncryptedAttribute: 'elastic-migrated',
-          additionalEncryptedAttribute: 'elastic-migrated-encrypted'
+          additionalEncryptedAttribute: 'elastic-migrated-encrypted',
         });
       });
     });

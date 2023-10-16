@@ -575,7 +575,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('migrations', () => {
-      function getGetApiUrl({ type, objectId, spaceId }: { type: string, objectId: string; spaceId?: string }) {
+      function getGetApiUrl({
+        type,
+        objectId,
+        spaceId,
+      }: {
+        type: string;
+        objectId: string;
+        spaceId?: string;
+      }) {
         const spacePrefix = spaceId ? `/s/${spaceId}` : '';
         return `${spacePrefix}/api/saved_objects/get-decrypted-as-internal-user/${type}/${objectId}`;
       }
@@ -607,13 +615,19 @@ export default function ({ getService }: FtrProviderContext) {
 
         describe('in the default space', () => {
           it('for a saved object that needs to be migrated before it is converted', async () => {
-            const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId: '74f3e6d7-b7bb-477d-ac28-92ee22728e6e' });
+            const getApiUrl = getGetApiUrl({
+              type: 'saved-object-with-migration',
+              objectId: '74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
+            });
             const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
             expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
           });
 
           it('for a saved object that does not need to be migrated before it is converted', async () => {
-            const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId: '362828f0-eef2-11eb-9073-11359682300a' });
+            const getApiUrl = getGetApiUrl({
+              type: 'saved-object-with-migration',
+              objectId: '362828f0-eef2-11eb-9073-11359682300a',
+            });
             const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
             expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
           });
@@ -684,7 +698,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           const { id: objectId } = savedObject;
 
-          const getApiUrl = getGetApiUrl({type: 'saved-object-with-migration', objectId });
+          const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId });
           const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
         });
@@ -699,7 +713,11 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           const { id: objectId } = savedObject;
 
-          const getApiUrl = getGetApiUrl({ type: 'saved-object-with-migration', objectId, spaceId });
+          const getApiUrl = getGetApiUrl({
+            type: 'saved-object-with-migration',
+            objectId,
+            spaceId,
+          });
           const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
         });
@@ -723,7 +741,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('in the default space', async () => {
-          const getApiUrl = getGetApiUrl({ type: 'saved-object-mv', objectId: 'e35debe0-6c54-11ee-88d4-47e62f05d6ef' });
+          const getApiUrl = getGetApiUrl({
+            type: 'saved-object-mv',
+            objectId: 'e35debe0-6c54-11ee-88d4-47e62f05d6ef',
+          });
           const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
           const pass = 1;
@@ -740,7 +761,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
         });
       });
-    })
+    });
 
     describe('key rotation', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');

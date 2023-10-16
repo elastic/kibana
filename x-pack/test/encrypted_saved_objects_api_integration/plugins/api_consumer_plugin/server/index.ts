@@ -323,6 +323,6 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
         inputType: typePriorTo810,
         shouldTransformIfDecryptionFails: true,
       }),
-    }
+    },
   });
 }
