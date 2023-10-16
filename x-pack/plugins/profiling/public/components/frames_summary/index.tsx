@@ -14,66 +14,65 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { TopNFunctions } from '@kbn/profiling-utils';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
 
+interface FrameValue {
+  selfCPU: number;
+  totalCPU: number;
+  totalCount: number;
+  duration: number;
+  scaleFactor?: number;
+}
+
 interface Props {
-  baselineTopNFunctions?: TopNFunctions;
-  comparisonTopNFunctions?: TopNFunctions;
-  baselineScaleFactor?: number;
-  comparisonScaleFactor?: number;
+  baseValue?: FrameValue;
+  comparisonValue?: FrameValue;
   isLoading: boolean;
-  baselineDuration: number;
-  comparisonDuration: number;
 }
 
 const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.estimatedValue', {
   defaultMessage: 'Estimated value',
 }) as string;
 
-export function TopNFunctionsSummary({
-  baselineTopNFunctions,
-  comparisonTopNFunctions,
-  baselineScaleFactor = 1,
-  comparisonScaleFactor = 1,
-  isLoading,
-  baselineDuration,
-  comparisonDuration,
-}: Props) {
+function getScaleFactor(scaleFactor: number = 1) {
+  return scaleFactor;
+}
+
+export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
-  const baselineScaledTotalSamples = baselineTopNFunctions
-    ? baselineTopNFunctions.TotalCount * baselineScaleFactor
+  const baselineScaledTotalSamples = baseValue
+    ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
     : 0;
 
-  const comparisonScaledTotalSamples = comparisonTopNFunctions
-    ? comparisonTopNFunctions.TotalCount * comparisonScaleFactor
+  const comparisonScaledTotalSamples = comparisonValue
+    ? comparisonValue.totalCount * getScaleFactor(comparisonValue.scaleFactor)
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
-    const baseImpactEstimates = baselineTopNFunctions
+    const baseImpactEstimates = baseValue
       ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
         calculateImpactEstimates({
-          countExclusive: baselineTopNFunctions.selfCPU,
-          countInclusive: baselineTopNFunctions.totalCPU,
-          totalSamples: baselineTopNFunctions.TotalCount,
-          totalSeconds: baselineDuration,
+          countExclusive: baseValue.selfCPU,
+          countInclusive: baseValue.totalCPU,
+          totalSamples: baseValue.totalCount,
+          totalSeconds: baseValue.duration,
         })
       : undefined;
 
-    const comparisonImpactEstimates = comparisonTopNFunctions
+    const comparisonImpactEstimates = comparisonValue
       ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
         calculateImpactEstimates({
-          countExclusive: comparisonTopNFunctions.selfCPU,
-          countInclusive: comparisonTopNFunctions.totalCPU,
-          totalSamples: comparisonTopNFunctions.TotalCount,
-          totalSeconds: comparisonDuration,
+          countExclusive: comparisonValue.selfCPU,
+          countInclusive: comparisonValue.totalCPU,
+          totalSamples: comparisonValue.totalCount,
+          totalSeconds: comparisonValue.duration,
         })
       : undefined;
 
@@ -94,13 +93,11 @@ export function TopNFunctionsSummary({
       }),
     };
   }, [
-    baselineDuration,
+    baseValue,
     baselineScaledTotalSamples,
-    baselineTopNFunctions,
     calculateImpactEstimates,
-    comparisonDuration,
     comparisonScaledTotalSamples,
-    comparisonTopNFunctions,
+    comparisonValue,
   ]);
 
   const data = [
