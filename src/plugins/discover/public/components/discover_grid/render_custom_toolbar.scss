@@ -1,5 +1,9 @@
 .dscGridToolbar {
   padding: $euiSizeS;
+
+  &--bottomBorder {
+    border-bottom: $euiBorderThin;
+  }
 }
 
 .dscGridToolbarControlButton .euiDataGrid__controlBtn {
@@ -54,4 +58,8 @@
     border-inline-start: $euiBorderThin;
     border-radius: 0;
   }
+}
+
+.dscGridToolbar .euiTabs {
+  transform: translateY(10px);
 }

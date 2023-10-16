@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import classnames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   UnifiedDataTableRenderCustomToolbarProps,
@@ -17,11 +18,13 @@ import './render_custom_toolbar.scss';
 
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
   leftSide?: React.ReactElement;
+  bottomBorder?: boolean;
 }
 
 export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.ReactElement => {
   const {
     leftSide,
+    bottomBorder,
     toolbarProps: {
       hasRoomForGridControls,
       columnControl,
@@ -64,7 +67,7 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
       gutterSize="s"
       justifyContent="spaceBetween"
       alignItems="center"
-      className="dscGridToolbar"
+      className={classnames('dscGridToolbar', { 'dscGridToolbar--bottomBorder': bottomBorder })}
       data-test-subj="dscGridToolbar"
       wrap
     >
@@ -97,6 +100,20 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+/**
+ * Render custom element on the left side and all controls to the right
+ */
+export const getRenderCustomToolbarWithViewModeToggle = (
+  viewModeToggle: React.ReactElement | undefined
+): UnifiedDataTableRenderCustomToolbar => {
+  return (props) =>
+    renderCustomToolbar({
+      ...props,
+      leftSide: viewModeToggle,
+      bottomBorder: true,
+    });
 };
 
 /**

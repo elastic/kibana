@@ -80,6 +80,10 @@ export const DiscoverMainContent = ({
   const documents = useObservable(stateContainer.dataState.data$.documents$);
   const isDropAllowed = Boolean(onDropFieldToTable);
 
+  const viewModeToggle = !isPlainRecord ? (
+    <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+  ) : undefined;
+
   return (
     <DragDrop
       draggable={false}
@@ -96,14 +100,9 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
-          <EuiFlexItem grow={false}>
-            {!isPlainRecord && (
-              <DocumentViewModeToggle
-                viewMode={viewMode}
-                setDiscoverViewMode={setDiscoverViewMode}
-              />
-            )}
-          </EuiFlexItem>
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL && (
+            <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+          )}
           {dataState.error && (
             <ErrorCallout
               title={i18n.translate('discover.documentsErrorTitle', {
@@ -122,6 +121,7 @@ export const DiscoverMainContent = ({
 
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
+              viewModeToggle={viewModeToggle}
               dataView={dataView}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               stateContainer={stateContainer}

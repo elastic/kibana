@@ -24,8 +24,11 @@ export const DocumentViewModeToggle = ({
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
 
+  const isFieldStatisticsActive = viewMode === VIEW_MODE.AGGREGATED_LEVEL;
+
   const tabsCss = css`
-    padding: 0 ${euiTheme.size.s};
+    padding: 0 ${isFieldStatisticsActive ? euiTheme.size.s : 0};
+    margin-top: ${isFieldStatisticsActive ? '19px' : 0};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -35,7 +38,12 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
+    <EuiTabs
+      size="s"
+      css={tabsCss}
+      data-test-subj="dscViewModeToggle"
+      bottomBorder={isFieldStatisticsActive}
+    >
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}

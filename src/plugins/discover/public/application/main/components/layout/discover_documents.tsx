@@ -57,6 +57,7 @@ import {
 } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import { getRenderCustomToolbarWithViewModeToggle } from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 
@@ -89,11 +90,13 @@ export const onResize = (
 };
 
 function DiscoverDocumentsComponent({
+  viewModeToggle,
   dataView,
   onAddFilter,
   stateContainer,
   onFieldEdited,
 }: {
+  viewModeToggle: React.ReactElement | undefined;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
@@ -240,6 +243,11 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
+  const renderCustomToolbar = useMemo(
+    () => getRenderCustomToolbarWithViewModeToggle(viewModeToggle),
+    [viewModeToggle]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -336,6 +344,7 @@ function DiscoverDocumentsComponent({
                 showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
                 maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                 renderDocumentView={renderDocumentView}
+                renderCustomToolbar={renderCustomToolbar}
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
