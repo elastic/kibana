@@ -6,16 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ErrorService } from './src/services/error_service';
-
-export interface ErrorBoundaryUIServices {
-  reloadWindow: () => void;
-}
-
-/**
- * Services that are consumed internally in this component.
- * @internal
- */
-export interface ErrorBoundaryServices extends ErrorBoundaryUIServices {
-  errorService: ErrorService;
-}
+export { BadComponent } from './src/bad_component';
+export { ChunkLoadErrorComponent } from './src/chunk_load_error_component';
+export { ErrorBoundaryStorybookMock } from './src/storybook';

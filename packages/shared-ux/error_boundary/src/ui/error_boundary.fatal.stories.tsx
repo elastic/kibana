@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import { Meta, Story } from '@storybook/react';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 
-import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 
-import mdx from '../../README.mdx';
-import { ErrorBoundaryStorybookMock } from '../../mocks/src/storybook';
+import { BadComponent, ErrorBoundaryStorybookMock } from '../../mocks';
 import { ErrorBoundaryProvider } from '../services/error_boundary_services';
 import { ErrorBoundary } from './error_boundary';
+
+import mdx from '../../README.mdx';
 
 const storybookMock = new ErrorBoundaryStorybookMock();
 
@@ -40,22 +40,6 @@ const Template: FC = ({ children }) => {
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
-};
-
-const BadComponent = () => {
-  const [hasError, setHasError] = useState(false);
-
-  if (hasError) {
-    throw new Error('This is an error to show the storybook user!'); // custom error
-  }
-
-  const clickedForError = action('clicked for error');
-  const handleClick = () => {
-    clickedForError();
-    setHasError(true);
-  };
-
-  return <EuiButton onClick={handleClick}>Click for error</EuiButton>;
 };
 
 export const ErrorInCallout: Story = () => {

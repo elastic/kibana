@@ -10,6 +10,13 @@ import React from 'react';
 
 const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;
 
+interface ErrorServiceError {
+  error: Error;
+  errorInfo?: Partial<React.ErrorInfo> | null;
+  name: string | null;
+  isFatal: boolean;
+}
+
 /**
  * Kibana Error Boundary Services: Error Service
  * Each Error Boundary tracks an instance of this class
@@ -65,11 +72,4 @@ export class ErrorService {
       name,
     };
   }
-}
-
-interface ErrorServiceError {
-  error: Error;
-  errorInfo?: Partial<React.ErrorInfo> | null;
-  name: string | null;
-  isFatal: boolean;
 }

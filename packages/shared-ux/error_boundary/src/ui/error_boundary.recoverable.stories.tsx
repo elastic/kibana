@@ -6,23 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import { Meta, Story } from '@storybook/react';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 
-import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 
-import mdx from '../../README.mdx';
-import { ErrorBoundaryStorybookMock } from '../../mocks/src/storybook';
+import { ChunkLoadErrorComponent, ErrorBoundaryStorybookMock } from '../../mocks';
 import { ErrorBoundaryProvider } from '../services/error_boundary_services';
 import { ErrorBoundary } from './error_boundary';
+
+import mdx from '../../README.mdx';
 
 const storybookMock = new ErrorBoundaryStorybookMock();
 
 export default {
   title: 'Errors/Recoverable Errors',
   description:
-    'This is the Kibana Error Boundary. Use this to put a boundary around React components that may throw errors when rendering. It will intercept the error and determine if it is fatal or recoverable.',
+    'This is the Kibana Error Boundary.' +
+    ' Use this to put a boundary around React components that may throw errors when rendering.' +
+    ' It will intercept the error and determine if it is fatal or recoverable.',
   parameters: {
     docs: {
       page: mdx,
@@ -42,28 +44,6 @@ const Template: FC = ({ children }) => {
   );
 };
 
-const BadComponent = () => {
-  const [hasError, setHasError] = useState(false);
-
-  if (hasError) {
-    const chunkError = new Error('Could not load chunk');
-    chunkError.name = 'ChunkLoadError'; // specific error known to be recoverable with a click of a refresh button
-    throw chunkError;
-  }
-
-  const clickedForError = action('clicked for error');
-  const handleClick = () => {
-    clickedForError();
-    setHasError(true);
-  };
-
-  return (
-    <EuiButton onClick={handleClick} fill={true}>
-      Click for error
-    </EuiButton>
-  );
-};
-
 export const ErrorInCallout: Story = () => {
   const services = storybookMock.getServices();
 
@@ -71,7 +51,7 @@ export const ErrorInCallout: Story = () => {
     <Template>
       <ErrorBoundaryProvider {...services}>
         <ErrorBoundary>
-          <BadComponent />
+          <ChunkLoadErrorComponent />
         </ErrorBoundary>
       </ErrorBoundaryProvider>
     </Template>
