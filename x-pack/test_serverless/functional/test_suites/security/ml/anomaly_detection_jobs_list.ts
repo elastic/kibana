@@ -12,9 +12,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage']);
   const adJobId = 'fq_single_permission';
 
-  describe('Anomaly detection jobs list', function () {
-    // Error: Failed to delete all indices with pattern [.ml-*]
-    this.tags(['failsOnMKI']);
+  // accessing restricted / system indices directly does not work in serverless
+  // Error: Failed to delete all indices with pattern [.ml-*]
+  describe.skip('Anomaly detection jobs list', function () {
     before(async () => {
       await PageObjects.svlCommonPage.login();
 
