@@ -11,6 +11,7 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { join, resolve } from 'path';
 
+import * as fs from 'fs';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
 /**
@@ -33,6 +34,12 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
 
     logger.info(`esql_loader joinPath\n${joinPath}`);
     logger.info(`esql_loader resolvePath\n${resolvePath}`);
+
+    if (fs.existsSync(resolvePath)) {
+      logger.info(`esql_loader the resolvePath exists`);
+    } else {
+      logger.info(`esql_loader the resolvePath does NOT exist`);
+    }
 
     const languageLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/esql/language_definition'),
