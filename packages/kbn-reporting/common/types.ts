@@ -11,12 +11,12 @@ import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { TypeOf } from '@kbn/config-schema';
 import { Writable } from 'stream';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { LocatorParams } from './url';
 import { ConfigSchema } from './schema';
 import { CancellationToken } from './cancellation_token';
 import { TaskRunResult } from './metrics';
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * @deprecated
