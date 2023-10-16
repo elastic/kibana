@@ -277,11 +277,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
         const pipes = codeRef.current.split('|');
         pipes?.pop();
-        const validContent =
-          ('customQuery' in options && options.customQuery) ??
-          ('sourcesOnly' in options && options.sourcesOnly)
-            ? pipes[0]
-            : pipes?.join('|');
+        let validContent = pipes?.join('|');
+        if ('customQuery' in options && options.customQuery) {
+          validContent = options.customQuery;
+        }
+        if ('sourcesOnly' in options && options.sourcesOnly) {
+          validContent = pipes[0];
+        }
         if (validContent) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
