@@ -23,6 +23,9 @@ export type IntegratedNodeMetricsTableProps = UseNodeMetricsTableOptions &
   SourceProviderProps &
   CoreProvidersProps;
 
+export type NodeMetricsTableProps = Omit<UseNodeMetricsTableOptions, 'metricsClient'> &
+  Partial<SourceProviderProps>;
+
 export type NodeMetricsTableData<NodeMetricsRow> =
   | {
       state: 'unknown';

@@ -6,10 +6,7 @@
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import type { MetricsDataClient } from './lib/metrics_client';
-import type {
-  UseNodeMetricsTableOptions,
-  SourceProviderProps,
-} from './components/infrastructure_node_metrics_tables/shared';
+import type { NodeMetricsTableProps } from './components/infrastructure_node_metrics_tables/shared';
 
 export interface MetricsDataPluginSetup {
   metricsClient: MetricsDataClient;
@@ -17,15 +14,9 @@ export interface MetricsDataPluginSetup {
 
 export interface MetricsDataPluginStart {
   metricsClient: MetricsDataClient;
-  HostMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
-  PodMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
-  ContainerMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
+  HostMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
+  PodMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
+  ContainerMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
 }
 
 export type MetricsDataPluginClass = PluginClass<MetricsDataPluginSetup, MetricsDataPluginStart>;

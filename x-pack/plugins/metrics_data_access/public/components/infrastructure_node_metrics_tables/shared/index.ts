@@ -28,4 +28,5 @@ export type {
   NodeMetricsTableData,
   SourceProviderProps,
   UseNodeMetricsTableOptions,
+  NodeMetricsTableProps,
 } from './types';

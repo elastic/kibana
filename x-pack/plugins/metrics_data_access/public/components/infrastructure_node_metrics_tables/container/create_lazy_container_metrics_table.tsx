@@ -8,18 +8,14 @@
 import { CoreStart } from '@kbn/core/public';
 import React, { lazy, Suspense } from 'react';
 import { MetricsDataClient } from '../../../lib/metrics_client';
-import type { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared';
+import type { NodeMetricsTableProps } from '../shared';
 
 const LazyIntegratedContainerMetricsTable = lazy(
   () => import('./integrated_container_metrics_table')
 );
 
 export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
-  return ({
-    timerange,
-    filterClauseDsl,
-    sourceId,
-  }: Omit<UseNodeMetricsTableOptions, 'metricsClient'> & Partial<SourceProviderProps>) => {
+  return ({ timerange, filterClauseDsl, sourceId }: NodeMetricsTableProps) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedContainerMetricsTable
