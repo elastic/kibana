@@ -44,7 +44,12 @@ import {
   saveQuery,
 } from '../../tasks/security_header';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/timeline';
+import {
+  addNameToTimeline,
+  closeTimeline,
+  populateTimeline,
+  saveTimeline,
+} from '../../tasks/timeline';
 
 import { hostsUrl } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
@@ -299,6 +304,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
     cy.get(LOADING_INDICATOR).should('not.exist');
+    saveTimeline();
     cy.wait('@timeline').then(({ response }) => {
       addNameToTimeline(getTimeline().title);
       closeTimeline();
