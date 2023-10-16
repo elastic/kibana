@@ -471,7 +471,6 @@ platform_engineer:
         - feature_fleet.all
         - feature_fleetv2.all
         - feature_osquery.all
-        - feature_indexPatterns.all
       resources: "*"
 
 endpoint_operations_analyst:
