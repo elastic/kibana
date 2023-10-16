@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
@@ -50,6 +51,10 @@ export const getCypressBaseConfig = (
         ELASTICSEARCH_USERNAME: 'system_indices_superuser',
         ELASTICSEARCH_PASSWORD: 'changeme',
 
+        // Default log level for instance of `ToolingLog` created via `crateToolingLog()`. Set this
+        // to `debug` or `verbose` when wanting to debug tooling used by tests (ex. data indexer functions).
+        TOOLING_LOG_LEVEL: 'info',
+
         // grep related configs
         grepFilterSpecs: true,
         grepOmitFiltered: true,
@@ -64,6 +69,9 @@ export const getCypressBaseConfig = (
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          // IMPORTANT: setting the log level should happen before any tooling is called
+          setupToolingLogLevel(config);
+
           dataLoaders(on, config);
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
@@ -75,7 +83,7 @@ export const getCypressBaseConfig = (
 
           on('after:spec', () => {
             createToolingLogger().info(
-              'Tooling Usage Tracking summary:',
+              'Tooling Usage Tracking summary:\n',
               usageTracker.toSummaryTable()
             );
           });
