@@ -290,6 +290,8 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
+  // Env. variable is set by `cypress_serverless.config.ts`
+  const isServerless = config.env.IS_SERVERLESS;
   let fleetServerContainerId: string | undefined;
 
   const stackServicesPromise = createRuntimeServices({
@@ -328,10 +330,14 @@ export const dataLoadersForRealEndpoints = (
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
       return createAndEnrollEndpointHost({
-        useClosestVersionMatch: true,
+        // https://github.com/elastic/security-team/issues/7816
+        useClosestVersionMatch: !isServerless,
         ...options,
         log,
         kbnClient,
+        // Currently standalone fleet-server has version 8.11.0
+        // https://github.com/elastic/security-team/issues/7816
+        version: isServerless ? '8.11.0-SNAPSHOT' : undefined,
       }).then((newHost) => {
         return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
           return newHost;
