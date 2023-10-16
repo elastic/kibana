@@ -4573,7 +4573,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/output_create_request"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output_create_request"
+                    }
+                  }
                 }
               }
             }
@@ -4650,7 +4655,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/output_update_request"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output_update_request"
+                    }
+                  }
                 }
               }
             }
