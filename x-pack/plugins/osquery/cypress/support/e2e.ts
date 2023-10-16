@@ -34,7 +34,7 @@ import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solut
 import type { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
-import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
 import { waitUntil } from '../tasks/wait_until';
 
 declare global {
@@ -76,16 +76,18 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', (role) => {
+Cypress.Commands.add('login', (role = 'elastic') => {
   // TODO Temporary approach to login until login with role is supported in serverless
   // Cypress.Commands.add('login', login);
   const isServerless = Cypress.env().IS_SERVERLESS;
 
-  if (isServerless) {
-    return login.with('system_indices_superuser', 'changeme');
-  }
+  const overwrittenRole = isServerless && role === 'elastic' ? 'elastic_serverless' : role;
 
-  return login(role);
+  // if (isServerless) {
+  //   return login.with('elastic_serverless', 'changeme');
+  // }
+
+  return login.with(overwrittenRole, 'changeme');
 });
 
 Cypress.Commands.add('waitUntil', waitUntil);

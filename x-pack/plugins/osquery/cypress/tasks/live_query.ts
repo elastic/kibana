@@ -145,8 +145,12 @@ export const checkActionItemsInResults = ({
   cases: boolean;
   timeline: boolean;
 }) => {
-  cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
-  cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
+  const isServerless = Cypress.env().IS_SERVERLESS;
+
+  cy.contains('View in Discover').should(
+    isServerless ? 'not.exist' : discover ? 'exist' : 'not.exist'
+  );
+  cy.contains('View in Lens').should(isServerless ? 'not.exist' : lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
   cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };
