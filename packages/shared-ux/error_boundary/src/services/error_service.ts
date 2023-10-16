@@ -58,6 +58,10 @@ export class ErrorService {
     return errorComponentName;
   }
 
+  /**
+   * Creates a decorated error object
+   * TODO: capture telemetry
+   */
   public registerError(
     error: Error,
     errorInfo: Partial<React.ErrorInfo> | null

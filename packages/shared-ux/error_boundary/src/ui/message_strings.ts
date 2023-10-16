@@ -13,7 +13,7 @@ export const errorMessageStrings = {
     inline: {
       title: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.inline.text', {
-          defaultMessage: 'Error: unable to load.',
+          defaultMessage: 'Error: unable to load',
         }),
     },
     callout: {
@@ -27,7 +27,7 @@ export const errorMessageStrings = {
         }),
       showDetailsButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.detailButton', {
-          defaultMessage: 'Show detail',
+          defaultMessage: 'Show details',
         }),
       details: {
         componentName: (errorComponentName: string) =>

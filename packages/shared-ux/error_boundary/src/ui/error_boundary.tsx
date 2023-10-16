@@ -20,9 +20,6 @@ interface ErrorBoundaryState {
 }
 
 interface ErrorBoundaryProps {
-  /**
-   *
-   */
   children?: React.ReactNode;
 }
 

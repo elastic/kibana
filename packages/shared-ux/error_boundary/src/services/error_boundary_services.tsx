@@ -28,7 +28,8 @@ export const ErrorBoundaryProvider: FC<ErrorBoundaryServices> = ({
  * Kibana-specific Provider that maps dependencies to services.
  */
 export const ErrorBoundaryKibanaProvider: FC = ({ children }) => {
-  const reloadWindow = () => window.location.reload();
+  // control side-effects of rendering with useMemo
+  const reloadWindow = useMemo(() => () => window.location.reload(), []);
   const errorService = useMemo(() => new ErrorService(), []);
 
   const value: ErrorBoundaryServices = {
