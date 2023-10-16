@@ -148,7 +148,6 @@ export const createTimelineEpic =
         })
       ),
       dispatcherTimelinePersistQueue.pipe(
-        delay(500),
         withLatestFrom(timeline$, notes$, timelineTimeRange$),
         concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
           const action: ActionTimeline = get('action', objAction);
