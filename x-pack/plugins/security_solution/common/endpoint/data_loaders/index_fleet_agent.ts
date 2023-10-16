@@ -11,6 +11,7 @@ import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types
 import type { KbnClient } from '@kbn/test';
 import type { Agent, FleetServerAgent, GetOneAgentResponse } from '@kbn/fleet-plugin/common';
 import { AGENT_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { wrapErrorAndRejectPromise } from './utils';
@@ -33,56 +34,59 @@ export interface IndexedFleetAgentResponse {
  * @param [kibanaVersion]
  * @param [fleetAgentGenerator]
  */
-export const indexFleetAgentForHost = async (
-  esClient: Client,
-  kbnClient: KbnClient,
-  endpointHost: HostMetadata,
-  agentPolicyId: string,
-  kibanaVersion: string = '8.0.0',
-  fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
-): Promise<IndexedFleetAgentResponse> => {
-  const agentDoc = fleetAgentGenerator.generateEsHit({
-    _id: endpointHost.agent.id,
-    _source: {
-      agent: {
-        id: endpointHost.agent.id,
-        version: endpointHost.agent.version,
-      },
-      local_metadata: {
-        elastic: {
-          agent: {
-            id: endpointHost.agent.id,
-            version: kibanaVersion,
+export const indexFleetAgentForHost = usageTracker.track(
+  'indexFleetAgentForHost',
+  async (
+    esClient: Client,
+    kbnClient: KbnClient,
+    endpointHost: HostMetadata,
+    agentPolicyId: string,
+    kibanaVersion: string = '8.0.0',
+    fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
+  ): Promise<IndexedFleetAgentResponse> => {
+    const agentDoc = fleetAgentGenerator.generateEsHit({
+      _id: endpointHost.agent.id,
+      _source: {
+        agent: {
+          id: endpointHost.agent.id,
+          version: endpointHost.agent.version,
+        },
+        local_metadata: {
+          elastic: {
+            agent: {
+              id: endpointHost.agent.id,
+              version: kibanaVersion,
+            },
+          },
+          host: {
+            ...endpointHost.host,
+          },
+          os: {
+            ...endpointHost.host.os,
           },
         },
-        host: {
-          ...endpointHost.host,
-        },
-        os: {
-          ...endpointHost.host.os,
-        },
+        policy_id: agentPolicyId,
       },
-      policy_id: agentPolicyId,
-    },
-  });
+    });
 
-  const createdFleetAgent = await esClient
-    .index<FleetServerAgent>({
-      index: agentDoc._index,
-      id: agentDoc._id,
-      body: agentDoc._source,
-      op_type: 'create',
-      refresh: 'wait_for',
-    })
-    .catch(wrapErrorAndRejectPromise);
+    const createdFleetAgent = await esClient
+      .index<FleetServerAgent>({
+        index: agentDoc._index,
+        id: agentDoc._id,
+        body: agentDoc._source,
+        op_type: 'create',
+        refresh: 'wait_for',
+      })
+      .catch(wrapErrorAndRejectPromise);
 
-  return {
-    fleetAgentsIndex: agentDoc._index,
-    agents: [
-      await fetchFleetAgent(kbnClient, createdFleetAgent._id).catch(wrapErrorAndRejectPromise),
-    ],
-  };
-};
+    return {
+      fleetAgentsIndex: agentDoc._index,
+      agents: [
+        await fetchFleetAgent(kbnClient, createdFleetAgent._id).catch(wrapErrorAndRejectPromise),
+      ],
+    };
+  }
+);
 
 const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
   return (

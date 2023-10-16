@@ -66,8 +66,6 @@ export interface IndexedHostsResponse
  * Endpoint Host metadata documents are added to an index that is set as "append only", thus one Endpoint host could
  * have multiple documents in that index.
  *
- *
- *
  * @param numDocs
  * @param client
  * @param kbnClient
@@ -176,6 +174,7 @@ export const indexEndpointHostDocs = usageTracker.track(
           enrolledAgent = indexedAgentResponse.agents[0];
           mergeAndAppendArrays(response, indexedAgentResponse);
         }
+
         // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
         hostMetadata = {
           ...hostMetadata,
