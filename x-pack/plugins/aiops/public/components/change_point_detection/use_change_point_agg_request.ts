@@ -9,12 +9,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
+import type {
+  MappingRuntimeFields,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
   FieldConfig,
+  useChangePointDetectionControlsContext,
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
@@ -37,8 +42,9 @@ interface RequestOptions {
 
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
-  query: QueryDslQueryContainer
-) {
+  query: QueryDslQueryContainer,
+  runtimeMappings: MappingRuntimeFields
+): SearchRequest {
   const timeSeriesAgg = {
     over_time: {
       date_histogram: {
@@ -98,15 +104,14 @@ function getChangePointDetectionRequestBody(
     : timeSeriesAgg;
 
   return {
-    params: {
-      index,
-      size: 0,
-      body: {
-        ...(query ? { query } : {}),
-        aggregations,
-      },
+    index,
+    size: 0,
+    body: {
+      ...(query ? { query } : {}),
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+      aggregations,
     },
-  };
+  } as SearchRequest;
 }
 
 export function useChangePointResults(
@@ -120,7 +125,7 @@ export function useChangePointResults(
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
-
+  const { splitFieldsOptions, metricFieldOptions } = useChangePointDetectionControlsContext();
   const { refreshTimestamp: refresh } = useReload();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
@@ -152,7 +157,23 @@ export function useChangePointResults(
           return;
         }
 
-        const requestPayload = getChangePointDetectionRequestBody(
+        const metricFieldDV = metricFieldOptions.find(
+          (option) => option.name === fieldConfig.metricField
+        );
+        const splitFieldDV = splitFieldsOptions.find(
+          (option) => option.name === fieldConfig.splitField
+        );
+
+        const runtimeMappings = {
+          ...(metricFieldDV?.isRuntimeField
+            ? { [metricFieldDV.name]: metricFieldDV.runtimeField! }
+            : {}),
+          ...(splitFieldDV?.isRuntimeField
+            ? { [splitFieldDV.name]: splitFieldDV.runtimeField! }
+            : {}),
+        } as MappingRuntimeFields;
+
+        const requestPayload: SearchRequest = getChangePointDetectionRequestBody(
           {
             index: dataView.getIndexPattern(),
             fn: fieldConfig.fn,
@@ -162,13 +183,14 @@ export function useChangePointResults(
             splitField: fieldConfig.splitField,
             afterKey,
           },
-          query
+          query,
+          runtimeMappings
         );
 
         const result = await runRequest<
-          typeof requestPayload,
+          { params: SearchRequest },
           { rawResponse: ChangePointAggResponse }
-        >(requestPayload);
+        >({ params: requestPayload });
 
         if (result === null) {
           setProgress(null);
@@ -176,7 +198,7 @@ export function useChangePointResults(
         }
 
         const isFetchCompleted = !(
-          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm &&
+          isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm) &&
           pageNumber < totalAggPages
         );
 
@@ -227,11 +249,11 @@ export function useChangePointResults(
 
         if (
           !isFetchCompleted &&
-          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm
+          isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm)
         ) {
           await fetchResults(
             pageNumber + 1,
-            result.rawResponse.aggregations.groupings.after_key.splitFieldTerm
+            result.rawResponse.aggregations.groupings.after_key!.splitFieldTerm
           );
         }
       } catch (e) {
@@ -243,17 +265,19 @@ export function useChangePointResults(
       }
     },
     [
-      runRequest,
-      requestParams.interval,
-      requestParams.changePointType,
+      isSingleMetric,
+      totalAggPages,
+      dataView,
       fieldConfig.fn,
       fieldConfig.metricField,
       fieldConfig.splitField,
+      requestParams.interval,
+      requestParams.changePointType,
       query,
-      dataView,
-      totalAggPages,
+      metricFieldOptions,
+      splitFieldsOptions,
+      runRequest,
       toasts,
-      isSingleMetric,
     ]
   );
 
