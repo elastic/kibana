@@ -316,9 +316,13 @@ export const dataLoadersForRealEndpoints = (
     fleetServerContainerId = data?.fleetServerContainerId;
   });
 
-  on('after:run', () => {
+  on('after:run', async () => {
     if (fleetServerContainerId) {
-      execa.sync('docker', ['kill', fleetServerContainerId]);
+      try {
+        await execa.sync('docker', ['kill', fleetServerContainerId]);
+      } catch(error) {
+        console.log(error);
+      }
     }
   });
 
