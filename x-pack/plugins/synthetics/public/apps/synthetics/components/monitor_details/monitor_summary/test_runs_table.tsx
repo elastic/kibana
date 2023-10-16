@@ -182,7 +182,11 @@ export const TestRunsTable = ({
               <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiIconTip type="refresh" content={FINAL_ATTEMPT_LABEL} />
+              <EuiIconTip
+                data-test-subj="isRetestIcon"
+                type="refresh"
+                content={FINAL_ATTEMPT_LABEL}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         );
