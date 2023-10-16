@@ -405,10 +405,6 @@ soc_manager:
       privileges:
         - all
       resources: "*"
-    - application: indexPatterns
-      privileges:
-        - all
-      resources: "*"
 
 detections_admin:
   cluster:
@@ -537,6 +533,11 @@ platform_engineer:
       privileges:
         - all
       resources: "*"
+    - application: indexPatterns
+      privileges:
+        - all
+      resources: "*"
+
 
 endpoint_operations_analyst:
   cluster:
@@ -556,6 +557,8 @@ endpoint_operations_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .lists*
+        - .items*
       privileges:
         - read
     - names:
@@ -563,15 +566,9 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .internal.alerts-security.alerts-*
-        - .lists*
-        - .items*
       privileges:
         - read
         - write
-        - manage
-        - maintenance
-        - view_index_metadata
   applications:
     - application: ml
       privileges:
@@ -618,10 +615,6 @@ endpoint_operations_analyst:
         - all
       resources: "*"
     - application: spaces
-      privileges:
-        - all
-      resources: "*"
-    - application: indexPatterns
       privileges:
         - all
       resources: "*"

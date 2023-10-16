@@ -17,6 +17,7 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
+          indexPatterns: ['all'],
           siem: [
             'minimal_all',
 

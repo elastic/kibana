@@ -389,7 +389,6 @@ soc_manager:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
-        - feature_indexPatterns.all
       resources: "*"
 
 detections_admin:
@@ -431,7 +430,6 @@ detections_admin:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
-        - feature_indexPatterns.all
       resources: "*"
 
 platform_engineer:
@@ -475,7 +473,6 @@ platform_engineer:
         - feature_fleet.all
         - feature_fleetv2.all
         - feature_osquery.all
-        - feature_indexPatterns.all
       resources: "*"
 
 endpoint_operations_analyst:
@@ -496,6 +493,8 @@ endpoint_operations_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .lists*
+        - .items*
       privileges:
         - read
     - names:
@@ -503,15 +502,9 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .internal.alerts-security.alerts-*
-        - .lists*
-        - .items*
       privileges:
         - read
         - write
-        - manage
-        - maintenance
-        - view_index_metadata
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -535,7 +528,6 @@ endpoint_operations_analyst:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
-        - feature_indexPatterns.all
       resources: "*"
 
 endpoint_policy_manager:
