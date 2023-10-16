@@ -182,12 +182,7 @@ describe('getProjectNavLinks', () => {
 
   it('should process cloud links', async () => {
     mockChromeNavLinksHas.mockReturnValue(true); // all links exist
-    const linkProjectSettings: NavigationLink<SecurityPageName> = {
-      id: SecurityPageName.projectSettings,
-      title: 'Project settings',
-      links: [link2],
-    };
-    const testSecurityNavLinks$ = new BehaviorSubject([link1, linkProjectSettings]);
+    const testSecurityNavLinks$ = new BehaviorSubject([link1]);
 
     const value = await createTestProjectNavLinks(testSecurityNavLinks$, {
       filterCloudLinks: false,

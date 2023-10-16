@@ -73,7 +73,7 @@ export class SecuritySolutionServerlessPlugin
       dashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
 
-    startNavigation(services, this.config);
+    startNavigation(services);
     setRoutes(services);
 
     return {};

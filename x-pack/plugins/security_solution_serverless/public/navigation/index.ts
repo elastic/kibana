@@ -7,13 +7,9 @@
 
 import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
-import type {
-  SecuritySolutionServerlessPluginSetupDeps,
-  ServerlessSecurityPublicConfig,
-} from '../types';
+import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-// import { SecurityPagePath } from './links/constants';
 import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 import { getDefaultNavigationComponent } from './default_navigation';
@@ -28,7 +24,7 @@ export const setupNavigation = (
   securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
 };
 
-export const startNavigation = (services: Services, config: ServerlessSecurityPublicConfig) => {
+export const startNavigation = (services: Services) => {
   const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
 

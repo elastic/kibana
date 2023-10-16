@@ -126,7 +126,7 @@ describe('SecuritySideNavigation', () => {
     );
     expect(mockSideNavigationFooter).toHaveBeenCalledWith(
       expect.objectContaining({
-        selectedId: '',
+        activeNodeId: '',
       })
     );
   });
@@ -142,7 +142,7 @@ describe('SecuritySideNavigation', () => {
     );
     expect(mockSideNavigationFooter).toHaveBeenCalledWith(
       expect.objectContaining({
-        selectedId: ExternalPageName.devTools,
+        activeNodeId: 'dev_tools',
       })
     );
   });
@@ -158,7 +158,7 @@ describe('SecuritySideNavigation', () => {
     );
     expect(mockSideNavigationFooter).toHaveBeenCalledWith(
       expect.objectContaining({
-        selectedId: ExternalPageName.mlOverview,
+        activeNodeId: 'ml:overview',
       })
     );
   });
@@ -176,7 +176,7 @@ describe('SecuritySideNavigation', () => {
     );
     expect(mockSideNavigationFooter).toHaveBeenCalledWith(
       expect.objectContaining({
-        selectedId: SecurityPageName.alerts,
+        activeNodeId: 'securitySolutionUI:alerts',
       })
     );
   });
