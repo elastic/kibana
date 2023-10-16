@@ -7,6 +7,7 @@
 
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
+import { isServerless } from './serverless';
 import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
@@ -145,8 +146,6 @@ export const checkActionItemsInResults = ({
   cases: boolean;
   timeline: boolean;
 }) => {
-  const isServerless = Cypress.env().IS_SERVERLESS;
-
   cy.contains('View in Discover').should(
     isServerless ? 'not.exist' : discover ? 'exist' : 'not.exist'
   );

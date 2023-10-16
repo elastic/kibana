@@ -37,6 +37,7 @@ import { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
 import { waitUntil } from '../tasks/wait_until';
+import { isServerless } from '../tasks/serverless';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -78,10 +79,6 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('login', (role) => {
-  // TODO Temporary approach to login until login with role is supported in serverless
-  // Cypress.Commands.add('login', login);
-  const isServerless = Cypress.env().IS_SERVERLESS;
-
   if (isServerless) {
     return login.with(role, 'changeme');
   }
