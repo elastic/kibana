@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export function nonNullable<T>(value: T): value is NonNullable<T> {
+export function lowerCaseFirstLetter(str: string) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+export function upperCaseFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function isTruthy<T>(value: T): value is NonNullable<T> {
   return value != null;
 }

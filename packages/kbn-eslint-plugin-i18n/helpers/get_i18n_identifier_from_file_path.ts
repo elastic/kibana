@@ -10,7 +10,7 @@ import fs from 'fs';
 import { join, parse, resolve } from 'path';
 import { findKey } from 'lodash';
 
-export function getAppName(fileName: string, cwd: string) {
+export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
@@ -23,5 +23,7 @@ export function getAppName(fileName: string, cwd: string) {
   const i18nrcFile = fs.readFileSync(xpackRC, 'utf8');
   const i18nrc = JSON.parse(i18nrcFile);
 
-  return i18nrc && i18nrc.paths ? findKey(i18nrc.paths, (v) => v === path) : undefined;
+  return i18nrc && i18nrc.paths
+    ? findKey(i18nrc.paths, (v) => v === path) ?? 'app_not_found_in_i18nrc'
+    : 'app_not_found_in_i18nrc';
 }

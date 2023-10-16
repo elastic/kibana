@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { TSESTree } from '@typescript-eslint/typescript-estree';
-import { lowerCaseFirstLetter, upperCaseFirstLetter } from './case_utils';
+import { lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
 
 export function getIntentFromNode(originalNode: TSESTree.JSXText): string {
   const value = lowerCaseFirstLetter(
