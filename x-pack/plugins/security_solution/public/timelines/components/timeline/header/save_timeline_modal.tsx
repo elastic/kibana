@@ -137,7 +137,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
             : i18n.SAVE_TIMELINE
           : timelineType === TimelineType.template
           ? i18n.NAME_TIMELINE_TEMPLATE
-          : i18n.NAME_TIMELINE,
+          : i18n.SAVE_TIMELINE,
       [status, timelineType]
     );
 

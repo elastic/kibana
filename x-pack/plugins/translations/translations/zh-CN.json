@@ -33666,7 +33666,6 @@
     "xpack.securitySolution.timeline.kpis.processKpiTitle": "进程",
     "xpack.securitySolution.timeline.kpis.sourceIpKpiTitle": "源 IP",
     "xpack.securitySolution.timeline.kpis.userKpiTitle": "用户",
-    "xpack.securitySolution.timeline.nameTimeline.modal.header": "命名时间线",
     "xpack.securitySolution.timeline.nameTimeline.save.title": "保存",
     "xpack.securitySolution.timeline.nameTimelineTemplate.modal.header": "命名时间线模板",
     "xpack.securitySolution.timeline.participantsTitle": "参与者",

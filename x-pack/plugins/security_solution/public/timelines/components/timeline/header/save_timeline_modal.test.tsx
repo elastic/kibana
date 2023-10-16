@@ -152,7 +152,7 @@ describe('EditTimelineModal', () => {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
-        i18n.NAME_TIMELINE
+        i18n.SAVE_TIMELINE
       );
     });
 
