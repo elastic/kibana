@@ -88,12 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('cannot find non-security job', async () => {
-      const rspBody = await executeGetModuleRequest(
-        'apm_transaction',
-        ['security'],
-        USER.ML_POWERUSER,
-        404
-      );
+      await executeGetModuleRequest('apm_transaction', ['security'], USER.ML_POWERUSER, 404);
     });
 
     for (const moduleId of moduleIds) {
