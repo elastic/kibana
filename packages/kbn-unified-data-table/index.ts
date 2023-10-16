@@ -10,6 +10,7 @@ export { UnifiedDataTable, DataLoadingState } from './src/components/data_table'
 export type {
   UnifiedDataTableProps,
   UnifiedDataTableRenderCustomToolbar,
+  UnifiedDataTableRenderCustomToolbarProps,
 } from './src/components/data_table';
 export { getDisplayedColumns } from './src/utils/columns';
 export { getTextBasedColumnTypes } from './src/utils/get_column_types';

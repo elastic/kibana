@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
@@ -19,6 +19,7 @@ import { DiscoverGrid } from '../components/discover_grid';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
+import { getRenderCustomToolbarInEmbeddable } from '../components/discover_grid/render_custom_toolbar';
 
 export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   totalHitCount?: number;
@@ -68,9 +69,14 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     ]
   );
 
+  const renderCustomToolbar = useMemo(
+    () => getRenderCustomToolbarInEmbeddable(props.totalHitCount),
+    [props.totalHitCount]
+  );
+
   return (
     <SavedSearchEmbeddableBase
-      totalHitCount={props.totalHitCount}
+      totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
@@ -84,6 +90,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
+        renderCustomToolbar={renderCustomToolbar}
       />
     </SavedSearchEmbeddableBase>
   );

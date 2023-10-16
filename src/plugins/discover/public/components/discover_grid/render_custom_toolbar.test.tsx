@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderCustomToolbar } from './render_custom_toolbar';
+import { renderCustomToolbar, getRenderCustomToolbarInEmbeddable } from './render_custom_toolbar';
 
 describe('renderCustomToolbar', () => {
   it('should render successfully', () => {
@@ -30,6 +30,22 @@ describe('renderCustomToolbar', () => {
       renderCustomToolbar({
         toolbarProps: {
           hasRoomForGridControls: false,
+          columnControl: 'column',
+          columnSortingControl: 'columnSorting',
+          displayControl: 'display',
+          fullScreenControl: 'fullScreen',
+          keyboardShortcutsControl: 'keyboard',
+        },
+        gridProps: { additionalControls: 'additional' },
+      })
+    ).toMatchSnapshot();
+  });
+
+  it('should render correctly for embeddable', () => {
+    expect(
+      getRenderCustomToolbarInEmbeddable(500)({
+        toolbarProps: {
+          hasRoomForGridControls: true,
           columnControl: 'column',
           columnSortingControl: 'columnSorting',
           displayControl: 'display',
