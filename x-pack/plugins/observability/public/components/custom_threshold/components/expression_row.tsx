@@ -19,6 +19,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
   builtInComparators,
+  COMPARATORS,
   IErrorObject,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -30,8 +31,12 @@ import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 
+// Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
+const updatedBuiltInComparators = { ...builtInComparators };
+delete updatedBuiltInComparators[COMPARATORS.NOT_BETWEEN];
+
 const customComparators = {
-  ...builtInComparators,
+  ...updatedBuiltInComparators,
   [Comparator.OUTSIDE_RANGE]: {
     text: i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.outsideRangeLabel', {
       defaultMessage: 'Is not between',

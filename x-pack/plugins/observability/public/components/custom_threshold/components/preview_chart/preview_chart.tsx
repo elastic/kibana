@@ -50,9 +50,6 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
 
     if (dataView?.id && aggType) {
       if (sourceField) {
-        console.log('comparator', comparator);
-        console.log('threshold', threshold);
-
         lensDoc
           .addDataLayer({
             layerId: 'main_date_histogram',
@@ -74,7 +71,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
             accessors: 'threshold_layer_accessors',
             comparator,
             label: 'threshold_layer',
-            value: threshold[0],
+            value: threshold,
           });
         }
         setAttributes(lensDoc.getAttributes());
@@ -110,7 +107,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
           body={
             <FormattedMessage
               id="xpack.observability.customThreshold.rule..charts.noDataMessageForEquation"
-              defaultMessage="Chart doesn't support equations, yet"
+              defaultMessage="The preview chart doesn't support multiple aggregations, yet"
             />
           }
         />

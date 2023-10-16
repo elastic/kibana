@@ -176,6 +176,65 @@ class LensDocBuilder {
   }: AddLensReferenceLayer) {
     this._removeLayer(layerId);
     this._addReference({ dataViewId, layerId });
+    if (comparator === Comparator.OUTSIDE_RANGE || comparator === Comparator.BETWEEN) {
+      const aboveAccessor = accessors + '_above';
+      const belowAccessor = accessors + '_below';
+      this.lensDoc.state.visualization.layers.push({
+        layerId,
+        layerType: 'referenceLine',
+        accessors: [aboveAccessor, belowAccessor],
+        yConfig: [
+          {
+            forAccessor: aboveAccessor,
+            axisMode: 'left',
+            color: color || '#e80000',
+            lineWidth: lineWidth || 3,
+            fill: comparator === Comparator.OUTSIDE_RANGE ? Fill.BELOW : Fill.ABOVE,
+          },
+          {
+            forAccessor: belowAccessor,
+            axisMode: 'left',
+            color: color || '#e80000',
+            lineWidth: lineWidth || 3,
+            fill: comparator === Comparator.OUTSIDE_RANGE ? Fill.ABOVE : Fill.BELOW,
+          },
+        ],
+      });
+      this.lensDoc.state.datasourceStates.formBased.layers[layerId] = {
+        linkToLayers: [],
+        columns: {
+          [aboveAccessor]: {
+            label,
+            dataType: 'number',
+            operationType: 'static_value',
+            isStaticValue: true,
+            isBucketed: false,
+            scale: 'ratio',
+            params: {
+              value: value[0],
+            },
+            customLabel: true,
+          },
+          [belowAccessor]: {
+            label,
+            dataType: 'number',
+            operationType: 'static_value',
+            isStaticValue: true,
+            isBucketed: false,
+            scale: 'ratio',
+            params: {
+              value: value[1],
+            },
+            customLabel: true,
+          },
+        },
+        columnOrder: [aboveAccessor, belowAccessor],
+        sampling: 1,
+        ignoreGlobalFilters: false,
+        incompleteColumns: {},
+      };
+      return this;
+    }
     this.lensDoc.state.visualization.layers.push({
       layerId,
       layerType: 'referenceLine',
@@ -201,7 +260,7 @@ class LensDocBuilder {
           isBucketed: false,
           scale: 'ratio',
           params: {
-            value,
+            value: value[0],
           },
           customLabel: true,
         },

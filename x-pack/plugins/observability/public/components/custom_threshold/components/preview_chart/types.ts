@@ -140,7 +140,7 @@ export interface AddLensReferenceLayer {
   layerId: string;
   accessors: string;
   dataViewId: string;
-  value: number;
+  value: number[];
   label: string;
   lineWidth?: number;
   comparator: Comparator;
