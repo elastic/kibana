@@ -604,7 +604,7 @@ async function getFunctionArgsSuggestions(
     const argIndex = Math.max(fn.args.length - 1, 0);
     const types = fnDefinition.signatures.flatMap((signature) => signature.params[argIndex].type);
     const suggestions = await getAllSuggestionsByType(types, command.name, getFieldsByType, {
-      functions: true,
+      functions: command.name !== 'stats',
       fields: true,
       newVariables: false,
     });

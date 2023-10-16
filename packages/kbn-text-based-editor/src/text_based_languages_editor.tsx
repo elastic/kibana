@@ -275,13 +275,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return await getIndicesForAutocomplete(dataViews);
       },
       getFieldsFor: async (options: { sourcesOnly?: boolean } | { customQuery?: string } = {}) => {
-        const pipes = codeRef.current.split('|');
+        const pipes = editorModel.current?.getValue().split('|');
         pipes?.pop();
         let validContent = pipes?.join('|');
         if ('customQuery' in options && options.customQuery) {
           validContent = options.customQuery;
         }
-        if ('sourcesOnly' in options && options.sourcesOnly) {
+        if (pipes && 'sourcesOnly' in options && options.sourcesOnly) {
           validContent = pipes[0];
         }
         if (validContent) {
@@ -314,8 +314,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql') return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+      const text = codeRef.current;
       const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
-        codeRef.current,
+        text,
         esqlCallbacks
       );
       const markers = [];
