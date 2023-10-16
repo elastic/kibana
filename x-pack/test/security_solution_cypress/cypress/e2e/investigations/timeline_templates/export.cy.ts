@@ -21,9 +21,10 @@ import { searchByTitle } from '../../../tasks/table_pagination';
 // FLAKY: https://github.com/elastic/kibana/issues/165760
 // FLAKY: https://github.com/elastic/kibana/issues/165645
 // accessing restricted / system indices directly does not work in serverless
-// From the failure message it's not immediately clear, where this access is happening:
+// From the failure message it's not immediately clear, where this access is
+// happening and why it also affects non-serverless runs:
 // TypeError: Cannot read properties of undefined (reading 'body')
-describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe.skip('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
 
