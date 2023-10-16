@@ -19,6 +19,7 @@ import {
 import { ActionType } from '@kbn/actions-plugin/common';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
+import {css} from "@emotion/css/dist/emotion-css.cjs";
 
 interface Props {
   actionTypes?: ActionType[];
@@ -26,6 +27,12 @@ interface Props {
   onClose: () => void;
   onSelect: (actionType: ActionType) => void;
 }
+const itemClassName = css`
+  .euiKeyPadMenuItem__label {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+`;
 
 export const ActionTypeSelectorModal = ({
   actionTypes,
@@ -46,6 +53,7 @@ export const ActionTypeSelectorModal = ({
             return (
               <EuiFlexItem data-test-subj="action-option" key={actionType.id} grow={false}>
                 <EuiKeyPadMenuItem
+                  className={itemClassName}
                   key={actionType.id}
                   isDisabled={!actionType.enabled}
                   label={actionType.name}
