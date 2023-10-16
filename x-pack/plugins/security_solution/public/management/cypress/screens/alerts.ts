@@ -43,7 +43,6 @@ export const getAlertsTableRows = (timeout?: number): Cypress.Chainable<JQuery<H
 };
 
 export const openAlertDetailsView = (rowIndex: number = 0): void => {
-  getAlertsTableRows().should('have.length.greaterThan', 0);
   cy.getByTestSubj('expand-event').eq(rowIndex).click();
   cy.getByTestSubj('take-action-dropdown-btn').click();
 };

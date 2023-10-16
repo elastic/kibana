@@ -9,6 +9,7 @@ import { loadPage } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
   addAlertToCase,
+  getAlertsTableRows,
   openAlertDetailsView,
   openResponderFromEndpointAlertDetails,
 } from '../../screens/alerts';
@@ -99,6 +100,8 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);
       closeAllToasts();
+
+      getAlertsTableRows().should('have.length.greaterThan', 0);
       openAlertDetailsView();
       addAlertToCase(caseId, caseOwner);
 

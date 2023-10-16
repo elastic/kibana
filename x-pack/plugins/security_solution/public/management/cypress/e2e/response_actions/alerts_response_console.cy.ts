@@ -7,6 +7,7 @@
 
 import { closeAllToasts } from '../../tasks/toasts';
 import {
+  getAlertsTableRows,
   openAlertDetailsView,
   openInvestigateInTimelineView,
   openResponderFromEndpointAlertDetails,
@@ -89,6 +90,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       toggleRuleOffAndOn(ruleName);
       visitRuleAlerts(ruleName);
       closeAllToasts();
+      getAlertsTableRows().should('have.length.greaterThan', 0);
       openAlertDetailsView();
 
       openResponderFromEndpointAlertDetails();
@@ -101,8 +103,11 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
+      getAlertsTableRows().should('have.length.greaterThan', 0);
       openInvestigateInTimelineView();
-      openAlertDetailsView();
+      cy.getByTestSubj('timeline-flyout').within(() => {
+        openAlertDetailsView();
+      });
       openResponderFromEndpointAlertDetails();
       ensureOnResponder();
     });
