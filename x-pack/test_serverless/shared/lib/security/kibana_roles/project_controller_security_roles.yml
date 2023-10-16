@@ -538,7 +538,6 @@ platform_engineer:
         - all
       resources: "*"
 
-
 endpoint_operations_analyst:
   cluster:
   indices:
