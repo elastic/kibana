@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { LinkCategoryType, SecurityPageName } from '@kbn/security-solution-navigation';
-import { SERVER_APP_ID } from '@kbn/security-solution-plugin/common';
-import type { LinkItem } from '@kbn/security-solution-plugin/public';
-import { ExternalPageName, SecurityPagePath } from '../constants';
-import type { ProjectLinkCategory, ProjectNavigationLink } from '../types';
-import {
-  IconMapServicesLazy,
-  IconIndexManagementLazy,
-  IconUsersRolesLazy,
-  IconReportingLazy,
-  IconVisualizationLazy,
-} from '../../../common/lazy_icons';
+import { ExternalPageName } from '../constants';
+import type { ProjectNavigationLink } from '../types';
 import * as i18n from './project_settings_translations';
 
 export const projectSettingsNavLinks: ProjectNavigationLink[] = [
