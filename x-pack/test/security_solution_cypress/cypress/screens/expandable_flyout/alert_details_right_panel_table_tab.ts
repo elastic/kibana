@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TABLE_TAB_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/right/tabs/test_ids';
+import { TABLE_TAB_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/right/tabs/test_ids';
 import { getClassSelector, getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT =
