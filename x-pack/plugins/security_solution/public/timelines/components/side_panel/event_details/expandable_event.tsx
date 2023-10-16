@@ -24,7 +24,7 @@ import styled from 'styled-components';
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { Assignees } from '../../../../flyout/right/components/assignees';
+import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
