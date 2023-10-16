@@ -158,8 +158,10 @@ export const DashboardUnsavedListing = ({
         if (result.status === 'error') {
           hasError = true;
           setTest(`${JSON.stringify(result)}}`);
-          dashboardBackup.clearState(result.id);
-          return { ...map, [`error-${Math.floor(Math.random() * 100)}`]: JSON.stringify(result) };
+          if (result.error.error === 'Not Found') {
+            dashboardBackup.clearState(result.id);
+          }
+          return map;
         }
         return {
           ...map,
@@ -167,7 +169,7 @@ export const DashboardUnsavedListing = ({
         };
       }, dashboardMap);
       if (hasError) {
-        // refreshUnsavedDashboards();
+        refreshUnsavedDashboards();
         return;
       }
       setItems(newItems);

@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { Reference } from '@kbn/content-management-utils';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
-import { Reference } from '@kbn/content-management-utils';
 import {
-  DashboardItem,
-  DashboardCrudTypes,
   DashboardAttributes,
+  DashboardCrudTypes,
+  DashboardItem,
 } from '../../../../common/content_management';
-import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DashboardStartDependencies } from '../../../plugin';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
@@ -87,6 +88,7 @@ export async function findDashboardById(
   // let response;
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
+    console.log('find');
     // throw new Error('here');
     const response = await contentManagement.client.get<
       DashboardCrudTypes['GetIn'],
@@ -95,6 +97,8 @@ export async function findDashboardById(
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
+    if (response.item.error) throw new Error(response.item.error.message);
+
     dashboardContentManagementCache.addDashboard(response);
     return {
       id,
@@ -102,6 +106,12 @@ export async function findDashboardById(
       attributes: response.item.attributes,
     } as FindDashboardsByIdResponse;
   } catch (e) {
+    console.log('CATCH!!!!', e, e.body, e.message);
+    if (isHttpFetchError(e) && e.message === 'Failed to fetch') {
+      console.log('IS HTTP FETCH ERROR 123', e, e.body, e.message, e.cause);
+      // return { status: 'error', error: 'THIS IS AN ERROR', id } as FindDashboardsByIdResponse;
+      // return { status: 'error', error: e, id };
+    }
     return { status: 'error', error: e.body || e.message, id } as FindDashboardsByIdResponse;
   }
   // try {

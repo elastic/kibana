@@ -63,7 +63,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async navigateToApp() {
-    await this.common.navigateToApp(this.APP_ID);
+    await this.common.navigateToApp(this.APP_ID, { shouldLoginIfPrompted: false });
   }
 
   public async navigateToAppFromAppsMenu() {
