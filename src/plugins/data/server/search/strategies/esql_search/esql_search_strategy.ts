@@ -47,7 +47,7 @@ export const esqlSearchStrategyProvider = (
             meta: true,
             // this is a temporary solution for ES|QL queries.
             // we found out that they are not aborted correctly
-            // so we decreate the ES timeout to 2mins
+            // so we change the ES timeout to 2mins
             // and remove the retries
             maxRetries: 0,
             requestTimeout: ES_TIMEOUT_IN_MS,
