@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiCollapsibleNavSubItemProps } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { EuiCollapsibleNavSubItemProps, IconType } from '@elastic/eui';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import { ExternalPageName } from '../links/constants';
 
 interface FooterCategory {
-  type: 'placeholder' | 'collapsible';
+  type: 'standalone' | 'collapsible';
   title?: string;
-  icon?: string;
+  icon?: IconType;
   linkIds: string[];
 }
 
 const categories: FooterCategory[] = [
-  { type: 'placeholder', linkIds: [SecurityPageName.landing, ExternalPageName.devTools] },
+  { type: 'standalone', linkIds: [SecurityPageName.landing, ExternalPageName.devTools] },
   {
     type: 'collapsible',
     title: 'Project Settings',
@@ -42,43 +42,23 @@ export const SideNavigationFooter: React.FC<{
     <>
       {categories.map((category, index) => {
         const categoryItems = items.filter((item) => category.linkIds.includes(item.id));
-        if (category.type === 'placeholder') {
+        if (category.type === 'standalone') {
           return (
-            <React.Fragment key={`placeholder-${index}`}>
-              {categoryItems.map((item) => (
-                <EuiCollapsibleNavItem
-                  key={item.id}
-                  id={item.id}
-                  title={item.label}
-                  icon={item.iconType}
-                  iconProps={{ size: 'm' }}
-                  data-test-subj={`nav-bucket-${item.id}`}
-                  href={item.href}
-                  onClick={item.onClick}
-                  isSelected={item.id === selectedId}
-                  linkProps={{ external: item.openInNewTab }}
-                />
-              ))}
-            </React.Fragment>
+            <SideNavigationFooterStandalone
+              key={index}
+              items={categoryItems}
+              selectedId={selectedId}
+            />
           );
         }
         if (category.type === 'collapsible') {
-          const id = (category.title ?? '').toLowerCase().replace(' ', '-');
-          const isSelected = category.linkIds.includes(selectedId);
           return (
-            <EuiCollapsibleNavItem
-              key={id}
-              data-test-subj={`navFooter-${id}`}
+            <SideNavigationFooterCollapsible
+              key={index}
               title={category.title ?? ''}
+              items={categoryItems}
+              selectedId={selectedId}
               icon={category.icon}
-              iconProps={{ size: 'm' }}
-              //   isCollapsible={true}
-              //   initialIsOpen={true}
-              accordionProps={{
-                forceState: isSelected ? 'open' : undefined,
-                initialIsOpen: isSelected,
-              }}
-              items={categoryItems.map((item) => formatCollapsibleItem(item, selectedId))}
             />
           );
         }
@@ -88,18 +68,73 @@ export const SideNavigationFooter: React.FC<{
   );
 };
 
+const SideNavigationFooterStandalone: React.FC<{
+  items: SolutionSideNavItem[];
+  selectedId: string;
+}> = ({ items, selectedId }) => (
+  <>
+    {items.map((item) => (
+      <EuiCollapsibleNavItem
+        key={item.id}
+        id={item.id}
+        title={item.label}
+        icon={item.iconType}
+        iconProps={{ size: 'm' }}
+        data-test-subj={`nav-bucket-${item.id}`}
+        href={item.href}
+        onClick={item.onClick}
+        isSelected={item.id === selectedId}
+        linkProps={{ external: item.openInNewTab }}
+      />
+    ))}
+  </>
+);
+
+const SideNavigationFooterCollapsible: React.FC<{
+  title: string;
+  items: SolutionSideNavItem[];
+  selectedId: string;
+  icon?: IconType;
+}> = ({ title, icon, items, selectedId }) => {
+  const hasSelected = useMemo(() => items.some(({ id }) => id === selectedId), [selectedId, items]);
+  const [isOpen, setIsOpen] = useState(hasSelected);
+  const categoryId = useMemo(() => (title ?? '').toLowerCase().replace(' ', '-'), [title]);
+
+  useEffect(() => {
+    setIsOpen((open) => (!open ? hasSelected : true));
+  }, [hasSelected]);
+
+  return (
+    <EuiCollapsibleNavItem
+      key={categoryId}
+      data-test-subj={`navFooterCollapsible-${categoryId}`}
+      title={title}
+      icon={icon}
+      iconProps={{ size: 'm' }}
+      accordionProps={{
+        forceState: isOpen ? 'open' : 'closed',
+        initialIsOpen: isOpen,
+        onToggle: (open) => {
+          setIsOpen(open);
+        },
+      }}
+      items={items.map((item) => formatCollapsibleItem(item, selectedId))}
+    />
+  );
+};
+
 const formatCollapsibleItem = (
   sideNavItem: SolutionSideNavItem,
   selectedId: string
 ): EuiCollapsibleNavSubItemProps => {
   return {
+    'data-test-subj': `solutionSideNavItemLink-${sideNavItem.id}`,
     id: sideNavItem.id,
     title: sideNavItem.label,
     isSelected: sideNavItem.id === selectedId,
-    linkProps: { external: sideNavItem.openInNewTab },
-    onClick: sideNavItem.onClick,
     href: sideNavItem.href,
-    'data-test-subj': `nav-item-${sideNavItem.id}`,
+    ...(sideNavItem.openInNewTab && { target: '_blank' }),
+    onClick: sideNavItem.onClick,
     icon: sideNavItem.iconType,
     iconProps: { size: 's' },
   };

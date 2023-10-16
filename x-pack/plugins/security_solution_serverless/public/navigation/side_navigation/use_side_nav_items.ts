@@ -14,7 +14,6 @@ import {
 } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
 import { ExternalPageName } from '../links/constants';
-import type { ProjectNavigationLink } from '../links/types';
 
 type GetLinkProps = (link: NavigationLink) => {
   href: string & Partial<SolutionSideNavItem>;
@@ -64,15 +63,6 @@ const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): Soluti
  */
 export const useSideNavItems = (): SolutionSideNavItem[] => {
   const navLinks = useNavLinks();
-  return useFormattedSideNavItems(navLinks);
-};
-
-/**
- * Returns all the formatted SideNavItems, including external links
- */
-export const useFormattedSideNavItems = (
-  navLinks: ProjectNavigationLink[]
-): SolutionSideNavItem[] => {
   const getKibanaLinkProps = useGetLinkProps();
 
   const getLinkProps = useCallback<GetLinkProps>(

@@ -14,6 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { SideNavComponent } from '@kbn/core-chrome-browser';
+import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import { SolutionSideNav, SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
 import { useObservable } from 'react-use';
 import { css } from '@emotion/react';
@@ -24,13 +25,26 @@ import { getProjectPageNameFromNavLinkId } from '../links/util';
 import { useKibana } from '../../common/services';
 import { SideNavigationFooter } from './side_navigation_footer';
 
+const getEuiNavItemFromSideNavItem = (sideNavItem: SolutionSideNavItem, selectedId: string) => ({
+  id: sideNavItem.id,
+  title: sideNavItem.label,
+  isSelected: sideNavItem.id === selectedId,
+  href: sideNavItem.href,
+  onClick: sideNavItem.onClick,
+});
+
 export const SecuritySideNavigation: SideNavComponent = React.memo(function SecuritySideNavigation({
   activeNodes: [activeChromeNodes],
 }) {
   const { chrome } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const hasHeaderBanner = useObservable(chrome.hasHeaderBanner$());
-  const isCollapsed = useObservable(chrome.getIsSideNavCollapsed$());
+
+  /**
+   * TODO: Uncomment this when we have the getIsSideNavCollapsed API available
+   * const isCollapsed = useObservable(chrome.getIsSideNavCollapsed$());
+   */
+  const isCollapsed = false;
 
   const items = useSideNavItems();
 
@@ -54,20 +68,10 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
     padding-right: ${euiTheme.size.s};
   `;
 
-  const collapsedItems = useMemo(() => {
+  const collapsedNavItems = useMemo(() => {
     return CATEGORIES.reduce<EuiCollapsibleNavItemProps[]>((links, category) => {
       const categoryLinks = items.filter((item) => category.linkIds.includes(item.id));
-      if (categoryLinks.length > 0) {
-        links.push(
-          ...categoryLinks.map((link) => ({
-            id: link.id,
-            title: link.label,
-            isSelected: link.id === selectedId,
-            href: link.href,
-            onClick: link.onClick,
-          }))
-        );
-      }
+      links.push(...categoryLinks.map((link) => getEuiNavItemFromSideNavItem(link, selectedId)));
       return links;
     }, []);
   }, [items, selectedId]);
@@ -87,7 +91,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
           icon="logoSecurity"
           iconProps={{ size: 'm' }}
           data-test-subj="nav-bucket-security"
-          items={isCollapsed ? collapsedItems : undefined}
+          items={isCollapsed ? collapsedNavItems : undefined}
         />
         {!isCollapsed && (
           <div css={bodyStyle}>

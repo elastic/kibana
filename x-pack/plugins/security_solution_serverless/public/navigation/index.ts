@@ -20,10 +20,6 @@ import { getDefaultNavigationComponent } from './default_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
 
-// const SECURITY_PROJECT_SETTINGS_PATH = `${APP_PATH}${
-//   SecurityPagePath[SecurityPageName.projectSettings]
-// }`;
-
 export const setupNavigation = (
   _core: CoreSetup,
   { securitySolution }: SecuritySolutionServerlessPluginSetupDeps
@@ -43,9 +39,8 @@ export const startNavigation = (services: Services, config: ServerlessSecurityPu
       serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
     });
   } else {
-    // if (!config.developer.disableManagementUrlRedirect) {
-    //   management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
-    // }
+    management.setupCardsNavigation({ enabled: true });
+
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigation({ navigationTree: chromeNavigationTree });
     });
