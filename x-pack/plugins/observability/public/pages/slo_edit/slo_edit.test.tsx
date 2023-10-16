@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
