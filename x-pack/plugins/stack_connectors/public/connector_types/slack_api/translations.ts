@@ -37,7 +37,7 @@ export const SELECT_MESSAGE = i18n.translate(
 export const ACTION_TYPE_TITLE = i18n.translate(
   'xpack.stackConnectors.components.slack_api.connectorTypeTitle',
   {
-    defaultMessage: 'Send to Slack',
+    defaultMessage: 'Slack',
   }
 );
 export const ALLOWED_CHANNELS = i18n.translate(
