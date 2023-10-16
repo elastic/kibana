@@ -33,10 +33,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const comboBox = getService('comboBox');
 
-  async function refreshRulesList() {
-    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-  }
-
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
     await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
@@ -80,8 +76,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const RULE_TYPE_ID = '.es-query';
 
       before(async () => {
-        await openRulesSection();
-
         const rule = await createRule({
           supertest,
           consumer: 'alerts',
@@ -102,10 +96,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         ruleIdList = [rule.id];
 
-        await refreshRulesList();
-
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
-
         await openFirstRule(rule.name);
       });
 
@@ -255,8 +247,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const RULE_TYPE_ID = '.es-query';
 
       before(async () => {
-        await openRulesSection();
-
         const rule = await createRule({
           supertest,
           consumer: 'alerts',
@@ -277,10 +267,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         ruleIdList = [rule.id];
 
-        await refreshRulesList();
-
+        await openRulesSection();
         await testSubjects.existOrFail('rulesList');
-
         await openFirstRule(rule.name);
       });
 
@@ -434,10 +422,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('selectActionConnector-.slack-0')).toEqual(true);
         // click the super selector the reveal the options
         await testSubjects.click('selectActionConnector-.slack-0');
-
-        // click the available option (my-slack1 is a preconfigured connector created before this test runs)
         await testSubjects.click(`dropdown-connector-${connector2.id}`);
-        // expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
       });
 
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
