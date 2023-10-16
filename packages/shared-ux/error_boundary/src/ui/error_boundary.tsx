@@ -11,7 +11,12 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { ErrorBoundaryServices, Toasts } from '../../types';
 import { useErrorBoundary } from '../services/error_boundary_services';
-import { FatalInline, FatalPrompt, RecoverableInline, RecoverablePrompt } from './error_messages';
+import {
+  FatalInline,
+  FatalPrompt,
+  RecoverableInline,
+  RecoverablePrompt,
+} from './message_components';
 
 interface ErrorBoundaryState {
   error: null | Error;

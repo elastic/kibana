@@ -63,7 +63,11 @@ const BadComponent = () => {
     setHasError(true);
   };
 
-  return <EuiButton onClick={handleClick}>Click for error</EuiButton>;
+  return (
+    <EuiButton onClick={handleClick} fill={true}>
+      Click for error
+    </EuiButton>
+  );
 };
 
 export const ErrorInCallout: Story = () => {

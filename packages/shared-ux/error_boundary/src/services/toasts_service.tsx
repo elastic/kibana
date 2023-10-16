@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListProps } from '@elastic/eui';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+
+import { EuiGlobalToastList, EuiGlobalToastListProps } from '@elastic/eui';
+
 import { ErrorBoundaryUIServices } from '../../types';
-import {
-  FatalToastText,
-  FatalToastTitle,
-  RecoverableToastText,
-  RecoverableToastTitle,
-} from '../ui/error_messages';
+import { FatalToastText, RecoverableToastText } from '../ui/message_components';
+import { errorMessageStrings as strings } from '../ui/message_strings';
 
 export class ToastsService {
   private _toasts = new Rx.BehaviorSubject<EuiGlobalToastListProps['toasts']>([]);
@@ -32,7 +30,7 @@ export class ToastsService {
       this._toasts.next([
         {
           id: 'fatal-123', // FIXME
-          title: <FatalToastTitle />,
+          title: strings.fatal.toast.title(),
           text: <FatalToastText reloadWindow={this.services.reloadWindow} />,
         },
       ]);
@@ -40,7 +38,7 @@ export class ToastsService {
       this._toasts.next([
         {
           id: 'recoverable-123', // FIXME
-          title: <RecoverableToastTitle />,
+          title: strings.recoverable.toast.title(),
           text: <RecoverableToastText reloadWindow={this.services.reloadWindow} />,
         },
       ]);

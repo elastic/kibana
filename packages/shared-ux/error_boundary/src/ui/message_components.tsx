@@ -8,13 +8,10 @@
 
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiAccordion,
   EuiButton,
   EuiCallOut,
-  EuiCode,
   EuiCodeBlock,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,6 +20,8 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
+import { errorMessageStrings as strings } from './message_strings';
 
 const DATA_TEST_SUBJ_PAGE_REFRESH_BUTTON = 'pageReloadButton';
 const DATA_TEST_SUBJ_PAGE_DETAILS_BUTTON = 'showDetailsButton';
@@ -34,19 +33,24 @@ export interface ErrorCalloutProps {
   reloadWindow: () => void;
 }
 
+export const FatalInline = (_props: ErrorCalloutProps) => {
+  return <EuiCallOut color="danger" iconType="error" title={strings.fatal.inline.title()} />;
+};
+
 export const FatalPrompt = (props: ErrorCalloutProps) => {
   const { error, errorInfo, name: errorComponentName, reloadWindow } = props;
   const errorBoundaryAccordionId = useGeneratedHtmlId({ prefix: 'errorBoundaryAccordion' });
   return (
-    <EuiCallOut title="A fatal error was encountered" color="danger" iconType="error">
-      <p>Try refreshing this page.</p>
-      <EuiAccordion id={errorBoundaryAccordionId} buttonContent="Show detail">
+    <EuiCallOut title={strings.fatal.callout.title()} color="danger" iconType="error">
+      <p>{strings.fatal.callout.body}</p>
+      <EuiAccordion
+        id={errorBoundaryAccordionId}
+        buttonContent={strings.fatal.callout.showDetailsButton()}
+      >
         <EuiPanel paddingSize="m">
           <EuiCodeBlock>
             {errorComponentName && (
-              <p>
-                An error occurred in <EuiCode>{errorComponentName}</EuiCode>
-              </p>
+              <p>{strings.fatal.callout.details.componentName(errorComponentName)}</p>
             )}
             {error?.message && <p>{error.message}</p>}
             {errorInfo?.componentStack}
@@ -56,23 +60,12 @@ export const FatalPrompt = (props: ErrorCalloutProps) => {
       <EuiSpacer />
       <p>
         <EuiButton color="danger" fill={true} onClick={reloadWindow}>
-          Refresh
+          {strings.fatal.callout.pageReloadButton()}
         </EuiButton>
       </p>
     </EuiCallOut>
   );
 };
-
-export const FatalInline = (_props: ErrorCalloutProps) => {
-  return <EuiCallOut color="danger" iconType="error" title="Error: unable to load." />;
-};
-
-export const FatalToastTitle = () => (
-  <FormattedMessage
-    id="sharedUXPackages.error_boundary.fatal.toastError.title"
-    defaultMessage="A fatal error was encountered."
-  />
-);
 
 export const FatalToastText = ({ reloadWindow }: { reloadWindow: () => void }) => {
   return (
@@ -90,10 +83,7 @@ export const FatalToastText = ({ reloadWindow }: { reloadWindow: () => void }) =
               fill={false}
               color="danger"
             >
-              <FormattedMessage
-                id="sharedUXPackages.error_boundary.toastError.fatal.details"
-                defaultMessage="Show details"
-              />
+              {strings.fatal.toast.showDetailsButton()}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -104,10 +94,7 @@ export const FatalToastText = ({ reloadWindow }: { reloadWindow: () => void }) =
               fill={true}
               color="danger"
             >
-              <FormattedMessage
-                id="sharedUXPackages.error_boundary.toastError.fatal.pageRefreshButtonLabel"
-                defaultMessage="Refresh"
-              />
+              {strings.fatal.toast.pageReloadButton()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -121,12 +108,12 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
   return (
     <EuiEmptyPrompt
       iconType="broom"
-      title={<h2>Sorry, please refresh</h2>}
-      body={<p>An error occurred when trying to load a part of the page. Please try refreshing.</p>}
+      title={<h2>{strings.recoverable.callout.title()}</h2>}
+      body={<p>{strings.recoverable.callout.body()}</p>}
       color="primary"
       actions={
         <EuiButton fill={true} onClick={reloadWindow}>
-          Refresh
+          {strings.recoverable.callout.pageReloadButton()}
         </EuiButton>
       }
     />
@@ -134,21 +121,23 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
 };
 
 export const RecoverableInline = (props: ErrorCalloutProps) => {
-  return <EuiCallOut iconType="broom" title="Please refresh." onClick={props.reloadWindow} />;
+  return (
+    <EuiButton
+      size="s"
+      onClick={props.reloadWindow}
+      data-test-subj={DATA_TEST_SUBJ_PAGE_REFRESH_BUTTON}
+      fill={false}
+    >
+      {strings.recoverable.inline.linkText()}
+    </EuiButton>
+  );
 };
-
-export const RecoverableToastTitle = () => (
-  <FormattedMessage
-    id="sharedUXPackages.error_boundary.toastError.recoverable.title"
-    defaultMessage="Sorry, please refresh"
-  />
-);
 
 export const RecoverableToastText = ({ reloadWindow }: { reloadWindow: () => void }) => {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <p>An error occurred when trying to load a part of the page. Please try refreshing.</p>
+        <p>{strings.recoverable.toast.body()}</p>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" direction="row">
@@ -159,10 +148,7 @@ export const RecoverableToastText = ({ reloadWindow }: { reloadWindow: () => voi
               data-test-subj={DATA_TEST_SUBJ_PAGE_REFRESH_BUTTON}
               fill={true}
             >
-              <FormattedMessage
-                id="sharedUXPackages.error_boundary.toastError.recoverable.pageRefreshButtonLabel"
-                defaultMessage="Refresh"
-              />
+              {strings.recoverable.toast.pageReloadButton()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
