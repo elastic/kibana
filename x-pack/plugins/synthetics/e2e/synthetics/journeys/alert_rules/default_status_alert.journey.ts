@@ -57,10 +57,10 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.click(byTestId('xpack.synthetics.alertsPopover.toggleButton'));
     await page.isDisabled(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
-    await page.waitForSelector('text=Edit rule');
+    await page.waitForSelector('text=Monitor status rule');
     expect(await page.locator(`[data-test-subj="intervalFormRow"]`).count()).toEqual(0);
     await page.click(byTestId('saveEditedRuleButton'));
-    await page.waitForSelector("text=Updated 'Synthetics internal alert'");
+    await page.waitForSelector("text=Updated 'Synthetics status internal rule'");
   });
 
   step('Monitor is as up in overview page', async () => {
@@ -108,7 +108,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       name: 'Test Monitor',
       location: 'North America - US Central',
       timestamp: downCheckTime,
-      status: 'is down.',
+      status: 'down',
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
@@ -169,7 +169,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       name,
       location: 'North America - US Central',
       timestamp: downCheckTime,
-      status: 'is down.',
+      status: 'down',
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
@@ -198,7 +198,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.waitForTimeout(10 * 1000);
 
     await page.click('[aria-label="View in app"]');
-    await page.click(byTestId('syntheticsMonitorOverviewTab'));
-    await page.waitForSelector('text=Monitor details');
+    await page.click(byTestId('/app/synthetics/monitors'));
   });
 });

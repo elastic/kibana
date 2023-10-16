@@ -32,6 +32,13 @@ function handleBreadcrumbClick(
           },
         }
       : {}),
+    ...(bc['data-test-subj']
+      ? {
+          'data-test-subj': bc['data-test-subj'],
+        }
+      : {
+          'data-test-subj': bc.href,
+        }),
   }));
 }
 
