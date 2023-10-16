@@ -31,13 +31,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         await svlObltNavigation.navigateToLandingPage();
-
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
         await dashboard.clickNewDashboard();
-
         await lens.createAndAddLensFromDashboard({});
-
         await dashboard.waitForRenderComplete();
       });
 

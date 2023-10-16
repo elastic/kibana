@@ -12,41 +12,28 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
   const svlSecNavigation = getService('svlSecNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
   const svlCases = getService('svlCases');
   const find = getService('find');
 
-  // Failing
-  // Issue: https://github.com/elastic/kibana/issues/165135
-  describe.skip('Cases persistable attachments', () => {
+  describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
-        );
-
+        await svlCommonPage.login();
         await svlSecNavigation.navigateToLandingPage();
 
         await testSubjects.click('solutionSideNavItemLink-dashboards');
-
         await testSubjects.click('createDashboardButton');
 
         await lens.createAndAddLensFromDashboard({});
-
         await dashboard.waitForRenderComplete();
       });
 
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
-        );
+        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
