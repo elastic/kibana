@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { ActionType } from '@kbn/actions-plugin/common';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { css } from '@emotion/css/dist/emotion-css.cjs';
 import * as i18n from '../translations';
-import {css} from "@emotion/css/dist/emotion-css.cjs";
 
 interface Props {
   actionTypes?: ActionType[];
