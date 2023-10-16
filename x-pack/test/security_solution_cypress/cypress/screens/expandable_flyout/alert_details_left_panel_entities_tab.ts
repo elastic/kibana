@@ -9,8 +9,8 @@ import {
   ENTITIES_DETAILS_TEST_ID,
   HOST_DETAILS_TEST_ID,
   USER_DETAILS_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
-import { INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/left/components/test_ids';
+import { INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
