@@ -30,7 +30,7 @@ export function defineQueryApiKeysRoute({
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/query/api_key',
+      path: '/internal/security/api_key/_query',
       validate: {
         body: schema.object({
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),

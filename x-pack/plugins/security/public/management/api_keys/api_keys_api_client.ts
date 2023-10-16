@@ -34,7 +34,7 @@ export class APIKeysAPIClient {
   }
 
   public async queryApiKeys() {
-    return await this.http.post<QueryApiKeyResult>(`/internal/security/query/api_key`, {
+    return await this.http.post<QueryApiKeyResult>(`${apiKeysUrl}/_query`, {
       body: JSON.stringify({ size: 100 }),
     });
   }
