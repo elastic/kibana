@@ -110,7 +110,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
           map(([selectedJobs, timeBounds]) => {
             return {
               bool: {
-                must: [
+                filter: [
                   {
                     term: {
                       [ALERT_RULE_TYPE_ID]: ML_ALERT_TYPES.ANOMALY_DETECTION,
