@@ -38,23 +38,17 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = (props) 
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {columnControl && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControl dscGridToolbarControl--single">
-                  {columnControl}
-                </div>
+                <div className="dscGridToolbarControlButton">{columnControl}</div>
               </EuiFlexItem>
             )}
             {columnSortingControl && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControl dscGridToolbarControl--single">
-                  {columnSortingControl}
-                </div>
+                <div className="dscGridToolbarControlButton">{columnSortingControl}</div>
               </EuiFlexItem>
             )}
             {additionalControls && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControl dscGridToolbarControl--single">
-                  {additionalControls}
-                </div>
+                <div className="dscGridToolbarControlButton">{additionalControls}</div>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -64,10 +58,14 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = (props) 
         {(keyboardShortcutsControl || displayControl || fullScreenControl) && (
           <div className="dscGridToolbarControlGroup">
             {keyboardShortcutsControl && (
-              <div className="dscGridToolbarControl">{keyboardShortcutsControl}</div>
+              <div className="dscGridToolbarControlIconButton">{keyboardShortcutsControl}</div>
             )}
-            {displayControl && <div className="dscGridToolbarControl">{displayControl}</div>}
-            {fullScreenControl && <div className="dscGridToolbarControl">{fullScreenControl}</div>}
+            {displayControl && (
+              <div className="dscGridToolbarControlIconButton">{displayControl}</div>
+            )}
+            {fullScreenControl && (
+              <div className="dscGridToolbarControlIconButton">{fullScreenControl}</div>
+            )}
           </div>
         )}
       </EuiFlexItem>

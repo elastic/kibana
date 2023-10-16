@@ -2,55 +2,56 @@
   padding: $euiSizeS;
 }
 
-.dscGridToolbarControlGroup {
+.dscGridToolbarControlButton .euiDataGrid__controlBtn {
+  block-size: $euiSizeXL;
   border: $euiBorderThin;
   border-radius: $euiBorderRadiusSmall;
-  padding: 0 $euiSizeXS;
-  display: inline-flex;
-  align-items: stretch;
-  flex-direction: row;
-}
 
-.dscGridToolbarControl {
-  padding-block-start: $euiSizeXS - $euiBorderWidthThin;
-  padding-block-end: $euiSizeXS - $euiBorderWidthThin;
-
-  &--single {
-    border: $euiBorderThin;
-    border-radius: $euiBorderRadiusSmall;
-    padding-inline: $euiSizeXS;
-    transition: transform $euiAnimSpeedNormal ease-in-out;
-
-    &:hover {
-      transform: translateY(-1px);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
-
-  & + & {
-    border-inline-start: $euiBorderThin;
-    margin-inline-start: $euiSizeXS;
-    padding-inline-start: $euiSizeXS;
-  }
-
+  // making the icons larger than the default size
   & svg {
     inline-size: $euiSize;
     block-size: $euiSize;
   }
 
-  & .euiDataGrid__controlBtn--active {
+  // cancel default background and font changes
+  &.euiDataGrid__controlBtn--active {
     font-weight: $euiFontWeightMedium;
   }
-
-  & .euiButtonIcon:hover {
+  &:active, &:focus {
     background: transparent;
-    transform: none;
   }
 
-  & .euiButtonEmpty:active {
+  // add toolbar control animation
+  transition: transform $euiAnimSpeedNormal ease-in-out;
+  &:hover {
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.dscGridToolbarControlGroup {
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadiusSmall;
+  display: inline-flex;
+  align-items: stretch;
+  flex-direction: row;
+}
+
+.dscGridToolbarControlIconButton .euiButtonIcon {
+  inline-size: $euiSizeXL;
+  block-size: $euiSizeXL;
+
+  // cancel default behaviour
+  &:hover, &:active, &:focus {
     background: transparent;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .dscGridToolbarControlIconButton + & {
+    border-inline-start: $euiBorderThin;
+    border-radius: 0;
   }
 }
