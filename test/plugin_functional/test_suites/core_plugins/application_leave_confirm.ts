@@ -8,7 +8,6 @@
 
 import url from 'url';
 import expect from '@kbn/expect';
-import { ToolingLog } from '@kbn/tooling-log';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
@@ -20,40 +19,50 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
     search,
   });
 
-async function logResult(curr: string, kib: string, log: ToolingLog) {
-  if (curr === kib) {
-    log.debug('navigation cancelled');
-  } else {
-    log.debug(`nav cancelled failed, curr is ${curr}`);
-  }
-}
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const retry = getService('retry');
+
+  const waitForUrlToBe = (pathname?: string, search?: string) => {
+    const expectedUrl = getKibanaUrl(pathname, search);
+    return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
+      const currentUrl = await browser.getCurrentUrl();
+      log.debug(`waiting for currentUrl ${currentUrl} to be expectedUrl ${expectedUrl}`);
+      return currentUrl === expectedUrl;
+    });
+  };
 
   describe('application using leave confirmation', () => {
     describe('when navigating to another app', () => {
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('AppLeave 2');
+        await waitForUrlToBe('/app/appleave1');
 
+        await appsMenu.clickLink('AppLeave 2');
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
+
         const currentUrl = await browser.getCurrentUrl();
         const kibanaUrl = getKibanaUrl('/app/appleave1');
-        await logResult(currentUrl, kibanaUrl, log);
+        log.debug(`currentUrl ${currentUrl} kibanaUrl ${kibanaUrl}`);
         expect(currentUrl).to.eql(kibanaUrl);
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('AppLeave 2');
+        await waitForUrlToBe('/app/appleave1');
 
+        await appsMenu.clickLink('AppLeave 2');
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickConfirmOnModal();
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave2'));
+
+        const currentUrl = await browser.getCurrentUrl();
+        const kibanaUrl = getKibanaUrl('/app/appleave2');
+        log.debug(`currentUrl ${currentUrl} kibanaUrl ${kibanaUrl}`);
+        expect(currentUrl).to.eql(kibanaUrl);
       });
     });
   });
