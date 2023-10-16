@@ -23,7 +23,7 @@ import {
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
 
-import type { MonacoError } from './helpers';
+import type { MonacoMessage } from './helpers';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -63,11 +63,11 @@ export function ErrorsWarningsPopover({
   onErrorClick,
 }: {
   isPopoverOpen: boolean;
-  items: MonacoError[];
+  items: MonacoMessage[];
   type: 'error' | 'warning';
   refreshErrors: () => void;
   setIsPopoverOpen: (flag: boolean) => void;
-  onErrorClick: (error: MonacoError) => void;
+  onErrorClick: (error: MonacoMessage) => void;
 }) {
   const strings = getConstsByType(type, items.length);
   return (
@@ -150,10 +150,10 @@ export function ErrorsWarningsPopover({
 interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
-  errors?: MonacoError[];
-  warning?: MonacoError[];
+  errors?: MonacoMessage[];
+  warning?: MonacoMessage[];
   detectTimestamp: boolean;
-  onErrorClick: (error: MonacoError) => void;
+  onErrorClick: (error: MonacoMessage) => void;
   refreshErrors: () => void;
   hideRunQueryText?: boolean;
 }
