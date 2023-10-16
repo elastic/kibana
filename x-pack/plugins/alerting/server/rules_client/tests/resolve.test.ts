@@ -148,11 +148,12 @@ describe('resolve()', () => {
     `);
     expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('calls saved objects client with id and includeLegacyId params', async () => {
@@ -232,11 +233,12 @@ describe('resolve()', () => {
     `);
     expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('calls saved objects client with id and includeSnoozeData params', async () => {

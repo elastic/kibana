@@ -12,7 +12,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
-import { snoozeRule, SnoozeParams } from '../application/rule/methods/snooze';
+import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { get, GetParams } from './methods/get';
 import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
@@ -162,7 +162,7 @@ export class RulesClient {
   public enable = (options: { id: string }) => enable(this.context, options);
   public disable = (options: { id: string }) => disable(this.context, options);
 
-  public snooze = (options: SnoozeParams) => snoozeRule(this.context, options);
+  public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
 
   public clearExpiredSnoozes = (options: {
