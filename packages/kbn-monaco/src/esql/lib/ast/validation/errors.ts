@@ -60,7 +60,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
           defaultMessage:
             'Error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
-          values: { fn: out.fn, funArgs: out.numArgs, passedArgs: out.passedArgs },
+          values: { fn: out.fn, numArgs: out.numArgs, passedArgs: out.passedArgs },
         }),
       };
     case 'noNestedArgumentSupport':
