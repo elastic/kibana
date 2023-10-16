@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
 import type { TopNFunctions } from '@kbn/profiling-utils';
+import React, { useMemo } from 'react';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
-import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   baselineTopNFunctions?: TopNFunctions;
@@ -155,14 +163,41 @@ export function TopNFunctionsSummary({
   ];
 
   return (
-    <EuiFlexGroup direction="row">
-      {data.map((item, idx) => {
-        return (
-          <EuiFlexItem key={idx}>
-            <SummaryItem {...item} isLoading={isLoading} />
+    <EuiAccordion
+      initialIsOpen
+      id="TopNFunctionsSummary"
+      buttonContent={
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
+              {data[0].title}
+            </EuiText>
           </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+          {data[0].baseIcon && (
+            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+              <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
+              {data[0].baseValue}
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="row">
+          {data.map((item, idx) => {
+            return (
+              <EuiFlexItem key={idx}>
+                <SummaryItem {...item} isLoading={isLoading} />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </>
+    </EuiAccordion>
   );
 }

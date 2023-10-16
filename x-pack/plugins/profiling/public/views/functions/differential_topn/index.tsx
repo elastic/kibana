@@ -206,7 +206,6 @@ export function DifferentialTopNFunctionsView() {
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} />
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>
