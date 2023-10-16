@@ -105,7 +105,7 @@ export async function ensureAuthorized<T extends string>(
   // Neither fully nor partially authorized. Bail with error.
   const uniqueUnauthorizedPrivileges = [...missingPrivileges.entries()].reduce(
     (acc, [, privilegeSet]) => {
-      privilegeSet.forEach(acc.add);
+      privilegeSet.forEach((entry) => acc.add(entry));
       return acc;
     },
     new Set<string>()
