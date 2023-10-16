@@ -41,6 +41,7 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
+    viewModeToggle: undefined,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     stateContainer,
