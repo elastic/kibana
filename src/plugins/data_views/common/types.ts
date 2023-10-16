@@ -518,7 +518,7 @@ export type DataViewSpec = {
    */
   name?: string;
   /**
-   * Whether the data view is hidden from the user
+   * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
 };
