@@ -11,7 +11,7 @@ export function MachineLearningNavigationProviderObservability({ getService }: F
   const testSubjects = getService('testSubjects');
 
   async function navigateToArea(id: string) {
-    await testSubjects.click('~nav-item-id-aiops');
+    await testSubjects.click('~nav-item-id-observability_project_nav.aiops');
     await testSubjects.existOrFail(`~nav-item-id-ml:${id}`, { timeout: 60 * 1000 });
     await testSubjects.click(`~nav-item-id-ml:${id}`);
   }
