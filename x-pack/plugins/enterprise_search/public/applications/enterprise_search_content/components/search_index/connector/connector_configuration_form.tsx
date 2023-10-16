@@ -17,6 +17,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -63,6 +64,25 @@ export const ConnectorConfigurationForm = () => {
           />
         </React.Fragment>
       ))}
+      {localConfigView.advancedConfigurations.length > 0 && (
+        <React.Fragment>
+          <EuiSpacer />
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.config.advancedConfigurations.title',
+                { defaultMessage: 'Advanced Configurations' }
+              )}
+            </h4>
+          </EuiTitle>
+          <EuiPanel color="subdued">
+            <ConnectorConfigurationFormItems
+              items={localConfigView.advancedConfigurations}
+              hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
+            />
+          </EuiPanel>
+        </React.Fragment>
+      )}
       <EuiSpacer />
       <EuiFormRow>
         <EuiFlexGroup>

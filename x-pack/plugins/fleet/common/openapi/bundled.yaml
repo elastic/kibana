@@ -894,6 +894,37 @@ paths:
         name: pkgName
         in: path
         required: true
+  /epm/templates/{pkgName}/{pkgVersion}/inputs:
+    get:
+      summary: Get inputs template
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-inputs-template
+      security:
+        - basicAuth: []
+    parameters:
+      - schema:
+          type: string
+        name: pkgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: pkgVersion
+        in: path
+        required: true
+      - schema:
+          type: string
+          enum:
+            - json
+            - yaml
+            - yml
+        name: format
+        description: Format of response - json or yaml
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -2822,7 +2853,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_create_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_create_request'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-output
@@ -2869,7 +2903,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_update_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_update_request'
         '400':
           $ref: '#/components/responses/error'
       parameters:

@@ -12,6 +12,9 @@ It is possible to validate the docs before bundling them by running these
 commands in the `x-pack/plugins/ml/common/openapi/` folder:
 
 ```
-npx swagger-cli validate ml_apis_v3.yaml
-npx @redocly/cli lint ml_apis_v3.yaml
+npx swagger-cli validate ml_apis.yaml
+npx @redocly/cli lint ml_apis.yaml
+
+npx swagger-cli validate ml_apis_serverless.yaml
+npx @redocly/cli lint ml_apis_serverless.yaml
 ```
