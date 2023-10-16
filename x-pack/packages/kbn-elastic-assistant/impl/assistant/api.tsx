@@ -8,7 +8,8 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-
+// TODO: Why do i get this error here? its imported in other places without issue
+// eslint-disable-next-line import/no-nodejs-modules
 import { IncomingMessage } from 'http';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
@@ -25,8 +26,9 @@ export interface FetchConnectorExecuteAction {
 }
 
 export interface FetchConnectorExecuteResponse {
-  response: string;
+  response: string | ReadableStreamDefaultReader<Uint8Array>;
   isError: boolean;
+  isStream: boolean;
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -64,28 +66,27 @@ export const fetchConnectorExecuteAction = async ({
   };
 
   try {
-    const response = await http.fetch<
-      | {
-          connector_id: string;
-          status: string;
-          data: string;
-          service_message?: string;
-        }
-      | IncomingMessage
-    >(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      signal,
-      asResponse: isStream,
-      rawResponse: isStream,
-    });
-
     if (isStream) {
+      const response = await http.fetch<IncomingMessage>(
+        `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+          signal,
+          asResponse: isStream,
+          rawResponse: isStream,
+        }
+      );
+
       const reader = response?.response?.body?.getReader();
 
       console.log('is typeof incoming message');
       if (!reader) {
-        throw new Error('Could not get reader from response');
+        return {
+          response: `${API_ERROR}\n\nCould not get reader from response`,
+          isError: true,
+          isStream: false,
+        };
       }
       return {
         response: reader,
@@ -94,26 +95,41 @@ export const fetchConnectorExecuteAction = async ({
       };
     }
 
+    const response = await http.fetch<{
+      connector_id: string;
+      status: string;
+      data: string;
+      service_message?: string;
+    }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      signal,
+    });
+
     if (response.status !== 'ok' || !response.data) {
       if (response.service_message) {
         return {
           response: `${API_ERROR}\n\n${response.service_message}`,
           isError: true,
+          isStream: false,
         };
       }
       return {
         response: API_ERROR,
         isError: true,
+        isStream: false,
       };
     }
     return {
       response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
       isError: false,
+      isStream: false,
     };
   } catch (error) {
     return {
       response: API_ERROR,
       isError: true,
+      isStream: false,
     };
   }
 };

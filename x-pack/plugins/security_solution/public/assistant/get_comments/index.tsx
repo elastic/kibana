@@ -13,6 +13,7 @@ import React from 'react';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react/dist/emotion-react.cjs';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
@@ -28,35 +29,20 @@ export const getComments = ({
   currentConversation.messages.map((message, index) => {
     const isUser = message.role === 'user';
     const replacements = currentConversation.replacements;
-    const messageContentWithReplacements =
-      replacements != null
-        ? Object.keys(replacements).reduce(
-            (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-            message.content
-          )
-        : message.content;
-    const transformedMessage = {
-      ...message,
-      content: messageContentWithReplacements,
+    const errorStyles = {
+      eventColor: 'danger' as EuiPanelProps['color'],
+      css: css`
+        .euiCommentEvent {
+          border: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
+        }
+        .euiCommentEvent__header {
+          padding: 0 !important;
+          border-block-end: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
+        }
+      `,
     };
 
-    return {
-      actions: <CommentActions message={transformedMessage} />,
-      children:
-        index !== currentConversation.messages.length - 1 ? (
-          <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>
-              {showAnonymizedValues ? message.content : transformedMessage.content}
-            </EuiMarkdownFormat>
-          </EuiText>
-        ) : (
-          <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>
-              {showAnonymizedValues ? message.content : transformedMessage.content}
-            </EuiMarkdownFormat>
-            <span ref={lastCommentRef} />
-          </EuiText>
-        ),
+    const messageProps = {
       timelineAvatar: isUser ? (
         <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
       ) : (
@@ -66,19 +52,51 @@ export const getComments = ({
         message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
       ),
       username: isUser ? i18n.YOU : i18n.ASSISTANT,
-      ...(message.isError
-        ? {
-            eventColor: 'danger',
-            css: css`
-              .euiCommentEvent {
-                border: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
-              }
-              .euiCommentEvent__header {
-                padding: 0 !important;
-                border-block-end: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
-              }
-            `,
-          }
-        : {}),
+      ...(message.isError ? errorStyles : {}),
+    };
+
+    if (message.content && message.content.length) {
+      const messageContentWithReplacements =
+        replacements != null
+          ? Object.keys(replacements).reduce(
+              (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+              message.content
+            )
+          : message.content;
+      const transformedMessage = {
+        ...message,
+        content: messageContentWithReplacements,
+      };
+
+      return {
+        ...messageProps,
+        actions: <CommentActions message={transformedMessage} />,
+        children:
+          index !== currentConversation.messages.length - 1 ? (
+            <EuiText>
+              <EuiMarkdownFormat className={`message-${index}`}>
+                {showAnonymizedValues ? message.content : transformedMessage.content}
+              </EuiMarkdownFormat>
+            </EuiText>
+          ) : (
+            <EuiText>
+              <EuiMarkdownFormat className={`message-${index}`}>
+                {showAnonymizedValues ? message.content : transformedMessage.content}
+              </EuiMarkdownFormat>
+              <span ref={lastCommentRef} />
+            </EuiText>
+          ),
+      };
+    }
+    if (message.reader) {
+      return {
+        ...messageProps,
+        children: <EuiText>{'hello world i need to make this a stream here dawg'}</EuiText>,
+      };
+    }
+    return {
+      ...messageProps,
+      children: <EuiText>{'oh no an error happened'}</EuiText>,
+      ...errorStyles,
     };
   });
