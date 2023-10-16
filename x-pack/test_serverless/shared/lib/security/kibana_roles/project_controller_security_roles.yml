@@ -355,6 +355,7 @@ soc_manager:
         - .items*
       privileges:
         - read
+        - maintenance
         - write
     - names:
         - metrics-endpoint.metadata_current_*

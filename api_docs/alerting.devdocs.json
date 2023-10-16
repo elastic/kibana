@@ -3396,10 +3396,6 @@
                 "path": "x-pack/plugins/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/metric_anomaly/metric_anomaly_executor.ts"
-              },
-              {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/server/alerts/base_rule.ts"
               },
@@ -3785,7 +3781,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
+              ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4883,27 +4879,9 @@
           },
           "<never> | ",
           "RuleWithLegacyId",
-          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: ",
-          "BulkOptions",
-          ") => Promise<{ errors: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkOperationError",
-            "text": "BulkOperationError"
-          },
-          "[]; rules: (",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.Rule",
-            "text": "Rule"
-          },
-          "<never> | ",
-          "RuleWithLegacyId",
-          "<never>)[]; total: number; }>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; }) => Promise<void>; snooze: (options: ",
+          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<",
+          "BulkDisableRulesResult",
+          "<Record<string, any>>>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; }) => Promise<void>; snooze: (options: ",
           "SnoozeParams",
           ") => Promise<void>; unsnooze: (options: ",
           "UnsnoozeParams",
@@ -4941,9 +4919,7 @@
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<",
-          "GetTagsResult",
-          ">; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
           ") => ",
           {
@@ -5492,6 +5468,101 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.getRuleCircuitBreakerErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getRuleCircuitBreakerErrorMessage",
+        "description": [],
+        "signature": [
+          "({ name, interval, intervalAvailable, action, rules, }: { name?: string | undefined; interval: number; intervalAvailable: number; action: \"create\" | \"update\" | \"bulkEdit\" | \"enable\" | \"bulkEnable\"; rules?: number | undefined; }) => string"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getRuleCircuitBreakerErrorMessage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name = '',\n  interval,\n  intervalAvailable,\n  action,\n  rules = 1,\n}",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.getRuleCircuitBreakerErrorMessage.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.getRuleCircuitBreakerErrorMessage.$1.interval",
+                "type": "number",
+                "tags": [],
+                "label": "interval",
+                "description": [],
+                "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.getRuleCircuitBreakerErrorMessage.$1.intervalAvailable",
+                "type": "number",
+                "tags": [],
+                "label": "intervalAvailable",
+                "description": [],
+                "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.getRuleCircuitBreakerErrorMessage.$1.action",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "action",
+                "description": [],
+                "signature": [
+                  "\"create\" | \"update\" | \"bulkEdit\" | \"enable\" | \"bulkEnable\""
+                ],
+                "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.getRuleCircuitBreakerErrorMessage.$1.rules",
+                "type": "number",
+                "tags": [],
+                "label": "rules",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.getRuleTagsAggregation",
         "type": "Function",
         "tags": [],
@@ -5661,6 +5732,39 @@
               "string"
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.parseRuleCircuitBreakerErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "parseRuleCircuitBreakerErrorMessage",
+        "description": [],
+        "signature": [
+          "(message: string) => { summary: string; details?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.parseRuleCircuitBreakerErrorMessage.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

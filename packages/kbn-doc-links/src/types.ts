@@ -415,6 +415,7 @@ export interface DocLinks {
     monitorUptimeSynthetics: string;
     userExperience: string;
     createAlerts: string;
+    syntheticsAlerting: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
@@ -581,6 +582,7 @@ export interface DocLinks {
     readonly elasticsearch: string;
   };
   readonly serverlessClients: {
+    readonly clientLib: string;
     readonly goApiReference: string;
     readonly goGettingStarted: string;
     readonly httpApis: string;
@@ -603,6 +605,9 @@ export interface DocLinks {
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
     readonly integrationsLogstash: string;
+  };
+  readonly serverlessSecurity: {
+    readonly apiKeyPrivileges: string;
   };
   readonly synthetics: {
     readonly featureRoles: string;

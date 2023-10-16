@@ -235,9 +235,9 @@ function FieldConflictInfoIcon() {
 }
 
 function getSearchHighlight(displayName: string, fieldSearchHighlight?: string): string {
-  const searchHighlight = fieldSearchHighlight || '';
+  const searchHighlight = (fieldSearchHighlight || '').trim();
   if (
-    searchHighlight.includes('*') &&
+    (searchHighlight.includes('*') || searchHighlight.includes(' ')) &&
     fieldNameWildcardMatcher({ name: displayName }, searchHighlight)
   ) {
     return displayName;

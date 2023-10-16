@@ -28,6 +28,7 @@ export const request = async <T = unknown>({
   configurationUtilities,
   headers,
   sslOverrides,
+  timeout,
   ...config
 }: {
   axios: AxiosInstance;
@@ -37,6 +38,7 @@ export const request = async <T = unknown>({
   data?: T;
   configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, AxiosHeaderValue>;
+  timeout?: number;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   const { httpAgent, httpsAgent } = getCustomAgents(
@@ -45,7 +47,8 @@ export const request = async <T = unknown>({
     url,
     sslOverrides
   );
-  const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
+  const { maxContentLength, timeout: settingsTimeout } =
+    configurationUtilities.getResponseSettings();
 
   return await axios(url, {
     ...config,
@@ -57,7 +60,7 @@ export const request = async <T = unknown>({
     httpsAgent,
     proxy: false,
     maxContentLength,
-    timeout,
+    timeout: Math.max(settingsTimeout, timeout ?? 0),
   });
 };
 
