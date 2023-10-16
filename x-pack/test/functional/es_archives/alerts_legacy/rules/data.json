@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "space1:action:17f38826-5a8d-4a76-975a-b496e7fffe0b",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": "test.index-record",
@@ -13,10 +13,14 @@
         "secrets": "/ZW1x3z3KWzPB0H3ociZNVBeWJGQytz2P5OEUCmz4ahO7S8709DDJ+uC9ztGRig7e73GtCgT6XU42Cn8l8rm90INusLWf2oXaXbdGctjMDtTXv5S3b75YdEwIHClhLTLswmraGQHUwMsTMe+EVh9gUhwGsjDLTQAiDqsDonMto8XkTdtyP6C5axn"
       },
       "namespace": "space1",
-      "references": [
-      ],
+      "references": [],
       "type": "action",
-      "updated_at": "2020-09-04T11:50:50.815Z"
+      "updated_at": "2020-09-04T11:50:50.815Z",
+      "namespaces": [
+        "space1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.3.0"
     }
   }
 }
@@ -25,7 +29,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:6ee9630a-a20e-44af-9465-217a3717d2ab",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -48,8 +52,7 @@
         "createdBy": "superuser",
         "enabled": true,
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "abc",
         "params": {
           "index": ".kibana-alerting-test-data",
@@ -66,9 +69,6 @@
         "throttle": "2s",
         "updatedBy": "superuser"
       },
-      "migrationVersion": {
-        "alert": "7.9.0"
-      },
       "namespace": "space1",
       "references": [
         {
@@ -78,7 +78,12 @@
         }
       ],
       "type": "alert",
-      "updated_at": "2020-09-04T11:51:05.222Z"
+      "updated_at": "2020-09-04T11:51:05.222Z",
+      "namespaces": [
+        "space1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }
@@ -87,7 +92,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:b384be60-ec53-4b26-857e-0253ee55b277",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -110,8 +115,7 @@
         "createdBy": "superuser",
         "enabled": true,
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "abc",
         "params": {
           "index": ".kibana-alerting-test-data",
@@ -128,9 +132,6 @@
         "throttle": "2s",
         "updatedBy": "superuser"
       },
-      "migrationVersion": {
-        "alert": "7.9.0"
-      },
       "namespace": "space1",
       "references": [
         {
@@ -140,7 +141,12 @@
         }
       ],
       "type": "alert",
-      "updated_at": "2020-09-04T11:50:54.902Z"
+      "updated_at": "2020-09-04T11:50:54.902Z",
+      "namespaces": [
+        "space1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }
@@ -149,7 +155,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:5cc59319-74ee-4edc-8646-a79ea91067cd",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -172,8 +178,7 @@
         "createdBy": "superuser",
         "enabled": true,
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "abc",
         "params": {
           "index": ".kibana-alerting-test-data",
@@ -190,9 +195,6 @@
         "throttle": "2s",
         "updatedBy": "superuser"
       },
-      "migrationVersion": {
-        "alert": "7.9.0"
-      },
       "namespace": "space1",
       "references": [
         {
@@ -202,7 +204,12 @@
         }
       ],
       "type": "alert",
-      "updated_at": "2020-09-04T11:51:03.175Z"
+      "updated_at": "2020-09-04T11:51:03.175Z",
+      "namespaces": [
+        "space1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }
@@ -211,7 +218,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:d41a6abb-b93b-46df-a80a-926221ea847c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -234,8 +241,7 @@
         "createdBy": "superuser",
         "enabled": true,
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "abc",
         "params": {
           "index": ".kibana-alerting-test-data",
@@ -252,9 +258,6 @@
         "throttle": "2s",
         "updatedBy": "superuser"
       },
-      "migrationVersion": {
-        "alert": "7.9.0"
-      },
       "namespace": "space1",
       "references": [
         {
@@ -264,7 +267,12 @@
         }
       ],
       "type": "alert",
-      "updated_at": "2020-09-04T11:50:59.083Z"
+      "updated_at": "2020-09-04T11:50:59.083Z",
+      "namespaces": [
+        "space1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }
@@ -273,7 +281,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:362e362b-a137-4aa2-9434-43e3d0d84a34",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -296,8 +304,7 @@
         "createdBy": "superuser",
         "enabled": true,
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "abc",
         "params": {
           "index": ".kibana-alerting-test-data",
@@ -314,9 +321,6 @@
         "throttle": "2s",
         "updatedBy": "superuser"
       },
-      "migrationVersion": {
-        "alert": "7.9.0"
-      },
       "namespace": "space1",
       "references": [
         {
@@ -326,7 +330,12 @@
         }
       ],
       "type": "alert",
-      "updated_at": "2020-09-04T11:50:57.048Z"
+      "updated_at": "2020-09-04T11:50:57.048Z",
+      "namespaces": [
+        "space1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }

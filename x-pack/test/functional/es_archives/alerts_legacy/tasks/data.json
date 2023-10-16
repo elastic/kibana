@@ -2,13 +2,9 @@
   "type": "doc",
   "value": {
     "id": "task:e9c069d0-eea4-11ea-a285-352ee3aecffa",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 0,
         "params": "{\"alertId\":\"6ee9630a-a20e-44af-9465-217a3717d2ab\",\"spaceId\":\"space1\"}",
@@ -24,7 +20,9 @@
         "taskType": "alerting:test.always-firing"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:05.197Z"
+      "updated_at": "2020-09-04T11:51:05.197Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }
@@ -33,13 +31,9 @@
   "type": "doc",
   "value": {
     "id": "task:e39a02f0-eea4-11ea-a285-352ee3aecffa",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 0,
         "ownerId": null,
@@ -56,7 +50,9 @@
         "taskType": "alerting:test.always-firing"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:04.273Z"
+      "updated_at": "2020-09-04T11:51:04.273Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }
@@ -65,13 +61,9 @@
   "type": "doc",
   "value": {
     "id": "task:e8885f00-eea4-11ea-a285-352ee3aecffa",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 1,
         "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
@@ -88,7 +80,9 @@
         "taskType": "alerting:test.always-firing"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:05.794Z"
+      "updated_at": "2020-09-04T11:51:05.794Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }
@@ -97,13 +91,9 @@
   "type": "doc",
   "value": {
     "id": "task:e616c2c0-eea4-11ea-a285-352ee3aecffa",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 1,
         "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
@@ -120,7 +110,9 @@
         "taskType": "alerting:test.always-firing"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:05.794Z"
+      "updated_at": "2020-09-04T11:51:05.794Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }
@@ -129,13 +121,9 @@
   "type": "doc",
   "value": {
     "id": "task:e4df5430-eea4-11ea-a285-352ee3aecffa",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 1,
         "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
@@ -152,7 +140,9 @@
         "taskType": "alerting:test.always-firing"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:05.794Z"
+      "updated_at": "2020-09-04T11:51:05.794Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }

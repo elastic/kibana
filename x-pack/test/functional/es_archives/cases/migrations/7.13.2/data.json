@@ -1,0 +1,392 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:e6e0f650-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-user-actions": {
+        "action": "push-to-service",
+        "action_at": "2021-06-17T18:57:45.524Z",
+        "action_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "action_field": [
+          "pushed"
+        ],
+        "new_value": "{\"pushed_at\":\"2021-06-17T18:57:45.524Z\",\"pushed_by\":{\"username\":\"711621466\",\"full_name\":\"j@j.com\",\"email\":null},\"connector_id\":\"d68508f0-cf9d-11eb-a603-13e7747d215c\",\"connector_name\":\"Test Jira\",\"external_id\":\"10106\",\"external_title\":\"TPN-99\",\"external_url\":\"https://cases-testing.atlassian.net/browse/TPN-99\"}",
+        "old_value": null
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [
+        {
+          "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2021-06-17T18:57:45.542Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.10.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [
+            {
+              "key": "issueType",
+              "value": "10002"
+            },
+            {
+              "key": "parent",
+              "value": null
+            },
+            {
+              "key": "priority",
+              "value": null
+            }
+          ],
+          "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+          "name": "Test Jira",
+          "type": ".jira"
+        },
+        "created_at": "2021-06-17T18:57:41.682Z",
+        "created_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "description": "asdf",
+        "external_service": {
+          "connector_id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+          "connector_name": "Test Jira",
+          "external_id": "10106",
+          "external_title": "TPN-99",
+          "external_url": "https://cases-testing.atlassian.net/browse/TPN-99",
+          "pushed_at": "2021-06-17T18:57:45.524Z",
+          "pushed_by": {
+            "email": null,
+            "full_name": "j@j.com",
+            "username": "711621466"
+          }
+        },
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "some tag"
+        ],
+        "title": "A case",
+        "type": "individual",
+        "updated_at": "2021-06-17T18:57:58.037Z",
+        "updated_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        }
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-17T18:57:58.076Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.12.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:e49ad6e0-cf9d-11eb-a603-13e7747d215z",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": "2021-06-17T18:57:42.682Z",
+        "closed_by": null,
+        "connector": {
+          "fields": [
+            {
+              "key": "issueType",
+              "value": "10002"
+            },
+            {
+              "key": "parent",
+              "value": null
+            },
+            {
+              "key": "priority",
+              "value": null
+            }
+          ],
+          "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+          "name": "Test Jira",
+          "type": ".jira"
+        },
+        "created_at": "2021-06-17T18:57:41.682Z",
+        "created_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "description": "asdf",
+        "external_service": {
+          "connector_id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+          "connector_name": "Test Jira",
+          "external_id": "10106",
+          "external_title": "TPN-99",
+          "external_url": "https://cases-testing.atlassian.net/browse/TPN-99",
+          "pushed_at": "2021-06-17T18:57:45.524Z",
+          "pushed_by": {
+            "email": null,
+            "full_name": "j@j.com",
+            "username": "711621466"
+          }
+        },
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "some tag"
+        ],
+        "title": "A case",
+        "type": "individual",
+        "updated_at": "2021-06-17T18:57:58.037Z",
+        "updated_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        }
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-17T18:57:58.076Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.12.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-comments:ee59cdd0-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-comments": {
+        "associationType": "case",
+        "comment": "A comment",
+        "created_at": "2021-06-17T18:57:58.037Z",
+        "created_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "pushed_at": null,
+        "pushed_by": null,
+        "type": "user",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [
+        {
+          "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-comments",
+      "updated_at": "2021-06-17T18:57:58.087Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.12.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:e5509250-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-user-actions": {
+        "action": "create",
+        "action_at": "2021-06-17T18:57:41.682Z",
+        "action_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "action_field": [
+          "description",
+          "status",
+          "tags",
+          "title",
+          "connector",
+          "settings"
+        ],
+        "new_value": "{\"type\":\"individual\",\"title\":\"A case\",\"tags\":[\"some tag\"],\"description\":\"asdf\",\"connector\":{\"id\":\"d68508f0-cf9d-11eb-a603-13e7747d215c\",\"name\":\"Test Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":null}},\"settings\":{\"syncAlerts\":true}}",
+        "old_value": null
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [
+        {
+          "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2021-06-17T18:57:42.925Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.10.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:eee3be50-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-user-actions": {
+        "action": "create",
+        "action_at": "2021-06-17T18:57:58.037Z",
+        "action_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "action_field": [
+          "comment"
+        ],
+        "new_value": "{\"comment\":\"A comment\",\"type\":\"user\"}",
+        "old_value": null
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [
+        {
+          "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+          "name": "associated-cases",
+          "type": "cases"
+        },
+        {
+          "id": "ee59cdd0-cf9d-11eb-a603-13e7747d215c",
+          "name": "associated-cases-comments",
+          "type": "cases-comments"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2021-06-17T18:57:58.979Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.10.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-configure:d95d5640-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-configure": {
+        "closure_type": "close-by-user",
+        "connector": {
+          "fields": [],
+          "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+          "name": "Test Jira",
+          "type": ".jira"
+        },
+        "created_at": "2021-06-17T18:57:21.091Z",
+        "created_by": {
+          "email": null,
+          "full_name": "j@j.com",
+          "username": "711621466"
+        },
+        "updated_at": null,
+        "updated_by": null
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [],
+      "type": "cases-configure",
+      "updated_at": "2021-06-17T18:57:22.870Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.10.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-connector-mappings:d903c490-cf9d-11eb-a603-13e7747d215c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-connector-mappings": {
+        "mappings": [
+          {
+            "action_type": "overwrite",
+            "source": "title",
+            "target": "summary"
+          },
+          {
+            "action_type": "overwrite",
+            "source": "description",
+            "target": "description"
+          },
+          {
+            "action_type": "append",
+            "source": "comments",
+            "target": "comments"
+          }
+        ]
+      },
+      "coreMigrationVersion": "7.13.2",
+      "references": [
+        {
+          "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+          "name": "associated-action",
+          "type": "action"
+        }
+      ],
+      "type": "cases-connector-mappings",
+      "updated_at": "2021-06-17T18:57:22.287Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}

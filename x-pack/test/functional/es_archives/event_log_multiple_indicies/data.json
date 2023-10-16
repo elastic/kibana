@@ -2,43 +2,19 @@
   "type": "doc",
   "value": {
     "id": "config:8.0.0",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "config": {
         "buildNum": 9007199254740991
       },
-      "migrationVersion": {
-        "config": "7.9.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "type": "config",
-      "updated_at": "2020-10-28T15:19:15.795Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "space:default",
-    "index": ".kibana_1",
-    "source": {
-      "migrationVersion": {
-        "space": "6.6.0"
-      },
-      "references": [
+      "updated_at": "2020-10-28T15:19:15.795Z",
+      "namespaces": [
+        "default"
       ],
-      "space": {
-        "_reserved": true,
-        "color": "#00bfb3",
-        "description": "This is your default space!",
-        "disabledFeatures": [
-        ],
-        "name": "Default"
-      },
-      "type": "space",
-      "updated_at": "2020-10-28T15:19:15.857Z"
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }
@@ -47,20 +23,17 @@
   "type": "doc",
   "value": {
     "id": "space:namespace-a",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
-      "migrationVersion": {
-        "space": "6.6.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "space": {
-        "disabledFeatures": [
-        ],
+        "disabledFeatures": [],
         "name": "Space A"
       },
       "type": "space",
-      "updated_at": "2020-10-28T15:19:52.887Z"
+      "updated_at": "2020-10-28T15:19:52.887Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0"
     }
   }
 }
@@ -71,10 +44,8 @@
     "id": "event_log_test:421f2511-5cd1-44fd-95df-e0df83e354d5",
     "index": ".kibana_1",
     "source": {
-      "event_log_test": {
-      },
-      "references": [
-      ],
+      "event_log_test": {},
+      "references": [],
       "type": "event_log_test",
       "updated_at": "2020-10-28T15:19:53.861Z"
     }

@@ -2,11 +2,8 @@
   "type": "doc",
   "value": {
     "id": "task:329798f0-b0b0-11ea-9510-fdf248d5f2a4",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
       "task": {
         "attempts": 0,
         "ownerId": null,
@@ -14,19 +11,21 @@
         "retryAt": null,
         "runAt": "2021-11-05T16:21:52.148Z",
         "schedule": {
-					"interval": "1m"
-				},
+          "interval": "1m"
+        },
         "scheduledAt": "2021-11-05T15:28:42.055Z",
         "scope": [
-					"alerting"
-				],
+          "alerting"
+        ],
         "startedAt": null,
         "status": "idle",
         "taskType": "alerting:example.always-firing"
       },
       "references": [],
       "type": "task",
-      "updated_at": "2021-11-05T16:21:37.629Z"
+      "updated_at": "2021-11-05T16:21:37.629Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.16.0"
     }
   }
 }
@@ -35,11 +34,8 @@
   "type": "doc",
   "value": {
     "id": "task:46be60d4-ae63-48ed-ab6f-f4d9b4defacf",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
       "task": {
         "attempts": 0,
         "ownerId": null,
@@ -47,19 +43,21 @@
         "retryAt": null,
         "runAt": "2021-11-05T16:21:52.148Z",
         "schedule": {
-					"interval": "1m"
-				},
+          "interval": "1m"
+        },
         "scheduledAt": "2021-11-05T15:28:42.055Z",
         "scope": [
-					"alerting"
-				],
+          "alerting"
+        ],
         "startedAt": null,
         "status": "idle",
         "taskType": "sampleTaskRemovedType"
       },
       "references": [],
       "type": "task",
-      "updated_at": "2021-11-05T16:21:37.629Z"
+      "updated_at": "2021-11-05T16:21:37.629Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.16.0"
     }
   }
 }

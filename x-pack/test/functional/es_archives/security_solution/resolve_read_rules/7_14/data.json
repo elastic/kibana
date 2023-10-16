@@ -1,22 +1,21 @@
 {
-  "type" : "doc",
+  "type": "doc",
   "value": {
-    "index" : ".kibana_1",
-    "id" : "space:714-space",
-    "source" : {
-      "space" : {
-        "name" : "714-space",
-        "initials" : "t",
-        "color" : "#B9A888",
-        "disabledFeatures" : [ ],
-        "imageUrl" : ""
+    "index": ".kibana",
+    "id": "space:714-space",
+    "source": {
+      "space": {
+        "name": "714-space",
+        "initials": "t",
+        "color": "#B9A888",
+        "disabledFeatures": [],
+        "imageUrl": ""
       },
-      "type" : "space",
-      "references" : [ ],
-      "migrationVersion" : {
-        "space" : "6.6.0"
-      },
-      "updated_at" : "2021-10-11T14:49:07.012Z"
+      "type": "space",
+      "references": [],
+      "updated_at": "2021-10-11T14:49:07.012Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0"
     }
   }
 }
@@ -25,23 +24,21 @@
   "type": "doc",
   "value": {
     "id": "714-space:alert:90e3ca0e-71f7-513a-b60a-ac678efd8887",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
-        "actions": [
-        ],
-        "alertTypeId" : "siem.queryRule",
-        "consumer" : "siem",
+        "actions": [],
+        "alertTypeId": "siem.queryRule",
+        "consumer": "siem",
         "apiKey": "QIUT8u0/kbOakEHSj50jDpVR90MrqOxanEscboYOoa8PxQvcA5jfHash+fqH3b+KNjJ1LpnBcisGuPkufY9j1e32gKzwGZV5Bfys87imHvygJvIM8uKiFF8bQ8Y4NTaxOJO9fAmZPrFy07ZcQMCAQz+DUTgBFqs=",
         "apiKeyOwner": "elastic",
         "createdAt": "2020-06-17T15:35:38.497Z",
         "createdBy": "elastic",
         "enabled": true,
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "always-firing-alert",
-        "params":{
+        "params": {
           "author": [],
           "description": "test",
           "ruleId": "82747bb8-bae0-4b59-8119-7f65ac564e14",
@@ -83,19 +80,19 @@
           "interval": "1m"
         },
         "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
-        "tags": [
-        ],
+        "tags": [],
         "throttle": null,
         "updatedBy": "elastic"
       },
-      "migrationVersion": {
-        "alert": "7.8.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "namespace": "714-space",
       "type": "alert",
-      "updated_at": "2020-06-17T15:35:39.839Z"
+      "updated_at": "2020-06-17T15:35:39.839Z",
+      "namespaces": [
+        "714-space"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.8.0"
     }
   }
 }

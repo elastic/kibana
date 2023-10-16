@@ -2,13 +2,9 @@
   "type": "doc",
   "value": {
     "id": "task:Alerting-alerting_telemetry",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "8.2.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 0,
         "params": "{}",
@@ -22,7 +18,9 @@
         "taskType": "alerting_telemetry"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:05.197Z"
+      "updated_at": "2020-09-04T11:51:05.197Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -31,13 +29,9 @@
   "type": "doc",
   "value": {
     "id": "task:Actions-actions_telemetry",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "8.2.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 0,
         "params": "{}",
@@ -51,7 +45,9 @@
         "taskType": "actions_telemetry"
       },
       "type": "task",
-      "updated_at": "2020-09-04T11:51:05.197Z"
+      "updated_at": "2020-09-04T11:51:05.197Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }

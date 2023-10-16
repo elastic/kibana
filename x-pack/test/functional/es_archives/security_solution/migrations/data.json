@@ -1,8 +1,8 @@
-  {
+{
   "type": "doc",
   "value": {
     "id": "siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3",
-    "index": ".kibana_1",
+    "index": ".kibana_security_solution",
     "source": {
       "siem-detection-engine-rule-actions": {
         "ruleAlertId": "fb1046a0-0452-11ec-9b15-d13d79d162f3",
@@ -21,11 +21,12 @@
       },
       "type": "siem-detection-engine-rule-actions",
       "references": [],
-      "migrationVersion": {
-        "siem-detection-engine-rule-actions": "7.11.2"
-      },
       "coreMigrationVersion": "7.14.0",
-      "updated_at": "2021-09-15T22:18:48.369Z"
+      "updated_at": "2021-09-15T22:18:48.369Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.11.2"
     }
   }
 }

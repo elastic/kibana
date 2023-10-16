@@ -1,0 +1,946 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline:1211b430-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline": {
+        "columns": [
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "@timestamp",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "signal.rule.description",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "event.action",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "process.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "The working directory of the process.",
+            "example": "/home/alice",
+            "id": "process.working_directory",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Array of process arguments, starting with the absolute path to\nthe executable.\n\nMay be filtered to protect sensitive information.",
+            "example": "[\"/usr/bin/ssh\",\"-l\",\"user\",\"10.0.0.16\"]",
+            "id": "process.args",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "process.pid",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Absolute path to the process executable.",
+            "example": "/usr/bin/ssh",
+            "id": "process.parent.executable",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Array of process arguments.\n\nMay be filtered to protect sensitive information.",
+            "example": "[\"ssh\",\"-l\",\"user\",\"10.0.0.16\"]",
+            "id": "process.parent.args",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Process id.",
+            "example": "4242",
+            "id": "process.parent.pid",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "number"
+          },
+          {
+            "aggregatable": true,
+            "category": "user",
+            "columnHeaderType": "not-filtered",
+            "description": "Short name or login of the user.",
+            "example": "albert",
+            "id": "user.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "host",
+            "columnHeaderType": "not-filtered",
+            "description": "Name of the host.\n\nIt can contain what `hostname` returns on Unix systems, the fully qualified\ndomain name, or a name specified by the user. The sender decides which value\nto use.",
+            "id": "host.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          }
+        ],
+        "created": 1633450792691,
+        "createdBy": "Elastic",
+        "dataProviders": [
+          {
+            "and": [],
+            "enabled": true,
+            "excluded": false,
+            "id": "timeline-1-4685da24-35c1-43f3-892d-1f926dbf5568",
+            "kqlQuery": "",
+            "name": "",
+            "queryMatch": {
+              "displayField": "agent.type",
+              "displayValue": "endpoint",
+              "field": "agent.type",
+              "operator": ":",
+              "value": "endpoint"
+            },
+            "type": "default"
+          }
+        ],
+        "dateRange": {
+          "end": "2021-10-05T16:19:52.691Z",
+          "start": "2021-10-04T16:19:52.691Z"
+        },
+        "description": "",
+        "eventType": "all",
+        "excludedRowRendererIds": [],
+        "filters": [],
+        "kqlMode": "filter",
+        "kqlQuery": {
+          "filterQuery": {
+            "kuery": {
+              "expression": "",
+              "kind": "kuery"
+            },
+            "serializedQuery": ""
+          }
+        },
+        "savedQueryId": null,
+        "sort": {
+          "columnId": "@timestamp",
+          "sortDirection": "desc"
+        },
+        "status": "immutable",
+        "templateTimelineId": "db366523-f1c6-4c1f-8731-6ce5ed9e5717",
+        "templateTimelineVersion": 2,
+        "timelineType": "template",
+        "title": "Generic Endpoint Timeline",
+        "updated": 1633450792691,
+        "updatedBy": "Elastic"
+      },
+      "type": "siem-ui-timeline",
+      "updated_at": "2021-10-05T16:19:52.756Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline:120f9150-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline": {
+        "columns": [
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "@timestamp",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "signal.rule.description",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "event.action",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "process.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "The working directory of the process.",
+            "example": "/home/alice",
+            "id": "process.working_directory",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Array of process arguments, starting with the absolute path to\nthe executable.\n\nMay be filtered to protect sensitive information.",
+            "example": "[\"/usr/bin/ssh\",\"-l\",\"user\",\"10.0.0.16\"]",
+            "id": "process.args",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "process.pid",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Absolute path to the process executable.",
+            "example": "/usr/bin/ssh",
+            "id": "process.parent.executable",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Array of process arguments.\n\nMay be filtered to protect sensitive information.",
+            "example": "[\"ssh\",\"-l\",\"user\",\"10.0.0.16\"]",
+            "id": "process.parent.args",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Process id.",
+            "example": "4242",
+            "id": "process.parent.pid",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "number"
+          },
+          {
+            "aggregatable": true,
+            "category": "user",
+            "columnHeaderType": "not-filtered",
+            "description": "Short name or login of the user.",
+            "example": "albert",
+            "id": "user.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "host",
+            "columnHeaderType": "not-filtered",
+            "description": "Name of the host.\n\nIt can contain what `hostname` returns on Unix systems, the fully qualified\ndomain name, or a name specified by the user. The sender decides which value\nto use.",
+            "id": "host.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          }
+        ],
+        "created": 1633450792676,
+        "createdBy": "Elastic",
+        "dataProviders": [
+          {
+            "and": [],
+            "enabled": true,
+            "excluded": false,
+            "id": "timeline-1-8622010a-61fb-490d-b162-beac9c36a853",
+            "kqlQuery": "",
+            "name": "{process.name}",
+            "queryMatch": {
+              "displayField": null,
+              "displayValue": null,
+              "field": "process.name",
+              "operator": ":",
+              "value": "{process.name}"
+            },
+            "type": "template"
+          }
+        ],
+        "dateRange": {
+          "end": "2021-10-05T16:19:52.676Z",
+          "start": "2021-10-04T16:19:52.676Z"
+        },
+        "description": "",
+        "eventType": "all",
+        "excludedRowRendererIds": [],
+        "filters": [],
+        "kqlMode": "filter",
+        "kqlQuery": {
+          "filterQuery": {
+            "kuery": {
+              "expression": "",
+              "kind": "kuery"
+            },
+            "serializedQuery": ""
+          }
+        },
+        "savedQueryId": null,
+        "sort": {
+          "columnId": "@timestamp",
+          "sortDirection": "desc"
+        },
+        "status": "immutable",
+        "templateTimelineId": "76e52245-7519-4251-91ab-262fb1a1728c",
+        "templateTimelineVersion": 2,
+        "timelineType": "template",
+        "title": "Generic Process Timeline",
+        "updated": 1633450792676,
+        "updatedBy": "Elastic"
+      },
+      "type": "siem-ui-timeline",
+      "updated_at": "2021-10-05T16:19:52.767Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline:12205a30-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline": {
+        "columns": [
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "@timestamp"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "signal.rule.description"
+          },
+          {
+            "aggregatable": true,
+            "category": "event",
+            "columnHeaderType": "not-filtered",
+            "description": "The action captured by the event.\n\nThis describes the information in the event. It is more specific than `event.category`.\nExamples are `group-add`, `process-started`, `file-created`. The value is\nnormally defined by the implementer.",
+            "example": "user-password-change",
+            "id": "event.action",
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Array of process arguments, starting with the absolute path to\nthe executable.\n\nMay be filtered to protect sensitive information.",
+            "example": "[\"/usr/bin/ssh\",\"-l\",\"user\",\"10.0.0.16\"]",
+            "id": "process.args",
+            "type": "string"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "process.pid"
+          },
+          {
+            "aggregatable": true,
+            "category": "source",
+            "columnHeaderType": "not-filtered",
+            "description": "IP address of the source (IPv4 or IPv6).",
+            "id": "source.ip",
+            "type": "ip"
+          },
+          {
+            "aggregatable": true,
+            "category": "source",
+            "columnHeaderType": "not-filtered",
+            "description": "Port of the source.",
+            "id": "source.port",
+            "type": "number"
+          },
+          {
+            "aggregatable": true,
+            "category": "destination",
+            "columnHeaderType": "not-filtered",
+            "description": "IP address of the destination (IPv4 or IPv6).",
+            "id": "destination.ip",
+            "type": "ip"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "destination.port"
+          },
+          {
+            "aggregatable": true,
+            "category": "user",
+            "columnHeaderType": "not-filtered",
+            "description": "Short name or login of the user.",
+            "example": "albert",
+            "id": "user.name",
+            "type": "string"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "host.name"
+          }
+        ],
+        "created": 1633450792787,
+        "createdBy": "Elastic",
+        "dataProviders": [
+          {
+            "and": [
+              {
+                "enabled": true,
+                "excluded": false,
+                "id": "timeline-1-ae18ef4b-f690-4122-a24d-e13b6818fba8",
+                "kqlQuery": "",
+                "name": "{threat.enrichments.matched.type}",
+                "queryMatch": {
+                  "displayField": null,
+                  "displayValue": null,
+                  "field": "threat.enrichments.matched.type",
+                  "operator": ":",
+                  "value": "{threat.enrichments.matched.type}"
+                },
+                "type": "template"
+              },
+              {
+                "enabled": true,
+                "excluded": false,
+                "id": "timeline-1-7b4cf27e-6788-4d8e-9188-7687f0eba0f2",
+                "kqlQuery": "",
+                "name": "{threat.enrichments.matched.field}",
+                "queryMatch": {
+                  "displayField": null,
+                  "displayValue": null,
+                  "field": "threat.enrichments.matched.field",
+                  "operator": ":",
+                  "value": "{threat.enrichments.matched.field}"
+                },
+                "type": "template"
+              }
+            ],
+            "enabled": true,
+            "excluded": false,
+            "id": "timeline-1-7db7d278-a80a-4853-971a-904319c50777",
+            "kqlQuery": "",
+            "name": "{threat.enrichments.matched.atomic}",
+            "queryMatch": {
+              "displayField": null,
+              "displayValue": null,
+              "field": "threat.enrichments.matched.atomic",
+              "operator": ":",
+              "value": "{threat.enrichments.matched.atomic}"
+            },
+            "type": "template"
+          }
+        ],
+        "dateRange": {
+          "end": "2021-10-05T16:19:52.787Z",
+          "start": "2021-10-04T16:19:52.787Z"
+        },
+        "description": "This Timeline template is for alerts generated by Indicator Match detection rules.",
+        "eqlOptions": {
+          "eventCategoryField": "event.category",
+          "query": "",
+          "size": 100,
+          "tiebreakerField": "",
+          "timestampField": "@timestamp"
+        },
+        "eventType": "alert",
+        "excludedRowRendererIds": [],
+        "filters": [],
+        "indexNames": [
+          ".siem-signals-default"
+        ],
+        "kqlMode": "filter",
+        "kqlQuery": {
+          "filterQuery": {
+            "kuery": {
+              "expression": "",
+              "kind": "kuery"
+            },
+            "serializedQuery": ""
+          }
+        },
+        "savedQueryId": null,
+        "sort": [
+          {
+            "columnId": "@timestamp",
+            "sortDirection": "desc"
+          }
+        ],
+        "status": "immutable",
+        "templateTimelineId": "495ad7a7-316e-4544-8a0f-9c098daee76e",
+        "templateTimelineVersion": 2,
+        "timelineType": "template",
+        "title": "Generic Threat Match Timeline",
+        "updated": 1633450792787,
+        "updatedBy": "Elastic"
+      },
+      "type": "siem-ui-timeline",
+      "updated_at": "2021-10-05T16:19:52.795Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline:12208140-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline": {
+        "columns": [
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "@timestamp",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "signal.rule.description",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "event",
+            "columnHeaderType": "not-filtered",
+            "description": "The action captured by the event.\n\nThis describes the information in the event. It is more specific than `event.category`.\nExamples are `group-add`, `process-started`, `file-created`. The value is\nnormally defined by the implementer.",
+            "example": "user-password-change",
+            "id": "event.action",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "aggregatable": true,
+            "category": "process",
+            "columnHeaderType": "not-filtered",
+            "description": "Array of process arguments, starting with the absolute path to\nthe executable.\n\nMay be filtered to protect sensitive information.",
+            "example": "[\"/usr/bin/ssh\",\"-l\",\"user\",\"10.0.0.16\"]",
+            "id": "process.args",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "process.pid",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "source",
+            "columnHeaderType": "not-filtered",
+            "description": "IP address of the source (IPv4 or IPv6).",
+            "id": "source.ip",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "ip"
+          },
+          {
+            "aggregatable": true,
+            "category": "source",
+            "columnHeaderType": "not-filtered",
+            "description": "Port of the source.",
+            "id": "source.port",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "number"
+          },
+          {
+            "aggregatable": true,
+            "category": "destination",
+            "columnHeaderType": "not-filtered",
+            "description": "IP address of the destination (IPv4 or IPv6).",
+            "id": "destination.ip",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "ip"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "destination.port",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          },
+          {
+            "aggregatable": true,
+            "category": "user",
+            "columnHeaderType": "not-filtered",
+            "description": "Short name or login of the user.",
+            "example": "albert",
+            "id": "user.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null,
+            "type": "string"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "host.name",
+            "indexes": null,
+            "name": null,
+            "searchable": null
+          }
+        ],
+        "created": 1633450792788,
+        "createdBy": "Elastic",
+        "dataProviders": [
+          {
+            "and": [
+              {
+                "enabled": true,
+                "excluded": false,
+                "id": "timeline-1-e37e37c5-a6e7-4338-af30-47bfbc3c0e1e",
+                "kqlQuery": "",
+                "name": "{destination.ip}",
+                "queryMatch": {
+                  "displayField": "destination.ip",
+                  "displayValue": "{destination.ip}",
+                  "field": "destination.ip",
+                  "operator": ":",
+                  "value": "{destination.ip}"
+                },
+                "type": "template"
+              }
+            ],
+            "enabled": true,
+            "excluded": false,
+            "id": "timeline-1-ec778f01-1802-40f0-9dfb-ed8de1f656cb",
+            "kqlQuery": "",
+            "name": "{source.ip}",
+            "queryMatch": {
+              "displayField": "source.ip",
+              "displayValue": "{source.ip}",
+              "field": "source.ip",
+              "operator": ":",
+              "value": "{source.ip}"
+            },
+            "type": "template"
+          }
+        ],
+        "dateRange": {
+          "end": "2021-10-05T16:19:52.788Z",
+          "start": "2021-10-04T16:19:52.788Z"
+        },
+        "description": "",
+        "eventType": "all",
+        "excludedRowRendererIds": [],
+        "filters": [],
+        "kqlMode": "filter",
+        "kqlQuery": {
+          "filterQuery": {
+            "kuery": {
+              "expression": "",
+              "kind": "kuery"
+            },
+            "serializedQuery": ""
+          }
+        },
+        "savedQueryId": null,
+        "sort": {
+          "columnId": "@timestamp",
+          "sortDirection": "desc"
+        },
+        "status": "immutable",
+        "templateTimelineId": "91832785-286d-4ebe-b884-1a208d111a70",
+        "templateTimelineVersion": 2,
+        "timelineType": "template",
+        "title": "Generic Network Timeline",
+        "updated": 1633450792788,
+        "updatedBy": "Elastic"
+      },
+      "type": "siem-ui-timeline",
+      "updated_at": "2021-10-05T16:19:52.797Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline:1e2e9850-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline": {
+        "columns": [
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "@timestamp",
+            "type": "number"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "message"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "event.category"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "event.action"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "host.name"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "source.ip"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "destination.ip"
+          },
+          {
+            "columnHeaderType": "not-filtered",
+            "id": "user.name"
+          }
+        ],
+        "created": 1633450813013,
+        "createdBy": "711621466",
+        "dataProviders": [],
+        "dateRange": {
+          "end": "2021-10-06T03:59:59.999Z",
+          "start": "2021-10-05T04:00:00.000Z"
+        },
+        "description": "",
+        "eqlOptions": {
+          "eventCategoryField": "event.category",
+          "query": "",
+          "size": 100,
+          "tiebreakerField": "",
+          "timestampField": "@timestamp"
+        },
+        "eventType": "all",
+        "excludedRowRendererIds": [],
+        "filters": [],
+        "indexNames": [
+          "logs-*",
+          ".siem-signals-awesome-space"
+        ],
+        "kqlMode": "filter",
+        "kqlQuery": {
+          "filterQuery": {
+            "kuery": {
+              "expression": "_id : *",
+              "kind": "kuery"
+            },
+            "serializedQuery": "{\"bool\":{\"should\":[{\"exists\":{\"field\":\"_id\"}}],\"minimum_should_match\":1}}"
+          }
+        },
+        "savedQueryId": null,
+        "sort": [
+          {
+            "columnId": "@timestamp",
+            "columnType": "number",
+            "sortDirection": "desc"
+          }
+        ],
+        "status": "active",
+        "templateTimelineId": null,
+        "templateTimelineVersion": null,
+        "timelineType": "default",
+        "title": "An awesome timeline",
+        "updated": 1633450820989,
+        "updatedBy": "711621466"
+      },
+      "type": "siem-ui-timeline",
+      "updated_at": "2021-10-05T16:20:20.997Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline-note:2d230670-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline-note": {
+        "created": 1633450838103,
+        "createdBy": "711621466",
+        "eventId": "StU_UXwBAowmaxx6YdiS",
+        "note": "a comment on a pinned event",
+        "timelineId": "1e2e9850-25f8-11ec-a981-b77847c6ef30",
+        "updated": 1633450838103,
+        "updatedBy": "711621466"
+      },
+      "type": "siem-ui-timeline-note",
+      "updated_at": "2021-10-05T16:20:38.118Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline-pinned-event:2694b600-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline-pinned-event": {
+        "created": 1633450827104,
+        "createdBy": "711621466",
+        "eventId": "StU_UXwBAowmaxx6YdiS",
+        "timelineId": "1e2e9850-25f8-11ec-a981-b77847c6ef30",
+        "updated": 1633450827104,
+        "updatedBy": "711621466"
+      },
+      "type": "siem-ui-timeline-pinned-event",
+      "updated_at": "2021-10-05T16:20:27.125Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "awesome-space:siem-ui-timeline-note:323df0c0-25f8-11ec-a981-b77847c6ef30",
+    "index": ".kibana_security_solution",
+    "source": {
+      "coreMigrationVersion": "7.15.0",
+      "namespace": "awesome-space",
+      "references": [],
+      "siem-ui-timeline-note": {
+        "created": 1633450846668,
+        "createdBy": "711621466",
+        "note": "A regular comment",
+        "timelineId": "1e2e9850-25f8-11ec-a981-b77847c6ef30",
+        "updated": 1633450846668,
+        "updatedBy": "711621466"
+      },
+      "type": "siem-ui-timeline-note",
+      "updated_at": "2021-10-05T16:20:46.688Z",
+      "namespaces": [
+        "awesome-space"
+      ],
+      "typeMigrationVersion": "7.16.0"
+    }
+  }
+}

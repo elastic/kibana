@@ -1,0 +1,508 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:13397a90-c30c-11eb-b9a0-c1a1a2accf39",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-06-01T19:03:39.465Z",
+        "created_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        },
+        "description": "another one ",
+        "external_service": null,
+        "owner": "securitySolution",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "rac"
+        ],
+        "title": "Oh no, a bad meanie",
+        "type": "individual",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-01T19:03:39.471Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:837184c0-c310-11eb-b9a0-c1a1a2accf39",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-06-01T19:35:25.711Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "description": "yay",
+        "external_service": null,
+        "owner": "securitySolution",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "in-progress",
+        "tags": [
+          "woohoo",
+          "\"quote\"",
+          "!special!",
+          ";nice;",
+          "(",
+          "["
+        ],
+        "title": "case",
+        "type": "individual",
+        "updated_at": "2021-06-08T17:49:26.659Z",
+        "updated_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        }
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-08T17:49:26.659Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:114137b0-bf14-11eb-b038-ed052d572401",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-05-27T17:50:47.470Z",
+        "created_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        },
+        "description": "another one ",
+        "external_service": null,
+        "owner": "observability",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "in-progress",
+        "tags": [
+          "rac"
+        ],
+        "title": "Oh no, a bad meanie",
+        "type": "individual",
+        "updated_at": "2021-06-02T17:19:05.822Z",
+        "updated_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        }
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-02T17:19:05.822Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:0ff35af0-bf14-11eb-b038-ed052d572401",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": "2021-06-02T17:21:10.898Z",
+        "closed_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "connector": {
+          "fields": [
+            {
+              "key": "issueType",
+              "value": "10023"
+            },
+            {
+              "key": "parent",
+              "value": null
+            },
+            {
+              "key": "priority",
+              "value": null
+            }
+          ],
+          "id": "01d77350-c3c6-11eb-b389-3fadeeafa60f",
+          "name": "Another Jira",
+          "type": ".jira"
+        },
+        "created_at": "2021-05-27T17:50:45.283Z",
+        "created_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        },
+        "description": "another one ",
+        "external_service": null,
+        "owner": "observability",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "closed",
+        "tags": [
+          "rac"
+        ],
+        "title": "Oh no, a bad meanie",
+        "type": "individual",
+        "updated_at": "2021-06-02T17:21:10.898Z",
+        "updated_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        }
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-02T17:21:10.899Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:4c32e6b0-c3c5-11eb-b389-3fadeeafa60f",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-06-02T17:09:31.938Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "description": "standard _markdown_",
+        "external_service": {
+          "connector_id": "71e5c7b0-c3c5-11eb-b389-3fadeeafa60f",
+          "connector_name": "Jira",
+          "external_id": "11240",
+          "external_title": "RJ2-231",
+          "external_url": "https://siem-kibana.atlassian.net/browse/RJ2-231",
+          "pushed_at": "2021-06-02T17:13:15.379Z",
+          "pushed_by": {
+            "email": null,
+            "full_name": null,
+            "username": "elastic"
+          }
+        },
+        "owner": "observability",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [],
+        "title": "New Case",
+        "type": "individual",
+        "updated_at": "2021-06-03T15:04:10.276Z",
+        "updated_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        }
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-03T15:04:10.276Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:ab2bf7d0-bd79-11eb-8941-d1975aa44879",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [
+            {
+              "key": "issueType",
+              "value": "10023"
+            },
+            {
+              "key": "parent",
+              "value": null
+            },
+            {
+              "key": "priority",
+              "value": null
+            }
+          ],
+          "id": "1d1f32b0-bcd2-11eb-be7b-7353381d0d2c",
+          "name": "RJ2",
+          "type": ".jira"
+        },
+        "created_at": "2021-05-25T16:53:02.545Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "description": "I'm a case!",
+        "external_service": {
+          "connector_id": "1d1f32b0-bcd2-11eb-be7b-7353381d0d2c",
+          "connector_name": "RJ2",
+          "external_id": "11232",
+          "external_title": "RJ2-229",
+          "external_url": "https://siem-kibana.atlassian.net/browse/RJ2-229",
+          "pushed_at": "2021-05-25T16:53:05.765Z",
+          "pushed_by": {
+            "email": null,
+            "full_name": null,
+            "username": "elastic"
+          }
+        },
+        "owner": "securitySolution",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "hello"
+        ],
+        "title": "Stop this cyber criminal",
+        "type": "individual",
+        "updated_at": "2021-05-25T16:53:05.765Z",
+        "updated_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        }
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-05-25T16:53:05.769Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:fee24e60-bf13-11eb-b038-ed052d572401",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-05-27T17:50:16.652Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "description": "h",
+        "external_service": null,
+        "owner": "observability",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "g"
+        ],
+        "title": "h",
+        "type": "individual",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-05-27T17:50:16.656Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:bc79db40-c87a-11eb-a112-61e8c6c9824d",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-06-08T16:58:23.865Z",
+        "created_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        },
+        "description": "another one ",
+        "external_service": null,
+        "owner": "securitySolution",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "rac"
+        ],
+        "title": "Oh no, a bad meanie",
+        "type": "individual",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-08T16:58:23.868Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:c2e4c530-c87a-11eb-a112-61e8c6c9824d",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-06-08T16:58:34.629Z",
+        "created_by": {
+          "email": "milovic@elastic.co",
+          "full_name": "Steph Milovic",
+          "username": "smilovic"
+        },
+        "description": "another one ",
+        "external_service": null,
+        "owner": "securitySolution",
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "rac"
+        ],
+        "title": "Big bad meanie",
+        "type": "individual",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "coreMigrationVersion": "8.0.0",
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-06-08T16:58:34.631Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "7.14.0"
+    }
+  }
+}

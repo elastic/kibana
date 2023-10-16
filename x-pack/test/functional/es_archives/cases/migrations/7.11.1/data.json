@@ -1,0 +1,226 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:2ea28c10-7855-11eb-9ca6-83ec5acb735f",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [],
+          "id": "none",
+          "name": "none",
+          "type": ".none"
+        },
+        "created_at": "2021-02-26T17:08:01.462Z",
+        "created_by": {
+          "email": null,
+          "full_name": "jonathan.buttner@elastic.co",
+          "username": "2737256380"
+        },
+        "description": "a case",
+        "external_service": null,
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [
+          "awesome"
+        ],
+        "title": "7.11.1 Case",
+        "updated_at": "2021-02-26T17:22:25.243Z",
+        "updated_by": {
+          "email": null,
+          "full_name": "jonathan.buttner@elastic.co",
+          "username": "2737256380"
+        }
+      },
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-02-26T17:22:25.255Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.11.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-comments:34a20a00-7855-11eb-9ca6-83ec5acb735f",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-comments": {
+        "comment": "A 7.11.1 comment",
+        "created_at": "2021-02-26T17:08:11.552Z",
+        "created_by": {
+          "email": null,
+          "full_name": "jonathan.buttner@elastic.co",
+          "username": "2737256380"
+        },
+        "pushed_at": null,
+        "pushed_by": null,
+        "type": "user",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "references": [
+        {
+          "id": "2ea28c10-7855-11eb-9ca6-83ec5acb735f",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-comments",
+      "updated_at": "2021-02-26T17:08:11.565Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.11.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-comments:3178f2b0-7857-11eb-9ca6-83ec5acb735f",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-comments": {
+        "alertId": "4cb39ae52e3ce2c6aa78a77c0257699e5bfd50670304b7d1b1855c85a16e9068",
+        "created_at": "2021-02-26T17:22:25.243Z",
+        "created_by": {
+          "email": null,
+          "full_name": "jonathan.buttner@elastic.co",
+          "username": "2737256380"
+        },
+        "index": ".siem-signals-default-000001",
+        "pushed_at": null,
+        "pushed_by": null,
+        "type": "alert",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "references": [
+        {
+          "id": "2ea28c10-7855-11eb-9ca6-83ec5acb735f",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-comments",
+      "updated_at": "2021-02-26T17:22:25.252Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.11.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases:6f973440-7abd-11eb-9ca6-83ec5acb735f",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases": {
+        "closed_at": null,
+        "closed_by": null,
+        "connector": {
+          "fields": [
+            {
+              "key": "urgency",
+              "value": "2"
+            },
+            {
+              "key": "severity",
+              "value": "2"
+            },
+            {
+              "key": "impact",
+              "value": "2"
+            }
+          ],
+          "id": "444ebab0-7abd-11eb-9ca6-83ec5acb735f",
+          "name": "SN",
+          "type": ".servicenow"
+        },
+        "created_at": "2021-03-01T18:39:20.437Z",
+        "created_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "description": "A case with SN connector",
+        "external_service": null,
+        "settings": {
+          "syncAlerts": true
+        },
+        "status": "open",
+        "tags": [],
+        "title": "7.11.1 Case - SN connector",
+        "updated_at": null,
+        "updated_by": null
+      },
+      "references": [],
+      "type": "cases",
+      "updated_at": "2021-03-01T18:39:20.462Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.11.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cases-user-actions:70306700-7abd-11eb-9ca6-83ec5acb735f",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "cases-user-actions": {
+        "action": "create",
+        "action_at": "2021-03-01T18:39:20.437Z",
+        "action_by": {
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
+        },
+        "action_field": [
+          "description",
+          "status",
+          "tags",
+          "title",
+          "connector",
+          "settings"
+        ],
+        "new_value": "{\"title\":\"7.11.1 Case - SN connector\",\"tags\":[],\"description\":\"A case with SN connector\",\"connector\":{\"id\":\"444ebab0-7abd-11eb-9ca6-83ec5acb735f\",\"name\":\"SN\",\"type\":\".servicenow\",\"fields\":{\"urgency\":\"2\",\"severity\":\"2\",\"impact\":\"2\"}},\"settings\":{\"syncAlerts\":true}}",
+        "old_value": null
+      },
+      "references": [
+        {
+          "id": "6f973440-7abd-11eb-9ca6-83ec5acb735f",
+          "name": "associated-cases",
+          "type": "cases"
+        }
+      ],
+      "type": "cases-user-actions",
+      "updated_at": "2021-03-01T18:39:21.465Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.10.0"
+    }
+  }
+}
