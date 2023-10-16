@@ -11,8 +11,8 @@ import { renderCustomToolbar } from './render_custom_toolbar';
 describe('renderCustomToolbar', () => {
   it('should render successfully', () => {
     expect(
-      renderCustomToolbar(
-        {
+      renderCustomToolbar({
+        toolbarProps: {
           hasRoomForGridControls: true,
           columnControl: 'column',
           columnSortingControl: 'columnSorting',
@@ -20,15 +20,15 @@ describe('renderCustomToolbar', () => {
           fullScreenControl: 'fullScreen',
           keyboardShortcutsControl: 'keyboard',
         },
-        { additionalControls: 'additional' }
-      )
+        gridProps: { additionalControls: 'additional' },
+      })
     ).toMatchSnapshot();
   });
 
   it('should render correctly for smaller screens', () => {
     expect(
-      renderCustomToolbar(
-        {
+      renderCustomToolbar({
+        toolbarProps: {
           hasRoomForGridControls: false,
           columnControl: 'column',
           columnSortingControl: 'columnSorting',
@@ -36,8 +36,8 @@ describe('renderCustomToolbar', () => {
           fullScreenControl: 'fullScreen',
           keyboardShortcutsControl: 'keyboard',
         },
-        { additionalControls: 'additional' }
-      )
+        gridProps: { additionalControls: 'additional' },
+      })
     ).toMatchSnapshot();
   });
 });

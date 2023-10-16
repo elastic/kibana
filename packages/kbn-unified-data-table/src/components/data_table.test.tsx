@@ -446,9 +446,9 @@ describe('UnifiedDataTable', () => {
     it('should render a custom toolbar', async () => {
       let toolbarParams: Record<string, unknown> = {};
       let gridParams: Record<string, unknown> = {};
-      const renderCustomToolbarMock = jest.fn((tp, gp) => {
-        toolbarParams = tp;
-        gridParams = gp;
+      const renderCustomToolbarMock = jest.fn((props) => {
+        toolbarParams = props.toolbarProps;
+        gridParams = props.gridProps;
         return <div data-test-subj="custom-toolbar">Custom layout</div>;
       });
       const component = await getComponent({
@@ -461,10 +461,12 @@ describe('UnifiedDataTable', () => {
 
       expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          hasRoomForGridControls: true,
-        }),
-        expect.objectContaining({
-          additionalControls: null,
+          toolbarProps: expect.objectContaining({
+            hasRoomForGridControls: true,
+          }),
+          gridProps: expect.objectContaining({
+            additionalControls: null,
+          }),
         })
       );
 

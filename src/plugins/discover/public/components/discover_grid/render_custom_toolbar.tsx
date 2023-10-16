@@ -11,17 +11,18 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UnifiedDataTableRenderCustomToolbar } from '@kbn/unified-data-table';
 import './render_custom_toolbar.scss';
 
-export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = (
-  {
-    hasRoomForGridControls,
-    columnControl,
-    columnSortingControl,
-    fullScreenControl,
-    keyboardShortcutsControl,
-    displayControl,
-  },
-  { additionalControls }
-) => {
+export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = (props) => {
+  const {
+    toolbarProps: {
+      hasRoomForGridControls,
+      columnControl,
+      columnSortingControl,
+      fullScreenControl,
+      keyboardShortcutsControl,
+      displayControl,
+    },
+    gridProps: { additionalControls },
+  } = props;
   return (
     <EuiFlexGroup
       responsive={false}

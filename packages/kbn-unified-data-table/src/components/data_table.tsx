@@ -67,12 +67,12 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 
-export type UnifiedDataTableRenderCustomToolbar = (
-  toolbarProps: EuiDataGridCustomToolbarProps,
+export type UnifiedDataTableRenderCustomToolbar = (props: {
+  toolbarProps: EuiDataGridCustomToolbarProps;
   gridProps: {
     additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
-  }
-) => React.ReactElement;
+  };
+}) => React.ReactElement;
 
 export type SortOrder = [string, string];
 
@@ -739,8 +739,11 @@ export const UnifiedDataTable = ({
     () =>
       renderCustomToolbar
         ? (toolbarProps) =>
-            renderCustomToolbar(toolbarProps, {
-              additionalControls,
+            renderCustomToolbar({
+              toolbarProps,
+              gridProps: {
+                additionalControls,
+              },
             })
         : undefined,
     [renderCustomToolbar, additionalControls]
