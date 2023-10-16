@@ -42,7 +42,7 @@ export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
   private getChromiumArgs: () => string[];
   private core: ReportingCore;
-  private protocolTimeout: number = 0;
+  private protocolTimeout?: number = 0;
 
   constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
     this.core = core;
@@ -106,7 +106,7 @@ export class HeadlessChromiumDriverFactory {
           chromiumArgs,
           viewport,
           browserTimezone,
-          this.protocolTimeout,
+          this.protocolTimeout
         );
 
         page = await browser.newPage();

@@ -79,7 +79,7 @@ describe('ScreenshotObservableHandler', () => {
     const reporting = await createMockReportingCore(createMockConfigSchema());
     const driverFactory = await createMockBrowserDriverFactory(reporting, logger);
     ({ driver } = await driverFactory
-      .createPage({ defaultViewport: { width: 2020 } }, logger)
+      .createPage({ defaultViewport: { width: 2020 }, protocolTimeout: 0 }, logger)
       .pipe(first())
       .toPromise());
     driver.isPageOpen = jest.fn().mockImplementation(() => true);

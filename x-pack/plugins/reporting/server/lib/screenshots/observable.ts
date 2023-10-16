@@ -66,6 +66,7 @@ export function getScreenshots$(
         browserTimezone,
         // not provided in 7.17: openUrlTimeout
         defaultViewport: { width: layout.width },
+        protocolTimeout: 0,
       },
       logger
     )
