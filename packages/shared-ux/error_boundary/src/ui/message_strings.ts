@@ -75,7 +75,7 @@ export const errorMessageStrings = {
     inline: {
       linkText: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.inline.pageReloadButton', {
-          defaultMessage: 'Refresh',
+          defaultMessage: 'Please refresh the page',
         }),
     },
     toast: {

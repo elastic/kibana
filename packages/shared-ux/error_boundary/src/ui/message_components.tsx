@@ -16,6 +16,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   useGeneratedHtmlId,
@@ -122,14 +123,11 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
 
 export const RecoverableInline = (props: ErrorCalloutProps) => {
   return (
-    <EuiButton
-      size="s"
-      onClick={props.reloadWindow}
-      data-test-subj={DATA_TEST_SUBJ_PAGE_REFRESH_BUTTON}
-      fill={false}
-    >
-      {strings.recoverable.inline.linkText()}
-    </EuiButton>
+    <EuiCallOut size="m">
+      <EuiLink onClick={props.reloadWindow} data-test-subj={DATA_TEST_SUBJ_PAGE_REFRESH_BUTTON}>
+        {strings.recoverable.inline.linkText()}
+      </EuiLink>
+    </EuiCallOut>
   );
 };
 
