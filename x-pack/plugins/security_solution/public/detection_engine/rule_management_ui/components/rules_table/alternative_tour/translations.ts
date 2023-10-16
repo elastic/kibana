@@ -18,6 +18,6 @@ export const CREATE_RULE_TOUR_CONTENT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent.eql',
   {
     defaultMessage:
-      'Use Elasticsearch Query Language (ES|QL) in a new rule type to iteratively explore and transform your data.',
+      'Use the Elasticsearch Query Language (ES|QL) rule to find events and aggregate search results.',
   }
 );
