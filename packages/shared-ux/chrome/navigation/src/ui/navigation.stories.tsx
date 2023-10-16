@@ -702,12 +702,13 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     title: 'Normal item',
                   },
                   {
-                    link: 'group:settings.logs',
+                    link: 'group:settings.logs2',
                     title: 'Item should NOT appear!', // Should not appear
                     sideNavStatus: 'hidden',
                   },
                   {
                     title: 'Group should NOT appear!',
+                    id: 'group:settings.logs3',
                     link: 'group:settings.logs',
                     sideNavStatus: 'hidden', // This group should not appear
                     children: [

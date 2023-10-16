@@ -56,8 +56,7 @@ const filterChildren = (
   children?: ChromeProjectNavigationNode[]
 ): ChromeProjectNavigationNode[] | undefined => {
   if (!children) return undefined;
-  const filtered = children.filter(itemIsVisible);
-  return filtered.length === 0 ? undefined : filtered;
+  return children.filter(itemIsVisible);
 };
 
 const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
@@ -72,7 +71,7 @@ const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
     navNode: serialized,
     hasChildren: nodeHasChildren(serialized),
     hasLink: nodeHasLink(serialized),
-    isItem: serialized.renderAs === 'item',
+    isItem: serialized.renderAs === 'item' || serialized.children === undefined,
   };
 };
 
@@ -205,8 +204,8 @@ const nodeToEuiCollapsibleNavProps = (
     iconProps: { size: treeDepth === 0 ? 'm' : 's' },
   };
 
-  const isVisible = isItem || !_navNode.children || items !== undefined;
-  return { props, isVisible };
+  const hasVisibleChildren = (items?.length ?? 0) > 0;
+  return { props, isVisible: isItem || hasVisibleChildren };
 };
 
 interface Props {
