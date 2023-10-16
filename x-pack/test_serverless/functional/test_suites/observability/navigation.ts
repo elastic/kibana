@@ -51,7 +51,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
 
       // check the aiops subsection
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'aiops' }); // open ai ops subsection
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'observability_project_nav.aiops' }); // open ai ops subsection
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AIOps' });
