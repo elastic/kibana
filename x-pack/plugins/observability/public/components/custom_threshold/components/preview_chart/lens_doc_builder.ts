@@ -51,10 +51,12 @@ class LensDocBuilder {
     accessors,
     xAccessor,
     dataViewId,
+    timeFieldName,
     operationType,
     sourceField,
     label,
     groupBy,
+    query,
   }: AddLensDataLayer): this {
     this._removeLayer(layerId);
     this._addReference({ dataViewId, layerId });
@@ -95,7 +97,7 @@ class LensDocBuilder {
           label: '@timestamp',
           dataType: 'date',
           operationType: 'date_histogram',
-          sourceField: '@timestamp',
+          sourceField: timeFieldName ?? '@timestamp',
           isBucketed: true,
           scale: 'interval',
           params: {
@@ -109,6 +111,10 @@ class LensDocBuilder {
           dataType: 'number',
           operationType,
           sourceField,
+          filter: {
+            query: query || '',
+            language: 'kuery',
+          },
           isBucketed: false,
           scale: 'ratio',
           params: {

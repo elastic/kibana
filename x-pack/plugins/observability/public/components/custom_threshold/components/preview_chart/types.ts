@@ -47,6 +47,10 @@ export interface FromBasedDataLayer {
         operationType: string;
         sourceField: string;
         isBucketed: boolean;
+        filter?: {
+          query: string;
+          language: string;
+        };
         scale: string;
         params: {
           size?: number;
@@ -124,10 +128,12 @@ export interface AddLensDataLayer {
   accessors: string;
   xAccessor: string;
   dataViewId: string;
+  timeFieldName?: string;
   operationType: OperationType;
   sourceField: string;
   label: string;
   groupBy?: string | string[];
+  query?: string;
 }
 
 export interface AddLensReferenceLayer {

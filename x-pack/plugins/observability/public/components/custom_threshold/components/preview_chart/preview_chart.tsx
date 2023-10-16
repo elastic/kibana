@@ -6,8 +6,9 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-
 import { OperationType } from '@kbn/lens-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Aggregators,
   CustomMetricAggTypes,
@@ -18,16 +19,16 @@ import { MetricExpression } from '../../types';
 
 interface PreviewChartPros {
   metricExpression: MetricExpression;
-  dataViewId?: string;
+  dataView?: DataView;
   filterQuery?: string;
   groupBy?: string | string[];
 }
 
-function PreviewChart({ metricExpression, dataViewId, filterQuery, groupBy }: PreviewChartPros) {
+function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: PreviewChartPros) {
   const {
     services: { lens },
   } = useKibana();
-  const { metrics, timeSize, timeUnit, threshold, equation, comparator } = metricExpression;
+  const { metrics, timeSize, timeUnit, threshold, comparator } = metricExpression;
   const [attributes, setAttributes] = useState();
 
   const getOperationTypeFromRuleAggType = (aggType: CustomMetricAggTypes): OperationType => {
@@ -35,67 +36,94 @@ function PreviewChart({ metricExpression, dataViewId, filterQuery, groupBy }: Pr
     if (aggType === Aggregators.CARDINALITY) return 'unique_count';
     return aggType;
   };
-
   useEffect(() => {
     if (!metrics || metrics.length === 0) {
       return;
     }
-    const { field, aggType, name, filter } = metrics[0];
+    const { field, aggType, filter } = metrics[0];
     const lensDoc = new LensDocBuilder();
+    let sourceField = field;
 
-    if (dataViewId) {
-      if (field && aggType) {
+    if (aggType === Aggregators.COUNT) {
+      sourceField = '___records___';
+    }
+
+    if (dataView?.id && aggType) {
+      if (sourceField) {
+        console.log('comparator', comparator);
+        console.log('threshold', threshold);
+
         lensDoc
           .addDataLayer({
             layerId: 'main_date_histogram',
             accessors: 'main_date_histogram_accessors',
             xAccessor: 'main_date_histogram_xAccessor',
-            dataViewId,
+            dataViewId: dataView.id,
+            timeFieldName: dataView.timeFieldName,
             operationType: getOperationTypeFromRuleAggType(aggType),
-            sourceField: field,
-            label: '@timestamp',
+            sourceField,
+            label: `${aggType} ${field}`,
             groupBy,
+            query: filter,
           })
           .addQueryFilter(filterQuery);
-      }
-
-      if (threshold.length >= 1) {
-        lensDoc.addReferenceLayer({
-          layerId: 'threshold_layer',
-          dataViewId,
-          accessors: 'threshold_layer_accessors',
-          comparator,
-          label: 'threshold_layer',
-          value: threshold[0],
-        });
+        if (threshold.length > 0) {
+          lensDoc.addReferenceLayer({
+            layerId: 'threshold_layer',
+            dataViewId: dataView.id,
+            accessors: 'threshold_layer_accessors',
+            comparator,
+            label: 'threshold_layer',
+            value: threshold[0],
+          });
+        }
+        setAttributes(lensDoc.getAttributes());
+      } else {
+        setAttributes(undefined);
       }
     }
+  }, [comparator, dataView, filterQuery, groupBy, metrics, threshold]);
 
-    setAttributes(lensDoc.getAttributes());
-  }, [comparator, dataViewId, filterQuery, groupBy, metrics, threshold]);
-
-  if (!metrics || metrics.length === 0 || !dataViewId || !attributes || !timeSize) {
+  if (!metrics || metrics.length === 0 || !dataView || !attributes || !timeSize) {
     return (
       <div style={{ maxHeight: 180, minHeight: 180 }}>
         <EuiEmptyPrompt
           iconType="visArea"
-          title={<h4>Preview chart</h4>}
           titleSize="xs"
-          body={<p>No data</p>}
+          body={
+            <FormattedMessage
+              id="xpack.observability.customThreshold.rule..charts.noDataMessage"
+              defaultMessage="No chart data available"
+            />
+          }
         />
       </div>
     );
   }
+  // TODO: Equations e.g. A + B
   if (metrics.length > 1) {
-    // It means have to use formula
+    return (
+      <div style={{ maxHeight: 180, minHeight: 180 }}>
+        <EuiEmptyPrompt
+          iconType="visArea"
+          titleSize="xs"
+          body={
+            <FormattedMessage
+              id="xpack.observability.customThreshold.rule..charts.noDataMessageForEquation"
+              defaultMessage="Chart doesn't support equations, yet"
+            />
+          }
+        />
+      </div>
+    );
   }
 
   return (
     <div>
       <lens.EmbeddableComponent
-        id=""
+        id="customThresholdPreviewChart"
         style={{ height: 180 }}
-        timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
+        timeRange={{ from: `now-${timeSize}${timeUnit}`, to: 'now' }}
         attributes={attributes}
       />
     </div>

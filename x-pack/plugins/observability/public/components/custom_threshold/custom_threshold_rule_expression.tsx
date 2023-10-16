@@ -482,7 +482,7 @@ export default function Expressions(props: Props) {
               >
                 <PreviewChart
                   metricExpression={e}
-                  dataViewId={dataView?.id}
+                  dataView={dataView}
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
                 />
