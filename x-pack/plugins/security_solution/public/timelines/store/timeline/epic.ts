@@ -134,7 +134,8 @@ export const createTimelineEpic =
             return getOr(false, 'payload.savedTimeline', action);
           } else if (
             action.type === saveTimeline.type &&
-            !timelineObj.isLoading &&
+            // don't save again when already saving, unless the timeline changed
+            (!timelineObj.isLoading || timelineObj.changed) &&
             isItAtimelineAction(timelineId)
           ) {
             return true;
